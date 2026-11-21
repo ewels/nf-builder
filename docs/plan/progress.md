@@ -60,3 +60,16 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - Biome formats and lints code, JSON and YAML but not Markdown, so docs and Accepted ADR bodies are never reformatted.
   - Q9 (StageNest, nf-schema-builder) doesn't affect the scaffold; it is being researched now and will be answered before M0 closes.
 - Blockers: none. Note: this sandbox can't reach `*.netlify.app`, `registry.nextflow.io` or `nextflow.io`; deployed checks run from GitHub Actions instead.
+
+## 2026-11-21 · F-002 · Claude (autonomous)
+- Did: minimal app shell (`apps/web`: React 19 + Vite 8, header with the app name, three labelled columns at 256 / fill / 296 px); `netlify.toml` with build, Node 22.23.5, pnpm 10.28.0, the QA-30 headers and an SPA fallback; `vite preview` serves the same headers; Playwright e2e under the production CSP (`pnpm test:e2e`, with a wrapper so `-- --grep` filters under pnpm 10); `version.json` stamped from `COMMIT_REF`; `deploy-check` workflow asserting deployed headers on previews and on `main`. PR #3.
+- State: passing. Preview of the PR head served every `netlify.toml` header on `/`, a deep route and a hashed asset (deploy-check run on PR #3). Production is checked by the same job on the merge commit.
+- Next: F-003 (CI).
+- Decisions:
+  - Security header set, CSP baseline, root `scripts/` and `e2e/` build-time folders, `smol-toml` dev dependency, public `/version.json` ([ADR 0014](../adr/0014-security-headers.md)).
+  - New workflow `.github/workflows/deploy-check.yml` (ADR 0014): `pull_request` and push to `main`, read-only token, SHA-pinned actions; fork PRs skip it.
+  - `vite dev` sends every header except the CSP, because its React Refresh preamble is an inline script; e2e runs against `vite preview` with the full CSP.
+  - Node 22.23.5 exactly in `netlify.toml` (inside `engines.node ^22.23.5`), not the researcher's Node 24 suggestion, to match the agent sandbox.
+  - `passes` is set before the post-merge production check ([Q11](open-questions.md)).
+  - Q9 answered: own schema form, nf-schema-builder as reference only; StageNest not inspectable from the sandbox ([Q9](open-questions.md), [notes](../research/2026-11-21-schema-builder-and-stagenest.md)).
+- Blockers: merged `feat/*` branches can't be deleted from the sandbox; issue #2 (`maintainer`) asks for "Automatically delete head branches".
