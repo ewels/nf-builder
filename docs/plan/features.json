@@ -1,0 +1,1345 @@
+{
+  "$comment": "Full v0.1 scope. Agents may only change `passes` (after the feature's steps pass end to end) and append to `notes`. Adding, removing or rewording entries needs the maintainer (PR label `scope-change`). Order within a milestone is priority order. See ADR 0012.",
+  "features": [
+    {
+      "id": "F-001",
+      "milestone": "M0",
+      "description": "Scaffold the pnpm monorepo per ADR 0003 with strict TypeScript, Biome, Vitest and dependency-cruiser; `pnpm check` runs typecheck, lint, unit tests and architecture rules.",
+      "spec": [
+        "ADR-0003"
+      ],
+      "depends_on": [],
+      "steps": [
+        "Fresh clone: `pnpm install && pnpm check` exits 0",
+        "Add a fixture import from `apps/web` into `packages/lang-2610`: `pnpm check` fails and the message names the rule and the allowed alternative",
+        "Each package has `src/`, `test/`, and a README of at most 10 lines stating its responsibility"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-002",
+      "milestone": "M0",
+      "description": "Minimal web app (header plus three empty columns) that builds with Vite and deploys to GitHub Pages from `main`.",
+      "spec": [
+        "ADR-0002",
+        "UX-01",
+        "UX-02"
+      ],
+      "depends_on": [
+        "F-001"
+      ],
+      "steps": [
+        "`pnpm dev` serves the app locally; the header shows the app name",
+        "Merging to `main` publishes to GitHub Pages and the page loads",
+        "The deployed page sends a Content-Security-Policy that matches QA-30"
+      ],
+      "passes": false,
+      "notes": "App name: nf-builder (Q1). Pages URL: https://ewels.github.io/nf-builder/"
+    },
+    {
+      "id": "F-003",
+      "milestone": "M0",
+      "description": "CI on every PR: `pnpm check`, Playwright smoke on Chromium, Firefox and WebKit, bundle-size budget, network host allow-list check, ADR lint, features.json validation.",
+      "spec": [
+        "ADR-0011",
+        "QA-01",
+        "QA-20",
+        "IO-41"
+      ],
+      "depends_on": [
+        "F-002"
+      ],
+      "steps": [
+        "A PR shows all jobs",
+        "Deliberately breaking each check in a throwaway branch makes the matching job fail with an actionable message",
+        "ADR lint rejects a duplicate number, a missing status line, or an ADR missing from the index"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-004",
+      "milestone": "M0",
+      "description": "Agent harness: `pnpm smoke` (build plus one e2e test), PR template with definition-of-done checklist, and a features.json guard that rejects changes other than `passes`/`notes` unless the PR has the `scope-change` label.",
+      "spec": [
+        "ADR-0012"
+      ],
+      "depends_on": [
+        "F-003"
+      ],
+      "steps": [
+        "`pnpm smoke` runs in under 60 s locally",
+        "A PR that rewords a feature description fails the guard; the same PR with `scope-change` passes",
+        "AGENTS.md commands section matches the real scripts in package.json"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-009",
+      "milestone": "M0",
+      "description": "Corpus tooling: `tools/corpus/corpus.yaml` lists pinned pipelines (repo plus tag or SHA); `pnpm corpus:fetch` downloads them into a git-ignored cache; CI caches them.",
+      "spec": [
+        "ADR-0011"
+      ],
+      "depends_on": [
+        "F-001"
+      ],
+      "steps": [
+        "`pnpm corpus:fetch` fetches nf-core/rnaseq, nf-core/sarek, nf-core/fetchngs, nextflow-io/rnaseq-nf (main and typed branch) at pinned refs",
+        "A second run is a no-op",
+        "Malformed fixtures live in `tools/corpus/fixtures/` and are committed"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-005",
+      "milestone": "M0",
+      "description": "Spike S1: run real Nextflow 26.10 in CI on fixture pipelines to settle typed/legacy interop across files, read the `.module-info` format from Nextflow's source, and confirm the latest 26.10 patch.",
+      "spec": [
+        "ADR-0007",
+        "ADR-0009",
+        "LA-03",
+        "LA-14"
+      ],
+      "depends_on": [
+        "F-003"
+      ],
+      "steps": [
+        "CI job runs `nextflow lint` and `nextflow run -stub` on: typed workflow calling a legacy process included from another file; legacy workflow calling a typed process; a script mixing both (expected to fail)",
+        "Report in `docs/research/` records each outcome with logs",
+        "ADR 0007 history and LA-14 updated (via a Proposed ADR if the decision changes)"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-006",
+      "milestone": "M0",
+      "description": "Spike S2: vendor the 26.10 nf-lang grammars, generate a TypeScript parser with antlr-ng, port the lexer base class, parse the corpus; build `tools/spec-extract` and produce `script.json` and `config.json`.",
+      "spec": [
+        "ADR-0005"
+      ],
+      "depends_on": [
+        "F-009"
+      ],
+      "steps": [
+        "Report lists parse pass rate per corpus pipeline and the sarek parse time",
+        "Every file that `nextflow lint` accepts parses; differences are listed with causes",
+        "Catalogue counts of directives, operators and factories match the docs reference pages, or the gaps are explained"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-007",
+      "milestone": "M0",
+      "description": "Spike S3: run `language-server-all.jar` under CheerpJ in a Web Worker and exchange LSP messages; measure cold start, memory and diagnostics latency. At most three sessions.",
+      "spec": [
+        "ADR-0010"
+      ],
+      "depends_on": [
+        "F-002"
+      ],
+      "steps": [
+        "A test page sends `initialize` and `textDocument/didOpen` and receives diagnostics for a file with a known error",
+        "Report records cold start, peak memory and diagnostics time against the ADR 0010 thresholds",
+        "ADR 0010 updated with the outcome"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-008",
+      "milestone": "M0",
+      "description": "Spike S4: deploy a probe page to GitHub Pages that calls the registry API endpoints, raw.githubusercontent.com and codeload.github.com, and records CORS results.",
+      "spec": [
+        "ADR-0009"
+      ],
+      "depends_on": [
+        "F-002"
+      ],
+      "steps": [
+        "Probe results (status, CORS headers, timing) are captured by a Playwright run against the deployed page",
+        "Registry endpoint paths are verified against https://registry.nextflow.io/openapi/",
+        "ADR 0009 updated with the outcome"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-010",
+      "milestone": "M0",
+      "description": "Spike S5: run nf-metro in a Web Worker under Pyodide (installing it without its native PNG and animation dependencies) and render the nf-core example `.mmd` files to SVG; measure download size and time.",
+      "spec": [
+        "ADR-0013",
+        "FI-54"
+      ],
+      "depends_on": [
+        "F-002"
+      ],
+      "steps": [
+        "A test page renders two nf-metro example maps to SVG in the browser",
+        "The SVG matches the CLI output for the same input (visual diff within tolerance)",
+        "Report records download size, first-render time and any nf-metro patches needed; ADR 0013 updated with the outcome"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-101",
+      "milestone": "M1",
+      "description": "`packages/lang-2610` parser: generated lexer and parser for scripts and configs, hand-ported base classes, lexer tests ported from upstream nf-lang tests.",
+      "spec": [
+        "ADR-0005",
+        "LA-30"
+      ],
+      "depends_on": [
+        "F-006"
+      ],
+      "steps": [
+        "`pnpm --filter lang-2610 test` passes, including ported lexer cases",
+        "`pnpm gen:grammar 26.10` regenerates byte-identical output",
+        "Generated files carry a do-not-edit header naming the upstream commit"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-102",
+      "milestone": "M1",
+      "description": "Script AST with source ranges and attached comments for every declaration and statement kind in the 26.10 syntax reference, typed and legacy.",
+      "spec": [
+        "AR-01",
+        "AR-02",
+        "LA-10"
+      ],
+      "depends_on": [
+        "F-101"
+      ],
+      "steps": [
+        "Snapshot tests cover each construct in the syntax reference",
+        "Every AST node's range slices back to its exact source text"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-103",
+      "milestone": "M1",
+      "description": "Config AST with source ranges and comments: scopes, assignments, selectors, profiles, includeConfig.",
+      "spec": [
+        "AR-01",
+        "FI-01",
+        "FI-05"
+      ],
+      "depends_on": [
+        "F-101"
+      ],
+      "steps": [
+        "Snapshot tests on every corpus `nextflow.config` and `conf/*.config`",
+        "Ranges slice back to exact source"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-104",
+      "milestone": "M1",
+      "description": "Lossless round trip with declaration-level fallback: a brace-aware pre-scanner splits files so one bad declaration doesn't sink the file; unparseable files are kept verbatim.",
+      "spec": [
+        "ADR-0004",
+        "IO-14",
+        "IO-20"
+      ],
+      "depends_on": [
+        "F-102",
+        "F-103",
+        "F-009"
+      ],
+      "steps": [
+        "Corpus test: parse and print every file with no edits; output is equivalent (spec glossary) for 100% of files",
+        "Malformed fixtures: the bad declaration is isolated, the rest of the file is modelled"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-105",
+      "milestone": "M1",
+      "description": "Semantic model: resolve includes (relative paths and registry module names), declarations by name, and dependencies between files.",
+      "spec": [
+        "AR-03",
+        "AR-04"
+      ],
+      "depends_on": [
+        "F-104"
+      ],
+      "steps": [
+        "On each corpus pipeline, every include resolves or produces a diagnostic naming the missing path",
+        "Changing one file re-models only that file and its dependants (asserted via instrumentation)"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-106",
+      "milestone": "M1",
+      "description": "Projection for typed workflows: calls, operator chains, factories, take, emit, params and output nodes, and def-use edges with Channel/Value types.",
+      "spec": [
+        "AR-10",
+        "AR-11",
+        "AR-12",
+        "LA-20",
+        "LA-22",
+        "LA-24",
+        "LA-25",
+        "LA-26",
+        "LA-28"
+      ],
+      "depends_on": [
+        "F-105"
+      ],
+      "steps": [
+        "Snapshot tests on typed fixtures and the typed rnaseq-nf branch",
+        "Node identities are stable across a re-parse with whitespace-only changes"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-107",
+      "milestone": "M1",
+      "description": "Projection for legacy workflows: `.out` access, pipes, `set`/`tap`, legacy process ports from qualifiers.",
+      "spec": [
+        "AR-14",
+        "LA-21"
+      ],
+      "depends_on": [
+        "F-106"
+      ],
+      "steps": [
+        "Snapshot tests on nf-core/rnaseq, sarek and fetchngs workflows",
+        "Report the share of statements modelled per corpus workflow; target at least 90% overall"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-108",
+      "milestone": "M1",
+      "description": "Code nodes: unmodellable statements become code nodes with inputs and outputs from free-variable analysis.",
+      "spec": [
+        "AR-13",
+        "LA-27",
+        "ADR-0004"
+      ],
+      "depends_on": [
+        "F-106"
+      ],
+      "steps": [
+        "Fixtures with arbitrary Groovy statements produce code nodes wired to the right variables",
+        "Round trip remains equivalent"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-109",
+      "milestone": "M1",
+      "description": "Generated 26.10 catalogue (`script.json`, `config.json`) committed in `lang-2610`, plus `palette.yaml` overlay with a validation test; CI regenerates on dispatch and fails on hand edits.",
+      "spec": [
+        "ADR-0005",
+        "UX-12",
+        "UX-13"
+      ],
+      "depends_on": [
+        "F-006"
+      ],
+      "steps": [
+        "`palette.yaml` references only names present in the catalogue (test)",
+        "Regeneration in CI produces no diff",
+        "No legacy-only construct appears in the palette definition"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-110",
+      "milestone": "M1",
+      "description": "Printer for typed declarations (process, workflow, record, function, params, output, include) matching `nextflow lint -format`; oracle job in CI.",
+      "spec": [
+        "ADR-0005",
+        "LA-45"
+      ],
+      "depends_on": [
+        "F-102",
+        "F-005"
+      ],
+      "steps": [
+        "Oracle job formats every printer fixture with Nextflow 26.10 and finds no difference",
+        "Printed fixtures pass `nextflow lint` with no errors"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-111",
+      "milestone": "M1",
+      "description": "Core edit commands: CreateProcess (own file, flag, include), AddCall, Connect, Disconnect, DeleteNode, RenameDeclaration, ReplaceFileText, with property tests.",
+      "spec": [
+        "AR-20",
+        "AR-21",
+        "AR-22",
+        "AR-23",
+        "AR-24",
+        "LA-12",
+        "LA-13"
+      ],
+      "depends_on": [
+        "F-106",
+        "F-110"
+      ],
+      "steps": [
+        "fast-check: results parse; declarations outside targets stay equivalent; undo restores exact bytes",
+        "CreateProcess writes `modules/local/<name>/main.nf` with `nextflow.enable.types = true` and adds the include",
+        "An edit that would mix typed and legacy definitions in one script is refused with a message"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-112",
+      "milestone": "M1",
+      "description": "Diagnostics: parser errors, constructs invalid for the language version, deprecations, type mismatches on edges, and suggestions for legacy patterns.",
+      "spec": [
+        "LA-29",
+        "LA-30",
+        "LA-31",
+        "LA-32",
+        "LA-33",
+        "LA-34",
+        "LA-35",
+        "LA-36",
+        "AR-05"
+      ],
+      "depends_on": [
+        "F-106",
+        "F-109"
+      ],
+      "steps": [
+        "Each lint has a positive and negative fixture",
+        "Every message states what to do; mechanical cases carry a quick-fix command"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-113",
+      "milestone": "M1",
+      "description": "Engine runs in a Web Worker behind a Comlink API with incremental per-file re-parse; budgets QA-03 and QA-04 measured in CI.",
+      "spec": [
+        "AR-04",
+        "QA-03",
+        "QA-04"
+      ],
+      "depends_on": [
+        "F-111"
+      ],
+      "steps": [
+        "Benchmark job reports sarek parse time and edit p95 against budgets",
+        "The main thread does no parsing (asserted in a Playwright performance trace)"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-201",
+      "milestone": "M2",
+      "description": "App shell: header, three resizable and collapsible columns, tab strip, status bar.",
+      "spec": [
+        "UX-01",
+        "UX-02",
+        "UX-03"
+      ],
+      "depends_on": [
+        "F-002"
+      ],
+      "steps": [
+        "Resize and collapse both side columns; widths persist after reload",
+        "Visual snapshot matches the approved baseline"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-202",
+      "milestone": "M2",
+      "description": "Projects in IndexedDB: create, switch, rename, delete; autosave with saved state in the header; persistent storage request and quota warning.",
+      "spec": [
+        "ADR-0002",
+        "IO-01",
+        "IO-03"
+      ],
+      "depends_on": [
+        "F-201",
+        "F-113"
+      ],
+      "steps": [
+        "Create a project, edit, reload: the edit is there",
+        "Header shows saving then saved",
+        "Simulated quota at 85% shows the warning"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-203",
+      "milestone": "M2",
+      "description": "New project dialog with Start blank and templates (Hello world, Samplesheet to MultiQC); every template is typed, documented and lint-clean; Publish docs checkbox.",
+      "spec": [
+        "UX-60",
+        "LA-11",
+        "LA-40",
+        "LA-41",
+        "LA-42",
+        "LA-43",
+        "LA-50",
+        "UX-60"
+      ],
+      "depends_on": [
+        "F-202"
+      ],
+      "steps": [
+        "Create from each template; the canvas shows the expected nodes",
+        "Oracle job: every template passes `nextflow lint` and `nextflow run -stub`",
+        "Every template has doc comments on all processes and workflows, and schema descriptions for all parameters (no documentation suggestions)"
+      ],
+      "passes": false,
+      "notes": "Template list depends on open question Q6."
+    },
+    {
+      "id": "F-204",
+      "milestone": "M2",
+      "description": "Palette from the language pack: generic categories as accordions, search, preview badges.",
+      "spec": [
+        "UX-10",
+        "UX-11",
+        "UX-12",
+        "UX-13"
+      ],
+      "depends_on": [
+        "F-201",
+        "F-109"
+      ],
+      "steps": [
+        "Every category expands and collapses; state persists",
+        "Searching `group` finds `groupTuple`",
+        "No legacy-only construct appears"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-205",
+      "milestone": "M2",
+      "description": "Canvas renders projections: node kinds and colours, ports with labels and compact toggle, queue/value edges, typed badges, minimap, zoom and fit.",
+      "spec": [
+        "UX-20",
+        "UX-21",
+        "UX-22",
+        "UX-23",
+        "UX-24",
+        "UX-26"
+      ],
+      "depends_on": [
+        "F-201",
+        "F-113"
+      ],
+      "steps": [
+        "Open each template and a corpus pipeline; visual snapshots per node kind match baselines",
+        "Typed processes and workflows show the `typed` badge, legacy ones none; value edges are dashed",
+        "Hovering an edge shows its type"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-206",
+      "milestone": "M2",
+      "description": "Details pane: read-only details for every node kind; workflow summary when nothing is selected.",
+      "spec": [
+        "UX-30",
+        "UX-31",
+        "UX-32"
+      ],
+      "depends_on": [
+        "F-205"
+      ],
+      "steps": [
+        "Click each node kind in a fixture project: details show name, kind, file, ports with types and connections",
+        "Click empty canvas: workflow summary shows"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-207",
+      "milestone": "M2",
+      "description": "Layout sidecar and ELK auto-layout in a worker; positions persist and survive re-parse.",
+      "spec": [
+        "ADR-0008",
+        "IO-02",
+        "UX-26"
+      ],
+      "depends_on": [
+        "F-205"
+      ],
+      "steps": [
+        "Open a project without a sidecar: nodes are laid out and the sidecar is written",
+        "Move a node, reload: same position",
+        "Rename a process through the app: its position is kept"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-208",
+      "milestone": "M2",
+      "description": "View modes Graph, Split and Code per tab; Code is Monaco (lazy-loaded) editing the whole file via ReplaceFileText.",
+      "spec": [
+        "UX-27",
+        "AR-32"
+      ],
+      "depends_on": [
+        "F-205",
+        "F-111"
+      ],
+      "steps": [
+        "Switch modes with the toggle and with G, S, C",
+        "Edit code in Split mode: the graph updates after a valid edit; an invalid edit shows a diagnostic and leaves the graph unchanged",
+        "Monaco is absent from the initial bundle (bundle report)"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-209",
+      "milestone": "M2",
+      "description": "Undo and redo across all edit commands, one step per command.",
+      "spec": [
+        "AR-23"
+      ],
+      "depends_on": [
+        "F-208"
+      ],
+      "steps": [
+        "Make five different edits, undo five times: files are byte-identical to the start",
+        "Redo five times: back to the edited state"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-301",
+      "milestone": "M3",
+      "description": "Add from palette by drag and drop or keyboard; a new process goes in its own module file with the flag and an include, plus a call in the current workflow.",
+      "spec": [
+        "UX-15",
+        "LA-12",
+        "AR-21"
+      ],
+      "depends_on": [
+        "F-204",
+        "F-209"
+      ],
+      "steps": [
+        "Drag Process onto the canvas: node appears; Files shows `modules/local/<name>/main.nf`; main.nf has the include and call",
+        "Focus Workflow in the palette and press Enter: node appears at viewport centre",
+        "Exported result passes `nextflow lint`"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-302",
+      "milestone": "M3",
+      "description": "Connect and disconnect ports with type checking; invalid targets dim while dragging; mismatches produce diagnostics.",
+      "spec": [
+        "UX-25",
+        "LA-29",
+        "LA-32"
+      ],
+      "depends_on": [
+        "F-301"
+      ],
+      "steps": [
+        "Connect a Channel<Sample> output to a Sample input: code updates, no diagnostics",
+        "Connect a Path output to a Sample input: edge turns red with a diagnostic",
+        "Delete an edge: the call argument is removed and the code still parses"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-303",
+      "milestone": "M3",
+      "description": "Edit popup, Configure tab for typed processes: name, description, inputs, stage, outputs, topics, directives (searchable from catalogue), script, stub. No kind control.",
+      "spec": [
+        "UX-40",
+        "UX-41",
+        "UX-42",
+        "UX-44"
+      ],
+      "depends_on": [
+        "F-301"
+      ],
+      "steps": [
+        "Double-click a process: popup opens on Configure",
+        "Add an input, rename an output, add `cpus` from the directive list, Apply: one undo step, code updated, ports updated",
+        "Deprecated directives are not offered",
+        "There is no control for changing kind"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-304",
+      "milestone": "M3",
+      "description": "Edit popup, Code tab: Monaco on the declaration only with Shiki Nextflow highlighting and inline diagnostics; Show whole file; Format; Apply disabled while invalid.",
+      "spec": [
+        "UX-43",
+        "UX-44"
+      ],
+      "depends_on": [
+        "F-303"
+      ],
+      "steps": [
+        "Edit in Code, switch to Configure: the form reflects the edit",
+        "Introduce a syntax error: Apply is disabled and the error shows inline",
+        "Format produces the same text as the oracle formatter for that declaration"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-305",
+      "milestone": "M3",
+      "description": "Configure forms for operator chains, channel factories, params block, output block, records, functions, includes.",
+      "spec": [
+        "UX-41",
+        "LA-24",
+        "LA-25",
+        "LA-26"
+      ],
+      "depends_on": [
+        "F-303"
+      ],
+      "steps": [
+        "For each kind, change one property through the form and verify the code and lint result",
+        "Operator closures are editable in a small Monaco field"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-306",
+      "milestone": "M3",
+      "description": "Configure tab for legacy processes with qualifier-based input and output editors; Migrate to typed shown only when a migration is available.",
+      "spec": [
+        "UX-41",
+        "UX-45",
+        "LA-10",
+        "LA-21"
+      ],
+      "depends_on": [
+        "F-303"
+      ],
+      "steps": [
+        "Edit a legacy nf-core process's inputs in a local copy: code stays legacy and lint-clean",
+        "No silent migration happens on any edit"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-307",
+      "milestone": "M3",
+      "description": "Workflow tabs: double-click a workflow node opens its canvas tab with breadcrumb; editing take or emit updates ports at every call site.",
+      "spec": [
+        "UX-50",
+        "UX-51"
+      ],
+      "depends_on": [
+        "F-301"
+      ],
+      "steps": [
+        "Double-click ALIGN in a fixture: a tab opens with take and emit pills",
+        "Add a take: the ALIGN node in main.nf gains an input port",
+        "Breadcrumb back returns to main.nf"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-308",
+      "milestone": "M3",
+      "description": "Operator chains: expand and collapse in place; drop an operator onto an edge to insert it into the chain.",
+      "spec": [
+        "UX-15",
+        "UX-28",
+        "ADR-0008"
+      ],
+      "depends_on": [
+        "F-302"
+      ],
+      "steps": [
+        "Drop `filter` onto an edge between two processes: the chain shows `filter`; code has `.filter { … }` in the right place",
+        "Expand and collapse a chain: code unchanged"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-309",
+      "milestone": "M3",
+      "description": "Problems panel listing errors, warnings and suggestions with locations and quick fixes; status bar counts.",
+      "spec": [
+        "UX-03",
+        "LA-30",
+        "LA-31",
+        "LA-32",
+        "LA-33",
+        "LA-34",
+        "LA-35",
+        "LA-36"
+      ],
+      "depends_on": [
+        "F-112",
+        "F-205"
+      ],
+      "steps": [
+        "Open a legacy fixture: suggestions are counted separately from problems",
+        "Apply a quick fix (for example `Channel.of` → `channel.of`): the suggestion disappears and one undo step reverts it"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-310",
+      "milestone": "M3",
+      "description": "Multi-select, delete, copy and paste of nodes within and across projects.",
+      "spec": [
+        "UX-26"
+      ],
+      "depends_on": [
+        "F-302"
+      ],
+      "steps": [
+        "Copy two connected processes to another project: both module files and the connection come across",
+        "Delete a multi-selection: one undo step restores all"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-311",
+      "milestone": "M3",
+      "description": "Doc comments: Configure description fields write nf-docs-format Groovydoc; both comment styles parsed; renames and deletes keep tags in step; details pane shows descriptions.",
+      "spec": [
+        "ADR-0013",
+        "LA-50",
+        "LA-51",
+        "LA-52",
+        "UX-46"
+      ],
+      "depends_on": [
+        "F-303"
+      ],
+      "steps": [
+        "Describe a process, one input and one output in Configure, Apply: the declaration has a Groovydoc block with the text, `@param` and `@return` lines",
+        "Rename the input: its `@param` tag is renamed",
+        "Open a legacy fixture using `Inputs:`/`Outputs:` lists: descriptions show in details; nothing is rewritten until edited",
+        "Docs oracle: nf-docs JSON for the result contains every description"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-312",
+      "milestone": "M3",
+      "description": "Documentation suggestions: undocumented processes, workflows, ports and parameters, each with a quick fix that opens the right field.",
+      "spec": [
+        "LA-54"
+      ],
+      "depends_on": [
+        "F-311",
+        "F-309"
+      ],
+      "steps": [
+        "A fresh process from the palette shows a documentation suggestion; filling the description clears it"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-401",
+      "milestone": "M4",
+      "description": "Import a public GitHub repo: ref resolution, tree listing, raw contents, filters, summary before and report after.",
+      "spec": [
+        "ADR-0009",
+        "IO-10",
+        "IO-12",
+        "IO-13",
+        "UX-61"
+      ],
+      "depends_on": [
+        "F-202",
+        "F-104",
+        "F-008"
+      ],
+      "steps": [
+        "Import nf-core/fetchngs at its pinned tag: file hashes match the corpus cache",
+        "The import uses at most two api.github.com requests (network log)",
+        "The report lists parse failures and legacy share"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-402",
+      "milestone": "M4",
+      "description": "Import a private GitHub repo with a token held in memory by default; optional remember-on-device.",
+      "spec": [
+        "IO-10",
+        "IO-15",
+        "QA-33"
+      ],
+      "depends_on": [
+        "F-401"
+      ],
+      "steps": [
+        "Import from a private test repo with a fine-grained token",
+        "Reload: the token is gone unless remember was ticked",
+        "The token never appears in exports or console output"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-403",
+      "milestone": "M4",
+      "description": "Zip import in a worker with top-level folder stripping and size limits.",
+      "spec": [
+        "IO-11",
+        "IO-12",
+        "QA-32"
+      ],
+      "depends_on": [
+        "F-202",
+        "F-104"
+      ],
+      "steps": [
+        "Import a GitHub archive zip of rnaseq-nf: same files as the GitHub import",
+        "A zip exceeding the limits is refused with a clear message"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-404",
+      "milestone": "M4",
+      "description": "Export project as zip, layout sidecar optional; untouched files equivalent to the source.",
+      "spec": [
+        "IO-20",
+        "IO-21",
+        "UX-62"
+      ],
+      "depends_on": [
+        "F-401"
+      ],
+      "steps": [
+        "Import, make one scripted edit, export: every file the edit didn't touch is equivalent to the source",
+        "Oracle: the exported project passes `nextflow lint` when the source did",
+        "Export, clear storage, import the zip: layout identical (ADR 0008 confirmation)"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-405",
+      "milestone": "M4",
+      "description": "Imported legacy pipelines show typed badges only on typed code, suggestion counts, and the share of each workflow that is modelled.",
+      "spec": [
+        "UX-23",
+        "LA-35",
+        "ADR-0004"
+      ],
+      "depends_on": [
+        "F-401",
+        "F-309"
+      ],
+      "steps": [
+        "Import nf-core/rnaseq: nf-core processes carry no typed badge; status bar shows suggestions; workflow summary shows % modelled"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-406",
+      "milestone": "M4",
+      "description": "Export all projects to one backup zip and import it back.",
+      "spec": [
+        "IO-04"
+      ],
+      "depends_on": [
+        "F-404"
+      ],
+      "steps": [
+        "Export all, clear storage, import the backup: every project restored with layout"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-501",
+      "milestone": "M5",
+      "description": "Scheduled GitHub Action builds the registry snapshot: module index with meta.yml ports and typed/legacy detection, per-module bundles, plugin index and specs.",
+      "spec": [
+        "ADR-0009",
+        "IO-31",
+        "QA-06"
+      ],
+      "depends_on": [
+        "F-008",
+        "F-104"
+      ],
+      "steps": [
+        "Action runs on schedule and dispatch, and publishes with the site",
+        "Index size within QA-06",
+        "Spot check: nf-core/fastqc ports match its meta.yml and it is marked legacy (as of 2026-11)"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-502",
+      "milestone": "M5",
+      "description": "RegistryClient with live and snapshot implementations and automatic fallback; palette shows source and age.",
+      "spec": [
+        "IO-30",
+        "UX-14"
+      ],
+      "depends_on": [
+        "F-501"
+      ],
+      "steps": [
+        "Block the registry host in Playwright: palette still lists modules from the snapshot and says so",
+        "With live access (if S4 allowed it): palette shows live"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-503",
+      "milestone": "M5",
+      "description": "Registry modules and plugins in the palette: namespace groups, process or workflow tag, search, lazy loading.",
+      "spec": [
+        "UX-11",
+        "UX-14"
+      ],
+      "depends_on": [
+        "F-502",
+        "F-204"
+      ],
+      "steps": [
+        "Search `fastqc`: nf-core/fastqc appears under Modules",
+        "Scrolling the module list loads more without blocking input"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-504",
+      "milestone": "M5",
+      "description": "Insert a registry module: bundle written to `modules/<ns>/<name>/`, include by name, reuse if present; warning per LA-14 when inserting legacy into typed if S1 requires it.",
+      "spec": [
+        "IO-32",
+        "LA-14",
+        "LA-23"
+      ],
+      "depends_on": [
+        "F-503",
+        "F-301"
+      ],
+      "steps": [
+        "Drop nf-core/fastqc into a typed template, connect it, export: passes `nextflow lint` (M5 exit)",
+        "Drop it again: the bundle is not duplicated"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-505",
+      "milestone": "M5",
+      "description": "Plugins: add from palette into the config `plugins` block; plugin functions, operators and factories join the palette; plugin scopes join the config editor catalogue.",
+      "spec": [
+        "IO-33",
+        "FI-01"
+      ],
+      "depends_on": [
+        "F-503"
+      ],
+      "steps": [
+        "Add nf-schema: `nextflow.config` gains the plugin line; its functions appear in the palette"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-506",
+      "milestone": "M5",
+      "description": "Registry module details: version, upstream link, update available; registry folders read-only with Make local copy.",
+      "spec": [
+        "UX-32",
+        "FI-22"
+      ],
+      "depends_on": [
+        "F-504"
+      ],
+      "steps": [
+        "Select an inserted module: details show version and upstream link",
+        "Make local copy: module moves to `modules/local/`, include updated, editing allowed"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-601",
+      "milestone": "M6",
+      "description": "nextflow.config editor: forms for first-class scopes, generic typed forms for other scopes, Add scope, option docs in the right pane, selectors showing matched processes, unknown options kept.",
+      "spec": [
+        "FI-01",
+        "FI-02",
+        "FI-03",
+        "FI-04",
+        "FI-05",
+        "FI-06"
+      ],
+      "depends_on": [
+        "F-103",
+        "F-208"
+      ],
+      "steps": [
+        "Set process memory and a withLabel selector through forms: code updated, lint-clean",
+        "An unknown option in an imported config is kept and flagged"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-602",
+      "milestone": "M6",
+      "description": "nextflow_schema.json builder with groups, all parameter properties, Ajv validation, and sync with the params block.",
+      "spec": [
+        "FI-10",
+        "FI-11",
+        "FI-12"
+      ],
+      "depends_on": [
+        "F-305"
+      ],
+      "steps": [
+        "Add a param in the params block: the schema builder offers the matching entry",
+        "Change a type in the schema: a diagnostic with quick fix appears on the params block"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-603",
+      "milestone": "M6",
+      "description": "Samplesheet schema in row mode, with record-type consistency diagnostics.",
+      "spec": [
+        "FI-13"
+      ],
+      "depends_on": [
+        "F-602"
+      ],
+      "steps": [
+        "Add a field to the Sample record: a diagnostic offers to add the matching samplesheet column"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-604",
+      "milestone": "M6",
+      "description": "meta.yml editor and Update from process.",
+      "spec": [
+        "FI-20",
+        "FI-21"
+      ],
+      "depends_on": [
+        "F-305"
+      ],
+      "steps": [
+        "Change a local process's inputs, run Update from process: diff shows the matching meta.yml change"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-605",
+      "milestone": "M6",
+      "description": "Markdown preview and editor (sanitised); Monaco for other text files; binaries listed but not opened.",
+      "spec": [
+        "FI-30",
+        "FI-31",
+        "FI-32",
+        "QA-31"
+      ],
+      "depends_on": [
+        "F-208"
+      ],
+      "steps": [
+        "A README containing a script tag previews without executing it",
+        "A .png in the project is listed but not opened"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-606",
+      "milestone": "M6",
+      "description": "Docs publishing: docs/ stubs and docs.yml for new projects (checkbox), Add docs publishing for imports, pinned versions from the pack; CI docs oracle on templates.",
+      "spec": [
+        "ADR-0013",
+        "FI-40",
+        "FI-41",
+        "FI-42",
+        "FI-43",
+        "FI-44"
+      ],
+      "depends_on": [
+        "F-203",
+        "F-602"
+      ],
+      "steps": [
+        "Create a project with the checkbox on: `docs/usage.md`, `docs/output.md` and `.github/workflows/docs.yml` exist; the README has the Pages setup line",
+        "CI job runs the generated docs.yml steps on a template in a test repo and the Pages artifact contains index.html",
+        "Import a pipeline: no docs files are added until Add docs publishing is used"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-607",
+      "milestone": "M6",
+      "description": "Metro map: generate `assets/metro_map.mmd` from the entry workflow (stations, sections, automatic lines), keep it in step until hand-edited, set `manifest.diagram`, render the SVG (in browser or via the metro-map workflow per S5), show it in details.",
+      "spec": [
+        "ADR-0013",
+        "FI-50",
+        "FI-51",
+        "FI-52",
+        "FI-53",
+        "FI-54",
+        "FI-55",
+        "UX-60"
+      ],
+      "depends_on": [
+        "F-606",
+        "F-010"
+      ],
+      "steps": [
+        "Create a project from the Samplesheet to MultiQC template: `assets/metro_map.mmd` exists, passes `nf-metro validate`, and `nextflow.config` sets `manifest.diagram`",
+        "Add a process on the canvas: the `.mmd` gains a station; the SVG updates (or the workflow file is present if S5 failed)",
+        "Edit the `.mmd` by hand, then change the canvas: the file is not overwritten and the problems panel shows it is out of date; Regenerate shows a diff",
+        "Docs oracle: `nf-metro validate` passes on every template's generated map"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-701",
+      "milestone": "M7",
+      "description": "Keyboard coverage and accessibility: all UX-70 shortcuts, keyboard port connection, axe clean.",
+      "spec": [
+        "UX-70",
+        "QA-10",
+        "QA-11",
+        "QA-12",
+        "QA-13",
+        "QA-14"
+      ],
+      "depends_on": [
+        "F-310",
+        "F-307"
+      ],
+      "steps": [
+        "Build the Hello world template from blank using only the keyboard",
+        "axe reports no violations on the main screens"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-702",
+      "milestone": "M7",
+      "description": "All performance budgets green in CI.",
+      "spec": [
+        "QA-01",
+        "QA-02",
+        "QA-03",
+        "QA-04",
+        "QA-05",
+        "QA-06"
+      ],
+      "depends_on": [
+        "F-503"
+      ],
+      "steps": [
+        "CI budget report shows every budget met on `main`"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-703",
+      "milestone": "M7",
+      "description": "Read-only mode below 1024 px.",
+      "spec": [
+        "UX-04"
+      ],
+      "depends_on": [
+        "F-206"
+      ],
+      "steps": [
+        "At 390 px wide: canvas and details visible, no editing controls, note shown"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F-704",
+      "milestone": "M7",
+      "description": "User docs (README, in-app help links) and the v0.1.0 release on GitHub Pages.",
+      "spec": [
+        "PR-01",
+        "PR-07"
+      ],
+      "depends_on": [
+        "F-701",
+        "F-702",
+        "F-703"
+      ],
+      "steps": [
+        "Tag v0.1.0; Pages serves the release build; README explains what the app does and where projects are stored"
+      ],
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}

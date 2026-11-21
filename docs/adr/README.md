@@ -1,0 +1,19 @@
+# Architecture decision records
+
+Process: [0001](0001-record-decisions-as-adrs.md). Template: [template.md](template.md). Until the first code is merged, ADRs are rewritten in place; after that, superseded.
+
+| # | Decision | Status |
+|---|---|---|
+| [0001](0001-record-decisions-as-adrs.md) | Record decisions as ADRs | Accepted |
+| [0002](0002-browser-only-app.md) | Browser-only static app, projects stored in IndexedDB | Accepted |
+| [0003](0003-stack-and-repo-layout.md) | TypeScript and React in a pnpm monorepo with tool-enforced boundaries | Proposed |
+| [0004](0004-files-are-the-source-of-truth.md) | Files are the source of truth, and code is never lost | Proposed |
+| [0005](0005-use-nextflows-own-sources.md) | Use Nextflow's own grammar, definitions and formatter | Proposed |
+| [0006](0006-language-packs-per-version.md) | One language pack per Nextflow version; 26.10 only at launch | Accepted |
+| [0007](0007-typed-by-default.md) | Typed by default; legacy code accepted and editable | Accepted |
+| [0008](0008-canvas-model.md) | Canvas model: fixed node kinds, chain nodes, layout in a sidecar | Proposed |
+| [0009](0009-registry-and-github-access.md) | Read the registry and GitHub straight from the browser, with a snapshot fallback | Proposed (spike S4) |
+| [0010](0010-language-server-spike.md) | Try the official language server in the browser; never depend on it | Proposed (spike S3) |
+| [0011](0011-testing-with-real-pipelines-and-nextflow.md) | Test against real pipelines, with real Nextflow and nf-docs as oracles | Proposed |
+| [0012](0012-agent-workflow.md) | Agents work one feature per session against a fixed feature list | Proposed |
+| [0013](0013-nf-docs-integration.md) | Write docs in nf-docs format, generate an nf-metro map, publish to GitHub Pages | Accepted |
