@@ -4,18 +4,12 @@
 //   git show origin/main:docs/plan/features.json > /tmp/base.json && node scripts/check-features-scope.ts --base /tmp/base.json
 // Labels come from the PR_LABELS environment variable (a JSON array of names); unset means none.
 import { readFileSync } from "node:fs";
-import { join } from "node:path";
-import {
-  isMain,
-  type Problem,
-  REPO_ROOT,
-  reportProblems,
-} from "./check-common.ts";
+import { isMain, type Problem, reportProblems } from "./check-common.ts";
+import { FEATURES_FILE } from "./check-features.ts";
 
-const FEATURES_FILE: string = join(REPO_ROOT, "docs/plan/features.json");
-export const SCOPE_CHANGE_LABEL = "scope-change";
+const SCOPE_CHANGE_LABEL = "scope-change";
 
-export type FeatureChange =
+type FeatureChange =
   | { kind: "passes"; id: string; from: unknown; to: unknown }
   | { kind: "notes-appended"; id: string }
   | { kind: "notes-rewritten"; id: string }
@@ -25,7 +19,7 @@ export type FeatureChange =
   | { kind: "reordered"; first: string; before: string }
   | { kind: "top-level"; key: string };
 
-export type ScopeVerdict = {
+type ScopeVerdict = {
   ok: boolean;
   labelled: boolean;
   changes: FeatureChange[];
@@ -44,7 +38,7 @@ const show = (value: unknown): string => {
   return text.length > 80 ? `${text.slice(0, 79)}…` : text;
 };
 
-export function describeChange(change: FeatureChange): string {
+function describeChange(change: FeatureChange): string {
   switch (change.kind) {
     case "passes":
       return `${change.id}: "passes" ${show(change.from)} → ${show(change.to)}`;
@@ -260,17 +254,14 @@ function main(argv: string[]): number {
   }
   const scope = verdict.changes.filter(isScopeChange);
   const allowed = verdict.changes.filter((c) => !isScopeChange(c));
-  if (verdict.changes.length === 0) console.log("features.json: no changes");
-  else if (scope.length > 0) {
-    console.log(
-      `features.json: ${scope.length} scope change(s) allowed by the scope-change label`,
-    );
-    for (const c of [...scope, ...allowed])
-      console.log(`  ${describeChange(c)}`);
-  } else {
-    console.log(`features.json: ${allowed.length} allowed change(s)`);
-    for (const c of allowed) console.log(`  ${describeChange(c)}`);
-  }
+  console.log(
+    verdict.changes.length === 0
+      ? "features.json: no changes"
+      : scope.length > 0
+        ? `features.json: ${scope.length} scope change(s) allowed by the scope-change label`
+        : `features.json: ${allowed.length} allowed change(s)`,
+  );
+  for (const c of [...scope, ...allowed]) console.log(`  ${describeChange(c)}`);
   return 0;
 }
 

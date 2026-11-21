@@ -29,7 +29,7 @@ type Resolved =
   | { kind: "root"; script: string }
   | { kind: "filtered"; filter: string; script: string };
 
-const BUILTINS = ["install", "add", "audit", "exec", "dlx"];
+const BUILTINS = ["install"];
 
 function resolvePnpm(command: string): Resolved {
   const tokens = command.split(/\s+/).slice(1);
@@ -69,10 +69,6 @@ function workspacePackages(): Pkg[] {
     }
   }
   return packages;
-}
-
-function scriptsRunByCheck(check: string): string[] {
-  return [...check.matchAll(/pnpm run ([\w:.-]+)/g)].map((m) => m[1] ?? "");
 }
 
 const rootScripts = (): Record<string, string> =>
@@ -150,7 +146,9 @@ describe("AGENTS.md Commands section", () => {
     )
       .map(resolvePnpm)
       .flatMap((r) => (r.kind === "root" ? [r.script] : []));
-    const run = scriptsRunByCheck(root.check ?? "");
+    const run = [...(root.check ?? "").matchAll(/pnpm run ([\w:.-]+)/g)].map(
+      (m) => m[1] ?? "",
+    );
     const undocumented = Object.keys(root).filter(
       (s) => s !== "check" && !documented.includes(s) && !run.includes(s),
     );

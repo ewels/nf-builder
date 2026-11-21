@@ -1,11 +1,5 @@
 import { spawnSync } from "node:child_process";
-import {
-  mkdirSync,
-  mkdtempSync,
-  readFileSync,
-  rmSync,
-  writeFileSync,
-} from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
@@ -32,8 +26,8 @@ function feature(id: string, extra: F = {}): F {
   };
 }
 
-function featuresJson(features: F[], comment = "x", indent = 2): string {
-  return `${JSON.stringify({ $comment: comment, features }, null, indent)}\n`;
+function featuresJson(features: F[], comment = "x"): string {
+  return `${JSON.stringify({ $comment: comment, features }, null, 2)}\n`;
 }
 
 const base = () => [
@@ -312,7 +306,6 @@ describe("features.json scope guard command line", () => {
 
   it("F-004: the scope guard exits 2 without --base, with a missing base file, or with bad PR_LABELS", () => {
     const d = tmp();
-    mkdirSync(d, { recursive: true });
     writeFileSync(join(d, "base.json"), featuresJson(base()));
     for (const r of [
       run([]),
@@ -362,8 +355,9 @@ describe("Scope guard workflow", () => {
     expect(yml).toContain("fetch-depth: 2");
     expect(yml).toContain("git show HEAD^1:docs/plan/features.json");
     expect(yml).toContain(
-      "PR_LABELS: ${{ toJSON(github.event.pull_request.labels.*.name) }}",
+      `PR_LABELS: \${{ toJSON(github.event.pull_request.labels.*.name) }}`,
     );
+    expect(yml).toContain("\n    name: Scope guard\n");
     expect(yml).toContain("node scripts/check-features-scope.ts --base");
     expect(yml).not.toContain("pnpm install");
     expect(yml).not.toContain("./.github/actions/setup");

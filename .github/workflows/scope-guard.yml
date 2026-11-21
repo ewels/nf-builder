@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
   features-scope:
-    name: features.json scope (ADR 0012)
+    name: Scope guard
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:

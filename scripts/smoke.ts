@@ -1,12 +1,12 @@
-// pnpm smoke (F-004, ADR 0012): run at the start of every session. A fresh production build (Playwright's
+// pnpm smoke (F-004, ADR 0016): run at the start of every session. A fresh production build (Playwright's
 // preview web server runs `pnpm build` first) plus the @smoke end-to-end tests on Chromium, in under 60 s.
 import { spawnSync } from "node:child_process";
 import { join } from "node:path";
-import { performance } from "node:perf_hooks";
 import { SMOKE_TAG } from "../e2e/browsers.ts";
 import { isMain, REPO_ROOT } from "./check-common.ts";
 
 export const SMOKE_BUDGET_MS = 60_000;
+const BUDGET = `${SMOKE_BUDGET_MS / 1000} s`;
 
 export function smokeArgs(argv: readonly string[]): string[] {
   const rest = argv[0] === "--" ? argv.slice(1) : argv;
@@ -18,7 +18,6 @@ const seconds = (ms: number): string => (ms / 1000).toFixed(1);
 export function smokeVerdict(
   elapsedMs: number,
   status: number | null,
-  budgetMs: number = SMOKE_BUDGET_MS,
 ): { exitCode: number; message: string } {
   if (status !== 0) {
     return {
@@ -26,15 +25,15 @@ export function smokeVerdict(
       message: `smoke: failed after ${seconds(elapsedMs)} s (Playwright exit code ${status ?? "none"}). The build or the app shell is broken; fixing it is the next work (AGENTS.md, Every session).`,
     };
   }
-  if (elapsedMs >= budgetMs) {
+  if (elapsedMs >= SMOKE_BUDGET_MS) {
     return {
       exitCode: 1,
-      message: `smoke: the test passed but the run took ${seconds(elapsedMs)} s; F-004 requires under ${seconds(budgetMs).replace(/\.0$/, "")} s. Check the timings above: the build (pnpm build), the web servers, or the test.`,
+      message: `smoke: the test passed but the run took ${seconds(elapsedMs)} s; F-004 requires under ${BUDGET}. Check the timings above: the build (pnpm build), the web servers, or the test.`,
     };
   }
   return {
     exitCode: 0,
-    message: `smoke: passed in ${seconds(elapsedMs)} s (F-004 budget: under ${seconds(budgetMs).replace(/\.0$/, "")} s)`,
+    message: `smoke: passed in ${seconds(elapsedMs)} s (F-004 budget: under ${BUDGET})`,
   };
 }
 
