@@ -1,4 +1,6 @@
 // Shared by the repository checkers (ADR lint, features.json validation, the budget and host scans).
+// Checker scripts import only `node:` built-ins and sibling scripts, because the `adr-lint` and `features`
+// CI jobs run them without `pnpm install`.
 import { existsSync, realpathSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 import { fileURLToPath } from "node:url";

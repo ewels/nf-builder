@@ -87,6 +87,31 @@ describe("IO-41 host scan", () => {
     ]);
   });
 
+  it("IO-41: classifies template and malformed URLs by their literal prefix", () => {
+    const cases: [string, string][] = [
+      [`\`https://evil.example\${p}\``, "forbidden"],
+      [`\`https://evil.example:\${port}\``, "forbidden"],
+      [`\`https://api.github.com\${path}\``, "allowed"],
+      [`\`https://\${host}/x\``, "no-host"],
+      [`"https://evil.example]x"`, "forbidden"],
+      [`"https://evil.example%zz"`, "forbidden"],
+    ];
+    for (const [text, expected] of cases) {
+      const found = findUrls(text);
+      expect(found, text).toHaveLength(1);
+      expect(kind(found[0]?.url ?? ""), text).toBe(expected);
+    }
+    expect(classifyUrl(`https://evil.example\${p}`)).toMatchObject({
+      kind: "forbidden",
+      host: "evil.example",
+    });
+    expect(classifyUrl("https://evil.example%zz")).toMatchObject({
+      kind: "forbidden",
+      host: "evil.example%zz",
+    });
+    expect(kind(`https://api.github.com:\${port}`)).toBe("forbidden");
+  });
+
   it("F-003 step 2: IO-41 fails on a fetch to an unlisted host, naming the host, file, column and both fixes", () => {
     const dist = makeDist({
       "assets/index-abc.js": `x;fetch(\`https://telemetry.example.com/collect\`)`,

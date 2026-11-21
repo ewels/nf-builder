@@ -61,19 +61,30 @@ export function findUrls(text: string): FoundUrl[] {
 }
 
 export function classifyUrl(url: string): Verdict {
+  // Classify by the literal prefix before the first template character (`https://evil.example${p}`).
+  const cutAt = url.search(/[${}]/);
+  let literal = cutAt === -1 ? url : url.slice(0, cutAt);
+  // A port separator with nothing after it (`https://h:${port}`): the origin is unknown, so never allowed.
+  const runtimePort = cutAt !== -1 && literal.endsWith(":");
+  if (runtimePort) literal = literal.slice(0, -1);
+  // Only a scheme is left: the host is built at runtime and can't be checked (the CSP blocks it).
+  if (/^[a-z]+:\/\/$/i.test(literal)) return { kind: "no-host" };
   let parsed: URL;
   try {
-    parsed = new URL(url);
+    parsed = new URL(literal);
   } catch {
-    return { kind: "no-host" };
+    // Not parseable (`https://evil.example]x`, `%zz`): a literal host that isn't an allowed origin is forbidden.
+    const authority = /^[a-z]+:\/\/([^/?#]*)/i.exec(literal)?.[1] ?? "";
+    const host = authority.slice(authority.lastIndexOf("@") + 1);
+    if (host === "") return { kind: "no-host" };
+    return { kind: "forbidden", origin: host, host };
   }
-  // A template placeholder such as `https://${h}/x` parses, but its host is only known at runtime.
-  if (/[${}]/.test(parsed.hostname)) return { kind: "no-host" };
   const entry = NON_FETCHED_URLS.find((e) =>
     e.match === "exact" ? url === e.url : url.startsWith(e.url),
   );
   if (entry !== undefined) return { kind: "ignored", entry };
-  if (ALLOWED_ORIGINS.includes(parsed.origin)) return { kind: "allowed" };
+  if (!runtimePort && ALLOWED_ORIGINS.includes(parsed.origin))
+    return { kind: "allowed" };
   return { kind: "forbidden", origin: parsed.origin, host: parsed.hostname };
 }
 
