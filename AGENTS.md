@@ -16,28 +16,28 @@ Browser-only visual builder for Nextflow pipelines (TypeScript, React). What it 
    - set `passes: true` only if every step in the feature passed;
    - append to `progress.md`;
    - open a PR using the template;
-   - when CI is green and the reviewer has nothing blocking, squash-merge it, delete the branch, update local `main`, and start again at step 1. "CI green" means every job of the `CI` and `Deploy check` workflows passed on the PR head (ADR 0015).
+   - when CI is green and the reviewer has nothing blocking, squash-merge it, delete the branch, update local `main`, and start again at step 1. "CI green" means every job of the `CI`, `Deploy check` and `Scope guard` workflows passed on the PR head (ADRs 0015, 0016).
 
 ## Commands
 
-These arrive with F-001 to F-004. Until then the repo is docs only.
+This table lists every root `package.json` script that `pnpm check` doesn't already run, and nothing that doesn't exist yet; `test/agents-md.test.ts` checks both. A feature that adds a script adds its row.
 
 | Command | When |
 |---|---|
 | `pnpm install` | First run, and after lockfile changes |
+| `pnpm smoke` | Session start: a fresh build plus the `@smoke` end-to-end test on Chromium; fails unless it finishes in under 60 s |
 | `pnpm dev` | Local dev server (http://localhost:5173; no CSP, see ADR 0014) |
 | `pnpm build` | Production build of `apps/web` into `apps/web/dist` (what Netlify runs) |
+| `pnpm preview` | After `pnpm build`: serve `apps/web/dist` with the `netlify.toml` headers on http://localhost:4173, as the end-to-end tests do |
 | `pnpm --filter <package> test` | While iterating on one package |
+| `pnpm format` | Before `pnpm check`: apply Biome's formatting and safe fixes |
 | `pnpm check` | Before every commit: typecheck, Biome, unit tests, dependency-cruiser, ADR lint, `features.json` validation |
 | `pnpm check:budget` and `pnpm check:hosts` | After `pnpm build`: QA-01 bundle budget and IO-41 host allow-list (ADR 0015) |
-| `pnpm smoke` | Session start: build plus one end-to-end test |
 | `pnpm test:e2e -- --grep F-123` | The feature's end-to-end test |
-| `pnpm corpus:fetch` then `pnpm test:corpus` | When touching the parser, model, projection or printer |
-| `pnpm gen:grammar 26.10` | After changing vendored grammar files |
 
-The catalogue (`pnpm gen:catalogue`, needs Java) and the Nextflow oracle tests run in CI only. Don't try to run them locally.
+Still to come, each with the feature that adds it: fetching and testing the pipeline corpus (F-009; run it when touching the parser, model, projection or printer), the grammar generator (F-101) and the catalogue generator (F-109). The catalogue (needs Java) and the Nextflow oracle tests run in CI only. Don't try to run them locally.
 
-`pnpm test:e2e` builds the app and serves it with the `netlify.toml` headers. In the Claude Code cloud sandbox only an older Chromium is installed: export `PW_CHROMIUM_EXECUTABLE=/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell` first, and never run `playwright install`. The sandbox also can't reach `*.netlify.app`; the `deploy-check` workflow checks deployed headers instead.
+`pnpm test:e2e` and `pnpm smoke` build the app and serve it with the `netlify.toml` headers. In the Claude Code cloud sandbox only an older Chromium is installed: export `PW_CHROMIUM_EXECUTABLE=/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell` first, and never run `playwright install`. The sandbox also can't reach `*.netlify.app`; the `deploy-check` workflow checks deployed headers instead.
 
 ## Boundaries
 

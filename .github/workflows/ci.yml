@@ -51,6 +51,9 @@ jobs:
       - uses: ./.github/actions/setup
       - name: Install ${{ matrix.browser }}
         run: pnpm exec playwright install --with-deps "$PW_BROWSERS"
+      - name: pnpm smoke (F-004, under 60 s)
+        if: matrix.browser == 'chromium'
+        run: pnpm smoke
       - run: pnpm test:e2e
       - name: Upload the Playwright report and traces
         if: failure()
