@@ -76,8 +76,8 @@
         "A PR that rewords a feature description fails the guard; the same PR with `scope-change` passes",
         "AGENTS.md commands section matches the real scripts in package.json"
       ],
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Verified 2026-11-21: `pnpm smoke` 4.0 s locally, about 5 s in CI; step 2 shown by throwaway PR #9 (Scope guard run 44950863653 failed on the reworded description, run 44950892037 passed after adding scope-change); step 3 by test/agents-md.test.ts. No e2e test of its own, so `--grep F-004` finds nothing; the CI runs are the end-to-end evidence."
     },
     {
       "id": "F-009",

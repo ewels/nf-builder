@@ -8,7 +8,7 @@ Browser-only visual builder for Nextflow pipelines (TypeScript, React). What it 
 
 1. Read the last three entries of `docs/plan/progress.md`, `git log --oneline -20`, and `docs/plan/features.json`.
 2. Take the first feature, in file order, with `passes: false` whose `depends_on` all pass and that isn't blocked. Work on that one only.
-3. Run `pnpm smoke` (from F-004 on). If it fails, fixing it is the next work.
+3. Run `pnpm smoke`. If it fails, fixing it is the next work.
 4. Read only the spec IDs and ADRs the feature cites.
 5. Branch `feat/<id>`. Commit in small steps.
 6. To finish the feature:
@@ -35,7 +35,7 @@ This table lists every root `package.json` script that `pnpm check` doesn't alre
 | `pnpm check:budget` and `pnpm check:hosts` | After `pnpm build`: QA-01 bundle budget and IO-41 host allow-list (ADR 0015) |
 | `pnpm test:e2e -- --grep F-123` | The feature's end-to-end test |
 
-Still to come, each with the feature that adds it: fetching and testing the pipeline corpus (F-009; run it when touching the parser, model, projection or printer), the grammar generator (F-101) and the catalogue generator (F-109). The catalogue (needs Java) and the Nextflow oracle tests run in CI only. Don't try to run them locally.
+Still to come, each with the feature that adds it: fetching the pipeline corpus (F-009), testing the parser against it (with the parser, F-101 to F-104; run it when touching the parser, model, projection or printer), the grammar generator (F-101) and the catalogue generator (F-109). The catalogue (needs Java) and the Nextflow oracle tests run in CI only. Don't try to run them locally.
 
 `pnpm test:e2e` and `pnpm smoke` build the app and serve it with the `netlify.toml` headers. In the Claude Code cloud sandbox only an older Chromium is installed: export `PW_CHROMIUM_EXECUTABLE=/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell` first, and never run `playwright install`. The sandbox also can't reach `*.netlify.app`; the `deploy-check` workflow checks deployed headers instead.
 
@@ -48,7 +48,7 @@ Still to come, each with the feature that adds it: fetching and testing the pipe
 - a change to package boundaries or dependency-cruiser rules;
 - a change to a persisted or exported format;
 - edits to `.github/workflows/`;
-- changes to `features.json` beyond `passes` and `notes` (adding or splitting features is fine; label the PR `scope-change`; never drop scope or weaken a step without an ADR);
+- changes to `features.json` beyond setting `passes` and appending to `notes` (the Scope guard fails without the `scope-change` label; adding or splitting features is fine; never drop scope or weaken a step without an ADR);
 - anything that contradicts an accepted ADR (supersede it) or depends on an open question in `docs/plan/open-questions.md` (answer it).
 
 **Blocked.** If a feature needs something only the maintainer can provide (a secret, a GitHub or Netlify setting, an account), note it under Blockers in `progress.md`, open a GitHub issue labelled `maintainer`, and move to the next feature. Stop only when every feature passes or everything left is blocked.
