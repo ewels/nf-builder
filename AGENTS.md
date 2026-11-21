@@ -7,7 +7,7 @@ Browser-only visual builder for Nextflow pipelines (TypeScript, React). What it 
 ## Every session
 
 1. Read the last three entries of `docs/plan/progress.md`, `git log --oneline -20`, and `docs/plan/features.json`.
-2. Take the first feature, in file order, with `passes: false` whose `depends_on` all pass and that isn't blocked. Up to three such features may be worked on at once, each on its own branch and git worktree, when none depends on another (maintainer, 2026-11-21).
+2. Take the first feature, in file order, with `passes: false` whose `depends_on` all pass and that isn't blocked. Up to three such features may be worked on at once, each on its own branch and git worktree, when none depends on another (ADR 0018).
 3. Run `pnpm smoke`. If it fails, fixing it is the next work.
 4. Read only the spec IDs and ADRs the feature cites.
 5. Branch `feat/<id>`. Commit in small steps.
@@ -36,7 +36,7 @@ This table lists every root `package.json` script that `pnpm check` doesn't alre
 | `pnpm test:e2e -- --grep F-123` | The feature's end-to-end test |
 | `pnpm corpus:fetch` | Fetch the pinned pipeline corpus into `.cache/corpus/` (git over github.com; second run is a no-op) |
 
-Still to come, each with the feature that adds it: testing the parser against the corpus (with the parser, F-101 to F-104; run it when touching the parser, model, projection or printer), the grammar generator (F-101) and the catalogue generator (F-109). The catalogue and the Nextflow oracle tests always run in CI. Running Nextflow locally as well is allowed and encouraged for a faster loop (maintainer, 2026-11-21): the sandbox has Java 21, and the release jar `nextflow-<version>-dist` from GitHub releases runs with `NXF_HOME=.cache/nextflow/home NXF_OFFLINE=true` (`.cache/` is git-ignored). Use the version the 26.10 pack pins; F-005 adds a wrapper.
+Still to come, each with the feature that adds it: testing the parser against the corpus (with the parser, F-101 to F-104; run it when touching the parser, model, projection or printer), the grammar generator (F-101) and the catalogue generator (F-109). The catalogue and the Nextflow oracle tests always run in CI. Running Nextflow locally as well is allowed for a faster loop (ADR 0018): the sandbox has Java 21, and the release jar `nextflow-<version>-dist` from GitHub releases runs with `NXF_HOME=.cache/nextflow/home NXF_OFFLINE=true` (`.cache/` is git-ignored). Use 26.10.7 until F-005 pins the version and adds a wrapper; CI stays the authority.
 
 `pnpm test:e2e` and `pnpm smoke` build the app and serve it with the `netlify.toml` headers. In the Claude Code cloud sandbox only an older Chromium is installed: export `PW_CHROMIUM_EXECUTABLE=/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell` first, and never run `playwright install`. The sandbox also can't reach `*.netlify.app`; the `deploy-check` workflow checks deployed headers instead.
 
@@ -61,7 +61,7 @@ Still to come, each with the feature that adds it: testing the parser against th
 - push to `main` directly, or merge a PR before CI is green and the reviewer has nothing blocking;
 - force-push or rewrite history on `main`;
 - commit tokens or secrets;
-- call a network host not on the ADR 0002 allow-list;
+- call a network host not on the ADR 0002 allow-list from app code (build-time tools may use the hosts their ADR records, ADR 0017);
 - write Nextflow syntax from memory without checking it.
 
 ## Generated files

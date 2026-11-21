@@ -92,3 +92,14 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - Scope guard design, `notes` append-only, smoke as "at least one `@smoke` test" ([ADR 0016](../adr/0016-scope-guard-and-smoke.md)).
   - AGENTS.md Commands lists only commands that exist; corpus, grammar and catalogue commands join it with their features.
 - Blockers: none new (#2, #6, #7 open for the maintainer).
+
+## 2026-11-21 · F-009 · Claude (autonomous)
+- Did: `tools/corpus` (`@nf-builder/corpus`): `corpus.yaml` pins nf-core/rnaseq 3.28.0, sarek 3.12.0, fetchngs 1.13.0 and nextflow-io/rnaseq-nf `master` and `static-typing` by full SHA; `pnpm corpus:fetch` checks each out by SHA into `.cache/corpus/` (5 pipelines, 63 MB, about 5 s; a second run makes no network call); nine malformed fixtures with `fixtures.yaml` (expected `lint` results confirmed with `nextflow lint` 26.10.7); a cached `corpus` CI job. PR #10.
+- State: passing.
+- Next: hand-off to a new session with wider network access (see the hand-off entry below).
+- Decisions:
+  - Corpus fetch design, formats, and ADR 0002's allow-list read as runtime-only ([ADR 0017](../adr/0017-corpus-fetch.md)).
+  - Maintainer's decisions recorded as [ADR 0018](../adr/0018-parallel-features-and-local-nextflow.md): up to three independent features in parallel; Nextflow may also run locally (CI stays the authority).
+  - Tooling features without UI pass on unit tests plus CI runs ([Q13](open-questions.md)).
+  - Malformed fixtures are exempt from "must pass the oracle"; the oracle must reproduce their recorded `lint` result (AGENTS.md, ADR 0017).
+- Blockers: none. (#2 closed by the maintainer.)
