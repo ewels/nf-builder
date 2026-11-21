@@ -82,4 +82,4 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - CI design, QA-01 measurement (initial JS from the Vite manifest, 1 kB = 1000 bytes, workers excluded until F-702), never-fetched URL list, browsers, Renovate ([ADR 0015](../adr/0015-ci-checks.md)).
   - `pnpm check` also runs the ADR lint and `features.json` validation.
   - F-203's duplicate `UX-60` removed; QA-34 and ADR-0015 added to F-003's spec list ([Q12](open-questions.md), PR labelled `scope-change`).
-- Blockers: Renovate app installation and required status checks on `main` are maintainer settings (issues to follow).
+- Blockers: Renovate app installation (#6) and required status checks on `main` (#7) are maintainer settings; neither blocks a feature.
