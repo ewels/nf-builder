@@ -7,7 +7,7 @@ Browser-only visual builder for Nextflow pipelines (TypeScript, React). What it 
 ## Every session
 
 1. Read the last three entries of `docs/plan/progress.md`, `git log --oneline -20`, and `docs/plan/features.json`.
-2. Take the first feature, in file order, with `passes: false` whose `depends_on` all pass and that isn't blocked. Work on that one only.
+2. Take the first feature, in file order, with `passes: false` whose `depends_on` all pass and that isn't blocked. Up to three such features may be worked on at once, each on its own branch and git worktree, when none depends on another (maintainer, 2026-11-21).
 3. Run `pnpm smoke`. If it fails, fixing it is the next work.
 4. Read only the spec IDs and ADRs the feature cites.
 5. Branch `feat/<id>`. Commit in small steps.

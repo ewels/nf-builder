@@ -27,4 +27,4 @@ Before a significant call you're making for the maintainer, ask `researcher` for
 
 The run is long and your context will be compacted. Keep state in files, not memory: after each merge, re-read AGENTS.md "Every session" and the last `progress.md` entries.
 
-Run one builder at a time. Researchers can run in parallel. Subagents don't see this conversation, so give each one the feature ID, the task, the relevant plan section and file paths.
+Run at most one builder per feature at a time; up to three independent features may run in parallel, each in its own git worktree with its own PR (maintainer, 2026-11-21). Researchers can run in parallel. Subagents don't see this conversation, so give each one the feature ID, the task, the relevant plan section and file paths.
