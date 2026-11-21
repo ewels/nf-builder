@@ -9,7 +9,8 @@
   "include": [
     "vitest.config.ts",
     "test",
-    "scripts"
+    "scripts",
+    "playwright.config.ts"
   ],
   "exclude": [
     "test/fixtures"

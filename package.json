@@ -9,17 +9,19 @@
   },
   "scripts": {
     "check": "pnpm run typecheck && pnpm run lint && pnpm run test && pnpm run arch",
-    "typecheck": "tsc && pnpm -r run typecheck",
+    "typecheck": "tsc && tsc -p e2e && pnpm -r run typecheck",
     "lint": "biome check .",
     "format": "biome check --write .",
     "test": "vitest run",
     "arch": "depcruise . --config .dependency-cruiser.cjs --output-type err-long",
     "dev": "pnpm --filter @nf-builder/web dev",
     "build": "pnpm --filter @nf-builder/web build",
-    "preview": "pnpm --filter @nf-builder/web preview"
+    "preview": "pnpm --filter @nf-builder/web preview",
+    "test:e2e": "node scripts/run-playwright.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "2.6.8",
+    "@playwright/test": "1.65.1",
     "@types/node": "22.20.5",
     "dependency-cruiser": "18.8.0",
     "smol-toml": "1.9.1",
