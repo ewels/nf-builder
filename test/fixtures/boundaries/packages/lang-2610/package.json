@@ -1,0 +1,6 @@
+{
+  "name": "@nf-builder/lang-2610",
+  "exports": {
+    ".": "./src/index.ts"
+  }
+}

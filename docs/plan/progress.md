@@ -48,3 +48,15 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
 - Next: F-001.
 - Decisions: none (maintainer's own).
 - Blockers: none.
+
+## 2026-11-21 · F-001 · Claude (autonomous)
+- Did: pnpm monorepo scaffold per ADR 0003: five packages (`lang-core`, `lang-2610`, `engine`, `sources`, `apps/web`) with `src/`, `test/` and short READMEs; strict TypeScript, Biome, Vitest projects, dependency-cruiser rules with "where to go instead" messages; `pnpm check` runs typecheck, lint, unit tests and architecture rules. Tests cover every rule, the layout and the check pipeline.
+- State: passing (fresh clone `pnpm install && pnpm check` exits 0).
+- Next: F-002 (web app shell and `netlify.toml`).
+- Decisions:
+  - Engine reaches packs only through a pack's entry module ([Q10](open-questions.md)).
+  - TypeScript pinned to 6.0.3: dependency-cruiser 18.8 silently cruises 0 modules under TypeScript 7.0. A test asserts the real `arch` run cruises at least one module, so a careless bump fails loudly. Move to 7.1 once dependency-cruiser supports it.
+  - Node 22 (`engines.node ^22.23.5`, the sandbox runtime; maintenance LTS until 2027-04-30) and pnpm 10.28.0. No `.nvmrc`: on Netlify it would override the Node version that `netlify.toml` sets (F-002).
+  - Biome formats and lints code, JSON and YAML but not Markdown, so docs and Accepted ADR bodies are never reformatted.
+  - Q9 (StageNest, nf-schema-builder) doesn't affect the scaffold; it is being researched now and will be answered before M0 closes.
+- Blockers: none. Note: this sandbox can't reach `*.netlify.app`, `registry.nextflow.io` or `nextflow.io`; deployed checks run from GitHub Actions instead.

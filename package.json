@@ -1,0 +1,26 @@
+{
+  "name": "nf-builder",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.28.0",
+  "engines": {
+    "node": "^22.23.5",
+    "pnpm": "10.28.0"
+  },
+  "scripts": {
+    "check": "pnpm run typecheck && pnpm run lint && pnpm run test && pnpm run arch",
+    "typecheck": "tsc && pnpm -r run typecheck",
+    "lint": "biome check .",
+    "format": "biome check --write .",
+    "test": "vitest run",
+    "arch": "depcruise . --config .dependency-cruiser.cjs --output-type err-long"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.6.8",
+    "@types/node": "22.20.5",
+    "dependency-cruiser": "18.8.0",
+    "typescript": "6.0.3",
+    "vite": "8.3.8",
+    "vitest": "5.1.1"
+  }
+}
