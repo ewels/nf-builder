@@ -10,20 +10,19 @@ import {
 import { join } from "node:path";
 import type { Manifest, Pipeline } from "./manifest.ts";
 
-export type SyncResult = {
+type SyncResult = {
   fetched: Pipeline[];
   upToDate: Pipeline[];
   failed: { pipeline: Pipeline; message: string }[];
 };
 
-export const githubUrl = (repo: string): string =>
-  `https://github.com/${repo}.git`;
-export const pipelineDir = (cacheDir: string, pipeline: Pipeline): string =>
+const githubUrl = (repo: string): string => `https://github.com/${repo}.git`;
+const pipelineDir = (cacheDir: string, pipeline: Pipeline): string =>
   join(cacheDir, pipeline.id);
-export const markerFile = (cacheDir: string, pipeline: Pipeline): string =>
+const markerFile = (cacheDir: string, pipeline: Pipeline): string =>
   join(cacheDir, `${pipeline.id}.complete`);
 
-/** True when the marker holds exactly pipeline.sha (after trim) and pipelineDir is a directory. Never runs git. */
+/** Never runs git. */
 export function isUpToDate(cacheDir: string, pipeline: Pipeline): boolean {
   try {
     return (
@@ -33,13 +32,6 @@ export function isUpToDate(cacheDir: string, pipeline: Pipeline): boolean {
   } catch {
     return false;
   }
-}
-
-export function missingPipelines(
-  manifest: Manifest,
-  cacheDir: string,
-): Pipeline[] {
-  return manifest.pipelines.filter((p) => !isUpToDate(cacheDir, p));
 }
 
 const REPO_ENV = [
@@ -57,15 +49,23 @@ function gitEnv(): NodeJS.ProcessEnv {
   return env;
 }
 
+const GIT_TIMEOUT_MS = 5 * 60_000;
+
 class GitFailure extends Error {}
 
-function git(args: string[]): string {
-  const result = spawnSync("git", args, { encoding: "utf8", env: gitEnv() });
+function git(args: string[], timeoutMs: number): string {
+  const result = spawnSync("git", args, {
+    encoding: "utf8",
+    env: gitEnv(),
+    timeout: timeoutMs,
+  });
   if (result.error) {
     if ((result.error as NodeJS.ErrnoException).code === "ENOENT")
       throw new Error(
         "git is not installed or not on PATH; install git to fetch the corpus",
       );
+    if ((result.error as NodeJS.ErrnoException).code === "ETIMEDOUT")
+      throw new GitFailure(`git timed out after ${timeoutMs} ms`);
     throw new GitFailure(result.error.message);
   }
   if (result.status !== 0) {
@@ -76,10 +76,10 @@ function git(args: string[]): string {
 }
 
 /** Fetches one pin. Throws an Error with the actionable message. */
-export function fetchPipeline(
+function fetchPipeline(
   cacheDir: string,
   pipeline: Pipeline,
-  _log: (line: string) => void,
+  timeoutMs: number,
 ): void {
   const dir = pipelineDir(cacheDir, pipeline);
   const marker = markerFile(cacheDir, pipeline);
@@ -87,32 +87,37 @@ export function fetchPipeline(
   const url = githubUrl(pipeline.repo);
   for (const path of [dir, marker, tmp])
     rmSync(path, { recursive: true, force: true });
-  mkdirSync(tmp, { recursive: true });
   try {
-    git(["-c", "init.defaultBranch=main", "init", "--quiet", tmp]);
-    git([
-      "-C",
-      tmp,
-      "fetch",
-      "--quiet",
-      "--depth",
-      "1",
-      "--no-tags",
-      url,
-      pipeline.sha,
-    ]);
-    git([
-      "-C",
-      tmp,
-      "-c",
-      "advice.detachedHead=false",
-      "-c",
-      "core.autocrlf=false",
-      "checkout",
-      "--quiet",
-      "FETCH_HEAD",
-    ]);
-    const actual = git(["-C", tmp, "rev-parse", "HEAD"]).trim();
+    git(["-c", "init.defaultBranch=main", "init", "--quiet", tmp], timeoutMs);
+    git(
+      [
+        "-C",
+        tmp,
+        "fetch",
+        "--quiet",
+        "--depth",
+        "1",
+        "--no-tags",
+        url,
+        pipeline.sha,
+      ],
+      timeoutMs,
+    );
+    git(
+      [
+        "-C",
+        tmp,
+        "-c",
+        "advice.detachedHead=false",
+        "-c",
+        "core.autocrlf=false",
+        "checkout",
+        "--quiet",
+        "FETCH_HEAD",
+      ],
+      timeoutMs,
+    );
+    const actual = git(["-C", tmp, "rev-parse", "HEAD"], timeoutMs).trim();
     if (actual !== pipeline.sha)
       throw new Error(
         `${pipeline.id}: checked out ${actual}, expected ${pipeline.sha}`,
@@ -129,11 +134,11 @@ export function fetchPipeline(
   }
 }
 
-/** For each pipeline in manifest order: skip if up to date, otherwise fetch. A failure is recorded and the loop continues. */
 export function syncCorpus(
   manifest: Manifest,
   cacheDir: string,
   log: (line: string) => void,
+  timeoutMs: number = GIT_TIMEOUT_MS,
 ): SyncResult {
   const result: SyncResult = { fetched: [], upToDate: [], failed: [] };
   mkdirSync(cacheDir, { recursive: true });
@@ -149,7 +154,7 @@ export function syncCorpus(
       `corpus: ${pipeline.id} fetching ${label} (${short}) from ${githubUrl(pipeline.repo)}`,
     );
     try {
-      fetchPipeline(cacheDir, pipeline, log);
+      fetchPipeline(cacheDir, pipeline, timeoutMs);
       log(`corpus: ${pipeline.id} fetched`);
       result.fetched.push(pipeline);
     } catch (error) {

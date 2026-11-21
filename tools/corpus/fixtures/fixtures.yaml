@@ -1,7 +1,7 @@
 # Intentionally malformed Nextflow files for the parser fallback tests (ADR 0004, ADR 0011).
 # Each file's first line is "// Malformed on purpose: <breaks>".
 # lint: expected `nextflow lint` 26.10 result. error = non-zero exit; ok = exit 0, warnings allowed.
-#   Not yet confirmed by the Nextflow oracle (see docs/plan, F-006).
+#   Confirmed with `nextflow lint` 26.10.7 on 2026-11-21; the CI oracle (F-005) re-checks them.
 # expect.wholeFile: true when no declaration can be isolated, so the file is kept verbatim (ADR 0004, first row).
 # expect.unparsed: declarations kept as raw text (ADR 0004, second row). expect.modelled: declarations that must still be modelled.
 # Declaration names: "process NAME", "workflow" (entry) or "workflow NAME", "featureFlag NAME";

@@ -14,7 +14,6 @@ export type ParseResult<T> =
 
 const KEYS = ["id", "repo", "ref", "sha"] as const;
 
-/** yaml.parseDocument; every doc.errors entry becomes a problem (its message includes the line). */
 export function parseYaml(text: string): ParseResult<unknown> {
   const doc = parseDocument(text);
   if (doc.errors.length > 0)
@@ -22,7 +21,7 @@ export function parseYaml(text: string): ParseResult<unknown> {
   return { ok: true, value: doc.toJS() };
 }
 
-const isRecord = (v: unknown): v is Record<string, unknown> =>
+export const isRecord = (v: unknown): v is Record<string, unknown> =>
   typeof v === "object" && v !== null && !Array.isArray(v);
 
 function stringProblem(
@@ -55,7 +54,6 @@ export function parseManifest(text: string): ParseResult<Manifest> {
     problems.push('"pipelines" must be a non-empty list');
     return { ok: false, problems };
   }
-  const pipelines: Pipeline[] = [];
   const seen = new Set<string>();
   list.forEach((item: unknown, i) => {
     const id = isRecord(item) && typeof item.id === "string" ? item.id : "?";
@@ -74,7 +72,6 @@ export function parseManifest(text: string): ParseResult<Manifest> {
         problems.push(
           `${where}: unknown key "${key}"; allowed: id, repo, ref, sha`,
         );
-    const before = problems.length;
     if ("id" in item) {
       if (typeof item.id !== "string" || !/^[a-z0-9][a-z0-9-]*$/.test(item.id))
         problems.push(
@@ -107,18 +104,22 @@ export function parseManifest(text: string): ParseResult<Manifest> {
           `${where}: "sha" must be a full 40-character lowercase commit SHA, got "${String(item.sha)}"`,
         );
     }
-    if (problems.length === before && KEYS.every((k) => k in item))
-      pipelines.push(item as Pipeline);
   });
   return problems.length > 0
     ? { ok: false, problems }
-    : { ok: true, value: { pipelines } };
+    : { ok: true, value: { pipelines: list as Pipeline[] } };
 }
 
-/** Reads and parses the file (default MANIFEST_FILE); throws an Error whose message is one "<file>: <problem>" line per problem. */
-export function loadManifest(file: string = MANIFEST_FILE): Manifest {
-  const result = parseManifest(readFileSync(file, "utf8"));
+/** Reads and parses a YAML file; throws an Error with one "<file>: <problem>" line per problem. */
+export function loadYaml<T>(
+  file: string,
+  parse: (text: string) => ParseResult<T>,
+): T {
+  const result = parse(readFileSync(file, "utf8"));
   if (!result.ok)
     throw new Error(result.problems.map((p) => `${file}: ${p}`).join("\n"));
   return result.value;
 }
+
+export const loadManifest = (file: string = MANIFEST_FILE): Manifest =>
+  loadYaml(file, parseManifest);

@@ -96,6 +96,14 @@ describe("CI workflows", () => {
     expect(job).toContain("run: pnpm corpus:fetch --check");
   });
 
+  it("F-009: the setup action only enables the pnpm cache when it installs", () => {
+    const action = read(join(ACTIONS, "setup/action.yml"));
+    expect(action).toMatch(
+      /cache: \$\{\{ inputs\.install == 'true' && 'pnpm' \|\| '' \}\}/,
+    );
+    expect(action).not.toMatch(/cache: pnpm\s*$/m);
+  });
+
   it("F-003 QA-34: renovate.json pins GitHub Actions by digest and groups updates", () => {
     const config = JSON.parse(read(join(REPO_ROOT, "renovate.json"))) as {
       extends: string[];

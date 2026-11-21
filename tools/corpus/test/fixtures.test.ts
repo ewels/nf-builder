@@ -133,6 +133,14 @@ describe("parseFixtures", () => {
       expect(result.problems.join("\n")).toMatch(/fixtures\[\d+\]/);
   });
 
+  it("F-009: parseFixtures reports one problem when expect has neither wholeFile nor unparsed and modelled", () => {
+    const result = parseFixtures(
+      ok().replace("wholeFile: true", "wholeFile: false"),
+    );
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.problems).toHaveLength(1);
+  });
+
   it("F-009: parseFixtures accepts a minimal valid entry", () => {
     expect(parseFixtures(ok()).ok).toBe(true);
   });

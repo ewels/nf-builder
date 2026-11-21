@@ -1,9 +1,8 @@
-import { readFileSync } from "node:fs";
 import type { ParseResult } from "./manifest.ts";
-import { parseYaml, REPO_ROOT } from "./manifest.ts";
+import { isRecord, loadYaml, parseYaml, REPO_ROOT } from "./manifest.ts";
 
 export const FIXTURES_DIR = `${REPO_ROOT}tools/corpus/fixtures`;
-export const FIXTURES_FILE = `${FIXTURES_DIR}/fixtures.yaml`;
+const FIXTURES_FILE = `${FIXTURES_DIR}/fixtures.yaml`;
 export const FIXTURE_HEADER = "// Malformed on purpose: ";
 
 export type LintOutcome = "error" | "ok";
@@ -21,9 +20,6 @@ export type FixtureManifest = { fixtures: Fixture[] };
 const KEYS = ["file", "breaks", "lint", "expect"] as const;
 const DECLARATION =
   /^(?:(?:process|featureFlag|assign|block) \S+|workflow(?: \S+)?)$/;
-
-const isRecord = (v: unknown): v is Record<string, unknown> =>
-  typeof v === "object" && v !== null && !Array.isArray(v);
 
 function names(
   where: string,
@@ -49,15 +45,15 @@ function expectation(
   where: string,
   value: unknown,
   problems: string[],
-): FixtureExpectation | undefined {
+): FixtureExpectation {
   if (!isRecord(value)) {
     problems.push(`${where}: "expect" must be a mapping`);
-    return undefined;
+    return { wholeFile: true };
   }
   const whole = value.wholeFile ?? false;
   if (typeof whole !== "boolean") {
     problems.push(`${where}: "expect.wholeFile" must be true or false`);
-    return undefined;
+    return { wholeFile: true };
   }
   const allowed = whole ? ["wholeFile"] : ["wholeFile", "unparsed", "modelled"];
   for (const key of Object.keys(value))
@@ -66,18 +62,17 @@ function expectation(
         `${where}: unknown key "expect.${key}"; allowed: ${allowed.join(", ")}`,
       );
   if (whole) return { wholeFile: true };
-  for (const key of ["unparsed", "modelled"])
-    if (!(key in value))
-      problems.push(
-        `${where}: "expect" needs wholeFile: true, or both unparsed and modelled`,
-      );
-  if (!("unparsed" in value && "modelled" in value)) return undefined;
-  const before = problems.length;
-  const unparsed = names(where, "unparsed", value.unparsed, problems);
-  const modelled = names(where, "modelled", value.modelled, problems);
-  return problems.length === before
-    ? { wholeFile: false, unparsed, modelled }
-    : undefined;
+  if (!("unparsed" in value && "modelled" in value)) {
+    problems.push(
+      `${where}: "expect" needs wholeFile: true, or both unparsed and modelled`,
+    );
+    return { wholeFile: true };
+  }
+  return {
+    wholeFile: false,
+    unparsed: names(where, "unparsed", value.unparsed, problems),
+    modelled: names(where, "modelled", value.modelled, problems),
+  };
 }
 
 export function parseFixtures(text: string): ParseResult<FixtureManifest> {
@@ -110,7 +105,6 @@ export function parseFixtures(text: string): ParseResult<FixtureManifest> {
       );
       return;
     }
-    const before = problems.length;
     for (const key of KEYS)
       if (!(key in item))
         problems.push(
@@ -142,25 +136,15 @@ export function parseFixtures(text: string): ParseResult<FixtureManifest> {
       problems.push(
         `${where}: "lint" must be error or ok, got "${String(item.lint)}"`,
       );
-    const expect =
-      "expect" in item ? expectation(where, item.expect, problems) : undefined;
-    if (problems.length === before && expect)
-      fixtures.push({
-        file: item.file as string,
-        breaks: item.breaks as string,
-        lint: item.lint as LintOutcome,
-        expect,
-      });
+    fixtures.push({
+      ...item,
+      expect: expectation(where, item.expect, problems),
+    } as Fixture);
   });
   return problems.length > 0
     ? { ok: false, problems }
     : { ok: true, value: { fixtures } };
 }
 
-/** Reads and parses the file (default FIXTURES_FILE); throws an Error whose message is one "<file>: <problem>" line per problem. */
-export function loadFixtures(file: string = FIXTURES_FILE): FixtureManifest {
-  const result = parseFixtures(readFileSync(file, "utf8"));
-  if (!result.ok)
-    throw new Error(result.problems.map((p) => `${file}: ${p}`).join("\n"));
-  return result.value;
-}
+export const loadFixtures = (file: string = FIXTURES_FILE): FixtureManifest =>
+  loadYaml(file, parseFixtures);
