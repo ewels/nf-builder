@@ -25,3 +25,12 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
 - State: no code yet.
 - Next: maintainer reviews the Proposed ADRs (Q2), then F-001.
 - Blockers: Q2.
+
+## 2026-11-21 · planning · Claude with Phil Ewels
+- Did:
+  - all ADRs accepted (Q2); spikes now append a `Spike result` section to their ADR (ADR 0001);
+  - mockup screenshots in `docs/mockup/`;
+  - Claude Code roles: Opus main session, subagents in `.claude/agents/` (`CLAUDE.md`, ADR 0012).
+- State: no code yet.
+- Next: F-001.
+- Blockers: none.

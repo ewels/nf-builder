@@ -1,6 +1,6 @@
 # 0010. Try the official language server in the browser; never depend on it
 
-- Status: Proposed (pending spike S3)
+- Status: Accepted (spike S3 to confirm)
 - Date: 2026-11-21
 
 ## Context

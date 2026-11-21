@@ -1,6 +1,6 @@
 # 0009. Read the registry and GitHub straight from the browser, with a snapshot fallback
 
-- Status: Proposed (pending spike S4)
+- Status: Accepted (spike S4 to confirm)
 - Date: 2026-11-21
 
 ## Context

@@ -5,7 +5,7 @@ Questions for the maintainer. Agents: if your task depends on one of these, stop
 | # | Question | Blocks | Status |
 |---|---|---|---|
 | Q1 | Final app name. Personal project (Phil's account), so no "Nextflow" in the name; it should read as Nextflow the way nf-docs does. Ruled out: Nextflow Composer, Nextflow Studio, nf-blocks (Rob Syme's lineage explorer), nf-studio. Unclaimed on GitHub (exact repo name), npm, PyPI and the legacy plugin index as of 2026-11-21: nf-builder, nf-canvas, nf-loom, nf-weave, nf-wire, nf-sketch, nf-draw, nf-forge, nf-scaffold. Affects the sidecar folder name (ADR 0008) and the Pages URL. | Final name only | Answered 2026-11-21: **nf-builder**. Repo `ewels/nf-builder`, Pages `https://ewels.github.io/nf-builder/`, sidecar folder `.nf-builder/`. Not checked: the new Nextflow registry and a GitHub user or org of that name |
-| Q2 | Accept, amend or reject each Proposed ADR: 0003, 0004, 0005, 0008, 0009, 0010, 0011, 0012. | F-001 | Open |
+| Q2 | Accept, amend or reject each Proposed ADR: 0003, 0004, 0005, 0008, 0009, 0010, 0011, 0012. | F-001 | Answered 2026-11-21: all accepted as written. 0009 and 0010 stand until spikes S4 and S3 confirm or supersede them |
 | Q3 | Is CheerpJ's licence (free for FOSS, commercial software) acceptable as an optional dependency? | F-007 outcome | Open |
 | Q4 | Keep the preview `agent` block in the palette (with a `preview` badge), or hide preview features until stable? | F-204 | Open; default is shown with badge |
 | Q5 | Who reviews and merges agent PRs besides Phil, if anyone? | ADR 0012 | Open |

@@ -1,6 +1,6 @@
 # 0004. Files are the source of truth, and code is never lost
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-11-21
 
 ## Context

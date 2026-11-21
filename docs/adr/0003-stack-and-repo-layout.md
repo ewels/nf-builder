@@ -1,6 +1,6 @@
 # 0003. TypeScript and React in a pnpm monorepo with tool-enforced boundaries
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-11-21
 
 ## Context

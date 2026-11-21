@@ -1,6 +1,6 @@
 # 0011. Test against real pipelines, with real Nextflow and nf-docs as oracles
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-11-21
 
 ## Context

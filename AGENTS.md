@@ -45,7 +45,7 @@ The catalogue (`pnpm gen:catalogue`, needs Java) and the Nextflow oracle tests r
 
 **Never:**
 - edit generated files (below);
-- edit the body of an `Accepted` ADR;
+- edit the body of an `Accepted` ADR, except to append a spike result (ADR 0001);
 - delete, skip or weaken a test or approved visual baseline;
 - merge to `main`;
 - commit tokens or secrets;

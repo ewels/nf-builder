@@ -14,7 +14,7 @@ Load only the file your task needs. Requirement IDs (for example `UX-12`) are st
 | [files.md](files.md) | Editors for `nextflow.config`, `nextflow_schema.json`, `meta.yml` and other files |
 | [quality.md](quality.md) | Performance budgets, accessibility, browser support, security |
 
-Mockup (six screens): https://claude.ai/artifact/51Yt3rj34xjNiqRU25SMTu
+Mockup (six screens): [docs/mockup](../mockup/README.md)
 
 ## Glossary
 

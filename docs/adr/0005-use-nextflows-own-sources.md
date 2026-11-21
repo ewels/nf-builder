@@ -1,6 +1,6 @@
 # 0005. Use Nextflow's own grammar, definitions and formatter
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-11-21
 
 ## Context

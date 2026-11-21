@@ -9,7 +9,7 @@ Get the repo, the harness and the risky unknowns settled before writing product 
 - Scaffold the monorepo, CI, GitHub Pages deploy, `pnpm check` and `pnpm smoke` (F-001 to F-004).
 - Corpus tooling (F-009).
 - Spikes S1 to S5 (F-005 to F-008, F-010).
-- Spikes, each ending in a short report in `docs/research/` and an update to the linked ADR:
+- Spikes, each ending in a short report in `docs/research/` and a `Spike result` section on the linked ADR (a superseding ADR if the decision changes):
 
 | Spike | Question | ADR |
 |---|---|---|
@@ -19,7 +19,7 @@ Get the repo, the harness and the risky unknowns settled before writing product 
 | S4 | Do the registry API, `raw.githubusercontent.com` and `codeload.github.com` allow requests from a GitHub Pages origin? | 0009 |
 | S5 | Can nf-metro render SVG in the browser under Pyodide, skipping its native PNG and animation dependencies? Load time and size? | 0013 |
 
-**Exit:** CI green on `main`; four spike reports merged; the maintainer has accepted, amended or rejected every Proposed ADR.
+**Exit:** CI green on `main`; five spike reports merged, each recorded on its ADR.
 
 ## M1: Engine core
 

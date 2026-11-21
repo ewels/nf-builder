@@ -1,6 +1,6 @@
 # 0008. Canvas model: fixed node kinds, chain nodes, layout in a sidecar
 
-- Status: Proposed. The fixed node kinds were decided by Phil; the rest awaits review.
+- Status: Accepted
 - Date: 2026-11-21
 
 ## Context

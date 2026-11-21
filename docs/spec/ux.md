@@ -1,6 +1,6 @@
 # User interface
 
-Mockup: https://claude.ai/artifact/51Yt3rj34xjNiqRU25SMTu. Where the mockup and this file disagree, this file wins.
+Mockup: [docs/mockup](../mockup/README.md). Where the mockup and this file disagree, this file wins.
 
 ## Layout
 
