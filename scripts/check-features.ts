@@ -9,7 +9,7 @@ import {
   reportProblems,
 } from "./check-common.ts";
 
-const FEATURES_FILE: string = join(REPO_ROOT, "docs/plan/features.json");
+export const FEATURES_FILE: string = join(REPO_ROOT, "docs/plan/features.json");
 const SPEC_DIR: string = join(REPO_ROOT, "docs/spec");
 const FEATURE_KEYS: readonly string[] = [
   "id",

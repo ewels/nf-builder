@@ -18,6 +18,7 @@
     "build": "pnpm --filter @nf-builder/web build",
     "preview": "pnpm --filter @nf-builder/web preview",
     "test:e2e": "node scripts/run-playwright.ts",
+    "smoke": "node scripts/smoke.ts",
     "check:adr": "node scripts/check-adrs.ts",
     "check:features": "node scripts/check-features.ts",
     "check:budget": "node scripts/check-bundle-budget.ts",

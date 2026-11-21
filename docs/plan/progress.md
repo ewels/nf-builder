@@ -83,3 +83,12 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - `pnpm check` also runs the ADR lint and `features.json` validation.
   - F-203's duplicate `UX-60` removed; QA-34 and ADR-0015 added to F-003's spec list ([Q12](open-questions.md), PR labelled `scope-change`).
 - Blockers: Renovate app installation (#6) and required status checks on `main` (#7) are maintainer settings; neither blocks a feature.
+
+## 2026-11-21 · F-004 · Claude (autonomous)
+- Did: `Scope guard` workflow and `scripts/check-features-scope.ts` (only `passes` changes and appended `notes` pass without `scope-change`); `pnpm smoke` (fresh build plus the `@smoke` tests on Chromium, under 60 s; about 4 s locally, also run in CI); tests that keep AGENTS.md Commands in step with `package.json` and the PR template's definition of done in step with AGENTS.md. PR #8; throwaway PR #9 showed the guard fail on a reworded description and pass once labelled.
+- State: passing.
+- Next: F-009 (corpus tooling).
+- Decisions:
+  - Scope guard design, `notes` append-only, smoke as "at least one `@smoke` test" ([ADR 0016](../adr/0016-scope-guard-and-smoke.md)).
+  - AGENTS.md Commands lists only commands that exist; corpus, grammar and catalogue commands join it with their features.
+- Blockers: none new (#2, #6, #7 open for the maintainer).

@@ -1,0 +1,43 @@
+# features.json scope guard (F-004, ADR 0012).
+# Without the scope-change label a pull request may only set "passes" and append to "notes".
+# Its own workflow, so adding or removing a label re-runs only this check.
+# Labels come from the event payload: re-running an old run does not see newer labels; add or remove a label instead.
+name: Scope guard
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: scope-guard-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  features-scope:
+    name: Scope guard
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          # The PR's merge commit and its parents: parent 1 is the base branch, parent 2 the PR head.
+          fetch-depth: 2
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: package.json
+      - name: Read features.json from the base branch
+        run: |
+          if ! git rev-parse --verify --quiet HEAD^2 > /dev/null; then
+            echo "::error::Expected the pull request merge commit (two parents); check the actions/checkout settings"
+            exit 2
+          fi
+          echo "base $(git rev-parse HEAD^1), head $(git rev-parse HEAD^2)"
+          git show HEAD^1:docs/plan/features.json > "$RUNNER_TEMP/features.base.json"
+      - name: Allow only passes and appended notes, unless labelled scope-change
+        env:
+          PR_LABELS: ${{ toJSON(github.event.pull_request.labels.*.name) }}
+        run: node scripts/check-features-scope.ts --base "$RUNNER_TEMP/features.base.json"
