@@ -4,6 +4,10 @@
     "lib": [
       "ES2024",
       "DOM"
+    ],
+    "jsx": "react-jsx",
+    "types": [
+      "vite/client"
     ]
   },
   "include": [
