@@ -46,7 +46,9 @@
         "ADR-0011",
         "QA-01",
         "QA-20",
-        "IO-41"
+        "IO-41",
+        "QA-34",
+        "ADR-0015"
       ],
       "depends_on": [
         "F-002"
@@ -56,8 +58,8 @@
         "Deliberately breaking each check in a throwaway branch makes the matching job fail with an actionable message",
         "ADR lint rejects a duplicate number, a missing status line, or an ADR missing from the index"
       ],
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Verified 2026-11-21: CI on PR #4 (all jobs green, Firefox and WebKit ran the @smoke test); throwaway PR #5 broke every check and each job failed with its own message; ADR lint step 3 cases in unit tests and on #5. No e2e test of its own: the CI runs are the end-to-end evidence. QA-34 (audit, Renovate) added to the spec list (scope-change, Q12)."
     },
     {
       "id": "F-004",
@@ -1304,7 +1306,7 @@
         "CI budget report shows every budget met on `main`"
       ],
       "passes": false,
-      "notes": ""
+      "notes": "ADR 0015 excludes worker bundles from the QA-01 measurement until this feature; revisit that here."
     },
     {
       "id": "F-703",

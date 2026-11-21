@@ -73,3 +73,13 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - `passes` is set before the post-merge production check ([Q11](open-questions.md)).
   - Q9 answered: own schema form, nf-schema-builder as reference only; StageNest not inspectable from the sandbox ([Q9](open-questions.md), [notes](../research/2026-11-21-schema-builder-and-stagenest.md)).
 - Blockers: merged `feat/*` branches can't be deleted from the sandbox; issue #2 (`maintainer`) asks for "Automatically delete head branches".
+
+## 2026-11-21 · F-003 · Claude (autonomous)
+- Did: `ci.yml` with one job per check (`pnpm check`, Playwright on Chromium plus `@smoke` on Firefox and WebKit, QA-01 bundle budget, IO-41 host allow-list, ADR lint, `features.json` validation, `pnpm audit`); checker scripts with unit tests and `file:line` messages; one allow-list shared by the CSP and the host scan; `renovate.json`. PR #4; throwaway PR #5 broke every check (all nine jobs failed with their own messages) and was closed.
+- State: passing. F-002's production deploy check also passed on `main` after merge.
+- Next: F-004 (agent harness).
+- Decisions:
+  - CI design, QA-01 measurement (initial JS from the Vite manifest, 1 kB = 1000 bytes, workers excluded until F-702), never-fetched URL list, browsers, Renovate ([ADR 0015](../adr/0015-ci-checks.md)).
+  - `pnpm check` also runs the ADR lint and `features.json` validation.
+  - F-203's duplicate `UX-60` removed; QA-34 and ADR-0015 added to F-003's spec list ([Q12](open-questions.md), PR labelled `scope-change`).
+- Blockers: Renovate app installation and required status checks on `main` are maintainer settings (issues to follow).
