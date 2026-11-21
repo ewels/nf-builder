@@ -25,6 +25,8 @@ These arrive with F-001 to F-004. Until then the repo is docs only.
 | Command | When |
 |---|---|
 | `pnpm install` | First run, and after lockfile changes |
+| `pnpm dev` | Local dev server (http://localhost:5173; no CSP, see ADR 0014) |
+| `pnpm build` | Production build of `apps/web` into `apps/web/dist` (what Netlify runs) |
 | `pnpm --filter <package> test` | While iterating on one package |
 | `pnpm check` | Before every commit: typecheck, Biome, unit tests, dependency-cruiser |
 | `pnpm smoke` | Session start: build plus one end-to-end test |
@@ -33,6 +35,8 @@ These arrive with F-001 to F-004. Until then the repo is docs only.
 | `pnpm gen:grammar 26.10` | After changing vendored grammar files |
 
 The catalogue (`pnpm gen:catalogue`, needs Java) and the Nextflow oracle tests run in CI only. Don't try to run them locally.
+
+`pnpm test:e2e` builds the app and serves it with the `netlify.toml` headers. In the Claude Code cloud sandbox only an older Chromium is installed: export `PW_CHROMIUM_EXECUTABLE=/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell` first, and never run `playwright install`. The sandbox also can't reach `*.netlify.app`; the `deploy-check` workflow checks deployed headers instead.
 
 ## Boundaries
 
