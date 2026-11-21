@@ -15,4 +15,6 @@ export default defineConfig({
   plugins: [react(), versionJson(process.env)],
   server: { port: 5173, strictPort: true, headers: devHeaders },
   preview: { port: 4173, strictPort: true, headers },
+  // QA-01: scripts/check-bundle-budget.ts reads dist/.vite/manifest.json to find the initial JavaScript.
+  build: { manifest: true },
 });
