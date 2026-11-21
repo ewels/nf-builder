@@ -14,8 +14,8 @@
         "Add a fixture import from `apps/web` into `packages/lang-2610`: `pnpm check` fails and the message names the rule and the allowed alternative",
         "Each package has `src/`, `test/`, and a README of at most 10 lines stating its responsibility"
       ],
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Verified 2026-11-21: fresh clone `pnpm install && pnpm check` exits 0; `pnpm test -t F-001` and `-t ADR-0003` cover steps 2 and 3. No e2e harness exists before F-002/F-003."
     },
     {
       "id": "F-002",
