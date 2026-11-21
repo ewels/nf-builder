@@ -59,6 +59,7 @@ Never edit these. Regenerate them.
 - `packages/lang-*/src/generated/**`: `pnpm gen:grammar <version>`
 - `packages/lang-*/catalogue/*.json`: CI job `catalogue`
 - `apps/web/public/registry/**`: CI job `registry-snapshot`
+- `.claude/skills/*/**` (vendored Nextflow skills): `.claude/skills/sync.sh`
 
 ## Decisions
 
@@ -71,7 +72,7 @@ If your change adds a dependency, moves a package boundary, changes a stored or 
   2. https://docs.seqera.io/nextflow;
   3. the syntax reference.
 - Use the Nextflow agent skills:
-  - Claude Code: `.claude/settings.json` enables `nextflow@nextflow-plugin` once you trust the folder. Cloud sessions skip plugins declared in repo settings;
+  - Claude Code: eight skills from `seqeralabs/nextflow-plugin` are vendored in `.claude/skills/` (see its README), so cloud sessions get them too;
   - other agents: `npx skills add seqeralabs/nextflow-plugin`.
 - Nextflow code in templates and fixtures must pass the CI oracle (`nextflow lint` on 26.10).
 

@@ -1340,6 +1340,24 @@
       ],
       "passes": false,
       "notes": ""
+    },
+    {
+      "id": "F-705",
+      "milestone": "M7",
+      "description": "Post-build cleanup: remove the build-time scaffolding that only agents needed.",
+      "spec": [
+        "ADR-0012"
+      ],
+      "depends_on": [
+        "F-704"
+      ],
+      "steps": [
+        "`.claude/skills/` (vendored Nextflow skills and `sync.sh`) and `docs/mockup/` are deleted",
+        "No file links to them: `docs/spec/README.md`, `docs/spec/ux.md`, `AGENTS.md` and `CLAUDE.md` are updated",
+        "`AGENTS.md` says how agents get the Nextflow skills from then on (plugin in `.claude/settings.json`, or another route)"
+      ],
+      "passes": false,
+      "notes": "Requested by the maintainer on 2026-11-21."
     }
   ]
 }

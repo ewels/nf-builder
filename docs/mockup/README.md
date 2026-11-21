@@ -14,3 +14,5 @@ The Nextflow code in the screenshots is illustrative and unchecked. Don't copy i
 | [4-subworkflow.png](4-subworkflow.png) | A workflow opened as its own canvas tab, with the Files tree |
 | [5-config.png](5-config.png) | `nextflow.config` editor |
 | [6-newproject.png](6-newproject.png) | New pipeline: blank, template or import, plus the nf-docs and nf-metro options |
+
+Temporary: F-705 removes this folder after v0.1.

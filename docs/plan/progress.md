@@ -34,3 +34,9 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
 - State: no code yet.
 - Next: F-001.
 - Blockers: none.
+
+## 2026-11-21 · planning · Claude with Phil Ewels
+- Did: vendored eight Nextflow skills into `.claude/skills/` so cloud sessions get them (plugin entries removed from `.claude/settings.json`); added F-705, a post-v0.1 cleanup that removes them and `docs/mockup/`.
+- State: no code yet.
+- Next: F-001.
+- Blockers: none.

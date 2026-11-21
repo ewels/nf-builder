@@ -59,7 +59,7 @@ Config, schema, `meta.yml` and other file editors, plus docs publishing to GitHu
 
 ## M7: Polish and first release
 
-**Exit:** all performance and accessibility checks green; read-only small-screen mode; user docs; `v0.1.0` tagged and live on GitHub Pages.
+**Exit:** all performance and accessibility checks green; read-only small-screen mode; user docs; `v0.1.0` tagged and live on GitHub Pages; build-time scaffolding (vendored skills, mockup) removed (F-705).
 
 ## After v0.1
 
