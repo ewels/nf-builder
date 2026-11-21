@@ -36,6 +36,14 @@ describe("check-common", () => {
     expect(run([], {}).ok).toBe(true);
   });
 
+  it("F-003: problems with a known column print as file:line:column: message", () => {
+    const { lines } = run(
+      [{ file: `${REPO_ROOT}a.js`, line: 2, column: 7, message: "msg" }],
+      {},
+    );
+    expect(lines).toContain("a.js:2:7: msg");
+  });
+
   it("F-003: annotations escape %, newlines, colons and commas", () => {
     const line = githubAnnotation({ message: "100%\nnext" }, "a:b,c");
     expect(line).toBe("::error title=a%3Ab%2Cc::100%25%0Anext");

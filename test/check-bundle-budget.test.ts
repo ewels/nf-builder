@@ -181,6 +181,7 @@ describe("QA-01 bundle budget", () => {
       spawnSync("node", ["scripts/check-bundle-budget.ts", ...args], {
         cwd: REPO_ROOT,
         encoding: "utf8",
+        env: { ...process.env, GITHUB_ACTIONS: "", GITHUB_STEP_SUMMARY: "" },
       });
     const over = run("--dist", dist, "--budgets", budgets);
     expect(over.status).toBe(1);

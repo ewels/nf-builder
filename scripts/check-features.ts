@@ -1,7 +1,7 @@
 // features.json validation (F-003): shape, ids, spec references, dependencies, cycles, passes ordering.
-// Imports only node: built-ins and check-common.ts, so CI can run it without `pnpm install`.
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { ADR_DIR } from "./check-adrs.ts";
 import {
   isMain,
   type Problem,
@@ -9,10 +9,9 @@ import {
   reportProblems,
 } from "./check-common.ts";
 
-export const FEATURES_FILE: string = join(REPO_ROOT, "docs/plan/features.json");
-export const SPEC_DIR: string = join(REPO_ROOT, "docs/spec");
-const ADR_DIR = join(REPO_ROOT, "docs/adr");
-export const FEATURE_KEYS: readonly string[] = [
+const FEATURES_FILE: string = join(REPO_ROOT, "docs/plan/features.json");
+const SPEC_DIR: string = join(REPO_ROOT, "docs/spec");
+const FEATURE_KEYS: readonly string[] = [
   "id",
   "milestone",
   "description",
@@ -22,7 +21,7 @@ export const FEATURE_KEYS: readonly string[] = [
   "passes",
   "notes",
 ];
-export type Feature = {
+type Feature = {
   id: string;
   milestone: string;
   description: string;
@@ -105,12 +104,7 @@ export function validateFeatures(
     ];
   }
   const top = data as Record<string, unknown> | null;
-  if (
-    typeof top !== "object" ||
-    top === null ||
-    Array.isArray(top) ||
-    !Array.isArray(top.features)
-  )
+  if (typeof top !== "object" || top === null || !Array.isArray(top.features))
     return [
       {
         file,
@@ -132,7 +126,7 @@ export function validateFeatures(
 
   const items = top.features as unknown[];
   const idLines: number[] = [];
-  lines(text).forEach((l, i) => {
+  text.split(/\r?\n/).forEach((l, i) => {
     if (/"id":\s*"/.test(l)) idLines.push(i + 1);
   });
   const lineOf = (index: number): number | undefined =>
@@ -140,7 +134,7 @@ export function validateFeatures(
 
   const firstSeen = new Map<string, number>();
   const byId = new Map<string, Record<string, unknown>>();
-  const valid: Feature[] = [];
+  const valid: Pick<Feature, "id" | "depends_on">[] = [];
   items.forEach((raw, index) => {
     const line = lineOf(index);
     const record = raw as Record<string, unknown>;
@@ -221,15 +215,15 @@ export function validateFeatures(
     if ("notes" in record && typeof record.notes !== "string")
       add('"notes" must be a string');
     if (typeof record.id === "string" && isStringArray(record.depends_on))
-      valid.push({ id: record.id, depends_on: record.depends_on } as Feature);
+      valid.push({ id: record.id, depends_on: record.depends_on });
   });
 
+  const graph = valid.filter((f) => byId.has(f.id));
   const lineOfId = (id: string): number | undefined => {
     const i = firstSeen.get(id);
     return i === undefined ? undefined : lineOf(i);
   };
-  for (const f of valid) {
-    if (firstSeen.get(f.id) === undefined) continue;
+  for (const f of graph) {
     for (const dep of f.depends_on) {
       if (dep === f.id)
         problems.push({
@@ -245,9 +239,7 @@ export function validateFeatures(
         });
     }
   }
-  for (const cycle of findCycles(
-    valid.filter((f) => byId.get(f.id) !== undefined),
-  ))
+  for (const cycle of findCycles(graph))
     if (cycle.length > 2)
       problems.push({
         file,
@@ -265,10 +257,6 @@ export function validateFeatures(
         });
   }
   return problems;
-}
-
-function lines(text: string): string[] {
-  return text.split(/\r?\n/);
 }
 
 if (isMain(import.meta)) {
@@ -289,10 +277,14 @@ if (isMain(import.meta)) {
     options.set(flag as string, value);
   }
   const file = options.get("--file") ?? FEATURES_FILE;
+  if (!existsSync(file)) {
+    console.error(`${file} not found`);
+    process.exit(2);
+  }
   const text = readFileSync(file, "utf8");
   const specIds = knownSpecIds(
-    options.get("--spec-dir") ?? SPEC_DIR,
-    options.get("--adr-dir") ?? ADR_DIR,
+    options.get("--spec-dir"),
+    options.get("--adr-dir"),
   );
   const problems = validateFeatures(text, { file, specIds });
   if (reportProblems("features.json", problems)) {

@@ -17,7 +17,7 @@ function yamlFiles(dir: string): string[] {
 }
 
 describe("CI workflows", () => {
-  it("F-003 step 1: ci.yml runs on pull requests and pushes to main and defines every check job", () => {
+  it("F-003 step 1 ADR-0011: ci.yml runs on pull requests and pushes to main and defines every check job", () => {
     const ci = read(join(WORKFLOWS, "ci.yml"));
     expect(ci).toMatch(/^\s*pull_request:/m);
     expect(ci).toMatch(/^\s*push:\s*\n\s*branches: \[main\]/m);

@@ -58,6 +58,12 @@ describe("IO-41 host scan", () => {
     expect(kind("http://api.github.com")).toBe("forbidden");
     expect(kind("https://api.github.com:8443/")).toBe("forbidden");
     expect(kind("https://api.github.com.evil.example/")).toBe("forbidden");
+    for (const url of [
+      "https://api.github.com@evil.example/x",
+      "https://api.github.com_x.evil.example/",
+      "https://api.github.com%2eevil.example/",
+    ])
+      expect(kind(url), url).not.toBe("allowed");
   });
 
   it("IO-41: skips the listed non-fetched URLs and nothing broader", () => {
@@ -75,7 +81,7 @@ describe("IO-41 host scan", () => {
 
   it("IO-41: skips URLs with no literal host", () => {
     expect(kind("https://")).toBe("no-host");
-    expect(kind("https://${h}/x")).toBe("no-host");
+    expect(kind(`https://\${h}/x`)).toBe("no-host");
     expect(findUrls(`"https://"+h`).map((f) => kind(f.url))).toEqual([
       "no-host",
     ]);
@@ -151,6 +157,7 @@ describe("IO-41 host scan", () => {
       spawnSync("node", ["scripts/check-hosts.ts", "--dist", dist], {
         cwd: REPO_ROOT,
         encoding: "utf8",
+        env: { ...process.env, GITHUB_ACTIONS: "", GITHUB_STEP_SUMMARY: "" },
       });
     const bad = run(makeDist({ "a.js": `fetch("https://evil.example/x")` }));
     expect(bad.status).toBe(1);

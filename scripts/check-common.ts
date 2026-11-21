@@ -1,6 +1,5 @@
-// Shared by the repository checkers (ADR lint, features.json validation, and later the budget and host scans).
-// Imports only node: built-ins, so CI jobs can run the checkers without `pnpm install`.
-import { realpathSync } from "node:fs";
+// Shared by the repository checkers (ADR lint, features.json validation, the budget and host scans).
+import { existsSync, realpathSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -20,11 +19,15 @@ function repoRelative(file: string): string {
     : file;
 }
 
-/** "docs/adr/0015-x.md:3: message"; the file is made repo-relative, ":line" appears only when known. */
-export function formatProblem(problem: Problem): string {
+/** "docs/adr/0015-x.md:3:7: message"; the file is made repo-relative, ":line" and ":column" appear only when known. */
+function formatProblem(problem: Problem): string {
   if (problem.file === undefined) return problem.message;
   const line = problem.line === undefined ? "" : `:${problem.line}`;
-  return `${repoRelative(problem.file)}${line}: ${problem.message}`;
+  const column =
+    problem.line === undefined || problem.column === undefined
+      ? ""
+      : `:${problem.column}`;
+  return `${repoRelative(problem.file)}${line}${column}: ${problem.message}`;
 }
 
 const escapeData = (value: string): string =>
@@ -59,6 +62,13 @@ export function reportProblems(
   for (const problem of problems) write(formatProblem(problem));
   if (env.GITHUB_ACTIONS === "true")
     for (const problem of problems) write(githubAnnotation(problem, title));
+  return false;
+}
+
+/** True when the build output directory exists; otherwise prints how to fix that. */
+export function distExists(dist: string): boolean {
+  if (existsSync(dist) && statSync(dist).isDirectory()) return true;
+  console.error(`${repoRelative(dist)} not found: run pnpm build first`);
   return false;
 }
 

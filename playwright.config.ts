@@ -1,7 +1,6 @@
 import { defineConfig, devices } from "@playwright/test";
 import {
   type BrowserName,
-  SMOKE_ONLY,
   SMOKE_TAG,
   selectedBrowsers,
 } from "./e2e/browsers.ts";
@@ -13,10 +12,10 @@ const executablePath = process.env.PW_CHROMIUM_EXECUTABLE || undefined;
 
 const viewport = { width: 1440, height: 900 };
 
+// QA-20: Chromium runs every end-to-end test; Firefox and WebKit run the @smoke tests.
+const grep = new RegExp(`${SMOKE_TAG}\\b`);
+
 function project(name: BrowserName) {
-  const grep = SMOKE_ONLY.includes(name)
-    ? new RegExp(`${SMOKE_TAG}\\b`)
-    : undefined;
   switch (name) {
     case "chromium":
       return {

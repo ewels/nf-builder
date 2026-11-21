@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
@@ -128,8 +128,8 @@ describe("features.json validation", () => {
     const root = tmp();
     const specDir = join(root, "spec");
     const adrDir = join(root, "adr");
-    require_mkdir(specDir);
-    require_mkdir(adrDir);
+    mkdirSync(specDir);
+    mkdirSync(adrDir);
     writeFileSync(
       join(specDir, "q.md"),
       "| ID | Text |\n|---|---|\n| QA-01 | x |\n",
@@ -158,8 +158,8 @@ describe("features.json validation", () => {
     const root = tmp();
     const specDir = join(root, "spec");
     const adrDir = join(root, "adr");
-    require_mkdir(specDir);
-    require_mkdir(adrDir);
+    mkdirSync(specDir);
+    mkdirSync(adrDir);
     writeFileSync(join(specDir, "q.md"), "| QA-01 | x |\n");
     const goodFile = join(root, "good.json");
     const badFile = join(root, "bad.json");
@@ -183,17 +183,19 @@ describe("features.json validation", () => {
           "--adr-dir",
           adrDir,
         ],
-        { cwd: REPO_ROOT, encoding: "utf8" },
+        {
+          cwd: REPO_ROOT,
+          encoding: "utf8",
+          env: { ...process.env, GITHUB_ACTIONS: "", GITHUB_STEP_SUMMARY: "" },
+        },
       );
     const bad = run(badFile);
     expect(bad.status).toBe(1);
     expect(bad.stdout + bad.stderr).toMatch(/bad\.json:\d+: F-001 passes/);
     expect(run(goodFile).status).toBe(0);
+    const missing = run(join(root, "nope.json"));
+    expect(missing.status).toBe(2);
+    expect(missing.stdout + missing.stderr).toContain("nope.json not found");
+    expect(missing.stderr).not.toContain("at ");
   });
 });
-
-import { mkdirSync } from "node:fs";
-
-function require_mkdir(dir: string): void {
-  mkdirSync(dir, { recursive: true });
-}

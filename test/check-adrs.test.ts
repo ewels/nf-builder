@@ -101,6 +101,45 @@ describe("ADR lint", () => {
     expect(problems[0]?.message).toContain("0004");
   });
 
+  it("F-003 step 3: ADR lint blames the unindexed duplicate whichever file sorts first", () => {
+    for (const [indexed, extra] of [
+      ["0003-existing.md", "0003-a-new.md"],
+      ["0003-existing.md", "0003-z-new.md"],
+    ] as const) {
+      const dir = makeDir(
+        [{ file: "0001-a.md" }, { file: indexed }, { file: extra }],
+        [
+          {
+            n: "0001",
+            link: "0001-a.md",
+            decision: "Title 0001",
+            status: "Accepted",
+          },
+          {
+            n: "0003",
+            link: indexed,
+            decision: "Title 0003",
+            status: "Accepted",
+          },
+        ],
+      );
+      const dup = lintAdrs(dir).filter((p) => /number 0003/.test(p.message));
+      expect(dup).toHaveLength(1);
+      expect(dup[0]?.file).toContain(extra);
+      expect(dup[0]?.message).toContain(indexed);
+      expect(dup[0]?.message).toContain("0004");
+    }
+  });
+
+  it("F-003 step 3: ADR lint reports one problem naming every file when all duplicates are indexed", () => {
+    const dir = makeDir([{ file: "0001-a.md" }, { file: "0001-b.md" }]);
+    const dup = lintAdrs(dir).filter((p) => /number 0001/.test(p.message));
+    expect(dup).toHaveLength(1);
+    expect(dup[0]?.message).toContain("0001-a.md");
+    expect(dup[0]?.message).toContain("0001-b.md");
+    expect(dup[0]?.message).not.toContain("this one");
+  });
+
   it('F-003 step 3: ADR lint rejects an ADR with no "- Status:" line', () => {
     const dir = makeDir([{ file: "0001-a.md", status: null }]);
     const problems = lintAdrs(dir);
@@ -262,7 +301,12 @@ describe("ADR lint", () => {
       spawnSync(process.execPath, ["scripts/check-adrs.ts", "--dir", dir], {
         cwd: REPO_ROOT,
         encoding: "utf8",
-        env: { ...process.env, GITHUB_ACTIONS: "", ...env },
+        env: {
+          ...process.env,
+          GITHUB_ACTIONS: "",
+          GITHUB_STEP_SUMMARY: "",
+          ...env,
+        },
       });
     const bad = run(broken);
     expect(bad.status).toBe(1);
@@ -274,5 +318,9 @@ describe("ADR lint", () => {
       "::error file=",
     );
     expect(run(good).status).toBe(0);
+    const missing = run(join(tmpdir(), "nf-builder-no-such-adr-dir"));
+    expect(missing.status).toBe(2);
+    expect(missing.stdout + missing.stderr).toContain("not found");
+    expect(missing.stderr).not.toContain("at ");
   });
 });

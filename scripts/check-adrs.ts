@@ -1,5 +1,4 @@
 // ADR lint (ADR 0001): numbering, title, status and date lines, and agreement with docs/adr/README.md.
-// Imports only node: built-ins and check-common.ts, so CI can run it without `pnpm install`.
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import {
@@ -10,20 +9,14 @@ import {
 } from "./check-common.ts";
 
 export const ADR_DIR: string = join(REPO_ROOT, "docs/adr");
-export const ADR_FILE_NAME = /^(\d{4})-[a-z0-9]+(?:-[a-z0-9]+)*\.md$/;
-export const ALLOWED_STATUS =
+const ADR_FILE_NAME = /^(\d{4})-[a-z0-9]+(?:-[a-z0-9]+)*\.md$/;
+const ALLOWED_STATUS =
   /^(Proposed|Accepted|Accepted \(agent\)|Accepted \(spike S\d+ to confirm\)|Superseded by (\d{4}))$/;
 const ALLOWED_TEXT =
   "Proposed, Accepted, Accepted (agent), Accepted (spike Sn to confirm), Superseded by NNNN (ADR 0001)";
 
-export type Adr = {
-  file: string;
-  number: string;
-  title: string | null;
-  status: string | null;
-  date: string | null;
-};
-export type IndexRow = {
+type Adr = { title: string | null; status: string | null };
+type IndexRow = {
   line: number;
   number: string;
   link: string;
@@ -41,7 +34,7 @@ function validDate(value: string): boolean {
   );
 }
 
-export function parseAdr(
+function parseAdr(
   file: string,
   text: string,
 ): { adr: Adr; problems: Problem[] } {
@@ -87,7 +80,6 @@ export function parseAdr(
     }
   }
 
-  let date: string | null = null;
   if (dateLines.length !== 1)
     problems.push({
       file,
@@ -97,7 +89,7 @@ export function parseAdr(
           : `${dateLines.length} "- Date:" lines under the title; keep exactly one.`,
     });
   else {
-    date = (dateLines[0] ?? "").replace(/^- Date:\s*/, "").trim();
+    const date = (dateLines[0] ?? "").replace(/^- Date:\s*/, "").trim();
     if (!validDate(date))
       problems.push({
         file,
@@ -105,12 +97,12 @@ export function parseAdr(
       });
   }
 
-  return { adr: { file, number, title, status, date }, problems };
+  return { adr: { title, status }, problems };
 }
 
 const ROW = /^\| \[(\d{4})\]\(([^)]+)\) \| (.+?) \| (.+?) \|$/;
 
-export function parseIndex(
+function parseIndex(
   text: string,
   indexFile: string,
 ): { rows: IndexRow[]; problems: Problem[] } {
@@ -153,22 +145,41 @@ export function lintAdrs(dir: string = ADR_DIR): Problem[] {
       });
   }
 
-  const max = adrNames.reduce((m, n) => Math.max(m, Number(n.slice(0, 4))), 0);
-  const nextFree = String(max + 1).padStart(4, "0");
-  const firstByNumber = new Map<string, string>();
+  const duplicates = (indexed: ReadonlySet<string>): void => {
+    const max = adrNames.reduce(
+      (m, n) => Math.max(m, Number(n.slice(0, 4))),
+      0,
+    );
+    const nextFree = String(max + 1).padStart(4, "0");
+    const byNumber = new Map<string, string[]>();
+    for (const name of adrNames) {
+      const number = name.slice(0, 4);
+      byNumber.set(number, [...(byNumber.get(number) ?? []), name]);
+    }
+    for (const [number, group] of byNumber) {
+      if (group.length < 2) continue;
+      // Never ask for a renumber of an ADR that the index already lists.
+      const blamed = group.filter((n) => !indexed.has(n));
+      if (blamed.length === 0 || blamed.length === group.length)
+        problems.push({
+          file: join(dir, group[1] ?? ""),
+          message: `ADR number ${number} is used by ${group.join(", ")}. Give one of them the next free number, ${nextFree}: rename the file, fix its title line, and fix its row in docs/adr/README.md.`,
+        });
+      else
+        for (const name of blamed)
+          problems.push({
+            file: join(dir, name),
+            message: `ADR number ${number} is also used by ${group.filter((n) => n !== name).join(", ")}. Give this one the next free number, ${nextFree}: rename the file, fix its title line, and fix its row in docs/adr/README.md.`,
+          });
+    }
+  };
+
   const adrs = new Map<string, Adr>();
   const known = new Set(adrNames.map((n) => n.slice(0, 4)));
 
   for (const name of adrNames) {
     const file = join(dir, name);
     const number = name.slice(0, 4);
-    const earlier = firstByNumber.get(number);
-    if (earlier === undefined) firstByNumber.set(number, name);
-    else
-      problems.push({
-        file,
-        message: `ADR number ${number} is also used by docs/adr/${earlier}. Give this one the next free number, ${nextFree}: rename the file, fix its title line, and fix its row in docs/adr/README.md.`,
-      });
     const parsed = parseAdr(file, readFileSync(file, "utf8"));
     problems.push(...parsed.problems);
     const status = parsed.adr.status;
@@ -192,6 +203,7 @@ export function lintAdrs(dir: string = ADR_DIR): Problem[] {
 
   const indexFile = join(dir, "README.md");
   if (!existsSync(indexFile)) {
+    duplicates(new Set());
     problems.push({
       file: indexFile,
       message: "docs/adr/README.md is missing; it must list every ADR.",
@@ -203,6 +215,7 @@ export function lintAdrs(dir: string = ADR_DIR): Problem[] {
     indexFile,
   );
   problems.push(...indexProblems);
+  duplicates(new Set(rows.map((r) => r.link)));
 
   const listed = new Map<string, number>();
   let previous = "";
@@ -263,6 +276,10 @@ if (isMain(import.meta)) {
   if (args[0] === "--dir" && args[1] !== undefined) dir = args[1];
   else if (args.length > 0) {
     console.error("usage: node scripts/check-adrs.ts [--dir <path>]");
+    process.exit(2);
+  }
+  if (!existsSync(dir)) {
+    console.error(`${dir} not found`);
     process.exit(2);
   }
   const problems = lintAdrs(dir);

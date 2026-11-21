@@ -8,11 +8,11 @@
 //   language server are lazy-loaded, so a static import of them blows the budget);
 // - CSS is excluded, and worker bundles are excluded until F-702.
 // Size is the gzip size (node:zlib, default level) of each file, summed. 1 kB = 1000 bytes, as in Vite's log.
-// Imports only node: built-ins and sibling scripts, so CI can run it without `pnpm install`.
-import { appendFileSync, existsSync, readFileSync, statSync } from "node:fs";
-import { join, relative, resolve } from "node:path";
+import { appendFileSync, existsSync, readFileSync } from "node:fs";
+import { join, resolve } from "node:path";
 import { gzipSync } from "node:zlib";
 import {
+  distExists,
   isMain,
   type Problem,
   REPO_ROOT,
@@ -20,16 +20,13 @@ import {
   WEB_DIST,
 } from "./check-common.ts";
 
-export type ManifestChunk = {
+type ManifestChunk = {
   file: string;
-  src?: string;
-  name?: string;
   isEntry?: boolean;
   isDynamicEntry?: boolean;
   imports?: string[];
   dynamicImports?: string[];
   css?: string[];
-  assets?: string[];
 };
 export type Manifest = Record<string, ManifestChunk>;
 export type Budget = {
@@ -38,8 +35,8 @@ export type Budget = {
   maxBytes: number;
   reason: string;
 };
-export type SizedFile = { file: string; bytes: number; gzipBytes: number };
-export type BudgetResult = {
+type SizedFile = { file: string; bytes: number; gzipBytes: number };
+type BudgetResult = {
   ok: boolean;
   budget: Budget;
   files: SizedFile[];
@@ -47,8 +44,8 @@ export type BudgetResult = {
   problems: Problem[];
 };
 
-export const BUDGETS_FILE: string = join(REPO_ROOT, "scripts/budgets.json");
-export const MANIFEST_PATH = ".vite/manifest.json";
+const BUDGETS_FILE: string = join(REPO_ROOT, "scripts/budgets.json");
+const MANIFEST_PATH = ".vite/manifest.json";
 
 export function readBudget(id: string, file: string = BUDGETS_FILE): Budget {
   let data: unknown;
@@ -82,7 +79,7 @@ export function readBudget(id: string, file: string = BUDGETS_FILE): Budget {
 }
 
 /** Dist-relative paths of `<script src>` and `<link rel="modulepreload" href>` (attribute order free). */
-export function htmlScripts(html: string): string[] {
+function htmlScripts(html: string): string[] {
   const found: string[] = [];
   for (const tag of html.matchAll(/<(script|link)\b[^>]*>/gi)) {
     const text = tag[0];
@@ -107,9 +104,6 @@ function collect(
   for (const [key, chunk] of Object.entries(manifest))
     byFile.set(chunk.file, key);
   const queue: string[] = [];
-  const visit = (key: string) => {
-    if (manifest[key] !== undefined) queue.push(key);
-  };
   const seen = new Set<string>();
   const entry = manifest["index.html"];
   if (entry === undefined)
@@ -118,7 +112,7 @@ function collect(
     });
   else {
     files.add(entry.file);
-    visit("index.html");
+    queue.push("index.html");
   }
   for (const src of htmlScripts(html)) {
     if (/^(?:[a-z][a-z0-9+.-]*:)?\/\//i.test(src)) {
@@ -130,7 +124,7 @@ function collect(
     }
     files.add(src);
     const key = byFile.get(src);
-    if (key !== undefined) visit(key);
+    if (key !== undefined) queue.push(key);
   }
   while (queue.length > 0) {
     const key = queue.pop() as string;
@@ -159,7 +153,7 @@ export function initialJsFiles(manifest: Manifest, html: string): string[] {
   return collect(manifest, html).files;
 }
 
-export function formatKb(bytes: number): string {
+function formatKb(bytes: number): string {
   return `${(bytes / 1000).toFixed(1)} kB`;
 }
 
@@ -272,13 +266,7 @@ function main(argv: string[]): number {
       return 2;
     }
   }
-  try {
-    if (!statSync(dist).isDirectory()) throw new Error("not a directory");
-  } catch {
-    const shown = dist.startsWith(REPO_ROOT) ? relative(REPO_ROOT, dist) : dist;
-    console.error(`${shown} not found: run pnpm build first`);
-    return 2;
-  }
+  if (!distExists(dist)) return 2;
   let budget: Budget;
   try {
     budget = readBudget("QA-01", budgets);

@@ -1,8 +1,6 @@
-export const BROWSERS = ["chromium", "firefox", "webkit"] as const;
+const BROWSERS = ["chromium", "firefox", "webkit"] as const;
 export type BrowserName = (typeof BROWSERS)[number];
 export const SMOKE_TAG = "@smoke";
-/** QA-20: Chromium runs every end-to-end test; Firefox and WebKit run the @smoke tests. */
-export const SMOKE_ONLY: readonly BrowserName[] = ["firefox", "webkit"];
 
 export function selectedBrowsers(value: string | undefined): BrowserName[] {
   if (!value?.trim()) return ["chromium"];
