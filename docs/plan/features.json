@@ -94,8 +94,8 @@
         "A second run is a no-op",
         "Malformed fixtures live in `tools/corpus/fixtures/` and are committed"
       ],
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Verified 2026-11-21: `pnpm corpus:fetch` fetched 5 pins (about 5 s, 63 MB), second run `0 fetched, 5 up to date` with no git call; fixtures' lint results confirmed with nextflow lint 26.10.7; CI `corpus` job on PR #10 (cache miss then hit). No UI, so no Playwright test (Q13)."
     },
     {
       "id": "F-005",
@@ -116,7 +116,7 @@
         "ADR 0007 history and LA-14 updated (via a Proposed ADR if the decision changes)"
       ],
       "passes": false,
-      "notes": ""
+      "notes": "The oracle job should also lint tools/corpus/fixtures/ and check each result against fixtures.yaml (AGENTS.md, ADR 0017)."
     },
     {
       "id": "F-006",

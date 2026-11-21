@@ -29,6 +29,7 @@ describe("CI workflows", () => {
       "adr-lint",
       "features",
       "audit",
+      "corpus",
     ]) {
       expect(ci, job).toMatch(new RegExp(`^  ${job}:`, "m"));
     }
@@ -37,7 +38,7 @@ describe("CI workflows", () => {
     }
     const jobs = ci.split(/^jobs:/m)[1] ?? "";
     const blocks = jobs.split(/^ {2}(?=[\w-]+:\s*$)/m).slice(1);
-    expect(blocks.length).toBe(7);
+    expect(blocks.length).toBe(8);
     for (const block of blocks) expect(block).toContain("timeout-minutes:");
     for (const command of [
       "pnpm check",
@@ -47,6 +48,7 @@ describe("CI workflows", () => {
       "node scripts/check-adrs.ts",
       "node scripts/check-features.ts",
       "pnpm audit --audit-level high",
+      "pnpm corpus:fetch --check",
     ]) {
       expect(ci, command).toContain(`run: ${command}`);
     }
@@ -76,6 +78,30 @@ describe("CI workflows", () => {
     for (const file of yamlFiles(WORKFLOWS)) {
       expect(read(file), file).toMatch(/^permissions:/m);
     }
+  });
+
+  it("F-009 ADR-0011: the corpus job restores .cache/corpus from the Actions cache keyed on corpus.yaml, fetches, then checks the cache is complete", () => {
+    const action = read(join(ACTIONS, "corpus/action.yml"));
+    expect(action).toMatch(/uses: actions\/cache@[0-9a-f]{40}/);
+    expect(action).toContain("path: .cache/corpus");
+    expect(action).toMatch(/key: .*hashFiles\('tools\/corpus\/corpus\.yaml'\)/);
+    expect(action).toContain("run: pnpm corpus:fetch");
+    const ci = read(join(WORKFLOWS, "ci.yml"));
+    const job = ci.split(/^ {2}corpus:\s*$/m)[1] ?? "";
+    const setup = job.indexOf("uses: ./.github/actions/setup");
+    expect(setup).toBeGreaterThanOrEqual(0);
+    expect(job.indexOf("uses: ./.github/actions/corpus")).toBeGreaterThan(
+      setup,
+    );
+    expect(job).toContain("run: pnpm corpus:fetch --check");
+  });
+
+  it("F-009: the setup action only enables the pnpm cache when it installs", () => {
+    const action = read(join(ACTIONS, "setup/action.yml"));
+    expect(action).toMatch(
+      /cache: \$\{\{ inputs\.install == 'true' && 'pnpm' \|\| '' \}\}/,
+    );
+    expect(action).not.toMatch(/cache: pnpm\s*$/m);
   });
 
   it("F-003 QA-34: renovate.json pins GitHub Actions by digest and groups updates", () => {

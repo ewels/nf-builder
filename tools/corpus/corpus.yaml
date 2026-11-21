@@ -1,0 +1,27 @@
+# Pinned pipelines for the corpus tests (ADR 0011). Bump pins deliberately, in their own PR.
+# id: cache directory name (.cache/corpus/<id>). repo: GitHub owner/name.
+# ref: the tag or branch the pin came from, for people; quote it so YAML keeps it a string.
+# sha: the full commit that pnpm corpus:fetch checks out; this is the pin.
+pipelines:
+  - id: rnaseq
+    repo: nf-core/rnaseq
+    ref: "3.28.0"
+    sha: f24c6c0e9469d04975d87c3a8bf9020800978782
+  - id: sarek
+    repo: nf-core/sarek
+    ref: "3.12.0"
+    sha: 786a11bb4f989751d1c4bb87908ffc6096635ff3
+  - id: fetchngs
+    repo: nf-core/fetchngs
+    ref: "1.13.0"
+    sha: 955c892d80927cee633765e6e390f9cc6b7235c9
+  # master is rnaseq-nf's main branch (legacy syntax).
+  - id: rnaseq-nf
+    repo: nextflow-io/rnaseq-nf
+    ref: master
+    sha: 53377cff870bdb0ae02ee5cdb74703af4b18e887
+  # static-typing is the typed branch (nextflow.enable.types = true, Nextflow >=26.10.0).
+  - id: rnaseq-nf-typed
+    repo: nextflow-io/rnaseq-nf
+    ref: static-typing
+    sha: ce09c72bc7317f89ac3e3f571a68953488229b17

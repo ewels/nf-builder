@@ -1,0 +1,62 @@
+# Intentionally malformed Nextflow files for the parser fallback tests (ADR 0004, ADR 0011).
+# Each file's first line is "// Malformed on purpose: <breaks>".
+# lint: expected `nextflow lint` 26.10 result. error = non-zero exit; ok = exit 0, warnings allowed.
+#   Confirmed with `nextflow lint` 26.10.7 on 2026-11-21; the CI oracle (F-005) re-checks them.
+# expect.wholeFile: true when no declaration can be isolated, so the file is kept verbatim (ADR 0004, first row).
+# expect.unparsed: declarations kept as raw text (ADR 0004, second row). expect.modelled: declarations that must still be modelled.
+# Declaration names: "process NAME", "workflow" (entry) or "workflow NAME", "featureFlag NAME";
+#   in config, "assign PATH" for a top-level assignment and "block NAME" for a top-level block.
+fixtures:
+  - file: unclosed-comment.nf
+    breaks: a block comment is opened and never closed, so the rest of the file is inside it.
+    lint: error
+    expect:
+      wholeFile: true
+  - file: bad-declaration.nf
+    breaks: process SECOND has a syntax error in its script section; FIRST and the entry workflow are valid.
+    lint: error
+    expect:
+      unparsed: [process SECOND]
+      modelled: [process FIRST, workflow]
+  - file: section-order.nf
+    breaks: "process LATE_INPUT declares input: after script:, so its section labels are out of order."
+    lint: error
+    expect:
+      unparsed: [process LATE_INPUT]
+      modelled: [process ON_TIME]
+  - file: unclosed-brace.nf
+    breaks: the entry workflow is missing its closing brace, so it runs to the end of the file.
+    lint: error
+    expect:
+      unparsed: [workflow]
+      modelled: [process SAY_HELLO]
+  - file: typed-legacy-mixed.nf
+    breaks: types are enabled, so the legacy process GOODBYE is not allowed in this script.
+    lint: error
+    expect:
+      unparsed: [process GOODBYE]
+      modelled: [featureFlag nextflow.enable.types, process HELLO]
+  - file: typed-without-flag.nf
+    breaks: process HELLO declares a typed input but the script does not set nextflow.enable.types = true.
+    lint: error
+    expect:
+      unparsed: [process HELLO]
+      modelled: [process GOODBYE]
+  - file: unknown-scope.config
+    breaks: notAScope is not a Nextflow config scope; the syntax is valid and the block must be kept as is.
+    lint: ok
+    expect:
+      unparsed: []
+      modelled: [assign docker.enabled, block notAScope, assign params.outdir]
+  - file: bad-config-block.config
+    breaks: the process block assigns cpus without a value; the other statements are valid.
+    lint: error
+    expect:
+      unparsed: [block process]
+      modelled: [assign docker.enabled, assign params.outdir]
+  - file: unclosed-config-block.config
+    breaks: the profiles block is missing its closing brace, so it runs to the end of the file.
+    lint: error
+    expect:
+      unparsed: [block profiles]
+      modelled: [assign params.outdir]

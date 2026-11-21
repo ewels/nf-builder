@@ -1,0 +1,12 @@
+name: Restore and fetch the corpus
+description: Restore .cache/corpus from the Actions cache, keyed on tools/corpus/corpus.yaml, then fetch any pin that is missing (ADR 0011). Run ./.github/actions/setup first.
+runs:
+  using: composite
+  steps:
+    - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: .cache/corpus
+        # Bump v1 if the cache layout in tools/corpus/src/fetch.ts changes.
+        key: corpus-v1-${{ hashFiles('tools/corpus/corpus.yaml') }}
+    - shell: bash
+      run: pnpm corpus:fetch
