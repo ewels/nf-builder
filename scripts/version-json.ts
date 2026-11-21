@@ -1,6 +1,6 @@
 import type { Plugin } from "vite";
 
-export type VersionInfo = { commit: string; context: string };
+type VersionInfo = { commit: string; context: string };
 
 export function versionInfo(
   env: Record<string, string | undefined>,

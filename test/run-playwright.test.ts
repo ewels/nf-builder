@@ -1,4 +1,5 @@
 import { spawnSync } from "node:child_process";
+import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
@@ -27,5 +28,20 @@ describe("pnpm test:e2e", () => {
     const { status, output } = listTests("NO-SUCH-ID");
     expect(status).not.toBe(0);
     expect(output).toContain("No tests found");
+  });
+
+  it("F-002: runs the project's own Playwright even when none is on PATH", () => {
+    const result = spawnSync(
+      process.execPath,
+      ["scripts/run-playwright.ts", "--", "--grep", "F-002", "--list"],
+      {
+        cwd: repoRoot,
+        encoding: "utf8",
+        env: { ...process.env, PATH: dirname(process.execPath) },
+      },
+    );
+    const output = `${result.stdout}${result.stderr}`;
+    expect(result.status, output).toBe(0);
+    expect(output).toContain("F-002");
   });
 });

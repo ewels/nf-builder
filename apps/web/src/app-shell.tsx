@@ -1,6 +1,6 @@
 import type { JSX } from "react";
 
-export const APP_NAME = "nf-builder";
+const APP_NAME = "nf-builder";
 
 export function AppShell(): JSX.Element {
   return (

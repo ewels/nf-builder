@@ -9,11 +9,7 @@ import { versionJson } from "../../scripts/version-json.ts";
 // netlify.toml is the single source of response headers; `vite preview` sends all of them so e2e runs under the production CSP.
 const headers = siteHeaders(readNetlifyConfig());
 // `vite dev` injects an inline React Refresh script and <style> tags, which that CSP blocks, so dev gets every header except the CSP.
-const devHeaders = Object.fromEntries(
-  Object.entries(headers).filter(
-    ([name]) => name.toLowerCase() !== "content-security-policy",
-  ),
-);
+const { "Content-Security-Policy": _csp, ...devHeaders } = headers;
 
 export default defineConfig({
   plugins: [react(), versionJson(process.env)],

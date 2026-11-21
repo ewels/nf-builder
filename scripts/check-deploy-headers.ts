@@ -25,6 +25,7 @@ export type DeployCheckResult = {
 export const DEEP_ROUTE = "/deploy-check/deep/route";
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+const NO_STORE = { headers: { "Cache-Control": "no-store" } };
 const message = (error: unknown) =>
   error instanceof Error ? error.message : String(error);
 
@@ -34,18 +35,19 @@ async function readVersion(
   baseUrl: string,
 ): Promise<{ version?: Version; last: string }> {
   try {
-    const response = await fetch(`${baseUrl}/version.json?ts=${Date.now()}`, {
-      headers: { "Cache-Control": "no-store" },
-    });
+    const response = await fetch(
+      `${baseUrl}/version.json?ts=${Date.now()}`,
+      NO_STORE,
+    );
     if (response.status !== 200) return { last: `status ${response.status}` };
-    const body: unknown = await response.json();
-    if (
-      typeof body !== "object" ||
-      body === null ||
-      typeof (body as { commit?: unknown }).commit !== "string"
-    )
+    const body = (await response.json()) as {
+      commit?: unknown;
+      context?: unknown;
+    } | null;
+    if (typeof body?.commit !== "string")
       return { last: "version.json has no commit" };
-    const { commit, context } = body as { commit: string; context?: unknown };
+    const commit = body.commit;
+    const context = body.context;
     return {
       version: {
         commit,
@@ -81,23 +83,13 @@ async function isNewerOrSame(
   }
 }
 
-type Page = { status: number; type: string; headers: Headers; body: string };
-
-async function get(url: string): Promise<Page | string> {
-  try {
-    const response = await fetch(url, {
-      headers: { "Cache-Control": "no-store" },
-    });
-    return {
-      status: response.status,
-      type: response.headers.get("content-type") ?? "",
-      headers: response.headers,
-      body: await response.text(),
-    };
-  } catch (error) {
-    return `request failed: ${message(error)}`;
-  }
-}
+type Page = {
+  path: string;
+  status: number;
+  type: string;
+  headers: Headers;
+  body: string;
+};
 
 export async function checkDeploy(
   options: DeployCheckOptions,
@@ -150,66 +142,60 @@ export async function checkDeploy(
       `version.json context is "${live?.context}", expected "${options.context}"`,
     );
 
-  const checkPage = (path: string, page: Page | string): Page | null => {
-    if (typeof page === "string") {
-      problems.push(`${path}: ${page}`);
+  const fetchPage = async (
+    path: string,
+    expectedType: string,
+    typeOk: (type: string) => boolean,
+  ): Promise<Page | null> => {
+    let page: Page;
+    try {
+      const response = await fetch(`${baseUrl}${path}`, NO_STORE);
+      page = {
+        path,
+        status: response.status,
+        type: response.headers.get("content-type") ?? "",
+        headers: response.headers,
+        body: await response.text(),
+      };
+    } catch (error) {
+      problems.push(`${path}: request failed: ${message(error)}`);
       return null;
     }
+    if (page.status !== 200)
+      problems.push(`${path}: status is ${page.status}, expected 200`);
+    if (!typeOk(page.type))
+      problems.push(
+        `${path}: content-type is "${page.type}", expected ${expectedType}`,
+      );
     return page;
   };
+  const isHtml = (type: string) => type.startsWith("text/html");
 
-  const root = checkPage("/", await get(`${baseUrl}/`));
-  let assetPath: string | undefined;
-  if (root) {
-    if (root.status !== 200)
-      problems.push(`/: status is ${root.status}, expected 200`);
-    if (!root.type.startsWith("text/html"))
-      problems.push(`/: content-type is "${root.type}", expected text/html`);
-    assetPath = /src="(\/assets\/[^"]+\.js)"/.exec(root.body)?.[1];
-    if (!assetPath)
-      problems.push("/: no /assets/*.js script found in the page");
-  }
+  const root = await fetchPage("/", "text/html", isHtml);
+  const assetPath = root && /src="(\/assets\/[^"]+\.js)"/.exec(root.body)?.[1];
+  if (root && !assetPath)
+    problems.push("/: no /assets/*.js script found in the page");
 
-  const deep = checkPage(DEEP_ROUTE, await get(`${baseUrl}${DEEP_ROUTE}`));
-  if (deep) {
-    if (deep.status !== 200)
-      problems.push(`${DEEP_ROUTE}: status is ${deep.status}, expected 200`);
-    if (!deep.type.startsWith("text/html"))
-      problems.push(
-        `${DEEP_ROUTE}: content-type is "${deep.type}", expected text/html`,
-      );
-    if (!deep.body.includes('<div id="root">'))
-      problems.push(
-        `${DEEP_ROUTE}: body is not the app shell (no single-page-app fallback)`,
-      );
-  }
+  const deep = await fetchPage(DEEP_ROUTE, "text/html", isHtml);
+  if (deep && !deep.body.includes('<div id="root">'))
+    problems.push(
+      `${DEEP_ROUTE}: body is not the app shell (no single-page-app fallback)`,
+    );
 
-  let asset: Page | null = null;
-  if (assetPath) {
-    asset = checkPage(assetPath, await get(`${baseUrl}${assetPath}`));
-    if (asset) {
-      if (asset.status !== 200)
-        problems.push(`${assetPath}: status is ${asset.status}, expected 200`);
-      if (!asset.type.includes("javascript"))
-        problems.push(
-          `${assetPath}: content-type is "${asset.type}", expected javascript`,
-        );
-    }
-  }
+  const asset = assetPath
+    ? await fetchPage(assetPath, "javascript", (type) =>
+        type.includes("javascript"),
+      )
+    : null;
 
-  const pages: [string, Page | null][] = [
-    ["/", root],
-    [DEEP_ROUTE, deep],
-    [assetPath ?? "(asset)", asset],
-  ];
-  for (const [path, page] of pages) {
+  for (const page of [root, deep, asset]) {
     if (!page) continue;
     for (const [name, expected] of Object.entries(expectedHeaders)) {
       const actual = page.headers.get(name);
-      if (actual === expected) log(`ok ${path} ${name}`);
+      if (actual === expected) log(`ok ${page.path} ${name}`);
       else
         problems.push(
-          `${path}: ${name} is "${actual ?? ""}", expected "${expected}"`,
+          `${page.path}: ${name} is "${actual ?? ""}", expected "${expected}"`,
         );
     }
   }
@@ -221,8 +207,8 @@ export async function checkDeploy(
   return { ok: problems.length === 0, liveCommit, problems };
 }
 
-async function main(): Promise<void> {
-  const { values } = parseArgs({
+const parseCli = () =>
+  parseArgs({
     options: {
       url: { type: "string" },
       commit: { type: "string" },
@@ -231,7 +217,17 @@ async function main(): Promise<void> {
       "timeout-minutes": { type: "string", default: "15" },
       "interval-seconds": { type: "string", default: "15" },
     },
-  });
+  }).values;
+
+async function main(): Promise<void> {
+  let values: ReturnType<typeof parseCli>;
+  try {
+    values = parseCli();
+  } catch (error) {
+    console.error(message(error));
+    process.exitCode = 2;
+    return;
+  }
   if (!values.url || !values.commit) {
     console.error(
       "usage: check-deploy-headers.ts --url <url> --commit <sha> [--context <name>] [--allow-newer]",
@@ -239,6 +235,17 @@ async function main(): Promise<void> {
     process.exitCode = 2;
     return;
   }
+  const timeoutMinutes = Number(values["timeout-minutes"]);
+  const intervalSeconds = Number(values["interval-seconds"]);
+  for (const [flag, value] of [
+    ["--timeout-minutes", timeoutMinutes],
+    ["--interval-seconds", intervalSeconds],
+  ] as const)
+    if (!Number.isFinite(value) || value <= 0) {
+      console.error(`${flag} must be a positive number`);
+      process.exitCode = 2;
+      return;
+    }
   let allowNewer: DeployCheckOptions["allowNewer"];
   if (values["allow-newer"]) {
     const repo = process.env.GITHUB_REPOSITORY;
@@ -250,17 +257,17 @@ async function main(): Promise<void> {
     allowNewer = {
       apiUrl: process.env.GITHUB_API_URL || "https://api.github.com",
       repo,
-      ...(process.env.GITHUB_TOKEN ? { token: process.env.GITHUB_TOKEN } : {}),
+      token: process.env.GITHUB_TOKEN,
     };
   }
   const result = await checkDeploy({
     baseUrl: values.url.replace(/\/+$/, ""),
     commit: values.commit,
-    ...(values.context !== undefined ? { context: values.context } : {}),
-    ...(allowNewer ? { allowNewer } : {}),
+    context: values.context,
+    allowNewer,
     expectedHeaders: siteHeaders(readNetlifyConfig()),
-    timeoutMs: Number(values["timeout-minutes"]) * 60_000,
-    intervalMs: Number(values["interval-seconds"]) * 1000,
+    timeoutMs: timeoutMinutes * 60_000,
+    intervalMs: intervalSeconds * 1000,
     log: console.log,
   });
   if (!result.ok) {

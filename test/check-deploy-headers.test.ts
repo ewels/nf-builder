@@ -1,3 +1,4 @@
+import { spawnSync } from "node:child_process";
 import {
   createServer,
   type IncomingMessage,
@@ -5,6 +6,7 @@ import {
   type ServerResponse,
 } from "node:http";
 import type { AddressInfo } from "node:net";
+import { fileURLToPath } from "node:url";
 import { afterEach, describe, expect, it } from "vitest";
 import {
   checkDeploy,
@@ -25,6 +27,8 @@ type Behaviour = {
   headerOverrides?: Record<string, string>;
   deepRouteStatus?: number;
   compareStatus?: string;
+  rootHtml?: string;
+  assetType?: string;
 };
 
 const servers: Server[] = [];
@@ -58,9 +62,15 @@ async function serve(b: Behaviour = {}): Promise<string> {
           context: b.context ?? "deploy-preview",
         }),
       );
-    else if (path === "/") send(res, 200, "text/html; charset=utf-8", HTML);
+    else if (path === "/")
+      send(res, 200, "text/html; charset=utf-8", b.rootHtml ?? HTML);
     else if (path === ASSET)
-      send(res, 200, "text/javascript; charset=utf-8", "console.log(1)");
+      send(
+        res,
+        200,
+        b.assetType ?? "text/javascript; charset=utf-8",
+        "console.log(1)",
+      );
     else if (path === DEEP_ROUTE)
       send(
         res,
@@ -153,5 +163,58 @@ describe("checkDeploy", () => {
       options(base, { allowNewer: { apiUrl: base, repo: "o/r" } }),
     );
     expect(result.ok).toBe(false);
+  });
+
+  it("F-002 step 3: fails when version.json reports a different context than expected", async () => {
+    const base = await serve({ context: "branch-deploy" });
+    const result = await checkDeploy(
+      options(base, { context: "deploy-preview" }),
+    );
+    expect(result.ok).toBe(false);
+    expect(result.problems).toContain(
+      'version.json context is "branch-deploy", expected "deploy-preview"',
+    );
+  });
+
+  it("F-002 step 3: fails when the root page references no /assets/*.js script", async () => {
+    const base = await serve({
+      rootHtml: '<!doctype html><div id="root"></div>',
+    });
+    const result = await checkDeploy(options(base));
+    expect(result.ok).toBe(false);
+    expect(result.problems).toContain(
+      "/: no /assets/*.js script found in the page",
+    );
+  });
+
+  it("F-002 step 3: fails when the hashed asset is not served as JavaScript", async () => {
+    const base = await serve({ assetType: "text/plain" });
+    const result = await checkDeploy(options(base));
+    expect(result.ok).toBe(false);
+    expect(result.problems).toContain(
+      `${ASSET}: content-type is "text/plain", expected javascript`,
+    );
+  });
+});
+
+describe("check-deploy-headers command line", () => {
+  const script = fileURLToPath(
+    new URL("../scripts/check-deploy-headers.ts", import.meta.url),
+  );
+  it.each([
+    ["--timeout-minutes", "abc"],
+    ["--timeout-minutes", "0"],
+    ["--timeout-minutes", "-1"],
+    ["--interval-seconds", "abc"],
+    ["--interval-seconds", "0"],
+    ["--interval-seconds", "-5"],
+  ])("F-002: %s %s is a usage error (exit 2)", (flag, value) => {
+    const result = spawnSync(
+      process.execPath,
+      [script, "--url", "http://127.0.0.1:1", "--commit", "x", flag, value],
+      { encoding: "utf8" },
+    );
+    expect(result.status).toBe(2);
+    expect(result.stderr).toContain(flag);
   });
 });

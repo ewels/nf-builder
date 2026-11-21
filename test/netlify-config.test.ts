@@ -69,7 +69,7 @@ describe("netlify.toml", () => {
     );
   });
 
-  it("QA-30: the netlify.toml Content-Security-Policy is one line, allows no inline or eval scripts, and limits connect-src to the ADR 0002 allow-list", () => {
+  it("ADR-0002 QA-30: the netlify.toml Content-Security-Policy is one line, allows no inline or eval scripts, and limits connect-src to the ADR 0002 allow-list", () => {
     const csp = siteHeaders(config)["Content-Security-Policy"] ?? "";
     expect(cspProblems(csp)).toEqual([]);
   });
@@ -110,5 +110,21 @@ describe("netlify.toml", () => {
     ["a comma", `${base}, img-src 'self'`],
   ])("QA-30: cspProblems rejects %s", (_name, policy) => {
     expect(cspProblems(policy).length).toBeGreaterThan(0);
+  });
+
+  const withScriptSource = (directive: string, source: string) =>
+    directive === "script-src"
+      ? `default-src 'self'; script-src 'self' ${source}; connect-src 'self'`
+      : `default-src 'self'; script-src 'self'; ${directive} 'self' ${source}; connect-src 'self'`;
+  it.each(
+    ["data:", "blob:", "*", "https:", "http:"].flatMap((source) =>
+      ["default-src", "script-src", "script-src-elem", "script-src-attr"].map(
+        (directive) =>
+          [`${source} in ${directive}`, directive, source] as const,
+      ),
+    ),
+  )("QA-30: cspProblems rejects %s", (_name, directive, source) => {
+    const problems = cspProblems(withScriptSource(directive, source));
+    expect(problems).toContain(`${directive} allows ${source}`);
   });
 });

@@ -1,10 +1,10 @@
 import { expect, test } from "@playwright/test";
+import { DEEP_ROUTE } from "../scripts/check-deploy-headers.ts";
 import { readNetlifyConfig, siteHeaders } from "../scripts/netlify-config.ts";
 import { watchForCspViolations } from "./csp.ts";
 import { DEV_URL } from "./urls.ts";
 
 const expectedHeaders = siteHeaders(readNetlifyConfig());
-const DEEP_ROUTE = "/deploy-check/deep/route";
 
 test("F-002: the app shell shows the header with the app name and three columns, with no CSP violations", async ({
   page,

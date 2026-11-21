@@ -1,9 +1,8 @@
 import { readFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
 import { parse } from "smol-toml";
 
-export type NetlifyHeaderRule = { for: string; values: Record<string, string> };
-export type NetlifyRedirect = {
+type NetlifyHeaderRule = { for: string; values: Record<string, string> };
+type NetlifyRedirect = {
   from: string;
   to: string;
   status: number;
@@ -18,10 +17,6 @@ export type NetlifyConfig = {
   redirects: NetlifyRedirect[];
   headers: NetlifyHeaderRule[];
 };
-
-export const NETLIFY_TOML = fileURLToPath(
-  new URL("../netlify.toml", import.meta.url),
-);
 
 /** ADR 0002: the only origins the app may connect to. */
 export const CONNECT_SRC_ALLOW_LIST: readonly string[] = [
@@ -58,8 +53,12 @@ function strings(value: unknown, key: string): Record<string, string> {
   return result;
 }
 
-export function readNetlifyConfig(path: string = NETLIFY_TOML): NetlifyConfig {
-  const root = table(parse(readFileSync(path, "utf8")), "root");
+export function readNetlifyConfig(): NetlifyConfig {
+  const toml = readFileSync(
+    new URL("../netlify.toml", import.meta.url),
+    "utf8",
+  );
+  const root = table(parse(toml), "root");
   const build = table(root.build, "build");
   const redirects = list(root.redirects, "redirects").map((entry, i) => {
     const r = table(entry, `redirects[${i}]`);
@@ -104,16 +103,6 @@ export function siteHeaders(config: NetlifyConfig): Record<string, string> {
   return { ...rules[0]?.values };
 }
 
-export function parseCsp(policy: string): Map<string, string[]> {
-  const directives = new Map<string, string[]>();
-  for (const part of policy.split(";")) {
-    const words = part.trim().toLowerCase().split(/\s+/).filter(Boolean);
-    const [name, ...sources] = words;
-    if (name !== undefined) directives.set(name, sources);
-  }
-  return directives;
-}
-
 const SCRIPT_DIRECTIVES = [
   "default-src",
   "script-src",
@@ -121,8 +110,9 @@ const SCRIPT_DIRECTIVES = [
   "script-src-attr",
 ];
 
+/** Keywords, nonces and hashes, `data:`, `blob:`, `*`, and any bare scheme such as `https:`. */
 const FORBIDDEN_SCRIPT_SOURCE =
-  /^'(unsafe-inline|unsafe-eval|unsafe-hashes|nonce-.*|sha(256|384|512)-.*)'$/;
+  /^('(unsafe-inline|unsafe-eval|unsafe-hashes|nonce-.*|sha(256|384|512)-.*)'|data:|blob:|\*|[a-z][a-z0-9+.-]*:)$/;
 
 /** Returns one readable problem per QA-30 breach; [] when the policy is acceptable. */
 export function cspProblems(policy: string): string[] {
@@ -133,14 +123,16 @@ export function cspProblems(policy: string): string[] {
       "the policy contains a comma, which makes it several policies",
     );
 
-  const names = policy
-    .split(";")
-    .map((part) => part.trim().split(/\s+/)[0]?.toLowerCase())
-    .filter((name): name is string => Boolean(name));
-  for (const name of new Set(names.filter((n, i) => names.indexOf(n) !== i)))
-    problems.push(`${name} appears more than once`);
+  const directives = new Map<string, string[]>();
+  const repeated = new Set<string>();
+  for (const part of policy.split(";")) {
+    const [name, ...sources] = part.trim().toLowerCase().split(/\s+/);
+    if (!name) continue;
+    if (directives.has(name)) repeated.add(name);
+    directives.set(name, sources);
+  }
+  for (const name of repeated) problems.push(`${name} appears more than once`);
 
-  const directives = parseCsp(policy);
   if (!directives.has("script-src")) problems.push("script-src is missing");
   for (const name of SCRIPT_DIRECTIVES) {
     for (const source of directives.get(name) ?? []) {
