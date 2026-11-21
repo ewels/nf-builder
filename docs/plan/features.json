@@ -456,7 +456,7 @@
         "The main thread does no parsing (asserted in a Playwright performance trace)"
       ],
       "passes": false,
-      "notes": ""
+      "notes": "From F-201's plan: the shell reads installed pack versions through engine on the main thread; once a pack's entry holds the parser, move that list behind the worker so the parser stays out of the initial bundle (QA-01 check will catch it)."
     },
     {
       "id": "F-201",
@@ -1285,7 +1285,7 @@
         "axe reports no violations on the main screens"
       ],
       "passes": false,
-      "notes": ""
+      "notes": "From F-201: drag-to-resize columns needs a single-pointer alternative for WCAG 2.5.7 (keyboard resizing alone doesn't satisfy it)."
     },
     {
       "id": "F-702",

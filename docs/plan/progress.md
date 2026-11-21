@@ -103,3 +103,11 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - Tooling features without UI pass on unit tests plus CI runs ([Q13](open-questions.md)).
   - Malformed fixtures are exempt from "must pass the oracle"; the oracle must reproduce their recorded `lint` result (AGENTS.md, ADR 0017).
 - Blockers: none. (#2 closed by the maintainer.)
+
+## 2026-11-21 · hand-off · Claude (autonomous)
+- Did: closed out the first session. Passing: F-001, F-002, F-003, F-004, F-009. Plans for F-005, F-006 and F-201 are in `docs/plan/handoff/` with their open points settled; this session's research is in `docs/research/2026-11-21-corpus-and-s1-facts.md` and `2026-11-21-netlify-csp-ci.md`.
+- State: `main` green; production deploy checked.
+- Next: a new session with wider network access starts F-005, F-006 and F-201 in parallel (ADR 0018), each in its own worktree, from the hand-off plans. After those: F-007, F-008, F-010 (spikes needing CheerpJ, the registry and Pyodide hosts), then M1 from F-101.
+- Decisions: the hand-off README settles the plans' open points.
+- Blockers: none. Open maintainer issues: #6 (Renovate), #7 (required checks). This session couldn't reach `*.netlify.app`, `registry.nextflow.io`, `docs.seqera.io`, `cdn.jsdelivr.net` or `codeload.github.com`.
+- Notes for the next session: run Nextflow locally with `.cache/nextflow/nextflow-26.10.7-dist` (download it from GitHub releases; `NXF_HOME=.cache/nextflow/home NXF_OFFLINE=true`); in the cloud sandbox export `PW_CHROMIUM_EXECUTABLE` for e2e (AGENTS.md); `pnpm corpus:fetch` populates `.cache/corpus`.
