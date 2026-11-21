@@ -2,7 +2,7 @@
   "$comment": "CI budgets from docs/spec/quality.md, enforced by scripts/check-bundle-budget.ts. A PR may raise maxBytes only with a reason here and in its description. 1 kB = 1000 bytes; gzip is node:zlib at its default level.",
   "QA-01": {
     "description": "Initial JavaScript, gzipped, excluding Monaco and the optional language server",
-    "maxBytes": 450000,
+    "maxBytes": 20000,
     "reason": "QA-01 as specified"
   }
 }
