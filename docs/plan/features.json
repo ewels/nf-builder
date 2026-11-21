@@ -64,7 +64,7 @@
     {
       "id": "F-004",
       "milestone": "M0",
-      "description": "Agent harness: `pnpm smoke` (build plus one e2e test), PR template with definition-of-done checklist, and a features.json guard that rejects changes other than `passes`/`notes` unless the PR has the `scope-change` label.",
+      "description": "Agent tooling: `pnpm smoke` (build plus one e2e test), PR template with definition-of-done checklist, and a features.json guard that rejects changes other than `passes`/`notes` unless the PR has the `scope-change` label.",
       "spec": [
         "ADR-0012"
       ],
