@@ -20,3 +20,4 @@ Process: [0001](0001-record-decisions-as-adrs.md). Template: [template.md](templ
 | [0014](0014-security-headers.md) | Serve a strict, one-line security header set from netlify.toml | Accepted (agent) |
 | [0015](0015-ci-checks.md) | Run every check on each pull request in one CI workflow | Accepted (agent) |
 | [0016](0016-scope-guard-and-smoke.md) | Guard features.json scope in CI and keep a one-minute smoke run | Accepted (agent) |
+| [0017](0017-corpus-fetch.md) | Fetch the corpus by commit SHA with git and cache it in Actions | Accepted (agent) |

@@ -85,7 +85,7 @@ If your change adds a dependency, moves a package boundary, changes a stored or 
 - Use the Nextflow agent skills:
   - Claude Code: eight skills from `seqeralabs/nextflow-plugin` are vendored in `.claude/skills/` (see its README), so cloud sessions get them too;
   - other agents: `npx skills add seqeralabs/nextflow-plugin`.
-- Nextflow code in templates and fixtures must pass the CI oracle (`nextflow lint` on 26.10).
+- Nextflow code in templates and fixtures must pass the CI oracle (`nextflow lint` on 26.10). The exception is `tools/corpus/fixtures/`, which is malformed on purpose: there the oracle must reproduce the `lint` result recorded in `fixtures.yaml` (ADR 0017).
 
 ## Conventions that tools don't enforce
 
