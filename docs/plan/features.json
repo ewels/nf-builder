@@ -8,7 +8,9 @@
       "spec": [
         "ADR-0003"
       ],
-      "depends_on": [],
+      "depends_on": [
+        "F-002"
+      ],
       "steps": [
         "Fresh clone: `pnpm install && pnpm check` exits 0",
         "Add a fixture import from `apps/web` into `packages/lang-2610`: `pnpm check` fails and the message names the rule and the allowed alternative",
@@ -131,7 +133,7 @@
         "Every file that `nextflow lint` accepts parses; differences are listed with causes",
         "Catalogue counts of directives, operators and factories match the docs reference pages, or the gaps are explained"
       ],
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
