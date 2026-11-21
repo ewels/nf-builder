@@ -17,3 +17,4 @@ Process: [0001](0001-record-decisions-as-adrs.md). Template: [template.md](templ
 | [0011](0011-testing-with-real-pipelines-and-nextflow.md) | Test against real pipelines, with real Nextflow and nf-docs as oracles | Accepted |
 | [0012](0012-agent-workflow.md) | Agents work one feature per session against a fixed feature list | Accepted |
 | [0013](0013-nf-docs-integration.md) | Write docs in nf-docs format, generate an nf-metro map, publish to GitHub Pages | Accepted |
+| [0014](0014-security-headers.md) | Serve a strict, one-line security header set from netlify.toml | Accepted (agent) |

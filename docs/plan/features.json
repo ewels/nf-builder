@@ -35,8 +35,8 @@
         "Merging to `main` deploys to https://nf-builder.netlify.app and the page loads; a pull request gets a deploy preview",
         "The deployed page sends a Content-Security-Policy header that matches QA-30"
       ],
-      "passes": false,
-      "notes": "App name: nf-builder (Q1). Netlify site `nf-builder` already exists and deploys from this repo's `main`."
+      "passes": true,
+      "notes": "App name: nf-builder (Q1). Netlify site `nf-builder` already exists and deploys from this repo's `main`. Verified 2026-11-21: `pnpm test:e2e -- --grep F-002` (6 tests) and unit tests; deploy-check on PR #3 confirmed the preview's headers. Step 3's production half is confirmed by deploy-check on the push to `main` (Q11)."
     },
     {
       "id": "F-003",

@@ -163,13 +163,55 @@ describe("ADR-0003 package boundaries", () => {
       "../../../packages/lang-core/src/index",
       "packages/lang-core/src/index.ts",
     ],
+    [
+      "web-src-not-to-build-scripts",
+      "apps/web/src/bad.ts",
+      "../../../scripts/build",
+      "scripts/build.ts",
+    ],
+    [
+      "web-src-not-to-build-scripts",
+      "apps/web/src/bad.ts",
+      "../../../e2e/helper",
+      "e2e/helper.ts",
+    ],
+    [
+      "lang-core-imports-nothing-internal",
+      "packages/lang-core/src/bad.ts",
+      "../../../scripts/build",
+      "scripts/build.ts",
+    ],
+    [
+      "pack-imports-only-lang-core",
+      "packages/lang-2610/src/bad.ts",
+      "../../../scripts/build",
+      "scripts/build.ts",
+    ],
+    [
+      "engine-imports-only-lang-core-and-pack-entries",
+      "packages/engine/src/bad.ts",
+      "../../../scripts/build",
+      "scripts/build.ts",
+    ],
+    [
+      "sources-imports-only-lang-core",
+      "packages/sources/src/bad.ts",
+      "../../../scripts/build",
+      "scripts/build.ts",
+    ],
+    ["tools-standalone", CORPUS, "../../../scripts/build", "scripts/build.ts"],
   ];
 
+  const BUILD_SCRIPT = "scripts/build.ts";
   it.each(violations)(
     "ADR-0003: rule %s rejects a forbidden import and says where the code should go",
     (name, from, specifier, target) => {
       const dir = makeWorkDir();
       mkdirSync(join(dir, "tools/corpus/src"), { recursive: true });
+      mkdirSync(join(dir, "scripts"), { recursive: true });
+      mkdirSync(join(dir, "e2e"), { recursive: true });
+      writeFileSync(join(dir, BUILD_SCRIPT), `export const build = 1;\n`);
+      writeFileSync(join(dir, "e2e/helper.ts"), `export const helper = 1;\n`);
       if (from === CORPUS)
         writeFileSync(join(dir, CORPUS), `export * from "${specifier}";\n`);
       else {
@@ -186,6 +228,24 @@ describe("ADR-0003 package boundaries", () => {
       expect(collapse(output)).toContain(collapse(rule?.comment ?? "missing"));
     },
   );
+
+  it("ADR-0014: apps/web/vite.config.ts and e2e may import the root build-time scripts", () => {
+    const dir = makeWorkDir();
+    mkdirSync(join(dir, "scripts"), { recursive: true });
+    mkdirSync(join(dir, "e2e"), { recursive: true });
+    writeFileSync(join(dir, "scripts/build.ts"), `export const build = 1;\n`);
+    writeFileSync(
+      join(dir, "apps/web/vite.config.ts"),
+      `export { build } from "../../scripts/build";\n`,
+    );
+    writeFileSync(
+      join(dir, "e2e/spec.ts"),
+      `export { build } from "../scripts/build";\n`,
+    );
+    const { status, output } = runArch(dir);
+    expect(output).toContain("no dependency violations found");
+    expect(status).toBe(0);
+  });
 
   it("ADR-0003: the real repository's arch check cruises at least one module", () => {
     const { status, output } = runArch(repoRoot);

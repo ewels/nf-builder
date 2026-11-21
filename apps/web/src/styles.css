@@ -1,0 +1,50 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: system-ui, sans-serif;
+}
+
+.app-shell {
+  display: grid;
+  grid-template-rows: 48px minmax(0, 1fr);
+  height: 100%;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  background: #1e2430;
+  color: #f4f6fa;
+}
+
+.app-name {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.app-columns {
+  display: grid;
+  grid-template-columns: 256px minmax(0, 1fr) 296px;
+  min-height: 0;
+}
+
+.column-left {
+  border-right: 1px solid #d0d5dd;
+}
+
+.column-right {
+  border-left: 1px solid #d0d5dd;
+}

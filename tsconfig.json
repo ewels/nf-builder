@@ -3,11 +3,14 @@
   "compilerOptions": {
     "types": [
       "node"
-    ]
+    ],
+    "erasableSyntaxOnly": true
   },
   "include": [
     "vitest.config.ts",
-    "test"
+    "test",
+    "scripts",
+    "playwright.config.ts"
   ],
   "exclude": [
     "test/fixtures"
