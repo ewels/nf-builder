@@ -1,0 +1,43 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":semanticCommits",
+    "helpers:pinGitHubActionDigests"
+  ],
+  "schedule": [
+    "before 6am on monday"
+  ],
+  "minimumReleaseAge": "3 days",
+  "lockFileMaintenance": {
+    "enabled": true
+  },
+  "packageRules": [
+    {
+      "description": "One PR for GitHub Actions",
+      "matchManagers": [
+        "github-actions"
+      ],
+      "groupName": "GitHub Actions"
+    },
+    {
+      "description": "One PR for non-major dev tooling",
+      "matchDepTypes": [
+        "devDependencies"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "groupName": "dev tooling (non-major)"
+    },
+    {
+      "description": "Node and pnpm move together; netlify.toml NODE_VERSION and PNPM_VERSION must follow by hand (test/netlify-config.test.ts fails until they do)",
+      "matchDepNames": [
+        "node",
+        "pnpm"
+      ],
+      "groupName": "Node and pnpm"
+    }
+  ]
+}
