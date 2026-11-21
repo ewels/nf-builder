@@ -45,6 +45,25 @@ describe("F-001 step 3: package layout", () => {
   });
 });
 
+describe("ADR 0003: build-time tools", () => {
+  it("ADR-0003: every directory under tools/ is a build-time tool from the ADR 0003 table with src/, test/ and a README of at most 10 lines", () => {
+    const tools = isDir(join(repoRoot, "tools"))
+      ? readdirSync(join(repoRoot, "tools"), { withFileTypes: true })
+          .filter((entry) => entry.isDirectory())
+          .map((entry) => `tools/${entry.name}`)
+      : [];
+    const allowed = ["tools/corpus", "tools/spec-extract"];
+    for (const dir of tools) {
+      expect(allowed, dir).toContain(dir);
+      expect(isDir(join(repoRoot, dir, "src")), `${dir}/src`).toBe(true);
+      expect(isDir(join(repoRoot, dir, "test")), `${dir}/test`).toBe(true);
+      const lines = readmeLines(dir);
+      expect(lines.length).toBeLessThanOrEqual(10);
+      expect(lines.join(" ")).toContain("Build-time tool");
+    }
+  });
+});
+
 describe("F-001 and ADR 0003: root scripts and compiler settings", () => {
   it("F-001: pnpm check runs typecheck, lint, unit tests and architecture rules, then the ADR and features checks (F-003)", () => {
     const { scripts } = JSON.parse(

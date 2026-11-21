@@ -34,8 +34,9 @@ This table lists every root `package.json` script that `pnpm check` doesn't alre
 | `pnpm check` | Before every commit: typecheck, Biome, unit tests, dependency-cruiser, ADR lint, `features.json` validation |
 | `pnpm check:budget` and `pnpm check:hosts` | After `pnpm build`: QA-01 bundle budget and IO-41 host allow-list (ADR 0015) |
 | `pnpm test:e2e -- --grep F-123` | The feature's end-to-end test |
+| `pnpm corpus:fetch` | Fetch the pinned pipeline corpus into `.cache/corpus/` (git over github.com; second run is a no-op) |
 
-Still to come, each with the feature that adds it: fetching the pipeline corpus (F-009), testing the parser against it (with the parser, F-101 to F-104; run it when touching the parser, model, projection or printer), the grammar generator (F-101) and the catalogue generator (F-109). The catalogue (needs Java) and the Nextflow oracle tests run in CI only. Don't try to run them locally.
+Still to come, each with the feature that adds it: testing the parser against the corpus (with the parser, F-101 to F-104; run it when touching the parser, model, projection or printer), the grammar generator (F-101) and the catalogue generator (F-109). The catalogue (needs Java) and the Nextflow oracle tests run in CI only. Don't try to run them locally.
 
 `pnpm test:e2e` and `pnpm smoke` build the app and serve it with the `netlify.toml` headers. In the Claude Code cloud sandbox only an older Chromium is installed: export `PW_CHROMIUM_EXECUTABLE=/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell` first, and never run `playwright install`. The sandbox also can't reach `*.netlify.app`; the `deploy-check` workflow checks deployed headers instead.
 
