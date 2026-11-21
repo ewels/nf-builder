@@ -12,11 +12,15 @@ Spec IDs: <!-- e.g. UX-25, LA-29 -->
 
 - [ ] `pnpm check` passes
 - [ ] `pnpm test:e2e -- --grep F-___` passes (steps in features.json all verified)
-- [ ] `features.json`: only `passes`/`notes` changed, or the PR has the `scope-change` label
+- [ ] `features.json`: only `passes`/`notes` changed, or the PR has the `scope-change` label and an ADR or decision note
 - [ ] `docs/plan/progress.md` entry added
-- [ ] Proposed ADR added if an ADR 0001 trigger applies
+- [ ] ADR added (`Accepted (agent)`) if an ADR 0001 trigger applies
 - [ ] No tests or visual baselines deleted, skipped or weakened
 - [ ] Fresh-context review done; findings addressed or answered below
+
+## Decisions made for the maintainer
+
+<!-- Each call with its ADR or open-question link, or "none". -->
 
 ## Screenshots
 

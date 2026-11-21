@@ -9,7 +9,7 @@ The tool must be free to host, open source, and keep users' code on their machin
 
 ## Decision
 
-- A static single-page app built in CI and published to GitHub Pages. No backend, accounts or telemetry.
+- A static single-page app. Netlify builds it from `main` using `netlify.toml` and serves it at https://nf-builder.netlify.app; pull requests get deploy previews. `netlify.toml` also sets the security headers (QA-30). No backend, accounts or telemetry.
 - At runtime it talks only to:
   - GitHub (API and raw content);
   - `registry.nextflow.io`;
@@ -31,6 +31,7 @@ The tool must be free to host, open source, and keep users' code on their machin
 
 ## Alternatives
 
+- GitHub Pages: free and simple, but it can't set response headers, so no real Content-Security-Policy, and no deploy previews.
 - Serverless proxy: solves CORS, but adds an account, a bill and an attack surface.
 - Desktop app: could run Java locally, but loses zero-install.
 - OPFS for storage: fine, but weaker tooling. Revisit if IndexedDB is slow.

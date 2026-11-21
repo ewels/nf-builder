@@ -29,17 +29,21 @@ The fixes are well documented: a lean `AGENTS.md`, a fixed feature list, a progr
   4. Build on `feat/<id>`, running `pnpm check` and the feature's e2e test.
   5. Set `passes`, log the session, open a PR.
 - **Roles (Claude Code):** an Opus main session orchestrates. Subagents in `.claude/agents/`: Opus for research, planning, review and simplification; Sonnet for building from a plan. Only the builder writes product code. Details in `CLAUDE.md`.
+- **Autonomous mode** (maintainer's decision, 2026-11-21): one long-running session works through the whole feature list without waiting for the maintainer.
+  - It makes the maintainer's calls itself. Each becomes an ADR marked `Accepted (agent)` or a dated answer in `open-questions.md`, and is listed under Decisions in that session's `progress.md` entry. The maintainer reviews them later and may supersede any.
+  - It merges its own PRs (squash) once CI is green and the reviewer reports nothing blocking. It never pushes to `main` directly.
+  - It skips a feature that needs something only the maintainer can provide (a secret, a GitHub or Netlify setting), opens an issue labelled `maintainer`, and moves on. It stops when every feature passes or everything left is blocked.
 - **Review:**
-  - A fresh-context reviewer agent comments on each PR.
-  - A human merges; agents never merge.
+  - A fresh-context reviewer agent checks each branch before its PR is merged.
   - A review comment that comes up twice becomes a rule in `AGENTS.md` or a check.
 
 ## Consequences
 
-- Steady progress over many sessions. Human review is the deliberate bottleneck, kept quick by small PRs.
+- Progress doesn't wait for the maintainer. The price is that mistakes reach `main` before a human sees them; small PRs, CI, the reviewer and the decision log keep them findable and revertible.
 - The feature list must be good up front. Reviewing it is part of M0.
 
 ## Alternatives
 
-- Long autonomous runs with one final review: unrecoverable when they go wrong.
+- A human merges every PR: safer, but the maintainer becomes the bottleneck. This was the original plan; switching back means removing the autonomous-mode bullet.
+- One long run without per-feature PRs: unrecoverable when it goes wrong.
 - Markdown task lists: agents rewrite them freely.

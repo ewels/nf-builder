@@ -2,18 +2,21 @@
 
 Browser-only visual builder for Nextflow pipelines (TypeScript, React). What it must do: `docs/spec/`. What's decided and why: `docs/adr/README.md`. Scope and status: `docs/plan/features.json`. Session log: `docs/plan/progress.md`.
 
+**Autonomous mode is on** (ADR 0012). Work through the whole feature list without waiting for the maintainer: decide, record, merge, continue.
+
 ## Every session
 
 1. Read the last three entries of `docs/plan/progress.md`, `git log --oneline -20`, and `docs/plan/features.json`.
-2. Take the first feature, in file order, with `passes: false` whose `depends_on` all pass. Work on that one only.
-3. Run `pnpm smoke`. If it fails, fixing it is this session's work.
+2. Take the first feature, in file order, with `passes: false` whose `depends_on` all pass and that isn't blocked. Work on that one only.
+3. Run `pnpm smoke` (from F-004 on). If it fails, fixing it is the next work.
 4. Read only the spec IDs and ADRs the feature cites.
 5. Branch `feat/<id>`. Commit in small steps.
-6. Before finishing:
+6. To finish the feature:
    - run `pnpm check` and `pnpm test:e2e -- --grep <id>`;
    - set `passes: true` only if every step in the feature passed;
    - append to `progress.md`;
-   - open a PR using the template.
+   - open a PR using the template;
+   - when CI is green and the reviewer has nothing blocking, squash-merge it, delete the branch, update local `main`, and start again at step 1. Until F-003 adds CI, "CI green" means `pnpm check` passes in a fresh clone of the branch.
 
 ## Commands
 
@@ -35,19 +38,22 @@ The catalogue (`pnpm gen:catalogue`, needs Java) and the Nextflow oracle tests r
 
 **Always:** run `pnpm check` before committing; add a test that fails without your change; cite requirement IDs in test names and PRs.
 
-**Ask first.** Stop, note it under Blockers in `progress.md`, and say so in the PR:
+**Decide and record.** These used to need the maintainer. Now make the call, then record it: an ADR marked `Accepted (agent)` or a dated answer in `docs/plan/open-questions.md`, a line under Decisions in `progress.md`, and a mention in the PR:
 - a new runtime dependency;
 - a change to package boundaries or dependency-cruiser rules;
 - a change to a persisted or exported format;
 - edits to `.github/workflows/`;
-- changes to `features.json` beyond `passes` and `notes`;
-- anything that contradicts an `Accepted` ADR or depends on an open question in `docs/plan/open-questions.md`.
+- changes to `features.json` beyond `passes` and `notes` (adding or splitting features is fine; label the PR `scope-change`; never drop scope or weaken a step without an ADR);
+- anything that contradicts an accepted ADR (supersede it) or depends on an open question in `docs/plan/open-questions.md` (answer it).
+
+**Blocked.** If a feature needs something only the maintainer can provide (a secret, a GitHub or Netlify setting, an account), note it under Blockers in `progress.md`, open a GitHub issue labelled `maintainer`, and move to the next feature. Stop only when every feature passes or everything left is blocked.
 
 **Never:**
 - edit generated files (below);
 - edit the body of an `Accepted` ADR, except to append a spike result (ADR 0001);
 - delete, skip or weaken a test or approved visual baseline;
-- merge to `main`;
+- push to `main` directly, or merge a PR before CI is green and the reviewer has nothing blocking;
+- force-push or rewrite history on `main`;
 - commit tokens or secrets;
 - call a network host not on the ADR 0002 allow-list;
 - write Nextflow syntax from memory without checking it.
@@ -63,7 +69,7 @@ Never edit these. Regenerate them.
 
 ## Decisions
 
-If your change adds a dependency, moves a package boundary, changes a stored or exported format, changes user-visible behaviour in the spec, or conflicts with an ADR, add a `Proposed` ADR (from `docs/adr/template.md`) in the same PR and list it in `docs/adr/README.md`.
+If your change adds a dependency, moves a package boundary, changes a stored or exported format, changes user-visible behaviour in the spec, or conflicts with an ADR, add an ADR marked `Accepted (agent)` (from `docs/adr/template.md`) in the same PR and list it in `docs/adr/README.md`.
 
 ## Nextflow knowledge
 

@@ -7,7 +7,8 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
 - Did: what changed (files, PR link)
 - State: passing / partial / blocked
 - Next: the next concrete step
-- Blockers: anything needing the maintainer, or "none"
+- Decisions: calls made for the maintainer, with ADR or question links, or "none"
+- Blockers: anything only the maintainer can unblock, or "none"
 ```
 
 ## 2026-11-21 · planning · Claude with Phil Ewels
@@ -39,4 +40,11 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
 - Did: vendored eight Nextflow skills into `.claude/skills/` so cloud sessions get them (plugin entries removed from `.claude/settings.json`); added F-705, a post-v0.1 cleanup that removes them and `docs/mockup/`.
 - State: no code yet.
 - Next: F-001.
+- Blockers: none.
+
+## 2026-11-21 · planning · Claude with Phil Ewels
+- Did: hosting moved to Netlify (`nf-builder.netlify.app`, ADR 0002; F-002 adds `netlify.toml`); autonomous mode on (ADR 0012, AGENTS.md, CLAUDE.md): the agent decides, records, merges its own PRs and continues to the end.
+- State: no code yet.
+- Next: F-001.
+- Decisions: none (maintainer's own).
 - Blockers: none.

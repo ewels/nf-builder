@@ -20,7 +20,7 @@
     {
       "id": "F-002",
       "milestone": "M0",
-      "description": "Minimal web app (header plus three empty columns) that builds with Vite and deploys to GitHub Pages from `main`.",
+      "description": "Minimal web app (header plus three empty columns) that builds with Vite and deploys to Netlify from `main` via `netlify.toml`.",
       "spec": [
         "ADR-0002",
         "UX-01",
@@ -31,11 +31,12 @@
       ],
       "steps": [
         "`pnpm dev` serves the app locally; the header shows the app name",
-        "Merging to `main` publishes to GitHub Pages and the page loads",
-        "The deployed page sends a Content-Security-Policy that matches QA-30"
+        "`netlify.toml` at the repo root sets the build command, publish directory, Node and pnpm versions, the QA-30 security headers and a single-page-app fallback",
+        "Merging to `main` deploys to https://nf-builder.netlify.app and the page loads; a pull request gets a deploy preview",
+        "The deployed page sends a Content-Security-Policy header that matches QA-30"
       ],
       "passes": false,
-      "notes": "App name: nf-builder (Q1). Pages URL: https://ewels.github.io/nf-builder/"
+      "notes": "App name: nf-builder (Q1). Netlify site `nf-builder` already exists and deploys from this repo's `main`."
     },
     {
       "id": "F-003",
@@ -154,7 +155,7 @@
     {
       "id": "F-008",
       "milestone": "M0",
-      "description": "Spike S4: deploy a probe page to GitHub Pages that calls the registry API endpoints, raw.githubusercontent.com and codeload.github.com, and records CORS results.",
+      "description": "Spike S4: deploy a probe page to Netlify (a deploy preview is enough) that calls the registry API endpoints, raw.githubusercontent.com and codeload.github.com, and records CORS results.",
       "spec": [
         "ADR-0009"
       ],
@@ -1325,7 +1326,7 @@
     {
       "id": "F-704",
       "milestone": "M7",
-      "description": "User docs (README, in-app help links) and the v0.1.0 release on GitHub Pages.",
+      "description": "User docs (README, in-app help links) and the v0.1.0 release on Netlify.",
       "spec": [
         "PR-01",
         "PR-07"
@@ -1336,7 +1337,7 @@
         "F-703"
       ],
       "steps": [
-        "Tag v0.1.0; Pages serves the release build; README explains what the app does and where projects are stored"
+        "Tag v0.1.0; https://nf-builder.netlify.app serves the release build; README explains what the app does and where projects are stored"
       ],
       "passes": false,
       "notes": ""
