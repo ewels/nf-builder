@@ -1,7 +1,5 @@
 {
   "name": "@nf-builder/lang-2610",
-  "private": true,
-  "type": "module",
   "exports": {
     ".": "./src/index.ts"
   }

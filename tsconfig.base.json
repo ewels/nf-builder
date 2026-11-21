@@ -8,11 +8,9 @@
     "moduleResolution": "bundler",
     "moduleDetection": "force",
     "verbatimModuleSyntax": true,
-    "isolatedModules": true,
     "resolveJsonModule": true,
     "strict": true,
     "noUncheckedIndexedAccess": true,
-    "types": [],
     "skipLibCheck": true,
     "noEmit": true
   }

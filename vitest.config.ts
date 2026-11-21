@@ -5,6 +5,7 @@ export default defineConfig({
     projects: [
       "packages/*",
       "apps/*",
+      "tools/*",
       { test: { name: "repo", include: ["test/**/*.test.ts"] } },
     ],
   },

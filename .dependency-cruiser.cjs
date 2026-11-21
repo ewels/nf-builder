@@ -85,12 +85,9 @@ module.exports = {
   options: {
     doNotFollow: { path: "node_modules" },
     includeOnly: "^(apps|packages|tools)/",
-    exclude: { path: "(^|/)node_modules/" },
     tsPreCompilationDeps: true,
     enhancedResolveOptions: {
       exportsFields: ["exports"],
-      conditionNames: ["import", "default", "types"],
-      mainFields: ["module", "main", "types"],
     },
   },
 };

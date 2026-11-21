@@ -22,7 +22,7 @@ const archScript: string = JSON.parse(
   readFileSync(join(repoRoot, "package.json"), "utf8"),
 ).scripts.arch;
 
-type Rule = { name: string; comment?: string };
+type Rule = { name: string; severity?: string; comment?: string };
 const rules: Rule[] = createRequire(import.meta.url)(configFile).forbidden;
 
 const workDirs: string[] = [];
@@ -119,9 +119,85 @@ describe("ADR-0003 package boundaries", () => {
     );
   });
 
+  const CORPUS = "tools/corpus/src/index.ts";
+  const violations: [string, string, string, string][] = [
+    [
+      "lang-core-imports-nothing-internal",
+      "packages/lang-core/src/bad.ts",
+      "../../engine/src/index",
+      "packages/engine/src/index.ts",
+    ],
+    [
+      "pack-imports-only-lang-core",
+      "packages/lang-2610/src/bad.ts",
+      "../../engine/src/index",
+      "packages/engine/src/index.ts",
+    ],
+    [
+      "engine-imports-only-lang-core-and-pack-entries",
+      "packages/engine/src/bad.ts",
+      "../../sources/src/index",
+      "packages/sources/src/index.ts",
+    ],
+    [
+      "sources-imports-only-lang-core",
+      "packages/sources/src/bad.ts",
+      "../../engine/src/index",
+      "packages/engine/src/index.ts",
+    ],
+    [
+      "web-not-to-pack",
+      "apps/web/src/bad.ts",
+      "../../../packages/lang-2610/src/index",
+      "packages/lang-2610/src/index.ts",
+    ],
+    [
+      "web-imports-only-listed-packages",
+      "apps/web/src/bad.ts",
+      "../../../tools/corpus/src/index",
+      CORPUS,
+    ],
+    [
+      "tools-standalone",
+      CORPUS,
+      "../../../packages/lang-core/src/index",
+      "packages/lang-core/src/index.ts",
+    ],
+  ];
+
+  it.each(violations)(
+    "ADR-0003: rule %s rejects a forbidden import and says where the code should go",
+    (name, from, specifier, target) => {
+      const dir = makeWorkDir();
+      mkdirSync(join(dir, "tools/corpus/src"), { recursive: true });
+      if (from === CORPUS)
+        writeFileSync(join(dir, CORPUS), `export * from "${specifier}";\n`);
+      else {
+        writeFileSync(join(dir, CORPUS), `export const corpus = 1;\n`);
+        writeFileSync(join(dir, from), `export * from "${specifier}";\n`);
+      }
+
+      const { status, output } = runArch(dir);
+      const rule = rules.find((r) => r.name === name);
+
+      expect(rule, name).toBeDefined();
+      expect(status).not.toBe(0);
+      expect(output).toContain(`error ${name}: ${from} → ${target}`);
+      expect(collapse(output)).toContain(collapse(rule?.comment ?? "missing"));
+    },
+  );
+
+  it("ADR-0003: the real repository's arch check cruises at least one module", () => {
+    const { status, output } = runArch(repoRoot);
+    expect(status).toBe(0);
+    const count = /\((\d+) modules/.exec(output)?.[1];
+    expect(Number(count)).toBeGreaterThan(0);
+  });
+
   it("ADR-0003: every rule is an error whose comment says where the code should go instead", () => {
     expect(rules.length).toBeGreaterThan(0);
     for (const rule of rules) {
+      expect(rule.severity, rule.name).toBe("error");
       expect(rule.comment, rule.name).toMatch(/ADR 0003/);
       expect(rule.comment, rule.name).toMatch(/(packages|apps|tools)\/[a-z<]/);
     }

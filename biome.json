@@ -6,7 +6,6 @@
     "useIgnoreFile": true
   },
   "files": {
-    "ignoreUnknown": true,
     "includes": [
       "**",
       "!**/*.md",
@@ -17,27 +16,11 @@
     ]
   },
   "formatter": {
-    "enabled": true,
-    "indentStyle": "space",
-    "indentWidth": 2
+    "indentStyle": "space"
   },
   "json": {
     "formatter": {
       "expand": "always"
-    }
-  },
-  "linter": {
-    "enabled": true,
-    "rules": {
-      "preset": "recommended"
-    }
-  },
-  "assist": {
-    "enabled": true,
-    "actions": {
-      "source": {
-        "organizeImports": "on"
-      }
     }
   }
 }

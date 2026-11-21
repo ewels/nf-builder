@@ -44,3 +44,24 @@ describe("F-001 step 3: package layout", () => {
     expect(found.sort()).toEqual(Object.keys(PACKAGES).sort());
   });
 });
+
+describe("F-001 and ADR 0003: root scripts and compiler settings", () => {
+  it("F-001: pnpm check runs typecheck, lint, unit tests and architecture rules", () => {
+    const { scripts } = JSON.parse(
+      readFileSync(join(repoRoot, "package.json"), "utf8"),
+    );
+    const order = ["typecheck", "lint", "test", "arch"].map((name) =>
+      (scripts.check as string).indexOf(`run ${name}`),
+    );
+    expect(order.every((i) => i >= 0)).toBe(true);
+    expect(order).toEqual([...order].sort((a, b) => a - b));
+  });
+
+  it("ADR-0003: TypeScript is strict with noUncheckedIndexedAccess", () => {
+    const { compilerOptions } = JSON.parse(
+      readFileSync(join(repoRoot, "tsconfig.base.json"), "utf8"),
+    );
+    expect(compilerOptions.strict).toBe(true);
+    expect(compilerOptions.noUncheckedIndexedAccess).toBe(true);
+  });
+});
