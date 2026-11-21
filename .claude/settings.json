@@ -1,4 +1,15 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
-  "model": "opus"
+  "model": "opus",
+  "extraKnownMarketplaces": {
+    "nextflow-plugin": {
+      "source": {
+        "source": "github",
+        "repo": "seqeralabs/nextflow-plugin"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "nextflow@nextflow-plugin": true
+  }
 }

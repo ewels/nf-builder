@@ -70,8 +70,8 @@ If your change adds a dependency, moves a package boundary, changes a stored or 
   1. the pack's `catalogue/*.json`;
   2. https://docs.seqera.io/nextflow;
   3. the syntax reference.
-- Install the Nextflow agent skills:
-  - Claude Code: `/plugin marketplace add seqeralabs/nextflow-plugin`, then `/plugin install nextflow@nextflow-plugin`;
+- Use the Nextflow agent skills:
+  - Claude Code: `.claude/settings.json` enables `nextflow@nextflow-plugin` once you trust the folder. Cloud sessions skip plugins declared in repo settings;
   - other agents: `npx skills add seqeralabs/nextflow-plugin`.
 - Nextflow code in templates and fixtures must pass the CI oracle (`nextflow lint` on 26.10).
 
