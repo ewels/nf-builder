@@ -16,7 +16,7 @@ Browser-only visual builder for Nextflow pipelines (TypeScript, React). What it 
    - set `passes: true` only if every step in the feature passed;
    - append to `progress.md`;
    - open a PR using the template;
-   - when CI is green and the reviewer has nothing blocking, squash-merge it, delete the branch, update local `main`, and start again at step 1. Until F-003 adds CI, "CI green" means `pnpm check` passes in a fresh clone of the branch.
+   - when CI is green and the reviewer has nothing blocking, squash-merge it, delete the branch, update local `main`, and start again at step 1. "CI green" means every job of the `CI` and `Deploy check` workflows passed on the PR head (ADR 0015).
 
 ## Commands
 
@@ -28,7 +28,8 @@ These arrive with F-001 to F-004. Until then the repo is docs only.
 | `pnpm dev` | Local dev server (http://localhost:5173; no CSP, see ADR 0014) |
 | `pnpm build` | Production build of `apps/web` into `apps/web/dist` (what Netlify runs) |
 | `pnpm --filter <package> test` | While iterating on one package |
-| `pnpm check` | Before every commit: typecheck, Biome, unit tests, dependency-cruiser |
+| `pnpm check` | Before every commit: typecheck, Biome, unit tests, dependency-cruiser, ADR lint, `features.json` validation |
+| `pnpm check:budget` and `pnpm check:hosts` | After `pnpm build`: QA-01 bundle budget and IO-41 host allow-list (ADR 0015) |
 | `pnpm smoke` | Session start: build plus one end-to-end test |
 | `pnpm test:e2e -- --grep F-123` | The feature's end-to-end test |
 | `pnpm corpus:fetch` then `pnpm test:corpus` | When touching the parser, model, projection or printer |

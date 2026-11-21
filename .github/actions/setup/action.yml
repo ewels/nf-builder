@@ -1,0 +1,18 @@
+name: Set up pnpm and Node
+description: pnpm from packageManager, Node from engines.node, then the locked dependencies unless install is "false".
+inputs:
+  install:
+    description: Run pnpm install --frozen-lockfile
+    required: false
+    default: "true"
+runs:
+  using: composite
+  steps:
+    - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+    - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+      with:
+        node-version-file: package.json
+        cache: pnpm
+    - if: inputs.install == 'true'
+      shell: bash
+      run: pnpm install --frozen-lockfile

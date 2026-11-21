@@ -46,13 +46,18 @@ describe("F-001 step 3: package layout", () => {
 });
 
 describe("F-001 and ADR 0003: root scripts and compiler settings", () => {
-  it("F-001: pnpm check runs typecheck, lint, unit tests and architecture rules", () => {
+  it("F-001: pnpm check runs typecheck, lint, unit tests and architecture rules, then the ADR and features checks (F-003)", () => {
     const { scripts } = JSON.parse(
       readFileSync(join(repoRoot, "package.json"), "utf8"),
     );
-    const order = ["typecheck", "lint", "test", "arch"].map((name) =>
-      (scripts.check as string).indexOf(`run ${name}`),
-    );
+    const order = [
+      "typecheck",
+      "lint",
+      "test",
+      "arch",
+      "check:adr",
+      "check:features",
+    ].map((name) => (scripts.check as string).indexOf(`run ${name}`));
     expect(order.every((i) => i >= 0)).toBe(true);
     expect(order).toEqual([...order].sort((a, b) => a - b));
   });

@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { parse } from "smol-toml";
+import { ALLOWED_ORIGINS } from "./allow-list.ts";
 
 type NetlifyHeaderRule = { for: string; values: Record<string, string> };
 type NetlifyRedirect = {
@@ -18,12 +19,10 @@ export type NetlifyConfig = {
   headers: NetlifyHeaderRule[];
 };
 
-/** ADR 0002: the only origins the app may connect to. */
+/** ADR 0002: the only origins the app may connect to (the list lives in scripts/allow-list.ts). */
 export const CONNECT_SRC_ALLOW_LIST: readonly string[] = [
   "'self'",
-  "https://api.github.com",
-  "https://raw.githubusercontent.com",
-  "https://registry.nextflow.io",
+  ...ALLOWED_ORIGINS,
 ];
 
 type Table = Record<string, unknown>;
