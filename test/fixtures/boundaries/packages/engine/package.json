@@ -1,0 +1,8 @@
+{
+  "name": "@nf-builder/engine",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  }
+}
