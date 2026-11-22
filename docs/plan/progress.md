@@ -423,6 +423,27 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - `.github/workflows/ci.yml` gains a `bench` job, and the `pnpm bench` script is new.
   - First numbers (local): sarek cold open 18.6 s of 30 s; edit p95 271 ms of 100 ms. The cost of re-projection and the double parse is noted in F-702.
   - The bench includes FASTQC under an alias to measure AddCall, since SAREK already calls FASTQC (a process is called once per workflow).
+
+## 2026-11-22 · F-112 · Claude (autonomous)
+- Did:
+  - Pack lint rules behind a lazy `loadLints()`, and an engine diagnoser that combines parse problems, model diagnostics and the rules.
+  - 30 codes, each with lint-recorded fixtures; the 16 lint-origin codes match `nextflow lint` on the fixtures and the whole pinned corpus.
+  - nf-lang wording plus advice; text-edit quick fixes for four codes.
+  - The oracle and the corpus lint cache now record warnings.
+- State: passing.
+- Next: F-113, then F-202 and F-205.
+- Decisions:
+  - [ADR 0042](../adr/0042-diagnostics.md):
+    - rules live in the pack, lazily loaded;
+    - code origins (lint, paranoid, ours) with lint parity;
+    - message style;
+    - `QuickFix { title, path, edits }` sharing F-111's `TextEdit`;
+    - the v0.1 code set;
+    - name-resolution parity deferred, with no new feature.
+  - LA-33 amended: a missing argument (`call-arity`) or a `null` for a typed input that isn't nullable (`null-argument`, ours) is an error, an unused output a warning. LA-31 extended. New LA-37. AR-05 and the architecture sketch updated.
+  - `duplicate-call` (ours) covers upstream bug 24, on the same branch path only (sarek calls a process in two exclusive `if`s; ternaries and `&&`/`||` count as branches too).
+  - Paranoid checks are reported at the spec's severity.
+  - No new dependency; diagnostics are in memory.
 - Blockers: none new.
 
 
@@ -453,6 +474,18 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - A present but broken registry snapshot fails the deploy (the full `check:registry` before upload) until the next good snapshot; only a missing branch is skipped.
   - [ADR 0044](../adr/0044-embeddable-in-frames.md) (maintainer's decision): no frame guard. An embedded copy has partitioned storage, so its own projects. Embedders grant clipboard and other permissions. Notes for F-202 and F-310.
 - Blockers: #35.
+
+## 2026-11-22 · deploy · Claude (autonomous)
+- Did:
+  - The maintainer enabled GitHub Pages and deleted the Netlify site. F-011 merged (PR #37), and the first `Pages` run deployed https://ewels.github.io/nf-builder/.
+    - `verify` confirmed the commit and the meta policy.
+    - A sampled `check:registry --url` against the live site passed.
+    - A `Registry snapshot` run was dispatched to exercise the snapshot-triggered deploy.
+  - F-112 merged (PR #40). M0 and M1 are complete, and 26 of 69 v0.1 features pass.
+- Decisions:
+  - The maintainer asked for the app to work inside iframes, so F-011 dropped its frame guard before merging ([ADR 0044](../adr/0044-embeddable-in-frames.md)).
+- Next: F-202 and F-205 are building; F-203 and F-209 are being planned; F-501 flips after the snapshot-triggered `verify`.
+- Blockers: none. #35 asks whether to use a custom domain (before F-202 ships) and to update the repository homepage.
 
 ## 2026-11-22 · F-202 · Claude (autonomous)
 - Did:

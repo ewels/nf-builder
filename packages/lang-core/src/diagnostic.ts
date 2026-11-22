@@ -1,7 +1,16 @@
-// A diagnostic from the semantic model (AR-05, F-105). In memory only; quick fixes and other sources come with F-112.
+// A diagnostic (AR-05, F-105, F-112). In memory only: plain data that crosses the worker boundary.
 import type { Range } from "./ast/range.ts";
+import type { TextEdit } from "./edit.ts";
 
-export type DiagnosticSeverity = "error" | "warning";
+export type DiagnosticSeverity = "error" | "warning" | "suggestion";
+
+/** A fix that edits one file's text. Offsets belong to the text that was diagnosed. */
+export interface QuickFix {
+  readonly title: string;
+  /** Project-relative POSIX path of the file to edit. */
+  readonly path: string;
+  readonly edits: readonly TextEdit[];
+}
 
 export interface Diagnostic {
   /** Project-relative POSIX path of the file the diagnostic is in. */
@@ -11,4 +20,5 @@ export interface Diagnostic {
   readonly message: string;
   /** A stable identifier, such as `include-target`. */
   readonly code: string;
+  readonly fix?: QuickFix;
 }

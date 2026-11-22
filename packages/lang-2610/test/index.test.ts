@@ -112,3 +112,23 @@ describe("F-105 the pack provides include rules", () => {
       );
   });
 });
+
+describe("F-112 the pack loads its lints lazily", () => {
+  it("F-112 LA-02 ADR-0006 QA-01: the pack loads its lints on demand and imports no lint module statically", async () => {
+    const lints = await entry.pack.loadLints();
+    expect(lints.codes.map((c) => c.code)).toContain("syntax");
+    expect(lints.advise).toBeTypeOf("function");
+    expect(await entry.pack.loadLints()).toBe(lints);
+    const source = readFileSync(
+      new URL("../src/index.ts", import.meta.url),
+      "utf8",
+    );
+    const statics = [
+      ...source.matchAll(
+        /^\s*(?:import|export)\b[^;]*?from\s+["']([^"']+)["']/gms,
+      ),
+    ].map((m) => m[1] as string);
+    for (const spec of statics) expect(spec, spec).not.toMatch(/\.\/lints/);
+    expect(source).toMatch(/import\(["']\.\/lints\/index\.ts["']\)/);
+  });
+});

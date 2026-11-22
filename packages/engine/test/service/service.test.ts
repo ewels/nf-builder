@@ -169,6 +169,36 @@ describe("F-113 engine service", () => {
     expect(applied.workflows.map((w) => w.name)).toEqual([null]);
   });
 
+  it("F-112 F-113 AR-05: diagnostics() returns the pack lint codes and is recomputed after a change", async () => {
+    const service = createEngineService();
+    const legacy = (receiver: string) =>
+      `workflow {\n    ${receiver}.of(1).view()\n}\n`;
+    const summary = await service.open({
+      version,
+      files: [{ path: "main.nf", text: legacy("Channel") }],
+    });
+    const codes = (r: Awaited<ReturnType<typeof service.diagnostics>>) => {
+      if (!("diagnostics" in r)) throw new Error(`refused: ${r.code}`);
+      return r.diagnostics.map((d) => d.code);
+    };
+    const before = await service.diagnostics();
+    expect(codes(before)).toContain("deprecated-channel");
+    expect("revision" in before && before.revision).toBe(summary.revision);
+    const applied = ok(
+      await service.apply(
+        {
+          kind: "replaceFileText",
+          path: "main.nf",
+          text: legacy("channel"),
+        },
+        summary.revision,
+      ),
+    );
+    const after = await service.diagnostics();
+    expect(codes(after)).not.toContain("deprecated-channel");
+    expect("revision" in after && after.revision).toBe(applied.revision);
+  });
+
   it("F-113: a command or patch list built on an older revision is refused as stale", async () => {
     const { service, summary } = await opened();
     const first = ok(await service.apply(addB, summary.revision));

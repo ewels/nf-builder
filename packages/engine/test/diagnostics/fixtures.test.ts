@@ -1,0 +1,218 @@
+import { readFileSync } from "node:fs";
+import type { Diagnostic } from "@nf-builder/lang-core";
+import { describe, expect, it } from "vitest";
+import { loadLints } from "../../src/diagnostics/lints";
+import { applyTextEdits } from "../../src/diagnostics/text-edits";
+import { readTree } from "../model/read-tree";
+import { diagnoseFiles, FIXTURES, fixtureDirs } from "./open";
+
+// The harness is driven by the pack's registry: a code added there is tested here against its fixtures.
+const lints = await loadLints("26.10");
+const codes = lints.codes.filter((c) => c.origin !== "internal");
+const dirs = fixtureDirs();
+
+type Located = { line: number; column: number; message: string };
+const manifest = new Map(
+  (
+    JSON.parse(readFileSync(`${FIXTURES}/../fixtures.json`, "utf8")) as {
+      fixtures: { file: string; lint: Located[]; warnings: Located[] }[];
+    }
+  ).fixtures.map((f) => [f.file, f]),
+);
+/** What `nextflow lint` recorded for the files of one fixture tree. */
+const recorded = (code: string, kind: string, key: "lint" | "warnings") =>
+  [...manifest]
+    .filter(([file]) => file.startsWith(`${code}/${kind}/`))
+    .flatMap(([file, f]) =>
+      f[key].map((e) => ({
+        ...e,
+        path: file.slice(`${code}/${kind}/`.length),
+      })),
+    );
+
+const diagnosed = new Map<string, Promise<readonly Diagnostic[]>>();
+const diagnose = (dir: string) => {
+  let list = diagnosed.get(dir);
+  if (!list) {
+    list = diagnoseFiles(readTree(dir)).then((r) => r.diagnoser.all());
+    diagnosed.set(dir, list);
+  }
+  return list;
+};
+const treeOf = (code: string, kind: string) =>
+  dirs.find((d) => d.code === code && d.kind === kind)?.dir;
+
+/**
+ * How a code's diagnostics are compared with lint's: which lint messages count, and where our message may differ
+ * (paths). A lint-origin code uses its registry `lintPattern` against lint's errors, or its warnings for a warning code.
+ */
+const PARITY: Record<
+  string,
+  { lint: RegExp; cut: string | null; key?: "lint" | "warnings" }
+> = {
+  syntax: { lint: /./, cut: null },
+  "include-target": { lint: /^Invalid include source/, cut: "'" },
+  "include-not-parsed": { lint: /^Module could not be parsed/, cut: "'" },
+  "include-name": { lint: /^Included name/, cut: " in module" },
+};
+for (const c of lints.codes)
+  if (c.origin === "lint" && c.lintPattern)
+    PARITY[c.code] = {
+      lint: c.lintPattern,
+      cut: null,
+      key: c.severity === "error" ? "lint" : "warnings",
+    };
+const VERBS = new Set([
+  "add",
+  "check",
+  "connect",
+  "correct",
+  "create",
+  "define",
+  "enable",
+  "fix",
+  "give",
+  "include",
+  "keep",
+  "make",
+  "migrate",
+  "move",
+  "pass",
+  "publish",
+  "remove",
+  "rename",
+  "rewrite",
+  "set",
+  "start",
+  "use",
+  "write",
+  "finish",
+  "edit",
+  "change",
+  "declare",
+]);
+
+describe("F-112 fixtures", () => {
+  it("F-112 step 1: every fixture directory is a registry code, so no fixture is left untested", () => {
+    const known = new Set(lints.codes.map((c) => c.code));
+    const unregistered = [...new Set(dirs.map((d) => d.code))].filter(
+      (c) => !known.has(c),
+    );
+    expect(unregistered).toEqual([]);
+  });
+
+  for (const { code, severity, fixable, spec, origin } of codes) {
+    it(`F-112 step 1: ${code} has a positive and a negative fixture`, () => {
+      expect(treeOf(code, "positive"), "positive").toBeDefined();
+      expect(treeOf(code, "negative"), "negative").toBeDefined();
+      expect(
+        treeOf(code, "fixed") !== undefined,
+        "fixed only when fixable",
+      ).toBe(fixable);
+    });
+
+    it(`F-112 step 1 ${spec.join(" ")}: ${code} fires on its positive fixture and not on its negative`, async () => {
+      const positive = (
+        await diagnose(treeOf(code, "positive") as string)
+      ).filter((d) => d.code === code);
+      const negative = (
+        await diagnose(treeOf(code, "negative") as string)
+      ).filter((d) => d.code === code);
+      expect(positive.length).toBeGreaterThanOrEqual(1);
+      expect(negative).toEqual([]);
+      for (const d of positive) expect(d.severity).toBe(severity);
+    });
+
+    it(`F-112 step 1 ADR-0005: ${code} matches nextflow lint on the fixtures`, async () => {
+      const ours = (await diagnose(treeOf(code, "positive") as string)).filter(
+        (d) => d.code === code,
+      );
+      const parity = PARITY[code];
+      if (!parity) return; // an own or paranoid code: lint has no counterpart
+      const cut = (m: string): string =>
+        parity.cut ? (m.split(parity.cut)[0] ?? m) : m;
+      const theirs = recorded(code, "positive", parity.key ?? "lint").filter(
+        (e) => parity.lint.test(e.message),
+      );
+      expect(
+        ours.map((d) => `${d.path}:${d.range.line}:${d.range.column}`),
+      ).toEqual(theirs.map((e) => `${e.path}:${e.line}:${e.column}`));
+      ours.forEach((d, i) => {
+        const t = theirs[i];
+        // ours is lint's wording, then advice
+        expect(
+          cut(d.message).startsWith(cut(t?.message ?? "")),
+          d.message,
+        ).toBe(true);
+      });
+    });
+
+    it(`F-112 ADR-0005: ${code}'s severity matches the oracle`, () => {
+      const errors = recorded(code, "positive", "lint");
+      const warnings = recorded(code, "positive", "warnings");
+      // lint accepts a process called twice in one workflow (upstream bug 24), so an own error has no counterpart
+      if (severity === "error" && origin !== "ours")
+        expect(errors.length).toBeGreaterThan(0);
+      else expect(errors).toEqual([]);
+      if (severity === "suggestion") expect(warnings).toEqual([]);
+      for (const kind of ["negative", "fixed"])
+        expect(recorded(code, kind, "lint"), kind).toEqual([]);
+    });
+
+    it(`F-112 step 2: every ${code} message states what to do`, async () => {
+      const ours = (await diagnose(treeOf(code, "positive") as string)).filter(
+        (d) => d.code === code,
+      );
+      const verbatim = lints.codes.find((c) => c.code === code)?.verbatim ?? [];
+      for (const d of ours) {
+        if (verbatim.some((p) => p.test(d.message))) continue;
+        const clause = d.message.split(" -- ")[1];
+        expect(clause, d.message).toBeDefined();
+        expect(
+          VERBS.has((clause as string).split(" ")[0] as string),
+          d.message,
+        ).toBe(true);
+      }
+    });
+
+    if (fixable)
+      it(`F-112 step 2 AR-05: every ${code} diagnostic carries a quick fix, and applying the fixes gives its fixed tree with no ${code} left`, async () => {
+        const dir = treeOf(code, "positive") as string;
+        const list = (await diagnose(dir)).filter((d) => d.code === code);
+        expect(list.length).toBeGreaterThan(0);
+        for (const d of list) expect(d.fix, d.message).toBeDefined();
+        const fixed = readTree(treeOf(code, "fixed") as string);
+        const result = readTree(dir).map((f) => ({
+          path: f.path,
+          text: applyTextEdits(
+            f.text,
+            list.flatMap((d) =>
+              d.path === f.path ? (d.fix?.edits ?? []) : [],
+            ),
+          ),
+        }));
+        expect(result).toEqual(fixed);
+        const after = await diagnose(treeOf(code, "fixed") as string);
+        expect(after.filter((d) => d.code === code)).toEqual([]);
+      });
+    else
+      it(`F-112 step 2: ${code} offers no quick fix`, async () => {
+        const list = (
+          await diagnose(treeOf(code, "positive") as string)
+        ).filter((d) => d.code === code);
+        for (const d of list) expect(d.fix).toBeUndefined();
+      });
+  }
+
+  it("F-112 step 2: the distinct messages of every code are kept in messages.md for review", async () => {
+    const lines: string[] = [];
+    for (const { code } of codes) {
+      const list = await diagnose(treeOf(code, "positive") as string);
+      const messages = [
+        ...new Set(list.filter((d) => d.code === code).map((d) => d.message)),
+      ].sort();
+      lines.push(`## ${code}`, "", ...messages.map((m) => `- ${m}`), "");
+    }
+    await expect(lines.join("\n")).toMatchFileSnapshot("./messages.md");
+  });
+});

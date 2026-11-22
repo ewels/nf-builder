@@ -1,6 +1,13 @@
 // The engine service (F-113): one open project, a revision counter, a projector snapshot per revision and a serial
 // call queue. Pure and DOM-free, so it runs in a worker or in Node; every result is plain data.
-import type { CommandResult, FileText } from "@nf-builder/lang-core";
+import type {
+  Catalogue,
+  CommandResult,
+  FileText,
+  PackLints,
+} from "@nf-builder/lang-core";
+import { createDiagnoser, type Diagnoser } from "../diagnostics/diagnose";
+import { loadLints } from "../diagnostics/lints";
 import {
   applyCommand,
   commit,
@@ -33,7 +40,10 @@ export interface EngineServiceOptions {
 interface Open {
   readonly version: string;
   readonly state: EditState;
+  readonly lints: PackLints;
+  readonly catalogue: Catalogue;
   projector?: Projector;
+  diagnoser?: Diagnoser;
 }
 
 export function createEngineService(
@@ -72,6 +82,17 @@ export function createEngineService(
     return open.projector;
   };
 
+  const diagnoserOf = (open: Open): Diagnoser => {
+    if (!open.diagnoser)
+      open.diagnoser = createDiagnoser({
+        model: open.state.model,
+        projector: projectorOf(open),
+        catalogue: open.catalogue,
+        lints: open.lints,
+      });
+    return open.diagnoser;
+  };
+
   const changed = (
     open: Open,
     files: readonly FileText[],
@@ -79,6 +100,7 @@ export function createEngineService(
   ): ProjectChange => {
     revision += 1;
     open.projector = undefined;
+    open.diagnoser = undefined;
     return {
       revision,
       files,
@@ -112,6 +134,7 @@ export function createEngineService(
           );
         revision += 1;
         open.projector = undefined;
+        open.diagnoser = undefined;
         return refusal(
           "internal",
           `The engine failed unexpectedly while changing the project (${reason}). The project may be partly changed; use the new revision and check its files.`,
@@ -167,7 +190,16 @@ export function createEngineService(
         });
         // progress is advisory and covers the open only; later edits trace through the same hook
         live = undefined;
-        const open: Open = { version: request.version, state };
+        const lints = await loadLints(request.version);
+        const pack = installedPacks.find((p) => p.version === request.version);
+        const catalogue = await pack?.loadCatalogue();
+        if (!catalogue) throw new Error(`No pack for ${request.version}`);
+        const open: Open = {
+          version: request.version,
+          state,
+          lints,
+          catalogue,
+        };
         current = open;
         revision += 1;
         const files = state.model.paths().flatMap((path) => {
@@ -242,7 +274,7 @@ export function createEngineService(
       guarded(
         (open): DiagnosticsResult => ({
           revision,
-          diagnostics: open.state.model.diagnostics(),
+          diagnostics: diagnoserOf(open).all(),
         }),
       ),
 

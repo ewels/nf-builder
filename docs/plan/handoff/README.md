@@ -15,15 +15,17 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-107 legacy projection | merged, PR #36 | |
 | F-108 code nodes | merged, PR #34 | |
 | F-111 edit commands | merged, PR #38 | |
-| F-112 diagnostics | `feat/F-112` | Tasks 1–7 committed; task 8 (calls and types) building. [plan](plan-F-112.md). |
-| F-113 engine worker | `feat/F-113`, in PR | Plan deleted in its PR. |
+| F-112 diagnostics | merged, PR #40 | |
+| F-113 engine worker | merged, PR #39 | |
 | F-202 projects in IndexedDB | `feat/F-202`, in PR | Plan deleted in its PR. |
-| F-205 canvas | not started | [plan](plan-F-205.md). After F-113 (and F-106); parallel with F-202. |
+| F-205 canvas | `feat/F-205` | Tasks 1–3 committed; task 4 building. [plan](plan-F-205.md). |
+| F-203 new project dialog | not started | [plan](plan-F-203.md). After F-202 and F-205. |
 | F-206 details pane | not started | [plan](plan-F-206.md). After F-205. |
 | F-207 layout sidecar | not started | [plan](plan-F-207.md). After F-205 and F-202. |
 | F-208 view modes and Code | not started | [plan](plan-F-208.md). After F-205. |
-| F-501 registry snapshot | merged, PR #29, **not passing** | Passes once the Pages deploy serves `/registry/` and `verify` passes (ADR 0041, F-011). F-502 to F-506, F-702, F-704 and F-705 depend on it. |
-| F-011 GitHub Pages hosting | `feat/F-011`, in PR #37 | Pages enabled by the maintainer; the plan stays (ADR 0040 links it). |
+| F-209 undo and redo | not started | [plan](plan-F-209.md). After F-202, F-205 and F-208. |
+| F-501 registry snapshot | merged, PR #29, **not passing** | Live `/registry/` passes a sampled check; waiting for the dispatched snapshot run's `workflow_run` deploy and `verify`, then flip in a PR. |
+| F-011 GitHub Pages hosting | merged, PR #37 | Live at https://ewels.github.io/nf-builder/; first `verify` passed. |
 
 ## Merge order
 
@@ -70,7 +72,7 @@ Next free ADR number: 0046 (0045 is F-202's).
 ### F-111 (merged with its PR)
 - Accept every recommendation in section 6: declaration-level reprint for workflow commands, identifier edits for renames, item-boundary include inserts; the command model of 2.2 (plain data, ids resolved at apply time, patches with inverses, `commit` separate); AR-24 read as "no problem the file didn't have"; our own LA-13 check (lint accepts positional mixing, upstream-bugs #20) with `ParseProblem.code` tags; `null` placeholders for missing positional inputs; variable introduction names; Connect moves a later source when safe; DeleteNode clears direct arguments; CreateProcess writes `modules/local/<lower>/main.nf` from `LanguagePack.scaffold`; the rename limits; `fast-check` 4.11.0 as an engine dev dependency (ADR 0011). One ADR at landing.
 
-### F-112 — [plan](plan-F-112.md)
+### F-112 (merged with its PR)
 - Accept the recommendations in section 6, except:
   - quick fixes carry text edits (`QuickFix { title, path, edits }`) and become F-111's `ReplaceFileText { path, text }` when applied (the plan's own fallback), so F-111's command shape is unchanged;
   - no new feature for full nf-lang name-resolution and type-check parity: the spec doesn't require it for v0.1, so the deferred checks (point 4's list) are recorded in F-112's notes and ADR.
@@ -157,3 +159,31 @@ Next free ADR number: 0046 (0045 is F-202's).
   - Only the refusal's problems are shown.
   - A clean buffer follows external changes, and a dirty one wins.
   - Step 3 evidence from the Node-side marker test and the budget job.
+
+### F-209 — [plan](plan-F-209.md)
+- Accept every recommendation in section 6:
+  - history lives in the engine worker's service, with `undo`, `redo`, `history` and `apply` options (amends ADR 0043's API);
+  - a group is a sequence of parts under a `group` token, not concatenated inverses, because `applyPatches` refuses two patches to one path;
+  - raw writes clear the history;
+  - limits of 100 steps and 8,000,000 units;
+  - platform shortcuts, with editors keeping their own undo;
+  - controls in the tab strip;
+  - no automatic retry after a stale refusal;
+  - the AR-23 and UX-70 wording;
+  - add F-202 to F-209's `depends_on` and F-209 to F-309's (`scope-change` label in F-209's PR);
+  - full-file byte checks, sidecar included;
+  - node moves stay outside the history.
+
+### F-203 — [plan](plan-F-203.md)
+- Accept every recommendation in section 6:
+  - **Q6 (answer at landing):** v0.1 ships Start blank, Hello world and Samplesheet to MultiQC. The nf-core skeleton and Pipeline composition move to a new M8 feature, "More project templates" (`scope-change`).
+  - **Format:** templates are pack-owned trees with generated `templates.json` (`pnpm gen:templates`), loaded lazily by `loadTemplates()`. Not a stored format.
+  - **Content:**
+    - no substitution and no `manifest.name`;
+    - blank has no output block (lint rejects an empty one);
+    - LA-42 `eval` versions, with the oracle's `run.tools` shims;
+    - Hello world has no `topic:` section;
+    - offline test data under `assets/`.
+  - **Dialog:** Publish docs is carried but does nothing until F-606; Import and the metro checkbox stay out of scope; the header's Templates button opens the dialog on From a template.
+  - **Licence:** template content is dedicated under MIT-0, with a `licences.md` row.
+  - **Checks:** the doc-comment check is test-only until F-311 and F-312; F-207 re-approves the template baselines.

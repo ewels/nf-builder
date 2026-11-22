@@ -29,6 +29,8 @@ export type LintResult = {
   nextflowVersion: string;
   filesChecked: number;
   errors: LintError[];
+  /** Added by F-112; a cache file without it is made again. */
+  warnings: LintError[];
 };
 
 const LINT_CACHE_DIR = `${REPO_ROOT}.cache/corpus-lint`;
@@ -45,6 +47,7 @@ const isRecord = (v: unknown): v is Record<string, unknown> =>
 export function parseLintJson(stdout: string): {
   filesChecked: number;
   errors: LintError[];
+  warnings: LintError[];
 } {
   let json: unknown;
   try {
@@ -62,7 +65,7 @@ export function parseLintJson(stdout: string): {
     typeof filesWithoutErrors !== "number"
   )
     throw new Error("nextflow lint summary has no file counts");
-  const errors = json.errors.map((e: unknown) => {
+  const entry = (e: unknown): LintError => {
     if (
       !isRecord(e) ||
       typeof e.filename !== "string" ||
@@ -77,8 +80,16 @@ export function parseLintJson(stdout: string): {
       startColumn: e.startColumn,
       message: e.message,
     };
-  });
-  return { filesChecked: filesWithErrors + filesWithoutErrors, errors };
+  };
+  const errors = json.errors.map(entry);
+  const warnings = (Array.isArray(json.warnings) ? json.warnings : []).map(
+    entry,
+  );
+  return {
+    filesChecked: filesWithErrors + filesWithoutErrors,
+    errors,
+    warnings,
+  };
 }
 
 /** The JSON `nextflow lint -format -o json` prints: the lint summary and errors, and how many files it rewrote. */
@@ -87,7 +98,7 @@ export function parseFormatJson(stdout: string): {
   filesFormatted: number;
   errors: LintError[];
 } {
-  const lint = parseLintJson(stdout);
+  const { warnings: _warnings, ...lint } = parseLintJson(stdout);
   const summary = (JSON.parse(stdout) as { summary: Record<string, unknown> })
     .summary;
   if (typeof summary.filesFormatted !== "number")
@@ -271,7 +282,7 @@ const tail = (text: string): string =>
 export function lintDir(
   launcher: string,
   dir: string,
-): { filesChecked: number; errors: LintError[] } {
+): { filesChecked: number; errors: LintError[]; warnings: LintError[] } {
   const run = spawnSync(launcher, ["lint", "-o", "json", "."], {
     cwd: dir,
     encoding: "utf8",
@@ -292,6 +303,16 @@ export function lintDir(
   throw new Error(
     `nextflow lint exited with ${run.status} in ${dir}\nstderr tail:\n${tail(run.stderr)}`,
   );
+}
+
+/** Whether a cached lint result records warnings (F-112); an older file has none and is linted again. */
+export function hasWarnings(file: string): boolean {
+  try {
+    const cached: unknown = JSON.parse(readFileSync(file, "utf8"));
+    return isRecord(cached) && Array.isArray(cached.warnings);
+  } catch {
+    return false;
+  }
 }
 
 /** Whether a cached comment dump has the current format (see `CommentDumpResult`). */
@@ -387,7 +408,7 @@ export function lintCorpus(o: {
       (!o.force &&
         isCached(commentsFile, t.sha, version) &&
         hasFormat(commentsFile));
-    if (!o.force && isCached(file, t.sha, version)) {
+    if (!o.force && isCached(file, t.sha, version) && hasWarnings(file)) {
       results.push(JSON.parse(readFileSync(file, "utf8")) as LintResult);
       o.log(`corpus-lint: ${t.id} up to date`);
       if (!commentsCached)
@@ -406,7 +427,7 @@ export function lintCorpus(o: {
     writeFileSync(file, `${JSON.stringify(result, null, 2)}\n`);
     results.push(result);
     o.log(
-      `corpus-lint: ${t.id}: ${lint.filesChecked} files, ${lint.errors.length} errors (${((Date.now() - started) / 1000).toFixed(1)} s)`,
+      `corpus-lint: ${t.id}: ${lint.filesChecked} files, ${lint.errors.length} errors, ${lint.warnings.length} warnings (${((Date.now() - started) / 1000).toFixed(1)} s)`,
     );
     if (commentsFor) writeComments(o.launcher, t, version, commentsFile, o.log);
     if (formatTarget) writeFormat(o.launcher, t, version, o.force, o.log);
