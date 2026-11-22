@@ -3,14 +3,9 @@ import { openProject } from "../../src/model/project";
 import { installedPacks, installedPackVersions } from "../../src/packs";
 import { createProjector, type Projector } from "../../src/projection/project";
 import { readTree } from "../model/read-tree";
+import { stripProbes } from "./probes";
 
 const version = installedPackVersions()[0] as string;
-
-/** The fixture tree's probe lines (`def probeN: Boolean = <expr>`) are type reveals for the oracle, not workflow code. */
-const PROBE = /^\s*def probe\d+: Boolean = .*\n/gm;
-
-export const stripProbeLines = (text: string): string =>
-  text.replace(PROBE, "");
 
 export function openFiles(files: ProjectFile[]): Promise<ProjectModel> {
   return openProject(version, files);
@@ -22,7 +17,7 @@ export function openTree(
   options: { stripProbes?: boolean } = {},
 ): Promise<ProjectModel> {
   const files = readTree(dir).map((f) =>
-    options.stripProbes ? { ...f, text: stripProbeLines(f.text) } : f,
+    options.stripProbes ? { ...f, text: stripProbes(f.text).text } : f,
   );
   return openFiles(files);
 }

@@ -1,0 +1,59 @@
+workflow main.nf# typed
+main.nf#/:params params "params" @8:1
+  out samples (samples): Channel<Sample>
+  out fasta (fasta): Path
+  out names (names): List<String>
+main.nf#/:code@1 code "log.info "fasta: ${params.fasta}"" @16:5
+main.nf#/prepared call "PREPARE" callee=PREPARE:workflow:modelled:typed @17:16
+  in samples (samples): Channel<Sample>
+    <- main.nf#/:params[samples] Channel<Sample> via params.samples
+  in fasta (fasta): Path
+    <- main.nf#/:params[fasta] Path via params.fasta
+  out bams (bams): Channel<Path>
+  out logs (logs): Channel<String>
+  out index (index): Value<Path>
+main.nf#/counts call "LEGACY_COUNT" callee=LEGACY_COUNT:process:modelled:legacy @18:14
+  in $1 ($1): -
+    <- main.nf#/prepared[bams] Channel<Path> via prepared.bams
+  out out (out): -
+main.nf#/ch_names factory "channel.fromList" factory=channel.fromList @19:16
+  out out (out): Channel<?>
+main.nf#/channel.of@1 factory "channel.of" factory=channel.of @20:29
+  out out (out): Channel<String>
+main.nf#/ch_names~2 chain ".mix" steps=mix @20:16
+  in in (in): -
+    <- main.nf#/ch_names[out] Channel<?> via ch_names
+  in 1:1 (mix(other)): -
+    <- main.nf#/channel.of@1[out] Channel<String>
+  out out (out): Channel<?>
+main.nf#/.view@1 chain ".view" steps=view @21:5
+  in in (in): -
+    <- main.nf#/ch_names~2[out] Channel<?> via ch_names
+  out out (out): Channel<?>
+main.nf#/sub call "SUB" callee=SUB:pipeline:modelled:typed @22:11
+  in input (input): Channel<String>
+    <- main.nf#/ch_names~2[out] Channel<?> via ch_names
+  out upper (upper): Channel<String>
+main.nf#/report code "report = file('report.html')" @23:5
+  out report (report): Path
+main.nf#/joined chain ".filter.combine" steps=filter,combine @24:14
+  in in (in): -
+    <- main.nf#/prepared[bams] Channel<Path> via prepared.bams
+  in 2:1 (combine(fields)): -
+    <- main.nf#/prepared[index] Value<Path> via prepared.index
+  out out (out): Channel<Record>
+main.nf#/answers call "QA" callee=QA:agent:modelled:typed @28:15
+  in question (question): String
+    <- main.nf#/ch_names~2[out] Channel<?> via ch_names
+  out out (out): Channel<String>
+main.nf#/single call "QA" callee=QA:agent:modelled:typed @29:14
+  in question (question): String
+    = 'how?' : String
+  out out (out): Value<String>
+main.nf#/:output output "output" @37:1
+  in bams (bams): Channel<Path>
+    <- main.nf#/prepared[bams] Channel<Path> via prepared.bams
+  in report (report): Path
+    <- main.nf#/report[report] Path via report
+  in upper (upper): Channel<String>
+    <- main.nf#/sub[upper] Channel<String> via sub

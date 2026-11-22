@@ -1,0 +1,29 @@
+workflow subworkflows/local/prepare/main.nf#PREPARE typed
+subworkflows/local/prepare/main.nf#PREPARE/:take:samples take "samples" @12:5
+  out out (out): Channel<Sample>
+subworkflows/local/prepare/main.nf#PREPARE/:take:fasta take "fasta" @13:5
+  out out (out): Path
+subworkflows/local/prepare/main.nf#PREPARE/index call "INDEX" callee=INDEX:process:modelled:typed @16:13
+  in fasta (fasta): Path
+    <- subworkflows/local/prepare/main.nf#PREPARE/:take:fasta[out] Path via fasta
+  out out (out): Value<Path>
+subworkflows/local/prepare/main.nf#PREPARE/aligned call "ALIGN" callee=ALIGN:process:modelled:typed @17:15
+  in $1 (record(id, reads)): Record
+    <- subworkflows/local/prepare/main.nf#PREPARE/:take:samples[out] Channel<Sample> via samples
+  in index (index): Path
+    <- subworkflows/local/prepare/main.nf#PREPARE/index[out] Value<Path> via index
+  out bam (bam): Channel<Path>
+  out log (log): Channel<String>
+subworkflows/local/prepare/main.nf#PREPARE/bams chain ".map" steps=map @18:12
+  in in (in): -
+    <- subworkflows/local/prepare/main.nf#PREPARE/aligned[bam] Channel<Path> via aligned.bam
+  out out (out): Channel<?>
+subworkflows/local/prepare/main.nf#PREPARE/:emit:bams emit "bams" @21:5
+  in in (in): Channel<Path>
+    <- subworkflows/local/prepare/main.nf#PREPARE/bams[out] Channel<?> via bams
+subworkflows/local/prepare/main.nf#PREPARE/:emit:logs emit "logs" @22:5
+  in in (in): -
+    <- subworkflows/local/prepare/main.nf#PREPARE/aligned[log] Channel<String> via aligned.log
+subworkflows/local/prepare/main.nf#PREPARE/:emit:index emit "index" @23:5
+  in in (in): -
+    <- subworkflows/local/prepare/main.nf#PREPARE/index[out] Value<Path> via index

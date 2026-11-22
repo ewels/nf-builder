@@ -1,0 +1,10 @@
+workflow workflow-typed.nf#greet typed
+workflow-typed.nf#greet/:take:greetings take "greetings" @5:5
+  out out (out): Channel<String>
+workflow-typed.nf#greet/messages chain ".map" steps=map @8:16
+  in in (in): -
+    <- workflow-typed.nf#greet/:take:greetings[out] Channel<String> via greetings
+  out out (out): Channel<?>
+workflow-typed.nf#greet/:emit:messages emit "messages" @11:5
+  in in (in): Channel<String>
+    <- workflow-typed.nf#greet/messages[out] Channel<?> via messages

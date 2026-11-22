@@ -288,7 +288,11 @@ class Projecting {
 
   #addOutput(node: WorkflowNode): void {
     const publishers = node.kind === "Workflow" ? node.publishers : null;
-    const block = this.#fileAst()?.body.find((i) => i.kind === "OutputBlock");
+    // the output block belongs to the entry workflow; a named workflow has an output node only if it publishes
+    const block =
+      this.ref.name === null
+        ? this.#fileAst()?.body.find((i) => i.kind === "OutputBlock")
+        : undefined;
     if (block === undefined && publishers === null) return;
     const specs: PortSpec[] = [];
     for (const o of block?.outputs ?? [])

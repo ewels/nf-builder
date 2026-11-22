@@ -1,0 +1,19 @@
+workflow main.nf# typed
+main.nf#/channel.fromPath@1 factory "channel.fromPath" factory=channel.fromPath @16:16
+  out out (out): Channel<Path>
+main.nf#/ch_reads chain ".map" steps=map @16:16
+  in in (in): -
+    <- main.nf#/channel.fromPath@1[out] Channel<Path>
+  out out (out): Channel<?>
+main.nf#/legacy_out call "LEGACY_COUNT" callee=LEGACY_COUNT:process:modelled:legacy @18:18
+  in $1 ($1): -
+    <- main.nf#/ch_reads[out] Channel<?> via ch_reads
+  out out (out): -
+main.nf#/.view@1 chain ".view" steps=view @19:5
+  in in (in): -
+    <- main.nf#/legacy_out[out] ? via legacy_out indirect
+  out out (out): ?
+main.nf#/.view@2 chain ".view" steps=view @20:5
+  in in (in): -
+    <- main.nf#/legacy_out[out] ? via legacy_out indirect
+  out out (out): ?

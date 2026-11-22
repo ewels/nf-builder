@@ -487,6 +487,17 @@ describe("F-106 AR-10 LA-20 projector", () => {
     expect(ports(node(p, "main.nf#/a"), "inputs")).toEqual(["$1", "$2"]);
   });
 
+  it("F-106 LA-26: the output block feeds only the entry workflow's output node; a named workflow has none (publish is entry-only)", async () => {
+    const p = await projectorForFiles({
+      "main.nf":
+        "nextflow.enable.types = true\n\nworkflow PLAIN {\n    main:\n    x = channel.of(1)\n}\n\nworkflow {\n    main:\n    y = channel.of(1)\n}\n\noutput {\n    x: Channel<Integer> {\n        path 'x'\n    }\n}\n",
+    });
+    const kinds = (name: string | null) =>
+      must(p, "main.nf", name).nodes.map((n) => n.kind);
+    expect(kinds("PLAIN")).not.toContain("output");
+    expect(kinds(null)).toContain("output");
+  });
+
   it("F-106 AR-10 ADR-0004: every main statement is one top node or one code node, every emit an emit node, every publish item an edge or port of the output node", () => {
     for (const ref of projector.workflows()) {
       const p = projector.project(ref.path, ref.name);

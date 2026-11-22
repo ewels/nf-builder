@@ -1,0 +1,10 @@
+workflow output-block.nf# typed
+output-block.nf#/samples factory "channel.of" factory=channel.of @10:15
+  out out (out): Channel<Record>
+output-block.nf#/summary_report code "summary_report = file('report.html')" @11:5
+  out summary_report (summary_report): Path
+output-block.nf#/:output output "output" @18:1
+  in samples (samples): Channel<Sample>
+    <- output-block.nf#/samples[out] Channel<Record> via samples
+  in summary_report (summary_report): Path
+    <- output-block.nf#/summary_report[summary_report] Path via summary_report
