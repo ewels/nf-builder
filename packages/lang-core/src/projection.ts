@@ -71,6 +71,8 @@ interface NodeShape<K extends GraphNodeKind> {
   readonly inputs: readonly Port[];
   readonly outputs: readonly Port[];
   readonly range: Range;
+  /** The `if` branches the node sits in, outer to inner (F-107); empty at the top level. */
+  readonly guards: readonly Guard[];
 }
 
 export interface CallNode extends NodeShape<"call"> {

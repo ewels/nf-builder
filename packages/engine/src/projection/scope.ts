@@ -38,12 +38,20 @@ function selectPorts(
   return picked === undefined ? [] : [picked];
 }
 
+/** The values of several lists, once per node (a node's ports are those of its first appearance). */
+function unionValues(lists: readonly (readonly Value[])[]): Value[] {
+  const seen = new Map<string, Value>();
+  for (const value of lists.flat())
+    if (!seen.has(value.node)) seen.set(value.node, value);
+  return [...seen.values()];
+}
+
 export class WorkflowScope {
   readonly #bindings = new Map<string, readonly Value[]>();
   /** Legacy `.out` (F-107): the calls that can reach this point, by callee name. */
   readonly #calls = new Map<string, readonly Value[]>();
   /** Legacy `runner = PROC`: a variable that stands for a callee. */
-  readonly #aliases = new Map<string, string>();
+  readonly #aliases = new Map<string, readonly string[]>();
 
   /** The values `name` is bound to; none when it isn't bound. */
   lookup(name: string): readonly Value[] {
@@ -61,22 +69,80 @@ export class WorkflowScope {
     this.#calls.set(callee, [value]);
   }
 
-  /** `name = CALLEE`: `name` stands for a callee, and no value. */
-  bindAlias(name: string, callee: string): void {
+  /** `name = CALLEE`: `name` stands for these callees (several after an `if`), and no value. */
+  bindAlias(name: string, callees: readonly string[]): void {
     this.#bindings.set(name, []);
-    this.#aliases.set(name, callee);
+    this.#aliases.set(name, callees);
   }
 
-  /** The callee `name` stands for: itself, or the one it aliases; null when it is a bound variable. */
-  calleeOf(name: string): string | null {
-    if (this.lookup(name).length > 0) return null;
-    return this.#aliases.get(name) ?? name;
+  /** The callees `name` stands for: itself, or the ones it aliases; none when it is a bound variable. */
+  calleesOf(name: string): readonly string[] {
+    if (this.lookup(name).length > 0) return [];
+    return this.#aliases.get(name) ?? [name];
   }
 
-  /** The calls of the callee `name` stands for that reach this point. */
+  /** The calls of the callees `name` stands for that reach this point. */
   callsOf(name: string): readonly Value[] {
-    const callee = this.calleeOf(name);
-    return callee === null ? [] : (this.#calls.get(callee) ?? []);
+    return unionValues(
+      this.calleesOf(name).map((c) => this.#calls.get(c) ?? []),
+    );
+  }
+
+  /** A copy to project one branch of an `if` in. */
+  fork(): WorkflowScope {
+    const copy = new WorkflowScope();
+    for (const [k, v] of this.#bindings) copy.#bindings.set(k, v);
+    for (const [k, v] of this.#calls) copy.#calls.set(k, v);
+    for (const [k, v] of this.#aliases) copy.#aliases.set(k, v);
+    return copy;
+  }
+
+  /**
+   * After an `if`: each name holds every value any branch end gives it, and this scope's own when the branches
+   * aren't exhaustive (no `else`). Calls and callee aliases are joined the same way.
+   */
+  join(ends: readonly WorkflowScope[], exhaustive: boolean): void {
+    const all = exhaustive ? ends : [...ends, this.fork()];
+    const joined = <T>(
+      table: (s: WorkflowScope) => Map<string, readonly T[]>,
+      merge: (all: T[]) => readonly T[],
+    ): Map<string, readonly T[]> => {
+      const out = new Map<string, readonly T[]>();
+      const names = new Set(all.flatMap((s) => [...table(s).keys()]));
+      for (const name of names)
+        out.set(name, merge(all.flatMap((s) => table(s).get(name) ?? [])));
+      return out;
+    };
+    const bindings = joined(
+      (s) => s.#bindings,
+      (l) => unionValues([l]),
+    );
+    const calls = joined(
+      (s) => s.#calls,
+      (l) => unionValues([l]),
+    );
+    const aliases = joined(
+      (s) => s.#aliases as Map<string, readonly string[]>,
+      (l) => [...new Set(l)],
+    );
+    this.#bindings.clear();
+    this.#calls.clear();
+    this.#aliases.clear();
+    for (const [k, v] of bindings) this.#bindings.set(k, v);
+    for (const [k, v] of calls) this.#calls.set(k, v);
+    for (const [k, v] of aliases) this.#aliases.set(k, v);
+  }
+
+  /** Gives each of `names` the binding it has in `from` (a `def` local to a branch goes out of scope). */
+  restore(names: Iterable<string>, from: WorkflowScope): void {
+    for (const name of names) {
+      const values = from.#bindings.get(name);
+      if (values === undefined) this.#bindings.delete(name);
+      else this.#bindings.set(name, values);
+      const aliases = from.#aliases.get(name);
+      if (aliases === undefined) this.#aliases.delete(name);
+      else this.#aliases.set(name, aliases);
+    }
   }
 
   /** Gives every binding of the node `id` the extra output `port` (a legacy callee's `.out` selection on demand). */
@@ -119,7 +185,7 @@ export class WorkflowScope {
    * single-output value). Null when `name` is unbound or has no outputs.
    */
   resolveRead(read: ReadPath): ResolvedRead | null {
-    if (read.properties[0] === "out" && this.calleeOf(read.name) !== null) {
+    if (read.properties[0] === "out" && this.calleesOf(read.name).length > 0) {
       const named = read.properties[1];
       const byName =
         named === undefined ? null : this.resolveOut(read.name, named);

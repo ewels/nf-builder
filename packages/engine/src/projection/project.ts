@@ -11,6 +11,8 @@ import type {
   FlowType,
   GraphEdge,
   GraphNode,
+  Guard,
+  IfStatement,
   IncludableDeclaration,
   LegacyOperator,
   MethodCall,
@@ -30,6 +32,7 @@ import type {
 import type { Binding } from "../model/file-model";
 import type { ProjectModel } from "../model/project";
 import { buildCodeNode } from "./code";
+import { branchesOf } from "./conditional";
 import { inlineType } from "./inline";
 import { KeyAllocator } from "./keys";
 import {
@@ -221,14 +224,24 @@ function readFeed(range: Range, read: ReadPath, resolved: ResolvedRead): Feed {
   };
 }
 
+/** A node as the projector builds it: its guards are added when the projection is finished. */
+type PendingNode<N = GraphNode> = N extends unknown ? Omit<N, "guards"> : never;
+
 class Projecting {
-  readonly #nodes: GraphNode[] = [];
-  readonly #edges = new Map<string, GraphEdge>();
-  readonly #scope = new WorkflowScope();
+  #nodes: PendingNode[] = [];
+  #edges = new Map<string, GraphEdge>();
+  #scope = new WorkflowScope();
+  /** The `if` branches around the statement being projected, and the guards of each node. */
+  #guardStack: Guard[] = [];
+  #guards = new Map<string, readonly Guard[]>();
   readonly #keys: KeyAllocator;
   readonly #statements: ProjectedStatement[] = [];
   /** The names the statement being projected has bound. */
   #bound: string[] = [];
+  /** Whether the statement being projected bound a graph value (an alias, a call result) or made a non-code node. */
+  #flowed = false;
+  /** How many statements so far made dataflow, counted by the `if` being tried. */
+  #flowedStatements = 0;
 
   constructor(
     private readonly model: ProjectModel,
@@ -270,7 +283,9 @@ class Projecting {
     this.#addOutput(node);
     return {
       workflow: this.ref,
-      nodes: this.#nodes,
+      nodes: this.#nodes.map(
+        (n) => ({ ...n, guards: this.#guards.get(n.id) ?? [] }) as GraphNode,
+      ),
       edges: this.#sortedEdges(),
       statements: this.#statements,
     };
@@ -395,20 +410,111 @@ class Projecting {
 
   #statement(statement: Statement): void {
     if (statement.kind === "EmptyStatement") return;
+    if (statement.kind === "If" && this.#transparentIf(statement)) return;
     const before = this.#nodes.length;
     this.#bound = [];
+    this.#flowed = false;
+    const guards = [...this.#guardStack];
     this.#project(statement);
+    this.#tag(before);
     const created = this.#nodes.slice(before);
+    if (this.#flowed || created.some((n) => n.kind !== "code"))
+      this.#flowedStatements += 1;
     this.#statements.push({
       range: statement.range,
       nodes: created.map((n) => n.id),
       binds: this.#bound,
       modelled: !created.some((n) => n.kind === "code"),
-      guards: [],
+      guards,
     });
   }
 
+  /** Gives the nodes made since `from` that have no guards yet the current ones. */
+  #tag(from: number): void {
+    for (const n of this.#nodes.slice(from))
+      if (!this.#guards.has(n.id))
+        this.#guards.set(n.id, [...this.#guardStack]);
+  }
+
+  /** Runs `fn` inside a branch: the nodes it makes carry the guard. */
+  #guarded<T>(guard: Guard, fn: () => T): T {
+    const from = this.#nodes.length;
+    this.#guardStack.push(guard);
+    try {
+      return fn();
+    } finally {
+      this.#tag(from);
+      this.#guardStack.pop();
+    }
+  }
+
+  /** Puts everything the projector has built back as it is now, for a branch that turns out not to be dataflow. */
+  #checkpoint(): () => void {
+    const nodes = [...this.#nodes];
+    const edges = new Map(this.#edges);
+    const scope = this.#scope.fork();
+    const guards = new Map(this.#guards);
+    const statements = this.#statements.length;
+    const keys = this.#keys.checkpoint();
+    return () => {
+      this.#nodes = nodes;
+      this.#edges = edges;
+      this.#scope = scope;
+      this.#guards = guards;
+      this.#statements.length = statements;
+      keys();
+    };
+  }
+
+  /**
+   * An `if` with dataflow in a branch is transparent: its branch statements are projected in order, each carrying
+   * the branch guards, and each branch starts from the bindings before the `if`. After it, a name holds the
+   * definitions of every branch end (and the earlier one without an `else`). An `if` with no dataflow in it is
+   * left to be one code node. False in that case.
+   */
+  #transparentIf(statement: IfStatement): boolean {
+    const undo = this.#checkpoint();
+    const flowed = this.#flowedStatements;
+    this.#flowedStatements = 0;
+    this.#ifBranches(statement);
+    const found = this.#flowedStatements > 0;
+    this.#flowedStatements = flowed + (found ? 1 : 0);
+    if (!found) undo();
+    return found;
+  }
+
+  #ifBranches(statement: IfStatement): void {
+    const incoming = this.#scope;
+    const ends: WorkflowScope[] = [];
+    const branch = (body: Statement, which: "then" | "else") => {
+      const scope = incoming.fork();
+      this.#scope = scope;
+      const items = body.kind === "Block" ? body.statements : [body];
+      this.#guarded(
+        { condition: statement.condition.range, branch: which },
+        () => {
+          for (const item of items) this.#statement(item);
+        },
+      );
+      // a `def` in a branch is local to it
+      scope.restore(
+        items.flatMap((i) =>
+          i.kind === "VariableDeclaration" && i.def
+            ? i.targets.map((t) => t.name.name)
+            : [],
+        ),
+        incoming,
+      );
+      ends.push(scope);
+    };
+    branch(statement.consequent, "then");
+    if (statement.alternate !== null) branch(statement.alternate, "else");
+    this.#scope = incoming;
+    incoming.join(ends, statement.alternate !== null);
+  }
+
   #bindValues(name: string, values: readonly Value[]): void {
+    if (values.length > 0) this.#flowed = true;
     this.#scope.bind(name, values);
     this.#bound.push(name);
   }
@@ -498,6 +604,7 @@ class Projecting {
       return true;
     }
     if (variable === null) return false;
+    if (this.#conditionalValue(e, variable)) return true;
     // `runner = PROC`: the variable stands for a process or workflow (legacy only)
     if (
       this.#legacy &&
@@ -505,8 +612,9 @@ class Projecting {
       this.#scope.lookup(e.name).length === 0 &&
       this.#callableByName(e.name) !== null
     ) {
-      this.#scope.bindAlias(variable, this.#scope.calleeOf(e.name) ?? e.name);
+      this.#scope.bindAlias(variable, this.#scope.calleesOf(e.name));
       this.#bound.push(variable);
+      this.#flowed = true;
       return true;
     }
     // an assignment of a graph reference creates no node
@@ -1098,6 +1206,53 @@ class Projecting {
     }
     if (set !== null) this.#bindValues(set, current);
     return current;
+  }
+
+  /** What a branch of a ternary or elvis expression stands for: dataflow, a graph reference, or neither. */
+  #branchKind(e: Expression): "dataflow" | "reference" | "other" {
+    const x = unwrap(e);
+    if (this.#isPipe(x) || this.#isDataflow(x) || this.#isOutputOfCall(x))
+      return "dataflow";
+    const ref = this.#reference(x);
+    if (ref !== null && ref.resolved.consumed === ref.read.properties.length)
+      return "reference";
+    return "other";
+  }
+
+  /**
+   * `x = c ? A : B` and `x = a ?: b`, where a branch is dataflow or a graph reference and the others read no graph
+   * value: dataflow branches become nodes guarded by the condition (the first keyed `x`, the next `x~2`), and `x`
+   * is bound to every branch's values. False for any other expression.
+   */
+  #conditionalValue(e: Expression, variable: string): boolean {
+    const branches = branchesOf(e);
+    if (branches === null) return false;
+    const kinds = branches.map((b) => this.#branchKind(b.expression));
+    if (!kinds.some((k) => k !== "other")) return false;
+    const readsNothing = branches.every(
+      (b, i) =>
+        kinds[i] !== "other" ||
+        variablesRead(b.expression, { closures: false }).every(
+          (r) => this.#scope.resolveRead(r) === null,
+        ),
+    );
+    if (!readsNothing) return false;
+    const values: Value[] = [];
+    branches.forEach((b, i) => {
+      const x = unwrap(b.expression);
+      if (kinds[i] === "other") return;
+      this.#guarded(b.guard, () => {
+        if (kinds[i] === "reference") {
+          const ref = this.#reference(x);
+          if (ref !== null) values.push(...this.#valuesOf(ref.resolved));
+        } else if (this.#isPipe(x))
+          values.push(...this.#pipe(x as BinaryExpr, variable));
+        else if (this.#isDataflow(x)) values.push(this.#build(x, variable));
+        else values.push((this.#nested(x) as { value: Value }).value);
+      });
+    });
+    this.#bindValues(variable, values);
+    return true;
   }
 
   /**

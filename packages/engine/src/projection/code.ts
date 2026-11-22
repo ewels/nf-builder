@@ -48,7 +48,7 @@ export function buildCodeNode(
   statement: Statement,
   context: CodeContext,
 ): {
-  readonly node: CodeNode;
+  readonly node: Omit<CodeNode, "guards">;
   readonly edges: readonly GraphEdge[];
   readonly writes: readonly PortSpec[];
 } {
@@ -96,7 +96,7 @@ export function buildCodeNode(
 
   const source = text.slice(statement.range.start, statement.range.end);
   const line = (source.split("\n").find((l) => l.trim() !== "") ?? "").trim();
-  const node: CodeNode = {
+  const node: Omit<CodeNode, "guards"> = {
     id,
     kind: "code",
     label:
