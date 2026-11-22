@@ -1,5 +1,19 @@
 import { expect, type Page, test } from "@playwright/test";
 import { canvasReady, openFixture, openWorkflow } from "./canvas.ts";
+import {
+  appendToLine,
+  canvasIds,
+  editor,
+  F208_AFTER,
+  F208_BEFORE,
+  fileText,
+  GREETED_LINE,
+  insertAfterLine,
+  lineNumberOf,
+  openCodeFixture,
+  readFileIn,
+} from "./code-view.ts";
+import { createProjectInUi, switcher } from "./projects.ts";
 
 const mode = (page: Page) => page.locator("#canvas-panel");
 const radio = (page: Page, name: string) =>
@@ -74,4 +88,134 @@ test("F-208 step 1 UX-70: G, S and C switch the mode; the same letters typed int
   await page.keyboard.type("gsc");
   await expect(search).toHaveValue("gsc");
   await expect(mode(page)).toHaveAttribute("data-view-mode", "graph");
+});
+
+const syncStatus = (page: Page) => page.locator(".code-pane-status");
+
+async function openSplit(page: Page): Promise<void> {
+  await page.goto("./");
+  await openCodeFixture(page);
+  await canvasReady(page);
+  await radio(page, "Split").click();
+  await expect(editor(page)).toBeVisible();
+}
+
+test("F-208 step 2 UX-27: in Split mode a valid edit updates the graph", async ({
+  page,
+}) => {
+  await openSplit(page);
+  const before = await canvasIds(page);
+  const line = lineNumberOf(F208_BEFORE, GREETED_LINE);
+  await insertAfterLine(page, line, "shouted = SHOUT(greeted)");
+  await expect(page.locator(".react-flow__node")).toHaveCount(
+    before.length + 1,
+  );
+  const added = (await canvasIds(page)).filter((id) => !before.includes(id));
+  expect(added).toEqual(["main.nf#/shouted"]);
+  await expect(syncStatus(page)).toHaveAttribute("data-sync", "idle");
+  await expect(page.getByRole("contentinfo")).toContainText(
+    `${before.length + 1} nodes`,
+  );
+  expect(await readFileIn(page, "main.nf")).toBe(fileText(F208_AFTER));
+});
+
+test("F-208 step 2 AR-24 ADR-0039: an invalid edit shows a diagnostic and leaves the graph unchanged", async ({
+  page,
+}) => {
+  await openSplit(page);
+  const ids = await canvasIds(page);
+  const original = fileText(F208_BEFORE);
+  const line = lineNumberOf(F208_BEFORE, GREETED_LINE);
+  await appendToLine(page, line, " )");
+  await expect(syncStatus(page)).toHaveAttribute("data-sync", "refused");
+  await expect(syncStatus(page)).toContainText("Not applied");
+  await expect(syncStatus(page)).toContainText(
+    "The graph shows the last version that parsed.",
+  );
+  await expect(page.locator(".squiggly-error").first()).toBeVisible();
+  expect(await canvasIds(page)).toEqual(ids);
+  expect(await readFileIn(page, "main.nf")).toBe(original);
+  // removing the token makes the text parse again, and the diagnostic goes
+  await page.keyboard.press("Backspace");
+  await page.keyboard.press("Backspace");
+  await expect(syncStatus(page)).toHaveAttribute("data-sync", "idle");
+  await expect(page.locator(".squiggly-error")).toHaveCount(0);
+  expect(await canvasIds(page)).toEqual(ids);
+});
+
+test("F-208 UX-27: an engine-side change to the file updates an editor with no pending edit", async ({
+  page,
+}) => {
+  await openSplit(page);
+  await expect(editor(page)).not.toContainText("SHOUT(greeted)");
+  await page.evaluate(async (text) => {
+    const hook = (
+      window as unknown as {
+        nfBuilderWorkspace: {
+          apply(command: unknown): Promise<{ ok: boolean }>;
+        };
+      }
+    ).nfBuilderWorkspace;
+    const outcome = await hook.apply({
+      kind: "replaceFileText",
+      path: "main.nf",
+      text,
+    });
+    if (!outcome.ok) throw new Error("the change was refused");
+  }, fileText(F208_AFTER));
+  // Monaco draws only the lines in view, so scroll to the end of the file
+  await page.locator(".monaco-editor .view-lines").click();
+  await page.keyboard.press("ControlOrMeta+End");
+  await expect(editor(page)).toContainText("SHOUT(greeted)");
+  await expect(syncStatus(page)).toHaveAttribute("data-sync", "idle");
+});
+
+test("F-208 IO-01: a Code view edit survives a reload", async ({ page }) => {
+  await page.goto("./");
+  await expect(switcher(page)).toBeEnabled();
+  await createProjectInUi(page, "Code edit");
+  await page.evaluate(async (text) => {
+    const engine = (
+      window as unknown as {
+        nfBuilderEngine: {
+          writeFiles(files: { path: string; text: string }[]): Promise<unknown>;
+        };
+      }
+    ).nfBuilderEngine;
+    await engine.writeFiles([{ path: "main.nf", text }]);
+  }, fileText(F208_BEFORE));
+  await canvasReady(page);
+  await radio(page, "Code").click();
+  await expect(editor(page)).toBeVisible();
+  const line = lineNumberOf(F208_BEFORE, GREETED_LINE);
+  await insertAfterLine(page, line, "shouted = SHOUT(greeted)");
+  await expect(syncStatus(page)).toHaveAttribute("data-sync", "idle");
+  await expect(page.getByRole("banner").locator(".save-state")).toHaveText(
+    "Saved",
+  );
+  await page.reload();
+  await canvasReady(page);
+  await expect
+    .poll(() => readFileIn(page, "main.nf"))
+    .toBe(fileText(F208_AFTER));
+});
+
+test("F-208 step 5 UX-27: Nextflow highlighting gives a keyword and an identifier different token classes", async ({
+  page,
+}) => {
+  await openSplit(page);
+  const tokenClass = async (text: string) =>
+    page
+      .locator(".monaco-editor .view-line span[class^='mtk']")
+      .filter({ hasText: new RegExp(`^${text}$`) })
+      .first()
+      .getAttribute("class");
+  await expect(
+    page.locator(".monaco-editor .view-line span[class^='mtk']").first(),
+  ).toBeVisible();
+  const keyword = await tokenClass("process");
+  const identifier = await tokenClass("name");
+  expect(keyword).not.toBeNull();
+  expect(identifier).not.toBeNull();
+  expect(keyword).not.toBe(identifier);
 });

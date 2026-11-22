@@ -2,6 +2,8 @@
 // UI's read-only copy. The engine is injected so tests use a fake; `canvasStore` uses the worker-backed one. The project
 // store (F-202) opens stored projects in the worker and hands the summary to `show`; `open` is the test hook's raw open.
 import type {
+  ApplyOutcome,
+  EditCommand,
   EngineApi,
   OpenRequest,
   ProjectChange,
@@ -46,6 +48,11 @@ export interface WorkspaceState {
   readonly content: CanvasContent;
   /** Session only (F-205 open point 11). */
   readonly portLabels: boolean;
+  /** The last change to the project and the files it touched, never their text (AR-30). */
+  readonly lastChange: {
+    readonly revision: number;
+    readonly paths: readonly string[];
+  } | null;
 }
 
 export interface WorkspaceActions {
@@ -61,6 +68,8 @@ export interface WorkspaceActions {
   selectTab(id: string): Promise<void>;
   setMode(tabId: string, mode: ViewMode): void;
   setPortLabels(value: boolean): void;
+  /** The single UI path for edit commands: sends `command` at the current revision; the change then reaches `changed`. */
+  apply(command: EditCommand): Promise<ApplyOutcome>;
 }
 
 /** The workflow a project opens with: main.nf's entry, else the first entry workflow, else the first named one. */
@@ -140,6 +149,7 @@ export function createCanvasStore(
       activeTab: null,
       content: EMPTY,
       portLabels: true,
+      lastChange: null,
 
       async open(request) {
         generation++;
@@ -158,6 +168,7 @@ export function createCanvasStore(
           tabs: tab === null ? [] : [tab],
           activeTab: null,
           content: EMPTY,
+          lastChange: null,
         });
         if (tab !== null) await load(tab);
       },
@@ -171,6 +182,7 @@ export function createCanvasStore(
           tabs: [],
           activeTab: null,
           content: EMPTY,
+          lastChange: null,
         });
       },
 
@@ -182,6 +194,10 @@ export function createCanvasStore(
             ...summary,
             revision: change.revision,
             workflows: change.workflows,
+          },
+          lastChange: {
+            revision: change.revision,
+            paths: change.files.map((f) => f.path),
           },
         });
         const active = tabs.find((t) => t.id === activeTab);
@@ -216,6 +232,35 @@ export function createCanvasStore(
 
       setPortLabels(portLabels) {
         set({ portLabels });
+      },
+
+      async apply(command) {
+        const { summary } = get();
+        if (summary === null)
+          return {
+            ok: false,
+            revision: null,
+            code: "no-project",
+            message: "No project is open.",
+            path: null,
+            problems: [],
+          };
+        const outcome = await engine().apply(command, summary.revision);
+        const now = get().summary;
+        if (now === null) return outcome;
+        if (outcome.ok) {
+          // the engine client announces changes to `changed` already; this covers an engine that doesn't
+          if (outcome.revision > now.revision) await get().changed(outcome);
+        } else if (
+          outcome.revision !== null &&
+          outcome.revision > now.revision
+        ) {
+          // another writer got in first: adopt its revision and show what it left
+          set({ summary: { ...now, revision: outcome.revision } });
+          const active = get().tabs.find((t) => t.id === get().activeTab);
+          if (active !== undefined) await load(active, true);
+        }
+        return outcome;
       },
     };
   });
