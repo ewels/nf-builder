@@ -12,15 +12,15 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-110 printer | merged, PR #25 | |
 | F-105 semantic model | merged, PR #30 | |
 | F-106 typed projection | merged, PR #32 | Plan deleted in its PR. |
-| F-107 legacy projection | `feat/F-107`, in PR | Plan deleted in its PR. |
+| F-107 legacy projection | merged, PR #36 | |
 | F-108 code nodes | merged, PR #34 | |
-| F-111 edit commands | `feat/F-111`, in PR | Plan deleted in its PR. |
-| F-112 diagnostics | not started | [plan](plan-F-112.md). After F-106 (and F-111 for fixes). |
-| F-113 engine worker | not started | [plan](plan-F-113.md). After F-111. |
+| F-111 edit commands | merged, PR #38 | |
+| F-112 diagnostics | `feat/F-112` | Tasks 1–7 committed; task 8 (calls and types) building. [plan](plan-F-112.md). |
+| F-113 engine worker | `feat/F-113` | Task 1 building. [plan](plan-F-113.md). |
 | F-202 projects in IndexedDB | not started | [plan](plan-F-202.md). After F-113. |
 | F-205 canvas | not started | [plan](plan-F-205.md). After F-113 (and F-106); parallel with F-202. |
 | F-501 registry snapshot | merged, PR #29, **not passing** | Passes once the Pages deploy serves `/registry/` and `verify` passes (ADR 0041, F-011). F-502 to F-506, F-702, F-704 and F-705 depend on it. |
-| F-011 GitHub Pages hosting | `feat/F-011` | [plan](plan-F-011.md). Merge only after Pages is enabled (#35). |
+| F-011 GitHub Pages hosting | `feat/F-011`, PR #37 | Reviewed, CI green; merge once Pages is enabled (#35), after merging `main`. |
 
 ## Merge order
 
