@@ -3,6 +3,9 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { nodeView } from "../../src/details/node-view";
 import { workflowSummary } from "../../src/details/summary";
+import { installedPackVersions } from "../../src/packs";
+import { createEngineService } from "../../src/service/service";
+import type { NodeDetailsResult } from "../../src/service/types";
 import { readTree } from "../model/read-tree";
 import { openFiles, projectorFor } from "../projection/open";
 
@@ -118,5 +121,62 @@ describe("F-206 UX-30 LA-20: the f206-details fixture projection", () => {
     });
     const chain = p.nodes.find((n) => n.kind === "chain");
     expect(chain && nodeView(p, chain.id)?.name).toBe("map → collect");
+  });
+});
+
+describe("F-206 UX-30 LA-20: the f206-details fixture's declaration details", () => {
+  it("F-206 UX-30: f206-details TRIM has its description, four directives, the versions topic, a cut script, and LEGACY_VERSIONS has a legacy-process suggestion", async () => {
+    const service = createEngineService();
+    await service.open({
+      version: installedPackVersions()[0] as string,
+      files: details(),
+    });
+    const projected = await service.project("main.nf", null);
+    if (!("projection" in projected) || projected.projection === null)
+      throw new Error("no projection");
+    const id = (callee: string) => {
+      const node = projected.projection?.nodes.find(
+        (n) => n.kind === "call" && n.callee.name === callee,
+      );
+      if (node === undefined) throw new Error(callee);
+      return node.id;
+    };
+    const trim = (await service.details(
+      "main.nf",
+      null,
+      id("TRIM"),
+    )) as NodeDetailsResult;
+    const t = trim.details;
+    expect(t?.declaration.path).toBe("modules/local/trim/main.nf");
+    expect(t?.declaration.description).toBe(
+      "Trims a name and greets it.\n\nRuns once per name and writes the greeting to standard output.",
+    );
+    expect(t?.declaration.directives.map((d) => d.name)).toEqual([
+      "tag",
+      "label",
+      "cpus",
+      "container",
+    ]);
+    expect(t?.declaration.directives[3]?.value).toHaveLength(60);
+    expect(t?.declaration.topics).toEqual([
+      { name: "versions", value: "tuple('trim', '1.0')" },
+    ]);
+    expect(t?.declaration.preview).toMatchObject({
+      title: "Script",
+      truncated: true,
+    });
+    expect(t?.declaration.preview?.text.split("\n")).toHaveLength(8);
+    expect(t?.diagnostics).toEqual([]);
+    const legacy = (await service.details(
+      "main.nf",
+      null,
+      id("LEGACY_VERSIONS"),
+    )) as NodeDetailsResult;
+    expect(legacy.details?.declaration.topics.map((r) => r.name)).toEqual([
+      "versions",
+    ]);
+    expect(legacy.details?.diagnostics.map((d) => d.code)).toContain(
+      "legacy-process",
+    );
   });
 });

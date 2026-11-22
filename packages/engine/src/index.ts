@@ -66,8 +66,11 @@ export type {
 } from "./canvas";
 export { CANVAS_METRICS, canvasView, nodeTitle } from "./canvas";
 export type {
+  CalleeDeclaration,
   DeclarationDetails,
   DetailRow,
+  DetailsInput,
+  DiagnosticScope,
   NodeDetails,
   NodeView,
   OperatorDetail,
@@ -80,10 +83,18 @@ export type {
   WorkflowSummary,
 } from "./details";
 export {
+  declarationDetails,
+  diagnosticsWithin,
+  docSummary,
   kindLabel,
+  nodeDetails,
+  nodeDiagnosticScopes,
   nodeView,
+  oneLine,
   PREVIEW_LINES,
   portTypeText,
+  previewText,
+  resolveCallee,
   VALUE_CHARS,
   workflowSummary,
 } from "./details";
@@ -151,6 +162,7 @@ export type {
   FileSummary,
   LoadPhase,
   LoadProgress,
+  NodeDetailsResult,
   OpenRequest,
   ProjectChange,
   ProjectionResult,
