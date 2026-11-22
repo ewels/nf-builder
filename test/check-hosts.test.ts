@@ -50,6 +50,14 @@ describe("IO-41 host scan", () => {
     expect(found[3]).toMatchObject({ line: 4 });
   });
 
+  it("IO-41 QA-30 F-011: a URL inside a CSP meta's connect-src does not carry the directive's closing semicolon", () => {
+    const meta = `<meta content="connect-src &#39;self&#39; https://registry.nextflow.io; worker-src &#39;self&#39;">`;
+    expect(findUrls(meta).map((f) => f.url)).toEqual([
+      "https://registry.nextflow.io",
+    ]);
+    expect(classifyUrl("https://registry.nextflow.io").kind).toBe("allowed");
+  });
+
   it("IO-41: allows the ADR 0002 origins over https only", () => {
     expect(kind("https://api.github.com/repos/x")).toBe("allowed");
     expect(kind("https://raw.githubusercontent.com/a")).toBe("allowed");

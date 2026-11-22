@@ -16,7 +16,7 @@ Browser-only visual builder for Nextflow pipelines (TypeScript, React). What it 
    - set `passes: true` only if every step in the feature passed;
    - append to `progress.md`;
    - open a PR using the template;
-   - when CI is green and the reviewer has nothing blocking, squash-merge it, delete the branch, update local `main`, and start again at step 1. "CI green" means every job of the `CI`, `Deploy check` and `Scope guard` workflows passed on the PR head (ADRs 0015, 0016). The `Registry snapshot` workflow depends on a third party and is not a merge gate (ADR 0035).
+   - when CI is green and the reviewer has nothing blocking, squash-merge it, delete the branch, update local `main`, and start again at step 1. "CI green" means every job of the `CI` and `Scope guard` workflows passed on the PR head (ADRs 0015, 0040). The `Registry snapshot` workflow depends on a third party and is not a merge gate (ADR 0035).
 
 ## Commands
 
@@ -26,13 +26,14 @@ This table lists every root `package.json` script that `pnpm check` doesn't alre
 |---|---|
 | `pnpm install` | First run, and after lockfile changes |
 | `pnpm smoke` | Session start: a fresh build plus the `@smoke` end-to-end test on Chromium; fails unless it finishes in under 60 s |
-| `pnpm dev` | Local dev server (http://localhost:5173; no CSP, see ADR 0014) |
-| `pnpm build` | Production build of `apps/web` into `apps/web/dist` (what Netlify runs) |
-| `pnpm preview` | After `pnpm build`: serve `apps/web/dist` with the `netlify.toml` headers on http://localhost:4173, as the end-to-end tests do |
+| `pnpm dev` | Local dev server (http://localhost:5173; no CSP, see ADR 0040) |
+| `pnpm build` | Production build of `apps/web` into `apps/web/dist` (what the `Pages` workflow deploys) |
+| `pnpm preview` | After `pnpm build`: serve `apps/web/dist` on http://localhost:4173 as GitHub Pages does, with no response headers and no single-page-app fallback (the policy is in `<meta>` elements, ADR 0040); the end-to-end tests do the same under `/nf-builder/` |
 | `pnpm --filter <package> test` | While iterating on one package |
 | `pnpm format` | Before `pnpm check`: apply Biome's formatting and safe fixes |
 | `pnpm check` | Before every commit: typecheck, Biome, unit tests, dependency-cruiser, ADR lint, `features.json` validation |
 | `pnpm check:budget` and `pnpm check:hosts` | After `pnpm build`: QA-01 bundle budget and IO-41 host allow-list (ADR 0015) |
+| `pnpm check:site [<dir>]` | After `pnpm build` with `BASE_PATH=/nf-builder/` (as the CI `site` job does): every page starts `<head>` with the QA-30 policy meta, asset URLs sit under the base, `version.json` is valid; `--url <site> --commit <sha>` polls a deployed site (ADR 0040) |
 | `pnpm test:e2e -- --grep F-123` | The feature's end-to-end test |
 | `pnpm corpus:fetch` | Fetch the pinned pipeline corpus into `.cache/corpus/` (git over github.com; second run is a no-op) |
 | `pnpm spike:s5` | Spike S5 (F-010): fetch the pinned Pyodide and nf-metro files, render the CLI references, then serve the test page on http://localhost:4175 (needs Python 3.11+) |
@@ -48,7 +49,7 @@ This table lists every root `package.json` script that `pnpm check` doesn't alre
 
 Run `pnpm test:corpus` when touching the parser, model, projection or printer. The catalogue (`catalogue` job), the corpus parse (`corpus-parse` job) and the Nextflow oracle (`oracle` job) always run in CI. Running Nextflow locally as well is allowed for a faster loop (ADR 0018): use `pnpm nextflow` and `pnpm oracle`, which run the version pinned in `packages/lang-2610/upstream.json` (Java 17 to 26; ADR 0019); CI stays the authority.
 
-`pnpm test:e2e` and `pnpm smoke` build the app and serve it with the `netlify.toml` headers. In the Claude Code cloud sandbox only an older Chromium is installed: export `PW_CHROMIUM_EXECUTABLE=/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell` first, and never run `playwright install`. An unfiltered Chromium `pnpm test:e2e` also runs spike S5, which needs network access to its recorded hosts and Python 3.11+ on first run. Some sandboxes can't reach `*.netlify.app`; the `deploy-check` workflow checks deployed headers either way. Visual baselines in `e2e/__screenshots__/` come only from CI (ADR 0021): when a `@visual` test fails, download the `playwright-chromium` artifact, view the `-actual.png` and commit it at the expected path; never run `--update-snapshots` locally.
+`pnpm test:e2e` and `pnpm smoke` build the app and serve it under `/nf-builder/` with no response headers, as Pages does. In the Claude Code cloud sandbox only an older Chromium is installed: export `PW_CHROMIUM_EXECUTABLE=/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell` first, and never run `playwright install`. An unfiltered Chromium `pnpm test:e2e` also runs spike S5, which needs network access to its recorded hosts and Python 3.11+ on first run. Visual baselines in `e2e/__screenshots__/` come only from CI (ADR 0021): when a `@visual` test fails, download the `playwright-chromium` artifact, view the `-actual.png` and commit it at the expected path; never run `--update-snapshots` locally.
 
 ## Boundaries
 

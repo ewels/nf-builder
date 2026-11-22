@@ -74,6 +74,8 @@ jobs:
     name: Bundle budget (QA-01)
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    env:
+      BASE_PATH: /nf-builder/
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -86,6 +88,8 @@ jobs:
     name: Network host allow-list (IO-41)
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    env:
+      BASE_PATH: /nf-builder/
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -93,6 +97,21 @@ jobs:
       - uses: ./.github/actions/setup
       - run: pnpm build
       - run: pnpm check:hosts
+
+  site:
+    name: Site build for GitHub Pages (QA-30)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      # The base path Pages serves a project site under (ADR 0040); tests are the only place that names it.
+      BASE_PATH: /nf-builder/
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - run: pnpm build
+      - run: pnpm check:site
 
   adr-lint:
     name: ADR lint

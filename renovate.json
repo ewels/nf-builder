@@ -32,7 +32,7 @@
       "groupName": "dev tooling (non-major)"
     },
     {
-      "description": "Node and pnpm move together; netlify.toml NODE_VERSION and PNPM_VERSION must follow by hand (test/netlify-config.test.ts fails until they do)",
+      "description": "Node and pnpm move together; netlify.toml NODE_VERSION and PNPM_VERSION must follow by hand (test/netlify-toml.test.ts fails until they do)",
       "matchDepNames": [
         "node",
         "pnpm"

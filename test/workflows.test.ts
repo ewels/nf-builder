@@ -53,6 +53,7 @@ describe("CI workflows", () => {
       "e2e",
       "budget",
       "hosts",
+      "site",
       "adr-lint",
       "features",
       "audit",
@@ -68,13 +69,14 @@ describe("CI workflows", () => {
     }
     const jobs = ci.split(/^jobs:/m)[1] ?? "";
     const blocks = jobs.split(/^ {2}(?=[\w-]+:\s*$)/m).slice(1);
-    expect(blocks.length).toBe(11);
+    expect(blocks.length).toBe(12);
     for (const block of blocks) expect(block).toContain("timeout-minutes:");
     for (const command of [
       "pnpm check",
       "pnpm test:e2e",
       "pnpm check:budget",
       "pnpm check:hosts",
+      "pnpm check:site",
       "node scripts/check-adrs.ts",
       "node scripts/check-features.ts",
       "pnpm audit --audit-level high",
@@ -85,6 +87,27 @@ describe("CI workflows", () => {
     ]) {
       expect(ci, command).toContain(`run: ${command}`);
     }
+  });
+
+  it("F-011 step 2 ADR-0040: the site job builds with BASE_PATH=/nf-builder/ and runs pnpm check:site after pnpm build; budget and hosts use the same base", () => {
+    const ci = read(join(WORKFLOWS, "ci.yml"));
+    const job = (name: string) =>
+      (ci.split(new RegExp(`^ {2}${name}:\\s*$`, "m"))[1] ?? "").split(
+        /^ {2}[\w-]+:\s*$/m,
+      )[0] ?? "";
+    const site = job("site");
+    expect(site).toContain("name: Site build for GitHub Pages (QA-30)");
+    expect(site).toMatch(
+      /^ {4}env:\n {6}(?:#.*\n {6})?BASE_PATH: \/nf-builder\/$/m,
+    );
+    expect(site.indexOf("run: pnpm build")).toBeGreaterThan(-1);
+    expect(site.indexOf("run: pnpm check:site")).toBeGreaterThan(
+      site.indexOf("run: pnpm build"),
+    );
+    for (const name of ["budget", "hosts"])
+      expect(job(name), name).toMatch(
+        /^ {4}env:\n {6}BASE_PATH: \/nf-builder\/$/m,
+      );
   });
 
   it("F-005 ADR-0019: the oracle job sets up Temurin 21, caches .cache/nextflow keyed on upstream.json, prints the Nextflow version, runs pnpm oracle and uploads .cache/oracle even on failure", () => {
