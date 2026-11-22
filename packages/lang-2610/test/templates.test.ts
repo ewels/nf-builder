@@ -46,6 +46,15 @@ describe("F-203 the 26.10 templates", () => {
     expect(await pack.loadTemplates()).toEqual(set);
   });
 
+  it("F-203 LA-41: the FastQC version command is the nf-core one", async () => {
+    const { list } = await all();
+    const t = list.find((x) => x.id === "samplesheet-multiqc");
+    const text = file(t as ProjectTemplate, "modules/local/fastqc/main.nf");
+    expect(text).toContain(
+      `eval('fastqc --version | sed "/FastQC v/!d; s/.*v//"')`,
+    );
+  });
+
   it("F-203 LA-03: every template's nextflow.config sets manifest.nextflowVersion to '>=26.10.6'", async () => {
     const { parseConfig } = await pack.loadParser();
     for (const t of (await all()).list) {

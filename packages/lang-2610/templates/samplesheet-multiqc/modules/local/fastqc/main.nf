@@ -26,7 +26,7 @@ process FASTQC {
     )
 
     topic:
-    tuple('fastqc', eval('fastqc --version | sed "s/FastQC v//"')) >> 'versions'
+    tuple('fastqc', eval('fastqc --version | sed "/FastQC v/!d; s/.*v//"')) >> 'versions'
 
     script:
     """
