@@ -4,6 +4,7 @@ import {
   readNetlifyConfig,
   siteHeaders,
 } from "../../scripts/netlify-config.ts";
+import { registrySnapshot } from "../../scripts/registry-snapshot-site.ts";
 import { versionJson } from "../../scripts/version-json.ts";
 
 // netlify.toml is the single source of response headers; `vite preview` sends all of them so e2e runs under the production CSP.
@@ -12,7 +13,7 @@ const headers = siteHeaders(readNetlifyConfig());
 const { "Content-Security-Policy": _csp, ...devHeaders } = headers;
 
 export default defineConfig({
-  plugins: [react(), versionJson(process.env)],
+  plugins: [react(), versionJson(process.env), registrySnapshot(process.env)],
   server: { port: 5173, strictPort: true, headers: devHeaders },
   preview: { port: 4173, strictPort: true, headers },
   // QA-01: scripts/check-bundle-budget.ts reads dist/.vite/manifest.json to find the initial JavaScript.

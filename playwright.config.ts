@@ -1,3 +1,4 @@
+import { fileURLToPath } from "node:url";
 import { defineConfig, devices } from "@playwright/test";
 import {
   type BrowserName,
@@ -7,6 +8,10 @@ import {
   visualEnabled,
 } from "./e2e/browsers.ts";
 import { DEV_URL, PREVIEW_URL } from "./e2e/urls.ts";
+
+const REGISTRY_FIXTURE = fileURLToPath(
+  new URL("tools/registry-snapshot/test/fixtures/expected", import.meta.url),
+);
 
 // This sandbox ships an older Chromium than @playwright/test expects: point PW_CHROMIUM_EXECUTABLE at it.
 // Local runs use Chromium only. CI runs one job per browser with PW_BROWSERS (F-003, QA-20).
@@ -72,6 +77,8 @@ export default defineConfig({
       command: "pnpm build && pnpm preview",
       url: PREVIEW_URL,
       timeout: 120_000,
+      // F-501: the fixture snapshot, so /registry/ has data without the registry-snapshot branch.
+      env: { REGISTRY_SNAPSHOT_DIR: REGISTRY_FIXTURE },
     },
     {
       command: "pnpm dev",
