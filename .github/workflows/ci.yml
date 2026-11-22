@@ -29,7 +29,8 @@ jobs:
 
   e2e:
     name: Playwright ${{ matrix.suite }} (${{ matrix.browser }})
-    runs-on: ubuntu-latest
+    # Pinned: visual baselines are rendered here, so the image must not move with the default runner label (ADR 0021).
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     strategy:
       fail-fast: false
@@ -142,6 +143,36 @@ jobs:
       - name: The cache now holds every pin, so a second run is a no-op (F-009 step 2)
         run: pnpm corpus:fetch --check
 
+  oracle:
+    name: Nextflow oracle (ADR 0019)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
+        with:
+          distribution: temurin
+          java-version: "21"
+      - name: Restore the pinned Nextflow
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .cache/nextflow
+          key: nextflow-v1-${{ hashFiles('packages/lang-2610/upstream.json') }}
+      - name: Nextflow version (LA-03)
+        run: pnpm nextflow -- -version
+      - run: pnpm oracle
+      - name: Upload the oracle logs
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: nextflow-oracle
+          path: .cache/oracle/
+          retention-days: 30
+          if-no-files-found: ignore
+
   corpus-parse:
     name: Corpus parse vs nextflow lint (F-006, ADR 0005)
     runs-on: ubuntu-latest
@@ -161,18 +192,8 @@ jobs:
           path: .cache/nextflow
           # Bump v1 if the layout of .cache/nextflow changes.
           key: nextflow-v1-${{ hashFiles('packages/lang-2610/upstream.json') }}
-      - name: Download the pinned Nextflow dist (nextflow and nextflowDist in packages/lang-2610/upstream.json)
-        run: |
-          version=$(node -p "require('./packages/lang-2610/upstream.json').nextflow.version")
-          url=$(node -p "require('./packages/lang-2610/upstream.json').nextflowDist.url")
-          sha=$(node -p "require('./packages/lang-2610/upstream.json').nextflowDist.sha256")
-          dist=".cache/nextflow/$version/nextflow-$version-dist"
-          if ! echo "$sha  $dist" | sha256sum -c - >/dev/null 2>&1; then
-            mkdir -p "$(dirname "$dist")"
-            curl -fsSL --retry 3 -o "$dist" "$url"
-          fi
-          echo "$sha  $dist" | sha256sum -c -
-          chmod +x "$dist"
+      - name: Nextflow version (LA-03)
+        run: pnpm nextflow -- -version
       - run: pnpm corpus:lint
       - run: pnpm test:corpus
       - name: Upload the parse report

@@ -30,6 +30,7 @@ describe("CI workflows", () => {
       "features",
       "audit",
       "corpus",
+      "oracle",
       "corpus-parse",
       "catalogue",
     ]) {
@@ -40,7 +41,7 @@ describe("CI workflows", () => {
     }
     const jobs = ci.split(/^jobs:/m)[1] ?? "";
     const blocks = jobs.split(/^ {2}(?=[\w-]+:\s*$)/m).slice(1);
-    expect(blocks.length).toBe(10);
+    expect(blocks.length).toBe(11);
     for (const block of blocks) expect(block).toContain("timeout-minutes:");
     for (const command of [
       "pnpm check",
@@ -51,11 +52,27 @@ describe("CI workflows", () => {
       "node scripts/check-features.ts",
       "pnpm audit --audit-level high",
       "pnpm corpus:fetch --check",
+      "pnpm oracle",
       "pnpm test:corpus",
       "pnpm gen:catalogue 26.10 --check",
     ]) {
       expect(ci, command).toContain(`run: ${command}`);
     }
+  });
+
+  it("F-005 ADR-0019: the oracle job sets up Temurin 21, caches .cache/nextflow keyed on upstream.json, prints the Nextflow version, runs pnpm oracle and uploads .cache/oracle even on failure", () => {
+    const ci = read(join(WORKFLOWS, "ci.yml"));
+    const job = ci.split(/^ {2}oracle:\s*$/m)[1] ?? "";
+    expect(job).toContain("distribution: temurin");
+    expect(job).toContain('java-version: "21"');
+    expect(job).toContain("path: .cache/nextflow");
+    expect(job).toContain("hashFiles('packages/lang-2610/upstream.json')");
+    expect(job).toContain("run: pnpm nextflow -- -version");
+    expect(job).toContain("run: pnpm oracle");
+    expect(job).toMatch(
+      /if: always\(\)\n\s+uses: actions\/upload-artifact@[0-9a-f]{40}[^\n]*\n(?:[^\n]*\n)*?\s+path: \.cache\/oracle\//,
+    );
+    expect(job).not.toContain("GITHUB_STEP_SUMMARY");
   });
 
   it("F-003: every action in .github/workflows and .github/actions is pinned to a full commit SHA with a version comment", () => {
@@ -100,7 +117,7 @@ describe("CI workflows", () => {
     expect(job).toContain("run: pnpm corpus:fetch --check");
   });
 
-  it("F-006 step 2 ADR-0005: the corpus-parse job sets up Java and Nextflow, runs corpus:lint then test:corpus, and uploads the report", () => {
+  it("F-006 step 2 ADR-0005: the corpus-parse job sets up Java and the pinned Nextflow (pnpm nextflow, ADR 0019), runs corpus:lint then test:corpus, and uploads the report", () => {
     const ci = read(join(WORKFLOWS, "ci.yml"));
     const job =
       ci.split(/^ {2}corpus-parse:\s*$/m)[1]?.split(/^ {2}[\w-]+:\s*$/m)[0] ??
@@ -119,15 +136,13 @@ describe("CI workflows", () => {
       at("distribution: temurin"),
       at(/java-version: "?21"?/),
       at("path: .cache/nextflow"),
-      at("sha256sum -c"),
+      at("run: pnpm nextflow -- -version"),
       at("run: pnpm corpus:lint"),
       at("run: pnpm test:corpus"),
       at(/uses: actions\/upload-artifact@[0-9a-f]{40}/),
     ];
     expect(order).toEqual([...order].sort((a, b) => a - b));
     expect(job).toMatch(/hashFiles\('packages\/lang-2610\/upstream\.json'\)/);
-    expect(job).toContain("curl -fsSL --retry 3");
-    expect(job).toContain("nextflowDist");
     expect(job).toContain("path: .cache/reports/");
     expect(job).toMatch(/if: always\(\)/);
     expect(job).toContain("timeout-minutes: 20");
@@ -178,5 +193,19 @@ describe("CI workflows", () => {
         (r) => r.matchManagers?.includes("github-actions") && r.groupName,
       ),
     ).toBe(true);
+  });
+  it("F-201 ADR-0021: the e2e job runs on a pinned runner image and uploads the report and test-results (with the actual screenshots) when it fails", () => {
+    const ci = read(join(WORKFLOWS, "ci.yml"));
+    const job = /^ {2}e2e:\s*$([\s\S]*?)^ {2}budget:/m.exec(ci)?.[1] ?? "";
+    expect(job).toMatch(/runs-on: ubuntu-24\.04\s*$/m);
+    expect(job).not.toContain("ubuntu-latest");
+    const upload =
+      /- name: Upload the Playwright report and traces\n([\s\S]*?)(?=\n {6}- |\n\S|$)/.exec(
+        job,
+      )?.[1] ?? "";
+    expect(upload).toMatch(/if: failure\(\)/);
+    expect(upload).toContain("uses: actions/upload-artifact@");
+    expect(upload).toContain("playwright-report/");
+    expect(upload).toContain("test-results/");
   });
 });

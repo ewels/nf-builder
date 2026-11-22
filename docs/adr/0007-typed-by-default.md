@@ -38,3 +38,7 @@ Static typing is stable in 26.10, and it is where Nextflow and nf-core are headi
 - Typed only: the registry would be nearly empty, and most imports would fail.
 - Migrate automatically on import: surprising, lossy, and detaches modules from upstream.
 - `legacy` badge instead: marks most nodes today, and reads as a judgement.
+
+## Spike result
+
+2026-11-22, spike S1 ([report](../research/2026-11-22-spike-s1-typed-legacy-interop.md)), Nextflow 26.10.7 through the oracle (ADR 0019): a typed workflow may call a legacy process or workflow included from another file, including an nf-core-shaped module whose named outputs it reads by assignment, and a legacy workflow may call a typed process. `nextflow lint` and `nextflow run -stub` pass in both directions. One constraint: typed code must build a legacy `tuple` input with `tuple(...)`; a list literal with mixed element types (`[[id: x], file]`) fails `nextflow lint` ("List expression has inconsistent element types"), while `nextflow run` only warns. Lint doesn't check a legacy input's shape, so a wrong arity fails only at run time. A script that enables types and defines a legacy process fails to parse, and so does a typed process without the flag, as this decision assumed. The decision stands: inserting a legacy module into a typed workflow needs no other route, and LA-14 drops its interim warning.

@@ -115,8 +115,8 @@
         "Report in `docs/research/` records each outcome with logs",
         "ADR 0007 history and LA-14 updated (via a Proposed ADR if the decision changes)"
       ],
-      "passes": false,
-      "notes": "The oracle job should also lint tools/corpus/fixtures/ and check each result against fixtures.yaml (AGENTS.md, ADR 0017)."
+      "passes": true,
+      "notes": "The oracle job should also lint tools/corpus/fixtures/ and check each result against fixtures.yaml (AGENTS.md, ADR 0017). Verified 2026-11-22 on PR #13: the CI oracle job (Temurin 21, cold cache download checked against the pinned SHA-256, nextflow -version 26.10.7) ran nextflow lint and run -stub on eight S1 cases (16 checks) and linted the nine corpus fixtures, all matching; the local run agrees. Report: docs/research/2026-11-22-spike-s1-typed-legacy-interop.md. No Playwright test, so --grep F-005 finds nothing; the CI run is the end-to-end evidence (Q13)."
     },
     {
       "id": "F-006",
@@ -386,7 +386,7 @@
         "Printed fixtures pass `nextflow lint` with no errors"
       ],
       "passes": false,
-      "notes": ""
+      "notes": "From F-005 (S1): in typed code the printer emits a legacy tuple input as tuple(a, b, ...), one argument per declared component; a mixed list literal fails nextflow lint (LA-14)."
     },
     {
       "id": "F-111",
@@ -474,8 +474,8 @@
         "Resize and collapse both side columns; widths persist after reload",
         "Visual snapshot matches the approved baseline"
       ],
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Verified 2026-11-22 on PR #12: step 1 by the F-201 e2e tests (drag, keyboard, collapse, reload persistence; the keyboard and persistence test also runs on Firefox and WebKit as @smoke); step 2 by the @visual test against the CI-rendered baseline e2e/__screenshots__/app-shell-layout.spec.ts/app-shell-default-chromium-linux.png, viewed and approved by the orchestrator (ADR 0021)."
     },
     {
       "id": "F-202",
@@ -683,7 +683,7 @@
         "Delete an edge: the call argument is removed and the code still parses"
       ],
       "passes": false,
-      "notes": ""
+      "notes": "From F-005 (S1): nextflow lint doesn't check a legacy tuple input's arity, so connecting to a legacy tuple input compares arity with its declaration (LA-14)."
     },
     {
       "id": "F-303",
@@ -827,7 +827,7 @@
         "Apply a quick fix (for example `Channel.of` → `channel.of`): the suggestion disappears and one undo step reverts it"
       ],
       "passes": false,
-      "notes": ""
+      "notes": "From F-201: the status bar's suggestions count is plain text until the problems panel exists; F-309 makes it link to the panel (UX-03)."
     },
     {
       "id": "F-310",
@@ -1081,7 +1081,7 @@
         "Drop it again: the bundle is not duplicated"
       ],
       "passes": false,
-      "notes": ""
+      "notes": "From F-005 (S1): typed workflows may call legacy registry modules across files with no warning; tuple inputs as tuple(...), outputs by assignment (LA-14). .module-info isn't written until its checksum algorithm is verified with the oracle (ADR 0009 spike result)."
     },
     {
       "id": "F-505",

@@ -35,14 +35,16 @@ This table lists every root `package.json` script that `pnpm check` doesn't alre
 | `pnpm check:budget` and `pnpm check:hosts` | After `pnpm build`: QA-01 bundle budget and IO-41 host allow-list (ADR 0015) |
 | `pnpm test:e2e -- --grep F-123` | The feature's end-to-end test |
 | `pnpm corpus:fetch` | Fetch the pinned pipeline corpus into `.cache/corpus/` (git over github.com; second run is a no-op) |
+| `pnpm nextflow -- <args>` | Run the pinned Nextflow (`packages/lang-2610/upstream.json`, Java 17 to 26): downloads the release once into `.cache/nextflow/`, checks its SHA-256, runs offline |
+| `pnpm oracle` | After changing Nextflow fixtures, templates or the printer: `nextflow lint` and `nextflow run -stub` on every case in `tools/oracle/cases/cases.yaml`; report in `.cache/oracle/report.md` (CI job `oracle`) |
 | `pnpm gen:grammar 26.10` | After changing `packages/lang-2610/grammar/` (vendored `.g4` or `port.ts`): regenerate `src/generated/`; `--check` only compares |
 | `pnpm gen:catalogue 26.10` | Regenerate `packages/lang-2610/catalogue/*.json` from the pinned language server jar (needs a JDK 17+); `--check` compares; CI job `catalogue` runs it on every PR |
 | `pnpm corpus:lint` | After `pnpm corpus:fetch`: `nextflow lint -o json` on each pinned pipeline and the malformed fixtures into `.cache/corpus-lint/` (needs Java; cached per pin and Nextflow version). The launcher is `--nextflow <path>`, else `NXF_LAUNCHER`, else the pinned dist at `.cache/nextflow/<version>/nextflow-<version>-dist` (version from `packages/lang-2610/upstream.json`) |
 | `pnpm test:corpus` | After `corpus:lint`, and when touching the parser, model, projection or printer: parse every corpus file, compare with lint, write `.cache/reports/parse-corpus.{json,md}` (about 2.5 minutes) |
 
-Still to come, each with the feature that adds it: testing the parser against the corpus (with the parser, F-101 to F-104; run it when touching the parser, model, projection or printer), the grammar generator (F-101) and the catalogue generator (F-109). The catalogue and the Nextflow oracle tests always run in CI. Running Nextflow locally as well is allowed for a faster loop (ADR 0018): the sandbox has Java 21, and the release jar `nextflow-<version>-dist` from GitHub releases runs with `NXF_HOME=.cache/nextflow/home NXF_OFFLINE=true` (`.cache/` is git-ignored). Use 26.10.7 until F-005 pins the version and adds a wrapper; CI stays the authority.
+Still to come, each with the feature that adds it: testing the parser against the corpus (with the parser, F-101 to F-104; run it when touching the parser, model, projection or printer), the grammar generator (F-101) and the catalogue generator (F-109). The catalogue and the Nextflow oracle tests always run in CI. Running Nextflow locally as well is allowed for a faster loop (ADR 0018): use `pnpm nextflow` and `pnpm oracle`, which run the version pinned in `packages/lang-2610/upstream.json` (Java 17 to 26; ADR 0019); CI stays the authority.
 
-`pnpm test:e2e` and `pnpm smoke` build the app and serve it with the `netlify.toml` headers. In the Claude Code cloud sandbox only an older Chromium is installed: export `PW_CHROMIUM_EXECUTABLE=/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell` first, and never run `playwright install`. The sandbox also can't reach `*.netlify.app`; the `deploy-check` workflow checks deployed headers instead.
+`pnpm test:e2e` and `pnpm smoke` build the app and serve it with the `netlify.toml` headers. In the Claude Code cloud sandbox only an older Chromium is installed: export `PW_CHROMIUM_EXECUTABLE=/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell` first, and never run `playwright install`. Some sandboxes can't reach `*.netlify.app`; the `deploy-check` workflow checks deployed headers either way. Visual baselines in `e2e/__screenshots__/` come only from CI (ADR 0021): when a `@visual` test fails, download the `playwright-chromium` artifact, view the `-actual.png` and commit it at the expected path; never run `--update-snapshots` locally.
 
 ## Boundaries
 
@@ -90,7 +92,7 @@ If your change adds a dependency, moves a package boundary, changes a stored or 
 - Use the Nextflow agent skills:
   - Claude Code: eight skills from `seqeralabs/nextflow-plugin` are vendored in `.claude/skills/` (see its README), so cloud sessions get them too;
   - other agents: `npx skills add seqeralabs/nextflow-plugin`.
-- Nextflow code in templates and fixtures must pass the CI oracle (`nextflow lint` on 26.10). The exception is `tools/corpus/fixtures/`, which is malformed on purpose: there the oracle must reproduce the `lint` result recorded in `fixtures.yaml` (ADR 0017).
+- Nextflow code in templates and fixtures must pass the oracle (`pnpm oracle`, CI job `oracle`: `nextflow lint` and `nextflow run -stub` on 26.10). In typed code, build a legacy `tuple` input with `tuple(...)`, never a mixed list literal (spike S1). The exceptions are malformed on purpose: in `tools/corpus/fixtures/` the oracle must reproduce the `lint` result recorded in `fixtures.yaml` (ADR 0017), and an oracle case marked `expect: error` in `tools/oracle/cases/cases.yaml` must fail as recorded (ADR 0019).
 
 ## Conventions that tools don't enforce
 

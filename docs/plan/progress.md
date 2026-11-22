@@ -111,3 +111,28 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
 - Decisions: the hand-off README settles the plans' open points.
 - Blockers: none. Open maintainer issues: #6 (Renovate), #7 (required checks). This session couldn't reach `*.netlify.app`, `registry.nextflow.io`, `docs.seqera.io`, `cdn.jsdelivr.net` or `codeload.github.com`.
 - Notes for the next session: run Nextflow locally with `.cache/nextflow/nextflow-26.10.7-dist` (download it from GitHub releases; `NXF_HOME=.cache/nextflow/home NXF_OFFLINE=true`); in the cloud sandbox export `PW_CHROMIUM_EXECUTABLE` for e2e (AGENTS.md); `pnpm corpus:fetch` populates `.cache/corpus`.
+
+## 2026-11-22 · F-201 · Claude (autonomous)
+- Did: app shell (`apps/web/src/shell/`): header with placeholder controls and the Nextflow version from the installed packs, side columns that resize by pointer or keyboard and collapse to a rail, tab strip, status bar; Zustand layout store persisted to localStorage; `LanguagePack` in lang-core, `pack` in lang-2610, `installedPackVersions()` in engine; a CI-rendered `@visual` baseline. PR #12.
+- State: passing.
+- Next: F-005 and F-006 in flight; then F-007, F-008, F-010.
+- Decisions:
+  - Hand-rolled resizing, widths and limits, layout format `nf-builder:layout` version 1 in localStorage, visual baselines rendered in CI and approved from the artifact ([ADR 0021](../adr/0021-app-shell-layout.md)).
+  - `zustand` 5.1.0 as an apps/web runtime dependency (named in ADR 0003).
+  - `.github/workflows/ci.yml`: the Chromium e2e job runs on `ubuntu-24.04` (ADR 0021).
+  - WCAG 2.5.7 single-pointer alternative deferred to F-701; the suggestions link to F-309 (notes).
+  - AGENTS.md: the `*.netlify.app` note now says some sandboxes can't reach it (this one can).
+- Blockers: none.
+
+## 2026-11-22 · F-005 · Claude (autonomous)
+- Did: `tools/oracle`: `pnpm nextflow` runs the pinned Nextflow release offline; `pnpm oracle` runs `nextflow lint` and `run -stub` on the cases in `tools/oracle/cases/cases.yaml` and lints the corpus fixtures against `fixtures.yaml`; CI job `oracle`. Spike S1 with eight cases; [report](../research/2026-11-22-spike-s1-typed-legacy-interop.md). PR #13.
+- State: passing.
+- Next: F-006 (parser speed under investigation), F-008 in progress, then F-010 and F-007.
+- Decisions:
+  - Oracle from the pinned release jar locally and in CI; pin in `packages/lang-2610/upstream.json`; `tools/oracle` joins the ADR 0003 tools; build-time hosts github.com release downloads ([ADR 0019](../adr/0019-nextflow-oracle.md), amending ADR 0011 as ADR 0018 did).
+  - `.github/workflows/ci.yml`: new `oracle` job with `actions/setup-java` pinned by SHA (ADR 0019).
+  - S1 found typed code must pass legacy tuple inputs as `tuple(...)`: a mixed list literal fails lint, and lint doesn't check arity. LA-14 drops its warning and says so (ADR 0007 spike result, no new ADR); notes on F-110, F-302 and F-504.
+  - LA-03: `>=26.10.6` confirmed, 26.10.7 latest.
+  - `.module-info`: format recorded, writing deferred to F-504 (ADR 0009 spike result).
+  - AGENTS.md: oracle cases marked `expect: error` are exempt from "must pass the oracle", like the corpus fixtures.
+- Blockers: none.
