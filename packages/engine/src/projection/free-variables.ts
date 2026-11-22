@@ -15,10 +15,8 @@ import {
   type Closure,
   childNodes,
   type Expression,
-  type MethodCall,
   type Range,
   type Statement,
-  type Variable,
   type VariableDeclaration,
 } from "@nf-builder/lang-core";
 import { setTarget } from "./legacy";

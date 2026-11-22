@@ -8,27 +8,13 @@ export function branchesOf(
 ):
   | readonly { readonly expression: Expression; readonly guard: Guard }[]
   | null {
-  if (e.kind === "Ternary")
-    return [
-      {
-        expression: e.consequent,
-        guard: { condition: e.condition.range, branch: "then" },
-      },
-      {
-        expression: e.alternate,
-        guard: { condition: e.condition.range, branch: "else" },
-      },
-    ];
-  if (e.kind === "Elvis")
-    return [
-      {
-        expression: e.condition,
-        guard: { condition: e.condition.range, branch: "then" },
-      },
-      {
-        expression: e.alternate,
-        guard: { condition: e.condition.range, branch: "else" },
-      },
-    ];
-  return null;
+  if (e.kind !== "Ternary" && e.kind !== "Elvis") return null;
+  const condition = e.condition.range;
+  return [
+    {
+      expression: e.kind === "Ternary" ? e.consequent : e.condition,
+      guard: { condition, branch: "then" },
+    },
+    { expression: e.alternate, guard: { condition, branch: "else" } },
+  ];
 }

@@ -173,4 +173,24 @@ workflow {
     const modelled = p.statements.map((s) => s.modelled);
     expect(modelled).toEqual([true, true, true, true, true, true, true, false]);
   });
+
+  it("F-107 AR-10: a non-dataflow if inside a dataflow branch keeps the branch's later definitions", async () => {
+    const p = await projectMain(`${PROCESSES}
+workflow {
+    ch = channel.of(1)
+    if (params.flag) {
+        if (params.verbose) {
+            log.info 'x'
+        }
+        ONE(ch)
+        res = ONE.out.a
+    }
+    res.view()
+    ONE.out.a.view()
+}
+`);
+    expect(into(p, k(".view@1"), "in")).toEqual(["ONE@1[a]"]);
+    expect(into(p, k(".view@2"), "in")).toEqual(["ONE@1[a]"]);
+    expect(ids(p).filter((id) => id.includes(":code"))).toEqual([k(":code@1")]);
+  });
 });

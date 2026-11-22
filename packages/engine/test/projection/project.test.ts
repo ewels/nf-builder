@@ -570,6 +570,13 @@ describe("F-106 AR-10 LA-20 projector", () => {
         p.edges.find((e) => e.to.node === "main.nf#/.view@1")?.type as never,
       ),
     ).toBe("Channel<Path>");
+    // `names.size()` reads the alias: its edge carries List<String> from the param
+    const read = p.edges.find((e) => e.to.node === "main.nf#/:code@1");
+    expect(read).toMatchObject({
+      from: { node: "main.nf#/:params", port: "names" },
+      variable: "names",
+    });
+    expect(formatFlowType(read?.type as never)).toBe("List<String>");
   });
 
   it("F-106 ADR-0004: calls to an Unparsed declaration or to an include with a missing target are call nodes marked unparsed or unresolved", async () => {

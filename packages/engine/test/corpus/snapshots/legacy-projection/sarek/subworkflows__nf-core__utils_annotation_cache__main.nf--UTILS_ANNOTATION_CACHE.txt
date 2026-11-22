@@ -119,9 +119,9 @@ subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/snpef
   out snpeff_cache (snpeff_cache): List
 subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/:emit:ensemblvep_cache emit "ensemblvep_cache" @67:5
   in in (in): -
-    <- subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/:take:ensemblvep_cache[out] ? via ensemblvep_cache indirect
+    <- subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/ensemblvep_cache[out] Value<?> via ensemblvep_cache indirect
     <- subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/ensemblvep_cache~2[ensemblvep_cache] List via ensemblvep_cache indirect
 subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/:emit:snpeff_cache emit "snpeff_cache" @68:5
   in in (in): -
-    <- subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/:take:snpeff_cache[out] ? via snpeff_cache indirect
+    <- subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/snpeff_cache[out] Value<?> via snpeff_cache indirect
     <- subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/snpeff_cache~2[snpeff_cache] List via snpeff_cache indirect

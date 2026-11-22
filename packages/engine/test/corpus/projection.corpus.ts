@@ -104,6 +104,18 @@ interface Stats {
   code: number;
 }
 
+/** Non-empty statements of a workflow's main section, from its file's AST. */
+function mainStatements(pinned: Pin, path: string, name: string | null) {
+  const source = pinned.model.file(path)?.source;
+  const ast = source?.language === "nextflow" ? source.ast : null;
+  const def = ast?.body.find(
+    (i) => i.kind === "Workflow" && (i.name?.name ?? null) === name,
+  );
+  return def?.kind === "Workflow"
+    ? (def.main?.items.filter((s) => s.kind !== "EmptyStatement") ?? [])
+    : [];
+}
+
 describe("F-106 IO-14 AR-10 corpus projection", () => {
   it("F-106 IO-14 AR-10: every workflow of every pinned pipeline projects without throwing, with unique ids and every statement represented", () => {
     expect(pins.length).toBeGreaterThan(0);
@@ -135,8 +147,18 @@ describe("F-106 IO-14 AR-10 corpus projection", () => {
           seen.add(n.id);
           stats.nodes[n.kind] = (stats.nodes[n.kind] ?? 0) + 1;
         }
-        // F-107: every statement is listed once, with the nodes it made or the names it bound (a transparent `if` by its branches)
-        stats.statements += p.statements.length;
+        // every AST statement has a projected statement within its range (a transparent `if` by its branches)
+        const statements = mainStatements(pinned, ref.path, ref.name);
+        stats.statements += statements.length;
+        for (const s of statements)
+          expect(
+            p.statements.some(
+              (ps) =>
+                ps.range.start >= s.range.start && ps.range.end <= s.range.end,
+            ),
+            `${pinned.id}:${ref.path}:${s.range.line}`,
+          ).toBe(true);
+        // F-107: every projected statement is listed with the nodes it made or the names it bound
         for (const s of p.statements)
           expect(
             s.nodes.length + s.binds.length,

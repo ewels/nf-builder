@@ -115,4 +115,27 @@ workflow {
 `);
     expect(typed.nodes.map((n) => n.kind)).toEqual(["factory", "code"]);
   });
+
+  it("F-107 AR-14: pipe, fork, set/tap, guard and alias feeds leave Port.argument null, so an edit never patches a process name", async () => {
+    const p = await projectMain(`${GREETERS}
+workflow {
+    ch = channel.of('Hello')
+    ch | GREET | (GREET & TO_UPPER) | mix | view
+    ch.set { a }
+    ch.tap { b }
+    c = ch
+    if (params.flag) {
+        d = c | TO_UPPER
+    }
+}
+`);
+    const inputs = p.nodes.flatMap((n) =>
+      n.inputs.map((i) => `${n.id}[${i.id}]`),
+    );
+    expect(inputs).toContain(k("GREET@2[x]"));
+    expect(inputs).toContain(k(".mix@1[1:1]"));
+    for (const n of p.nodes)
+      for (const input of n.inputs)
+        expect(input.argument, `${n.id}[${input.id}]`).toBeNull();
+  });
 });

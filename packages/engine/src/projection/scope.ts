@@ -38,10 +38,10 @@ function selectPorts(
   return picked === undefined ? [] : [picked];
 }
 
-/** The values of several lists, once per node (a node's ports are those of its first appearance). */
-function unionValues(lists: readonly (readonly Value[])[]): Value[] {
+/** The values, once per node (a node's ports are those of its first appearance). */
+function unionValues(values: readonly Value[]): Value[] {
   const seen = new Map<string, Value>();
-  for (const value of lists.flat())
+  for (const value of values)
     if (!seen.has(value.node)) seen.set(value.node, value);
   return [...seen.values()];
 }
@@ -84,7 +84,7 @@ export class WorkflowScope {
   /** The calls of the callees `name` stands for that reach this point. */
   callsOf(name: string): readonly Value[] {
     return unionValues(
-      this.calleesOf(name).map((c) => this.#calls.get(c) ?? []),
+      this.calleesOf(name).flatMap((c) => this.#calls.get(c) ?? []),
     );
   }
 
@@ -102,35 +102,26 @@ export class WorkflowScope {
    * aren't exhaustive (no `else`). Calls and callee aliases are joined the same way.
    */
   join(ends: readonly WorkflowScope[], exhaustive: boolean): void {
+    // `this` is never one of `all` (the incoming bindings are a fork), so its tables can be rewritten in place
     const all = exhaustive ? ends : [...ends, this.fork()];
-    const joined = <T>(
+    const join = <T>(
       table: (s: WorkflowScope) => Map<string, readonly T[]>,
       merge: (all: T[]) => readonly T[],
-    ): Map<string, readonly T[]> => {
-      const out = new Map<string, readonly T[]>();
+    ): void => {
       const names = new Set(all.flatMap((s) => [...table(s).keys()]));
+      table(this).clear();
       for (const name of names)
-        out.set(name, merge(all.flatMap((s) => table(s).get(name) ?? [])));
-      return out;
+        table(this).set(
+          name,
+          merge(all.flatMap((s) => table(s).get(name) ?? [])),
+        );
     };
-    const bindings = joined(
-      (s) => s.#bindings,
-      (l) => unionValues([l]),
-    );
-    const calls = joined(
-      (s) => s.#calls,
-      (l) => unionValues([l]),
-    );
-    const aliases = joined(
-      (s) => s.#aliases as Map<string, readonly string[]>,
+    join((s) => s.#bindings, unionValues);
+    join((s) => s.#calls, unionValues);
+    join(
+      (s) => s.#aliases,
       (l) => [...new Set(l)],
     );
-    this.#bindings.clear();
-    this.#calls.clear();
-    this.#aliases.clear();
-    for (const [k, v] of bindings) this.#bindings.set(k, v);
-    for (const [k, v] of calls) this.#calls.set(k, v);
-    for (const [k, v] of aliases) this.#aliases.set(k, v);
   }
 
   /** Gives each of `names` the binding it has in `from` (a `def` local to a branch goes out of scope). */
@@ -190,14 +181,7 @@ export class WorkflowScope {
       const byName =
         named === undefined ? null : this.resolveOut(read.name, named);
       const out = byName ?? this.resolveOut(read.name, null);
-      if (out !== null) {
-        const used = byName === null ? 1 : 2;
-        return {
-          ...out,
-          variable: [read.name, ...read.properties.slice(0, used)].join("."),
-          consumed: used,
-        };
-      }
+      if (out !== null) return { ...out, consumed: byName === null ? 1 : 2 };
     }
     const first = read.properties[0];
     const sources: ResolvedRead["sources"][number][] = [];

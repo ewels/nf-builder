@@ -11,13 +11,14 @@ import {
 } from "node:fs";
 import { join } from "node:path";
 import type { Projection } from "@nf-builder/lang-core";
-import { beforeAll, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import type { ProjectModel } from "../../src/index";
 import { projectionCoverage } from "../../src/projection/coverage";
 import type { Projector } from "../../src/projection/project";
 import { readTree } from "../model/read-tree";
 import { openFiles, projectorFor } from "../projection/open";
 import { renderProjection } from "../projection/render";
+import { snapshotName as name } from "../projection/sets";
 
 const ROOT = join(import.meta.dirname, "../../../..");
 const CORPUS = join(ROOT, ".cache/corpus");
@@ -30,47 +31,33 @@ interface Pin {
   model: ProjectModel;
   projector: Projector;
 }
+// opened when the file loads, so the snapshot tests can be made from the pins on disk
 const pins: Pin[] = [];
-
-beforeAll(async () => {
-  for (const id of PINS) {
-    if (!existsSync(join(CORPUS, id))) continue;
-    const model = await openFiles(readTree(join(CORPUS, id)));
-    pins.push({ id, model, projector: await projectorFor(model) });
-  }
-});
-
-const name = (path: string, workflow: string | null) =>
-  `${path.replaceAll("/", "__")}--${workflow ?? "entry"}.txt`;
+for (const id of PINS) {
+  if (!existsSync(join(CORPUS, id))) continue;
+  const model = await openFiles(readTree(join(CORPUS, id)));
+  pins.push({ id, model, projector: await projectorFor(model) });
+}
 
 /** The legacy workflows of a pin: modelled and not typed. */
 const legacy = (pin: Pin) =>
   pin.projector.workflows().filter((w) => w.modelled && w.typed === false);
 
-// the corpus is read when the test starts, so the snapshot tests are made from the pins on disk
-const present = PINS.filter((id) => existsSync(join(CORPUS, id)));
-
-describe("F-107 step 1 AR-14 LA-21 legacy corpus snapshots", async () => {
-  for (const id of present) {
-    const model = await openFiles(readTree(join(CORPUS, id)));
-    const projector = await projectorFor(model);
-    const workflows = projector
-      .workflows()
-      .filter((w) => w.modelled && w.typed === false);
-    for (const ref of workflows)
-      it(`F-107 step 1 AR-14 LA-21: ${id}/${ref.path}#${ref.name ?? ""} matches its projection snapshot`, async () => {
-        const projection = projector.project(ref.path, ref.name);
+describe("F-107 step 1 AR-14 LA-21 legacy corpus snapshots", () => {
+  for (const pin of pins)
+    for (const ref of legacy(pin))
+      it(`F-107 step 1 AR-14 LA-21: ${pin.id}/${ref.path}#${ref.name ?? ""} matches its projection snapshot`, async () => {
+        const projection = pin.projector.project(ref.path, ref.name);
         if (projection === null) throw new Error(`no projection ${ref.path}`);
-        const text = model.file(ref.path)?.source.text ?? "";
+        const text = pin.model.file(ref.path)?.source.text ?? "";
         const rendered = renderProjection(projection, text);
         expect(rendered).toMatch(
           /^workflow .*\nstatements \d+, modelled \d+\n/,
         );
         await expect(rendered).toMatchFileSnapshot(
-          `${SNAPSHOTS}/${id}/${name(ref.path, ref.name)}`,
+          `${SNAPSHOTS}/${pin.id}/${name(ref.path, ref.name)}`,
         );
       });
-  }
 
   it("F-107 step 1: every workflow of the pins has a snapshot", () => {
     expect(pins.length).toBe(PINS.length);

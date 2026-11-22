@@ -16,7 +16,7 @@ import type {
 } from "@nf-builder/lang-core";
 import { wrapFlow } from "./types";
 
-const unwrap = (e: Expression): Expression =>
+export const unwrap = (e: Expression): Expression =>
   e.kind === "Parenthesized" ? unwrap(e.expression) : e;
 
 /**
@@ -88,7 +88,6 @@ export function outPath(expression: Expression): {
 }
 
 export type PipeStep =
-  | { readonly kind: "source"; readonly expression: Expression }
   /** A process, workflow or operator: a bare name, or a call with no receiver such as `map { ... }`. */
   | {
       readonly kind: "step";
@@ -113,7 +112,9 @@ function forkNames(e: Expression): string[] | null {
 }
 
 /** `a | b | c` as its source and steps in order; null when a step is neither a name, a receiver-less call nor a fork. */
-export function pipeSteps(e: BinaryExpr): readonly PipeStep[] | null {
+export function pipeSteps(
+  e: BinaryExpr,
+): { readonly source: Expression; readonly steps: readonly PipeStep[] } | null {
   if (e.operator !== "|") return null;
   const steps: PipeStep[] = [];
   let at: Expression = e;
@@ -145,8 +146,7 @@ export function pipeSteps(e: BinaryExpr): readonly PipeStep[] | null {
     } else return null;
     at = at.left;
   }
-  steps.unshift({ kind: "source", expression: at });
-  return steps;
+  return { source: at, steps };
 }
 
 /** Operators whose result keeps the receiver's element type. */

@@ -1,4 +1,5 @@
 import type { Projection } from "@nf-builder/lang-core";
+import { projectionCoverage } from "../../src/projection/coverage";
 import { formatFlowType } from "../../src/projection/types";
 
 const type = (t: Parameters<typeof formatFlowType>[0] | null): string =>
@@ -16,10 +17,8 @@ export function renderProjection(projection: Projection, text: string): string {
   lines.push(
     `workflow ${w.path}#${w.name ?? ""} ${w.typed === null ? "?" : w.typed ? "typed" : "legacy"}`,
   );
-  const modelled = projection.statements.filter((s) => s.modelled).length;
-  lines.push(
-    `statements ${projection.statements.length}, modelled ${modelled}`,
-  );
+  const { statements, modelled } = projectionCoverage(projection);
+  lines.push(`statements ${statements}, modelled ${modelled}`);
   for (const node of projection.nodes) {
     const extra =
       node.kind === "call"

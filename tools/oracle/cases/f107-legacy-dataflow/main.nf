@@ -8,6 +8,7 @@ params.greeting = 'Hello'
 
 include { GREET; TO_UPPER } from './modules/local/greet/main.nf'
 include { ALL_INPUTS; ONE_UNNAMED; MANY_UNNAMED } from './modules/local/qualifiers/main.nf'
+include { PAIR; PAIR_B; JOIN2 } from './modules/local/spread/main.nf'
 include { SUB } from './subworkflows/local/sub/main.nf'
 
 workflow {
@@ -61,6 +62,14 @@ workflow {
     ch_nums.collate(2).view()
     ch_nums.distinct().view()
     channel.from(1, 2).view()
+
+    // a multi-output left side spreading over a process's inputs in a pipe, an indexed call result, and | set
+    PAIR(channel.of(1)) | JOIN2
+    JOIN2.out.view { v -> "spread ${v.trim()}" }
+    ch_second = PAIR_B(channel.of(2))[1]
+    ch_second.view { v -> "index ${v}" }
+    channel.of('w1', 'w2') | map { v -> v.toUpperCase() } | set { ch_w }
+    ch_w.view()
 
     // a legacy subworkflow, read through .out
     SUB(channel.of('n1', 'n2'), params.flag)
