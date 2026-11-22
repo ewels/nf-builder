@@ -1,5 +1,7 @@
 export type {
   ConfigSourceFile,
+  Diagnostic,
+  IncludeTarget,
   PaletteCategoryId,
   PaletteIcon,
   PaletteView,
@@ -12,6 +14,22 @@ export type {
   SourceLanguage,
   SourceParser,
 } from "@nf-builder/lang-core";
+export type {
+  Binding,
+  ConfigIncludeModel,
+  FileModel,
+  ResolvedEntry,
+  ResolvedInclude,
+  ScriptIncludeModel,
+} from "./model/file-model";
+export {
+  type ModelChange,
+  type ModelEvent,
+  openProject,
+  type ProjectFile,
+  ProjectModel,
+  type ProjectModelOptions,
+} from "./model/project";
 export { installedPackVersions } from "./packs";
 export { loadPalette } from "./palette";
 export { paletteItemCount, searchPalette } from "./palette-search";

@@ -1,0 +1,4 @@
+process TOP {
+    script:
+    "echo"
+}

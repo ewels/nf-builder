@@ -284,8 +284,8 @@
         "On each corpus pipeline, every include resolves or produces a diagnostic naming the missing path",
         "Changing one file re-models only that file and its dependants (asserted via instrumentation)"
       ],
-      "passes": false,
-      "notes": "From F-103: includeConfig sources are ConfigInclude nodes with the source expression; resolving them (and reporting 'Invalid include source') is F-105's. From F-104: SourceFile (lang-core) with status modelled/partial/verbatim/plain; top-level Unparsed items keep their text and a DeclarationHead (keyword, name); engine createSourceFile(path, text, await loadParser(version)); the loaded SourceParser also carries the printer."
+      "passes": true,
+      "notes": "From F-103: includeConfig sources are ConfigInclude nodes with the source expression; resolving them (and reporting 'Invalid include source') is F-105's. From F-104: SourceFile (lang-core) with status modelled/partial/verbatim/plain; top-level Unparsed items keep their text and a DeclarationHead (keyword, name); engine createSourceFile(path, text, await loadParser(version)); the loaded SourceParser also carries the printer. Verified 2026-11-22: step 1 by packages/engine/test/corpus/model.corpus.ts (CI corpus-parse): on all 5 pins, all 589 script includes resolve (549 local, 40 plugin, 0 registry), 550 entries bind, all 117 constant includeConfig resolve, 8 dynamic ones are external (unchecked, as nf-lang), and there are 0 diagnostics, as lint reports 0 errors; deleting 75 real targets gives each of their 150 includers an include-target diagnostic naming the path, and restoring them restores the model. Messages and positions match nextflow lint in oracle cases f105-includes-resolve and f105-includes-missing. Step 2 by packages/engine/test/model/project.test.ts and the corpus test: a change parses only the changed file and re-models it and its dependants (trace instrumentation, 88 corpus files changed), untouched models are kept by identity, and the incremental model equals a fresh build (200-step seeded property and on every pin). ADR 0034. No Playwright test (no UI, Q13): evidence is PR #30 and its CI corpus-parse and oracle jobs."
     },
     {
       "id": "F-106",
@@ -310,7 +310,7 @@
         "Node identities are stable across a re-parse with whitespace-only changes"
       ],
       "passes": false,
-      "notes": ""
+      "notes": "From F-105: ProjectModel.lookup(path, name) gives a call's binding (a local declaration, or an include entry with its resolved target and declaration); plugin entries have none; entries bound to Unparsed draw as unparsed nodes; ResolvedEntry.pipeline marks pipeline includes."
     },
     {
       "id": "F-107",
@@ -437,7 +437,7 @@
         "Every message states what to do; mechanical cases carry a quick-fix command"
       ],
       "passes": false,
-      "notes": "From F-101: 8 ported AgentParserTest inputs (L485-L491, L518: agent output types, eval not defined) parse and are rejected only by name and type resolution (owner F-112 in packages/lang-2610/test/ported/cases.json). From F-102: AST-builder errors come with nf-lang wording in ScriptParseResult.errors (source builder or parser); warnings (ScriptAstBuilder.java #L597, #L619, #L634, #L695, #L824, #L836, #L977, #L1059) and resolver errors are F-112's. From F-103: selector placement, includeConfig placement and include resolution are resolver checks, not AST-builder errors (lint 26.10.7: a selector inside docker passes lint; includeConfig inside process gives 'Config includes are only allowed at the top-level or in a profile'); decimal number-format errors are not ported. From F-104: whole-script checks carry scope 'file' and never isolate a declaration; Unparsed.problems hold the chunk's own errors; source 'internal' marks caught exceptions and model-check failures."
+      "notes": "From F-101: 8 ported AgentParserTest inputs (L485-L491, L518: agent output types, eval not defined) parse and are rejected only by name and type resolution (owner F-112 in packages/lang-2610/test/ported/cases.json). From F-102: AST-builder errors come with nf-lang wording in ScriptParseResult.errors (source builder or parser); warnings (ScriptAstBuilder.java #L597, #L619, #L634, #L695, #L824, #L836, #L977, #L1059) and resolver errors are F-112's. From F-103: selector placement, includeConfig placement and include resolution are resolver checks, not AST-builder errors (lint 26.10.7: a selector inside docker passes lint; includeConfig inside process gives 'Config includes are only allowed at the top-level or in a profile'); decimal number-format errors are not ported. From F-104: whole-script checks carry scope 'file' and never isolate a declaration; Unparsed.problems hold the chunk's own errors; source 'internal' marks caught exceptions and model-check failures. From F-105: Diagnostic (lang-core) with codes include-target, include-not-parsed and include-name at the include node; left to F-112: pipeline-include typing errors (ResolveIncludeVisitor L134-L137), alias rules (records and enums can't be aliased; workflow and params must be), duplicate names (scope keeps the first) and config include placement."
     },
     {
       "id": "F-113",
@@ -456,7 +456,7 @@
         "The main thread does no parsing (asserted in a Playwright performance trace)"
       ],
       "passes": false,
-      "notes": "From F-201's plan: the shell reads installed pack versions through engine on the main thread; once a pack's entry holds the parser, move that list behind the worker so the parser stays out of the initial bundle (QA-01 check will catch it). From F-006: QA-03 risk. Sarek parses in 1.1 s warm but 15.9 s cold in Node (first-use DFA construction for real grammar ambiguities; upstream Java pays it too). Measure in the worker, then consider parsing open or changed files first, warming the parser at worker start, or caching parse results. 2026-11-22, maintainer (ADR 0029): QA-03 no longer asks for 3 s. The worker must keep the UI responsive and report loading progress; sarek must finish within 30 s on the CI reference profile. The earlier cold-start note no longer needs lazy parsing or caching. From F-104: LanguagePack.loadParser() is a dynamic import (parser and printer in one chunk); call it in the worker. A failing file is parsed at most twice (whole, then per chunk); the whole-corpus round trip takes about 31 s in Node."
+      "notes": "From F-201's plan: the shell reads installed pack versions through engine on the main thread; once a pack's entry holds the parser, move that list behind the worker so the parser stays out of the initial bundle (QA-01 check will catch it). From F-006: QA-03 risk. Sarek parses in 1.1 s warm but 15.9 s cold in Node (first-use DFA construction for real grammar ambiguities; upstream Java pays it too). Measure in the worker, then consider parsing open or changed files first, warming the parser at worker start, or caching parse results. 2026-11-22, maintainer (ADR 0029): QA-03 no longer asks for 3 s. The worker must keep the UI responsive and report loading progress; sarek must finish within 30 s on the CI reference profile. The earlier cold-start note no longer needs lazy parsing or caching. From F-104: LanguagePack.loadParser() is a dynamic import (parser and printer in one chunk); call it in the worker. A failing file is parsed at most twice (whole, then per chunk); the whole-corpus round trip takes about 31 s in Node. From F-105: ProjectModel is synchronous; setFile/deleteFile return the re-modelled paths; the trace hook counts parse and model work; openProject(version, files) loads the pack's parser."
     },
     {
       "id": "F-201",
@@ -1102,7 +1102,7 @@
         "Drop it again: the bundle is not duplicated"
       ],
       "passes": false,
-      "notes": "From F-005 (S1): typed workflows may call legacy registry modules across files with no warning; tuple inputs as tuple(...), outputs by assignment (LA-14). .module-info isn't written until its checksum algorithm is verified with the oracle (ADR 0009 spike result)."
+      "notes": "From F-005 (S1): typed workflows may call legacy registry modules across files with no warning; tuple inputs as tuple(...), outputs by assignment (LA-14). .module-info isn't written until its checksum algorithm is verified with the oracle (ADR 0009 spike result). From F-105: registry includes need modules/<scope>/<name>/main.nf and meta.yml, under the project root or, for scripts under a modules/ directory, under that directory (nested vendoring); .module-info isn't needed to resolve (ADR 0034)."
     },
     {
       "id": "F-505",
@@ -1160,7 +1160,7 @@
         "An unknown option in an imported config is kept and flagged"
       ],
       "passes": false,
-      "notes": "From F-103: the config AST is syntactic. Profiles, params and env are ConfigBlocks; selectors are ConfigSelector with the kind as written; plugins is ConfigApplyBlock; mapping to catalogue/config.json is F-601's."
+      "notes": "From F-103: the config AST is syntactic. Profiles, params and env are ConfigBlocks; selectors are ConfigSelector with the kind as written; plugins is ConfigApplyBlock; mapping to catalogue/config.json is F-601's. From F-105: FI-05 links come from FileModel.includes (config includes with file targets); external sources (expressions, URLs) have no link."
     },
     {
       "id": "F-602",

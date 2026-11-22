@@ -13,5 +13,8 @@
   "dependencies": {
     "@nf-builder/lang-2610": "workspace:*",
     "@nf-builder/lang-core": "workspace:*"
+  },
+  "devDependencies": {
+    "yaml": "2.9.1"
   }
 }

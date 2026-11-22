@@ -1,4 +1,8 @@
-import type { LanguagePack, SourceParser } from "@nf-builder/lang-core";
+import type {
+  IncludeRules,
+  LanguagePack,
+  SourceParser,
+} from "@nf-builder/lang-core";
 import { describe, expect, it } from "vitest";
 import { installedPackVersions } from "../../src/packs";
 import { loadParser } from "../../src/source/parser";
@@ -11,6 +15,7 @@ const stub: SourceParser = {
 const fake = (load: () => Promise<SourceParser>): LanguagePack => ({
   version: "99.01",
   palette: { categories: [] },
+  includes: {} as IncludeRules,
   loadCatalogue: () => Promise.reject(new Error("not used here")),
   loadParser: load,
 });

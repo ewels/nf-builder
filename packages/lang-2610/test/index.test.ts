@@ -71,3 +71,38 @@ describe("F-104 the pack loads its parser lazily", () => {
     expect(source).toMatch(/import\(["']\.\/source\/index\.ts["']\)/);
   });
 });
+
+describe("F-105 the pack provides include rules", () => {
+  it("F-105 ADR-0006 LA-02: the pack provides include rules without loading the parser", () => {
+    const { includes } = entry.pack;
+    const tree = {
+      isFile: (p: string) => p === "modules/a.nf",
+      isDirectory: () => false,
+    };
+    expect(includes.scriptInclude("main.nf", "./modules/a", tree)).toEqual({
+      kind: "file",
+      path: "modules/a.nf",
+      module: null,
+    });
+    expect(includes.notParsed("x.nf")).toBe(
+      "Module could not be parsed: 'x.nf'",
+    );
+    expect(includes.notDefined("N", "x.nf")).toBe(
+      "Included name 'N' is not defined in module 'x.nf'",
+    );
+    const source = readFileSync(
+      new URL("../src/index.ts", import.meta.url),
+      "utf8",
+    );
+    const statics = [
+      ...source.matchAll(
+        /^\s*(?:import|export)\b[^;]*?from\s+["']([^"']+)["']/gms,
+      ),
+    ].map((m) => m[1] as string);
+    expect(statics).toContain("./includes/index.ts");
+    for (const spec of statics)
+      expect(spec, spec).not.toMatch(
+        /\.\/(ast|parser|source|generated)|antlr4ng/,
+      );
+  });
+});

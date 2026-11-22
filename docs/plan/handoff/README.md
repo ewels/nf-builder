@@ -10,7 +10,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-103 config AST | merged, PR #24 | |
 | F-104 round trip | merged, PR #26 | |
 | F-110 printer | merged, PR #25 | |
-| F-105 semantic model | `feat/F-105` | Tasks 1–2 building. [plan](plan-F-105.md). |
+| F-105 semantic model | `feat/F-105`, in PR | Plan deleted in its PR. |
 | F-106 typed projection | not started | [plan](plan-F-106.md). Branch from `main` after F-105 merges. |
 | F-107 legacy projection | not started | [plan](plan-F-107.md). After F-106; parallel with F-108. |
 | F-108 code nodes | not started | [plan](plan-F-108.md). After F-106; parallel with F-107. |
@@ -40,7 +40,7 @@ Next free ADR number: 0036 (0034 is F-105's, 0035 F-501's).
 - Port legacy printing too; default formatter flags only; no pack loader in F-110 (the parser loader from F-104 or F-111 carries the printer); the plan's oracle extension; corpus parity in the `corpus-parse` job; reuse F-102's fixtures by path; statement-level printing left to F-111; no fast-check yet.
 - Spec gap: also print feature flags, enums and agents if cheap; record what LA-45 formats.
 
-### F-105 — [plan](plan-F-105.md)
+### F-105 (merged with its PR)
 - Accept every recommendation in section 6: rules in the pack (`LanguagePack.includes`, new ADR); minimal `Diagnostic` in lang-core; nf-lang wording, our own for registry cases lint can't report; upstream registry fidelity (nested vendoring, `meta.yml`) with the AR-03 clarification; dynamic `includeConfig` counted as external; partial targets bind what they can; direct dependants only; F-112 keeps the typing, alias and duplicate checks; two lint-only oracle cases; `yaml` as an engine dev dependency.
 - Rebase the plan on F-104's names as built before task 2 (section 1.4 lists them).
 
