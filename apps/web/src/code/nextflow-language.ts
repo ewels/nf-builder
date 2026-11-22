@@ -11,46 +11,59 @@ import { monaco, NEXTFLOW_LANGUAGE_ID } from "./monaco";
 export const NEXTFLOW_THEME = "github-light";
 
 let registered: Promise<void> | undefined;
+let languageDone = false;
 
-/** Registers the language, its configuration and the highlighting once. */
+/**
+ * Registers the language, its configuration and the highlighting once. If Shiki fails the editor still opens with plain
+ * tokens, and the next mount tries the highlighting again.
+ */
 export function registerNextflow(): Promise<void> {
   registered ??= (async () => {
-    monaco.languages.register({
-      id: NEXTFLOW_LANGUAGE_ID,
-      extensions: [".nf"],
-      aliases: ["Nextflow"],
-    });
-    monaco.languages.setLanguageConfiguration(NEXTFLOW_LANGUAGE_ID, {
-      comments: { lineComment: "//", blockComment: ["/*", "*/"] },
-      brackets: [
-        ["{", "}"],
-        ["[", "]"],
-        ["(", ")"],
-      ],
-      autoClosingPairs: [
-        { open: "{", close: "}" },
-        { open: "[", close: "]" },
-        { open: "(", close: ")" },
-        { open: "'", close: "'", notIn: ["string", "comment"] },
-        { open: '"', close: '"', notIn: ["string", "comment"] },
-      ],
-      surroundingPairs: [
-        { open: "{", close: "}" },
-        { open: "[", close: "]" },
-        { open: "(", close: ")" },
-        { open: "'", close: "'" },
-        { open: '"', close: '"' },
-      ],
-    });
-    const highlighter = await createHighlighterCore({
-      langs: [nextflow],
-      themes: [githubLight],
-      engine: createJavaScriptRegexEngine(),
-    });
-    shikiToMonaco(
-      highlighter,
-      monaco as unknown as Parameters<typeof shikiToMonaco>[1],
-    );
+    if (!languageDone) registerLanguage();
+    languageDone = true;
+    try {
+      const highlighter = await createHighlighterCore({
+        langs: [nextflow],
+        themes: [githubLight],
+        engine: createJavaScriptRegexEngine(),
+      });
+      shikiToMonaco(
+        highlighter,
+        monaco as unknown as Parameters<typeof shikiToMonaco>[1],
+      );
+    } catch {
+      registered = undefined;
+    }
   })();
   return registered;
+}
+
+function registerLanguage(): void {
+  monaco.languages.register({
+    id: NEXTFLOW_LANGUAGE_ID,
+    extensions: [".nf"],
+    aliases: ["Nextflow"],
+  });
+  monaco.languages.setLanguageConfiguration(NEXTFLOW_LANGUAGE_ID, {
+    comments: { lineComment: "//", blockComment: ["/*", "*/"] },
+    brackets: [
+      ["{", "}"],
+      ["[", "]"],
+      ["(", ")"],
+    ],
+    autoClosingPairs: [
+      { open: "{", close: "}" },
+      { open: "[", close: "]" },
+      { open: "(", close: ")" },
+      { open: "'", close: "'", notIn: ["string", "comment"] },
+      { open: '"', close: '"', notIn: ["string", "comment"] },
+    ],
+    surroundingPairs: [
+      { open: "{", close: "}" },
+      { open: "[", close: "]" },
+      { open: "(", close: ")" },
+      { open: "'", close: "'" },
+      { open: '"', close: '"' },
+    ],
+  });
 }
