@@ -6,7 +6,7 @@
 //   doesn't exist yet, or access is refused) the build warns and emits nothing, so the site builds without a snapshot.
 //   Only an unexpected failure after a successful read, such as a corrupt clone, fails the build.
 // - Otherwise: emit nothing.
-import { execFileSync } from "node:child_process";
+import { spawnSync } from "node:child_process";
 import {
   mkdtempSync,
   readdirSync,
@@ -46,7 +46,9 @@ type Fetched = { fetched: true } | { fetched: false; reason: string };
 
 /**
  * Shallow-clones `branch` of `url` into `into`. When the branch can't be read (missing, no access, any failure of
- * `git ls-remote`) it says why instead of throwing; a failure of the clone after a successful read still throws.
+ * `git ls-remote`) it says why instead of throwing; a failure of the clone after a successful read throws.
+ * The token goes to git through the environment, never argv, and errors carry only the exit code and one line of stderr,
+ * because the build log shows messages and Netlify masks only the plain secret, not its base64.
  */
 export function fetchSnapshotBranch(
   url: string,
@@ -54,33 +56,31 @@ export function fetchSnapshotBranch(
   into: string,
   token?: string,
 ): Fetched {
-  const auth = token
-    ? [
-        "-c",
-        `http.extraheader=AUTHORIZATION: basic ${Buffer.from(`x-access-token:${token}`).toString("base64")}`,
-      ]
-    : [];
-  const run = (args: string[]): void =>
-    void execFileSync("git", [...auth, ...args], {
-      stdio: "pipe",
-      env: { ...process.env, GIT_TERMINAL_PROMPT: "0" },
-    });
-  try {
-    run(["ls-remote", "--exit-code", "--heads", url, branch]);
-  } catch (error) {
-    const { status, stderr } = error as { status?: number; stderr?: unknown };
-    // `ls-remote --exit-code` exits 2 when no ref matches.
-    if (status === 2)
-      return { fetched: false, reason: `no ${branch} branch in ${url}` };
-    const detail = String(stderr ?? error)
+  const env: NodeJS.ProcessEnv = { ...process.env, GIT_TERMINAL_PROMPT: "0" };
+  if (token) {
+    // Append to any config the environment already carries.
+    const n = Number(process.env.GIT_CONFIG_COUNT) || 0;
+    env.GIT_CONFIG_COUNT = String(n + 1);
+    env[`GIT_CONFIG_KEY_${n}`] = "http.extraheader";
+    env[`GIT_CONFIG_VALUE_${n}`] =
+      `AUTHORIZATION: basic ${Buffer.from(`x-access-token:${token}`).toString("base64")}`;
+  }
+  const git = (args: string[]): { status: number | null; failure: string } => {
+    const result = spawnSync("git", args, { env, encoding: "utf8" });
+    const line = (result.error?.message ?? result.stderr ?? "")
       .trim()
       .split("\n")[0];
     return {
-      fetched: false,
-      reason: `git ls-remote ${url} failed (exit ${status}): ${detail}`,
+      status: result.status,
+      failure: `git ${args[0]} failed (exit ${result.status}): ${line}`,
     };
-  }
-  run([
+  };
+  const list = git(["ls-remote", "--exit-code", "--heads", url, branch]);
+  // `ls-remote --exit-code` exits 2 when no ref matches.
+  if (list.status === 2)
+    return { fetched: false, reason: `no ${branch} branch in ${url}` };
+  if (list.status !== 0) return { fetched: false, reason: list.failure };
+  const clone = git([
     "clone",
     "--quiet",
     "--depth",
@@ -91,6 +91,7 @@ export function fetchSnapshotBranch(
     url,
     into,
   ]);
+  if (clone.status !== 0) throw new Error(clone.failure);
   return { fetched: true };
 }
 

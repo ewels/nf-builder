@@ -70,14 +70,30 @@ function repo(branch: "snapshot" | "empty" | false): string {
   return pathToFileURL(dir).href;
 }
 
-/** Puts a `git` first on PATH that logs its arguments and GIT_TERMINAL_PROMPT, then runs the real one. */
+/**
+ * Puts a `git` first on PATH that logs GIT_TERMINAL_PROMPT, the GIT_CONFIG_* environment and each argument (as
+ * `env:` and `arg:` lines), then runs the real one. With NF_FAIL_CLONE set, `git clone` fails after printing a line.
+ */
 function gitLog(): string {
   const bin = tmp();
   const log = join(bin, "git.log");
   const script = join(bin, "git");
   writeFileSync(
     script,
-    `#!/bin/sh\nprintf '%s\\n' "prompt=$GIT_TERMINAL_PROMPT" "$@" >> "${log}"\nexec "${realGit}" "$@"\n`,
+    `#!/bin/sh
+{
+  printf 'env:prompt=%s\n' "$GIT_TERMINAL_PROMPT"
+  n=$(( \${GIT_CONFIG_COUNT:-0} - 1 ))
+  if [ "$n" -ge 0 ]; then eval "k=\\$GIT_CONFIG_KEY_$n v=\\$GIT_CONFIG_VALUE_$n"; else k=; v=; fi
+  printf 'env:config=%s|%s\n' "$k" "$v"
+  for a in "$@"; do printf 'arg:%s\n' "$a"; done
+} >> "${log}"
+if [ "$1" = clone ] && [ -n "$NF_FAIL_CLONE" ]; then
+  printf 'fatal: simulated clone failure\nsecond line\n' >&2
+  exit 128
+fi
+exec "${realGit}" "$@"
+`,
   );
   chmodSync(script, 0o755);
   process.env.PATH = `${bin}:${originalPath}`;
@@ -147,22 +163,58 @@ describe("F-501 registry snapshot site plugin", () => {
     expect(warnings.join()).toMatch(/without \/registry\//);
     // Git never prompts for a username, and no token means no auth header.
     const calls = readFileSync(log, "utf8");
-    expect(calls).toContain("prompt=0");
-    expect(calls).not.toContain("http.extraheader");
+    expect(calls).toContain("env:prompt=0");
+    expect(calls).not.toContain("extraheader");
   });
 
-  it("F-501 step 1: REGISTRY_SNAPSHOT_TOKEN is passed to git as a basic-auth header, never in the URL", async () => {
+  it("F-501 step 1: REGISTRY_SNAPSHOT_TOKEN reaches git as a basic-auth header in the environment, never in argv or the URL", async () => {
+    const url = repo("snapshot");
     const log = gitLog();
     await build({
       NETLIFY: "true",
-      REPOSITORY_URL: repo("snapshot"),
+      REPOSITORY_URL: url,
       REGISTRY_SNAPSHOT_TOKEN: "s3cret",
     });
-    const calls = readFileSync(log, "utf8");
-    const header = `http.extraheader=AUTHORIZATION: basic ${Buffer.from("x-access-token:s3cret").toString("base64")}`;
-    expect(calls).toContain(header);
-    expect(calls).toContain("prompt=0");
-    expect(calls).not.toContain("s3cret");
+    const calls = readFileSync(log, "utf8").split("\n");
+    const base64 = Buffer.from("x-access-token:s3cret").toString("base64");
+    const env = calls.filter((l) => l.startsWith("env:config="));
+    const args = calls.filter((l) => l.startsWith("arg:"));
+    expect(env.length).toBeGreaterThanOrEqual(2);
+    for (const line of env)
+      expect(line).toBe(
+        `env:config=http.extraheader|AUTHORIZATION: basic ${base64}`,
+      );
+    expect(args.length).toBeGreaterThan(0);
+    for (const line of args) {
+      expect(line).not.toContain("s3cret");
+      expect(line).not.toContain(base64);
+      expect(line).not.toContain("extraheader");
+    }
+    expect(calls).toContain("env:prompt=0");
+  });
+
+  it("F-501 step 1: when the clone fails after a successful ls-remote the error names the exit code and one line of stderr, never the token, its base64 or the command line", async () => {
+    gitLog();
+    process.env.NF_FAIL_CLONE = "1";
+    try {
+      const failure = await build({
+        NETLIFY: "true",
+        REPOSITORY_URL: repo("snapshot"),
+        REGISTRY_SNAPSHOT_TOKEN: "s3cret",
+      }).catch((error: unknown) => error as Error);
+      expect(failure).toBeInstanceOf(Error);
+      const text = `${(failure as Error).message}\n${(failure as Error).stack}`;
+      expect(text).toContain("exit 128");
+      expect(text).toContain("simulated clone failure");
+      expect(text).not.toContain("second line");
+      expect(text).not.toContain("s3cret");
+      expect(text).not.toContain(
+        Buffer.from("x-access-token:s3cret").toString("base64"),
+      );
+      expect(text).not.toContain("Command failed");
+    } finally {
+      delete process.env.NF_FAIL_CLONE;
+    }
   });
 
   it("F-501 step 1: only an unexpected failure after a successful read (a branch without registry/) fails the build, and the temporary directory is always removed", async () => {
