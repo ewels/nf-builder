@@ -17,6 +17,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-111 edit commands | not started | [plan](plan-F-111.md). Tasks 1–6 need only F-105; 7 onwards need F-106. |
 | F-112 diagnostics | not started | [plan](plan-F-112.md). After F-106 (and F-111 for fixes). |
 | F-113 engine worker | not started | [plan](plan-F-113.md). After F-111. |
+| F-202 projects in IndexedDB | not started | [plan](plan-F-202.md). After F-113. |
 | F-501 registry snapshot | merged, PR #29, **not passing** | Blocked on #31 (Netlify can't read the snapshot branch of a private repository). F-502 to F-506, F-702, F-704 and F-705 depend on it. #27 (build hook). |
 
 Next free ADR number: 0036 (0034 is F-105's, 0035 F-501's).
@@ -69,6 +70,9 @@ Next free ADR number: 0036 (0034 is F-105's, 0035 F-501's).
 
 ### F-113 — [plan](plan-F-113.md)
 - Accept every recommendation in section 6: Comlink 4.4.2 as a runtime dependency of `@nf-builder/web` (ADR 0003 names it); pack versions from a pack-free `version` export, palette through the worker; Comlink only in apps/web; the page throttled 4× with worker timings reported unthrottled (Chromium can't throttle workers), clarified in `quality.md`; F-113 reports QA-03 and QA-04, F-702 gates QA-03; diagnostics from `ProjectModel.diagnostics()` until F-112 wires its diagnoser; `window.nfBuilderEngine` test hook; no double-parse optimisation yet; loading progress shown by F-202; the worker manifest and the `check:hosts` amendment; a `bench` job in `ci.yml` and `pnpm bench`. One ADR at landing.
+
+### F-202 — [plan](plan-F-202.md)
+- Accept every recommendation in section 6: a hand-written IndexedDB wrapper instead of Dexie (amends one clause of ADR 0002); schema v1 (`projects`, `files` keyed by `[projectId, path]`, text only) with migrations; storage and autosave in the engine worker, `persist()`/`estimate()` on the main thread; `fake-indexeddb` 6.2.8 as a web dev dependency; the IO-01 and IO-03 readings (warning at 80%, step 3 simulates 85%); blank project has no files until F-203; step 1's content edit through `window.nfBuilderEngine` until F-208; `readFile`/`close` added to F-113's service (fold in if F-113 is still open); no new UX row for loading progress; a disclosure-button switcher with native dialogs; no multi-tab coordination; the F-201 header test update and baseline re-approval from CI. One ADR at landing.
 
 ### F-501 (merged with its PR)
 - Accept every recommendation in section 6: an orphan `registry-snapshot` branch fetched by each Netlify build; ship without the build-hook secret and open a `maintainer` issue for it; split `index.json` (QA-06) and `ports.json`, with IO-31 read as the pair; `tools/registry-snapshot` may import lang-core and pack entries (amends ADR 0003); make lang-2610 erasable for plain Node; ports from registry metadata in `meta.yml` order; parser wins on kind and component; every bundle file; pinned dependency closure; plugin release admitted by the pinned Nextflow; the failure policy; a path-filtered PR dry run outside "CI green"; daily at 03:23 UTC; the fixture snapshot for e2e. ADR 0035 (F-105 takes 0034).
