@@ -1,20 +1,14 @@
 // The engine service (F-113): one open project, a revision counter, a projector snapshot per revision and a serial
 // call queue. Pure and DOM-free, so it runs in a worker or in Node; every result is plain data.
-import type {
-  CommandResult,
-  EditCommand,
-  FileText,
-  LanguagePack,
-  ParseProblem,
-  TextPatch,
-} from "@nf-builder/lang-core";
+import type { CommandResult, FileText } from "@nf-builder/lang-core";
 import {
   applyCommand,
   commit,
   createEditState,
   type EditState,
+  patchResult,
 } from "../edit/apply";
-import { applyPatches, PatchError } from "../edit/patches";
+import { PatchError } from "../edit/patches";
 import type { ModelEvent } from "../model/project";
 import { installedPacks } from "../packs";
 import { loadPalette } from "../palette";
@@ -32,8 +26,6 @@ import type {
 } from "./types";
 
 export interface EngineServiceOptions {
-  /** The packs `palette` reads; defaults to the installed ones. */
-  readonly packs?: readonly LanguagePack[];
   /** Called for every parse and model computation, including those of later edits (tests count work with it). */
   readonly trace?: (event: ModelEvent) => void;
 }
@@ -42,11 +34,7 @@ interface Open {
   readonly version: string;
   readonly state: EditState;
   projector?: Projector;
-  diagnostics?: DiagnosticsResult["diagnostics"];
 }
-
-const message = (error: unknown): string =>
-  error instanceof Error ? error.message : String(error);
 
 export function createEngineService(
   options: EngineServiceOptions = {},
@@ -64,16 +52,14 @@ export function createEngineService(
 
   const refusal = (
     code: EngineRefusalCode,
-    text: string,
-    path: string | null = null,
-    problems: readonly ParseProblem[] = [],
+    message: string,
   ): EngineRefusal => ({
     ok: false,
     revision: current ? revision : null,
     code,
-    message: text,
-    path,
-    problems,
+    message,
+    path: null,
+    problems: [],
   });
 
   const projectorOf = (open: Open): Projector => {
@@ -93,7 +79,6 @@ export function createEngineService(
   ): ProjectChange => {
     revision += 1;
     open.projector = undefined;
-    open.diagnostics = undefined;
     return {
       revision,
       files,
@@ -102,18 +87,34 @@ export function createEngineService(
     };
   };
 
-  /** Runs a call that needs the open project; any exception becomes an `internal` refusal (IO-14). */
+  /**
+   * Runs a call that needs the open project; any exception becomes an `internal` refusal. A call marks the point where
+   * it starts changing the model; after that point a throw may leave the model partly changed, so the snapshot is
+   * dropped and the revision moves on (a caller's older revision is then stale).
+   */
   const guarded = <T>(
-    fn: (open: Open) => T,
-  ): Promise<Exclude<T, never> | EngineRefusal> =>
+    fn: (open: Open, startedChanging: () => void) => T,
+  ): Promise<T | EngineRefusal> =>
     serial(() => {
       if (!current) return refusal("no-project", "No project is open.");
+      const open = current;
+      let changing = false;
       try {
-        return fn(current);
+        return fn(open, () => {
+          changing = true;
+        });
       } catch (error) {
+        const reason = error instanceof Error ? error.message : String(error);
+        if (!changing)
+          return refusal(
+            "internal",
+            `The engine failed unexpectedly (${reason}). Nothing was changed.`,
+          );
+        revision += 1;
+        open.projector = undefined;
         return refusal(
           "internal",
-          `The engine failed unexpectedly (${message(error)}). Nothing was changed.`,
+          `The engine failed unexpectedly while changing the project (${reason}). The project may be partly changed; use the new revision and check its files.`,
         );
       }
     });
@@ -129,7 +130,9 @@ export function createEngineService(
   const accept = (
     open: Open,
     result: Extract<CommandResult, { ok: true }>,
+    startedChanging: () => void,
   ): ApplyOutcome => {
+    startedChanging();
     const remodelled = commit(open.state, result);
     return {
       ok: true,
@@ -140,7 +143,7 @@ export function createEngineService(
   };
 
   return {
-    palette: (version) => serial(() => loadPalette(version, options.packs)),
+    palette: (version) => serial(() => loadPalette(version)),
 
     open: (request, onProgress) =>
       serial(async (): Promise<ProjectSummary> => {
@@ -189,7 +192,8 @@ export function createEngineService(
       }),
 
     writeFiles: (files) =>
-      guarded((open) => {
+      guarded((open, startedChanging) => {
+        startedChanging();
         const touched = new Set<string>();
         for (const file of files) {
           const change =
@@ -201,49 +205,29 @@ export function createEngineService(
         return changed(open, files, [...touched].sort());
       }),
 
-    apply: (command: EditCommand, given) =>
-      guarded((open): ApplyOutcome => {
+    apply: (command, given) =>
+      guarded((open, startedChanging): ApplyOutcome => {
         const old = stale(given);
         if (old) return old;
         const result = applyCommand(open.state, command);
-        if (!result.ok)
-          return refusal(
-            result.code,
-            result.message,
-            result.path,
-            result.problems,
-          );
-        return accept(open, result);
+        return result.ok
+          ? accept(open, result, startedChanging)
+          : { ...result, revision };
       }),
 
-    applyPatches: (patches: readonly TextPatch[], given) =>
-      guarded((open): ApplyOutcome => {
+    applyPatches: (patches, given) =>
+      guarded((open, startedChanging): ApplyOutcome => {
         const old = stale(given);
         if (old) return old;
-        const before = new Map<string, string>();
-        for (const patch of patches) {
-          const text = open.state.model.file(patch.path)?.source.text;
-          if (text !== undefined) before.set(patch.path, text);
-        }
-        let applied: ReturnType<typeof applyPatches>;
+        let result: Extract<CommandResult, { ok: true }>;
         try {
-          applied = applyPatches(before, patches);
+          result = patchResult(open.state.model, patches);
         } catch (error) {
           if (error instanceof PatchError)
             return refusal("invalid", error.message);
           throw error;
         }
-        const files: FileText[] = patches.map((p) => ({
-          path: p.path,
-          text:
-            p.kind === "delete" ? null : (applied.files.get(p.path) as string),
-        }));
-        return accept(open, {
-          ok: true,
-          patches,
-          inverse: applied.inverse,
-          files,
-        });
+        return accept(open, result, startedChanging);
       }),
 
     project: (path, workflow) =>
@@ -255,9 +239,11 @@ export function createEngineService(
       ),
 
     diagnostics: () =>
-      guarded((open): DiagnosticsResult => {
-        open.diagnostics ??= open.state.model.diagnostics();
-        return { revision, diagnostics: open.diagnostics };
-      }),
+      guarded(
+        (open): DiagnosticsResult => ({
+          revision,
+          diagnostics: open.state.model.diagnostics(),
+        }),
+      ),
   };
 }

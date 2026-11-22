@@ -91,22 +91,24 @@ export {
 } from "./projection/project";
 export { formatFlowType, formatType } from "./projection/types";
 export {
-  type Applied,
-  type ApplyOutcome,
   createEngineService,
-  type DiagnosticsResult,
-  type EngineApi,
-  type EngineRefusal,
-  type EngineRefusalCode,
   type EngineServiceOptions,
-  type FileSummary,
-  type LoadPhase,
-  type LoadProgress,
-  type OpenRequest,
-  type ProjectChange,
-  type ProjectionResult,
-  type ProjectSummary,
-} from "./service";
+} from "./service/service";
+export type {
+  Applied,
+  ApplyOutcome,
+  DiagnosticsResult,
+  EngineApi,
+  EngineRefusal,
+  EngineRefusalCode,
+  FileSummary,
+  LoadPhase,
+  LoadProgress,
+  OpenRequest,
+  ProjectChange,
+  ProjectionResult,
+  ProjectSummary,
+} from "./service/types";
 export {
   type Equivalence,
   equivalent,

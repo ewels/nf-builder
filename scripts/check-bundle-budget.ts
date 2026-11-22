@@ -29,12 +29,12 @@ type ManifestChunk = {
   css?: string[];
 };
 export type Manifest = Record<string, ManifestChunk>;
-export type Budget = {
+/** A budgets.json entry; QA-03 and QA-04 are time budgets (maxMs), read by scripts/bench-report.ts. */
+export type Budget<Limit extends "maxBytes" | "maxMs" = "maxBytes"> = {
   id: string;
   description: string;
-  maxBytes: number;
   reason: string;
-};
+} & Record<Limit, number>;
 type SizedFile = { file: string; bytes: number; gzipBytes: number };
 type BudgetResult = {
   ok: boolean;
@@ -47,7 +47,11 @@ type BudgetResult = {
 const BUDGETS_FILE: string = join(REPO_ROOT, "scripts/budgets.json");
 const MANIFEST_PATH = ".vite/manifest.json";
 
-export function readBudget(id: string, file: string = BUDGETS_FILE): Budget {
+export function readBudget<Limit extends "maxBytes" | "maxMs" = "maxBytes">(
+  id: string,
+  file: string = BUDGETS_FILE,
+  limit: Limit = "maxBytes" as Limit,
+): Budget<Limit> {
   let data: unknown;
   try {
     data = JSON.parse(readFileSync(file, "utf8"));
@@ -60,12 +64,9 @@ export function readBudget(id: string, file: string = BUDGETS_FILE): Budget {
   if (typeof entry !== "object" || entry === null)
     throw new Error(`${file}: no budget "${id}"`);
   const e = entry as Record<string, unknown>;
-  if (
-    typeof e.maxBytes !== "number" ||
-    !Number.isInteger(e.maxBytes) ||
-    e.maxBytes <= 0
-  )
-    throw new Error(`${file}: ${id}.maxBytes must be a positive integer`);
+  const max = e[limit];
+  if (typeof max !== "number" || !Number.isInteger(max) || max <= 0)
+    throw new Error(`${file}: ${id}.${limit} must be a positive integer`);
   if (typeof e.description !== "string" || e.description === "")
     throw new Error(`${file}: ${id}.description must be a non-empty string`);
   if (typeof e.reason !== "string" || e.reason === "")
@@ -73,9 +74,9 @@ export function readBudget(id: string, file: string = BUDGETS_FILE): Budget {
   return {
     id,
     description: e.description,
-    maxBytes: e.maxBytes,
+    [limit]: max,
     reason: e.reason,
-  };
+  } as Budget<Limit>;
 }
 
 /** Dist-relative paths of `<script src>` and `<link rel="modulepreload" href>` (attribute order free). */

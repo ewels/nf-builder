@@ -22,7 +22,7 @@ export interface OpenRequest {
 
 export type LoadPhase = "loading" | "parsing" | "modelling";
 
-/** Advisory loading progress; `path` is null outside the parsing phase. */
+/** Advisory loading progress. `done` counts files started (parsing begins on each), not finished; `path` is null outside the parsing phase. */
 export interface LoadProgress {
   readonly phase: LoadPhase;
   readonly done: number;

@@ -14,15 +14,7 @@ export interface WorkerChunk {
   dynamicImports: readonly string[];
 }
 
-export const WORKER_MANIFEST_FILE = ".vite/worker-manifest.json";
-
-interface ChunkLike {
-  type: string;
-  fileName: string;
-  facadeModuleId?: string | null;
-  isEntry?: boolean;
-  dynamicImports?: readonly string[];
-}
+const WORKER_MANIFEST_FILE = ".vite/worker-manifest.json";
 
 export function workerManifest(root: string): {
   collect(): Plugin;
@@ -33,20 +25,24 @@ export function workerManifest(root: string): {
     collect: () => ({
       name: "nf-builder:worker-manifest-collect",
       generateBundle(_options, bundle) {
-        for (const item of Object.values(bundle) as ChunkLike[]) {
+        for (const item of Object.values(bundle)) {
           if (item.type !== "chunk") continue;
           const id = item.facadeModuleId?.replace(/\?.*$/, "");
           chunks.set(item.fileName, {
             file: item.fileName,
             src: id ? relative(root, id).split("\\").join("/") : null,
-            isEntry: item.isEntry === true,
-            dynamicImports: [...(item.dynamicImports ?? [])],
+            isEntry: item.isEntry,
+            dynamicImports: [...item.dynamicImports],
           });
         }
       },
     }),
     emit: {
       name: "nf-builder:worker-manifest-emit",
+      // the main build starts before its worker builds, so a rebuild starts from an empty list
+      buildStart() {
+        chunks.clear();
+      },
       generateBundle() {
         this.emitFile({
           type: "asset",

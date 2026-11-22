@@ -1,6 +1,6 @@
 import { createEngineService, type LoadProgress } from "@nf-builder/engine";
-import { describe, expect, it } from "vitest";
-import { connectEngine } from "../src/engine/engine-client";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { connectEngine, getEngine } from "../src/engine/engine-client";
 import { exposeEngine } from "../src/engine/expose";
 
 const files = [
@@ -65,11 +65,49 @@ describe("F-113 engine client", () => {
       },
     });
     try {
+      // a fresh evaluation: the static import above has already run its module body
+      vi.resetModules();
       await import("../src/engine/engine-client");
       expect(touched).toBe(false);
     } finally {
       if (original) Object.defineProperty(globalThis, "Worker", original);
       else Reflect.deleteProperty(globalThis, "Worker");
     }
+  });
+});
+
+describe("F-113 engine client failures", () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("F-113: a call rejects when the worker fails to load, and the next getEngine starts a new worker", async () => {
+    const workers: FakeWorker[] = [];
+    class FakeWorker extends EventTarget {
+      terminated = false;
+      constructor() {
+        super();
+        workers.push(this);
+      }
+      postMessage() {}
+      terminate() {
+        this.terminated = true;
+      }
+    }
+    vi.stubGlobal("Worker", FakeWorker);
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const first = getEngine();
+    expect(getEngine()).toBe(first);
+    const pending = first.palette(version);
+    workers[0]?.dispatchEvent(new Event("error"));
+    await expect(pending).rejects.toThrow(/engine worker failed/);
+    // a call made after the failure rejects too, and the failed worker is gone
+    await expect(first.palette(version)).rejects.toThrow(
+      /engine worker failed/,
+    );
+    expect(workers[0]?.terminated).toBe(true);
+    const second = getEngine();
+    expect(second).not.toBe(first);
+    expect(workers).toHaveLength(2);
+    workers[1]?.dispatchEvent(new Event("messageerror"));
+    await expect(second.palette(version)).rejects.toThrow(/messageerror/);
   });
 });

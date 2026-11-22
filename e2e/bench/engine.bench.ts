@@ -7,7 +7,7 @@ import {
   writeBenchReport,
 } from "../../scripts/bench-report.ts";
 import { REPO_ROOT } from "../../scripts/check-common.ts";
-import { readProject } from "../engine.ts";
+import { type EngineHook, readProject } from "../engine.ts";
 
 const SAREK = join(REPO_ROOT, ".cache/corpus/sarek");
 // Every process sarek.nf includes is already called in SAREK, and AddCall refuses a second call. So the bench first
@@ -17,42 +17,18 @@ const TARGET = { path: "workflows/sarek.nf", workflow: "SAREK" };
 const WARMUP = 5;
 const MEASURED = 50;
 
-type Api = {
-  open(
-    request: { version: string; files: { path: string; text: string }[] },
-    onProgress?: (p: unknown) => void,
-  ): Promise<{ revision: number }>;
-  apply(
-    command: unknown,
-    revision: number,
-  ): Promise<{
-    ok: boolean;
-    revision: number | null;
-    inverse?: unknown;
-    code?: string;
-    message?: string;
-  }>;
-  applyPatches(
-    patches: unknown,
-    revision: number,
-  ): Promise<{ ok: boolean; revision: number | null }>;
-  project(path: string, workflow: string | null): Promise<unknown>;
-  writeFiles(
-    files: { path: string; text: string | null }[],
-  ): Promise<{ revision?: number; ok?: boolean }>;
-};
-
 test("F-113 step 1 QA-03 QA-04: sarek open time and edit p95 in the engine worker, reported against budgets", async ({
   page,
   browserName,
 }) => {
   if (!existsSync(SAREK))
     throw new Error("The sarek corpus is missing: run pnpm corpus:fetch");
-  const files = readProject(SAREK).filter((f) => !f.path.startsWith(".git/"));
+  // corpus:fetch removes .git, so this is every project file
+  const files = readProject(SAREK);
   const cdp = await page.context().newCDPSession(page);
   // QA-02's profile. It reaches the page but not the worker (Chromium can't throttle workers).
   await cdp.send("Emulation.setCPUThrottlingRate", { rate: 4 });
-  await page.goto("/");
+  await page.goto("./");
   // not timed: place the files in the page
   await page.evaluate((f) => {
     (window as unknown as { __files: unknown }).__files = f;
@@ -61,7 +37,7 @@ test("F-113 step 1 QA-03 QA-04: sarek open time and edit p95 in the engine worke
   const measured = await page.evaluate(
     async ({ target, callee, warmup, count }) => {
       const w = window as unknown as {
-        nfBuilderEngine: Api;
+        nfBuilderEngine: EngineHook;
         __files: { path: string; text: string }[];
       };
       const engine = w.nfBuilderEngine;

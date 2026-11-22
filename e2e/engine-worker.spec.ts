@@ -20,7 +20,7 @@ test("F-113 AR-04 QA-20 QA-30: the engine worker opens a project and applies an 
   tag: SMOKE_TAG,
 }, async ({ page }) => {
   const watch = await watchForCspViolations(page);
-  await page.goto("/");
+  await page.goto("./");
   const files = readProject(TREE);
   const target = "modules/local/a/main.nf";
   const text = files.find((f) => f.path === target)?.text ?? "";
@@ -62,6 +62,7 @@ test("F-113 step 2 QA-01 ADR-0033: the parser and the catalogue are built only i
       /catalogue\/(script|config)\.json$/,
     );
   }
+  // F-011: serves the app under /nf-builder/; initialJsFiles then needs the base path to match the HTML's asset URLs
   const html = readFileSync(join(WEB_DIST, "index.html"), "utf8");
   const initial = new Set(initialJsFiles(manifest, html));
   const worker = readWorkerManifest(WEB_DIST);
@@ -90,10 +91,8 @@ test("F-113 step 2 AR-04: the main thread does no parsing (Chromium performance 
   browserName,
 }) => {
   test.skip(browserName !== "chromium", "performance traces are Chromium only");
-  await page.goto("/");
-  const files = readProject(
-    join(REPO_ROOT, "tools/oracle/cases/f105-includes-resolve"),
-  );
+  await page.goto("./");
+  const files = readProject(TREE);
   const main = files.find((f) => f.path === "main.nf")?.text ?? "";
   await browser.startTracing(page, {
     categories: [
@@ -125,12 +124,22 @@ test("F-113 step 2 AR-04: the main thread does no parsing (Chromium performance 
   );
   const trace = JSON.parse((await browser.stopTracing()).toString("utf8"));
   expect(applied).toBe(true);
-  const parser = parserChunks();
-  expect(parser.length).toBeGreaterThan(0);
+  // every built script that holds the parser, wherever it was built, so a parser loaded on the main thread shows up
+  const holders = readdirSync(join(WEB_DIST, "assets"))
+    .filter((f) => f.endsWith(".js"))
+    .filter((f) =>
+      readFileSync(join(WEB_DIST, "assets", f), "utf8").includes(PARSER_MARKER),
+    );
+  expect(holders.length).toBeGreaterThan(0);
   const activity = scriptActivity(trace, (url) =>
-    parser.some((file) => url.endsWith(`/${file}`)),
+    holders.some((file) => url.endsWith(`/assets/${file}`)),
   );
-  expect(activity.get("CrRendererMain")).toEqual({ samples: 0, compiles: 0 });
+  // the main thread was profiled (a missing profile can't pass) and ran no parser code
+  expect(activity.get("CrRendererMain")?.total).toBeGreaterThan(0);
+  expect(activity.get("CrRendererMain")).toMatchObject({
+    samples: 0,
+    compiles: 0,
+  });
   // positive control: the same analysis sees the parser run on the worker thread
   expect(activity.get("DedicatedWorker thread")?.samples).toBeGreaterThan(0);
 });

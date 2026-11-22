@@ -85,9 +85,14 @@ describe("trace analysis", () => {
       ],
     };
     const activity = scriptActivity(trace, (u) => u.includes("source-"));
-    expect(activity.get("CrRendererMain")).toEqual({ samples: 0, compiles: 0 });
+    expect(activity.get("CrRendererMain")).toEqual({
+      samples: 0,
+      total: 3,
+      compiles: 0,
+    });
     expect(activity.get("DedicatedWorker thread")).toEqual({
       samples: 3,
+      total: 3,
       compiles: 1,
     });
   });
@@ -102,5 +107,25 @@ describe("trace analysis", () => {
         () => true,
       ),
     ).toThrow(/profile/i);
+  });
+
+  it("F-113 step 2: a thread whose profile has no samples reports a zero total (main thread not profiled)", () => {
+    const trace = {
+      traceEvents: [
+        thread(1, 10, "CrRendererMain"),
+        thread(1, 20, "DedicatedWorker thread"),
+        thread(1, 30, "v8:ProfEvntProc"),
+        profile(1, 10, "0x1"),
+        profile(1, 20, "0x2"),
+        chunk(1, 30, "0x2", [{ id: 1, url }], [1]),
+      ],
+    };
+    const activity = scriptActivity(trace, (u) => u.includes("source-"));
+    expect(activity.get("CrRendererMain")).toEqual({
+      samples: 0,
+      total: 0,
+      compiles: 0,
+    });
+    expect(activity.get("DedicatedWorker thread")?.total).toBe(1);
   });
 });

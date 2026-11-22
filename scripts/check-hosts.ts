@@ -107,16 +107,11 @@ function hostsOf(origins: readonly string[]): string {
 /** Absolute paths of the built chunks that come straight from a .json source, per the Vite and worker manifests. */
 function jsonChunks(distDir: string): Set<string> {
   const path = join(distDir, ".vite/manifest.json");
+  const vite: { src?: string; file: string }[] = existsSync(path)
+    ? Object.values(JSON.parse(readFileSync(path, "utf8")))
+    : [];
   const chunks = new Set<string>();
-  if (existsSync(path)) {
-    const manifest = JSON.parse(readFileSync(path, "utf8")) as Record<
-      string,
-      { src?: string; file: string }
-    >;
-    for (const { src, file } of Object.values(manifest))
-      if (src?.endsWith(".json")) chunks.add(resolve(distDir, file));
-  }
-  for (const { src, file } of readWorkerManifest(distDir))
+  for (const { src, file } of [...vite, ...readWorkerManifest(distDir)])
     if (src?.endsWith(".json")) chunks.add(resolve(distDir, file));
   return chunks;
 }

@@ -21,7 +21,10 @@ interface TraceEvent {
 }
 
 export interface ThreadActivity {
+  /** CPU profile samples whose frame is in a target script. */
   samples: number;
+  /** All CPU profile samples of the thread, so a thread that was never profiled can't pass for "no parsing". */
+  total: number;
   compiles: number;
 }
 
@@ -30,9 +33,7 @@ export function scriptActivity(
   trace: unknown,
   isTarget: (url: string) => boolean,
 ): Map<string, ThreadActivity> {
-  const events: TraceEvent[] = Array.isArray(trace)
-    ? trace
-    : ((trace as { traceEvents?: TraceEvent[] }).traceEvents ?? []);
+  const events = (trace as { traceEvents?: TraceEvent[] }).traceEvents ?? [];
   const names = new Map<string, string>();
   const key = (e: TraceEvent) => `${e.pid}:${e.tid}`;
   for (const e of events)
@@ -46,7 +47,7 @@ export function scriptActivity(
 
   const activity = new Map<string, ThreadActivity>();
   for (const name of names.values())
-    activity.set(name, { samples: 0, compiles: 0 });
+    activity.set(name, { samples: 0, total: 0, compiles: 0 });
   const entry = (e: TraceEvent) => activity.get(names.get(key(e)) ?? "");
 
   // Chromium emits ProfileChunk events from a profiler thread; the `Profile` event with the same pid and id is on the
@@ -67,8 +68,11 @@ export function scriptActivity(
     if (e.name === "ProfileChunk") {
       const thread = sampled.get(profileKey(e));
       const set = targets.get(profileKey(e));
-      for (const id of e.args?.data?.cpuProfile?.samples ?? [])
-        if (thread && set?.has(id)) thread.samples += 1;
+      for (const id of e.args?.data?.cpuProfile?.samples ?? []) {
+        if (!thread) continue;
+        thread.total += 1;
+        if (set?.has(id)) thread.samples += 1;
+      }
     } else if (e.name === "v8.compileModule") {
       const thread = entry(e);
       if (thread && isTarget(e.args?.fileName ?? e.args?.url ?? ""))

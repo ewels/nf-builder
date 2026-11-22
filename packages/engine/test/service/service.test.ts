@@ -5,16 +5,17 @@ import type {
   TextPatch,
 } from "@nf-builder/lang-core";
 import { describe, expect, it } from "vitest";
-import { loadPalette, type ModelEvent } from "../../src";
-import { installedPackVersions } from "../../src/packs";
 import {
   type ApplyOutcome,
   createEngineService,
   type EngineRefusal,
   type LoadProgress,
+  loadPalette,
+  type ModelEvent,
   type ProjectChange,
   type ProjectionResult,
-} from "../../src/service";
+} from "../../src";
+import { installedPackVersions } from "../../src/packs";
 
 const version = installedPackVersions()[0] as string;
 const proc = (n: string) => `process ${n} {\n    script:\n    '${n}'\n}\n`;
@@ -241,11 +242,39 @@ describe("F-113 engine service", () => {
     for (const r of results) expect(structuredClone(r)).toEqual(r);
   });
 
-  it("F-113 IO-14: a failing open rejects and the next open works", async () => {
+  it("F-113: a failing open rejects and the next open works", async () => {
     const service = createEngineService();
     await expect(service.open({ version: "0.0", files })).rejects.toThrow();
     const summary = await service.open({ version, files });
     expect(summary.files).toHaveLength(3);
     expect(summary.revision).toBeGreaterThan(0);
+  });
+
+  it("F-113 AR-24: a throw after a write has started is an internal refusal that moves the revision on and does not claim nothing changed", async () => {
+    const { service, summary } = await opened();
+    const refused = await service.writeFiles([
+      { path: "extra.nf", text: proc("X") },
+      {
+        path: "bad.nf",
+        get text(): string {
+          throw new Error("boom");
+        },
+      },
+    ]);
+    expect(refused).toMatchObject({ ok: false, code: "internal" });
+    if (!("ok" in refused) || refused.ok) throw new Error("expected a refusal");
+    expect(refused.message).not.toMatch(/Nothing was changed/);
+    expect(refused.message).toMatch(/partly changed/);
+    expect(refused.revision).toBe(summary.revision + 1);
+    // the old revision is stale, and the first write is in the model
+    expect(await service.apply(addB, summary.revision)).toMatchObject({
+      code: "stale",
+    });
+    const diagnostics = await service.diagnostics();
+    expect("diagnostics" in diagnostics && diagnostics.revision).toBe(
+      summary.revision + 1,
+    );
+    const next = ok(await service.apply(addB, summary.revision + 1));
+    expect(next.revision).toBe(summary.revision + 2);
   });
 });

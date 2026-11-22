@@ -13,6 +13,7 @@ export default defineConfig({
   timeout: 10 * 60_000,
   outputDir: "../test-results/bench",
   reporter: process.env.CI ? [["list"], ["github"]] : "list",
+  // F-011: the app is served under /nf-builder/, so the base URL (and the web server URL below) need that path
   use: { baseURL: PREVIEW_URL },
   projects: [
     {

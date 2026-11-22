@@ -28,7 +28,7 @@ export function parserChunks(): string[] {
     .map((c) => c.file);
 }
 
-/** The subset of the engine API the tests call, on `window.nfBuilderEngine`. */
+/** The subset of the engine API the tests and the bench call, on `window.nfBuilderEngine`. */
 export interface EngineHook {
   open(
     request: { version: string; files: { path: string; text: string }[] },
@@ -38,6 +38,9 @@ export interface EngineHook {
       total: number;
     }) => void,
   ): Promise<{ revision: number }>;
+  writeFiles(
+    files: { path: string; text: string | null }[],
+  ): Promise<{ revision?: number }>;
   apply(
     command: unknown,
     revision: number,
@@ -45,7 +48,13 @@ export interface EngineHook {
     ok: boolean;
     revision: number | null;
     remodelled?: string[];
+    inverse?: unknown;
     code?: string;
+    message?: string;
   }>;
+  applyPatches(
+    patches: unknown,
+    revision: number,
+  ): Promise<{ ok: boolean; revision: number | null }>;
   project(path: string, workflow: string | null): Promise<unknown>;
 }

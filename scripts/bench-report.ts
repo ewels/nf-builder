@@ -1,44 +1,14 @@
 // The QA-03 and QA-04 benchmark report (F-113): measurements from e2e/bench/engine.bench.ts against the time budgets in
 // scripts/budgets.json. Reported, not gated (ADR 0030): nothing here fails on a breach; F-702 gates QA-03.
-import {
-  appendFileSync,
-  mkdirSync,
-  readFileSync,
-  writeFileSync,
-} from "node:fs";
+import { appendFileSync, mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { type Budget, readBudget } from "./check-bundle-budget.ts";
 import { REPO_ROOT } from "./check-common.ts";
 
-const BUDGETS_FILE = join(REPO_ROOT, "scripts/budgets.json");
 const REPORTS_DIR = join(REPO_ROOT, ".cache/reports");
 
-export interface TimeBudget {
-  id: string;
-  description: string;
-  maxMs: number;
-  reason: string;
-}
-
-export function readTimeBudget(
-  id: "QA-03" | "QA-04",
-  file: string = BUDGETS_FILE,
-): TimeBudget {
-  const data = JSON.parse(readFileSync(file, "utf8")) as Record<
-    string,
-    unknown
-  >;
-  const e = data[id] as Record<string, unknown> | undefined;
-  if (
-    !e ||
-    typeof e.maxMs !== "number" ||
-    !(e.maxMs > 0) ||
-    typeof e.description !== "string" ||
-    typeof e.reason !== "string" ||
-    e.reason === ""
-  )
-    throw new Error(`${file}: "${id}" needs description, maxMs > 0 and reason`);
-  return { id, description: e.description, maxMs: e.maxMs, reason: e.reason };
-}
+export const readTimeBudget = (id: "QA-03" | "QA-04"): Budget<"maxMs"> =>
+  readBudget(id, undefined, "maxMs");
 
 /** Nearest rank: the smallest value with at least p% of the values at or below it. */
 export function percentile(values: readonly number[], p: number): number {
@@ -90,36 +60,23 @@ const stats = (values: readonly number[]): EditStats => ({
   max: Math.max(...values),
 });
 
+const row = (id: "QA-03" | "QA-04", measured: number): BenchRow => {
+  const { description, maxMs } = readTimeBudget(id);
+  return { id, description, measured, limit: maxMs, within: measured <= maxMs };
+};
+
 export function benchReport(result: BenchResult): BenchReport {
-  const all = result.edits.map((e) => e.ms);
   const kinds = [...new Set(result.edits.map((e) => e.kind))].sort();
   const perKind: Record<string, EditStats> = {};
   for (const kind of kinds)
     perKind[kind] = stats(
       result.edits.filter((e) => e.kind === kind).map((e) => e.ms),
     );
-  const overall = stats(all);
-  const qa3 = readTimeBudget("QA-03");
-  const qa4 = readTimeBudget("QA-04");
+  const overall = stats(result.edits.map((e) => e.ms));
   return {
     result,
     edits: { overall, perKind },
-    rows: [
-      {
-        id: "QA-03",
-        description: qa3.description,
-        measured: result.open.coldMs,
-        limit: qa3.maxMs,
-        within: result.open.coldMs <= qa3.maxMs,
-      },
-      {
-        id: "QA-04",
-        description: qa4.description,
-        measured: overall.p95,
-        limit: qa4.maxMs,
-        within: overall.p95 <= qa4.maxMs,
-      },
-    ],
+    rows: [row("QA-03", result.open.coldMs), row("QA-04", overall.p95)],
   };
 }
 

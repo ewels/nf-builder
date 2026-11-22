@@ -85,19 +85,9 @@ export function applyCommand(
   command: EditCommand,
 ): CommandResult {
   try {
-    const patches = build(state, command);
-    const current = new Map<string, string>();
-    for (const path of state.model.paths()) {
-      const file = state.model.file(path);
-      if (file) current.set(path, file.source.text);
-    }
-    const applied = applyPatches(current, patches);
-    const files: FileText[] = patches.map((p) => ({
-      path: p.path,
-      text: p.kind === "delete" ? null : (applied.files.get(p.path) as string),
-    }));
-    checkResult((p) => state.model.file(p)?.source, files, state.parser);
-    return { ok: true, patches, inverse: applied.inverse, files };
+    const result = patchResult(state.model, build(state, command));
+    checkResult((p) => state.model.file(p)?.source, result.files, state.parser);
+    return result;
   } catch (error) {
     if (error instanceof EditRefusal)
       return {
@@ -115,6 +105,24 @@ export function applyCommand(
       problems: [],
     };
   }
+}
+
+/** Applies `patches` to the model's current texts without writing them; throws `PatchError` when they don't apply. */
+export function patchResult(
+  model: ProjectModel,
+  patches: readonly TextPatch[],
+): Extract<CommandResult, { ok: true }> {
+  const current = new Map<string, string>();
+  for (const { path } of patches) {
+    const text = model.file(path)?.source.text;
+    if (text !== undefined) current.set(path, text);
+  }
+  const applied = applyPatches(current, patches);
+  const files: FileText[] = patches.map((p) => ({
+    path: p.path,
+    text: p.kind === "delete" ? null : (applied.files.get(p.path) as string),
+  }));
+  return { ok: true, patches, inverse: applied.inverse, files };
 }
 
 /** Writes an accepted result into the model; returns the files the model recomputed, sorted. */
