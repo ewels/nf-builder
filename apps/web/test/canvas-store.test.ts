@@ -258,3 +258,24 @@ describe("F-205 canvas store", () => {
     expect(store.getState().summary).toBeNull();
   });
 });
+
+describe("F-208 view mode per tab", () => {
+  it("F-208 UX-27 AR-30: tabs open in Graph mode; setMode changes only that tab, and selecting a tab keeps its mode", async () => {
+    const wf = [ref("main.nf", null), ref("lib.nf", "LIB")];
+    const store = createCanvasStore(() => fake(wf).engine);
+    await store.getState().open(request);
+    await store.getState().openWorkflow("lib.nf", "LIB");
+    const modes = () => store.getState().tabs.map((t) => t.mode);
+    expect(modes()).toEqual(["graph", "graph"]);
+    store.getState().setMode("lib.nf#LIB", "code");
+    expect(modes()).toEqual(["graph", "code"]);
+    store.getState().setMode("main.nf#", "split");
+    await store.getState().selectTab("lib.nf#LIB");
+    expect(modes()).toEqual(["split", "code"]);
+    await store.getState().selectTab("main.nf#");
+    expect(modes()).toEqual(["split", "code"]);
+    // an unknown tab changes nothing
+    store.getState().setMode("none#", "code");
+    expect(modes()).toEqual(["split", "code"]);
+  });
+});

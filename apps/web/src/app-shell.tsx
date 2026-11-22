@@ -1,6 +1,5 @@
 import { installedPackVersions } from "@nf-builder/engine";
 import type { JSX } from "react";
-import { CanvasHost } from "./canvas/canvas-host";
 import { type CanvasContent, useWorkspace } from "./canvas/canvas-store";
 import { COLLAPSED_WIDTH, useLayout } from "./layout/layout-store";
 import { ProjectControls } from "./project/project-controls";
@@ -12,6 +11,8 @@ import { LeftColumn } from "./shell/left-column";
 import { SideColumn } from "./shell/side-column";
 import { StatusBar } from "./shell/status-bar";
 import { TabStrip } from "./shell/tab-strip";
+import { TabPanel } from "./views/tab-panel";
+import { useViewModeKeys } from "./views/use-view-mode-keys";
 
 const languageVersions = installedPackVersions();
 
@@ -29,6 +30,7 @@ export function canvasCounts(content: CanvasContent): {
 }
 
 export function AppShell(): JSX.Element {
+  useViewModeKeys();
   const left = useLayout((s) => s.left);
   const right = useLayout((s) => s.right);
   const leftWidth = left.collapsed ? COLLAPSED_WIDTH : left.width;
@@ -62,7 +64,7 @@ export function AppShell(): JSX.Element {
         )}
         <main className="column column-centre" aria-label="Canvas and editor">
           <TabStrip />
-          <CanvasHost />
+          <TabPanel />
         </main>
         {right.collapsed ? null : (
           <ColumnSeparator side="right" label="Resize details" />

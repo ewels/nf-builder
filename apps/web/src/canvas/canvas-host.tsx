@@ -2,7 +2,6 @@ import type { JSX } from "react";
 import { lazy, Suspense } from "react";
 import { CanvasPlaceholder } from "../project/project-status";
 import { useProjects } from "../project/project-store";
-import { workflowTabId } from "../shell/tab-strip";
 import { CanvasErrorBoundary } from "./canvas-error-boundary";
 import { useWorkspace } from "./canvas-store";
 
@@ -41,18 +40,5 @@ export function CanvasHost(): JSX.Element {
   else if (content.status === "loading")
     body = <p className="muted">Loading workflow…</p>;
   else body = <p className="muted">No workflow open</p>;
-  return (
-    <div
-      className="canvas-area"
-      id="canvas-panel"
-      {...(activeTab === null
-        ? {}
-        : {
-            role: "tabpanel",
-            "aria-labelledby": workflowTabId(activeTab),
-          })}
-    >
-      {body}
-    </div>
-  );
+  return <div className="canvas-area">{body}</div>;
 }

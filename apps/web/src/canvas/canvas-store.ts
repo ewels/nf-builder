@@ -12,6 +12,7 @@ import type {
 import { useStore } from "zustand";
 import { createStore, type StoreApi } from "zustand/vanilla";
 import { getEngine, onEngineChange } from "../engine/engine-client";
+import type { ViewMode } from "../views/view-mode";
 
 export interface WorkflowTab {
   /** `<path>#<workflow>`, the empty name for the entry workflow (the projection key prefix, ADR 0036). */
@@ -20,6 +21,8 @@ export interface WorkflowTab {
   /** Null for the entry workflow. */
   readonly workflow: string | null;
   readonly label: string;
+  /** The view mode of this tab, for the session (AR-30, UX-27). */
+  readonly mode: ViewMode;
 }
 
 export type CanvasContent =
@@ -56,6 +59,7 @@ export interface WorkspaceActions {
   changed(change: ProjectChange): Promise<void>;
   openWorkflow(path: string, workflow: string | null): Promise<void>;
   selectTab(id: string): Promise<void>;
+  setMode(tabId: string, mode: ViewMode): void;
   setPortLabels(value: boolean): void;
 }
 
@@ -83,6 +87,7 @@ export function tabFor(ref: {
     path: ref.path,
     workflow: ref.name,
     label: ref.name ?? fileName(ref.path),
+    mode: "graph",
   };
 }
 
@@ -201,6 +206,12 @@ export function createCanvasStore(
       async selectTab(id) {
         const tab = get().tabs.find((t) => t.id === id);
         if (tab !== undefined) await load(tab);
+      },
+
+      setMode(tabId, mode) {
+        set({
+          tabs: get().tabs.map((t) => (t.id === tabId ? { ...t, mode } : t)),
+        });
       },
 
       setPortLabels(portLabels) {
