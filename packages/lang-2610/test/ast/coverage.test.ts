@@ -103,6 +103,8 @@ describe("F-102 step 1: the fixtures cover the syntax reference", () => {
       "IncompleteDeclaration",
       "InvalidDeclaration",
       "IncompleteExpression",
+      // built only by F-104's fallback; tested in test/source/
+      "Unparsed",
     ]);
     const seen = new Set<string>();
     visit((node) => {

@@ -23,7 +23,7 @@ import type {
   Closure,
   Comment,
   ConfigAst,
-  ConfigStatement,
+  ConfigItem,
   Expression,
   IfStatement,
   MethodCall,
@@ -208,11 +208,15 @@ class Attacher {
   // statement takes no comments: upstream's attacher would take the incomplete one, but `buildAST` throws on it first.
 
   private configStatements(
-    statements: readonly ConfigStatement[],
+    statements: readonly ConfigItem[],
     parent: Container,
   ): void {
     for (const stmt of statements) {
-      if (stmt.kind === "ConfigIncomplete" || stmt.kind === "ConfigInvalid")
+      if (
+        stmt.kind === "ConfigIncomplete" ||
+        stmt.kind === "ConfigInvalid" ||
+        stmt.kind === "Unparsed"
+      )
         continue;
       this.addChild(parent, stmt);
       switch (stmt.kind) {

@@ -8,15 +8,15 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 |---|---|---|
 | F-102 script AST | merged, PR #23 | |
 | F-103 config AST | merged, PR #24 | |
-| F-104 round trip | `feat/F-104` | Tasks 1–2 building. [plan](plan-F-104.md). |
-| F-110 printer | `feat/F-110`, in PR | Plan deleted in its PR. |
+| F-104 round trip | `feat/F-104`, in PR | Plan deleted in its PR. |
+| F-110 printer | merged, PR #25 | |
 | F-105 semantic model | not started | [plan](plan-F-105.md). Branch from `main` after F-104 merges. |
 | F-106 typed projection | not started | [plan](plan-F-106.md). Branch from `main` after F-105 merges. |
 | F-107 legacy projection | not started | [plan](plan-F-107.md). After F-106; parallel with F-108. |
 | F-108 code nodes | not started | [plan](plan-F-108.md). After F-106; parallel with F-107. |
 | F-501 registry snapshot | not started | [plan](plan-F-501.md). Branch from `main` after F-104 merges; runs alongside F-105. |
 
-Next free ADR number: 0033.
+Next free ADR number: 0034.
 
 ## Decisions already taken on the plans' open points
 
@@ -30,7 +30,7 @@ Next free ADR number: 0033.
 - Snapshots all 228 corpus configs (one line per statement); fixture configs are oracle cases; integer number-format errors ported; `parseConfig` off the pack entry.
 - Records at landing: licences rows for ported `ConfigAstBuilder`, `EscapeUtils`, Groovy `Numbers` and the corpus-derived snapshots; AGENTS.md `pnpm test:corpus` row mentions `pnpm test:corpus config-ast -u`; F-112 notes for keyword checks, duplicate named arguments, decimal-number errors, selector placement and include resolution.
 
-### F-104 — [plan](plan-F-104.md)
+### F-104 (merged with its PR)
 - Accept the plan's recommendations: a new ADR for `LanguagePack.loadParser()` (lazy, like ADR 0028's `loadCatalogue()`) replacing the synchronous parse methods in the architecture sketch; `Unparsed` joins the AST unions; the plan's isolation and verbatim rules; its reading of the glossary's "equivalent"; chunks parsed by slicing and shifting; `SourceFile` in memory only; `yaml` as a lang-2610 dev dependency and Node types for engine tests are fine.
 
 ### F-110 (merged with its PR)

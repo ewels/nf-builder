@@ -70,13 +70,14 @@ export function buildScript(
     switch (node.kind) {
       case "OutputBlock":
         if (outputs)
-          cx.error("Output block defined more than once", node.range);
+          cx.fileError("Output block defined more than once", node.range);
         outputs = node;
         break;
       case "ParamsBlock":
-        if (params) cx.error("Params block defined more than once", node.range);
+        if (params)
+          cx.fileError("Params block defined more than once", node.range);
         if (legacyParams > 0)
-          cx.error(
+          cx.fileError(
             "Params block cannot be mixed with legacy parameter declarations",
             node.range,
           );
@@ -84,7 +85,7 @@ export function buildScript(
         break;
       case "LegacyParam":
         if (params)
-          cx.error(
+          cx.fileError(
             "Legacy parameter declarations cannot be mixed with the params block",
             node.range,
           );
@@ -93,7 +94,7 @@ export function buildScript(
       case "Workflow":
         if (node.name === null) {
           if (entry)
-            cx.error("Entry workflow defined more than once", node.range);
+            cx.fileError("Entry workflow defined more than once", node.range);
           entry = true;
         }
         break;
@@ -128,18 +129,18 @@ export function buildScript(
 
   if (hasDeclarations)
     for (const item of statements)
-      cx.error(
+      cx.fileError(
         "Statements cannot be mixed with script declarations -- move statements into a process, workflow, or function",
         item.range,
       );
 
   if (!entry && params)
-    cx.error(
+    cx.fileError(
       "Params block cannot be defined without an entry workflow",
       params.range,
     );
   if (!entry && outputs)
-    cx.error(
+    cx.fileError(
       "Output block cannot be defined without an entry workflow",
       outputs.range,
     );

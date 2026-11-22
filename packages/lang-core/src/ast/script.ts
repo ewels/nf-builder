@@ -2,6 +2,7 @@
 // (LA-10). Kind strings are PascalCase; field order is source order wherever the grammar fixes it (`childNodes`
 // relies on it). Conventions: ADR 0027.
 import type { Comment, NodeBase, Range } from "./range.ts";
+import type { Unparsed } from "./unparsed.ts";
 
 export interface Identifier extends NodeBase<"Identifier"> {
   readonly name: string;
@@ -18,7 +19,11 @@ export interface ScriptAst extends NodeBase<"Script"> {
   readonly typesEnabled: boolean;
 }
 
-export type ScriptItem = Declaration | Statement | InvalidDeclaration;
+export type ScriptItem =
+  | Declaration
+  | Statement
+  | InvalidDeclaration
+  | Unparsed;
 export type Declaration =
   | FeatureFlag
   | Include
@@ -484,6 +489,7 @@ export const SCRIPT_NODE_KINDS = [
   "Function",
   "IncompleteDeclaration",
   "InvalidDeclaration",
+  "Unparsed",
   "Block",
   "ExpressionStatement",
   "VariableDeclaration",

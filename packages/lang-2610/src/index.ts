@@ -19,4 +19,6 @@ export const pack: LanguagePack = {
       config: config.default as ConfigCatalogue,
     };
   },
+  // Import the parser (and the printer with it) only dynamically here: it stays a lazy chunk (QA-01, ADR 0027).
+  loadParser: async () => (await import("./source/index.ts")).parser,
 };

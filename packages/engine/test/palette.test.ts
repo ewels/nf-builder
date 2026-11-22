@@ -62,5 +62,6 @@ function fake(load: (real: Catalogue) => Promise<Catalogue>): LanguagePack {
       ],
     },
     loadCatalogue: () => load({} as Catalogue),
+    loadParser: () => Promise.reject(new Error("not used here")),
   };
 }

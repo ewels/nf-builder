@@ -35,6 +35,19 @@ export abstract class AbstractLexer extends Lexer {
     super.emitToken(token);
   }
 
+  /**
+   * `-> popMode` with nothing to pop: upstream's ANTLR throws an `EmptyStackException` that nf-lang swallows, so the
+   * token is dropped and lexing goes on (a stray top-level `}` passes `nextflow lint` 26.10.7; upstream-bugs.md, 16).
+   * Here the token is skipped the same way.
+   */
+  public override popMode(): number {
+    if (this.modeStack.length === 0) {
+      this.skip();
+      return this.mode;
+    }
+    return super.popMode();
+  }
+
   protected isRegexAllowed(): boolean {
     return !this.regexCheckTokenTypes.has(this.lastTokenType);
   }
