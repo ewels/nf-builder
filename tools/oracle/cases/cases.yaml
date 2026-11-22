@@ -96,3 +96,12 @@ cases:
           "Script compilation failed",
           "Typed input declaration is not allowed in legacy process",
         ]
+  # Spike S3 (F-007): the known error the language server must report under CheerpJ.
+  - id: s3-known-error-500
+    about: A 500-line legacy script whose line 487 uses an undefined variable; the language server under CheerpJ must report the same error (spike S3).
+    spec: [F-007, ADR-0010]
+    sources:
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/modules/nf-lang/src/main/java/nextflow/script/control/ScriptResolveVisitor.java#L326
+    lint:
+      expect: error
+      errors: ["`undefined_channel` is not defined"]

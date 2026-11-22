@@ -24,4 +24,5 @@ Process: [0001](0001-record-decisions-as-adrs.md). Template: [template.md](templ
 | [0018](0018-parallel-features-and-local-nextflow.md) | Allow parallel features and local Nextflow runs | Accepted |
 | [0019](0019-nextflow-oracle.md) | Run the Nextflow oracle from the pinned release, locally and in CI | Accepted (agent) |
 | [0021](0021-app-shell-layout.md) | Hand-roll the resizable shell and keep its layout in localStorage | Accepted (agent) |
+| [0022](0022-s3-spike-local.md) | Run spike S3 locally, with its own header set and no CI job | Accepted (agent) |
 | [0023](0023-s4-probe.md) | Probe cross-origin access from the deployed site with a Playwright-driven page | Accepted (agent) |
