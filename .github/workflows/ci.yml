@@ -208,6 +208,30 @@ jobs:
           retention-days: 14
           if-no-files-found: ignore
 
+  bench:
+    name: Engine benchmark (QA-03, QA-04; reported, not gated, ADR 0030)
+    # Pinned like the e2e job: the timings are only comparable on the same image.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - uses: ./.github/actions/corpus
+      - name: Install chromium
+        run: pnpm exec playwright install --with-deps chromium
+      # Fails only when a measurement fails; the table lands in the job summary (scripts/bench-report.ts).
+      - run: pnpm bench
+      - name: Upload the bench report
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: engine-bench
+          path: .cache/reports/bench.*
+          retention-days: 14
+          if-no-files-found: ignore
+
   catalogue:
     name: Catalogue regenerates without a diff (ADR 0005)
     runs-on: ubuntu-latest
