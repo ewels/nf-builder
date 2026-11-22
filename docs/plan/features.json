@@ -194,13 +194,14 @@
     {
       "id": "F-011",
       "milestone": "M0",
-      "description": "Host the app on GitHub Pages, deployed from GitHub Actions with the registry snapshot and no secrets; the QA-30 policy travels in `<meta>` elements and the app won't run inside a frame (ADRs 0040, 0041).",
+      "description": "Host the app on GitHub Pages, deployed from GitHub Actions with the registry snapshot and no secrets; the QA-30 policy travels in `<meta>` elements, and the app also works embedded in an iframe (ADRs 0040, 0041, 0044).",
       "spec": [
         "ADR-0040",
         "ADR-0041",
         "QA-30",
         "IO-31",
-        "IO-41"
+        "IO-41",
+        "ADR-0044"
       ],
       "depends_on": [
         "F-002",
@@ -210,11 +211,11 @@
         "A push to `main` runs the `Pages` workflow: it builds with the base path from `actions/configure-pages`, deploys, and its `verify` job finds the pushed commit in `version.json` at https://ewels.github.io/nf-builder/ (placeholder; a custom domain may replace it)",
         "Every built page starts its `<head>` with the QA-30 policy in `<meta http-equiv=\"Content-Security-Policy\">` (ADR 0014's policy without `frame-ancestors`) followed by `<meta name=\"referrer\" content=\"no-referrer\">`; the CI `site` job checks a `/nf-builder/` build with `pnpm check:site` on every pull request, and `verify` checks the deployed page",
         "`pnpm test:e2e` builds and previews under `/nf-builder/` with no security headers and no single-page-app fallback, as Pages serves it, and the app loads with no CSP violation or console error",
-        "Inside a frame the app does not mount and shows a short message with an \"Open in a new tab\" link",
+        "Inside a cross-origin iframe the app loads and works: the shell mounts, the palette loads through the engine worker, and there is no CSP violation or console error (ADR 0044)",
         "A successful `Registry snapshot` run on `main` triggers a Pages deploy that serves the snapshot at `/registry/` without any secret, and `verify` passes `pnpm check:registry --url` against the deployed site"
       ],
       "passes": true,
-      "notes": "Verified 2026-11-22: step 2 by the CI `site` job (`pnpm check:site` on a `/nf-builder/` build), test/check-site.test.ts, test/security-policy*.test.ts and e2e/pages-hosting.spec.ts; step 3 by `pnpm test:e2e` under `/nf-builder/` (pages-hosting.spec.ts and the F-002/F-011 preview test in app-shell.spec.ts); step 4 by apps/web/test/frame-guard.test.tsx and the cross-origin frame e2e test. Steps 1 and 5 are confirmed after merge by `pages.yml`'s `verify` job: the push run, then the first `workflow_run` after a Registry snapshot run (Q11). Merge only once Pages' source is \"GitHub Actions\" (#35)."
+      "notes": "Verified 2026-11-22: step 2 by the CI `site` job (`pnpm check:site` on a `/nf-builder/` build), test/check-site.test.ts, test/security-policy*.test.ts and e2e/pages-hosting.spec.ts; step 3 by `pnpm test:e2e` under `/nf-builder/` (pages-hosting.spec.ts and the F-002/F-011 preview test in app-shell.spec.ts); step 4 by the cross-origin iframe test in e2e/pages-hosting.spec.ts (ADR 0044). Steps 1 and 5 are confirmed after merge by `pages.yml`'s `verify` job: the push run, then the first `workflow_run` after a Registry snapshot run (Q11). Merge only once Pages' source is \"GitHub Actions\" (#35)."
     },
     {
       "id": "F-101",
@@ -521,7 +522,7 @@
         "Simulated quota at 85% shows the warning"
       ],
       "passes": false,
-      "notes": "From F-113: show loading progress from EngineApi.open's progress callback (phases and file counts); the main thread keeps only pack versions and palette search, everything else goes through getEngine(). From F-113 review: the settled F-202 decision adds readFile and close to F-113's EngineApi; F-113 merged without them, so F-202 adds them. Request the palette before open: the worker's queue is serial, so the palette would otherwise wait behind a long open (18 s on sarek)."
+      "notes": "From F-113: show loading progress from EngineApi.open's progress callback (phases and file counts); the main thread keeps only pack versions and palette search, everything else goes through getEngine(). From F-113 review: the settled F-202 decision adds readFile and close to F-113's EngineApi; F-113 merged without them, so F-202 adds them. Request the palette before open: the worker's queue is serial, so the palette would otherwise wait behind a long open (18 s on sarek). From F-011 (ADR 0044): the app may run in a cross-origin iframe, where storage is partitioned (a separate project list) and navigator.storage.persist() may be refused; show that in the storage notice rather than failing."
     },
     {
       "id": "F-203",
@@ -890,7 +891,7 @@
         "Delete a multi-selection: one undo step restores all"
       ],
       "passes": false,
-      "notes": "From F-111: group several commands as one undo step by committing each and concatenating the inverses in reverse."
+      "notes": "From F-111: group several commands as one undo step by committing each and concatenating the inverses in reverse. From F-011 (ADR 0044): inside an iframe the clipboard API needs the embedder's allow=\"clipboard-read; clipboard-write\"; fall back to in-app copy and paste when it is refused."
     },
     {
       "id": "F-311",

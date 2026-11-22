@@ -29,7 +29,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 
 Branches are stacked: `feat/F-108` → `feat/F-107`; `feat/F-111` also merges F-107. Open PRs for F-108, F-107 and F-111 against `main` in that order (merge `main` into each first), each green before the next. Worktrees: `/home/user/wt-F-1xx`.
 
-Next free ADR number: 0044 (0040 and 0041 are F-011's, 0042 F-112's, 0043 F-113's).
+Next free ADR number: 0045 (0042 is F-112's, 0044 F-011's).
 
 ## Decisions already taken on the plans' open points
 
@@ -109,7 +109,7 @@ Next free ADR number: 0044 (0040 and 0041 are F-011's, 0042 F-112's, 0043 F-113'
   - `SITE_CONTEXT=production`;
   - a fifth step for the frame guard;
   - the tests removed with their behaviour are mapped in the PR;
-  - the notice reads "nf-builder can't run inside another page." with an "Open in a new tab" link;
+  - the notice reads "nf-builder can't run inside another page." with an "Open in a new tab" link (superseded by ADR 0044: the maintainer wants the app to work in frames, so there is no guard);
   - `passes` is set in the PR, and F-501 flips in a follow-up after a snapshot-triggered `verify` passes.
 - `smol-toml` stays (section 6).
 - The plan's mention of #33 is stale: Actions runs again.

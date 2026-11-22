@@ -431,7 +431,7 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - production hosting moved to GitHub Pages: `pages.yml` builds with configure-pages' base path and the registry snapshot branch, checks, deploys and verifies the live site, with no secrets;
   - the QA-30 policy is in `<meta>` elements stamped into every built page from `scripts/security-policy.ts`, plus `pnpm check:site` and a CI `site` job;
   - preview mirrors Pages, and the e2e tests run under `/nf-builder/`;
-  - the app shows an "Open in a new tab" notice instead of starting inside a frame;
+  - the app loads and works inside frames, including cross-origin iframes (ADR 0044, at the maintainer's request; the first draft refused to run in a frame);
   - the snapshot plugin is host-neutral and `check:registry --url` samples with cache-busting;
   - Deploy check, the netlify.toml headers and the Netlify verify job are gone, and `netlify.toml` keeps only build settings.
 - State: passing (steps 1 and 5 confirmed by the first `verify` runs after merge, Q11); merges once the maintainer enables Pages (#35).
@@ -451,4 +451,5 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
     - the S4 pull-request trigger became dispatch-only;
     - the registry `verify` job and hook moved to the `pages.yml` tests.
   - A present but broken registry snapshot fails the deploy (the full `check:registry` before upload) until the next good snapshot; only a missing branch is skipped.
+  - [ADR 0044](../adr/0044-embeddable-in-frames.md) (maintainer's decision): no frame guard. An embedded copy has partitioned storage, so its own projects. Embedders grant clipboard and other permissions. Notes for F-202 and F-310.
 - Blockers: #35.
