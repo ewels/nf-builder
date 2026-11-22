@@ -65,16 +65,12 @@ const isLink = (expr: Expression): expr is MethodCall | CallExpr =>
 const receiverOf = (call: MethodCall | CallExpr): Expression | null =>
   call.kind === "MethodCall" ? call.receiver : call.callee;
 
-const isTripleQuoted = (text: string) =>
-  text.startsWith('"""') || text.startsWith("'''");
-
 export class Formatter {
   /** The comments the formatter wrote (upstream `CommentAttacher.markEmitted`). */
   readonly emitted = new Set<Comment>();
 
   private buffer = "";
   private indentCount = 0;
-  private stringIndentDelta = 0;
   private currentRootExpr: Expression | null = null;
   private inWrappedMethodChain = false;
 
@@ -182,49 +178,9 @@ export class Formatter {
     }
   }
 
-  // L232: string re-indentation
-
-  /**
-   * Begin a statement, recording how far its indentation moved from the source. A multi-line string inside it is shifted
-   * by the same amount. Only a statement that begins its own source line has an indentation to compare (L246).
-   */
-  beginStatement(node: AstNode): number {
-    const previous = this.stringIndentDelta;
-    this.stringIndentDelta =
-      hasPosition(node.range) &&
-      this.layout.startsLine(line(node), column(node))
-        ? TAB_SIZE * this.indentCount - (column(node) - 1)
-        : 0;
-    return previous;
-  }
-
-  endStatement(previous: number): void {
-    this.stringIndentDelta = previous;
-  }
-
-  /**
-   * Shift the interior lines of a multi-line string by the indentation shift of the statement that contains it. Blank
-   * lines are left alone, and a line is never shifted past its first non-whitespace character (L263).
-   */
-  private reindentString(text: string): string {
-    const delta = this.stringIndentDelta;
-    if (delta === 0 || !text.includes("\n")) return text;
-    const parts = text.split("\n");
-    let result = parts[0] as string;
-    for (const part of parts.slice(1)) {
-      result += "\n";
-      if (part === "") continue;
-      if (delta > 0) {
-        result += " ".repeat(delta) + part;
-      } else {
-        let strip = 0;
-        while (strip < -delta && strip < part.length && part[strip] === " ")
-          strip++;
-        result += part.slice(strip);
-      }
-    }
-    return result;
-  }
+  // L232: string re-indentation. Known difference `string-reindent` (docs/research/upstream-bugs.md #23): upstream shifts
+  // the interior lines of a multi-line string with the statement that holds it (`reindentString`, L246-L263), which
+  // changes the string's value. The printer prints multi-line string and GString content exactly as written.
 
   // L302: statements
 
@@ -313,10 +269,8 @@ export class Formatter {
     this.currentRootExpr = root;
     this.appendLeadingComments(node);
     this.appendIndent();
-    const sid = this.beginStatement(node);
     if (labelled) this.statementLabels(node);
     body();
-    this.endStatement(sid);
     this.appendTrailingComment(node);
     this.appendNewLine();
     this.currentRootExpr = cre;
@@ -499,11 +453,7 @@ export class Formatter {
         this.append(node.text);
         return;
       case "String":
-        this.append(
-          isTripleQuoted(node.text)
-            ? this.reindentString(node.text)
-            : node.text,
-        );
+        this.append(node.text);
         return;
       case "Boolean":
         this.append(node.value ? "true" : "false");
@@ -671,7 +621,6 @@ export class Formatter {
   /** L546 (`visitDirective`): a call printed as a command call, `name args`. */
   directive(owner: AstNode, call: MethodCall): void {
     this.appendIndent();
-    const sid = this.beginStatement(owner);
     this.append(
       call.method.kind === "Identifier" ? call.method.name : call.method.value,
     );
@@ -699,7 +648,6 @@ export class Formatter {
         this.append(")");
       }
     }
-    this.endStatement(sid);
     this.appendTrailingComment(owner);
     this.appendNewLine();
   }
@@ -903,11 +851,10 @@ export class Formatter {
 
   /** L905 (`visitGStringExpression`): every interpolation is braced. */
   private gstring(node: Extract<Expression, { kind: "GString" }>): void {
-    const tripleQuoted = node.quote === '"""';
     this.append(node.quote);
     for (const part of node.parts) {
       if (part.kind === "GStringText") {
-        this.append(tripleQuoted ? this.reindentString(part.text) : part.text);
+        this.append(part.text);
       } else {
         this.append("${");
         this.expression(part.expression);

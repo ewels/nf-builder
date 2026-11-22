@@ -789,7 +789,8 @@
       "section": "MULTI-LINE STRINGS",
       "kind": "check-format",
       "in": "cases/ScriptFormatterTest-L1302.in.nf",
-      "out": "cases/ScriptFormatterTest-L1302.out.nf"
+      "out": "cases/ScriptFormatterTest-L1302.out.nf",
+      "knownDifference": "string-reindent"
     },
     {
       "id": "ScriptFormatterTest-L1323",
@@ -799,7 +800,8 @@
       "section": "MULTI-LINE STRINGS",
       "kind": "check-format",
       "in": "cases/ScriptFormatterTest-L1323.in.nf",
-      "out": "cases/ScriptFormatterTest-L1323.out.nf"
+      "out": "cases/ScriptFormatterTest-L1323.out.nf",
+      "knownDifference": "string-reindent"
     },
     {
       "id": "ScriptFormatterTest-L1349",
@@ -809,7 +811,8 @@
       "section": "MULTI-LINE STRINGS",
       "kind": "check-format",
       "in": "cases/ScriptFormatterTest-L1349.in.nf",
-      "out": "cases/ScriptFormatterTest-L1349.out.nf"
+      "out": "cases/ScriptFormatterTest-L1349.out.nf",
+      "knownDifference": "string-reindent"
     },
     {
       "id": "ScriptFormatterTest-L1375",

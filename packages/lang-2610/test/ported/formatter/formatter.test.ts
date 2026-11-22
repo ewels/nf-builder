@@ -21,6 +21,8 @@ type Case = {
   out?: string;
   contains?: string[];
   excluded?: string;
+  /** The printer deliberately differs from upstream here (ADR 0032); the case checks it still does, and is stable. */
+  knownDifference?: string;
 };
 type Manifest = {
   upstream: { repo: string; tag: string; commit: string; file: string };
@@ -55,6 +57,13 @@ describe("ported nf-lang ScriptFormatterTest cases", () => {
       }
       const output =
         c.kind === "format-equals-input" ? input : read(c.out as string);
+      if (c.knownDifference) {
+        // a known difference that no longer differs must be removed from cases.json
+        const printed = format(input);
+        expect(printed).not.toBe(output);
+        expect(format(printed)).toBe(printed);
+        return;
+      }
       expect(format(input)).toBe(output);
       if (c.kind === "check-format") expect(format(output)).toBe(output);
     });
