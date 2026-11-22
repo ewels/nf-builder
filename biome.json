@@ -12,6 +12,7 @@
       "!.claude/skills",
       "!packages/lang-*/src/generated",
       "!packages/lang-*/catalogue",
+      "!packages/lang-*/palette.json",
       "!apps/web/public/registry"
     ]
   },

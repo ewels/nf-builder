@@ -36,6 +36,14 @@ function stepIndex(job: string): (needle: string | RegExp) => number {
 }
 
 describe("CI workflows", () => {
+  it("F-109 step 2 ADR-0005: ci.yml can be dispatched by hand, so the catalogue job regenerates and fails on a diff", () => {
+    const ci = read(join(WORKFLOWS, "ci.yml"));
+    expect(ci).toMatch(/^on:\n(?:[ #].*\n)*? {2}workflow_dispatch:/m);
+    expect(ci).toMatch(/^permissions:\n {2}contents: read$/m);
+    expect(ci).not.toMatch(/contents: write/);
+    expect(jobOf("catalogue")).toContain("pnpm gen:catalogue 26.10 --check");
+  });
+
   it("F-003 step 1 ADR-0011: ci.yml runs on pull requests and pushes to main and defines every check job", () => {
     const ci = read(join(WORKFLOWS, "ci.yml"));
     expect(ci).toMatch(/^\s*pull_request:/m);

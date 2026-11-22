@@ -40,6 +40,7 @@ This table lists every root `package.json` script that `pnpm check` doesn't alre
 | `pnpm oracle` | After changing Nextflow fixtures, templates or the printer: `nextflow lint` and `nextflow run -stub` on every case in `tools/oracle/cases/cases.yaml`; report in `.cache/oracle/report.md` (CI job `oracle`) |
 | `pnpm gen:grammar 26.10` | After changing `packages/lang-2610/grammar/` (vendored `.g4` or `port.ts`): regenerate `src/generated/`; `--check` only compares |
 | `pnpm gen:catalogue 26.10` | Regenerate `packages/lang-2610/catalogue/*.json` from the pinned language server jar (needs a JDK 17+); `--check` compares; CI job `catalogue` runs it on every PR |
+| `pnpm gen:palette 26.10` | After editing `packages/lang-2610/palette.yaml`: regenerate `palette.json`; `--check` compares (a unit test runs it in `pnpm check`) |
 | `pnpm corpus:lint` | After `pnpm corpus:fetch`: `nextflow lint -o json` on each pinned pipeline and the malformed fixtures into `.cache/corpus-lint/` (needs Java; cached per pin and Nextflow version). The launcher is `--nextflow <path>`, else `NXF_LAUNCHER`, else the pinned dist at `.cache/nextflow/<version>/nextflow-<version>-dist` (version from `packages/lang-2610/upstream.json`) |
 | `pnpm test:corpus` | After `corpus:lint`, and when touching the parser, model, projection or printer: parse every corpus file, compare with lint, write `.cache/reports/parse-corpus.{json,md}` (about 30 seconds) |
 
@@ -77,6 +78,7 @@ Never edit these. Regenerate them.
 
 - `packages/lang-*/src/generated/**`: `pnpm gen:grammar <version>`
 - `packages/lang-*/catalogue/*.json`: `pnpm gen:catalogue <version>` (CI job `catalogue` checks it)
+- `packages/lang-*/palette.json`: `pnpm gen:palette <version>` from the hand-edited `palette.yaml`
 - `apps/web/public/registry/**`: CI job `registry-snapshot`
 - `.claude/skills/*/**` (vendored Nextflow skills): `.claude/skills/sync.sh`
 

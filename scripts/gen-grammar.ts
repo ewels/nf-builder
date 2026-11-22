@@ -18,7 +18,7 @@ import {
 import { tmpdir } from "node:os";
 import { basename, join } from "node:path";
 import { pathToFileURL } from "node:url";
-import { isMain, REPO_ROOT } from "./check-common.ts";
+import { isMain, packFor, REPO_ROOT } from "./check-common.ts";
 
 export type GenOptions = { version: string; repoRoot?: string };
 
@@ -48,27 +48,9 @@ const LEFTOVER_JAVA: readonly RegExp[] = [
   /package nextflow\//,
 ];
 
-const packsOf = (repoRoot: string): string[] => {
-  const dir = join(repoRoot, "packages");
-  return existsSync(dir)
-    ? readdirSync(dir)
-        .filter((name) => existsSync(join(dir, name, "grammar", "port.ts")))
-        .sort()
-    : [];
-};
-
 /** "26.10" -> <repo>/packages/lang-2610. A version without a pack that has grammar/ lists the packs there are. */
 export function packDir(version: string, repoRoot: string = REPO_ROOT): string {
-  const match = /^(\d+)\.(\d+)$/.exec(version);
-  const name = match ? `lang-${match[1]}${match[2]}` : undefined;
-  const packs = packsOf(repoRoot);
-  if (name === undefined || !packs.includes(name)) {
-    const known = packs.map((p) => p.replace(/^lang-(\d+)(\d{2})$/, "$1.$2"));
-    throw new Error(
-      `No language pack with a grammar/ directory for version "${version}". Packs with one: ${known.join(", ") || "none"}.`,
-    );
-  }
-  return join(repoRoot, "packages", name);
+  return packFor(version, "grammar/port.ts", "grammar/ directory", repoRoot);
 }
 
 export function readUpstream(pack: string): Upstream {

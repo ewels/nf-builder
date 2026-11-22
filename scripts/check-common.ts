@@ -1,7 +1,7 @@
 // Shared by the repository checkers (ADR lint, features.json validation, the budget and host scans).
 // Checker scripts import only `node:` built-ins and sibling scripts, because the `adr-lint` and `features`
 // CI jobs run them without `pnpm install`.
-import { existsSync, realpathSync, statSync } from "node:fs";
+import { existsSync, readdirSync, realpathSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -81,4 +81,31 @@ export function isMain(meta: ImportMeta): boolean {
   } catch {
     return false;
   }
+}
+
+/**
+ * "26.10" -> <repo>/packages/lang-2610, for the language packs that have `marker` (a path inside the pack).
+ * A version without such a pack throws "No language pack with a <what> for version ...", listing the packs there are.
+ */
+export function packFor(
+  version: string,
+  marker: string,
+  what: string,
+  repoRoot: string = REPO_ROOT,
+): string {
+  const match = /^(\d+)\.(\d+)$/.exec(version);
+  const name = match ? `lang-${match[1]}${match[2]}` : undefined;
+  const dir = join(repoRoot, "packages");
+  const packs = existsSync(dir)
+    ? readdirSync(dir)
+        .filter((n) => existsSync(join(dir, n, marker)))
+        .sort()
+    : [];
+  if (name === undefined || !packs.includes(name)) {
+    const known = packs.map((p) => p.replace(/^lang-(\d+)(\d{2})$/, "$1.$2"));
+    throw new Error(
+      `No language pack with a ${what} for version "${version}". Packs with one: ${known.join(", ") || "none"}.`,
+    );
+  }
+  return join(dir, name);
 }

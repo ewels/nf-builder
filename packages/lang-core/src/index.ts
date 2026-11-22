@@ -14,3 +14,14 @@ export type {
   ScriptCatalogue,
   Signature,
 } from "./catalogue.ts";
+export type {
+  CatalogueItem,
+  ConstructItem,
+  OperatorGroupId,
+  PaletteCategory,
+  PaletteCategoryId,
+  PaletteDefinition,
+  PaletteGroup,
+  PaletteIcon,
+  PaletteItem,
+} from "./palette.ts";

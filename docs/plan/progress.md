@@ -192,3 +192,15 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - `docs/licences.md`: the upstream test inputs (Apache-2.0).
   - `.gitattributes`: the ported inputs are byte-exact (`-text`).
 - Blockers: none.
+
+## 2026-11-22 · F-109 · Claude (autonomous)
+- Did: `packages/lang-2610/palette.yaml` (45 items in UX-12's categories) with `pnpm gen:palette` writing the committed `palette.json`, a loader in the pack, validation tests against the catalogue and grammar, and `workflow_dispatch` on `ci.yml`; the catalogue itself came with F-006.
+- State: passing.
+- Next: F-102 and F-103.
+- Decisions:
+  - Palette overlay in YAML with a generated JSON mirror; construct items name grammar rules; legacy-only items refused; palette not yet on `LanguagePack` ([ADR 0025](../adr/0025-palette-overlay.md)).
+  - `yaml` 2.9.1 as a root dev dependency (already in the stack); `palette.json` joins AGENTS.md's generated files.
+  - `.github/workflows/ci.yml`: `workflow_dispatch` trigger, token unchanged (ADR 0025).
+  - Q4 answered: `agent` stays in the palette with a `preview` badge; `fromLineage` and pipeline includes, documented as experimental, carry no badge.
+  - F-204's search example (`groupTuple`) is legacy-only; noted on F-204.
+- Blockers: none.
