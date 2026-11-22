@@ -3,7 +3,6 @@ nextflow.enable.types = true
 include { SAY_HELLO } from './modules/local/say_hello/main.nf'
 
 params {
-    // The greeting to write to the output file.
     greeting: String = 'Hello, world!'
 }
 

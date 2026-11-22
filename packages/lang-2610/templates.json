@@ -34,7 +34,7 @@
         },
         {
           "path": "main.nf",
-          "text": "nextflow.enable.types = true\n\ninclude { SAY_HELLO } from './modules/local/say_hello/main.nf'\n\nparams {\n    // The greeting to write to the output file.\n    greeting: String = 'Hello, world!'\n}\n\n/**\n * Writes the greeting to a text file and publishes it.\n */\nworkflow {\n\n    main:\n    greetings = channel.of(params.greeting)\n    greeting_file = SAY_HELLO(greetings)\n\n    publish:\n    greeting_file = greeting_file\n}\n\noutput {\n    greeting_file: Channel<Path> {\n        path 'greetings'\n    }\n}\n"
+          "text": "nextflow.enable.types = true\n\ninclude { SAY_HELLO } from './modules/local/say_hello/main.nf'\n\nparams {\n    greeting: String = 'Hello, world!'\n}\n\n/**\n * Writes the greeting to a text file and publishes it.\n */\nworkflow {\n\n    main:\n    greetings = channel.of(params.greeting)\n    greeting_file = SAY_HELLO(greetings)\n\n    publish:\n    greeting_file = greeting_file\n}\n\noutput {\n    greeting_file: Channel<Path> {\n        path 'greetings'\n    }\n}\n"
         },
         {
           "path": "modules/local/say_hello/main.nf",
@@ -57,7 +57,7 @@
       "files": [
         {
           "path": "README.md",
-          "text": "# Samplesheet to MultiQC\n\nA typed pipeline that reads a samplesheet, runs FastQC on each sample and summarises the results in one MultiQC report.\n\n- `main.nf` holds the `Sample` record, the `params` block, the entry workflow and the `output` block.\n- `modules/local/fastqc/main.nf` and `modules/local/multiqc/main.nf` hold the two processes. Each reports its tool version to the `versions` topic.\n- `assets/samplesheet.csv` and `assets/test/` hold a tiny test samplesheet and its reads.\n- The `test` profile in `nextflow.config` sets `params.input` to that samplesheet.\n\nRun it with `nextflow run . -profile test`, or pass your own samplesheet with `--input`. Results appear in `results/`.\n"
+          "text": "# Samplesheet to MultiQC\n\nA typed pipeline that reads a samplesheet, runs FastQC on each sample and summarises the results in one MultiQC report.\n\n- `main.nf` holds the `Sample` record, the `params` block, the entry workflow and the `output` block.\n- `modules/local/fastqc/main.nf` and `modules/local/multiqc/main.nf` hold the two processes. Each reports its tool version to the `versions` topic.\n- `assets/samplesheet.csv` and `assets/test/` hold a tiny test samplesheet and its reads.\n- The `test` profile in `nextflow.config` sets `params.input` to that samplesheet.\n\nRun it with `nextflow run . -profile test`, or pass your own samplesheet with `--input`. Results appear in `results/`, and `results/pipeline_info/versions.yml` lists the tool versions.\n\nThe pipeline doesn't set a container or enable Conda, so FastQC and MultiQC must be on your `PATH`. Alternatively add `-with-conda` to the command: each process names its Bioconda package, and Nextflow needs Conda installed to create the environments.\n"
         },
         {
           "path": "assets/samplesheet.csv",
@@ -77,7 +77,7 @@
         },
         {
           "path": "main.nf",
-          "text": "nextflow.enable.types = true\n\ninclude { FASTQC } from './modules/local/fastqc/main.nf'\ninclude { MULTIQC } from './modules/local/multiqc/main.nf'\n\n/**\n * One row of the samplesheet.\n */\nrecord Sample {\n    id: String\n    fastq_1: Path\n    fastq_2: Path?\n}\n\nparams {\n    // The samplesheet: a CSV file with the columns id, fastq_1 and fastq_2 (fastq_2 may be empty).\n    input: Channel<Sample>\n}\n\n/**\n * Checks the quality of each sample's reads with FastQC and summarises all samples in one MultiQC report.\n */\nworkflow {\n\n    main:\n    fastqc = FASTQC(params.input)\n    reports = fastqc.flatMap { result -> result.reports }.collect()\n    multiqc_report = MULTIQC(reports)\n    versions = channel.topic('versions').unique()\n\n    publish:\n    fastqc = fastqc\n    multiqc_report = multiqc_report\n    versions = versions\n}\n\noutput {\n    fastqc {\n        path 'fastqc'\n    }\n    multiqc_report {\n        path 'multiqc'\n    }\n    versions {\n        path 'pipeline_info'\n    }\n}\n"
+          "text": "nextflow.enable.types = true\n\ninclude { FASTQC } from './modules/local/fastqc/main.nf'\ninclude { MULTIQC } from './modules/local/multiqc/main.nf'\n\n/**\n * One row of the samplesheet.\n */\nrecord Sample {\n    id: String\n    fastq_1: Path\n    fastq_2: Path?\n}\n\nparams {\n    input: Channel<Sample>\n}\n\n/**\n * Checks the quality of each sample's reads with FastQC and summarises all samples in one MultiQC report.\n */\nworkflow {\n\n    main:\n    fastqc = FASTQC(params.input)\n    reports = fastqc.flatMap { result -> result.reports }.collect()\n    multiqc_report = MULTIQC(reports)\n    versions = channel.topic('versions').unique()\n\n    publish:\n    fastqc = fastqc\n    multiqc_report = multiqc_report\n    versions = versions\n}\n\noutput {\n    fastqc: Channel<Record> {\n        path 'fastqc'\n    }\n    multiqc_report: Value<Path> {\n        path 'multiqc'\n    }\n    versions: Channel<Tuple<String, String>> {\n        index {\n            path 'pipeline_info/versions.yml'\n        }\n    }\n}\n"
         },
         {
           "path": "modules/local/fastqc/main.nf",

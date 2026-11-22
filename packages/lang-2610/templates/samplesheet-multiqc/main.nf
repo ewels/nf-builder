@@ -13,7 +13,6 @@ record Sample {
 }
 
 params {
-    // The samplesheet: a CSV file with the columns id, fastq_1 and fastq_2 (fastq_2 may be empty).
     input: Channel<Sample>
 }
 
@@ -35,13 +34,15 @@ workflow {
 }
 
 output {
-    fastqc {
+    fastqc: Channel<Record> {
         path 'fastqc'
     }
-    multiqc_report {
+    multiqc_report: Value<Path> {
         path 'multiqc'
     }
-    versions {
-        path 'pipeline_info'
+    versions: Channel<Tuple<String, String>> {
+        index {
+            path 'pipeline_info/versions.yml'
+        }
     }
 }

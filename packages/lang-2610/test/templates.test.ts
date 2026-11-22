@@ -185,6 +185,24 @@ describe("F-203 the 26.10 templates", () => {
     }
   });
 
+  it("F-203 LA-53: no params block holds a // comment: parameters are described in the schema only", async () => {
+    for (const t of (await all()).list) {
+      const text = file(t, "main.nf") ?? "";
+      const block = /^params \{[\s\S]*?^\}/m.exec(text)?.[0] ?? "";
+      expect(block, t.id).not.toMatch(/\/\/|\/\*/);
+    }
+  });
+
+  it("F-203 LA-11 LA-41: Samplesheet to MultiQC types every workflow output, and indexes the versions, which are tuples with no files to publish", async () => {
+    const t = (await all()).list.find((x) => x.id === "samplesheet-multiqc");
+    const text = file(t as ProjectTemplate, "main.nf") ?? "";
+    const output = text.slice(text.indexOf("\noutput {"));
+    expect(output).toMatch(/^ {4}fastqc: Channel<Record> \{/m);
+    expect(output).toMatch(/^ {4}multiqc_report: Value<Path> \{/m);
+    expect(output).toMatch(/^ {4}versions: Channel<Tuple<String, String>> \{/m);
+    expect(output).toMatch(/index \{\s+path 'pipeline_info\/versions\.yml'/);
+  });
+
   it("F-203 LA-42: every Samplesheet to MultiQC process has a topic: section emitting to 'versions'", async () => {
     for (const { t, path, ast } of await scripts()) {
       if (!PROCESS_WITH_TOPICS.includes(t.id)) continue;
