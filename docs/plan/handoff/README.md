@@ -20,7 +20,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-202 projects in IndexedDB | not started | [plan](plan-F-202.md). After F-113. |
 | F-205 canvas | not started | [plan](plan-F-205.md). After F-113 (and F-106); parallel with F-202. |
 | F-501 registry snapshot | merged, PR #29, **not passing** | Passes once the Pages deploy serves `/registry/` and `verify` passes (ADR 0041, F-011). F-502 to F-506, F-702, F-704 and F-705 depend on it. |
-| F-011 GitHub Pages hosting | `feat/F-011` | [plan](plan-F-011.md). Merge only after Pages is enabled (#35). |
+| F-011 GitHub Pages hosting | `feat/F-011`, in PR | Merge only after Pages is enabled (#35). The plan stays: ADR 0040 links to it. |
 
 ## Merge order
 
@@ -95,7 +95,7 @@ Next free ADR number: 0042 (0038 is F-107's, 0039 F-111's, 0040 and 0041 F-011's
 - Visual baselines: download the `playwright-chromium` artefact, view the `-actual.png`, commit it (ADR 0021).
 - Local e2e: `export PW_CHROMIUM_EXECUTABLE=/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell`; stale `vite preview` servers from other worktrees can hold ports 4173 and 5173. Spike ports: S5 4175, S3 4177 and 4178.
 
-### F-011 — [plan](plan-F-011.md)
+### F-011 (merged with its PR)
 - Accept every point in section 8:
   - build now, and merge only after Pages is enabled (#35);
   - ADR 0014 and ADR 0035 are superseded by ADRs 0040 and 0041, and ADR 0002 is amended;

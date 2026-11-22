@@ -386,3 +386,23 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - Legacy operators as pack data (`LanguagePack.legacyOperators`); one `set`/`tap` rule matching nf-lang's `VariableScopeVisitor`, shared with F-108.
   - Licences row for the 119 corpus-derived snapshots. No new dependency.
 - Blockers: none.
+
+## 2026-11-22 · F-011 · Claude (autonomous)
+- Did:
+  - production hosting moved to GitHub Pages: `pages.yml` builds with configure-pages' base path and the registry snapshot branch, checks, deploys and verifies the live site, with no secrets;
+  - the QA-30 policy is in `<meta>` elements stamped into every built page from `scripts/security-policy.ts`, plus `pnpm check:site` and a CI `site` job;
+  - preview mirrors Pages, and the e2e tests run under `/nf-builder/`;
+  - the app shows an "Open in a new tab" notice instead of starting inside a frame;
+  - the snapshot plugin is host-neutral and `check:registry --url` samples with cache-busting;
+  - Deploy check, the netlify.toml headers and the Netlify verify job are gone, and `netlify.toml` keeps only build settings.
+- State: built; merges once the maintainer enables Pages (#35). Steps 1 and 5 are confirmed by the first `verify` runs after merge (Q11).
+- Next: F-111, then F-112 and F-113.
+- Decisions:
+  - [ADR 0040](../adr/0040-github-pages-hosting.md) and [ADR 0041](../adr/0041-registry-snapshot-deploy.md) (on `main` since fcc9483).
+  - `scope-change`: new feature F-011; F-002 reworded (no SPA fallback or deploy previews; the Pages URL); F-704's URL. Notes appended to F-008, F-501, F-502 and F-607.
+  - `.github/workflows/`: `pages.yml` is new and `deploy-check.yml` is deleted; `ci.yml` gains `site`, and `budget` and `hosts` build under `/nf-builder/`; `registry-snapshot.yml` loses `verify` and stops writing `netlify.toml`; `s4-probe.yml` runs on dispatch only.
+  - `check:hosts` ignores a CSP directive's closing `;` after a URL.
+  - `smol-toml` stays, for `test/netlify-toml.test.ts`.
+  - `SITE_CONTEXT` and `SITE_COMMIT` stamp `version.json`.
+  - The registry check samples 20 bundles and 5 plugins after deploys; the full check runs before upload.
+- Blockers: #35.
