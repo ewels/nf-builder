@@ -41,7 +41,8 @@ export { commit };
 import type { GraphNode, PortRef, Projection } from "@nf-builder/lang-core";
 import { createProjector } from "../../src/projection/project";
 
-type State = Awaited<ReturnType<typeof stateFor>>;
+export type EditStateOf = Awaited<ReturnType<typeof stateFor>>;
+type State = EditStateOf;
 
 export function projection(
   state: State,

@@ -100,3 +100,25 @@ describe("F-111 AddCall", () => {
     expect(texts(state)["main.nf"]).toContain("include { helper }");
   });
 });
+
+describe("F-111 AddCall and the formatter's empty-statement rule", () => {
+  it("F-111 AR-22 LA-45: AddCall on a workflow with `if (x) ;` prints the braced form nf-lang's formatter writes, and the result lints and runs", async () => {
+    const source =
+      "process A {\n    script:\n    'echo a'\n}\n\nworkflow {\n    x = true\n    if (x) ;\n    A()\n}\n".replace(
+        "workflow",
+        "process B {\n    script:\n    'echo b'\n}\n\nworkflow",
+      );
+    const state = await stateFor({ "main.nf": source });
+    const r = accepted(state, { kind: "addCall", target, callee: "B" });
+    const text = r.files[0]?.text as string;
+    expect(text).toContain("if (x) {");
+    expect(text).not.toContain("if (x) ;");
+    // the oracle case f111-addcall-empty-if holds this text; `pnpm oracle` lints it with the pinned Nextflow and stub-runs it
+    await expect(text).toMatchFileSnapshot(
+      new URL(
+        "../../../../tools/oracle/cases/f111-addcall-empty-if/main.nf",
+        import.meta.url,
+      ).pathname,
+    );
+  });
+});

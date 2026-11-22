@@ -167,4 +167,21 @@ describe("F-111 splice", () => {
       reprintDeclaration(file, def, dropped, parser.printer, [first]),
     ).not.toThrow();
   });
+
+  it("F-111 LA-45 ADR-0032: a reprint keeps the content of a multi-line string exactly as written (known difference string-reindent)", () => {
+    const text =
+      'workflow {\n    if (true) {\n    m = """\n      first\n        second\n      """\n    println(m)\n    }\n}\n';
+    const file = script(text);
+    const def = file.ast?.body[0];
+    if (!def || def.kind !== "Workflow") throw new Error("no workflow");
+    const out = applyEdit(
+      text,
+      reprintDeclaration(file, def, def, parser.printer),
+    );
+    // the statement moves to its formatted indentation; the string's lines don't move with it
+    expect(out).toContain(
+      '        m = """\n      first\n        second\n      """',
+    );
+    expect(script(out).problems).toEqual([]);
+  });
 });
