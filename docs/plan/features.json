@@ -227,7 +227,7 @@
         "Every AST node's range slices back to its exact source text"
       ],
       "passes": false,
-      "notes": "From F-101: 31 ported inputs parse at grammar level and must be rejected by the AST builder here (packages/lang-2610/test/ported/cases.json, owner F-102): 4 reparse cases (ScriptAstBuilderTest L194, L209, L224, AgentParserTest L168; ScriptAstBuilder.java#L251-L320, also needed by F-104's section-order fixture) and 27 AST-builder errors (ScriptAstBuilderTest L245-L700 and the escape cases L744-L852, AgentParserTest L403)."
+      "notes": "From F-101: 31 ported inputs parse at grammar level and must be rejected by the AST builder here (packages/lang-2610/test/ported/cases.json, owner F-102): 4 reparse cases (ScriptAstBuilderTest L194, L209, L224, AgentParserTest L168; ScriptAstBuilder.java#L251-L320, also needed by F-104's section-order fixture) and 27 AST-builder errors (ScriptAstBuilderTest L245-L700 and the escape cases L744-L852, AgentParserTest L403). Also from F-101: the ported valid-escape and GString cases (cases.json, layer lexer) must stay error-free once the AST builder adds upstream's EscapeUtils check; ParseError.endColumn follows upstream (start in code points, end from the UTF-16 length), so convert when slicing ranges."
     },
     {
       "id": "F-103",
@@ -246,7 +246,7 @@
         "Ranges slice back to exact source"
       ],
       "passes": false,
-      "notes": "From F-101: 7 ported ConfigAstBuilderTest inputs (L059, L076, L097, L113, L129, L163, L175) parse at grammar level and must be rejected by the config AST builder here (owner F-103 in packages/lang-2610/test/ported/cases.json)."
+      "notes": "From F-101: 7 ported ConfigAstBuilderTest inputs (L059, L076, L097, L113, L129, L163, L175) parse at grammar level and must be rejected by the config AST builder here (owner F-103 in packages/lang-2610/test/ported/cases.json). Also from F-101: the ported valid-escape cases must stay error-free once the config AST builder checks escapes (EscapeUtils)."
     },
     {
       "id": "F-104",
