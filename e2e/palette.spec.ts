@@ -84,6 +84,34 @@ test("F-204 step 1 UX-12: every category expands and collapses with its button",
   }
 });
 
+test("F-204 step 1 UX-12 ADR-0028: the open categories persist after reload, and searching does not change them", async ({
+  page,
+}) => {
+  await open(page);
+  await category(page, "Processes").click();
+  await category(page, "Channel factories").click();
+  await category(page, "Plugins & config").click();
+  await search(page).fill("group");
+  await search(page).press("Escape");
+  await page.reload();
+  await category(page, "Processes").waitFor();
+  const expected = new Set([
+    "Workflows",
+    "Operators",
+    "Channel factories",
+    "Plugins & config",
+  ]);
+  for (const label of CATEGORIES)
+    await expectState(page, label, expected.has(label));
+  const stored = await page.evaluate(() =>
+    localStorage.getItem("nf-builder:palette"),
+  );
+  expect(JSON.parse(stored ?? "null")).toEqual({
+    state: { open: ["workflows", "factories", "operators", "plugins-config"] },
+    version: 1,
+  });
+});
+
 test("F-204 step 1 UX-12 QA-11: categories toggle from the keyboard with Enter and Space", {
   tag: SMOKE_TAG,
 }, async ({ page }) => {

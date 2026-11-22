@@ -52,24 +52,11 @@ const view: PaletteView = {
   ],
 };
 
-const expanded = (open: PaletteCategoryId[]) =>
-  Object.fromEntries(
-    [
-      "processes",
-      "workflows",
-      "factories",
-      "operators",
-      "params-outputs",
-      "types-functions-includes",
-      "plugins-config",
-    ].map((id) => [id, open.includes(id as PaletteCategoryId)]),
-  ) as Record<PaletteCategoryId, boolean>;
-
 const render = (open: PaletteCategoryId[], searching = false) =>
   renderToStaticMarkup(
     <PaletteTree
       view={view}
-      expanded={expanded(open)}
+      open={open}
       searching={searching}
       onToggle={() => {}}
     />,

@@ -41,6 +41,6 @@ export const NON_FETCHED_URLS: readonly NonFetchedUrl[] = [
     match: "prefix",
     url: "https://docs.seqera.io/nextflow/",
     reason:
-      "Documentation links in the palette (palette.json `docs`); shown as links for the user to open, never fetched by the app",
+      "Documentation links kept in the palette data (palette.json `docs`); the app does not fetch them",
   },
 ];

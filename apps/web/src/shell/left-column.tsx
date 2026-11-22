@@ -81,6 +81,8 @@ export function LeftColumn({
       <div
         role="tabpanel"
         id="left-panel-files"
+        // biome-ignore lint/a11y/noNoninteractiveTabindex: WAI-ARIA tabs pattern: a panel with no focusable content is itself focusable
+        tabIndex={0}
         aria-labelledby="left-tab-files"
         hidden={view !== "files"}
       >

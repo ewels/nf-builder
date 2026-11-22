@@ -4,12 +4,13 @@ import { PaletteCategorySection } from "./palette-category-section";
 
 export function PaletteTree({
   view,
-  expanded,
+  open,
   searching,
   onToggle,
 }: {
   readonly view: PaletteView;
-  readonly expanded: Readonly<Record<PaletteCategoryId, boolean>>;
+  /** The categories that are open when not searching. */
+  readonly open: readonly PaletteCategoryId[];
   readonly searching: boolean;
   readonly onToggle: (id: PaletteCategoryId) => void;
 }): JSX.Element {
@@ -22,7 +23,7 @@ export function PaletteTree({
         <PaletteCategorySection
           key={category.id}
           category={category}
-          expanded={expanded[category.id]}
+          expanded={open.includes(category.id)}
           searching={searching}
           onToggle={() => onToggle(category.id)}
         />
