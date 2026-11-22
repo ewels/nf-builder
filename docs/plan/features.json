@@ -933,7 +933,7 @@
     },
     {
       "id": "F-402",
-      "milestone": "M4",
+      "milestone": "M8",
       "description": "Import a private GitHub repo with a token held in memory by default; optional remember-on-device.",
       "spec": [
         "IO-10",
@@ -949,7 +949,7 @@
         "The token never appears in exports or console output"
       ],
       "passes": false,
-      "notes": ""
+      "notes": "Deferred past v0.1 by the maintainer on 2026-11-22 (ADR 0030); milestone M8 holds deferred features."
     },
     {
       "id": "F-403",
@@ -1311,7 +1311,7 @@
     {
       "id": "F-702",
       "milestone": "M7",
-      "description": "All performance budgets green in CI.",
+      "description": "Performance budgets in CI: bundle size (QA-01), the QA-03 ceiling and the registry snapshot size (QA-06) fail CI when exceeded; QA-02, QA-04 and QA-05 are measured and reported.",
       "spec": [
         "QA-01",
         "QA-02",
@@ -1324,10 +1324,10 @@
         "F-503"
       ],
       "steps": [
-        "CI budget report shows every budget met on `main`"
+        "On `main`, CI fails when QA-01, QA-03 or QA-06 is exceeded, and its budget report shows the QA-02, QA-04 and QA-05 measurements"
       ],
       "passes": false,
-      "notes": "ADR 0015 excludes worker bundles from the QA-01 measurement until this feature; revisit that here."
+      "notes": "ADR 0015 excludes worker bundles from the QA-01 measurement until this feature; revisit that here. 2026-11-22, maintainer (ADR 0030): QA-02, QA-04 and QA-05 are reported, not gates."
     },
     {
       "id": "F-703",
