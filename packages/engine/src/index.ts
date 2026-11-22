@@ -56,6 +56,12 @@ export { installedPackVersions } from "./packs";
 export { loadPalette } from "./palette";
 export { paletteItemCount, searchPalette } from "./palette-search";
 export { projectionCoverage } from "./projection/coverage";
+export type {
+  FreeRead,
+  StatementVariables,
+  Write,
+} from "./projection/free-variables";
+export { statementVariables } from "./projection/free-variables";
 export { formatNodeKey, parseNodeKey } from "./projection/keys";
 export {
   createProjector,

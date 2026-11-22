@@ -14,6 +14,7 @@ import {
   AST_ERRORS_FILE,
   AST_FIXTURES_FILE,
   CONFIG_AST_ERRORS_FILE,
+  FREE_VARIABLE_PROBES_FILE,
   PROJECTION_FIXTURES_FILE,
 } from "../src/paths.ts";
 import { loadTreeManifest, runTree } from "../src/trees.ts";
@@ -251,6 +252,41 @@ describe("F-102 trees", () => {
     expect(
       rows.filter(
         (r) => r.caseId.startsWith("projection-fixtures:") && !r.matched,
+      ).length,
+    ).toBe(manifest.files.length);
+  });
+
+  it("F-108 ADR-0019: the free-variable probe tree loads, every file exists, and a plain oracle run checks it with positions", () => {
+    const manifest = loadTreeManifest(
+      FREE_VARIABLE_PROBES_FILE,
+      "free-variable-probes",
+    );
+    expect(manifest.files.length).toBeGreaterThan(0);
+    for (const f of manifest.files) {
+      expect(existsSync(join(manifest.dir, f.file)), f.file).toBe(true);
+      expect(f.lint.length, f.file).toBeGreaterThan(0);
+      for (const e of f.lint) expect(e.message).toMatch(/is not defined$/);
+    }
+    const cache = tmp();
+    main([], {
+      pin: { version: "1.2.3", sha256: "a".repeat(64) },
+      exec: (args) =>
+        args[0] === "-version"
+          ? { ...lintJson([]), stdout: "version 1.2.3 build 1" }
+          : lintJson([]),
+      env: {},
+      oracleCache: cache,
+      write: () => {},
+    });
+    const rows = (
+      JSON.parse(readFileSync(join(cache, "results.json"), "utf8")) as {
+        results: { caseId: string; matched: boolean }[];
+      }
+    ).results;
+    // a fake that finds no errors cannot match the recorded errors
+    expect(
+      rows.filter(
+        (r) => r.caseId.startsWith("free-variable-probes:") && !r.matched,
       ).length,
     ).toBe(manifest.files.length);
   });

@@ -4,6 +4,8 @@ main.nf#/:params params "params" @8:1
   out fasta (fasta): Path
   out names (names): List<String>
 main.nf#/:code@1 code "log.info "fasta: ${params.fasta}"" @16:5
+  in params.fasta (params.fasta): -
+    <- main.nf#/:params[fasta] Path via params.fasta indirect
 main.nf#/prepared call "PREPARE" callee=PREPARE:workflow:modelled:typed @17:16
   in samples (samples): Channel<Sample>
     <- main.nf#/:params[samples] Channel<Sample> via params.samples
