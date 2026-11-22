@@ -37,3 +37,43 @@ export const texts = (state: Awaited<ReturnType<typeof stateFor>>) =>
   );
 
 export { commit };
+
+import type { GraphNode, PortRef, Projection } from "@nf-builder/lang-core";
+import { createProjector } from "../../src/projection/project";
+
+type State = Awaited<ReturnType<typeof stateFor>>;
+
+export function projection(
+  state: State,
+  path = "main.nf",
+  workflow: string | null = null,
+): Projection {
+  const p = createProjector(state.model, state.catalogue).project(
+    path,
+    workflow,
+  );
+  if (!p) throw new Error(`no projection for ${path}`);
+  return p;
+}
+
+/** The node whose id ends with `suffix` (ids are `<path>#<workflow>/<local>`). */
+export function node(
+  state: State,
+  local: string,
+  path = "main.nf",
+  workflow: string | null = null,
+): GraphNode {
+  const found = projection(state, path, workflow).nodes.find((n) =>
+    n.id.endsWith(`/${local}`),
+  );
+  if (!found) throw new Error(`no node ${local}`);
+  return found;
+}
+
+export const port = (
+  state: State,
+  local: string,
+  portId: string,
+  path = "main.nf",
+  workflow: string | null = null,
+): PortRef => ({ node: node(state, local, path, workflow).id, port: portId });

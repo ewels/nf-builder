@@ -18,7 +18,10 @@ import {
 import { installedPacks } from "../packs";
 import { loadParser } from "../source/parser";
 import { addCall } from "./commands/add-call";
+import { connect, disconnect } from "./commands/connect";
 import { createProcess } from "./commands/create-process";
+import { deleteNode } from "./commands/delete-node";
+import { renameDeclaration } from "./commands/rename";
 import { replaceFileText } from "./commands/replace-file-text";
 import { checkResult } from "./guards";
 import { applyPatches } from "./patches";
@@ -60,14 +63,14 @@ const build = (state: EditState, command: EditCommand): TextPatch[] => {
       return addCall(state, command);
     case "replaceFileText":
       return replaceFileText(state, command);
-    case "connect":
-    case "disconnect":
-    case "deleteNode":
     case "renameDeclaration":
-      throw new EditRefusal(
-        "invalid",
-        `The ${command.kind} command is not available yet.`,
-      );
+      return renameDeclaration(state, command);
+    case "connect":
+      return connect(state, command);
+    case "disconnect":
+      return disconnect(state, command);
+    case "deleteNode":
+      return deleteNode(state, command);
     default:
       throw new EditRefusal(
         "invalid",
