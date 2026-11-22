@@ -72,6 +72,40 @@ const PARITY: Record<
     cut: null,
     key: "warnings",
   },
+  "missing-type": {
+    lint: /should have a type annotation$/,
+    cut: null,
+    key: "warnings",
+  },
+  "typed-process-outputs": {
+    lint: /^Typed process should have only one output/,
+    cut: null,
+    key: "warnings",
+  },
+  "publish-type-ignored": {
+    lint: /^Workflow output type should be declared/,
+    cut: null,
+    key: "warnings",
+  },
+  // errors
+  "feature-flag": { lint: /^Unrecognized feature flag/, cut: null },
+  "pipeline-include-types": {
+    lint: /^Including a pipeline requires/,
+    cut: null,
+  },
+  "config-include-placement": {
+    lint: /^Config includes are only allowed/,
+    cut: null,
+  },
+  "agent-output": {
+    lint: /^(Agent output `|`(eval|env)` is not defined)/,
+    cut: null,
+  },
+  "include-alias": {
+    lint: /^(An included pipeline must be aliased|Included types cannot be aliased)/,
+    cut: null,
+  },
+  "duplicate-name": { lint: /is already (included|declared)$/, cut: null },
 };
 const VERBS = new Set([
   "add",
@@ -232,17 +266,8 @@ describe("F-112 fixtures", () => {
 
 /** Fixture codes whose rules a later F-112 task adds. */
 const PENDING = [
-  "agent-output",
   "call-arity",
-  "config-include-placement",
-  "duplicate-name",
-  "feature-flag",
-  "include-alias",
-  "missing-type",
   "multiple-channels",
-  "pipeline-include-types",
-  "publish-type-ignored",
   "type-mismatch",
-  "typed-process-outputs",
   "unused-output",
 ];

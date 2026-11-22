@@ -18,6 +18,7 @@ const includeCode = (code: string): DiagnosticCode => ({
 
 const NF_LANG = "modules/nf-lang/src/main/java/nextflow";
 const BUILDER = `${NF_LANG}/script/parser/ScriptAstBuilder.java`;
+const RESOLVE_INCLUDE = `${NF_LANG}/script/control/ResolveIncludeVisitor.java`;
 const SCRIPT_SCOPE = `${NF_LANG}/script/control/VariableScopeVisitor.java`;
 
 /** A code with no verbatim messages and no fix unless the caller says so. */
@@ -135,5 +136,104 @@ export const CODES: readonly DiagnosticCode[] = [
     severity: "suggestion",
     spec: ["LA-36"],
     origin: "ours",
+  }),
+  code({
+    code: "missing-type",
+    severity: "warning",
+    spec: ["LA-37"],
+    origin: "lint",
+    upstream: [
+      `${BUILDER}#L597`,
+      `${BUILDER}#L619`,
+      `${BUILDER}#L634`,
+      `${BUILDER}#L977`,
+    ],
+    lintPattern: /should have a type annotation$/,
+  }),
+  code({
+    code: "typed-process-outputs",
+    severity: "warning",
+    spec: ["LA-37"],
+    origin: "lint",
+    upstream: [`${BUILDER}#L695`],
+    lintPattern: /^Typed process should have only one output/,
+    verbatim: [/^Typed process should have only one output -- consider /],
+  }),
+  code({
+    code: "publish-type-ignored",
+    severity: "warning",
+    spec: ["LA-37"],
+    origin: "lint",
+    upstream: [`${BUILDER}#L1059`],
+    lintPattern: /^Workflow output type should be declared in the output block/,
+    verbatim: [/^Workflow output type should be declared in the output block/],
+    fixable: true,
+  }),
+  code({
+    code: "feature-flag",
+    severity: "error",
+    spec: ["LA-31"],
+    origin: "lint",
+    upstream: [`${SCRIPT_SCOPE}#L249`],
+    lintPattern: /^Unrecognized feature flag/,
+  }),
+  code({
+    code: "pipeline-include-types",
+    severity: "error",
+    spec: ["LA-31"],
+    origin: "lint",
+    upstream: [`${RESOLVE_INCLUDE}#L139-L142`],
+    lintPattern:
+      /^(Including a pipeline requires|An included pipeline must enable static typing)/,
+  }),
+  code({
+    code: "config-include-placement",
+    severity: "error",
+    spec: ["LA-31"],
+    origin: "lint",
+    upstream: [`${NF_LANG}/config/control/VariableScopeVisitor.java#L204`],
+    lintPattern:
+      /^Config includes are only allowed at the top-level or in a profile/,
+  }),
+  code({
+    code: "agent-output",
+    severity: "error",
+    spec: ["LA-31"],
+    origin: "lint",
+    upstream: [
+      `${NF_LANG}/script/control/ScriptResolveVisitor.java#L174`,
+      `${NF_LANG}/script/control/ScriptResolveVisitor.java#L179`,
+      `${SCRIPT_SCOPE}#L803`,
+    ],
+    lintPattern: /^(Agent output `|`(eval|env)` is not defined)/,
+    verbatim: [
+      /^Agent output `[^`]+` (should declare a type|has unsupported )/,
+    ],
+  }),
+  code({
+    code: "include-alias",
+    severity: "error",
+    spec: ["AR-05"],
+    origin: "lint",
+    upstream: [`${SCRIPT_SCOPE}#L140`, `${SCRIPT_SCOPE}#L144`],
+    lintPattern:
+      /^(An included pipeline must be aliased|Included types cannot be aliased)/,
+    verbatim: [/^An included pipeline must be aliased, e\.g\. /],
+  }),
+  code({
+    code: "duplicate-name",
+    severity: "error",
+    spec: ["AR-05"],
+    origin: "lint",
+    upstream: [
+      `${SCRIPT_SCOPE}#L150`,
+      `${SCRIPT_SCOPE}#L183`,
+      `${SCRIPT_SCOPE}#L189`,
+      `${SCRIPT_SCOPE}#L210`,
+      `${SCRIPT_SCOPE}#L217`,
+      `${SCRIPT_SCOPE}#L260`,
+    ],
+    lintPattern: /is already (included|declared)$/,
+    fixable: true,
   }),
 ];

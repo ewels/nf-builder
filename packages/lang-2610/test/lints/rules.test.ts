@@ -1,10 +1,4 @@
-import { readFileSync } from "node:fs";
-import type {
-  Catalogue,
-  LintContext,
-  LintFinding,
-  LintRule,
-} from "@nf-builder/lang-core";
+import type { LintFinding, LintRule } from "@nf-builder/lang-core";
 import { describe, expect, it } from "vitest";
 import {
   DIRECTIVE_ADVICE,
@@ -22,63 +16,21 @@ import {
   publishDir,
   tupleWhereRecord,
 } from "../../src/lints/legacy.ts";
-import {
-  parseConfigSource,
-  parseScriptSource,
-} from "../../src/source/parse-source.ts";
+import { catalogue, context } from "./context.ts";
 
-const json = (file: string): unknown =>
-  JSON.parse(
-    readFileSync(new URL(`../../catalogue/${file}`, import.meta.url), "utf8"),
-  );
-const catalogue = {
-  script: json("script.json"),
-  config: json("config.json"),
-} as Catalogue;
-
-function context(
-  text: string,
-  language: "script" | "config" = "script",
-): LintContext {
-  const file =
-    language === "script"
-      ? ({
-          path: "main.nf",
-          text,
-          language: "nextflow",
-          ...parseScriptSource(text),
-          comments: [],
-        } as never)
-      : ({
-          path: "nextflow.config",
-          text,
-          language: "config",
-          ...parseConfigSource(text),
-          comments: [],
-        } as never);
-  return {
-    file,
-    catalogue,
-    lookup: () => undefined,
-    includes: [],
-    projections: () => [],
-    configs: () => [],
-  };
-}
 const run = (rule: LintRule, text: string, language?: "script" | "config") =>
   rule.check(context(text, language));
 const at = (text: string, findings: readonly LintFinding[]) =>
   findings.map((f) => text.slice(f.range.start, f.range.end));
-// Each finding's fix is complete on its own, so two findings in one closure carry the same edit: apply it once.
+// A minimal applier (a pack may not import the engine's applyTextEdits): edits are applied last to first.
 const apply = (text: string, findings: readonly LintFinding[]) => {
   const unique = new Map(
     findings
       .flatMap((f) => f.fix?.edits ?? [])
       .map((e) => [`${e.start}:${e.end}:${e.text}`, e]),
   );
-  const edits = [...unique.values()].sort((a, b) => b.start - a.start);
   let out = text;
-  for (const e of edits)
+  for (const e of [...unique.values()].sort((a, b) => b.start - a.start))
     out = out.slice(0, e.start) + e.text + out.slice(e.end);
   return out;
 };

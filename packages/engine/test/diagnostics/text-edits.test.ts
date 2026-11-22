@@ -34,4 +34,15 @@ describe("F-112 text edits", () => {
       applyTextEdits("abc", [{ start: -1, end: 1, text: "" }]),
     ).toThrow(RangeError);
   });
+
+  it("F-112 AR-05: identical edits apply once, edits that overlap without being identical still throw", () => {
+    const insert = { start: 2, end: 2, text: " it ->" };
+    expect(applyTextEdits("abcd", [insert, { ...insert }])).toBe("ab it ->cd");
+    expect(() =>
+      applyTextEdits("abcd", [
+        { start: 1, end: 3, text: "x" },
+        { start: 1, end: 3, text: "y" },
+      ]),
+    ).toThrow(RangeError);
+  });
 });

@@ -58,3 +58,48 @@
 ## publish-dir
 
 - The `publishDir` directive is discouraged -- publish outputs from the entry workflow (`publish:` and the `output` block) instead
+
+## missing-type
+
+- Process input should have a type annotation -- add a type, such as `name: String`
+- Process input should have a type annotation -- add a type, such as `q: String`
+- Tuple component should have a type annotation -- add a type, such as `a: String`
+- Tuple component should have a type annotation -- add a type, such as `b: String`
+- Typed workflow input should have a type annotation -- add a type, such as `names: String`
+
+## typed-process-outputs
+
+- Typed process should have only one output -- consider combining outputs into a record
+
+## publish-type-ignored
+
+- Workflow output type should be declared in the output block -- the type annotation in the publish statement is ignored
+
+## feature-flag
+
+- Unrecognized feature flag 'nextflow.enable.typess' -- use one of nextflow.enable.configProcessNamesValidation, nextflow.enable.dsl, nextflow.enable.moduleBinaries, nextflow.enable.strict, nextflow.enable.types, nextflow.preview.recursion, or remove it
+
+## pipeline-include-types
+
+- Including a pipeline requires `nextflow.enable.types = true` in the including script -- add `nextflow.enable.types = true` to this script
+
+## config-include-placement
+
+- Config includes are only allowed at the top-level or in a profile -- move it to the top level or into a profile
+
+## agent-output
+
+- Agent output `b` has unsupported field `meta` with type Map -- supported types are Boolean, Float, Integer, List<E>, Path, String, or a record type
+- Agent output `items` has unsupported type List -- supported types are Boolean, Float, Integer, List<E>, Path, String, or a record type
+- Agent output `q` should declare a type -- typed outputs are answered by the model
+- `eval` is not defined -- use `stdout()`, `file()` or `files()` in an agent output
+
+## include-alias
+
+- An included pipeline must be aliased, e.g. `params as MY_PIPELINE`
+- An included pipeline must be aliased, e.g. `workflow as MY_PIPELINE`
+- Included types cannot be aliased -- remove the alias
+
+## duplicate-name
+
+- `hello` is already included -- remove the duplicate, or rename one or alias it with `as`
