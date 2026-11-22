@@ -30,3 +30,4 @@ Process: [0001](0001-record-decisions-as-adrs.md). Template: [template.md](templ
 | [0024](0024-spike-s5-self-hosted-pyodide.md) | Run spike S5 as a local test page with pinned, self-hosted Pyodide | Accepted (agent) |
 | [0025](0025-palette-overlay.md) | Keep the palette overlay in YAML, generate JSON for the pack | Accepted (agent) |
 | [0026](0026-no-language-server-in-v0-1.md) | Keep the CheerpJ language server out of v0.1 | Accepted (agent) |
+| [0027](0027-ast-conventions.md) | Share AST conventions across scripts and configs, and attach comments as nf-lang does | Accepted (agent) |
