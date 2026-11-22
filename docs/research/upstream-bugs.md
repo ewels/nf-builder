@@ -31,6 +31,8 @@ To reproduce with the pinned dist: `NXF_OFFLINE=true .cache/nextflow/26.10.7/nex
 | 19 | Nextflow registry | `nf-core/fasta_clean_faidx` is listed as a process but declares a workflow; `nextflow-io/hello` has no `componentName` | F-501 plan | no |
 | 20 | nf-lang lint | A legacy process before `nextflow.enable.types = true` and a typed one after it in the same script pass lint and run, although the docs say a script can't mix them | F-111 plan | no |
 | 21 | Nextflow registry | The download endpoint for `nf-core/cooler/digest` 0.0.0-6d1763b returns HTTP 401 | F-501 live build | no |
+| 22 | nf-lang lint | Errors on a bare variable that is an `if` condition or the only index in `x[i]` point one column early, at the `(` or `[` | F-108 | no |
+| 23 | nf-lang formatter | `lint -format` re-indents multi-line string content, changing the string's value | F-111 | no |
 
 ## Details
 
@@ -316,3 +318,36 @@ workflow {
 - **What happens:** on 2026-11-22, `GET https://registry.nextflow.io/api/v1/modules/nf-core%2Fcooler%2Fdigest/0.0.0-6d1763b/download` returned HTTP 401, while the module's details endpoint and every other module's download worked anonymously.
 - **Expected:** a redirect to the bundle, as for the other 2,320 modules.
 - **nf-builder:** the snapshot build reports it and leaves the module out (F-501).
+
+### 22. Some variable errors point at the delimiter, one column early
+
+```nextflow
+workflow {
+    if (flag) {
+        println('x')
+    }
+    xs = [1, 2]
+    println(xs[idx])
+    println(other)
+}
+```
+
+- **What happens:** `nextflow lint -o json .` reports "`flag` is not defined" at 2:8 (the `(`; `flag` starts at 2:9) and "`idx` is not defined" at 6:15 (the `[`; `idx` starts at 6:16). "`other` is not defined" is at 7:13, which is right.
+- **Expected:** the position of the variable itself. The parenthesised condition and the index expression seem to take the position of their enclosing delimiter.
+- **nf-builder:** reports the variable's own position; the F-108 free-variable oracle test allows for the one-column difference in these two shapes.
+
+### 23. The formatter changes the value of multi-line strings
+
+```nextflow
+workflow {
+        msg = """
+  first
+    second
+"""
+    println(msg)
+}
+```
+
+- **What happens:** `nextflow run main.nf` prints `  first` and `    second`. After `nextflow lint -format .`, the string's lines are re-indented (here to column 1, losing even their relative indentation), and the same run prints `first` and `second`. Formatting changed what the program does.
+- **Expected:** the formatter leaves string content alone, or re-indents only strings whose value can't change (for example those passed through `stripIndent()` or `stripMargin()`).
+- **nf-builder:** the printer matches upstream here (F-110 parity) and only reprints declarations an edit touches (ADR 0032); F-111's reprint test lists the workflows whose strings are re-indented. A known difference may be added if this is confirmed as a bug.
