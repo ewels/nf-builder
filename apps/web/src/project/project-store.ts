@@ -84,7 +84,9 @@ export function createProjectStore(
       const savedNow =
         get().status.save.status === "saving" && status.save.status === "saved";
       set({ status });
-      if (status.current === null) deps.canvas.projectGone();
+      // a status sent while a project opens can arrive after that open's summary; it must not clear the canvas
+      if (status.current === null && status.opening === null)
+        deps.canvas.projectGone();
       if (savedNow) {
         void askPersistence();
         void checkUsage();

@@ -11,6 +11,7 @@ import {
   switcher,
   type WorkspaceHook,
 } from "./projects.ts";
+import { templateFilesOnDisk } from "./templates.ts";
 import { PREVIEW_URL } from "./urls.ts";
 
 const readFile = (page: Page, path: string) =>
@@ -213,9 +214,15 @@ test("F-202 ADR-0002 IO-01: the stored records match the recorded IndexedDB form
     "updatedAt",
   ]);
   expect(projects[0]?.name).toBe("Format");
-  expect(db.stores.files?.records).toEqual([
-    { projectId: projects[0]?.id, path: "README.md", text: "y\n" },
-  ]);
+  // F-203: Start blank stores the blank template's files; the edit replaced README.md.
+  const files = db.stores.files?.records as Record<string, unknown>[];
+  expect(files.map((f) => f.path).sort()).toEqual(
+    templateFilesOnDisk("blank")
+      .map((f) => f.path)
+      .sort(),
+  );
+  for (const f of files) expect(f.projectId).toBe(projects[0]?.id);
+  expect(files.find((f) => f.path === "README.md")?.text).toBe("y\n");
 });
 
 test("F-202 QA-10: focus returns to the switcher after Escape, Cancel, Create and choosing a project", async ({

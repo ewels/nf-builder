@@ -126,6 +126,16 @@ describe("F-202 F-205 project store and canvas", () => {
     f.push(ready({ current: null }));
     expect(f.gone.count).toBe(before + 1);
   });
+
+  it("F-203 UX-20: a status sent while a project opens does not reset the canvas, so a late one can't wipe the opened project", async () => {
+    const f = fixture(ready());
+    await f.store.getState().start();
+    const before = f.gone.count;
+    f.push(
+      ready({ current: null, opening: { project: meta("a"), progress: null } }),
+    );
+    expect(f.gone.count).toBe(before);
+  });
 });
 
 describe("F-202 project store", () => {

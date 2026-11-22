@@ -129,11 +129,13 @@ test("F-201 UX-01: the header shows the project switcher, save state, Templates,
 }) => {
   await page.goto("./");
   const header = page.getByRole("banner");
-  // F-202: the switcher is a live disclosure button once storage is ready; the rest stay disabled.
+  // F-202: the switcher is a live disclosure button once storage is ready. F-203: Templates is enabled; Import and
+  // Export stay disabled.
   const switcher = header.getByRole("button", { name: "No project" });
   await expect(switcher).toBeEnabled();
   await expect(switcher).toHaveAttribute("aria-expanded", "false");
-  for (const name of ["Templates", "Import", "Export"])
+  await expect(header.getByRole("button", { name: "Templates" })).toBeEnabled();
+  for (const name of ["Import", "Export"])
     await expect(header.getByRole("button", { name })).toBeDisabled();
   await expect(header.getByText("Nothing to save")).toBeVisible();
   const select = header.getByRole("combobox", { name: "Nextflow version" });
