@@ -23,6 +23,18 @@ cases:
     run:
       expect: ok
       output: ["txt: ", "s1.count.txt", "versions: "]
+  - id: s1-typed-list-literal-tuple
+    about: Typed code builds a legacy tuple input with a mixed list literal; lint rejects it and run only warns.
+    spec: [F-005, LA-14, ADR-0007]
+    sources:
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/modules/nf-lang/src/main/java/nextflow/script/control/TypeCheckingVisitor.java#L1403-L1424
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/migrations/26-10.mdx#L22
+    lint:
+      expect: error
+      errors: ["List expression has inconsistent element types"]
+    run:
+      expect: ok
+      output: ["Type checking found 1 error", "txt: "]
   - id: s1-legacy-calls-typed
     about: A legacy entry workflow calls a typed process and a typed workflow included from another file.
     spec: [F-005, LA-14, ADR-0007]

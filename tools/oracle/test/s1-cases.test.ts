@@ -9,6 +9,7 @@ const ids = {
   interop: [
     "s1-typed-calls-legacy",
     "s1-typed-calls-legacy-module",
+    "s1-typed-list-literal-tuple",
     "s1-legacy-calls-typed",
     "s1-legacy-calls-typed-module",
   ],
@@ -41,12 +42,28 @@ describe("F-005 S1 cases", () => {
       const callee = read(join(dir, include?.[1] ?? ""));
       const mainTyped = main.includes(FLAG);
       expect(mainTyped !== callee.includes(FLAG), id).toBe(true);
-      expect(mainTyped, id).toBe(id.startsWith("s1-typed-calls-"));
+      expect(mainTyped, id).toBe(id.startsWith("s1-typed-"));
     }
   });
 
+  it("F-005 LA-14: typed code passes a legacy tuple input with tuple(), and a mixed list literal fails lint but only warns at run time", () => {
+    const fixed = byId.get("s1-typed-calls-legacy-module");
+    expect(read(join(fixed?.dir ?? "", "main.nf"))).toContain("tuple(");
+    const pitfall = byId.get("s1-typed-list-literal-tuple");
+    expect(read(join(pitfall?.dir ?? "", "main.nf"))).toContain(
+      "[[id: reads.baseName], reads]",
+    );
+    expect(pitfall?.lint?.expect).toBe("error");
+    expect(pitfall?.lint?.errors).toContain(
+      "List expression has inconsistent element types",
+    );
+    expect(pitfall?.run?.expect).toBe("ok");
+  });
+
   it("F-005 LA-14 ADR-0007: typed and legacy code across files is expected to pass lint and run -stub", () => {
-    for (const id of ids.interop) {
+    for (const id of ids.interop.filter(
+      (i) => i !== "s1-typed-list-literal-tuple",
+    )) {
       expect(byId.get(id)?.lint?.expect, id).toBe("ok");
       expect(byId.get(id)?.run?.expect, id).toBe("ok");
     }
