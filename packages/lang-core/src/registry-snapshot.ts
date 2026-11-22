@@ -93,26 +93,38 @@ export interface SnapshotPluginFile {
   readonly definitions: readonly PluginDefinition[];
 }
 
+/** A type as the plugin spec writes it: a name, or a generic such as `Set<String>`. */
+export type PluginTypeRef =
+  | string
+  | {
+      readonly name: string;
+      readonly typeArguments?: readonly PluginTypeRef[];
+    };
+
 export interface PluginConfigOption {
   readonly name: string;
-  readonly description?: string;
-  readonly type: string;
-  readonly additionalTypes?: readonly string[];
+  readonly description?: string | null;
+  readonly type: PluginTypeRef;
+  readonly additionalTypes?: readonly PluginTypeRef[];
 }
 
 export interface PluginConfigScope {
   readonly name: string;
-  readonly description?: string;
-  readonly children?: readonly (PluginConfigScope | PluginConfigOption)[];
+  readonly description?: string | null;
+  readonly children?: readonly PluginConfigChild[];
 }
+
+export type PluginConfigChild =
+  | { readonly type: "ConfigScope"; readonly spec: PluginConfigScope }
+  | { readonly type: "ConfigOption"; readonly spec: PluginConfigOption };
 
 export interface PluginFunction {
   readonly name: string;
-  readonly description?: string;
-  readonly returnType?: string;
+  readonly description?: string | null;
+  readonly returnType?: PluginTypeRef;
   readonly parameters?: readonly {
     readonly name: string;
-    readonly type: string;
+    readonly type: PluginTypeRef;
   }[];
 }
 

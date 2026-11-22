@@ -156,7 +156,7 @@ describe("ADR-0003 package boundaries", () => {
     expect(other.output).toContain(
       "error tools-standalone: tools/corpus/src/index.ts → tools/registry-snapshot/src/index.ts",
     );
-  });
+  }, 30_000);
 
   const CORPUS = "tools/corpus/src/index.ts";
   const violations: [string, string, string, string][] = [

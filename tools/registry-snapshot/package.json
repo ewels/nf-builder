@@ -9,10 +9,10 @@
   },
   "dependencies": {
     "@nf-builder/lang-2610": "workspace:*",
-    "@nf-builder/lang-core": "workspace:*"
+    "@nf-builder/lang-core": "workspace:*",
+    "yaml": "2.9.1"
   },
   "devDependencies": {
-    "@types/node": "22.20.5",
-    "yaml": "2.9.1"
+    "@types/node": "22.20.5"
   }
 }

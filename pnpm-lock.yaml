@@ -122,13 +122,13 @@ importers:
       '@nf-builder/lang-core':
         specifier: workspace:*
         version: link:../../packages/lang-core
+      yaml:
+        specifier: 2.9.1
+        version: 2.9.1
     devDependencies:
       '@types/node':
         specifier: 22.20.5
         version: 22.20.5
-      yaml:
-        specifier: 2.9.1
-        version: 2.9.1
 
   tools/spec-extract:
     devDependencies:
