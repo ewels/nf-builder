@@ -20,13 +20,13 @@ categories:
         name: processDef
         label: Process
         description: Run a script or command once per input, in its own work directory.
-        docs: https://docs.seqera.io/nextflow/process
+        docs: https://docs.seqera.io/nextflow/process-typed
       - kind: construct
         id: exec-process
         name: processDef
         label: Exec process
         description: Run Nextflow code natively as a process task, with no external script.
-        docs: https://docs.seqera.io/nextflow/process#native-execution
+        docs: https://docs.seqera.io/nextflow/process-typed
       - kind: construct
         id: agent
         name: agentDef
@@ -44,7 +44,7 @@ categories:
         name: workflowDef
         label: Workflow
         description: Compose processes, workflows and operators into a dataflow.
-        docs: https://docs.seqera.io/nextflow/workflow
+        docs: https://docs.seqera.io/nextflow/workflow-typed
       - kind: construct
         id: include-pipeline
         name: includeDeclaration
