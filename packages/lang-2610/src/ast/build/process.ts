@@ -38,7 +38,7 @@ import {
   type ProcessWhenContext,
   type WorkflowEmitContext,
 } from "../../generated/ScriptParser.ts";
-import type { BuildContext } from "./context.ts";
+import { type BuildContext, MIXED_DEFINITIONS } from "./context.ts";
 import { expression } from "./expressions.ts";
 import {
   directive,
@@ -152,7 +152,11 @@ export function processInput(
   if (single) {
     // built first, so that its own errors are reported too
     const stmt = statement(single, cx);
-    cx.error("Invalid input declaration in typed process", stmt.range);
+    cx.error(
+      "Invalid input declaration in typed process",
+      stmt.range,
+      MIXED_DEFINITIONS,
+    );
     return null;
   }
   const ident = ctx.identifier();
@@ -244,7 +248,7 @@ function legacyInput(
       cx.range(ctx),
     );
   }
-  cx.error(TYPED_INPUT_IN_LEGACY, cx.range(ctx));
+  cx.error(TYPED_INPUT_IN_LEGACY, cx.range(ctx), MIXED_DEFINITIONS);
   return null;
 }
 
@@ -350,7 +354,7 @@ function legacyOutput(
       cx.range(ctx),
     );
   }
-  cx.error(TYPED_OUTPUT_IN_LEGACY, cx.range(ctx));
+  cx.error(TYPED_OUTPUT_IN_LEGACY, cx.range(ctx), MIXED_DEFINITIONS);
   return null;
 }
 

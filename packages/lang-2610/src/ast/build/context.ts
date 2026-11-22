@@ -4,6 +4,9 @@ import type { ParseProblem, Range } from "@nf-builder/lang-core";
 import type { CommonTokenStream, ParserRuleContext, Token } from "antlr4ng";
 import { contextRange, PositionIndex, tokenRange } from "../positions.ts";
 
+/** `ParseProblem.code` of an error about a definition in the other style, typed or legacy (LA-13, F-111). */
+export const MIXED_DEFINITIONS = "mixed-definitions";
+
 /** A builder error that stops the build (upstream `createParsingFailedException`): the file gets no tree. */
 export class FatalBuildError extends Error {
   readonly problem: ParseProblem;
@@ -58,8 +61,10 @@ export class BuildContext {
   }
 
   /** Collect an error and carry on (upstream `collectSyntaxError`). */
-  error(message: string, at: Range): void {
-    this.errors.push(problem(message, at));
+  error(message: string, at: Range, code?: string): void {
+    this.errors.push(
+      code ? { ...problem(message, at), code } : problem(message, at),
+    );
   }
 
   /**

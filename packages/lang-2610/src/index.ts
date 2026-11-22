@@ -5,12 +5,14 @@ import type {
 } from "@nf-builder/lang-core";
 import { includes } from "./includes/index.ts";
 import { palette } from "./palette.ts";
+import { scaffold } from "./scaffold.ts";
 
 // Import the catalogue JSON only dynamically here: it must stay lazy chunks that come straight from JSON (QA-01, ADR 0028).
 export const pack: LanguagePack = {
   version: "26.10",
   palette,
   includes,
+  scaffold,
   loadCatalogue: async () => {
     const [script, config] = await Promise.all([
       import("../catalogue/script.json"),

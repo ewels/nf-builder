@@ -20,7 +20,7 @@ import type {
   WorkflowTakeContext,
   WorkflowTakesContext,
 } from "../../generated/ScriptParser.ts";
-import type { BuildContext } from "./context.ts";
+import { type BuildContext, MIXED_DEFINITIONS } from "./context.ts";
 import { expression } from "./expressions.ts";
 import { namedOutput } from "./process.ts";
 import { labelled, statementsRange, unlabelled } from "./sections.ts";
@@ -41,6 +41,7 @@ function take(ctx: WorkflowTakeContext, cx: BuildContext): TypedName | null {
     cx.error(
       "Typed input is not allowed in legacy workflow -- set `nextflow.enable.types = true` to use typed workflows in this script",
       cx.range(ctx),
+      MIXED_DEFINITIONS,
     );
     return null;
   }
@@ -76,6 +77,7 @@ function emit(
     cx.error(
       "Typed output is not allowed in legacy workflow -- set `nextflow.enable.types = true` to use typed workflows in this script",
       cx.range(ctx),
+      MIXED_DEFINITIONS,
     );
     return null;
   }

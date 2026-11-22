@@ -158,3 +158,26 @@ cases:
           "Including a pipeline requires `nextflow.enable.types = true` in the including script",
           "An included pipeline must enable static typing",
         ]
+  # F-111: edit commands. The mixed script shows lint does not enforce LA-13; the start trees are the property and golden inputs.
+  - id: f111-mixed-after-flag
+    about: A legacy process, then the types flag, then a typed process in one script; lint and run accept it because the split depends on position, so LA-13 needs the app's own check.
+    spec: [F-111, LA-13, ADR-0007]
+    sources:
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/static-typing.mdx#L50
+    lint: { expect: ok }
+    run:
+      expect: ok
+  - id: f111-start-typed
+    about: A typed project with two modules and an entry workflow; the start tree of the typed edit sequence.
+    spec: [F-111, LA-11, LA-12, AR-22]
+    sources:
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/process-typed.mdx
+    lint: { expect: ok }
+    run: { expect: ok }
+  - id: f111-start-legacy
+    about: A legacy project with one module and an entry workflow; the start tree of the legacy edit sequence.
+    spec: [F-111, LA-14, AR-22]
+    sources:
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/process.mdx
+    lint: { expect: ok }
+    run: { expect: ok }

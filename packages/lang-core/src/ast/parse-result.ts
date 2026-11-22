@@ -13,6 +13,11 @@ export interface ParseProblem {
   readonly endColumn: number;
   /** Set on whole-file checks (such as a duplicate params block), which never isolate one declaration (F-104). */
   readonly scope?: "file";
+  /**
+   * Set by a pack for problems callers act on. `"mixed-definitions"`: a process or workflow definition (or part of one)
+   * is in the other style, typed or legacy, than the script's types flag allows (LA-13, F-111).
+   */
+  readonly code?: string;
 }
 
 /** What a builder returns for one file: the tree and every error found, or the errors alone when it could not build one. */

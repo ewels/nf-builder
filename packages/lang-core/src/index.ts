@@ -1,4 +1,5 @@
 import type { Catalogue } from "./catalogue.ts";
+import type { Scaffold } from "./edit.ts";
 import type { IncludeRules } from "./includes.ts";
 import type { PaletteDefinition } from "./palette.ts";
 import type { SourceParser } from "./source-file.ts";
@@ -10,6 +11,8 @@ export interface LanguagePack {
   readonly palette: PaletteDefinition;
   /** Include resolution rules (AR-03, F-105): pure, loaded with the pack. */
   readonly includes: IncludeRules;
+  /** New-file templates (LA-02, LA-12): pure, loaded with the pack. */
+  readonly scaffold: Scaffold;
   /** The generated catalogue, loaded on first call (a dynamic import, so it stays out of the initial bundle; ADR 0028). */
   loadCatalogue(): Promise<Catalogue>;
   /** The parser with declaration-level fallback, loaded on first call (a dynamic import; ADR 0004, ADR 0027). */
@@ -31,6 +34,24 @@ export type {
   Signature,
 } from "./catalogue.ts";
 export type { Diagnostic, DiagnosticSeverity } from "./diagnostic.ts";
+export {
+  type AddCall,
+  type CommandResult,
+  type Connect,
+  type CreateProcess,
+  type DeleteNode,
+  type Disconnect,
+  EDIT_COMMAND_KINDS,
+  type EditCommand,
+  type FileText,
+  type RefusalCode,
+  type RenameDeclaration,
+  type ReplaceFileText,
+  type Scaffold,
+  type TextEdit,
+  type TextPatch,
+  type WorkflowTarget,
+} from "./edit.ts";
 export type {
   Includable,
   IncludableDeclaration,
