@@ -1,5 +1,6 @@
-# Registry snapshot (F-501, IO-31, ADR 0035). Builds the static registry snapshot daily and publishes it to the orphan
-# branch `registry-snapshot`, which every Netlify build copies into the site at /registry/.
+# Registry snapshot (F-501, IO-31, ADRs 0035 and 0041). Builds the static registry snapshot daily and publishes it to the
+# orphan branch `registry-snapshot`. The `Pages` workflow starts when this one succeeds on main (workflow_run) and copies
+# the branch into the site at /registry/.
 # Not a merge gate: it depends on registry.nextflow.io, so AGENTS.md's "CI green" does not include it. A pull request that
 # touches the tool gets a dry run (build and check, never publish) as evidence.
 name: Registry snapshot
@@ -35,7 +36,7 @@ jobs:
       - uses: ./.github/actions/setup
       - name: Fetch the previous snapshot, if there is one
         env:
-          # The repository is private: read it with the job's read-only token, and never prompt.
+          # Read with the job's read-only token (it also works if the repository is made private), and never prompt.
           GITHUB_TOKEN: ${{ github.token }}
           GIT_TERMINAL_PROMPT: "0"
           REPO_URL: https://github.com/${{ github.repository }}.git
@@ -98,37 +99,11 @@ jobs:
         run: |
           work="$(mktemp -d)"
           cp -r .cache/registry/out/registry "$work/registry"
-          printf '[build]\n  ignore = "exit 0"\n' > "$work/netlify.toml"
           cd "$work"
           git init --quiet --initial-branch registry-snapshot
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add registry netlify.toml
+          git add registry
           git commit --quiet -m "Registry snapshot $GENERATED_AT"
           auth="$(printf 'x-access-token:%s' "$GITHUB_TOKEN" | base64 -w0)"
           git -c "http.extraheader=Authorization: Basic $auth" push --force "$REPO_URL" HEAD:refs/heads/registry-snapshot
-
-  verify:
-    name: Trigger Netlify and check the deployed snapshot
-    needs: [build, publish]
-    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - uses: ./.github/actions/setup
-        with:
-          install: "false"
-      - name: Trigger a Netlify build and check the deployed snapshot
-        env:
-          NETLIFY_BUILD_HOOK: ${{ secrets.NETLIFY_BUILD_HOOK }}
-          GENERATED_AT: ${{ needs.build.outputs.generated-at }}
-        run: |
-          if [ -z "$NETLIFY_BUILD_HOOK" ]; then
-            echo "NETLIFY_BUILD_HOOK is not set: the snapshot reaches the site at the next production deploy."
-            exit 0
-          fi
-          curl --fail --silent --show-error --request POST "$NETLIFY_BUILD_HOOK" > /dev/null
-          pnpm check:registry --url https://nf-builder.netlify.app --generated-at "$GENERATED_AT"

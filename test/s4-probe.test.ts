@@ -20,7 +20,7 @@ import { REPO_ROOT } from "../scripts/check-common.ts";
 import { findUrls } from "../scripts/check-hosts.ts";
 import { policyMetaHtml } from "../scripts/security-policy-meta.ts";
 
-const PAGE = "https://nf-builder.netlify.app";
+const PAGE = "https://ewels.github.io";
 
 describe("S4 probe model", () => {
   it("F-008 step 1 ADR-0040: S4_PROBE_URL accepts only the production Pages site and a local preview under its base path, over https except localhost", () => {
@@ -288,8 +288,8 @@ describe("S4 OpenAPI and targets", () => {
     if (!first || !second) throw new Error("targets missing");
     const run: ProbeRun = {
       probedAt: "2026-11-22T10:00:00.000Z",
-      pageUrl: "https://deploy-preview-9--nf-builder.netlify.app/spike/s4/",
-      deployed: { commit: "abc1234", context: "deploy-preview" },
+      pageUrl: `${PRODUCTION_URL}spike/s4/`,
+      deployed: { commit: "abc1234", context: "production" },
       browserName: "chromium",
       browserVersion: "140.0",
       environment: "github-actions",

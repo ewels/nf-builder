@@ -7,7 +7,7 @@ export function basePath(env: Record<string, string | undefined>): string {
   if (value === undefined || value === "") return "/";
   if (!value.startsWith("/") || value.startsWith("//"))
     throw new Error(
-      `BASE_PATH must be an absolute path such as /nf-builder/, got "${value}"`,
+      `BASE_PATH must be an absolute path such as /my-site/, got "${value}"`,
     );
   return value.endsWith("/") ? value : `${value}/`;
 }
