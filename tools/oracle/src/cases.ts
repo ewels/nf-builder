@@ -1,15 +1,22 @@
 import { existsSync, readFileSync, statSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { dirname, isAbsolute, join, relative, resolve } from "node:path";
 import { parse } from "yaml";
-import { DEFAULT_MANIFEST } from "./paths.ts";
+import { DEFAULT_MANIFEST, REPO_ROOT } from "./paths.ts";
 
 export type Outcome = "ok" | "error";
-export type LintSpec = { expect: Outcome; errors: string[] };
+export type LintSpec = {
+  expect: Outcome;
+  errors: string[];
+  /** Set only when true: any lint warning fails the case. */
+  clean?: boolean;
+};
 export type RunSpec = {
   expect: Outcome;
   output: string[];
   script: string;
   args: string[];
+  /** Set only when not empty: tools the run gets a version-printing shim for, first on PATH. */
+  tools?: string[];
 };
 export type OracleCase = {
   id: string;
@@ -30,10 +37,16 @@ const isStrings = (value: unknown): value is string[] =>
 const nonEmptyStrings = (value: unknown): value is string[] =>
   isStrings(value) && value.length > 0;
 
-const CASE_KEYS = ["id", "about", "spec", "sources", "lint", "run"];
+const CASE_KEYS = ["id", "dir", "about", "spec", "sources", "lint", "run"];
 
-/** Collects every problem and throws one Error listing them as "<file>: case <id>: <problem>". */
-export function loadManifest(file: string = DEFAULT_MANIFEST): Manifest {
+/**
+ * Collects every problem and throws one Error listing them as "<file>: case <id>: <problem>".
+ * A case's directory is `dir` (relative to the manifest, and inside repoRoot) or else the folder named like its id.
+ */
+export function loadManifest(
+  file: string = DEFAULT_MANIFEST,
+  repoRoot: string = REPO_ROOT,
+): Manifest {
   const root: unknown = parse(readFileSync(file, "utf8"));
   const rawCases = isRecord(root) ? root.cases : undefined;
   if (!Array.isArray(rawCases)) {
@@ -66,7 +79,18 @@ export function loadManifest(file: string = DEFAULT_MANIFEST): Manifest {
     }
     if (!nonEmptyStrings(entry.spec)) problem("spec must not be empty");
     if (!nonEmptyStrings(entry.sources)) problem("sources must not be empty");
-    const dir = join(baseDir, id);
+    let dir = join(baseDir, id);
+    if (entry.dir !== undefined) {
+      if (typeof entry.dir !== "string" || entry.dir === "") {
+        problem("dir must be a path");
+      } else {
+        dir = resolve(baseDir, entry.dir);
+        const out = relative(resolve(repoRoot), dir);
+        if (out === "" || out.startsWith("..") || isAbsolute(out)) {
+          problem("dir must resolve inside the repository");
+        }
+      }
+    }
     if (!existsSync(dir) || !statSync(dir).isDirectory()) {
       problem(`directory ${dir} is missing`);
     }
@@ -92,16 +116,24 @@ export function loadManifest(file: string = DEFAULT_MANIFEST): Manifest {
     let lint: LintSpec | undefined;
     if (entry.lint !== undefined) {
       const l = isRecord(entry.lint) ? entry.lint : {};
-      unknownKeys(l, ["expect", "errors"], "lint.");
+      unknownKeys(l, ["expect", "errors", "clean"], "lint.");
       lint = {
         expect: outcome("lint", l.expect),
         errors: strings("lint.errors", l.errors),
       };
+      if (l.clean !== undefined) {
+        if (typeof l.clean !== "boolean") {
+          problem("lint.clean must be true or false");
+        } else if (l.clean) {
+          if (lint.expect !== "ok") problem("lint.clean needs lint.expect ok");
+          lint.clean = true;
+        }
+      }
     }
     let run: RunSpec | undefined;
     if (entry.run !== undefined) {
       const r = isRecord(entry.run) ? entry.run : {};
-      unknownKeys(r, ["expect", "output", "script", "args"], "run.");
+      unknownKeys(r, ["expect", "output", "script", "args", "tools"], "run.");
       const script = typeof r.script === "string" ? r.script : "main.nf";
       if (existsSync(dir) && !existsSync(join(dir, script))) {
         problem(`run script ${script} is missing from ${dir}`);
@@ -112,6 +144,13 @@ export function loadManifest(file: string = DEFAULT_MANIFEST): Manifest {
         script,
         args: r.args === undefined ? ["-stub"] : strings("run.args", r.args),
       };
+      const tools = strings("run.tools", r.tools);
+      for (const tool of tools) {
+        if (!/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(tool)) {
+          problem(`run.tools: "${tool}" is not a plain command name`);
+        }
+      }
+      if (tools.length > 0) run.tools = tools;
     }
     if (!lint && !run) {
       problem("needs a lint or a run check");

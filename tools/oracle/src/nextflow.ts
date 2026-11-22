@@ -119,14 +119,22 @@ export type ExecResult = {
   stderr: string;
   durationMs: number;
 };
-export type Exec = (args: readonly string[], cwd: string) => ExecResult;
+/** `pathPrefix` is a directory put first on PATH for this command. */
+export type ExecOptions = { pathPrefix?: string };
+export type Exec = (
+  args: readonly string[],
+  cwd: string,
+  options?: ExecOptions,
+) => ExecResult;
 
 export function nextflowExec(dist: string, env: NodeJS.ProcessEnv): Exec {
-  return (args, cwd) => {
+  return (args, cwd, options) => {
     const started = Date.now();
     const result = spawnSync(dist, [...args], {
       cwd,
-      env,
+      env: options?.pathPrefix
+        ? { ...env, PATH: `${options.pathPrefix}:${env.PATH ?? ""}` }
+        : env,
       encoding: "utf8",
       timeout: 600_000,
       maxBuffer: 64 * 1024 * 1024,
