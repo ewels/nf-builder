@@ -9,6 +9,21 @@ type PaletteViewState =
 
 const LOADING: PaletteViewState = { status: "loading" };
 
+const requests = new Map<string, Promise<PaletteView>>();
+
+/** One palette request per version, shared by everyone; a rejected request is forgotten so the next call asks again. */
+export function requestPaletteView(version: string): Promise<PaletteView> {
+  let request = requests.get(version);
+  if (!request) {
+    request = getEngine().palette(version);
+    requests.set(version, request);
+    request.catch(() => {
+      if (requests.get(version) === request) requests.delete(version);
+    });
+  }
+  return request;
+}
+
 /** Loads the palette for `version`; results for a version that is no longer current are ignored. */
 export function usePaletteView(version: string | undefined): PaletteViewState {
   const [state, setState] = useState<{
@@ -18,16 +33,14 @@ export function usePaletteView(version: string | undefined): PaletteViewState {
   useEffect(() => {
     if (version === undefined) return;
     let current = true;
-    getEngine()
-      .palette(version)
-      .then(
-        (view) => {
-          if (current) setState({ version, result: { status: "ready", view } });
-        },
-        () => {
-          if (current) setState({ version, result: { status: "error" } });
-        },
-      );
+    requestPaletteView(version).then(
+      (view) => {
+        if (current) setState({ version, result: { status: "ready", view } });
+      },
+      () => {
+        if (current) setState({ version, result: { status: "error" } });
+      },
+    );
     return () => {
       current = false;
     };
