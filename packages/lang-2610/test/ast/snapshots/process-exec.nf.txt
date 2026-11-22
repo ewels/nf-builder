@@ -1,0 +1,30 @@
+Script typesEnabled=false 1:1-12:1
+  body[0] Process typed=false 1:1-11:2
+    name Identifier 1:9-1:14 "greet"
+    inputs Section label="input" labelRange=2:5-2:11 2:5-4:13
+      items[0] ExpressionStatement 3:5-3:17
+        expression MethodCall trailingComma=false parens=false 3:5-3:17
+          method Identifier 3:5-3:8 "val"
+          args[0] Variable 3:9-3:17 "greeting"
+          closures=[]
+      items[1] ExpressionStatement 4:5-4:13
+        expression MethodCall trailingComma=false parens=false 4:5-4:13
+          method Identifier 4:5-4:8 "val"
+          args[0] Variable 4:9-4:13 "name"
+          closures=[]
+    exec Section label="exec" labelRange=6:5-6:10 6:5-7:38
+      items[0] Assignment operator="=" 7:5-7:38
+        target Variable 7:5-7:12 "message"
+        value GString quote="\"" 7:15-7:38
+          parts[0] Interpolation braced=true 7:16-7:27
+            expression Variable 7:18-7:26 "greeting"
+          parts[1] GStringText 7:27-7:29 ", "
+          parts[2] Interpolation braced=true 7:29-7:36
+            expression Variable 7:31-7:35 "name"
+          parts[3] GStringText 7:36-7:37 "!"
+    outputs Section label="output" labelRange=9:5-9:12 9:5-10:16
+      items[0] ExpressionStatement 10:5-10:16
+        expression MethodCall trailingComma=false parens=false 10:5-10:16
+          method Identifier 10:5-10:8 "val"
+          args[0] Variable 10:9-10:16 "message"
+          closures=[]

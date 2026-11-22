@@ -1,0 +1,83 @@
+Script typesEnabled=false 1:1-23:1
+  body[0] VariableDeclaration def=true multiple=false 1:1-1:6
+    targets[0] TypedName 1:5-1:6
+      name Identifier 1:5-1:6 "v"
+  body[1] VariableDeclaration def=true multiple=false 2:1-2:17
+    targets[0] TypedName 2:5-2:9
+      name Identifier 2:5-2:9 "list"
+    initializer List trailingComma=false 2:12-2:17
+      elements[0] String value="a" quote="'" 2:13-2:16 "'a'"
+  body[2] VariableDeclaration def=true multiple=false 3:1-3:14
+    targets[0] TypedName 3:5-3:8
+      name Identifier 3:5-3:8 "map"
+    initializer Map trailingComma=false 3:11-3:14 "[:]"
+      entries=[]
+  body[3] VariableDeclaration def=true multiple=false 4:1-4:10
+    targets[0] TypedName 4:5-4:6
+      name Identifier 4:5-4:6 "x"
+    initializer Number integer=true 4:9-4:10 "1"
+  body[4] VariableDeclaration def=true multiple=false 5:1-5:10
+    targets[0] TypedName 5:5-5:6
+      name Identifier 5:5-5:6 "y"
+    initializer Number integer=true 5:9-5:10 "2"
+  body[5] Assignment operator="=" 6:1-6:7
+    target Variable 6:1-6:2 "v"
+    value Number integer=true 6:5-6:7 "42"
+  body[6] Assignment operator="=" 7:1-7:18
+    target Index 7:1-7:8
+      object Variable 7:1-7:5 "list"
+      indices[0] Number integer=true 7:6-7:7 "0"
+    value String value="first" quote="'" 7:11-7:18 "'first'"
+  body[7] Assignment operator="=" 8:1-8:18
+    target Property navigation="." 8:1-8:8
+      object Variable 8:1-8:4 "map"
+      property Identifier 8:5-8:8 "key"
+    value String value="value" quote="'" 8:11-8:18 "'value'"
+  body[8] Assignment operator="=" 9:1-9:21
+    target TupleTarget 9:1-9:7
+      names[0] Variable 9:2-9:3 "x"
+      names[1] Variable 9:5-9:6 "y"
+    value MethodCall trailingComma=false parens=true 9:10-9:21
+      method Identifier 9:10-9:15 "tuple"
+      args[0] Number integer=true 9:16-9:17 "1"
+      args[1] Number integer=true 9:19-9:20 "2"
+      closures=[]
+  body[9] Assignment operator="+=" 10:1-10:7
+    target Variable 10:1-10:2 "x"
+    value Number integer=true 10:6-10:7 "1"
+  body[10] Assignment operator="-=" 11:1-11:7
+    target Variable 11:1-11:2 "x"
+    value Number integer=true 11:6-11:7 "1"
+  body[11] Assignment operator="*=" 12:1-12:7
+    target Variable 12:1-12:2 "x"
+    value Number integer=true 12:6-12:7 "2"
+  body[12] Assignment operator="/=" 13:1-13:7
+    target Variable 13:1-13:2 "x"
+    value Number integer=true 13:6-13:7 "2"
+  body[13] Assignment operator="%=" 14:1-14:7
+    target Variable 14:1-14:2 "x"
+    value Number integer=true 14:6-14:7 "3"
+  body[14] Assignment operator="**=" 15:1-15:8
+    target Variable 15:1-15:2 "x"
+    value Number integer=true 15:7-15:8 "2"
+  body[15] Assignment operator="&=" 16:1-16:7
+    target Variable 16:1-16:2 "x"
+    value Number integer=true 16:6-16:7 "1"
+  body[16] Assignment operator="|=" 17:1-17:7
+    target Variable 17:1-17:2 "x"
+    value Number integer=true 17:6-17:7 "2"
+  body[17] Assignment operator="^=" 18:1-18:7
+    target Variable 18:1-18:2 "x"
+    value Number integer=true 18:6-18:7 "3"
+  body[18] Assignment operator="<<=" 19:1-19:8
+    target Variable 19:1-19:2 "x"
+    value Number integer=true 19:7-19:8 "1"
+  body[19] Assignment operator=">>=" 20:1-20:8
+    target Variable 20:1-20:2 "x"
+    value Number integer=true 20:7-20:8 "1"
+  body[20] Assignment operator=">>>=" 21:1-21:9
+    target Variable 21:1-21:2 "x"
+    value Number integer=true 21:8-21:9 "1"
+  body[21] Assignment operator="?=" 22:1-22:7
+    target Variable 22:1-22:2 "v"
+    value Number integer=true 22:6-22:7 "0"

@@ -19,7 +19,7 @@ files (IndexedDB) ──► engine worker: parse ─► AST ─► semantic mode
 | ID | Requirement |
 |---|---|
 | AR-01 | `SourceFile` holds path, text, language (`nextflow`, `config`, `json`, `yaml`, `markdown`, `text`), parse status, AST, and comment map. |
-| AR-02 | The AST is our own typed tree built from the ANTLR parse tree. Every node has a source range. Comments are attached to the following node. |
+| AR-02 | The AST is our own typed tree built from the ANTLR parse tree. Every node has a source range. Comments are attached as leading, trailing or dangling comments, as nf-lang's `CommentAttacher` does (ADR 0027). |
 | AR-03 | The semantic model resolves includes across files, declarations by name, workflow bodies into statements, and statements into calls, chains, assignments and code nodes. Includes of registry modules resolve to `modules/<namespace>/<name>/`. |
 | AR-04 | Re-parsing is per file. A change to one file re-parses that file and recomputes the model for files that depend on it. |
 | AR-05 | Diagnostics come from the parser, the model, and pack lint rules. Each has a range, severity, message, and optional quick fix (an edit command). |

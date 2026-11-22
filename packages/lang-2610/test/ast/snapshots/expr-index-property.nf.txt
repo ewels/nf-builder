@@ -1,0 +1,69 @@
+Script typesEnabled=false 1:1-10:1
+  comments[0] line 6:27-6:33 "// dot"
+  comments[1] line 7:27-7:84 "// spread dot:  myFiles.collect { myFile -> myFile.text }"
+  comments[2] line 8:27-8:78 "// safe dot:    myFile != null ? myFile.text : null"
+  body[0] VariableDeclaration def=true multiple=false 1:1-1:23
+    targets[0] TypedName 1:5-1:11
+      name Identifier 1:5-1:11 "myList"
+    initializer List trailingComma=false 1:14-1:23
+      elements[0] Number integer=true 1:15-1:16 "1"
+      elements[1] Number integer=true 1:18-1:19 "2"
+      elements[2] Number integer=true 1:21-1:22 "3"
+  body[1] VariableDeclaration def=true multiple=false 2:1-2:31
+    targets[0] TypedName 2:5-2:11
+      name Identifier 2:5-2:11 "myFile"
+    initializer MethodCall trailingComma=false parens=true 2:14-2:31
+      method Identifier 2:14-2:18 "file"
+      args[0] String value="hello.txt" quote="'" 2:19-2:30 "'hello.txt'"
+      closures=[]
+  body[2] VariableDeclaration def=true multiple=false 3:1-3:23
+    targets[0] TypedName 3:5-3:12
+      name Identifier 3:5-3:12 "myFiles"
+    initializer List trailingComma=false 3:15-3:23
+      elements[0] Variable 3:16-3:22 "myFile"
+  body[3] ExpressionStatement 4:1-4:18
+    expression MethodCall trailingComma=false parens=false 4:1-4:18
+      method Identifier 4:1-4:8 "println"
+      args[0] Index 4:9-4:18
+        object Variable 4:9-4:15 "myList"
+        indices[0] Number integer=true 4:16-4:17 "0"
+      closures=[]
+  body[4] ExpressionStatement 5:1-5:21
+    expression MethodCall trailingComma=false parens=false 5:1-5:21
+      method Identifier 5:1-5:8 "println"
+      args[0] Index 5:9-5:21
+        object Variable 5:9-5:15 "myList"
+        indices[0] Number integer=true 5:16-5:17 "0"
+        indices[1] Number integer=true 5:19-5:20 "1"
+      closures=[]
+  body[5] ExpressionStatement 6:1-6:20
+    expression MethodCall trailingComma=false parens=false 6:1-6:20
+      method Identifier 6:1-6:8 "println"
+      args[0] Property navigation="." 6:9-6:20
+        object Variable 6:9-6:15 "myFile"
+        property Identifier 6:16-6:20 "text"
+      closures=[]
+    trailingComments[0] line 6:27-6:33 "// dot"
+  body[6] ExpressionStatement 7:1-7:22
+    expression MethodCall trailingComma=false parens=false 7:1-7:22
+      method Identifier 7:1-7:8 "println"
+      args[0] Property navigation="*." 7:9-7:22
+        object Variable 7:9-7:16 "myFiles"
+        property Identifier 7:18-7:22 "text"
+      closures=[]
+    trailingComments[0] line 7:27-7:84 "// spread dot:  myFiles.collect { myFile -> myFile.text }"
+  body[7] ExpressionStatement 8:1-8:21
+    expression MethodCall trailingComma=false parens=false 8:1-8:21
+      method Identifier 8:1-8:8 "println"
+      args[0] Property navigation="?." 8:9-8:21
+        object Variable 8:9-8:15 "myFile"
+        property Identifier 8:17-8:21 "text"
+      closures=[]
+    trailingComments[0] line 8:27-8:78 "// safe dot:    myFile != null ? myFile.text : null"
+  body[8] ExpressionStatement 9:1-9:22
+    expression MethodCall trailingComma=false parens=false 9:1-9:22
+      method Identifier 9:1-9:8 "println"
+      args[0] Property navigation="." 9:9-9:22
+        object Variable 9:9-9:15 "myFile"
+        property String value="name" quote="'" 9:16-9:22 "'name'"
+      closures=[]

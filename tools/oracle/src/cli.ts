@@ -16,6 +16,8 @@ import {
   nextflowExec,
 } from "./nextflow.ts";
 import {
+  AST_ERRORS_FILE,
+  AST_FIXTURES_FILE,
   DEFAULT_MANIFEST,
   FIXTURES_FILE,
   ORACLE_CACHE,
@@ -24,6 +26,7 @@ import {
 import { loadPin, type NextflowPin } from "./pin.ts";
 import { annotations, formatReport } from "./report.ts";
 import { runOracle } from "./run.ts";
+import { loadTreeManifest, runTree, type TreeManifest } from "./trees.ts";
 
 export const USAGE = "Usage: pnpm oracle [--case <id>]... [--manifest <file>]";
 
@@ -34,6 +37,8 @@ export type OracleDeps = {
   oracleCache?: string;
   /** The fixtures manifest to lint. Default: tools/corpus/fixtures/fixtures.yaml, unless --manifest is given; --case always skips fixtures. */
   fixturesFile?: string;
+  /** The trees to lint as one run each. Default: F-102's AST fixtures and error inputs, on a plain run (no --case, no --manifest). */
+  trees?: TreeManifest[];
   write?: (line: string) => void;
 };
 
@@ -69,11 +74,20 @@ export function main(argv: readonly string[], deps: OracleDeps = {}): number {
   let pin: NextflowPin;
   let manifest: Manifest;
   let fixtures: FixtureManifest | undefined;
+  let trees: TreeManifest[];
   try {
     pin = deps.pin ?? loadPin();
     manifest = loadManifest(resolve(values.manifest ?? DEFAULT_MANIFEST));
     fixtures =
       fixturesFile === undefined ? undefined : loadFixtures(fixturesFile);
+    trees =
+      deps.trees ??
+      (values.case === undefined && values.manifest === undefined
+        ? [
+            loadTreeManifest(AST_FIXTURES_FILE, "ast-fixtures"),
+            loadTreeManifest(AST_ERRORS_FILE, "ast-errors"),
+          ]
+        : []);
   } catch (error) {
     write((error as Error).message);
     return 2;
@@ -124,6 +138,10 @@ export function main(argv: readonly string[], deps: OracleDeps = {}): number {
       }),
     );
   }
+  for (const tree of trees)
+    run.results.push(
+      ...runTree(tree, { exec, cacheDir: oracleCache, log: write }),
+    );
   const report = formatReport(run);
   mkdirSync(oracleCache, { recursive: true });
   writeFileSync(`${oracleCache}/report.md`, report);

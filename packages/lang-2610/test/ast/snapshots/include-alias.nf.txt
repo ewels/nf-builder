@@ -1,0 +1,6 @@
+Script typesEnabled=false 1:1-2:1
+  body[0] Include 1:1-1:51
+    entries[0] IncludeEntry 1:11-1:28
+      name Identifier 1:11-1:16 "hello"
+      alias Identifier 1:20-1:28 "sayHello"
+    source String value="./some/module" quote="'" 1:36-1:51 "'./some/module'"

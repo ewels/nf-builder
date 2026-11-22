@@ -1,0 +1,103 @@
+# nf-lang 26.10.7 comment attachments for the fixtures (45 comments), the oracle for comments.test.ts.
+# Produced with: java -cp .cache/nextflow/26.10.7/nextflow-26.10.7-dist DumpComments.java <fixture files>
+# (a single-file program that runs ScriptAstBuilder and CommentAttacher.of and prints each attachment).
+# Row: <comment line>:<comment column> <slot> <anchor node class>@<line>:<column>-<last line>:<last column> <comment text, \n escaped>
+== agent.nf
+002:005 leading ExpressionStatement@3:5-3:30 // directives
+== comments-attachment.nf
+002:001 leading ProcessNodeV1@7:1-23:2 /**\n * Say hello to someone.\n *\n * @param name the person to greet\n */
+008:005 leading ExpressionStatement@9:5-9:11 // directives first
+018:005 leading ExpressionStatement@19:5-21:8 // the command
+025:001 leading WorkflowNode@26:1-46:2 /* entry workflow */
+028:009 leading MethodCallExpression@27:5-29:38 // a comment between chain links
+035:009 leading MapEntryExpression@36:9-36:23 // leading a map entry
+041:005 leading BlockStatement@43:9-44:1 // before else
+009:012 trailing ExpressionStatement@9:5-9:11 // one is enough
+012:014 trailing ExpressionStatement@12:5-12:13 // who to greet
+027:026 trailing MethodCallExpression@27:5-27:25 // source
+029:039 trailing MethodCallExpression@27:5-29:38 // upper-case it
+032:015 trailing VariableExpression@32:9-32:14 // the only argument
+036:025 trailing MapEntryExpression@36:9-36:23 // trailing a map entry
+022:005 dangling ProcessNodeV1@7:1-23:2 // dangling at the end of the script section
+045:005 dangling WorkflowNode@26:1-46:2 // dangling at the end of the workflow
+047:001 dangling ScriptNode@-1:-1--1:-1 // dangling at the end of the file
+== comments.nf
+002:001 leading ExpressionStatement@5:1-5:23 /*\n * block comment\n */
+001:024 trailing ExpressionStatement@1:1-1:23 // line comment
+== enum.nf
+== expr-calls.nf
+008:001 leading ExpressionStatement@9:1-9:30 // positional args
+011:001 leading ExpressionStatement@12:1-12:38 // positional and named args
+014:001 leading ExpressionStatement@15:1-15:56 // closure arg with additional args
+017:001 leading ExpressionStatement@18:1-18:36 // single closure arg
+020:001 leading ExpressionStatement@21:1-21:34 // single closure arg without parentheses
+004:021 trailing ExpressionStatement@4:1-4:17 // dot
+005:021 trailing ExpressionStatement@5:1-5:19 // spread dot:  myFiles.collect { myFile -> myFile.getText() }
+006:021 trailing ExpressionStatement@6:1-6:18 // safe dot:    myFile != null ? myFile.getText() : null
+== expr-closures.nf
+== expr-collections.nf
+== expr-constructor.nf
+== expr-gstrings.nf
+== expr-index-property.nf
+006:027 trailing ExpressionStatement@6:1-6:20 // dot
+007:027 trailing ExpressionStatement@7:1-7:22 // spread dot:  myFiles.collect { myFile -> myFile.text }
+008:027 trailing ExpressionStatement@8:1-8:21 // safe dot:    myFile != null ? myFile.text : null
+== expr-literals.nf
+== expr-operators.nf
+== expr-strings.nf
+== expr-types.nf
+== feature-flag.nf
+== function.nf
+009:001 leading FunctionNode@10:1-14:2 // return with no value
+016:001 leading FunctionNode@17:1-21:2 // return a value
+== include-alias.nf
+== include-clauses.nf
+001:001 leading IncludeNode@2:1-2:56 // semi-colons
+== include-newlines.nf
+001:001 leading IncludeNode@2:1-5:23 // newlines
+== include-pipeline.nf
+== include-registry.nf
+== include-separate.nf
+== legacy-dataflow.nf
+== modules/nf-core/fastqc/main.nf
+001:001 leading ProcessNodeV1@4:1-60:2 // Copyright (c) the nf-core community under an open-source MIT license.
+002:001 leading ProcessNodeV1@4:1-60:2 // See https://github.com/nf-core/modules for full license, file patching instructions and upstream contributing.
+027:005 leading ExpressionStatement@28:5-28:212 // Make list of old name and new name pairs to use for renaming in the bash while loop
+032:005 leading ExpressionStatement@35:5-37:15 // The total amount of allocated RAM by FastQC is equal to the number of threads defined (--threads) time the amount of RAM defined (--memory)
+033:005 leading ExpressionStatement@35:5-37:15 // https://github.com/s-andrews/FastQC/blob/1faeea0412093224d7f6a07f777fad60a5650795/fastqc#L211-L222
+034:005 leading ExpressionStatement@35:5-37:15 // Dividing the task.memory by task.cpus allows to stick to requested amount of RAM in the label
+038:005 leading ExpressionStatement@39:5-39:97 // FastQC memory value allowed range (100 - 10000)
+== output-block.nf
+== params-block.nf
+== params-legacy.nf
+== pipelines/rnaseq.nf
+== process-exec.nf
+== process-legacy-io.nf
+== process-legacy.nf
+002:005 leading ExpressionStatement@3:5-3:26 // directives
+013:013 leading ExpressionStatement@14:5-16:8 // or exec:
+== process-minimal.nf
+== process-typed-io.nf
+== process-typed.nf
+== record.nf
+== shebang.nf
+== some/module.nf
+== stmt-assert.nf
+== stmt-assignment.nf
+== stmt-empty.nf
+== stmt-expression.nf
+== stmt-if-else.nf
+== stmt-labelled.nf
+== stmt-return.nf
+== stmt-separators.nf
+001:001 leading ExpressionStatement@2:1-2:17 // newline
+005:001 leading ExpressionStatement@6:1-6:17 // semi-colon
+== stmt-throw.nf
+== stmt-try-catch-legacy.nf
+== stmt-try-catch.nf
+== stmt-variable-declaration.nf
+== workflow-emit-only.nf
+== workflow-entry.nf
+== workflow-implicit-main.nf
+== workflow-named.nf
+== workflow-typed.nf

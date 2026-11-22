@@ -1,0 +1,56 @@
+Script typesEnabled=false 1:1-8:1
+  body[0] VariableDeclaration def=true multiple=false 1:1-1:21
+    targets[0] TypedName 1:5-1:9
+      name Identifier 1:5-1:9 "list"
+    initializer List trailingComma=false 1:12-1:21
+      elements[0] Number integer=true 1:13-1:14 "1"
+      elements[1] Number integer=true 1:16-1:17 "2"
+      elements[2] Number integer=true 1:19-1:20 "3"
+  body[1] VariableDeclaration def=true multiple=false 2:1-2:26
+    targets[0] TypedName 2:5-2:13
+      name Identifier 2:5-2:13 "trailing"
+    initializer List trailingComma=true 2:16-2:26
+      elements[0] Number integer=true 2:17-2:18 "1"
+      elements[1] Number integer=true 2:20-2:21 "2"
+      elements[2] Number integer=true 2:23-2:24 "3"
+  body[2] VariableDeclaration def=true multiple=false 3:1-3:15
+    targets[0] TypedName 3:5-3:10
+      name Identifier 3:5-3:10 "empty"
+    initializer List trailingComma=false 3:13-3:15 "[]"
+      elements=[]
+  body[3] VariableDeclaration def=true multiple=false 4:1-4:40
+    targets[0] TypedName 4:5-4:8
+      name Identifier 4:5-4:8 "map"
+    initializer Map trailingComma=false 4:11-4:40
+      entries[0] MapEntry 4:12-4:20
+        key Identifier 4:12-4:17 "alpha"
+        value Number integer=true 4:19-4:20 "1"
+      entries[1] MapEntry 4:22-4:29
+        key Identifier 4:22-4:26 "beta"
+        value Number integer=true 4:28-4:29 "2"
+      entries[2] MapEntry 4:31-4:39
+        key Identifier 4:31-4:36 "gamma"
+        value Number integer=true 4:38-4:39 "3"
+  body[4] VariableDeclaration def=true multiple=false 5:1-5:19
+    targets[0] TypedName 5:5-5:13
+      name Identifier 5:5-5:13 "emptyMap"
+    initializer Map trailingComma=false 5:16-5:19 "[:]"
+      entries=[]
+  body[5] VariableDeclaration def=true multiple=false 6:1-6:16
+    targets[0] TypedName 6:5-6:6
+      name Identifier 6:5-6:6 "x"
+    initializer String value="alpha" quote="'" 6:9-6:16 "'alpha'"
+  body[6] VariableDeclaration def=true multiple=false 7:1-7:41
+    targets[0] TypedName 7:5-7:10
+      name Identifier 7:5-7:10 "keyed"
+    initializer Map trailingComma=false 7:13-7:41
+      entries[0] MapEntry 7:14-7:20
+        key Parenthesized 7:14-7:17
+          expression Variable 7:15-7:16 "x"
+        value Number integer=true 7:19-7:20 "1"
+      entries[1] MapEntry 7:22-7:33
+        key String value="quoted" quote="'" 7:22-7:30 "'quoted'"
+        value Number integer=true 7:32-7:33 "2"
+      entries[2] MapEntry 7:35-7:40
+        key Identifier 7:35-7:37 "in"
+        value Number integer=true 7:39-7:40 "3"

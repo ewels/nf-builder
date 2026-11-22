@@ -1,0 +1,25 @@
+Script typesEnabled=false 1:1-4:1
+  body[0] ExpressionStatement 1:1-1:29
+    expression MethodCall trailingComma=false parens=false 1:1-1:29
+      method Identifier 1:1-1:8 "println"
+      args[0] New trailingComma=false 1:9-1:29
+        type TypeRef nullable=false 1:13-1:27 "java.util.Date"
+          typeArguments=[]
+        args=[]
+      closures=[]
+  body[1] ExpressionStatement 2:1-2:19
+    expression MethodCall trailingComma=false parens=false 2:1-2:19
+      method Identifier 2:1-2:8 "println"
+      args[0] New trailingComma=false 2:9-2:19
+        type TypeRef nullable=false 2:13-2:17 "Date"
+          typeArguments=[]
+        args=[]
+      closures=[]
+  body[2] VariableDeclaration def=true multiple=false 3:1-3:35
+    targets[0] TypedName 3:5-3:9
+      name Identifier 3:5-3:9 "list"
+    initializer New trailingComma=false 3:12-3:35
+      type TypeRef name="ArrayList" nullable=false 3:16-3:33
+        typeArguments[0] TypeRef nullable=false 3:26-3:32 "String"
+          typeArguments=[]
+      args=[]

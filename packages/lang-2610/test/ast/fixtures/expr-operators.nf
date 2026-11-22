@@ -1,0 +1,40 @@
+def a = 7
+def b = 2
+println !(2 + 2 == 4)
+println(~a)
+println(+a)
+println(-a)
+println a ** b
+println a * b
+println a / b
+println a % b
+println a + b
+println a - b
+println a << b
+println a >> b
+println a >>> b
+println a..b
+println a..<b
+println a as String
+println a instanceof Integer
+println a !instanceof String
+println a < b
+println a > b
+println a <= b
+println a >= b
+println a in [1, 7]
+println a !in [1, 7]
+println a == b
+println a != b
+println a <=> b
+println 'abc' =~ /b/
+println 'abc' ==~ /a.c/
+println a & b
+println a ^ b
+println a | b
+println a > 1 && b > 1
+println a > 1 || b > 1
+println a ?: b
+println a % 2 == 0 ? 'a is even!' : 'a is odd!'
+println 1 + 2 * 3
+println((1 + 2) * 3)

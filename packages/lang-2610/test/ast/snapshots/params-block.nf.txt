@@ -1,0 +1,20 @@
+Script typesEnabled=false 1:1-9:1
+  body[0] ParamsBlock 1:1-4:2
+    params[0] Param 2:5-2:16
+      name Identifier 2:5-2:10 "input"
+      type TypeRef nullable=false 2:12-2:16 "Path"
+        typeArguments=[]
+    params[1] Param 3:5-3:34
+      name Identifier 3:5-3:19 "max_iterations"
+      type TypeRef nullable=false 3:21-3:28 "Integer"
+        typeArguments=[]
+      defaultValue Number integer=true 3:31-3:34 "100"
+  body[1] Workflow typed=false 6:1-8:2
+    main Section 7:5-7:25
+      items[0] ExpressionStatement 7:5-7:25
+        expression MethodCall trailingComma=false parens=false 7:5-7:25
+          method Identifier 7:5-7:12 "println"
+          args[0] Property navigation="." 7:13-7:25
+            object Variable 7:13-7:19 "params"
+            property Identifier 7:20-7:25 "input"
+          closures=[]

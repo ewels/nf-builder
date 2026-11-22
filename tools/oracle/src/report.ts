@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { relative } from "node:path";
 import { stripAnsi } from "./check.ts";
-import { FIXTURES_FILE } from "./paths.ts";
+import { AST_ERRORS_FILE, AST_FIXTURES_FILE, FIXTURES_FILE } from "./paths.ts";
 import type { OracleRun } from "./run.ts";
 
 const escapeData = (value: string): string =>
@@ -54,16 +54,24 @@ export function formatReport(run: OracleRun): string {
   return out.join("\n");
 }
 
-/** One `::error` annotation per mismatched check; fixture rows point at fixtures.yaml, case rows at the manifest. */
+/** The file a row belongs to: fixture rows are in fixtures.yaml, AST tree rows in the pack's JSON, case rows in the manifest. */
+const sourceOf = (caseId: string, manifest: string): string =>
+  caseId.startsWith("fixture:")
+    ? FIXTURES_FILE
+    : caseId.startsWith("ast-fixtures:")
+      ? AST_FIXTURES_FILE
+      : caseId.startsWith("ast-errors:")
+        ? AST_ERRORS_FILE
+        : manifest;
+
+/** One `::error` annotation per mismatched check, pointing at the file that records what was expected. */
 export function annotations(run: OracleRun, repoRoot: string): string[] {
   const rel = (file: string): string =>
     relative(repoRoot, file).split("\\").join("/");
   return run.results
     .filter((r) => !r.matched)
     .map((r) => {
-      const file = rel(
-        r.caseId.startsWith("fixture:") ? FIXTURES_FILE : run.manifest,
-      );
+      const file = rel(sourceOf(r.caseId, run.manifest));
       return `::error file=${escapeProperty(file)},title=Nextflow oracle::${escapeData(`${r.caseId} ${r.kind}: ${r.problems.join("; ")}`)}`;
     });
 }

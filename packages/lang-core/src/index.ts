@@ -9,6 +9,8 @@ export interface LanguagePack {
   /** The generated catalogue, loaded on first call (a dynamic import, so it stays out of the initial bundle; ADR 0028). */
   loadCatalogue(): Promise<Catalogue>;
 }
+
+export * from "./ast/index.ts";
 export type {
   Catalogue,
   CatalogueEntry,

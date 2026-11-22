@@ -1,0 +1,622 @@
+{
+  "about": "F-102 AST snapshot fixtures. Each passes nextflow lint 26.10.7 with no errors (warnings allowed); the CI oracle re-checks them. source cites nextflow-io/nextflow docs at the pinned commit; adjusted says what was changed to make a reference snippet a lint-clean script.",
+  "upstream": {
+    "repo": "nextflow-io/nextflow",
+    "tag": "v26.10.7",
+    "commit": "0ad848ef3c3a22824cd9eb2ca14568385867702d"
+  },
+  "lintCheckedWith": "nextflow 26.10.7 lint -o json (NXF_SYNTAX_PARSER=v2, NXF_OFFLINE=true, no network), 2026-11-22",
+  "fixtures": [
+    {
+      "file": "comments.nf",
+      "sections": [
+        "Comments"
+      ],
+      "source": [
+        "docs/reference/syntax.mdx#L14-L25"
+      ],
+      "lint": []
+    },
+    {
+      "file": "comments-attachment.nf",
+      "sections": [
+        "Comments"
+      ],
+      "source": [],
+      "note": "lint-validated: leading, trailing and dangling comments, a doc comment (LA-50), comments in a chain, an argument list, a map and before else",
+      "lint": []
+    },
+    {
+      "file": "shebang.nf",
+      "sections": [
+        "Shebang"
+      ],
+      "source": [
+        "docs/reference/syntax.mdx#L68-L70",
+        "docs/reference/syntax.mdx#L49"
+      ],
+      "lint": []
+    },
+    {
+      "file": "feature-flag.nf",
+      "sections": [
+        "Feature flag"
+      ],
+      "source": [
+        "docs/reference/syntax.mdx#L77",
+        "docs/reference/syntax.mdx#L210"
+      ],
+      "lint": []
+    },
+    {
+      "file": "some/module.nf",
+      "sections": [
+        "Function"
+      ],
+      "source": [],
+      "note": "lint-validated support module for the include fixtures (./some/module, as in the reference)",
+      "lint": []
+    },
+    {
+      "file": "include-alias.nf",
+      "sections": [
+        "Include"
+      ],
+      "source": [
+        "docs/reference/syntax.mdx#L85"
+      ],
+      "lint": []
+    },
+    {
+      "file": "include-clauses.nf",
+      "sections": [
+        "Include"
+      ],
+      "source": [
+        "docs/reference/syntax.mdx#L97-L98"
+      ],
+      "lint": []
+    },
+    {
+      "file": "include-newlines.nf",
+      "sections": [
+        "Include"
+      ],
+      "source": [
+        "docs/reference/syntax.mdx#L100-L104"
+      ],
+      "lint": []
+    },
+    {
+      "file": "include-separate.nf",
+      "sections": [
+        "Include"
+      ],
+      "source": [
+        "docs/reference/syntax.mdx#L110-L111"
+      ],
+      "lint": []
+    },
+    {
+      "file": "include-pipeline.nf",
+      "sections": [
+        "Include"
+      ],
+      "source": [
+        "docs/reference/syntax.mdx#L119-L122"
+      ],
+      "adjusted": "adds nextflow.enable.types = true: lint says 'Including a pipeline requires `nextflow.enable.types = true` in the including script'",
+      "lint": []
+    },
+    {
+      "file": "pipelines/rnaseq.nf",
+      "sections": [
+        "Params block",
+        "Workflow (typed)"
+      ],
+      "source": [],
+      "note": "lint-validated support pipeline for include-pipeline.nf",
+      "lint": []
+    },
+    {
+      "file": "include-registry.nf",
+      "sections": [
+        "Include"
+      ],
+      "source": [],
+      "note": "lint-validated: a registry module name; resolves offline to the vendored modules/nf-core/fastqc/",
+      "lint": []
+    },
+    {
+      "file": "modules/nf-core/fastqc/main.nf",
+      "sections": [
+        "Process"
+      ],
+      "source": [],
+      "note": "vendored registry module nf-core/fastqc as nextflow lint 26.10.7 installed it (with .module-info), so lint resolves include-registry.nf without network; a real legacy nf-core module",
+      "lint": []
+    },
+    {
+      "file": "params-block.nf",
+      "sections": [
+        "Params block"
+      ],
+      "source": [
+        "docs/reference/syntax.mdx#L132-L135"
+      ],
+      "adjusted": "adds an entry workflow: lint says 'Params block cannot be defined without an entry workflow'",
+      "lint": []
+    },
+    {
+      "file": "params-legacy.nf",
+      "sections": [
+        "Parameter (legacy)"
+      ],
+      "source": [
+        "docs/reference/syntax.mdx#L145"
+      ],
+      "adjusted": "adds an entry workflow that reads the parameter",
+      "lint": []
+    },
+    {
+      "file": "workflow-named.nf",
+      "sections": [
+        "Workflow"
+      ],
+      "source": [
+        "docs/reference/syntax.mdx#L157-L166"
+      ],
+      "lint": []
+    },
+    {
+      "file": "workflow-entry.nf",
+      "sections": [
+        "Workflow",
+        "Output block"
+      ],
+      "source": [
+        "docs/reference/syntax.mdx#L180-L194"
+      ],
+      "adjusted": "adds an output block declaring `messages`",
+      "lint": []
+    },
+    {
+      "file": "workflow-typed.nf",
+      "sections": [
+        "Workflow (typed)"
+      ],
+      "source": [
+        "docs/reference/syntax.mdx#L210-L221"
+      ],
+      "lint": []
+    },
+    {
+      "file": "workflow-emit-only.nf",
+      "sections": [
+        "Workflow"
+      ],
+      "source": [],
+      "note": "lint-validated: take and emit without main (second workflowBody alternative)",
+      "lint": []
+    },
+    {
+      "file": "workflow-implicit-main.nf",
+      "sections": [
+        "Workflow",
+        "Script declarations"
+      ],
+      "source": [
+        "docs/reference/syntax.mdx#L55-L57"
+      ],
+      "lint": []
+    },
+    {
+      "file": "process-minimal.nf",
+      "sections": [
+        "Process"
+      ],
+      "source": [
+        "docs/reference/syntax.mdx#L237-L241"
+      ],
+      "lint": []
+    },
+    {
+      "file": "process-legacy.nf",
+      "sections": [
+        "Process"
+      ],
+      "source": [
+        "docs/reference/syntax.mdx#L247-L268"
+      ],
+      "lint": []
+    },
+    {
+      "file": "process-exec.nf",
+      "sections": [
+        "Process"
+      ],
+      "source": [
+        "docs/reference/syntax.mdx#L282-L292"
+      ],
+      "adjusted": "output after exec (second processBody alternative)",
+      "lint": []
+    },
+    {
+      "file": "process-legacy-io.nf",
+      "sections": [
+        "Process"
+      ],
+      "source": [],
+      "note": "lint-validated: legacy qualifiers val/path/file/env/stdin/each/tuple/eval/stdout, emit/optional/topic, when:, shell: (two deprecation warnings)",
+      "lint": []
+    },
+    {
+      "file": "process-typed.nf",
+      "sections": [
+        "Process (typed)"
+      ],
+      "source": [
+        "docs/reference/syntax.mdx#L304-L322"
+      ],
+      "adjusted": "adds nextflow.enable.types = true: without it lint rejects the typed input",
+      "lint": []
+    },
+    {
+      "file": "process-typed-io.nf",
+      "sections": [
+        "Process (typed)"
+      ],
+      "source": [],
+      "note": "lint-validated: record() and tuple() inputs with a trailing comma, named, assigned and expression outputs, topic",
+      "lint": []
+    },
+    {
+      "file": "agent.nf",
+      "sections": [
+        "Agent"
+      ],
+      "source": [
+        "docs/reference/syntax.mdx#L354-L369"
+      ],
+      "lint": []
+    },
+    {
+      "file": "function.nf",
+      "sections": [
+        "Function",
+        "return"
+      ],
+      "source": [
+        "docs/reference/syntax.mdx#L399-L401",
+        "docs/reference/syntax.mdx#L407-L409",
+        "docs/reference/syntax.mdx#L417-L429"
+      ],
+      "adjusted": "the second greet is renamed greetIfNamed (two functions of one name)",
+      "lint": []
+    },
+    {
+      "file": "enum.nf",
+      "sections": [
+        "Enum type"
+      ],
+      "source": [
+        "docs/reference/syntax.mdx#L437-L445"
+      ],
+      "lint": []
+    },
+    {
+      "file": "record.nf",
+      "sections": [
+        "Record type"
+      ],
+      "source": [
+        "docs/reference/syntax.mdx#L453-L457"
+      ],
+      "lint": []
+    },
+    {
+      "file": "output-block.nf",
+      "sections": [
+        "Output block",
+        "Record type"
+      ],
+      "source": [
+        "docs/reference/syntax.mdx#L466-L476"
+      ],
+      "adjusted": "adds record Sample and an entry workflow that publishes both outputs",
+      "lint": []
+    },
+    {
+      "file": "stmt-separators.nf",
+      "sections": [
+        "Statements"
+      ],
+      "source": [
+        "docs/reference/syntax.mdx#L486-L491"
+      ],
+      "lint": []
+    },
+    {
+      "file": "stmt-variable-declaration.nf",
+      "sections": [
+        "Variable declaration"
+      ],
+      "source": [
+        "docs/reference/syntax.mdx#L499",
+        "docs/reference/syntax.mdx#L505",
+        "docs/reference/syntax.mdx#L511-L512"
+      ],
+      "adjusted": "variables renamed so each is declared once; adds a Groovy-typed and an uninitialised declaration",
+      "lint": []
+    },
+    {
+      "file": "stmt-assignment.nf",
+      "sections": [
+        "Assignment"
+      ],
+      "source": [
+        "docs/reference/syntax.mdx#L520-L522",
+        "docs/reference/syntax.mdx#L530",
+        "docs/reference/syntax.mdx#L533-L536"
+      ],
+      "adjusted": "declares the variables first; one statement per compound operator listed at L533",
+      "lint": []
+    },
+    {
+      "file": "stmt-expression.nf",
+      "sections": [
+        "Expression statement"
+      ],
+      "source": [
+        "docs/reference/syntax.mdx#L49"
+      ],
+      "lint": []
+    },
+    {
+      "file": "stmt-assert.nf",
+      "sections": [
+        "assert",
+        "Boolean"
+      ],
+      "source": [
+        "docs/reference/syntax.mdx#L550",
+        "docs/reference/syntax.mdx#L672"
+      ],
+      "lint": []
+    },
+    {
+      "file": "stmt-if-else.nf",
+      "sections": [
+        "if/else"
+      ],
+      "source": [
+        "docs/reference/syntax.mdx#L558-L564",
+        "docs/reference/syntax.mdx#L570-L580"
+      ],
+      "lint": []
+    },
+    {
+      "file": "stmt-return.nf",
+      "sections": [
+        "return"
+      ],
+      "source": [
+        "docs/reference/syntax.mdx#L588-L596"
+      ],
+      "lint": []
+    },
+    {
+      "file": "stmt-throw.nf",
+      "sections": [
+        "throw"
+      ],
+      "source": [
+        "docs/reference/syntax.mdx#L606"
+      ],
+      "lint": []
+    },
+    {
+      "file": "stmt-try-catch.nf",
+      "sections": [
+        "try/catch"
+      ],
+      "source": [
+        "docs/reference/syntax.mdx#L614-L626"
+      ],
+      "adjusted": "AccessDeniedException qualified as java.nio.file.AccessDeniedException: the reference's unqualified name fails lint ('`AccessDeniedException` is not defined')",
+      "lint": []
+    },
+    {
+      "file": "stmt-try-catch-legacy.nf",
+      "sections": [
+        "try/catch"
+      ],
+      "source": [],
+      "note": "lint-validated: Groovy-style catch( IOException e )",
+      "lint": []
+    },
+    {
+      "file": "stmt-labelled.nf",
+      "sections": [
+        "Closure"
+      ],
+      "source": [],
+      "note": "lint-validated: a closure with labelled statements (branch)",
+      "lint": []
+    },
+    {
+      "file": "stmt-empty.nf",
+      "sections": [
+        "Statements"
+      ],
+      "source": [],
+      "note": "lint-validated: empty statements",
+      "lint": []
+    },
+    {
+      "file": "stmt-empty-body.nf",
+      "sections": [
+        "Statements"
+      ],
+      "source": [],
+      "note": "lint-validated: an empty statement as an if body (the only way to get an EmptyStatement node)",
+      "lint": []
+    },
+    {
+      "file": "expr-literals.nf",
+      "sections": [
+        "Number",
+        "Boolean",
+        "Null"
+      ],
+      "source": [
+        "docs/reference/syntax.mdx#L654-L664",
+        "docs/reference/syntax.mdx#L672-L674",
+        "docs/reference/syntax.mdx#L682-L683"
+      ],
+      "adjusted": "numbers as list elements, plus suffixed forms (lint-validated)",
+      "lint": []
+    },
+    {
+      "file": "expr-strings.nf",
+      "sections": [
+        "String"
+      ],
+      "source": [
+        "docs/reference/syntax.mdx#L691-L692",
+        "docs/reference/syntax.mdx#L698-L706",
+        "docs/reference/syntax.mdx#L712",
+        "docs/reference/syntax.mdx#L721-L739"
+      ],
+      "adjusted": "one string using every escape in the table, a slashy string with \\/ and a line continuation",
+      "lint": []
+    },
+    {
+      "file": "expr-gstrings.nf",
+      "sections": [
+        "Dynamic string"
+      ],
+      "source": [
+        "docs/reference/syntax.mdx#L746-L747",
+        "docs/reference/syntax.mdx#L754-L755",
+        "docs/reference/syntax.mdx#L762-L768"
+      ],
+      "adjusted": "defines the variables the multi-line string reads",
+      "lint": []
+    },
+    {
+      "file": "expr-collections.nf",
+      "sections": [
+        "List",
+        "Map"
+      ],
+      "source": [
+        "docs/reference/syntax.mdx#L776",
+        "docs/reference/syntax.mdx#L784",
+        "docs/reference/syntax.mdx#L790",
+        "docs/reference/syntax.mdx#L796-L797"
+      ],
+      "adjusted": "adds a trailing comma, an empty list, quoted and keyword keys",
+      "lint": []
+    },
+    {
+      "file": "expr-closures.nf",
+      "sections": [
+        "Closure"
+      ],
+      "source": [
+        "docs/reference/syntax.mdx#L806",
+        "docs/reference/syntax.mdx#L814-L819"
+      ],
+      "adjusted": "closures assigned to variables; adds typed parameters with a default, `->` only, implicit it, a Groovy-typed parameter",
+      "lint": []
+    },
+    {
+      "file": "expr-index-property.nf",
+      "sections": [
+        "Variable",
+        "Index expression",
+        "Property expression"
+      ],
+      "source": [
+        "docs/reference/syntax.mdx#L829",
+        "docs/reference/syntax.mdx#L837-L839"
+      ],
+      "adjusted": "defines the variables; adds a two-element index and a string property",
+      "lint": []
+    },
+    {
+      "file": "expr-calls.nf",
+      "sections": [
+        "Function call"
+      ],
+      "source": [
+        "docs/reference/syntax.mdx#L849",
+        "docs/reference/syntax.mdx#L855-L857",
+        "docs/reference/syntax.mdx#L863",
+        "docs/reference/syntax.mdx#L871-L875",
+        "docs/reference/syntax.mdx#L884-L891"
+      ],
+      "adjusted": "defines the variables; omits resourceLabels (a process directive, not a function); adds a trailing comma in arguments",
+      "lint": []
+    },
+    {
+      "file": "expr-call-value.nf",
+      "sections": [
+        "Function call"
+      ],
+      "source": [],
+      "note": "lint-validated: a call of a call result, `f(1)(2)` and `(f(3))(4)` (upstream `.call`)",
+      "lint": []
+    },
+    {
+      "file": "expr-constructor.nf",
+      "sections": [
+        "Constructor call"
+      ],
+      "source": [
+        "docs/reference/syntax.mdx#L899",
+        "docs/reference/syntax.mdx#L905"
+      ],
+      "adjusted": "adds a generic constructor",
+      "lint": []
+    },
+    {
+      "file": "expr-operators.nf",
+      "sections": [
+        "Unary expressions",
+        "Binary expressions",
+        "Ternary expression",
+        "Parentheses",
+        "Precedence"
+      ],
+      "source": [
+        "docs/reference/syntax.mdx#L913",
+        "docs/reference/syntax.mdx#L918-L963",
+        "docs/reference/syntax.mdx#L970",
+        "docs/reference/syntax.mdx#L978-L982"
+      ],
+      "adjusted": "one println per operator; unary operands in parentheses (`println ~a` is a command call lint rejects)",
+      "lint": []
+    },
+    {
+      "file": "expr-types.nf",
+      "sections": [
+        "Function"
+      ],
+      "source": [],
+      "note": "lint-validated: generic, nullable, qualified and wildcard type annotations",
+      "lint": []
+    },
+    {
+      "file": "legacy-dataflow.nf",
+      "sections": [
+        "Binary expressions",
+        "Function call"
+      ],
+      "source": [],
+      "note": "lint-validated: legacy pipe |, .out, set and tap (AR-14)",
+      "lint": []
+    }
+  ]
+}

@@ -1,0 +1,116 @@
+Script typesEnabled=false 1:1-48:1
+  shebang shebang 1:1-1:24 "#!/usr/bin/env nextflow"
+  comments[0] doc 2:1-6:4 "/**\n * Say hello to someone.\n *\n * @param name the person to greet\n */"
+  comments[1] line 8:5-8:24 "// directives first"
+  comments[2] line 9:12-9:28 "// one is enough"
+  comments[3] line 12:14-12:29 "// who to greet"
+  comments[4] line 18:5-18:19 "// the command"
+  comments[5] line 22:5-22:49 "// dangling at the end of the script section"
+  comments[6] block 25:1-25:21 "/* entry workflow */"
+  comments[7] line 27:26-27:35 "// source"
+  comments[8] line 28:9-28:41 "// a comment between chain links"
+  comments[9] line 29:39-29:55 "// upper-case it"
+  comments[10] line 32:15-32:35 "// the only argument"
+  comments[11] line 35:9-35:31 "// leading a map entry"
+  comments[12] line 36:25-36:48 "// trailing a map entry"
+  comments[13] line 41:5-41:19 "// before else"
+  comments[14] line 45:5-45:43 "// dangling at the end of the workflow"
+  comments[15] line 47:1-47:35 "// dangling at the end of the file"
+  body[0] Process typed=false 7:1-23:2
+    leadingComments[0] doc 2:1-6:4 "/**\n * Say hello to someone.\n *\n * @param name the person to greet\n */"
+    name Identifier 7:9-7:14 "HELLO"
+    directives Section 9:5-9:11
+      items[0] ExpressionStatement 9:5-9:11
+        leadingComments[0] line 8:5-8:24 "// directives first"
+        expression MethodCall trailingComma=false parens=false 9:5-9:11
+          method Identifier 9:5-9:9 "cpus"
+          args[0] Number integer=true 9:10-9:11 "1"
+          closures=[]
+        trailingComments[0] line 9:12-9:28 "// one is enough"
+    inputs Section label="input" labelRange=11:5-11:11 11:5-12:13
+      items[0] ExpressionStatement 12:5-12:13
+        expression MethodCall trailingComma=false parens=false 12:5-12:13
+          method Identifier 12:5-12:8 "val"
+          args[0] Variable 12:9-12:13 "name"
+          closures=[]
+        trailingComments[0] line 12:14-12:29 "// who to greet"
+    outputs Section label="output" labelRange=14:5-14:12 14:5-15:11
+      items[0] ExpressionStatement 15:5-15:11
+        expression MethodCall trailingComma=false parens=false 15:5-15:11
+          method Identifier 15:5-15:11 "stdout"
+          args=[]
+          closures=[]
+    exec Section label="script" labelRange=17:5-17:12 17:5-21:8
+      items[0] ExpressionStatement 19:5-21:8
+        leadingComments[0] line 18:5-18:19 "// the command"
+        expression GString quote="\"\"\"" 19:5-21:8
+          parts[0] GStringText 19:8-20:17 "\n    echo 'Hello "
+          parts[1] Interpolation braced=true 20:17-20:24
+            expression Variable 20:19-20:23 "name"
+          parts[2] GStringText 20:24-21:5 "'\n    "
+    danglingComments[0] line 22:5-22:49 "// dangling at the end of the script section"
+  body[1] Workflow typed=false 26:1-46:2
+    leadingComments[0] block 25:1-25:21 "/* entry workflow */"
+    main Section 27:5-44:6
+      items[0] ExpressionStatement 27:5-30:23
+        expression MethodCall navigation="." trailingComma=false parens=false 27:5-30:23
+          receiver MethodCall navigation="." trailingComma=false parens=false 27:5-29:38
+            leadingComments[0] line 28:9-28:41 "// a comment between chain links"
+            receiver MethodCall navigation="." trailingComma=false parens=true 27:5-27:25
+              receiver Variable 27:5-27:12 "channel"
+              method Identifier 27:13-27:15 "of"
+              args[0] String value="a" quote="'" 27:16-27:19 "'a'"
+              args[1] String value="b" quote="'" 27:21-27:24 "'b'"
+              closures=[]
+              trailingComments[0] line 27:26-27:35 "// source"
+            method Identifier 29:10-29:13 "map"
+            args=[]
+            closures[0] Closure 29:14-29:38
+              params[0] Parameter def=false 29:16-29:17
+                name Identifier 29:16-29:17 "v"
+              body[0] ExpressionStatement 29:21-29:36
+                expression MethodCall navigation="." trailingComma=false parens=true 29:21-29:36
+                  receiver Variable 29:21-29:22 "v"
+                  method Identifier 29:23-29:34 "toUpperCase"
+                  args=[]
+                  closures=[]
+            trailingComments[0] line 29:39-29:55 "// upper-case it"
+          method Identifier 30:10-30:13 "set"
+          args=[]
+          closures[0] Closure 30:14-30:23
+            body[0] ExpressionStatement 30:16-30:21
+              expression Variable 30:16-30:21 "names"
+      items[1] ExpressionStatement 31:5-33:6
+        expression MethodCall trailingComma=false parens=true 31:5-33:6
+          method Identifier 31:5-31:10 "HELLO"
+          args[0] Variable 32:9-32:14 "names"
+            trailingComments[0] line 32:15-32:35 "// the only argument"
+          closures=[]
+      items[2] VariableDeclaration def=true multiple=false 34:5-37:6
+        targets[0] TypedName 34:9-34:15
+          name Identifier 34:9-34:15 "config"
+        initializer Map trailingComma=true 34:18-37:6
+          entries[0] MapEntry 36:9-36:23
+            leadingComments[0] line 35:9-35:31 "// leading a map entry"
+            key Identifier 36:9-36:17 "greeting"
+            value String value="hi" quote="'" 36:19-36:23 "'hi'"
+            trailingComments[0] line 36:25-36:48 "// trailing a map entry"
+      items[3] If elseRange=42:5-42:9 38:5-44:6
+        condition Property navigation="." 38:9-38:24
+          object Variable 38:9-38:15 "config"
+          property Identifier 38:16-38:24 "greeting"
+        consequent Block 38:27-40:6
+          statements[0] ExpressionStatement 39:9-39:22
+            expression MethodCall trailingComma=false parens=false 39:9-39:22
+              method Identifier 39:9-39:16 "println"
+              args[0] String value="yes" quote="'" 39:17-39:22 "'yes'"
+              closures=[]
+        alternate Block 42:10-44:6
+          leadingComments[0] line 41:5-41:19 "// before else"
+          statements[0] ExpressionStatement 43:9-43:21
+            expression MethodCall trailingComma=false parens=false 43:9-43:21
+              method Identifier 43:9-43:16 "println"
+              args[0] String value="no" quote="'" 43:17-43:21 "'no'"
+              closures=[]
+    danglingComments[0] line 45:5-45:43 "// dangling at the end of the workflow"
+  danglingComments[0] line 47:1-47:35 "// dangling at the end of the file"

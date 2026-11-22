@@ -1,0 +1,15 @@
+Script typesEnabled=false 1:1-6:1
+  comments[0] line 1:24-1:39 "// line comment"
+  comments[1] block 2:1-4:4 "/*\n * block comment\n */"
+  body[0] ExpressionStatement 1:1-1:23
+    expression MethodCall trailingComma=false parens=false 1:1-1:23
+      method Identifier 1:1-1:8 "println"
+      args[0] String value="Hello world!" quote="'" 1:9-1:23 "'Hello world!'"
+      closures=[]
+    trailingComments[0] line 1:24-1:39 "// line comment"
+  body[1] ExpressionStatement 5:1-5:23
+    leadingComments[0] block 2:1-4:4 "/*\n * block comment\n */"
+    expression MethodCall trailingComma=false parens=false 5:1-5:23
+      method Identifier 5:1-5:8 "println"
+      args[0] String value="Hello again!" quote="'" 5:9-5:23 "'Hello again!'"
+      closures=[]

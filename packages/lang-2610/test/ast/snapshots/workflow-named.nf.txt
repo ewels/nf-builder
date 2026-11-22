@@ -1,0 +1,24 @@
+Script typesEnabled=false 1:1-11:1
+  body[0] Workflow typed=false 1:1-10:2
+    name Identifier 1:10-1:15 "greet"
+    takes Section label="take" labelRange=2:5-2:10 2:5-3:14
+      items[0] TypedName 3:5-3:14
+        name Identifier 3:5-3:14 "greetings"
+    main Section label="main" labelRange=5:5-5:10 5:5-6:50
+      items[0] Assignment operator="=" 6:5-6:50
+        target Variable 6:5-6:13 "messages"
+        value MethodCall navigation="." trailingComma=false parens=false 6:16-6:50
+          receiver Variable 6:16-6:25 "greetings"
+          method Identifier 6:26-6:29 "map"
+          args=[]
+          closures[0] Closure 6:30-6:50
+            params[0] Parameter def=false 6:32-6:33
+              name Identifier 6:32-6:33 "v"
+            body[0] ExpressionStatement 6:37-6:48
+              expression GString quote="\"" 6:37-6:48
+                parts[0] Interpolation braced=false 6:38-6:40
+                  expression Variable 6:39-6:40 "v"
+                parts[1] GStringText 6:40-6:47 " world!"
+    emits Section label="emit" labelRange=8:5-8:10 8:5-9:13
+      items[0] NamedOutput 9:5-9:13
+        name Identifier 9:5-9:13 "messages"

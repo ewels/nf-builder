@@ -1,0 +1,90 @@
+Script typesEnabled=false 1:1-22:1
+  comments[0] line 9:1-9:24 "// return with no value"
+  comments[1] line 16:1-16:18 "// return a value"
+  body[0] Function def=true 1:1-3:2
+    name Identifier 1:5-1:10 "greet"
+    params[0] Parameter def=false 1:11-1:19
+      name Identifier 1:11-1:19 "greeting"
+    params[1] Parameter def=false 1:21-1:25
+      name Identifier 1:21-1:25 "name"
+    body Block 1:27-3:2
+      statements[0] ExpressionStatement 2:5-2:36
+        expression MethodCall trailingComma=false parens=false 2:5-2:36
+          method Identifier 2:5-2:12 "println"
+          args[0] GString quote="\"" 2:13-2:36
+            parts[0] Interpolation braced=true 2:14-2:25
+              expression Variable 2:16-2:24 "greeting"
+            parts[1] GStringText 2:25-2:27 ", "
+            parts[2] Interpolation braced=true 2:27-2:34
+              expression Variable 2:29-2:33 "name"
+            parts[3] GStringText 2:34-2:35 "!"
+          closures=[]
+  body[1] Function def=true 5:1-7:2
+    name Identifier 5:5-5:8 "add"
+    params[0] Parameter def=false 5:9-5:19
+      name Identifier 5:9-5:10 "a"
+      type TypeRef nullable=false 5:12-5:19 "Integer"
+        typeArguments=[]
+    params[1] Parameter def=false 5:21-5:31
+      name Identifier 5:21-5:22 "b"
+      type TypeRef nullable=false 5:24-5:31 "Integer"
+        typeArguments=[]
+    returnType TypeRef nullable=false 5:36-5:43 "Integer"
+      typeArguments=[]
+    body Block 5:44-7:2
+      statements[0] ExpressionStatement 6:5-6:10
+        expression Binary operator="+" 6:5-6:10
+          left Variable 6:5-6:6 "a"
+          right Variable 6:9-6:10 "b"
+  body[2] Function def=true 10:1-14:2
+    leadingComments[0] line 9:1-9:24 "// return with no value"
+    name Identifier 10:5-10:17 "greetIfNamed"
+    params[0] Parameter def=false 10:18-10:26
+      name Identifier 10:18-10:26 "greeting"
+    params[1] Parameter def=false 10:28-10:32
+      name Identifier 10:28-10:32 "name"
+    body Block 10:34-14:2
+      statements[0] If 11:5-12:15
+        condition Binary operator="||" 11:9-11:27
+          left Unary operator="!" 11:9-11:18
+            operand Variable 11:10-11:18 "greeting"
+          right Unary operator="!" 11:22-11:27
+            operand Variable 11:23-11:27 "name"
+        consequent Return 12:9-12:15 "return"
+      statements[1] ExpressionStatement 13:5-13:36
+        expression MethodCall trailingComma=false parens=false 13:5-13:36
+          method Identifier 13:5-13:12 "println"
+          args[0] GString quote="\"" 13:13-13:36
+            parts[0] Interpolation braced=true 13:14-13:25
+              expression Variable 13:16-13:24 "greeting"
+            parts[1] GStringText 13:25-13:27 ", "
+            parts[2] Interpolation braced=true 13:27-13:34
+              expression Variable 13:29-13:33 "name"
+            parts[3] GStringText 13:34-13:35 "!"
+          closures=[]
+  body[3] Function def=true 17:1-21:2
+    leadingComments[0] line 16:1-16:18 "// return a value"
+    name Identifier 17:5-17:8 "fib"
+    params[0] Parameter def=false 17:9-17:10
+      name Identifier 17:9-17:10 "x"
+    body Block 17:12-21:2
+      statements[0] If 18:5-19:17
+        condition Binary operator="<=" 18:9-18:15
+          left Variable 18:9-18:10 "x"
+          right Number integer=true 18:14-18:15 "1"
+        consequent Return 19:9-19:17
+          value Variable 19:16-19:17 "x"
+      statements[1] ExpressionStatement 20:5-20:28
+        expression Binary operator="+" 20:5-20:28
+          left MethodCall trailingComma=false parens=true 20:5-20:15
+            method Identifier 20:5-20:8 "fib"
+            args[0] Binary operator="-" 20:9-20:14
+              left Variable 20:9-20:10 "x"
+              right Number integer=true 20:13-20:14 "1"
+            closures=[]
+          right MethodCall trailingComma=false parens=true 20:18-20:28
+            method Identifier 20:18-20:21 "fib"
+            args[0] Binary operator="-" 20:22-20:27
+              left Variable 20:22-20:23 "x"
+              right Number integer=true 20:26-20:27 "2"
+            closures=[]

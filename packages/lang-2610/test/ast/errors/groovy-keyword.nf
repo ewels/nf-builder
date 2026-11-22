@@ -1,0 +1,1 @@
+def static = 1

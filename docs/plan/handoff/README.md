@@ -6,7 +6,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 
 | Feature | Branch | State |
 |---|---|---|
-| F-102 script AST | `feat/F-102` (pushed, `7888e70`) | Tasks 1–6 committed: types, statements and expressions shared with configs, declarations, comment attachment (3,923/3,923 corpus comments match nf-lang), every ScriptAstBuilder error (46 inputs and the 31 F-101 cases match lint), corpus property test, oracle trees and comment-dump oracle. `pnpm check` 752 tests; `pnpm oracle` 128 rows ok. Left: task 7 (records), merge `main` (F-204 changed `packages/lang-core/src/index.ts`), PR, reviewer and simplifier. |
+| F-102 script AST | `feat/F-102`, PR #23 | Plan deleted in the PR that merges it. |
 | F-103 config AST | `feat/F-103` (pushed, stacked on `feat/F-102` at `83511c3`) | Built and committed: config AST, 228 corpus snapshots, range property test, ConfigAstBuilder errors, oracle cases. After F-102 merges: merge `main`; fill comment slots with F-102's `attachComments`; delete `src/ast/config/literal-errors.ts` and its number handling, since the shared builders now report escapes (`checkEscapes` in `stringLiteral`/`gstringText`), keyword and duplicate-argument errors, and number formats (call `cx.failOnNumberFormat()` at the end of the config unit); check config paths and block headers still get escape checks; records; PR. |
 | F-104 round trip | not started | [plan](plan-F-104.md). Branch from `main` after F-102 (and F-103) merge. |
 | F-110 printer | not started | [plan](plan-F-110.md). Branch from `main` after F-102 merges; can run alongside F-104. |
@@ -15,7 +15,7 @@ Next free ADR number: 0032.
 
 ## Decisions already taken on the plans' open points
 
-### F-102 — [plan](plan-F-102.md)
+### F-102 (merged)
 - Conventions are ADR 0027 (on `feat/F-102`; flat ranges `{start, end, line, column, endLine, endColumn}`, nf-lang comment attachment, AR-02 amended).
 - Report every ScriptAstBuilder error; `-1:-1` upstream errors at the real node; vendored nf-core/fastqc fixture module (MIT) allowed; oracle extended to lint the fixture and error trees (an AGENTS.md "Nextflow knowledge" line says the oracle reproduces `errors.json`); comment-dump oracle in `pnpm test:corpus`.
 - Records at landing: `docs/licences.md` rows for the ported `ScriptAstBuilder`, `CommentAttacher`, `Comments`, `EscapeUtils`, Groovy `StringUtils`/`Numbers` logic, the syntax-reference snippets in fixtures (Apache-2.0) and the vendored fastqc module (MIT); notes from the plan's section 9.

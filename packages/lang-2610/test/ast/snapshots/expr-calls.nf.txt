@@ -1,0 +1,130 @@
+Script typesEnabled=false 1:1-24:1
+  comments[0] line 4:21-4:27 "// dot"
+  comments[1] line 5:21-5:83 "// spread dot:  myFiles.collect { myFile -> myFile.getText() }"
+  comments[2] line 6:21-6:77 "// safe dot:    myFile != null ? myFile.getText() : null"
+  comments[3] line 8:1-8:19 "// positional args"
+  comments[4] line 11:1-11:29 "// positional and named args"
+  comments[5] line 14:1-14:36 "// closure arg with additional args"
+  comments[6] line 17:1-17:22 "// single closure arg"
+  comments[7] line 20:1-20:42 "// single closure arg without parentheses"
+  body[0] ExpressionStatement 1:1-1:31
+    expression MethodCall trailingComma=false parens=true 1:1-1:31
+      method Identifier 1:1-1:7 "printf"
+      args[0] String value="Hello %s!\n" quote="'" 1:8-1:21 "'Hello %s!\\n'"
+      args[1] String value="World" quote="'" 1:23-1:30 "'World'"
+      closures=[]
+  body[1] VariableDeclaration def=true multiple=false 2:1-2:52
+    targets[0] TypedName 2:5-2:11
+      name Identifier 2:5-2:11 "myFile"
+    initializer MethodCall trailingComma=false parens=true 2:14-2:52
+      method Identifier 2:14-2:18 "file"
+      args[0] String value="hello.txt" quote="'" 2:19-2:30 "'hello.txt'"
+      args[1] NamedArgument 2:32-2:51
+        name Identifier 2:32-2:45 "checkIfExists"
+        value Boolean 2:47-2:51 "true"
+      closures=[]
+  body[2] VariableDeclaration def=true multiple=false 3:1-3:23
+    targets[0] TypedName 3:5-3:12
+      name Identifier 3:5-3:12 "myFiles"
+    initializer List trailingComma=false 3:15-3:23
+      elements[0] Variable 3:16-3:22 "myFile"
+  body[3] ExpressionStatement 4:1-4:17
+    expression MethodCall navigation="." trailingComma=false parens=true 4:1-4:17
+      receiver Variable 4:1-4:7 "myFile"
+      method Identifier 4:8-4:15 "getText"
+      args=[]
+      closures=[]
+    trailingComments[0] line 4:21-4:27 "// dot"
+  body[4] ExpressionStatement 5:1-5:19
+    expression MethodCall navigation="*." trailingComma=false parens=true 5:1-5:19
+      receiver Variable 5:1-5:8 "myFiles"
+      method Identifier 5:10-5:17 "getText"
+      args=[]
+      closures=[]
+    trailingComments[0] line 5:21-5:83 "// spread dot:  myFiles.collect { myFile -> myFile.getText() }"
+  body[5] ExpressionStatement 6:1-6:18
+    expression MethodCall navigation="?." trailingComma=false parens=true 6:1-6:18
+      receiver Variable 6:1-6:7 "myFile"
+      method Identifier 6:9-6:16 "getText"
+      args=[]
+      closures=[]
+    trailingComments[0] line 6:21-6:77 "// safe dot:    myFile != null ? myFile.getText() : null"
+  body[6] ExpressionStatement 9:1-9:30
+    leadingComments[0] line 8:1-8:19 "// positional args"
+    expression MethodCall trailingComma=false parens=false 9:1-9:30
+      method Identifier 9:1-9:7 "printf"
+      args[0] String value="Hello %s!\n" quote="'" 9:8-9:21 "'Hello %s!\\n'"
+      args[1] String value="World" quote="'" 9:23-9:30 "'World'"
+      closures=[]
+  body[7] ExpressionStatement 12:1-12:38
+    leadingComments[0] line 11:1-11:29 "// positional and named args"
+    expression MethodCall trailingComma=false parens=false 12:1-12:38
+      method Identifier 12:1-12:5 "file"
+      args[0] String value="hello.txt" quote="'" 12:6-12:17 "'hello.txt'"
+      args[1] NamedArgument 12:19-12:38
+        name Identifier 12:19-12:32 "checkIfExists"
+        value Boolean 12:34-12:38 "true"
+      closures=[]
+  body[8] ExpressionStatement 15:1-15:56
+    leadingComments[0] line 14:1-14:36 "// closure arg with additional args"
+    expression MethodCall navigation="." trailingComma=false parens=true 15:1-15:56
+      receiver List trailingComma=false 15:1-15:10
+        elements[0] Number integer=true 15:2-15:3 "1"
+        elements[1] Number integer=true 15:5-15:6 "2"
+        elements[2] Number integer=true 15:8-15:9 "3"
+      method Identifier 15:11-15:17 "inject"
+      args[0] String value="result:" quote="'" 15:18-15:27 "'result:'"
+      closures[0] Closure 15:29-15:56
+        params[0] Parameter def=false 15:31-15:34
+          name Identifier 15:31-15:34 "acc"
+        params[1] Parameter def=false 15:36-15:37
+          name Identifier 15:36-15:37 "v"
+        body[0] ExpressionStatement 15:41-15:54
+          expression Binary operator="+" 15:41-15:54
+            left Binary operator="+" 15:41-15:50
+              left Variable 15:41-15:44 "acc"
+              right String value=" " quote="'" 15:47-15:50 "' '"
+            right Variable 15:53-15:54 "v"
+  body[9] ExpressionStatement 18:1-18:36
+    leadingComments[0] line 17:1-17:22 "// single closure arg"
+    expression MethodCall navigation="." trailingComma=false parens=true 18:1-18:36
+      receiver List trailingComma=false 18:1-18:10
+        elements[0] Number integer=true 18:2-18:3 "1"
+        elements[1] Number integer=true 18:5-18:6 "2"
+        elements[2] Number integer=true 18:8-18:9 "3"
+      method Identifier 18:11-18:15 "each"
+      args=[]
+      closures[0] Closure 18:18-18:36
+        params[0] Parameter def=false 18:20-18:21
+          name Identifier 18:20-18:21 "v"
+        body[0] ExpressionStatement 18:25-18:34
+          expression MethodCall trailingComma=false parens=false 18:25-18:34
+            method Identifier 18:25-18:32 "println"
+            args[0] Variable 18:33-18:34 "v"
+            closures=[]
+  body[10] ExpressionStatement 21:1-21:34
+    leadingComments[0] line 20:1-20:42 "// single closure arg without parentheses"
+    expression MethodCall navigation="." trailingComma=false parens=false 21:1-21:34
+      receiver List trailingComma=false 21:1-21:10
+        elements[0] Number integer=true 21:2-21:3 "1"
+        elements[1] Number integer=true 21:5-21:6 "2"
+        elements[2] Number integer=true 21:8-21:9 "3"
+      method Identifier 21:11-21:15 "each"
+      args=[]
+      closures[0] Closure 21:16-21:34
+        params[0] Parameter def=false 21:18-21:19
+          name Identifier 21:18-21:19 "v"
+        body[0] ExpressionStatement 21:23-21:32
+          expression MethodCall trailingComma=false parens=false 21:23-21:32
+            method Identifier 21:23-21:30 "println"
+            args[0] Variable 21:31-21:32 "v"
+            closures=[]
+  body[11] ExpressionStatement 23:1-23:24
+    expression MethodCall trailingComma=true parens=true 23:1-23:24
+      method Identifier 23:1-23:8 "println"
+      args[0] MethodCall navigation="." trailingComma=false parens=true 23:9-23:22
+        receiver Variable 23:9-23:15 "myFile"
+        method Identifier 23:16-23:20 "size"
+        args=[]
+        closures=[]
+      closures=[]

@@ -244,3 +244,17 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
 - Next: finish F-102 (tasks 5–7), merge it, then F-103, then F-104 and F-110 in parallel.
 - Decisions: see the entries above and `docs/plan/handoff/README.md`.
 - Blockers: none. Open maintainer issues: #6 (Renovate), #7 (required checks).
+
+## 2026-11-22 · F-102 · Claude (autonomous)
+- Did: script AST in `lang-core` types with the builder in `lang-2610` (`parseScriptAst`, internal): every declaration and statement kind in the 26.10 syntax reference, typed and legacy, with exact ranges; comments attached by a port of nf-lang's `CommentAttacher` (3,923 corpus comments match); every `ScriptAstBuilder` error with upstream wording; 56 snapshot fixtures, 46 error inputs and the corpus checked by the oracle and `corpus-parse`.
+- State: passing.
+- Next: F-103 (rebase on F-102's shared builders), then F-104 and F-110 in parallel.
+- Decisions:
+  - AST conventions: flat ranges, UTF-16 offsets with code-point columns, nf-lang comment attachment; AR-02 amended to match ([ADR 0027](../adr/0027-ast-conventions.md)).
+  - AST types live in `lang-core`, the builder in the pack (ADR 0003's "model types"; no boundary change). The AST is built in memory and is not a stored or exported format, so no format ADR.
+  - Report every `ScriptAstBuilder` error now rather than leaving half to F-112; warnings and resolver errors stay F-112's (notes).
+  - Upstream bugs: the two errors upstream prints at -1:-1 are reported at the real node (`note` in `errors.json`); legacy `params.x =` with types enabled, which crashes lint, gets the upstream message and stays out of the oracle-linted inputs.
+  - Vendored nf-core/fastqc (MIT) as a fixture so lint resolves a registry include offline; the oracle lints the AST fixtures and error inputs (AGENTS.md "Nextflow knowledge"); a comment-dump oracle runs in `pnpm test:corpus`.
+  - `parseScriptAst` stays internal to the pack (bundle size); F-104 adds a lazy `LanguagePack.loadParser()` and `SourceFile`.
+  - `docs/licences.md`: ported AST classes, syntax-reference snippets, fastqc module. No new dependency.
+- Blockers: none.

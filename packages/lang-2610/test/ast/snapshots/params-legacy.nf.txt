@@ -1,0 +1,15 @@
+Script typesEnabled=false 1:1-6:1
+  body[0] LegacyParam 1:1-1:32
+    target Property navigation="." 1:1-1:15
+      object Variable 1:1-1:7 "params"
+      property Identifier 1:8-1:15 "message"
+    value String value="Hello world!" quote="'" 1:18-1:32 "'Hello world!'"
+  body[1] Workflow typed=false 3:1-5:2
+    main Section 4:5-4:27
+      items[0] ExpressionStatement 4:5-4:27
+        expression MethodCall trailingComma=false parens=false 4:5-4:27
+          method Identifier 4:5-4:12 "println"
+          args[0] Property navigation="." 4:13-4:27
+            object Variable 4:13-4:19 "params"
+            property Identifier 4:20-4:27 "message"
+          closures=[]
