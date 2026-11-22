@@ -59,7 +59,7 @@ interface LanguagePack {
   loadCatalogue(): Promise<Catalogue>;  // generated, lazily loaded (ADR 0005, ADR 0028)
   scaffold: Scaffold;                   // new-process and include text (ADR 0039)
   loadLints(): Promise<PackLints>;      // codes, rules and connection checks, lazily loaded (ADR 0042)
-  templates: Template[];
+  loadTemplates(): Promise<TemplateSet>; // project templates, lazily loaded (ADR 0047)
   defaults: ProjectDefaults;
   upgradeFrom?: { from: string; steps: UpgradeStep[] };
 }
