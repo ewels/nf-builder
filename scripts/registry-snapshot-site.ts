@@ -1,4 +1,4 @@
-// F-501, IO-31: serves the registry snapshot at /registry/ (ADR 0034). The snapshot is not in the repository: the
+// F-501, IO-31: serves the registry snapshot at /registry/ (ADR 0035). The snapshot is not in the repository: the
 // `Registry snapshot` workflow publishes it to the orphan branch `registry-snapshot`, and each build copies it in.
 // - REGISTRY_SNAPSHOT_DIR (tests, local runs): copy <dir>/registry/**.
 // - Otherwise on Netlify (NETLIFY=true): fetch the branch from REPOSITORY_URL with git. A missing branch warns and emits

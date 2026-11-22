@@ -16,7 +16,7 @@ Browser-only visual builder for Nextflow pipelines (TypeScript, React). What it 
    - set `passes: true` only if every step in the feature passed;
    - append to `progress.md`;
    - open a PR using the template;
-   - when CI is green and the reviewer has nothing blocking, squash-merge it, delete the branch, update local `main`, and start again at step 1. "CI green" means every job of the `CI`, `Deploy check` and `Scope guard` workflows passed on the PR head (ADRs 0015, 0016).
+   - when CI is green and the reviewer has nothing blocking, squash-merge it, delete the branch, update local `main`, and start again at step 1. "CI green" means every job of the `CI`, `Deploy check` and `Scope guard` workflows passed on the PR head (ADRs 0015, 0016). The `Registry snapshot` workflow depends on a third party and is not a merge gate (ADR 0035).
 
 ## Commands
 
@@ -82,7 +82,7 @@ Never edit these. Regenerate them.
 - `packages/lang-*/catalogue/*.json`: `pnpm gen:catalogue <version>` (CI job `catalogue` checks it)
 - `packages/lang-*/palette.json`: `pnpm gen:palette <version>` from the hand-edited `palette.yaml`
 - `packages/lang-*/test/printer/formatted*/**`: `pnpm oracle --write-format`
-- `apps/web/public/registry/**`: CI job `registry-snapshot`
+- the registry snapshot (branch `registry-snapshot`, served at `/registry/`): workflow `Registry snapshot`; never commit it
 - `.claude/skills/*/**` (vendored Nextflow skills): `.claude/skills/sync.sh`
 
 ## Decisions

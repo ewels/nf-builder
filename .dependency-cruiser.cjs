@@ -97,7 +97,7 @@ module.exports = {
       name: "registry-snapshot-imports-only-lang-core-and-pack-entries",
       severity: "error",
       comment:
-        "tools/registry-snapshot may import only packages/lang-core and a language pack's entry module (packages/lang-NNNN/src/index.ts), never pack internals, packages/engine, other tools or the root scripts/ and e2e/ (ADR 0003, amended by ADR 0034). Put shared types in packages/lang-core; copy anything else the tool needs into tools/registry-snapshot/.",
+        "tools/registry-snapshot may import only packages/lang-core and a language pack's entry module (packages/lang-NNNN/src/index.ts), never pack internals, packages/engine, other tools or the root scripts/ and e2e/ (ADR 0003, amended by ADR 0035). Put shared types in packages/lang-core; copy anything else the tool needs into tools/registry-snapshot/.",
       from: { path: "^tools/registry-snapshot/" },
       to: {
         path: INTERNAL,

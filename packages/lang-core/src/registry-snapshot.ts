@@ -1,4 +1,4 @@
-// Registry snapshot format v1 (F-501, IO-31, ADR 0034). Types only: the tool writes it, packages/sources reads it.
+// Registry snapshot format v1 (F-501, IO-31, ADR 0035). Types only: the tool writes it, packages/sources reads it.
 
 export interface RegistrySnapshotIndex {
   readonly format: 1;
