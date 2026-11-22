@@ -25,6 +25,10 @@ To reproduce with the pinned dist: `NXF_OFFLINE=true .cache/nextflow/26.10.7/nex
 | 13 | Nextflow lint | A registry module missing `meta.yml` aborts lint ("corrupted") instead of giving a diagnostic | F-105 plan | no |
 | 14 | nf-lang config resolver | `includeConfig` of a directory passes lint; `nextflow run` then fails to parse the config | F-105 plan | no |
 | 15 | Nextflow lint | Lint downloads a missing registry module into the project even with `NXF_OFFLINE=true` (may be intended) | F-105 plan | no |
+| 16 | nf-lang lexer | A stray top-level `}` is silently accepted by lint and run | F-104 review | no |
+| 17 | Nextflow registry | `nf-core/tiara/tiara` returns HTTP 500 on its module and releases endpoints | F-501 plan | no |
+| 18 | Nextflow registry | Module metadata lists outputs in a different order from `meta.yml` and `main.nf` | F-501 plan | no |
+| 19 | Nextflow registry | `nf-core/fasta_clean_faidx` is listed as a process but declares a workflow; `nextflow-io/hello` has no `componentName` | F-501 plan | no |
 
 ## Details
 
@@ -226,3 +230,34 @@ with `modules/nf-core/nometa/main.nf` holding a process `NOMETA` and no `meta.ym
 - **What happens:** with `NXF_OFFLINE=true`, `nextflow lint .` downloads the module into `modules/nf-core/fastqc/` and reports only a warning. Linting changes the project, and the offline setting is ignored.
 - **Expected:** possibly intended (lint resolves modules as `run` does), but offline mode should not reach the registry, and a read-only check arguably shouldn't write files. Raise as a question rather than a bug.
 - **nf-builder:** reports a missing registry module as a diagnostic naming `modules/nf-core/fastqc/main.nf` (F-105).
+
+### 16. A stray closing brace is silently accepted
+
+```nextflow
+workflow {
+    println('hi')
+}
+}
+```
+
+- **What happens:** `nextflow lint .` reports no errors and `nextflow run main.nf` succeeds. The last `}` pops a lexer mode with nothing left to pop (`ScriptLexer.g4` L737); the ANTLR runtime's empty-stack exception is not reported as a syntax error.
+- **Expected:** a syntax error at 4:1 (`Unexpected input: '}'`), as for any other unexpected token.
+- **nf-builder:** follows upstream so lint-clean files stay fully modelled (F-104).
+
+### 17. A registry module that always fails
+
+- **What happens:** on 2026-11-22, `GET https://registry.nextflow.io/api/v1/modules/nf-core%2Ftiara%2Ftiara` and its `/releases` endpoint return HTTP 500 on every attempt; the other 2,321 modules respond.
+- **Expected:** the module's details, or a 404 if it shouldn't be listed.
+- **nf-builder:** the snapshot build keeps the previous entry or leaves the module out and reports it (F-501).
+
+### 18. Registry output order differs from `meta.yml`
+
+- **What happens:** for `nf-core/fastqc` the registry's `metadata.output` lists `zip, html, versions_fastqc`; the module's `meta.yml` and `main.nf` list `html, zip, versions_fastqc`. The order is the same across endpoints, so it looks like a map sorted or re-keyed on the server.
+- **Expected:** outputs in `meta.yml` order, which is the process's emit order and what users see.
+- **nf-builder:** reorders outputs by the bundle's `meta.yml` (F-501).
+
+### 19. Registry metadata disagrees with the module source
+
+- **What happens:** `nf-core/fasta_clean_faidx` is listed with `kind: Process`, but its `main.nf` declares a workflow; `nextflow-io/hello` has no `metadata.componentName`, although its `main.nf` declares process `HELLO`.
+- **Expected:** `kind` and `componentName` that match `main.nf`.
+- **nf-builder:** takes kind and component from the parsed `main.nf` and reports disagreements (F-501).
