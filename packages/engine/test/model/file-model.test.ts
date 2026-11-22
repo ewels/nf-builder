@@ -136,17 +136,20 @@ workflow {
 
   it('F-105 step 1 ADR-0004: a target the grammar rejects gives "Module could not be parsed" but still binds what it can; builder-only errors don\'t', () => {
     const flag = readFileSync(corpusFixtures("typed-without-flag.nf"), "utf8");
+    const order = readFileSync(corpusFixtures("section-order.nf"), "utf8");
     const models = modelAll(
       files(
         [
           "main.nf",
           `include { OK ; MISSING } from './q'
 include { HELLO ; GOODBYE } from './typed-without-flag'
+include { ON_TIME ; LATE_INPUT } from './section-order'
 include { NOPE } from './typed-without-flag'
 `,
         ],
         ["q.nf", "process OK {\n    script:\n    'x'\n}\n\nprocess Q {\n"],
         ["typed-without-flag.nf", flag],
+        ["section-order.nf", order],
       ),
       parser,
       rules,
@@ -156,7 +159,7 @@ include { NOPE } from './typed-without-flag'
       main?.diagnostics.map((d) => [d.code, d.range.line, d.range.column]),
     ).toEqual([
       ["include-not-parsed", 1, 1],
-      ["include-name", 3, 1],
+      ["include-name", 4, 1],
     ]);
     expect(main?.diagnostics[0]?.message).toBe(
       "Module could not be parsed: 'q.nf'",
@@ -177,6 +180,13 @@ include { NOPE } from './typed-without-flag'
       "Unparsed",
       "Process",
     ]);
+    const third = main?.includes[2];
+    if (third?.kind !== "script") throw new Error("not a script include");
+    // a builder-only target (lint resolves it): ON_TIME is modelled, LATE_INPUT binds by its head
+    expect(third.entries.map((e) => e.declaration?.kind)).toEqual([
+      "Process",
+      "Unparsed",
+    ]);
   });
 
   it("F-105 step 1 AR-03 FI-05: missing targets give diagnostics naming the path, in a script and in a config", () => {
@@ -188,7 +198,7 @@ include { NOPE } from './typed-without-flag'
         ],
         [
           "nextflow.config",
-          "includeConfig 'conf/missing.config'\nprofiles {\n    test { includeConfig 'conf/ok.config' }\n}\nincludeConfig \"${params.x}.config\"\n",
+          "includeConfig 'conf/missing.config'\nprofiles {\n    test { includeConfig 'conf/ok.config' }\n}\nincludeConfig params.x\n",
         ],
         ["conf/ok.config", "process.cpus = 1\n"],
       ),
