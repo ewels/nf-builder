@@ -112,6 +112,24 @@ describe("F-202 workspace", () => {
     expect(await b.workspace.readFile("README.md")).toBe("two\n");
   });
 
+  it("F-203 UX-20: every status has a higher seq than the one before, and openProject returns the seq of the status that made the project current", async () => {
+    const s = setup();
+    await s.watching;
+    const meta = await s.workspace.createProject({
+      name: "P",
+      languageVersion: version,
+      files,
+    });
+    const opened = await s.workspace.openProject(meta.id);
+    const seqs = s.statuses.map((status) => status.seq);
+    expect(seqs.length).toBeGreaterThan(2);
+    expect(seqs).toEqual([...seqs].sort((a, b) => a - b));
+    expect(new Set(seqs).size).toBe(seqs.length);
+    const current = s.statuses.findLast((status) => status.current !== null);
+    expect(current?.current?.id).toBe(meta.id);
+    expect(opened.seq).toBe(current?.seq);
+  });
+
   it("F-202 step 2 IO-01: watch pushes saving after an applied command and saved after the write", async () => {
     const s = setup();
     await s.watching;
@@ -122,7 +140,7 @@ describe("F-202 workspace", () => {
     });
     const opened = await s.workspace.openProject(meta.id);
     s.statuses.length = 0;
-    ok(await s.workspace.apply(readme("two\n"), opened.revision));
+    ok(await s.workspace.apply(readme("two\n"), opened.summary.revision));
     expect(s.statuses.at(-1)?.save.status).toBe("saving");
     expect(s.saves).toHaveLength(0);
     s.clock.fire();
@@ -141,12 +159,15 @@ describe("F-202 workspace", () => {
     });
     const opened = await s.workspace.openProject(meta.id);
     const applied = ok(
-      await s.workspace.apply(readme("two\n"), opened.revision),
+      await s.workspace.apply(readme("two\n"), opened.summary.revision),
     ) as { revision: number; inverse: never[] };
     await s.workspace.flush();
     expect(s.saves).toHaveLength(1);
     // a stale command is refused and saves nothing
-    const refused = await s.workspace.apply(readme("x\n"), opened.revision);
+    const refused = await s.workspace.apply(
+      readme("x\n"),
+      opened.summary.revision,
+    );
     expect(refused).toMatchObject({ ok: false, code: "stale" });
     await s.workspace.flush();
     expect(s.saves).toHaveLength(1);
@@ -204,7 +225,7 @@ describe("F-202 workspace", () => {
       files,
     });
     const opened = await s.workspace.openProject(a.id);
-    ok(await s.workspace.apply(readme("edited\n"), opened.revision));
+    ok(await s.workspace.apply(readme("edited\n"), opened.summary.revision));
     expect(s.saves).toHaveLength(0);
     await s.workspace.openProject(b.id);
     expect(s.saves).toHaveLength(1);
@@ -238,7 +259,7 @@ describe("F-202 workspace", () => {
     expect(s.statuses.at(-1)?.projects.map((p) => p.name)).toContain("Alpha");
     await expect(s.workspace.renameProject(a.id, "  ")).rejects.toThrow();
     await expect(s.workspace.renameProject("nope", "x")).rejects.toThrow();
-    ok(await s.workspace.apply(readme("pending\n"), opened.revision));
+    ok(await s.workspace.apply(readme("pending\n"), opened.summary.revision));
     await s.workspace.deleteProject(a.id);
     const last = s.statuses.at(-1);
     expect(last?.current).toBeNull();

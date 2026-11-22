@@ -7,7 +7,6 @@ import {
   type EngineRefusal,
   installedPackVersions,
   type ProjectChange,
-  type ProjectSummary,
   templateFiles,
 } from "@nf-builder/engine";
 import { createAutosaver, type Timer } from "./autosave";
@@ -16,6 +15,7 @@ import { normaliseProjectName } from "./project-name";
 import {
   INITIAL_STATUS,
   type NewProject,
+  type OpenedProject,
   type ProjectMeta,
   type WorkspaceApi,
   type WorkspaceStatus,
@@ -51,7 +51,7 @@ export function createWorkspace(options: WorkspaceOptions): WorkspaceApi {
   let status = INITIAL_STATUS;
 
   const push = (patch: Partial<WorkspaceStatus>) => {
-    status = { ...status, ...patch };
+    status = { ...status, ...patch, seq: status.seq + 1 };
     try {
       // across Comlink the listener returns a promise; a dead listener must not break the workspace
       Promise.resolve(listener?.(status)).catch(() => undefined);
@@ -172,7 +172,7 @@ export function createWorkspace(options: WorkspaceOptions): WorkspaceApi {
       }),
 
     openProject: (id) =>
-      serial(async (): Promise<ProjectSummary> => {
+      serial(async (): Promise<OpenedProject> => {
         const store = needDb();
         await autosaver.flush();
         const stored = await store.readProject(id);
@@ -197,7 +197,7 @@ export function createWorkspace(options: WorkspaceOptions): WorkspaceApi {
             opening: null,
             projects: await store.listProjects(),
           });
-          return summary;
+          return { summary, seq: status.seq };
         } catch (error) {
           await engine.close().catch(() => undefined);
           push({

@@ -75,6 +75,7 @@ export function createProjectStore(
 
   return createStore<ProjectUiState & ProjectActions>()((set, get) => {
     let checks = 0;
+    let newest = 0; // the highest status `seq` applied or reported by an open
     const checkUsage = async () => {
       const id = ++checks;
       const usage = await storageUsage(storage());
@@ -86,6 +87,8 @@ export function createProjectStore(
       if (granted !== null) set({ persisted: granted });
     };
     const onStatus = (status: WorkspaceStatus) => {
+      if (status.seq < newest) return; // overtaken: an older push arriving after a newer one
+      newest = status.seq;
       const savedNow =
         get().status.save.status === "saving" && status.save.status === "saved";
       set({ status });
@@ -100,7 +103,9 @@ export function createProjectStore(
 
     /** Opens a stored project in the worker, then shows it on the canvas. */
     const openAndShow = async (id: string) => {
-      const summary = await deps.workspace().openProject(id);
+      const { summary, seq } = await deps.workspace().openProject(id);
+      // the reply is newer than any status pushed before it, even one still on its way
+      newest = Math.max(newest, seq);
       void deps.canvas.show(summary).catch(() => undefined);
     };
 
@@ -120,7 +125,10 @@ export function createProjectStore(
             void deps.templates(deps.languageVersion).catch(() => undefined);
           const workspace = deps.workspace();
           const initial = await workspace.watch(onStatus);
-          set({ status: initial });
+          if (initial.seq >= newest) {
+            newest = initial.seq;
+            set({ status: initial });
+          }
           void checkUsage();
           const first = initial.projects[0];
           if (first && !initial.current && !initial.opening)

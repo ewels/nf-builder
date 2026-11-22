@@ -55,7 +55,7 @@ function fixture(
     }),
     openProject: vi.fn(async (id: string) => {
       calls.push(`openProject:${id}`);
-      return { revision: 7 };
+      return { summary: { revision: 7 }, seq: 0 };
     }),
     renameProject: vi.fn(async () => meta("x")),
     deleteProject: vi.fn(async () => {
@@ -138,6 +138,28 @@ describe("F-202 F-205 project store and canvas", () => {
       ready({ current: null, opening: { project: meta("a"), progress: null } }),
     );
     expect(f.gone.count).toBe(before);
+  });
+});
+
+describe("F-203 status ordering", () => {
+  it("F-203 UX-20: a status older than the open's reply is ignored, so a stale push can't clear the canvas", async () => {
+    const f = fixture(ready({ seq: 1 }));
+    (f.workspace.openProject as ReturnType<typeof vi.fn>).mockImplementation(
+      async () => ({ summary: { revision: 7 }, seq: 5 }),
+    );
+    await f.store.getState().start();
+    const before = f.gone.count;
+    await f.store.getState().open("a");
+    // pushed by createProject's refresh when nothing was open, delivered after the open's reply
+    f.push(ready({ seq: 3, current: null, opening: null }));
+    expect(f.gone.count).toBe(before);
+    expect(f.store.getState().status.seq).toBe(1);
+    f.push(ready({ seq: 5, current: meta("a") }));
+    expect(f.store.getState().status.current?.id).toBe("a");
+    f.push(ready({ seq: 4, current: null }));
+    expect(f.store.getState().status.current?.id).toBe("a");
+    f.push(ready({ seq: 6, current: null }));
+    expect(f.store.getState().status.current).toBeNull();
   });
 });
 
