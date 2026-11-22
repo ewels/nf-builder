@@ -11,6 +11,7 @@
 import { appendFileSync, existsSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { gzipSync } from "node:zlib";
+import { basePath } from "./base-path.ts";
 import {
   distExists,
   isMain,
@@ -78,8 +79,13 @@ export function readBudget(id: string, file: string = BUDGETS_FILE): Budget {
   };
 }
 
+/** `url` relative to dist: the base path (default `/`) stripped from the front. */
+function stripBase(url: string, base: string): string {
+  return url.startsWith(base) ? url.slice(base.length) : url.replace(/^\//, "");
+}
+
 /** Dist-relative paths of `<script src>` and `<link rel="modulepreload" href>` (attribute order free). */
-function htmlScripts(html: string): string[] {
+function htmlScripts(html: string, base: string): string[] {
   const found: string[] = [];
   for (const tag of html.matchAll(/<(script|link)\b[^>]*>/gi)) {
     const text = tag[0];
@@ -89,7 +95,7 @@ function htmlScripts(html: string): string[] {
     const url = new RegExp(`\\b${attr}\\s*=\\s*["']([^"']+)["']`, "i").exec(
       text,
     )?.[1];
-    if (url !== undefined) found.push(url.replace(/^\//, ""));
+    if (url !== undefined) found.push(stripBase(url, base));
   }
   return found;
 }
@@ -97,6 +103,7 @@ function htmlScripts(html: string): string[] {
 function collect(
   manifest: Manifest,
   html: string,
+  base: string,
 ): { files: string[]; problems: Problem[] } {
   const problems: Problem[] = [];
   const files = new Set<string>();
@@ -114,7 +121,7 @@ function collect(
     files.add(entry.file);
     queue.push("index.html");
   }
-  for (const src of htmlScripts(html)) {
+  for (const src of htmlScripts(html, base)) {
     if (/^(?:[a-z][a-z0-9+.-]*:)?\/\//i.test(src)) {
       problems.push({
         file: "index.html",
@@ -149,8 +156,12 @@ function collect(
 }
 
 /** Dist-relative paths of the initial JavaScript files (see the header for the definition). */
-export function initialJsFiles(manifest: Manifest, html: string): string[] {
-  return collect(manifest, html).files;
+export function initialJsFiles(
+  manifest: Manifest,
+  html: string,
+  base = "/",
+): string[] {
+  return collect(manifest, html, base).files;
 }
 
 function formatKb(bytes: number): string {
@@ -160,6 +171,7 @@ function formatKb(bytes: number): string {
 export function checkBundleBudget(
   distDir: string,
   budget: Budget,
+  base = "/",
 ): BudgetResult {
   const fail = (problems: Problem[]): BudgetResult => ({
     ok: false,
@@ -192,6 +204,7 @@ export function checkBundleBudget(
   const { files: names, problems } = collect(
     manifest,
     readFileSync(htmlFile, "utf8"),
+    base,
   );
   const files: SizedFile[] = [];
   for (const name of names) {
@@ -267,14 +280,16 @@ function main(argv: string[]): number {
     }
   }
   if (!distExists(dist)) return 2;
+  let base: string;
   let budget: Budget;
   try {
+    base = basePath(process.env);
     budget = readBudget("QA-01", budgets);
   } catch (error) {
     console.error(error instanceof Error ? error.message : String(error));
     return 2;
   }
-  const result = checkBundleBudget(dist, budget);
+  const result = checkBundleBudget(dist, budget, base);
   const report = budgetReport(result);
   console.log(report);
   if (process.env.GITHUB_STEP_SUMMARY)

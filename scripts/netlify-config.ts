@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { parse } from "smol-toml";
-import { ALLOWED_ORIGINS } from "./allow-list.ts";
+import { CONNECT_SRC_ALLOW_LIST, cspProblems } from "./security-policy.ts";
 
 type NetlifyHeaderRule = { for: string; values: Record<string, string> };
 type NetlifyRedirect = {
@@ -19,11 +19,7 @@ export type NetlifyConfig = {
   headers: NetlifyHeaderRule[];
 };
 
-/** ADR 0002: the only origins the app may connect to (the list lives in scripts/allow-list.ts). */
-export const CONNECT_SRC_ALLOW_LIST: readonly string[] = [
-  "'self'",
-  ...ALLOWED_ORIGINS,
-];
+export { CONNECT_SRC_ALLOW_LIST, cspProblems };
 
 type Table = Record<string, unknown>;
 
@@ -100,55 +96,4 @@ export function siteHeaders(config: NetlifyConfig): Record<string, string> {
       `netlify.toml: expected exactly one headers rule for "/*", found ${rules.length}`,
     );
   return { ...rules[0]?.values };
-}
-
-const SCRIPT_DIRECTIVES = [
-  "default-src",
-  "script-src",
-  "script-src-elem",
-  "script-src-attr",
-];
-
-/** Keywords, nonces and hashes, `data:`, `blob:`, `*`, and any bare scheme such as `https:`. */
-const FORBIDDEN_SCRIPT_SOURCE =
-  /^('(unsafe-inline|unsafe-eval|unsafe-hashes|nonce-.*|sha(256|384|512)-.*)'|data:|blob:|\*|[a-z][a-z0-9+.-]*:)$/;
-
-/** Returns one readable problem per QA-30 breach; [] when the policy is acceptable. */
-export function cspProblems(policy: string): string[] {
-  const problems: string[] = [];
-  if (/[\r\n]/.test(policy)) problems.push("the policy contains a line break");
-  if (policy.includes(","))
-    problems.push(
-      "the policy contains a comma, which makes it several policies",
-    );
-
-  const directives = new Map<string, string[]>();
-  const repeated = new Set<string>();
-  for (const part of policy.split(";")) {
-    const [name, ...sources] = part.trim().toLowerCase().split(/\s+/);
-    if (!name) continue;
-    if (directives.has(name)) repeated.add(name);
-    directives.set(name, sources);
-  }
-  for (const name of repeated) problems.push(`${name} appears more than once`);
-
-  if (!directives.has("script-src")) problems.push("script-src is missing");
-  for (const name of SCRIPT_DIRECTIVES) {
-    for (const source of directives.get(name) ?? []) {
-      if (FORBIDDEN_SCRIPT_SOURCE.test(source))
-        problems.push(`${name} allows ${source}`);
-    }
-  }
-
-  const connect = directives.get("connect-src");
-  if (connect === undefined) problems.push("connect-src is missing");
-  else {
-    for (const source of connect) {
-      if (!CONNECT_SRC_ALLOW_LIST.includes(source))
-        problems.push(
-          `connect-src allows ${source}, which is not on the ADR 0002 allow-list`,
-        );
-    }
-  }
-  return problems;
 }
