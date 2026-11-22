@@ -12,7 +12,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-110 printer | merged, PR #25 | |
 | F-105 semantic model | merged, PR #30 | |
 | F-106 typed projection | `feat/F-106`, in PR | Plan deleted in its PR. |
-| F-107 legacy projection | not started | [plan](plan-F-107.md). After F-106; parallel with F-108. |
+| F-107 legacy projection | `feat/F-107` (stacked on F-106 and F-108), in PR | Plan deleted in its PR. |
 | F-108 code nodes | `feat/F-108` (stacked on F-106), in PR | Plan deleted in its PR. |
 | F-111 edit commands | not started | [plan](plan-F-111.md). Tasks 1–6 need only F-105; 7 onwards need F-106. |
 | F-112 diagnostics | not started | [plan](plan-F-112.md). After F-106 (and F-111 for fixes). |
@@ -53,7 +53,7 @@ Next free ADR number: 0040 (0037 is F-108's, 0038 F-107's, 0039 F-111's).
 - Amendment from the F-112 plan: ports carry `argumentType` (the inline argument's type) for LA-32 checks.
 - Amendment from the F-107/F-108 plans: task 4 also creates `packages/engine/src/projection/scope.ts` (`lookup`, `bind`, `resolveRead`, multi-value bindings) and `Read.properties`, so F-107 and F-108 can run in parallel (plan-F-107.md section 1.5).
 
-### F-107 — [plan](plan-F-107.md)
+### F-107 (merged with its PR)
 - Accept every recommendation in section 6. Step 2's 90% needs alias statements, call-result properties, callee aliases and transparent dataflow `if`s and ternaries as well as AR-14's four forms (74% without them): keep them in F-107, amend AR-14 and record it in the F-107 ADR. Legacy operator data in the pack (`LanguagePack.legacyOperators`). Commit all 119 corpus workflow snapshots with a licences row.
 
 ### F-108 (merged with its PR)

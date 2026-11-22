@@ -353,3 +353,13 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - `CodeNode` gains `text`; no new dependency.
   - Upstream: lint reports some variable errors one column early (`docs/research/upstream-bugs.md` 22).
 - Blockers: #33.
+
+## 2026-11-22 · F-107 · Claude (autonomous)
+- Did: the legacy projection: ports from process qualifiers (also for typed callers), `.out` in every form, pipes and forks, `set`/`tap`, legacy operators and factories from the pack, legacy params, aliases, call-result properties, and transparent dataflow `if`s and ternaries with guards; `Projection.statements` and a coverage measure; 90.6% of corpus statements modelled.
+- State: passing (stacked on F-106 and F-108; merges after them once CI runs, #33).
+- Next: F-111 finishing; then F-112 and F-113.
+- Decisions:
+  - AR-14 amended: aliases, call-result properties and dataflow conditionals are needed for step 2's 90% ([ADR 0038](../adr/0038-legacy-projection.md)).
+  - Legacy operators as pack data (`LanguagePack.legacyOperators`); one `set`/`tap` rule matching nf-lang's `VariableScopeVisitor`, shared with F-108.
+  - Licences row for the 119 corpus-derived snapshots. No new dependency.
+- Blockers: #33.
