@@ -98,6 +98,7 @@ describe("F-206 declaration details", () => {
       "cpus",
       "container",
     ]);
+    // biome-ignore lint/suspicious/noTemplateCurlyInString: Nextflow source, not a template
     expect(d.directives[0]?.value).toBe('"${x}"');
     expect(d.directives[1]?.value).toBe("2");
     expect(d.directives[2]?.value.length).toBe(60);
@@ -168,6 +169,29 @@ describe("F-206 declaration details", () => {
       text: "a\n  b",
       truncated: true,
     });
+  });
+
+  it("F-206 AR-30 UX-30: a preview dedents over the lines shown and cuts each line at 200 characters", () => {
+    const at = (text: string) => ({
+      start: 0,
+      end: text.length,
+      line: 1,
+      column: 1,
+      endLine: 1,
+      endColumn: 1,
+    });
+    const indented = "    a\n    b\n  c";
+    expect(previewText(indented, at(indented), 2)).toEqual({
+      text: "a\nb",
+      truncated: true,
+    });
+    const wide = `x${"y".repeat(300)}\nshort`;
+    const shown = previewText(wide, at(wide)).text.split("\n");
+    expect(shown[0]?.length).toBe(200);
+    expect(shown[0]?.endsWith("…")).toBe(true);
+    expect(shown[1]).toBe("short");
+    const exact = "z".repeat(200);
+    expect(previewText(exact, at(exact)).text).toBe(exact);
   });
 
   it("F-206 UX-30: an agent shows its directives and prompt; a workflow or pipeline callee has no preview", async () => {

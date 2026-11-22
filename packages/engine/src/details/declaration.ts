@@ -31,6 +31,8 @@ import type {
 
 /** The most lines a script preview shows. */
 const PREVIEW_LINES = 8;
+/** A preview line is cut here, so the preview stays small whatever the source (AR-30). */
+const PREVIEW_LINE_CHARS = 200;
 /** The most characters a directive or topic value shows. */
 const VALUE_CHARS = 60;
 
@@ -101,7 +103,7 @@ export function oneLine(text: string, max = VALUE_CHARS): string {
   return flat.length <= max ? flat : `${flat.slice(0, max - 1)}…`;
 }
 
-/** The text of `range`, dedented, without blank edge lines, cut to `lines` lines. */
+/** The text of `range` without blank edge lines, cut to `lines` lines of at most 200 characters, dedented by the lines shown. */
 export function previewText(
   text: string,
   range: Range,
@@ -113,15 +115,23 @@ export function previewText(
   const all = source.split("\n").map((l) => l.trimEnd());
   while (all.length > 0 && all[0] === "") all.shift();
   while (all.length > 0 && all[all.length - 1] === "") all.pop();
+  const shown = all.slice(0, lines);
   const indent = Math.min(
-    ...all.filter((l) => l !== "").map((l) => l.length - l.trimStart().length),
+    ...shown
+      .filter((l) => l !== "")
+      .map((l) => l.length - l.trimStart().length),
   );
-  const dedented = all.map((l) =>
-    l.slice(Number.isFinite(indent) ? indent : 0),
-  );
+  const cut = Number.isFinite(indent) ? indent : 0;
   return {
-    text: dedented.slice(0, lines).join("\n"),
-    truncated: dedented.length > lines,
+    text: shown
+      .map((l) => l.slice(cut))
+      .map((l) =>
+        l.length <= PREVIEW_LINE_CHARS
+          ? l
+          : `${l.slice(0, PREVIEW_LINE_CHARS - 1)}…`,
+      )
+      .join("\n"),
+    truncated: all.length > lines,
   };
 }
 
