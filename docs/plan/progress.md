@@ -237,3 +237,10 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
 - Next: finish F-102's current builder run, then hand off.
 - Decisions: the maintainer's own (ADR 0031).
 - Blockers: none.
+
+## 2026-11-22 · hand-off · Claude (autonomous)
+- Did: this session merged F-201, F-005, F-008, F-010, F-006, F-007, F-101, F-109 and F-204 (PRs #12–#20), plus the maintainer's spec and process changes (ADRs 0029–0031). 14 of 69 features pass; M0 is complete.
+- State: F-102 (`feat/F-102`, tasks 1–4 committed, 5–6 in progress) and F-103 (`feat/F-103`, built, stacked on F-102) are open branches; F-104 and F-110 are planned. Plans and settled open points are in `docs/plan/handoff/`.
+- Next: finish F-102 (tasks 5–7), merge it, then F-103, then F-104 and F-110 in parallel.
+- Decisions: see the entries above and `docs/plan/handoff/README.md`.
+- Blockers: none. Open maintainer issues: #6 (Renovate), #7 (required checks).
