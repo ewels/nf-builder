@@ -25,13 +25,13 @@ const USAGE =
   "Usage: pnpm gen:catalogue <version> [--check] [--jar <path>] [--out <dir>]";
 
 export type Pin = { tag: string; nfLang: string; url: string; sha256: string };
-export type CatalogueSource = {
+type CatalogueSource = {
   generator: "tools/spec-extract";
   languageServer: string;
   nfLang: string;
   jarSha256: string;
 };
-export type Kind = "script" | "config";
+type Kind = "script" | "config";
 type Json = Record<string, unknown>;
 export type Extracted = { script: unknown; config: unknown };
 
@@ -138,8 +138,15 @@ export function runExtractor(
 
 // ---- normalisation -----------------------------------------------------------------------------------------
 
-const byName = (a: { name: string }, b: { name: string }): number =>
-  a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
+/** A comparator that orders by a string key. */
+const by =
+  <T>(key: (item: T) => string) =>
+  (a: T, b: T): number => {
+    const x = key(a);
+    const y = key(b);
+    return x < y ? -1 : x > y ? 1 : 0;
+  };
+const byName = by<Json>((item) => String(item.name));
 
 /** Trims, and removes the indentation of the text block the description was written in. */
 function tidy(text: unknown): string {
@@ -170,11 +177,14 @@ function signature(raw: Json): Json {
 }
 
 function entry(raw: Json): Json {
-  const signatures = (raw.signatures as Json[]).map(signature).sort((a, b) => {
-    const key = (s: Json): string =>
-      `${(s.parameters as unknown[]).length}|${JSON.stringify(s.parameters)}|${s.returns}`;
-    return key(a) < key(b) ? -1 : key(a) > key(b) ? 1 : 0;
-  });
+  const signatures = (raw.signatures as Json[])
+    .map(signature)
+    .sort(
+      by<Json>(
+        (s) =>
+          `${(s.parameters as unknown[]).length}|${JSON.stringify(s.parameters)}|${s.returns}`,
+      ),
+    );
   const out: Json = {
     name: raw.name,
     description: tidy(raw.description),
@@ -186,7 +196,7 @@ function entry(raw: Json): Json {
 }
 
 const entries = (raw: unknown): Json[] =>
-  (raw as Json[]).map(entry).sort(byName as (a: Json, b: Json) => number);
+  (raw as Json[]).map(entry).sort(byName);
 
 const group = (raw: Json): Json => ({
   name: raw.name,
@@ -201,9 +211,7 @@ function configNode(raw: Json): Json {
     description: tidy(raw.description),
   };
   const children = (): Json[] =>
-    (raw.children as Json[])
-      .map(configNode)
-      .sort(byName as (a: Json, b: Json) => number);
+    (raw.children as Json[]).map(configNode).sort(byName);
   switch (raw.kind) {
     case "scope":
       return { ...base, children: children() };
@@ -231,16 +239,13 @@ export function normalise(
   if (kind === "config")
     return {
       source,
-      scopes: (raw as Json[])
-        .map(configNode)
-        .sort(byName as (a: Json, b: Json) => number),
+      scopes: (raw as Json[]).map(configNode).sort(byName),
     };
   const r = raw as Json;
   const sections = r.processSections as Json;
-  const operators = entries(r.operators).sort((a, b) => {
-    const key = (o: Json): string => `${o.receiver}.${o.name}`;
-    return key(a) < key(b) ? -1 : key(a) > key(b) ? 1 : 0;
-  });
+  const operators = entries(r.operators).sort(
+    by<Json>((o) => `${o.receiver}.${o.name}`),
+  );
   return {
     source,
     directives: entries(r.directives),
@@ -255,12 +260,8 @@ export function normalise(
     factories: entries(r.factories),
     constants: entries(r.constants),
     functions: entries(r.functions),
-    namespaces: (r.namespaces as Json[])
-      .map(group)
-      .sort(byName as (a: Json, b: Json) => number),
-    types: (r.types as Json[])
-      .map(group)
-      .sort(byName as (a: Json, b: Json) => number),
+    namespaces: (r.namespaces as Json[]).map(group).sort(byName),
+    types: (r.types as Json[]).map(group).sort(byName),
     featureFlags: (r.featureFlags as Json[])
       .map((f) => ({
         name: f.name,
@@ -268,7 +269,7 @@ export function normalise(
         type: f.type,
         preview: f.preview === true,
       }))
-      .sort(byName as (a: Json, b: Json) => number),
+      .sort(byName),
   };
 }
 
@@ -298,7 +299,7 @@ export const serialise = (value: unknown): string =>
 export type MainIo = {
   repoRoot?: string;
   /** Replaces the Java run, for tests. */
-  extract?: (pin: Pin, jarSha256: string) => Extracted;
+  extract?: () => Extracted;
 };
 
 function defaultExtract(jar: string): Extracted {
@@ -347,22 +348,20 @@ export function main(argv: readonly string[], io: MainIo = {}): number {
     const pack = packDir(version, repoRoot);
     const pin = readPin(pack);
     let extracted: Extracted;
-    let jarSha256 = pin.sha256;
     if (io.extract) {
-      extracted = io.extract(pin, jarSha256);
+      extracted = io.extract();
     } else {
       const jar = values.jar
         ? resolve(values.jar)
         : ensureJar(pin, join(repoRoot, ".cache", "language-server"));
       verifyJar(jar, pin);
-      jarSha256 = sha256(jar);
       extracted = defaultExtract(jar);
     }
     const source: CatalogueSource = {
       generator: "tools/spec-extract",
       languageServer: pin.tag,
       nfLang: pin.nfLang,
-      jarSha256,
+      jarSha256: pin.sha256,
     };
     const files: Record<string, string> = {
       "script.json": serialise(normalise(extracted.script, source, "script")),

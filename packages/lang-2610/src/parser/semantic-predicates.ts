@@ -1,7 +1,7 @@
 // Ported from nextflow-io/nextflow v26.10.7, modules/nf-lang/src/main/java/nextflow/script/parser/SemanticPredicates.java
 // (Apache-2.0; see ../../grammar/NOTICE and ../../grammar/LICENSE).
-// antlr4ng character streams hold code points (Java's hold UTF-16 units), so the surrogate-pair branches
-// of the Java original are unreachable here and are not ported.
+// Character streams hold code points in both antlr4ng and nf-lang (CharStreams.fromReader), so columns count code points
+// and the surrogate-pair branches of the Java original never match here; they are not ported.
 import type { CharStream } from "antlr4ng";
 import { isJavaIdentifierPart } from "./java-character.ts";
 

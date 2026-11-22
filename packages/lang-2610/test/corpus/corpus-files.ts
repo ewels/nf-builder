@@ -13,7 +13,7 @@ export const LINT_EXCLUDES: readonly string[] = [
   "work",
 ];
 
-export type SourceFile = { path: string; kind: "script" | "config" };
+type SourceFile = { path: string; kind: "script" | "config" };
 
 /** `*.nf` are scripts and `*.config` are configs; sorted, relative POSIX paths. */
 export function listSources(dir: string): SourceFile[] {
@@ -43,7 +43,7 @@ export type KnownDifference = {
   cause: string;
 };
 export type FileOutcome = { pipeline: string; file: string; parser: Outcome };
-export type Diff = Omit<KnownDifference, "cause">;
+type Diff = Omit<KnownDifference, "cause">;
 
 const isOutcome = (v: unknown): v is Outcome => v === "error" || v === "ok";
 

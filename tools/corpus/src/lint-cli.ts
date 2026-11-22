@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 import { parseArgs } from "node:util";
 import { isUpToDate } from "./fetch.ts";
 import { FIXTURES_DIR } from "./fixtures.ts";
-import { lintCorpus, resolveLauncher, UPSTREAM_FILE } from "./lint.ts";
+import { lintCorpus, resolveLauncher } from "./lint.ts";
 import { DEFAULT_CACHE_DIR, loadManifest } from "./manifest.ts";
 
 const USAGE = "Usage: pnpm corpus:lint [--nextflow <launcher>] [--force]";
@@ -33,7 +33,7 @@ function main(argv: string[]): number {
     launcher = resolveLauncher({
       flag: values.nextflow,
       env: process.env,
-      upstreamFile: values.upstream ? resolve(values.upstream) : UPSTREAM_FILE,
+      upstreamFile: values.upstream ? resolve(values.upstream) : undefined,
     }).path;
   } catch (error) {
     console.error(`corpus-lint: ${(error as Error).message}`);

@@ -75,7 +75,7 @@ Run `pnpm test:corpus` when touching the parser, model, projection or printer. T
 Never edit these. Regenerate them.
 
 - `packages/lang-*/src/generated/**`: `pnpm gen:grammar <version>`
-- `packages/lang-*/catalogue/*.json`: CI job `catalogue`
+- `packages/lang-*/catalogue/*.json`: `pnpm gen:catalogue <version>` (CI job `catalogue` checks it)
 - `apps/web/public/registry/**`: CI job `registry-snapshot`
 - `.claude/skills/*/**` (vendored Nextflow skills): `.claude/skills/sync.sh`
 

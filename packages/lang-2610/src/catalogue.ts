@@ -4,5 +4,5 @@ import type { ConfigCatalogue, ScriptCatalogue } from "@nf-builder/lang-core";
 import config from "../catalogue/config.json" with { type: "json" };
 import script from "../catalogue/script.json" with { type: "json" };
 
-export const scriptCatalogue: ScriptCatalogue = script as ScriptCatalogue;
-export const configCatalogue: ConfigCatalogue = config as ConfigCatalogue;
+export const scriptCatalogue = script as ScriptCatalogue;
+export const configCatalogue = config as ConfigCatalogue;

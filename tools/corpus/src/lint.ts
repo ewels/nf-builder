@@ -8,7 +8,7 @@ import { basename, join } from "node:path";
 import type { Manifest } from "./manifest.ts";
 import { REPO_ROOT } from "./manifest.ts";
 
-export type LintError = {
+type LintError = {
   filename: string;
   startLine: number;
   startColumn: number;
@@ -22,8 +22,8 @@ export type LintResult = {
   errors: LintError[];
 };
 
-export const LINT_CACHE_DIR = `${REPO_ROOT}.cache/corpus-lint`;
-export const UPSTREAM_FILE = `${REPO_ROOT}packages/lang-2610/upstream.json`;
+const LINT_CACHE_DIR = `${REPO_ROOT}.cache/corpus-lint`;
+const UPSTREAM_FILE = `${REPO_ROOT}packages/lang-2610/upstream.json`;
 
 const isRecord = (v: unknown): v is Record<string, unknown> =>
   typeof v === "object" && v !== null && !Array.isArray(v);
@@ -179,17 +179,15 @@ function fixturesSha(fixturesDir: string): string {
   return hash.digest("hex");
 }
 
-/** One result per pipeline plus "fixtures", written to <outDir>/<id>.json. */
+/** One result per pipeline plus "fixtures", written to .cache/corpus-lint/<id>.json. */
 export function lintCorpus(o: {
   launcher: string;
   manifest: Manifest;
   cacheDir: string;
   fixturesDir: string;
-  outDir?: string;
   force?: boolean;
   log: (line: string) => void;
 }): LintResult[] {
-  const outDir = o.outDir ?? LINT_CACHE_DIR;
   const version = nextflowVersion(o.launcher);
   const targets = [
     ...o.manifest.pipelines.map((p) => ({
@@ -199,10 +197,10 @@ export function lintCorpus(o: {
     })),
     { id: "fixtures", sha: fixturesSha(o.fixturesDir), dir: o.fixturesDir },
   ];
-  mkdirSync(outDir, { recursive: true });
+  mkdirSync(LINT_CACHE_DIR, { recursive: true });
   const results: LintResult[] = [];
   for (const t of targets) {
-    const file = join(outDir, `${t.id}.json`);
+    const file = join(LINT_CACHE_DIR, `${t.id}.json`);
     if (!o.force && isCached(file, t.sha, version)) {
       results.push(JSON.parse(readFileSync(file, "utf8")) as LintResult);
       o.log(`corpus-lint: ${t.id} up to date`);

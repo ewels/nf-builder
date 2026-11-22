@@ -16,11 +16,11 @@ import {
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { basename, join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { isMain, REPO_ROOT } from "./check-common.ts";
 
-export type GenOptions = { version: string; check: boolean; repoRoot?: string };
+export type GenOptions = { version: string; repoRoot?: string };
 
 type PortEntry = { java: string; ts: string; occurrences: number };
 type GrammarPort = {
@@ -291,7 +291,7 @@ async function render(
       ).replace(/\r\n/g, "\n");
       const header = generatedHeader({
         version: o.version,
-        packRel: `packages/${pack.split(/[\\/]/).pop()}`,
+        packRel: `packages/${basename(pack)}`,
         grammarFile: `${name}.g4`,
         path: upstream.grammar.path,
         tag: upstream.nextflow.tag,
@@ -357,7 +357,7 @@ export async function main(argv: readonly string[]): Promise<number> {
   }
   try {
     if (check) {
-      const { differences } = await checkGenerated({ version, check });
+      const { differences } = await checkGenerated({ version });
       if (differences.length === 0) {
         console.log(
           `gen:grammar ${version}: src/generated matches the generator output`,
@@ -371,7 +371,7 @@ export async function main(argv: readonly string[]): Promise<number> {
       );
       return 1;
     }
-    const { written } = await generate({ version, check });
+    const { written } = await generate({ version });
     console.log(`gen:grammar ${version}: wrote ${written.join(", ")}`);
     return 0;
   } catch (error) {

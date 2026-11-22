@@ -155,7 +155,7 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
 - Decisions:
   - `antlr4ng` 3.0.16 runtime and `antlr-ng` 1.0.10 dev dependency, pinned exactly and grouped in Renovate; generated parser committed; spec-extract as a single-file Java program; catalogue from language server v26.10.2 (nf-lang 26.10.4) against 26.10.7 grammars; build-time hosts; two blocking CI jobs ([ADR 0020](../adr/0020-parser-and-catalogue-generation.md)).
   - Licensing: upstream NOTICE and Apache-2.0 licence ship with the grammars; `docs/licences.md` lists the generated parser, ported classes, catalogue text and antlr4ng.
-  - Stage 1 predicts the `sep` and `type` decisions with full LL; trees equal pure LL on the corpus.
+  - Stage 1 predicts the `sep` and `type` decisions with full LL; trees equal pure LL on the files the corpus harness checks (and on the whole corpus in a one-off research check).
   - QA-03 cold-start risk handed to F-113 (notes); the catalogue's 26.10.4 skew and docs gaps recorded in ADR 0005's spike result.
   - Hand-off plans folder removed now that all three hand-off features have merged.
 - Blockers: none.

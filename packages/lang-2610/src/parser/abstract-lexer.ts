@@ -47,8 +47,8 @@ export abstract class AbstractLexer extends Lexer {
     attachPosition: boolean,
   ): void {
     if (condition) return;
-    const line = this.getErrorLine();
-    const column = this.getErrorColumn() + offset;
+    const line = this.line;
+    const column = this.column + 1 + offset;
     const position =
       line === -1 || column === -1 ? "" : ` @ line ${line}, column ${column}`;
     throw new LexerSyntaxError(
@@ -56,13 +56,5 @@ export abstract class AbstractLexer extends Lexer {
       line,
       column,
     );
-  }
-
-  protected getErrorLine(): number {
-    return this.line;
-  }
-
-  protected getErrorColumn(): number {
-    return this.column + 1;
   }
 }

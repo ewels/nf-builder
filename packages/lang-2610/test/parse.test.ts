@@ -1,14 +1,10 @@
-import {
-  BailErrorStrategy,
-  CharStream,
-  CommonTokenStream,
-  PredictionMode,
-  Trees,
-} from "antlr4ng";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import { Trees } from "antlr4ng";
 import { describe, expect, it } from "vitest";
-import { ScriptLexer } from "../src/generated/ScriptLexer.ts";
 import { ScriptParser } from "../src/generated/ScriptParser.ts";
 import { parseConfig, parseScript } from "../src/parser/parse.ts";
+import { pureLlTree } from "./helpers.ts";
 
 const TYPED_AND_LEGACY = `nextflow.enable.types = true
 
@@ -167,6 +163,40 @@ describe("parseScript", () => {
   });
 });
 
+describe("parse error messages and positions", () => {
+  it("ADR-0005: an input mismatch under the bail-out strategy still carries a message", () => {
+    for (const text of ["def f( {\n", "/* never closed\nx = 1\n"]) {
+      const outcome = parseScript(text);
+      expect(outcome.ok, text).toBe(false);
+      if (outcome.ok) continue;
+      expect(outcome.error.message.length, text).toBeGreaterThan(0);
+    }
+  });
+
+  it("ADR-0005: a parse error on the unclosed-comment fixture has a message", () => {
+    const text = readFileSync(
+      join(
+        import.meta.dirname,
+        "../../../tools/corpus/fixtures/unclosed-comment.nf",
+      ),
+      "utf8",
+    );
+    const outcome = parseScript(text);
+    expect(outcome.ok).toBe(false);
+    if (!outcome.ok) expect(outcome.error.message.length).toBeGreaterThan(0);
+  });
+
+  it("ADR-0005: columns count code points, not UTF-16 units, as nextflow lint does", () => {
+    const outcome = parseScript(
+      'workflow {\n    v = "\u{1d400}\u{1d400}" + = 1\n}\n',
+    );
+    expect(outcome.ok).toBe(false);
+    if (outcome.ok) return;
+    expect(outcome.error.line).toBe(2);
+    expect(outcome.error.column).toBe(16);
+  });
+});
+
 describe("parseConfig", () => {
   it("ADR-0005: parseConfig accepts scopes, assignments, selectors, profiles and includeConfig", () => {
     const outcome = parseConfig(CONFIG);
@@ -199,16 +229,6 @@ const INSTANCEOF_TERNARY = `workflow {
 }
 `;
 
-function pureLlTree(text: string): string {
-  const lexer = new ScriptLexer(CharStream.fromString(text));
-  lexer.removeErrorListeners();
-  const parser = new ScriptParser(new CommonTokenStream(lexer));
-  parser.removeErrorListeners();
-  parser.errorHandler = new BailErrorStrategy();
-  parser.interpreter.predictionMode = PredictionMode.LL;
-  return Trees.toStringTree(parser.compilationUnit(), ScriptParser.ruleNames);
-}
-
 describe("stage 1 prediction", () => {
   it("F-006 QA-03: a workflow with a blank line before emit: parses in stage 1 without falling back to full LL", () => {
     expect(parseScript(BLANK_BEFORE_EMIT)).toMatchObject({
@@ -229,7 +249,7 @@ describe("stage 1 prediction", () => {
       const outcome = parseScript(text);
       if (!outcome.ok) throw new Error(outcome.error.message);
       expect(Trees.toStringTree(outcome.tree, ScriptParser.ruleNames)).toBe(
-        pureLlTree(text),
+        pureLlTree("script", text),
       );
     }
   });

@@ -4,20 +4,12 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { cpus } from "node:os";
 import { join } from "node:path";
-import {
-  BailErrorStrategy,
-  CharStream,
-  CommonTokenStream,
-  ParseCancellationException,
-  PredictionMode,
-  Trees,
-} from "antlr4ng";
+import { Trees } from "antlr4ng";
 import { beforeAll, describe, expect, it } from "vitest";
-import { ConfigLexer } from "../../src/generated/ConfigLexer.ts";
 import { ConfigParser } from "../../src/generated/ConfigParser.ts";
-import { ScriptLexer } from "../../src/generated/ScriptLexer.ts";
 import { ScriptParser } from "../../src/generated/ScriptParser.ts";
-import { parseConfig, parseScript } from "../../src/index.ts";
+import { parseConfig, parseScript } from "../../src/parser/parse.ts";
+import { pureLlTree } from "../helpers.ts";
 import {
   compare,
   type FileOutcome,
@@ -63,53 +55,20 @@ function parseAll(id: string): Pass {
     const outcome =
       source.kind === "script" ? parseScript(text) : parseConfig(text);
     const ms = performance.now() - t0;
-    files.push(
-      outcome.ok
-        ? {
-            pipeline: id,
-            file: source.path,
-            parser: "ok",
-            mode: outcome.mode,
-            ms,
-          }
-        : {
-            pipeline: id,
-            file: source.path,
-            parser: "error",
-            mode: outcome.mode,
-            ms,
-            error: `${outcome.error.source}: ${outcome.error.message}`,
-            line: outcome.error.line,
-          },
-    );
+    const parsed: Parsed = {
+      pipeline: id,
+      file: source.path,
+      parser: outcome.ok ? "ok" : "error",
+      mode: outcome.mode,
+      ms,
+    };
+    if (!outcome.ok) {
+      parsed.error = `${outcome.error.source}: ${outcome.error.message}`;
+      parsed.line = outcome.error.line;
+    }
+    files.push(parsed);
   }
   return { files, ms: performance.now() - started };
-}
-
-/** The tree (as a string) of a pure LL parse with no stage 1, or undefined if it fails. */
-function pureLl(kind: "script" | "config", text: string): string | undefined {
-  const input = CharStream.fromString(text);
-  const [lexer, parser] =
-    kind === "script"
-      ? (() => {
-          const l = new ScriptLexer(input);
-          return [l, new ScriptParser(new CommonTokenStream(l))] as const;
-        })()
-      : (() => {
-          const l = new ConfigLexer(input);
-          return [l, new ConfigParser(new CommonTokenStream(l))] as const;
-        })();
-  lexer.removeErrorListeners();
-  parser.removeErrorListeners();
-  parser.errorHandler = new BailErrorStrategy();
-  parser.interpreter.predictionMode = PredictionMode.LL;
-  try {
-    return Trees.toStringTree(parser.compilationUnit(), parser.ruleNames);
-  } catch (error) {
-    if (error instanceof ParseCancellationException) return undefined;
-    // A lexer error is a failure for the parser under test too.
-    return undefined;
-  }
 }
 
 // Pure LL on all of sarek takes about a minute, so compare every file of the small pipelines and a fixed sample of sarek.
@@ -253,7 +212,7 @@ describe("corpus parse", () => {
       }
       for (const source of sources) {
         const text = readFileSync(join(dirOf(id), source.path), "utf8");
-        const expected = pureLl(source.kind, text);
+        const expected = pureLlTree(source.kind, text);
         const outcome =
           source.kind === "script" ? parseScript(text) : parseConfig(text);
         const actual = outcome.ok

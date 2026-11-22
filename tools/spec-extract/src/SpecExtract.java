@@ -150,7 +150,6 @@ public class SpecExtract {
             Map<String, Object> entry = new LinkedHashMap<>();
             entry.put("name", e.getKey());
             entry.put("description", description);
-            entry.put("deprecated", false);
             entry.put("signatures", signatures);
             out.add(entry);
         }

@@ -15,7 +15,7 @@ import {
   PredictionMode,
   type RecognitionException,
   type Recognizer,
-  type Token,
+  Token,
   type TokenStream,
 } from "antlr4ng";
 import { ConfigLexer } from "../generated/ConfigLexer.ts";
@@ -40,8 +40,6 @@ export type ParseOutcome<T> =
   | { ok: true; tree: T; mode: "SLL" | "LL" }
   | { ok: false; error: ParseError; mode: "SLL" | "LL" };
 
-type AnyParser = ScriptParser | ConfigParser;
-
 class FirstErrorListener extends BaseErrorListener {
   first: ParseError | undefined;
 
@@ -65,16 +63,15 @@ class FirstErrorListener extends BaseErrorListener {
  * Stage 1 is SLL, except for the decisions inside rules `sep` and `type`, which are predicted with LL. SLL cannot see the
  * caller of `sep : (NL | SEMI)+` (a blank line before `emit:`), nor tell `x instanceof List ? a : b` from a nullable type,
  * so it fails and drops to full LL for most real files (sarek: about 50 s instead of about 1 s). Upstream's two-stage
- * parse falls back on the same files. Stage 2 stays pure LL, and the trees are identical (checked on the corpus).
+ * parse falls back on the same files. Stage 2 stays pure LL. The corpus test compares the stage 1 tree with the pure LL
+ * tree for every file of the small pipelines and a sample of sarek.
  */
 class Stage1Simulator extends ParserATNSimulator {
-  constructor(
-    parser: Parser,
-    atn: ATN,
-    dfa: DFA[],
-    private readonly ll: ReadonlySet<number>,
-  ) {
+  private readonly ll: ReadonlySet<number>;
+
+  constructor(parser: Parser, atn: ATN, dfa: DFA[], ll: ReadonlySet<number>) {
     super(parser, atn, dfa, new PredictionContextCache());
+    this.ll = ll;
   }
 
   override adaptivePredict(
@@ -105,8 +102,18 @@ const llDecisions = (atn: ATN, ruleNames: string[]) => {
 const SCRIPT_LL = llDecisions(ScriptParser._ATN, ScriptParser.ruleNames);
 const CONFIG_LL = llDecisions(ConfigParser._ATN, ConfigParser.ruleNames);
 
-const isCancellation = (error: unknown): error is ParseCancellationException =>
-  error instanceof ParseCancellationException;
+const EOF_MESSAGE =
+  "Unexpected end of file -- check for an unclosed brace, bracket, parenthesis, or string";
+
+/** nf-lang's DescriptiveErrorStrategy wording for an input mismatch: the offending token, quoted and escaped. */
+function describe(token: Token | null | undefined): string {
+  if (!token || token.type === Token.EOF) return EOF_MESSAGE;
+  const text = (token.text ?? "")
+    .replaceAll("\n", "\\n")
+    .replaceAll("\r", "\\r")
+    .replaceAll("\t", "\\t");
+  return `Unexpected input: '${text}'`;
+}
 
 /** The error behind a bail-out: the listener's if it heard one, else the recognition exception's offending token. */
 function errorOf(
@@ -114,23 +121,21 @@ function errorOf(
   listener: FirstErrorListener,
 ): ParseError {
   if (listener.first) return listener.first;
-  const cause = (error as { cause?: unknown }).cause as
-    | RecognitionException
-    | undefined;
-  const token: Token | null | undefined = cause?.offendingToken;
+  const cause = error.cause as RecognitionException | undefined;
+  const token = cause?.offendingToken;
   return {
     source: "parser",
-    message: cause?.message ?? error.message,
+    message: cause?.message || describe(token),
     line: token?.line ?? 1,
     column: (token?.column ?? 0) + 1,
   };
 }
 
-function run<T>(
+function run<P extends ScriptParser | ConfigParser, T>(
   text: string,
   makeLexer: (input: CharStream) => ScriptLexer | ConfigLexer,
-  makeParser: (tokens: CommonTokenStream) => AnyParser,
-  start: (parser: AnyParser) => T,
+  makeParser: (tokens: CommonTokenStream) => P,
+  start: (parser: P) => T,
 ): ParseOutcome<T> {
   const lexer = makeLexer(CharStream.fromString(text));
   lexer.removeErrorListeners();
@@ -164,7 +169,7 @@ function run<T>(
     return { ok: true, tree: start(parser), mode: "SLL" };
   } catch (error) {
     if (error instanceof LexerSyntaxError) return lexerError(error, "SLL");
-    if (!isCancellation(error)) throw error;
+    if (!(error instanceof ParseCancellationException)) throw error;
   }
 
   tokens.seek(0);
@@ -177,7 +182,7 @@ function run<T>(
     return { ok: true, tree: start(parser), mode: "LL" };
   } catch (error) {
     if (error instanceof LexerSyntaxError) return lexerError(error, "LL");
-    if (!isCancellation(error)) throw error;
+    if (!(error instanceof ParseCancellationException)) throw error;
     return { ok: false, mode: "LL", error: errorOf(error, listener) };
   }
 }
@@ -189,7 +194,7 @@ export function parseScript(
     text,
     (input) => new ScriptLexer(input),
     (tokens) => new ScriptParser(tokens),
-    (parser) => (parser as ScriptParser).compilationUnit(),
+    (parser) => parser.compilationUnit(),
   );
 }
 
@@ -198,6 +203,6 @@ export function parseConfig(text: string): ParseOutcome<ConfigUnitContext> {
     text,
     (input) => new ConfigLexer(input),
     (tokens) => new ConfigParser(tokens),
-    (parser) => (parser as ConfigParser).compilationUnit(),
+    (parser) => parser.compilationUnit(),
   );
 }

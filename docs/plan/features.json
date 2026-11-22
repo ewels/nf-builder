@@ -134,7 +134,7 @@
         "Catalogue counts of directives, operators and factories match the docs reference pages, or the gaps are explained"
       ],
       "passes": true,
-      "notes": "Verified 2026-11-22: step 1 by pnpm gen:grammar 26.10 --check and the lang-2610 parse tests; step 2 by pnpm test:corpus (570 of 570 lint-accepted corpus files parse; 3 fixture differences listed with causes) in the CI corpus-parse job; step 3 by pnpm gen:catalogue 26.10 --check in the CI catalogue job and the docs-compare table. Report: docs/research/2026-11-22-spike-s2-parser.md. No Playwright test, so --grep F-006 finds nothing (Q13). F-101 steps 2 and 3 are covered by the generator tests (T1, T2)."
+      "notes": "Verified 2026-11-22: step 1 by pnpm gen:grammar 26.10 --check and the lang-2610 parse tests; step 2 by pnpm test:corpus (570 of 570 lint-accepted corpus files parse; 3 fixture differences listed with causes) in the CI corpus-parse job; step 3 by pnpm gen:catalogue 26.10 --check in the CI catalogue job and the docs-compare table. Report: docs/research/2026-11-22-spike-s2-parser.md. No Playwright test, so --grep F-006 finds nothing (Q13). F-101 steps 2 and 3 are covered by the generator tests (T1, T2). Correction and CI evidence: step 1 is the parse report (.cache/reports/parse-corpus.md, written by pnpm test:corpus and uploaded by the CI corpus-parse job; summarised in the research report). CI run 44985714834 on PR #16 passed corpus-parse (570 of 570) and catalogue (no diff on Temurin 21)."
     },
     {
       "id": "F-007",

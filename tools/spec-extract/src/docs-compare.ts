@@ -4,41 +4,31 @@
 
 import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, renameSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { basename, dirname, join } from "node:path";
 import { parseArgs } from "node:util";
 import { packDir, REPO_ROOT } from "./cli.ts";
 
 const unique = (names: string[]): string[] => [...new Set(names)].sort();
 
+/** The sorted, unique first capture group of every match of `re` (a global, multiline pattern) in `mdx`. */
+const captures = (mdx: string, re: RegExp): string[] =>
+  unique([...mdx.matchAll(re)].flatMap((m) => (m[1] ? [m[1]] : [])));
+
 /** Rows of the directives table: "| [`name`][ref] | text |". */
-export function directivesFromTable(mdx: string): string[] {
-  return unique(
-    [...mdx.matchAll(/^\| \[`(\w+)`\]/gm)].flatMap((m) => (m[1] ? [m[1]] : [])),
-  );
-}
+export const directivesFromTable = (mdx: string): string[] =>
+  captures(mdx, /^\| \[`(\w+)`\]/gm);
 
 /** Second-level headings: "## name". */
-export function operatorsFromHeadings(mdx: string): string[] {
-  return unique(
-    [...mdx.matchAll(/^## (\w+)\s*$/gm)].flatMap((m) => (m[1] ? [m[1]] : [])),
-  );
-}
+export const operatorsFromHeadings = (mdx: string): string[] =>
+  captures(mdx, /^## (\w+)\s*$/gm);
 
 /** Callable headings: "##### `name( ... ) -> T`". Overloads repeat the name. */
-export function callablesFromHeadings(mdx: string): string[] {
-  return unique(
-    [...mdx.matchAll(/^##### `(\w+)\(/gm)].flatMap((m) => (m[1] ? [m[1]] : [])),
-  );
-}
+export const callablesFromHeadings = (mdx: string): string[] =>
+  captures(mdx, /^##### `(\w+)\(/gm);
 
 /** Flag headings: "##### `nextflow.enable.strict`". */
-export function featureFlagsFromHeadings(mdx: string): string[] {
-  return unique(
-    [...mdx.matchAll(/^##### `(nextflow\.[\w.]+)`\s*$/gm)].flatMap((m) =>
-      m[1] ? [m[1]] : [],
-    ),
-  );
-}
+export const featureFlagsFromHeadings = (mdx: string): string[] =>
+  captures(mdx, /^##### `(nextflow\.[\w.]+)`\s*$/gm);
 
 export function compare(
   docs: readonly string[],
@@ -164,7 +154,7 @@ function main(argv: string[]): number {
       readFileSync(join(pack, "catalogue", "script.json"), "utf8"),
     ) as Script;
     console.log(
-      `Docs at nextflow-io/nextflow ${commit}, catalogue from ${pack.split("/").pop()}/catalogue/script.json\n`,
+      `Docs at nextflow-io/nextflow ${commit}, catalogue from ${basename(pack)}/catalogue/script.json\n`,
     );
     console.log(report(script, (page) => fetchPage(commit, page)));
     return 0;

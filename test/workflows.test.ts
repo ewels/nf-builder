@@ -16,6 +16,25 @@ function yamlFiles(dir: string): string[] {
     .map((f) => join(dir, f));
 }
 
+/** The text of one job of ci.yml, up to the next job. */
+function jobOf(name: string): string {
+  return (
+    read(join(WORKFLOWS, "ci.yml"))
+      .split(new RegExp(`^ {2}${name}:\\s*$`, "m"))[1]
+      ?.split(/^ {2}[\w-]+:\s*$/m)[0] ?? ""
+  );
+}
+
+/** A function giving the position of a step in `job`; fails the test when it is missing. */
+function stepIndex(job: string): (needle: string | RegExp) => number {
+  return (needle) => {
+    const index =
+      typeof needle === "string" ? job.indexOf(needle) : job.search(needle);
+    expect(index, String(needle)).toBeGreaterThanOrEqual(0);
+    return index;
+  };
+}
+
 describe("CI workflows", () => {
   it("F-003 step 1 ADR-0011: ci.yml runs on pull requests and pushes to main and defines every check job", () => {
     const ci = read(join(WORKFLOWS, "ci.yml"));
@@ -118,17 +137,9 @@ describe("CI workflows", () => {
   });
 
   it("F-006 step 2 ADR-0005: the corpus-parse job sets up Java and the pinned Nextflow (pnpm nextflow, ADR 0019), runs corpus:lint then test:corpus, and uploads the report", () => {
-    const ci = read(join(WORKFLOWS, "ci.yml"));
-    const job =
-      ci.split(/^ {2}corpus-parse:\s*$/m)[1]?.split(/^ {2}[\w-]+:\s*$/m)[0] ??
-      "";
+    const job = jobOf("corpus-parse");
     expect(job).toMatch(/name: Corpus parse vs nextflow lint/);
-    const at = (needle: string | RegExp): number => {
-      const index =
-        typeof needle === "string" ? job.indexOf(needle) : job.search(needle);
-      expect(index, String(needle)).toBeGreaterThanOrEqual(0);
-      return index;
-    };
+    const at = stepIndex(job);
     const order = [
       at("uses: ./.github/actions/setup"),
       at("uses: ./.github/actions/corpus"),
@@ -149,16 +160,9 @@ describe("CI workflows", () => {
   });
 
   it("F-006 ADR-0005: the catalogue job sets up Java, caches the language server jar and fails on a catalogue diff", () => {
-    const ci = read(join(WORKFLOWS, "ci.yml"));
-    const job =
-      ci.split(/^ {2}catalogue:\s*$/m)[1]?.split(/^ {2}[\w-]+:\s*$/m)[0] ?? "";
+    const job = jobOf("catalogue");
     expect(job).toMatch(/name: Catalogue regenerates without a diff/);
-    const at = (needle: string | RegExp): number => {
-      const index =
-        typeof needle === "string" ? job.indexOf(needle) : job.search(needle);
-      expect(index, String(needle)).toBeGreaterThanOrEqual(0);
-      return index;
-    };
+    const at = stepIndex(job);
     const order = [
       at("uses: ./.github/actions/setup"),
       at(/uses: actions\/setup-java@[0-9a-f]{40}/),

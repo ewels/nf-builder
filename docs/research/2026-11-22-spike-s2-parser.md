@@ -4,7 +4,7 @@
 
 ## Answer
 
-- **Parser:** yes. The four grammars at v26.10.7, with 17 hand-ported lexer actions and one parser predicate, generate a TypeScript parser with antlr-ng 1.0.10 for the antlr4ng 3.0.16 runtime. It passes strict `tsc` without `@ts-nocheck`. It parses all 570 corpus files that `nextflow lint` 26.10.7 accepts (348 scripts, 222 configs across five pipelines).
+- **Parser:** yes. The four grammars at v26.10.7, with 17 hand-ported lexer actions and one parser predicate, generate a TypeScript parser with antlr-ng 1.0.10 for the antlr4ng 3.0.16 runtime. It passes strict `tsc` without `@ts-nocheck`. It parses all 570 corpus files that `nextflow lint` 26.10.7 accepts (342 scripts and 228 configs across five pipelines).
 - **Speed:** warm parsing is fast (sarek, 275 files: 1.1 s total, p95 12 ms per file). Cold parsing is not: 15.9 s for sarek in Node, because ANTLR builds its prediction DFA on first use. QA-03 (3 s for a sarek-sized project in a worker) is at risk; see Consequences.
 - **Catalogue:** yes. `tools/spec-extract` reflects the language server jar into `catalogue/script.json` and `config.json`, deterministically. It matches the docs except for explained gaps.
 
@@ -33,7 +33,7 @@ The three fixture differences are files lint rejects after parsing, which a gram
 
 ## Speed
 
-The parse runs in two stages, as upstream does (`ScriptAstBuilder.java:169-197`): SLL with a bail-out error strategy, then full LL with error reporting. At first 199 of 275 sarek files failed stage 1, because SLL can't see the caller of `sep : (NL|SEMI)+` (a blank line before `emit:` makes it keep looping) or decide `QUESTION?` in `type` (a ternary after `instanceof`). Upstream's Java parser falls back on the same files. Stage 1 now predicts the decisions of `sep` and `type` with full LL and everything else with SLL; trees equal pure LL on every corpus file checked.
+The parse runs in two stages, as upstream does (`ScriptAstBuilder.java:169-197`): SLL with a bail-out error strategy, then full LL with error reporting. At first 199 of 275 sarek files failed stage 1, because SLL can't see the caller of `sep : (NL|SEMI)+` (a blank line before `emit:` makes it keep looping) or decide `QUESTION?` in `type` (a ternary after `instanceof`). Upstream's Java parser falls back on the same files. Stage 1 now predicts the decisions of `sep` and `type` with full LL and everything else with SLL. The corpus harness checks that its trees equal pure LL for every file of fetchngs, both rnaseq-nf branches and the fixtures, and a fixed sample of 20 sarek files; a one-off check during research covered all 342 scripts and 228 configs.
 
 | Sarek, Node 22, 4 × Xeon 2.1 GHz | Before | After |
 |---|---|---|
@@ -54,16 +54,18 @@ The remaining cold time is DFA construction for real ambiguities in the grammar 
 
 Also generated: 7 agent directives, 10 constants, 15 functions, 4 namespaces, 16 types, process input and output qualifiers, and 42 config scopes (569 nodes). Operator names repeat across the `Channel` and `Value` receivers (`map`, `combine`, `flatMap`, `mix`, `subscribe`, `view`).
 
+Causes of the other gaps, from the docs at the same commit: `fromSRA` is marked deprecated in 26.04 (`stdlib-namespaces/channel.mdx:198-202`) and nf-lang 26.10.4 no longer models it; `groupBy` is a typed operator documented in `stdlib-types/channel.mdx:72` but not in the legacy `operator.mdx`; `nextflow.preview.recursion` is modelled by nf-lang but missing from `feature-flags.mdx`.
+
 ## Limits
 
 - One error per file, as upstream; message wording is matched for lexer errors only.
-- Columns on lines with characters outside the Basic Multilingual Plane count code points, where Java counts UTF-16 units (untested).
+- Columns count code points, as nf-lang does (it reads input with `CharStreams.fromReader`): `nextflow lint` and the parser both report 2:16 for `v = "𝐀𝐀" + = 1` on the second line of a workflow block.
 - Timings are raw parse in Node, outside a worker and without the model.
 
 ## Consequences
 
 - F-101: steps 2 and 3 are delivered here. nf-lang has no lexer tests, so "ported lexer cases" means the parse cases of `ScriptAstBuilderTest` and `ConfigAstBuilderTest` (recorded when F-101 lands).
-- F-102: comments are on the hidden channel and newlines are `NL` tokens; the AST attaches them.
+- F-102: comments are `NL` tokens on the default channel (`ScriptLexer.g4:855-867`), so the AST builder must recover their text from those tokens to attach them.
 - F-104: the pre-scanner can rely on the parser accepting every corpus file lint accepts.
 - F-109: the catalogue exists; F-109 adds `palette.yaml` and on-demand regeneration.
 - F-113: QA-03 needs cold-start work: parse only open or changed files first, warm the parser on a small representative file at worker start, cache parse results, or move to a faster prediction strategy. Measure in a worker before choosing.
