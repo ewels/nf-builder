@@ -645,6 +645,25 @@
       "notes": ""
     },
     {
+      "id": "F-210",
+      "milestone": "M2",
+      "description": "Files view: the project tree in the left column's Files tab, with new file, new folder and upload actions; registry module folders tagged `registry`; files that failed to parse badged; dropping files or a zip adds them.",
+      "spec": [
+        "UX-10",
+        "UX-16"
+      ],
+      "depends_on": [
+        "F-202",
+        "F-204"
+      ],
+      "steps": [
+        "Create a file and a folder from the Files view, upload a file, and drop a zip: all appear in the tree and persist after reload",
+        "A registry module folder shows the `registry` tag and a file with a syntax error shows an error badge"
+      ],
+      "passes": false,
+      "notes": "Added 2026-11-22 (F-204 PR, scope-change): UX-16 had no owning feature; F-301 and F-403 rely on the Files view."
+    },
+    {
       "id": "F-301",
       "milestone": "M3",
       "description": "Add from palette by drag and drop or keyboard; a new process goes in its own module file with the flag and an include, plus a call in the current workflow.",
