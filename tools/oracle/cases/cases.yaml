@@ -299,3 +299,16 @@ cases:
       - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/reference/syntax.mdx
     lint: { expect: ok, clean: true }
     run: { expect: ok, output: ["greeting.txt"] }
+  - id: template-samplesheet-multiqc
+    dir: ../../../packages/lang-2610/templates/samplesheet-multiqc
+    about: The Samplesheet to MultiQC template, a samplesheet channel of records, typed FASTQC and MULTIQC with eval versions on a topic, lints with no warning and stub-runs with the test profile and tool shims.
+    spec: [F-203, LA-02, LA-11, LA-12, LA-40, LA-41, LA-42]
+    sources:
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/process-typed.mdx
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/tutorials/topic-channels.mdx
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/tutorials/static-types.mdx
+    lint: { expect: ok, clean: true }
+    run:
+      expect: ok
+      args: ["-stub", "-profile", "test"]
+      tools: [fastqc, multiqc]

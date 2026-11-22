@@ -9,3 +9,6 @@ templates:
   - id: hello-world
     name: Hello world
     description: A typed pipeline with one process that writes a greeting to a file.
+  - id: samplesheet-multiqc
+    name: Samplesheet to MultiQC
+    description: Reads a samplesheet, runs FastQC on each sample and summarises the results in one MultiQC report.

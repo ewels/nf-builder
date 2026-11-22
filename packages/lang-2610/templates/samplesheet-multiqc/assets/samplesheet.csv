@@ -1,0 +1,3 @@
+id,fastq_1,fastq_2
+sample_a,assets/test/sample_a_1.fastq,assets/test/sample_a_2.fastq
+sample_b,assets/test/sample_b_1.fastq,

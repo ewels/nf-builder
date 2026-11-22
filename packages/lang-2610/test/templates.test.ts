@@ -8,9 +8,12 @@ import { describe, expect, it } from "vitest";
 import { pack } from "../src/index";
 import { docOf, expectedTags } from "./templates/doc-tags";
 
+const PROCESS_WITH_TOPICS = ["samplesheet-multiqc"];
+
 const EXPECTED = [
   { id: "blank", name: "Blank" },
   { id: "hello-world", name: "Hello world" },
+  { id: "samplesheet-multiqc", name: "Samplesheet to MultiQC" },
 ] as const;
 
 async function all(): Promise<{ set: TemplateSet; list: ProjectTemplate[] }> {
@@ -180,5 +183,66 @@ describe("F-203 the 26.10 templates", () => {
       }
       expect(described.map(([n]) => n).sort(), t.id).toEqual([...names].sort());
     }
+  });
+
+  it("F-203 LA-42: every Samplesheet to MultiQC process has a topic: section emitting to 'versions'", async () => {
+    for (const { t, path, ast } of await scripts()) {
+      if (!PROCESS_WITH_TOPICS.includes(t.id)) continue;
+      for (const item of ast.body) {
+        if (item.kind !== "Process") continue;
+        const id = `${t.id}/${path}`;
+        expect(item.typed, id).toBe(true);
+        const topics = item.typed ? (item.topics?.items ?? []) : [];
+        expect(topics.length, id).toBeGreaterThan(0);
+        for (const topic of topics) {
+          const text = file(t, path)?.slice(topic.range.start, topic.range.end);
+          expect(text, id).toMatch(/^tuple\(.*\) >> 'versions'$/s);
+          expect(text, id).toContain("eval(");
+        }
+      }
+    }
+  });
+
+  it("F-203 LA-50: a record or tuple process input is documented with one @param per field or component", async () => {
+    const { parseScript } = await pack.loadParser();
+    const ast = parseScript(
+      `nextflow.enable.types = true
+
+/**
+ * Text.
+ *
+ * @param id a
+ * @param reads b
+ * @param extra c
+ * @param left d
+ * @param right e
+ * @return f
+ */
+process P {
+    input:
+    record(id: String, reads: Path)
+    extra: String
+    tuple(left: String, right: Path)
+
+    output:
+    file('x')
+
+    script:
+    """
+    true
+    """
+}
+`,
+    ).ast;
+    const proc = ast?.body.find((i) => i.kind === "Process");
+    if (proc?.kind !== "Process") throw new Error("no process");
+    expect(expectedTags(proc).params).toEqual([
+      "id",
+      "reads",
+      "extra",
+      "left",
+      "right",
+    ]);
+    expect(docOf(proc)?.params).toEqual(expectedTags(proc).params);
   });
 });

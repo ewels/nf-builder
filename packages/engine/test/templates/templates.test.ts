@@ -12,6 +12,16 @@ import { diagnoseFiles } from "../diagnostics/open";
 
 const version = installedPackVersions()[0] as string;
 
+const SAMPLESHEET_NODES = [
+  { id: "main.nf#/:params", kind: "params", typed: null },
+  { id: "main.nf#/fastqc", kind: "call", typed: true },
+  { id: "main.nf#/reports", kind: "chain", typed: null },
+  { id: "main.nf#/multiqc_report", kind: "call", typed: true },
+  { id: "main.nf#/channel.topic@1", kind: "factory", typed: null },
+  { id: "main.nf#/versions", kind: "chain", typed: null },
+  { id: "main.nf#/:output", kind: "output", typed: null },
+];
+
 /** The expected nodes of each template's entry workflow; e2e/templates.ts repeats these for the canvas (F-203 task 8). */
 const TEMPLATE_NODES: Record<
   string,
@@ -24,6 +34,7 @@ const TEMPLATE_NODES: Record<
     { id: "main.nf#/greeting_file", kind: "call", typed: true },
     { id: "main.nf#/:output", kind: "output", typed: null },
   ],
+  "samplesheet-multiqc": SAMPLESHEET_NODES,
 };
 
 async function everyTemplate() {
@@ -65,6 +76,30 @@ describe("F-203 engine templates", () => {
         expect(n.callee.typed, `${t.id} ${n.id}`).toBe(true);
       }
     }
+  });
+
+  it("F-203 LA-41: Samplesheet to MultiQC's FASTQC takes and emits records", async () => {
+    const pack = installedPacks[0];
+    if (!pack) throw new Error("no pack");
+    const catalogue = await pack.loadCatalogue();
+    const { model } = await diagnoseFiles(
+      await templateFiles(version, "samplesheet-multiqc"),
+    );
+    const projector = createProjector(model, catalogue.script, {
+      legacyOperators: pack.legacyOperators,
+    });
+    const nodes = projector.project("main.nf", null)?.nodes ?? [];
+    const call = nodes.find((n) => n.id === "main.nf#/fastqc") as CallNode;
+    expect(call.inputs[0]?.label).toBe("record(id, fastq_1, fastq_2)");
+    expect(call.outputs[0]?.type).toEqual({
+      dataflow: "channel",
+      element: { name: "Record", args: [], nullable: false },
+    });
+    const params = nodes.find((n) => n.kind === "params");
+    expect(params?.outputs[0]?.type).toEqual({
+      dataflow: "channel",
+      element: { name: "Sample", args: [], nullable: false },
+    });
   });
 
   it("F-203 LA-44: every chain step in the templates is a known typed operator", async () => {

@@ -42,10 +42,16 @@ export function expectedTags(node: ProcessDef | WorkflowDef): {
   if (node.kind === "Process") {
     const inputs = node.typed ? (node.inputs?.items ?? []) : [];
     return {
+      // A plain input is one @param by its name. A record or tuple input is one @param per field or component,
+      // because each is a variable in the script.
       params: inputs.flatMap((i) =>
-        i.kind === "TypedName" ? [i.name.name] : [],
+        i.kind === "TypedName"
+          ? [i.name.name]
+          : i.kind === "RecordInput"
+            ? i.fields.map((f) => f.name.name)
+            : i.components.map((c) => c.name.name),
       ),
-      returns: node.outputs?.items.length ?? 0, // record and tuple inputs are not handled: no template has one yet
+      returns: node.outputs?.items.length ?? 0,
     };
   }
   return {

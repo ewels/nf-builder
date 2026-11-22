@@ -49,6 +49,53 @@
           "text": "{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"Pipeline parameters\",\n  \"description\": \"The parameters of the Hello world pipeline.\",\n  \"type\": \"object\",\n  \"$defs\": {\n    \"greeting_options\": {\n      \"title\": \"Greeting options\",\n      \"type\": \"object\",\n      \"description\": \"What the pipeline writes.\",\n      \"properties\": {\n        \"greeting\": {\n          \"type\": \"string\",\n          \"default\": \"Hello, world!\",\n          \"description\": \"The greeting to write to the output file.\"\n        }\n      }\n    }\n  },\n  \"allOf\": [{ \"$ref\": \"#/$defs/greeting_options\" }]\n}\n"
         }
       ]
+    },
+    {
+      "id": "samplesheet-multiqc",
+      "name": "Samplesheet to MultiQC",
+      "description": "Reads a samplesheet, runs FastQC on each sample and summarises the results in one MultiQC report.",
+      "files": [
+        {
+          "path": "README.md",
+          "text": "# Samplesheet to MultiQC\n\nA typed pipeline that reads a samplesheet, runs FastQC on each sample and summarises the results in one MultiQC report.\n\n- `main.nf` holds the `Sample` record, the `params` block, the entry workflow and the `output` block.\n- `modules/local/fastqc/main.nf` and `modules/local/multiqc/main.nf` hold the two processes. Each reports its tool version to the `versions` topic.\n- `assets/samplesheet.csv` and `assets/test/` hold a tiny test samplesheet and its reads.\n- The `test` profile in `nextflow.config` sets `params.input` to that samplesheet.\n\nRun it with `nextflow run . -profile test`, or pass your own samplesheet with `--input`. Results appear in `results/`.\n"
+        },
+        {
+          "path": "assets/samplesheet.csv",
+          "text": "id,fastq_1,fastq_2\nsample_a,assets/test/sample_a_1.fastq,assets/test/sample_a_2.fastq\nsample_b,assets/test/sample_b_1.fastq,\n"
+        },
+        {
+          "path": "assets/test/sample_a_1.fastq",
+          "text": "@read1\nACGTACGTACGTACGTACGT\n+\nIIIIIIIIIIIIIIIIIIII\n@read2\nTTGCATTGCATTGCATTGCA\n+\nIIIIIIIIIIIIIIIIIIII\n"
+        },
+        {
+          "path": "assets/test/sample_a_2.fastq",
+          "text": "@read1\nTGCATGCATGCATGCATGCA\n+\nIIIIIIIIIIIIIIIIIIII\n@read2\nAACGTAACGTAACGTAACGT\n+\nIIIIIIIIIIIIIIIIIIII\n"
+        },
+        {
+          "path": "assets/test/sample_b_1.fastq",
+          "text": "@read1\nGGCCGGCCGGCCGGCCGGCC\n+\nIIIIIIIIIIIIIIIIIIII\n@read2\nCCGGCCGGCCGGCCGGCCGG\n+\nIIIIIIIIIIIIIIIIIIII\n"
+        },
+        {
+          "path": "main.nf",
+          "text": "nextflow.enable.types = true\n\ninclude { FASTQC } from './modules/local/fastqc/main.nf'\ninclude { MULTIQC } from './modules/local/multiqc/main.nf'\n\n/**\n * One row of the samplesheet.\n */\nrecord Sample {\n    id: String\n    fastq_1: Path\n    fastq_2: Path?\n}\n\nparams {\n    // The samplesheet: a CSV file with the columns id, fastq_1 and fastq_2 (fastq_2 may be empty).\n    input: Channel<Sample>\n}\n\n/**\n * Checks the quality of each sample's reads with FastQC and summarises all samples in one MultiQC report.\n */\nworkflow {\n\n    main:\n    fastqc = FASTQC(params.input)\n    reports = fastqc.flatMap { result -> result.reports }.collect()\n    multiqc_report = MULTIQC(reports)\n    versions = channel.topic('versions').unique()\n\n    publish:\n    fastqc = fastqc\n    multiqc_report = multiqc_report\n    versions = versions\n}\n\noutput {\n    fastqc {\n        path 'fastqc'\n    }\n    multiqc_report {\n        path 'multiqc'\n    }\n    versions {\n        path 'pipeline_info'\n    }\n}\n"
+        },
+        {
+          "path": "modules/local/fastqc/main.nf",
+          "text": "nextflow.enable.types = true\n\n/**\n * Runs FastQC on the reads of one sample.\n *\n * @param id The sample name.\n * @param fastq_1 The first reads file.\n * @param fastq_2 The second reads file, when the sample is paired-end.\n * @return The sample name and its FastQC reports.\n */\nprocess FASTQC {\n    tag id\n    conda 'bioconda::fastqc=0.13.0'\n\n    input:\n    record(\n        id: String,\n        fastq_1: Path,\n        fastq_2: Path?\n    )\n\n    output:\n    record(\n        id: id,\n        reports: files('*_fastqc.{html,zip}'),\n    )\n\n    topic:\n    tuple('fastqc', eval('fastqc --version | sed \"s/FastQC v//\"')) >> 'versions'\n\n    script:\n    \"\"\"\n    fastqc --quiet ${fastq_1.name} ${fastq_2?.name ?: ''}\n    \"\"\"\n\n    stub:\n    \"\"\"\n    touch ${id}_fastqc.html ${id}_fastqc.zip\n    \"\"\"\n}\n"
+        },
+        {
+          "path": "modules/local/multiqc/main.nf",
+          "text": "nextflow.enable.types = true\n\n/**\n * Summarises the FastQC reports of all samples in one MultiQC report.\n *\n * @param reports The FastQC reports of every sample.\n * @return The MultiQC report.\n */\nprocess MULTIQC {\n    conda 'bioconda::multiqc=1.35'\n\n    input:\n    reports: Bag<Path>\n\n    output:\n    file('multiqc_report.html')\n\n    topic:\n    tuple('multiqc', eval('multiqc --version | sed \"s/.* //g\"')) >> 'versions'\n\n    script:\n    \"\"\"\n    multiqc --force --filename multiqc_report.html .\n    \"\"\"\n\n    stub:\n    \"\"\"\n    touch multiqc_report.html\n    \"\"\"\n}\n"
+        },
+        {
+          "path": "nextflow.config",
+          "text": "manifest {\n    description = 'Quality control of sequencing reads with FastQC and MultiQC'\n    nextflowVersion = '>=26.10.6'\n}\n\nprofiles {\n    test {\n        params.input = \"${projectDir}/assets/samplesheet.csv\"\n    }\n}\n"
+        },
+        {
+          "path": "nextflow_schema.json",
+          "text": "{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"Pipeline parameters\",\n  \"description\": \"The parameters of the Samplesheet to MultiQC pipeline.\",\n  \"type\": \"object\",\n  \"$defs\": {\n    \"input_output_options\": {\n      \"title\": \"Input/output options\",\n      \"type\": \"object\",\n      \"description\": \"Where the pipeline finds its reads.\",\n      \"required\": [\"input\"],\n      \"properties\": {\n        \"input\": {\n          \"type\": \"string\",\n          \"format\": \"file-path\",\n          \"exists\": true,\n          \"mimetype\": \"text/csv\",\n          \"pattern\": \"^\\\\S+\\\\.csv$\",\n          \"description\": \"The samplesheet: a CSV file with the columns id, fastq_1 and fastq_2. The fastq_2 cell may be empty for single-end reads.\"\n        }\n      }\n    }\n  },\n  \"allOf\": [{ \"$ref\": \"#/$defs/input_output_options\" }]\n}\n"
+        }
+      ]
     }
   ]
 }
