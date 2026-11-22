@@ -21,6 +21,10 @@ To reproduce with the pinned dist: `NXF_OFFLINE=true .cache/nextflow/26.10.7/nex
 | 9 | Nextflow docs | `nextflow.preview.recursion` is modelled by nf-lang but missing from `feature-flags.mdx` | F-006 (spike S2) | no |
 | 10 | Nextflow docs | `groupBy` is documented as a typed operator but missing from the legacy `operator.mdx` | F-006 (spike S2) | no |
 | 11 | nf-lang formatter | `lint -format` drops a directive's parentheses when a comment wraps its arguments, so the result fails lint | F-110 | no |
+| 12 | Nextflow lint | An invalid registry module reference aborts lint instead of giving a diagnostic at the include | F-105 plan | no |
+| 13 | Nextflow lint | A registry module missing `meta.yml` aborts lint ("corrupted") instead of giving a diagnostic | F-105 plan | no |
+| 14 | nf-lang config resolver | `includeConfig` of a directory passes lint; `nextflow run` then fails to parse the config | F-105 plan | no |
+| 15 | Nextflow lint | Lint downloads a missing registry module into the project even with `NXF_OFFLINE=true` (may be intended) | F-105 plan | no |
 
 ## Details
 
@@ -174,3 +178,51 @@ process HELLO {
 - **What happens:** the input passes `nextflow lint`; `lint -format` prints `memory`, the comment and `2.GB` on separate lines without the parentheses, plus a whitespace-only line, and the result fails lint.
 - **Expected:** keep the parentheses when the arguments wrap.
 - **nf-builder:** keeps them; known difference `directive-comment` (F-110).
+
+### 12. An invalid module reference aborts lint
+
+```nextflow
+include { X } from 'Bad'
+
+workflow {
+    X()
+}
+```
+
+- **What happens:** `nextflow lint .` stops with `ERROR ~ Failed to resolve remote module Bad: Invalid module reference: 'Bad'. Expected format: ...` and lints nothing else.
+- **Expected:** an error diagnostic at the include (1:1) with that message, and the rest of the project linted.
+- **nf-builder:** reports nf-lang's `ModuleReference` message at the include (F-105).
+
+### 13. A registry module without `meta.yml` aborts lint
+
+`main.nf`:
+
+```nextflow
+include { NOMETA } from 'nf-core/nometa'
+
+workflow {
+    NOMETA()
+}
+```
+
+with `modules/nf-core/nometa/main.nf` holding a process `NOMETA` and no `meta.yml`.
+
+- **What happens:** lint stops with `ERROR ~ Failed to resolve remote module nf-core/nometa: Module nf-core/nometa is corrupted (missing required files). Please remove and reinstall.`
+- **Expected:** a diagnostic at the include naming the missing `meta.yml`.
+- **nf-builder:** reports one (F-105).
+
+### 14. `includeConfig` of a directory passes lint but fails at run time
+
+`nextflow.config`: `includeConfig 'conf/sub'`, where `conf/sub/` is a directory; `main.nf` has `workflow { println('hi') }`.
+
+- **What happens:** `nextflow lint .` reports no errors; `nextflow run main.nf` fails with `ERROR ~ Unable to parse config file: '.../nextflow.config'`.
+- **Expected:** lint reports "Invalid include source" for a target that isn't a file (`config/control/ResolveIncludeVisitor.java` checks existence only).
+- **nf-builder:** treats a directory as a missing target (F-105).
+
+### 15. Lint installs a missing registry module even when offline
+
+`main.nf`: `include { FASTQC } from 'nf-core/fastqc'` and a workflow calling it, with no `modules/` directory.
+
+- **What happens:** with `NXF_OFFLINE=true`, `nextflow lint .` downloads the module into `modules/nf-core/fastqc/` and reports only a warning. Linting changes the project, and the offline setting is ignored.
+- **Expected:** possibly intended (lint resolves modules as `run` does), but offline mode should not reach the registry, and a read-only check arguably shouldn't write files. Raise as a question rather than a bug.
+- **nf-builder:** reports a missing registry module as a diagnostic naming `modules/nf-core/fastqc/main.nf` (F-105).
