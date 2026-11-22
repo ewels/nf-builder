@@ -9,7 +9,7 @@ Spike S5 (F-010, ADR 0013, FI-54) must show that nf-metro renders SVG in a Web W
 
 ## Decision
 
-- Spike pages live in `spikes/<id>/`. They are outside the pnpm workspace, not built by `pnpm build`, and not deployed. Only `e2e/` and `test/` import them. A spike folder is deleted by the feature that ships the real thing (FI-54 for S5).
+- Spike S5 lives in `spikes/s5-nf-metro/`, outside the pnpm workspace, not built by `pnpm build` and not deployed; only `e2e/` and `test/` import it. Other spikes that needn't be deployed may use `spikes/<id>/` the same way (a deployed probe, like S4's, follows ADR 0023 instead). A spike folder is deleted by the feature that ships the real thing (FI-54 for S5).
 - `spikes/s5-nf-metro/assets.json` pins every file the page serves (Pyodide 314.0.8 core, five wheels, nf-metro 2.1.0 examples) by URL and sha256. `prepare.ts` fetches them into `.cache/spikes/s5/` and renders the CLI references with nf-metro 2.1.0 in a venv there. It needs Python 3.11+.
 - Build-time hosts (ADR 0017): `cdn.jsdelivr.net`, `pypi.org`, `files.pythonhosted.org`, `raw.githubusercontent.com`. At runtime the page contacts only its own origin. ADR 0002 is unchanged.
 - The spike's `vite preview` (port 4175) sends netlify.toml's headers with `'wasm-unsafe-eval'` added to `script-src`. netlify.toml is unchanged until a shipped feature needs it.
@@ -19,7 +19,7 @@ Spike S5 (F-010, ADR 0013, FI-54) must show that nf-metro renders SVG in a Web W
 ## Consequences
 
 - No production change, no new npm dependency, no runtime host.
-- Each CI run fetches about 17 MB and installs the nf-metro CLI, until FI-54's test replaces the spike.
+- Each CI Chromium e2e run fetches about 17 MB of browser assets and about 50 MB of CLI wheels (PyAV alone is 35 MB), taking about 15 s on a cold cache, until FI-54's test replaces the spike.
 - The licences of fetched files (Pyodide MPL-2.0, nf-metro MIT, Inter OFL-1.1, lark MIT, drawsvg MIT, networkx BSD-3-Clause, Pillow MIT-CMU) become obligations only when FI-54 ships them, with `docs/licences.md` entries.
 
 ## Alternatives
