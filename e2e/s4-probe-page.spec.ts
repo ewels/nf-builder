@@ -36,19 +36,19 @@ test("F-008 ADR-0009: the S4 probe page loads under the site CSP with no violati
   expect(watch.consoleErrors).toEqual([]);
 });
 
-test("F-008 QA-30: under the site CSP the probe page reports codeload.github.com as blocked by CSP", async ({
+test("F-008 QA-30: under the site CSP the probe page reports github.com as blocked by CSP", async ({
   page,
 }) => {
   const watch = await watchForCspViolations(page);
   await openProbe(page);
-  const target = S4_TARGETS.find((t) => t.id === "codeload-zip");
-  if (!target) throw new Error("codeload-zip target missing");
+  const target = S4_TARGETS.find((t) => t.id === "github-archive");
+  if (!target) throw new Error("github-archive target missing");
   const [result] = await runInPage(page, [{ id: target.id, url: target.url }]);
   expect(result).toMatchObject({
     outcome: "csp-blocked",
     cspDirective: "connect-src",
   });
   expect(await watch.violations()).toContain(
-    "connect-src https://codeload.github.com/nf-core/fetchngs/zip/refs/tags/1.13.0",
+    "connect-src https://github.com/nf-core/fetchngs/archive/refs/tags/1.13.0.zip",
   );
 });

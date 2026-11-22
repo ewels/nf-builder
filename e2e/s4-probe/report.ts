@@ -1,7 +1,7 @@
 import type { ProbeTarget } from "./targets.ts";
 
 export type TargetInput = { id: string; url: string };
-export type BrowserOutcome = "readable" | "failed" | "timeout" | "csp-blocked";
+type BrowserOutcome = "readable" | "failed" | "timeout" | "csp-blocked";
 export type BrowserResult = {
   id: string;
   url: string;
@@ -49,7 +49,7 @@ export type ServerResult = {
   preflight: Preflight;
   error?: string;
 };
-export type Verdict =
+type Verdict =
   | "allowed"
   | "blocked-by-cors"
   | "blocked-by-csp"
@@ -115,11 +115,7 @@ export function pickHeaders(
 const ACAO = "access-control-allow-origin";
 
 function hostOf(url: string): string {
-  try {
-    return new URL(url).host;
-  } catch {
-    return url;
-  }
+  return new URL(url).host;
 }
 
 /** Verdict for one target from what the page saw and what the server sent. */
@@ -240,8 +236,9 @@ export function matchTemplate(
   return best && { template: best.template, operationId: best.operationId };
 }
 
+/** One line per cell: keeps the first line of a multi-line message. */
 function cell(text: string): string {
-  return text.replaceAll("|", "\\|");
+  return (text.trim().split("\n")[0] ?? "").trim().replaceAll("|", "\\|");
 }
 
 function hopsText(server: ServerResult): string {
@@ -273,7 +270,7 @@ function browserText(browser: BrowserResult): string {
   return `${browser.outcome}${detail}`;
 }
 
-/** One heading line plus a table: Target | Verdict | Browser | Server hops | Preflight | ms. */
+/** One heading line plus a table: Target | Verdict | Browser | Server hops | Preflight (Authorization) | ms. */
 export function toMarkdown(run: ProbeRun): string {
   const deployed = run.deployed
     ? `commit ${run.deployed.commit}, context ${run.deployed.context}`
@@ -281,7 +278,7 @@ export function toMarkdown(run: ProbeRun): string {
   const lines = [
     `## S4 probe: ${run.browserName} ${run.browserVersion}, ${run.pageUrl}, ${deployed}, ${run.environment}, ${run.probedAt}`,
     "",
-    "| Target | Verdict | Browser | Server hops (status, ACAO, Origin sent) | Preflight | ms |",
+    "| Target | Verdict | Browser | Server hops (status, ACAO, Origin sent) | Preflight (Authorization) | ms |",
     "|---|---|---|---|---|---|",
   ];
   for (const record of run.records) {

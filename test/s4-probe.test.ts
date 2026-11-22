@@ -332,7 +332,15 @@ describe("S4 OpenAPI and targets", () => {
         },
       ],
     };
+    const [, secondRecord] = run.records;
+    if (!secondRecord) throw new Error("record missing");
+    secondRecord.server.preflight = {
+      error: "apiRequestContext.fetch: a | b\nCall log:\n  - sending",
+    };
     const md = toMarkdown(run);
+    expect(md).toContain("error: apiRequestContext.fetch: a \\| b |");
+    expect(md).not.toContain("Call log");
+    expect(md).toContain("Preflight (Authorization)");
     expect(md).toContain("abc1234");
     expect(md).toContain("chromium");
     expect(md).toContain(

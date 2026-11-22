@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { appendFileSync, writeFileSync } from "node:fs";
-import { expect, test } from "@playwright/test";
-import { openProbe, PROBE_TITLE, runInPage } from "./page.ts";
+import { expect, type TestInfo, test } from "@playwright/test";
+import { openProbe, PROBE_PATH, PROBE_TITLE, runInPage } from "./page.ts";
 import {
   type BrowserResult,
   classify,
@@ -25,38 +25,47 @@ function summary(markdown: string) {
   }
 }
 
-test.describe("F-008 S4 probe against the deployed site", () => {
-  // Measure CORS, not our own CSP (ADR 0023).
-  test.use({ bypassCSP: true });
+async function save(
+  testInfo: TestInfo,
+  name: string,
+  text: string,
+  contentType: string,
+) {
+  const path = testInfo.outputPath(name);
+  writeFileSync(path, text);
+  await testInfo.attach(name, { path, contentType });
+}
 
+test.describe("F-008 S4 probe against the deployed site", () => {
   test("F-008 step 1 ADR-0009: the deployed probe page records status, CORS headers and timing for every registry, raw.githubusercontent.com and codeload.github.com target", async ({
     page,
     request,
     browser,
     browserName,
   }, testInfo) => {
-    // Console and failed-request messages, keyed by the target they belong to.
-    const messages = new Map<string, string[]>();
-    const note = (url: string, text: string) => {
-      for (const target of S4_TARGETS) {
-        if (url.startsWith(target.url.split("?")[0] ?? target.url)) {
-          messages.set(target.id, [...(messages.get(target.id) ?? []), text]);
-        }
-      }
-    };
-    page.on("console", (m) => {
-      const text = m.text();
-      for (const target of S4_TARGETS) {
-        if (text.includes(new URL(target.url).origin)) {
-          messages.set(target.id, [
-            ...(messages.get(target.id) ?? []),
-            `${m.type()}: ${text}`,
-          ]);
-        }
-      }
+    // Measure CORS, not our own CSP (ADR 0023): drop the CSP header from the probe document only.
+    // The page keeps its origin, and this works the same in every engine (bypassCSP does not lift connect-src in WebKit).
+    await page.route(`${BASE}${PROBE_PATH}`, async (route) => {
+      const response = await route.fetch();
+      const { "content-security-policy": _csp, ...headers } =
+        response.headers();
+      await route.fulfill({ response, headers });
     });
+
+    // Targets are probed one at a time, so console and failed-request messages belong to the target in flight.
+    const messages = new Map<string, string[]>(
+      S4_TARGETS.map((t) => [t.id, []]),
+    );
+    let inFlight = "";
+    page.on("console", (m) =>
+      messages.get(inFlight)?.push(`${m.type()}: ${m.text()}`),
+    );
     page.on("requestfailed", (r) =>
-      note(r.url(), `requestfailed: ${r.failure()?.errorText ?? "unknown"}`),
+      messages
+        .get(inFlight)
+        ?.push(
+          `requestfailed: ${r.failure()?.errorText ?? "unknown"} ${r.url()}`,
+        ),
     );
 
     const versionResponse = await request.get(`${BASE}/version.json`, {
@@ -71,26 +80,26 @@ test.describe("F-008 S4 probe against the deployed site", () => {
       expect(version?.commit).toBe(process.env.S4_EXPECTED_COMMIT);
     }
 
-    await openProbe(page, BASE);
+    await openProbe(page);
     await expect(page).toHaveTitle(PROBE_TITLE);
-    const browserResults = await runInPage(page, S4_TARGETS);
-    expect(browserResults).toHaveLength(S4_TARGETS.length);
-
     const records: ProbeRecord[] = [];
-    for (const [i, target] of S4_TARGETS.entries()) {
-      const result = browserResults[i] as BrowserResult;
-      expect(result.id).toBe(target.id);
+    for (const target of S4_TARGETS) {
+      inFlight = target.id;
+      const [result] = await runInPage(page, [target]);
+      expect(result?.id).toBe(target.id);
+      const browserResult = result as BrowserResult;
       const server = await probeServer(request, target.url, BASE);
-      const { verdict, reason } = classify(result, server);
+      const { verdict, reason } = classify(browserResult, server);
       records.push({
         target,
-        browser: result,
+        browser: browserResult,
         browserMessages: messages.get(target.id) ?? [],
         server,
         verdict,
         reason,
       });
     }
+    inFlight = "";
 
     const run: ProbeRun = {
       probedAt: new Date().toISOString(),
@@ -104,18 +113,13 @@ test.describe("F-008 S4 probe against the deployed site", () => {
       records,
     };
     const markdown = toMarkdown(run);
-    const jsonPath = testInfo.outputPath("s4-probe.json");
-    const mdPath = testInfo.outputPath("s4-probe.md");
-    writeFileSync(jsonPath, `${JSON.stringify(run, null, 2)}\n`);
-    writeFileSync(mdPath, markdown);
-    await testInfo.attach("s4-probe.json", {
-      path: jsonPath,
-      contentType: "application/json",
-    });
-    await testInfo.attach("s4-probe.md", {
-      path: mdPath,
-      contentType: "text/markdown",
-    });
+    await save(
+      testInfo,
+      "s4-probe.json",
+      `${JSON.stringify(run, null, 2)}\n`,
+      "application/json",
+    );
+    await save(testInfo, "s4-probe.md", markdown, "text/markdown");
     await testInfo.attach("probe-table", {
       body: await page.screenshot({ fullPage: true }),
       contentType: "image/png",
@@ -142,12 +146,20 @@ test.describe("F-008 S4 probe against the deployed site", () => {
           "error" in record.server.preflight,
         record.target.id,
       ).toBe(true);
-      // The bypass worked: our own CSP must never be what blocks a target.
+      // The CSP strip worked: our own CSP must never be what blocks a target.
       expect(record.verdict, record.target.id).not.toBe("blocked-by-csp");
     }
     const control = records.find((r) => r.target.id === "raw-pipeline-file");
     expect(control?.verdict).toBe("allowed");
     expect(control?.browser.status).toBe(200);
+    // A readable target carries no CORS error from another target.
+    expect(
+      control?.browserMessages.filter((m) => /cors|blocked/i.test(m)),
+    ).toEqual([]);
+    // Negative control: github.com sends no CORS headers.
+    expect(
+      records.find((r) => r.target.id === "github-archive")?.verdict,
+    ).not.toBe("allowed");
   });
 
   test("F-008 step 2 ADR-0009 @openapi: every registry endpoint the probe calls is a GET operation in the live OpenAPI document at registry.nextflow.io/openapi/", async ({
@@ -188,12 +200,12 @@ test.describe("F-008 S4 probe against the deployed site", () => {
       versions: versions.split(/\s+/),
       matches,
     };
-    const path = testInfo.outputPath("openapi.json");
-    writeFileSync(path, `${JSON.stringify(evidence, null, 2)}\n`);
-    await testInfo.attach("openapi.json", {
-      path,
-      contentType: "application/json",
-    });
+    await save(
+      testInfo,
+      "openapi.json",
+      `${JSON.stringify(evidence, null, 2)}\n`,
+      "application/json",
+    );
     summary(
       `## S4 OpenAPI check\n\nRegistry OpenAPI ${version} (sha256 ${evidence.sha256}), ${matches.length} endpoints matched.\n`,
     );

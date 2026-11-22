@@ -9,8 +9,9 @@ import {
 
 const MAX_HOPS = 5;
 const TIMEOUT_MS = 20_000;
+// First line only: Playwright appends a call log.
 const message = (error: unknown) =>
-  error instanceof Error ? error.message : String(error);
+  (error instanceof Error ? error.message : String(error)).split("\n")[0] ?? "";
 
 async function preflight(
   request: APIRequestContext,
@@ -79,6 +80,6 @@ export async function probeServer(
   return {
     hops,
     preflight: await preflight(request, url, pageOrigin),
-    ...(error ? { error } : {}),
+    error,
   };
 }

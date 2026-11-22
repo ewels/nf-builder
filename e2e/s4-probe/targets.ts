@@ -1,4 +1,4 @@
-export type TargetGroup =
+type TargetGroup =
   | "registry"
   | "raw"
   | "codeload"

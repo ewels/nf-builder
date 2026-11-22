@@ -10,7 +10,6 @@ document.addEventListener("securitypolicyviolation", (event) => {
   });
 });
 
-const pause = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const round = (ms) => Math.round(ms * 10) / 10;
 
 function originOf(url) {
@@ -22,6 +21,8 @@ function originOf(url) {
 }
 
 async function probeOne(target) {
+  // Violations belong to one target: an earlier one must not label a later failure.
+  violations.length = 0;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
   const t0 = performance.now();
@@ -53,7 +54,7 @@ async function probeOne(target) {
       return { ...base, outcome: "timeout", durationMs };
     }
     // The violation event can arrive after the rejection.
-    await pause(50);
+    await new Promise((resolve) => setTimeout(resolve, 50));
     const origin = originOf(target.url);
     const violation = violations.find((v) => originOf(v.blockedURI) === origin);
     if (violation) {
@@ -77,7 +78,6 @@ function cell(text) {
 }
 
 async function run(targets) {
-  document.body.dataset.state = "running";
   const body = document.querySelector("#probe-results tbody");
   const results = [];
   for (const target of targets) {
@@ -99,4 +99,3 @@ async function run(targets) {
 }
 
 window.s4Probe = { run };
-document.body.dataset.state = "ready";

@@ -11,9 +11,10 @@ Spike S4 (F-008) must show, from the deployed origin and in real browsers, wheth
 
 - **Page:** a static, host-free probe page at `apps/web/public/spike/s4/` ships with every deploy and does nothing until driven. It fetches the targets it is given, records outcome and timing, and exposes `window.s4Probe.run(targets)`.
 - **Targets in test code:** the target list lives in `e2e/s4-probe/targets.ts`, so the built bundle names no third-party host and IO-41 stays honest.
-- **CSP:** the Playwright run opens the page with `bypassCSP`, so it measures each host's CORS policy rather than our own CSP. `netlify.toml` is unchanged; nothing is loosened.
+- **CSP:** the Playwright run intercepts the probe document (`page.route`) and serves it without its `Content-Security-Policy` header, so it measures each host's CORS policy rather than our own CSP. The page keeps its origin. Playwright's `bypassCSP` was tried first and doesn't lift `connect-src` in WebKit. `netlify.toml` is unchanged; nothing is loosened.
 - **Server view:** for each target the test also makes a Node-side request with the page's `Origin`, follows redirects by hand and sends a preflight, recording status, CORS headers and the redirect chain, including for requests the browser blocks.
 - **Workflow:** a separate `S4 probe` workflow runs the deployed probe in Chromium, Firefox and WebKit, on pull requests that touch the probe (against the PR's deploy preview, after waiting for its head commit) and on `workflow_dispatch` against any `nf-builder.netlify.app` site. Artefacts are kept 90 days. CORS outcomes never fail it; only a broken probe does. It is not in AGENTS.md's "CI green" list: like Deploy check and Scope guard, it is a deliberate exception to ADR 0015's single workflow.
+- **Hosts (ADR 0017):** the probe contacts `registry.nextflow.io` (and `public-cr-prod.seqera.io` through the module download redirect), `raw.githubusercontent.com`, `codeload.github.com`, `api.github.com` and `github.com`. They are test-time hosts, not app hosts.
 - **Sandbox:** local runs against a preview are cross-checks for the registry and `raw.githubusercontent.com` only.
 - **Lifetime:** the probe stays for re-runs until F-502 builds the registry client, which deletes it.
 
@@ -25,6 +26,7 @@ Spike S4 (F-008) must show, from the deployed origin and in real browsers, wheth
 
 ## Alternatives
 
+- Playwright's `bypassCSP`: doesn't lift `connect-src` in WebKit.
 - A per-path header rule loosening the CSP for the probe: Netlify doesn't document how overlapping header rules combine, and `vite preview` can't serve per-path headers.
 - A deploy-preview-only build switched on `CONTEXT`: a second build mode to keep working.
 - A throwaway PR: leaves no way to re-run.
