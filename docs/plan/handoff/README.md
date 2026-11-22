@@ -22,6 +22,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-206 details pane | not started | [plan](plan-F-206.md). After F-205. |
 | F-207 layout sidecar | not started | [plan](plan-F-207.md). After F-205 and F-202. |
 | F-208 view modes and Code | not started | [plan](plan-F-208.md). After F-205. |
+| F-209 undo and redo | not started | [plan](plan-F-209.md). After F-202, F-205 and F-208. |
 | F-501 registry snapshot | merged, PR #29, **not passing** | Live `/registry/` passes a sampled check; waiting for the dispatched snapshot run's `workflow_run` deploy and `verify`, then flip in a PR. |
 | F-011 GitHub Pages hosting | merged, PR #37 | Live at https://ewels.github.io/nf-builder/; first `verify` passed. |
 
@@ -157,3 +158,17 @@ Next free ADR number: 0045 (0042 is F-112's, 0044 F-011's).
   - Only the refusal's problems are shown.
   - A clean buffer follows external changes, and a dirty one wins.
   - Step 3 evidence from the Node-side marker test and the budget job.
+
+### F-209 — [plan](plan-F-209.md)
+- Accept every recommendation in section 6:
+  - history lives in the engine worker's service, with `undo`, `redo`, `history` and `apply` options (amends ADR 0043's API);
+  - a group is a sequence of parts under a `group` token, not concatenated inverses, because `applyPatches` refuses two patches to one path;
+  - raw writes clear the history;
+  - limits of 100 steps and 8,000,000 units;
+  - platform shortcuts, with editors keeping their own undo;
+  - controls in the tab strip;
+  - no automatic retry after a stale refusal;
+  - the AR-23 and UX-70 wording;
+  - add F-202 to F-209's `depends_on` and F-209 to F-309's (`scope-change` label in F-209's PR);
+  - full-file byte checks, sidecar included;
+  - node moves stay outside the history.
