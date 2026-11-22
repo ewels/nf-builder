@@ -22,3 +22,4 @@ Process: [0001](0001-record-decisions-as-adrs.md). Template: [template.md](templ
 | [0016](0016-scope-guard-and-smoke.md) | Guard features.json scope in CI and keep a one-minute smoke run | Accepted (agent) |
 | [0017](0017-corpus-fetch.md) | Fetch the corpus by commit SHA with git and cache it in Actions | Accepted (agent) |
 | [0018](0018-parallel-features-and-local-nextflow.md) | Allow parallel features and local Nextflow runs | Accepted |
+| [0020](0020-parser-and-catalogue-generation.md) | Generate the parser with antlr-ng and the catalogue from the language server jar | Accepted (agent) |

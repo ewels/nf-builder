@@ -35,6 +35,7 @@ This table lists every root `package.json` script that `pnpm check` doesn't alre
 | `pnpm check:budget` and `pnpm check:hosts` | After `pnpm build`: QA-01 bundle budget and IO-41 host allow-list (ADR 0015) |
 | `pnpm test:e2e -- --grep F-123` | The feature's end-to-end test |
 | `pnpm corpus:fetch` | Fetch the pinned pipeline corpus into `.cache/corpus/` (git over github.com; second run is a no-op) |
+| `pnpm gen:grammar 26.10` | After changing `packages/lang-2610/grammar/` (vendored `.g4` or `port.ts`): regenerate `src/generated/`; `--check` only compares |
 
 Still to come, each with the feature that adds it: testing the parser against the corpus (with the parser, F-101 to F-104; run it when touching the parser, model, projection or printer), the grammar generator (F-101) and the catalogue generator (F-109). The catalogue and the Nextflow oracle tests always run in CI. Running Nextflow locally as well is allowed for a faster loop (ADR 0018): the sandbox has Java 21, and the release jar `nextflow-<version>-dist` from GitHub releases runs with `NXF_HOME=.cache/nextflow/home NXF_OFFLINE=true` (`.cache/` is git-ignored). Use 26.10.7 until F-005 pins the version and adds a wrapper; CI stays the authority.
 

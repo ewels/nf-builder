@@ -1,0 +1,27 @@
+{
+  "nextflow": {
+    "version": "26.10.7",
+    "tag": "v26.10.7",
+    "commit": "0ad848ef3c3a22824cd9eb2ca14568385867702d"
+  },
+  "nextflowDist": {
+    "url": "https://github.com/nextflow-io/nextflow/releases/download/v26.10.7/nextflow-26.10.7-dist",
+    "sha256": "c54cd4b7be058e8954180b378a8efa6d61085bc433d7d9b06ec2cad2ad6580a6"
+  },
+  "grammar": {
+    "path": "modules/nf-lang/src/main/antlr",
+    "files": {
+      "ScriptLexer.g4": "c0ec421338ddaf5fd5bc3e8405af1261d88202bf5029c61ca1181b454bfc130c",
+      "ScriptParser.g4": "b632d132a8883bff72ed4471eb7579beef708feb701855db41928a779b151cc1",
+      "ConfigLexer.g4": "2400a9e2968dfe576b6cf004d6acc67717ee025a13713fcd6f300b91acde0a92",
+      "ConfigParser.g4": "fa1a8ea9a8412919f57b14ebb75037d7c99b8049c63837110117e11d99644f69"
+    }
+  },
+  "languageServer": {
+    "tag": "v26.10.2",
+    "commit": "32601171ad37c813c988e5e33b7bc93df93a1ffe",
+    "nfLang": "26.10.4",
+    "url": "https://github.com/nextflow-io/language-server/releases/download/v26.10.2/language-server-all.jar",
+    "sha256": "20326778651c5c5e5f40a570c2275d1f520419941624386a2b1a111f1dfa4b26"
+  }
+}
