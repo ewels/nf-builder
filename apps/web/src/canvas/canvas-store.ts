@@ -42,6 +42,8 @@ export type CanvasSource = "project" | "unsaved";
 
 export interface WorkspaceState {
   readonly source: CanvasSource | null;
+  /** Counts the projects shown; a command sent from an older session never reaches the engine (ADR 0004, IO-01). */
+  readonly session: number;
   readonly summary: ProjectSummary | null;
   readonly tabs: readonly WorkflowTab[];
   readonly activeTab: string | null;
@@ -68,8 +70,11 @@ export interface WorkspaceActions {
   selectTab(id: string): Promise<void>;
   setMode(tabId: string, mode: ViewMode): void;
   setPortLabels(value: boolean): void;
-  /** The single UI path for edit commands: sends `command` at the current revision; the change then reaches `changed`. */
-  apply(command: EditCommand): Promise<ApplyOutcome>;
+  /**
+   * The single UI path for edit commands: sends `command` at the current revision; the change then reaches `changed`.
+   * With a `session`, a command from a project that is no longer shown is refused without calling the engine.
+   */
+  apply(command: EditCommand, session?: number): Promise<ApplyOutcome>;
 }
 
 /** The workflow a project opens with: main.nf's entry, else the first entry workflow, else the first named one. */
@@ -144,6 +149,7 @@ export function createCanvasStore(
 
     return {
       source: null,
+      session: 0,
       summary: null,
       tabs: [],
       activeTab: null,
@@ -164,6 +170,7 @@ export function createCanvasStore(
         const tab = first === null ? null : tabFor(first);
         set({
           source,
+          session: get().session + 1,
           summary,
           tabs: tab === null ? [] : [tab],
           activeTab: null,
@@ -178,6 +185,7 @@ export function createCanvasStore(
         generation++;
         set({
           source: null,
+          session: get().session + 1,
           summary: null,
           tabs: [],
           activeTab: null,
@@ -234,8 +242,17 @@ export function createCanvasStore(
         set({ portLabels });
       },
 
-      async apply(command) {
+      async apply(command, session) {
         const { summary } = get();
+        if (session !== undefined && session !== get().session)
+          return {
+            ok: false,
+            revision: null,
+            code: "no-project",
+            message: "The project changed.",
+            path: null,
+            problems: [],
+          };
         if (summary === null)
           return {
             ok: false,

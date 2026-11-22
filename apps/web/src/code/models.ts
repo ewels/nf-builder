@@ -1,4 +1,5 @@
 // One Monaco model per path for the session (F-208), shared by the Split and Code views.
+import { canvasStore } from "../canvas/canvas-store";
 import { monaco, NEXTFLOW_LANGUAGE_ID } from "./monaco";
 
 interface FileModel {
@@ -31,8 +32,16 @@ export function modelFor(path: string, text: string): FileModel {
   return made;
 }
 
-/** Drops every model, when another project opens. */
+/** Drops every model, when another project opens: a draft never follows a path into another project (ADR 0004, IO-01). */
 export function disposeModels(): void {
   for (const { model } of models.values()) model.dispose();
   models.clear();
 }
+
+// this module loads with the editor, after the eager store, so it watches the store itself
+let seenSession = canvasStore.getState().session;
+canvasStore.subscribe((state) => {
+  if (state.session === seenSession) return;
+  seenSession = state.session;
+  disposeModels();
+});

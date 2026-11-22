@@ -28,6 +28,7 @@ export interface TextSync {
   flush(): Promise<void>;
   /** The project's text changed under a clean buffer: adopt it and drop any pending edit. */
   reset(synced: string): void;
+  /** Drops what is pending and sends nothing more, not even a retry of a send in flight. */
   dispose(): void;
 }
 
@@ -67,6 +68,7 @@ export function createTextSync(
         let outcome = await sendOnce(sent);
         // another writer got in first: one more try, on the revision the engine now holds
         if (
+          !disposed &&
           !(outcome instanceof Error) &&
           !outcome.ok &&
           outcome.code === "stale"
@@ -122,7 +124,8 @@ export function createTextSync(
     },
     async flush() {
       cancelTimer();
-      if (latest !== null && latest !== syncedText) await request();
+      if (disposed) await running;
+      else if (latest !== null && latest !== syncedText) await request();
       else await running;
     },
     reset(text) {
@@ -133,6 +136,7 @@ export function createTextSync(
     },
     dispose() {
       disposed = true;
+      wanted = false;
       cancelTimer();
     },
   };

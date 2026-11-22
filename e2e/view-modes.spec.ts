@@ -1,5 +1,10 @@
 import { expect, type Page, test } from "@playwright/test";
-import { canvasReady, openFixture, openWorkflow } from "./canvas.ts";
+import {
+  canvasReady,
+  openFixture,
+  openProject,
+  openWorkflow,
+} from "./canvas.ts";
 import {
   appendToLine,
   canvasIds,
@@ -214,4 +219,45 @@ test("F-208 step 5 UX-27: Nextflow highlighting gives a keyword and an identifie
   expect(keyword).not.toBeNull();
   expect(identifier).not.toBeNull();
   expect(keyword).not.toBe(identifier);
+});
+
+test("F-208 ADR-0004 IO-01: a draft in one project never reaches another project's file", async ({
+  page,
+}) => {
+  const a = fileText(F208_BEFORE);
+  const b = a.replace("'ada', 'grace'", "'bob', 'carol'");
+  expect(b).not.toBe(a);
+  const write = (text: string) =>
+    page.evaluate(async (t) => {
+      const engine = (window as unknown as { nfBuilderEngine: WorkspaceHook })
+        .nfBuilderEngine;
+      await engine.writeFiles([{ path: "main.nf", text: t }]);
+    }, text);
+  await page.goto("./");
+  await expect(switcher(page)).toBeEnabled();
+  await createProjectInUi(page, "Project A");
+  await write(a);
+  await canvasReady(page);
+  await radio(page, "Code").click();
+  await expect(editor(page)).toBeVisible();
+  await appendToLine(page, lineNumberOf(F208_BEFORE, GREETED_LINE), " )");
+  await expect(syncStatus(page)).toHaveAttribute("data-sync", "refused");
+
+  await openProject(page, [{ path: "main.nf", text: b }]);
+  await canvasReady(page);
+  await radio(page, "Code").click();
+  await expect(editor(page)).toBeVisible();
+  await expect(syncStatus(page)).toHaveAttribute("data-sync", "idle");
+  await page.locator(".monaco-editor .view-lines").click();
+  await page.keyboard.press("ControlOrMeta+End");
+  await expect(editor(page)).toContainText("'bob', 'carol'");
+  // undo does not bring back A's draft, and an ordinary edit keeps B's own text
+  await page.keyboard.press("ControlOrMeta+z");
+  await page.keyboard.press("ControlOrMeta+End");
+  await page.keyboard.press("Enter");
+  await page.keyboard.insertText("// edited in project B");
+  await expect(syncStatus(page)).toHaveAttribute("data-sync", "idle");
+  await expect
+    .poll(() => readFile(page, "main.nf"))
+    .toBe(`${b}\n// edited in project B`);
 });

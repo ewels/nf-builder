@@ -371,4 +371,23 @@ describe("F-208 apply", () => {
     const outcome = await store.getState().apply(command);
     expect(outcome.ok === false && outcome.code).toBe("no-project");
   });
+
+  it("F-208 ADR-0004 IO-01: show and projectGone start a new session, and an apply from an old one never reaches the engine", async () => {
+    const wf = [ref("main.nf", null)];
+    const { engine, revisions } = applying(wf, { ok: true });
+    const store = createCanvasStore(() => engine);
+    await store.getState().open(request);
+    const first = store.getState().session;
+    await store.getState().show(summaryOf(wf), "project");
+    const second = store.getState().session;
+    expect(second).toBeGreaterThan(first);
+    const stale = await store.getState().apply(command, first);
+    expect(stale.ok === false && stale.code).toBe("no-project");
+    expect(revisions).toEqual([]);
+    store.getState().projectGone();
+    expect(store.getState().session).toBeGreaterThan(second);
+    await store.getState().show(summaryOf(wf), "project");
+    await store.getState().apply(command, store.getState().session);
+    expect(revisions).toEqual([1]);
+  });
 });

@@ -33,6 +33,7 @@ export function PanelLayout({
 /** The tab panel: the active tab's graph, code or both, by its view mode. */
 export function TabPanel(): JSX.Element {
   const summary = useWorkspace((s) => s.summary);
+  const session = useWorkspace((s) => s.session);
   const tab = useWorkspace((s) => s.tabs.find((t) => t.id === s.activeTab));
   if (summary === null || tab === undefined) return <CanvasHost />;
   return (
@@ -46,7 +47,7 @@ export function TabPanel(): JSX.Element {
       <PanelLayout
         mode={tab.mode}
         canvas={<CanvasHost key="canvas" />}
-        code={<CodePane key="code" path={tab.path} />}
+        code={<CodePane key={`code:${session}`} path={tab.path} />}
       />
     </div>
   );

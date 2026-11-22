@@ -153,4 +153,25 @@ describe("F-208 text sync", () => {
     await vi.advanceTimersByTimeAsync(1000);
     expect(g.sent).toEqual([]);
   });
+
+  it("F-208 ADR-0004 IO-01: nothing is sent after dispose, and a stale refusal is not retried", async () => {
+    const g = gated();
+    const sync = createTextSync("a", {
+      send: g.send,
+      onState: () => undefined,
+    });
+    sync.edit("b");
+    void sync.flush();
+    await vi.advanceTimersByTimeAsync(0);
+    expect(g.sent).toEqual(["b"]);
+    sync.edit("c");
+    await vi.advanceTimersByTimeAsync(300);
+    sync.dispose();
+    g.settle(refusal("stale"));
+    await vi.advanceTimersByTimeAsync(1000);
+    expect(g.sent).toEqual(["b"]);
+    sync.edit("d");
+    await sync.flush();
+    expect(g.sent).toEqual(["b"]);
+  });
 });

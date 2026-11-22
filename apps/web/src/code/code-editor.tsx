@@ -64,6 +64,8 @@ export default function CodeEditor({
   report.current = onSync;
   useEffect(() => {
     let cancelled = false;
+    // the project this editor belongs to: its text is never sent to another (ADR 0004, IO-01)
+    const session = canvasStore.getState().session;
     const cleanup: (() => void)[] = [];
     (async () => {
       const [text] = await Promise.all([
@@ -71,6 +73,7 @@ export default function CodeEditor({
         registerNextflow(),
       ]);
       if (cancelled || host.current === null) return;
+      if (canvasStore.getState().session !== session) return;
       if (text === null) {
         setProblem(`${path} is not in the project.`);
         return;
@@ -81,7 +84,7 @@ export default function CodeEditor({
         send: async (sent) => {
           const outcome = await canvasStore
             .getState()
-            .apply({ kind: "replaceFileText", path, text: sent });
+            .apply({ kind: "replaceFileText", path, text: sent }, session);
           if (outcome.ok) file.synced.text = sent;
           return outcome;
         },
@@ -122,10 +125,11 @@ export default function CodeEditor({
         () => editor.dispose(),
         () => onContent.dispose(),
         () => onBlur.dispose(),
-        () => {
-          void sync.flush();
-          sync.dispose();
-        },
+        // a flush within the same project still sends; after a project change the sync is already disposed
+        () => void sync.flush(),
+        canvasStore.subscribe((state) => {
+          if (state.session !== session) sync.dispose();
+        }),
       );
       // a draft left in the model (refused earlier) is sent again, so its markers and status come back
       if (model.getValue() !== file.synced.text) {
