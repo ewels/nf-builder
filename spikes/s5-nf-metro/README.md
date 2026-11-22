@@ -5,7 +5,7 @@ Serves feature F-010 (ADR 0013, FI-54, ADR 0024). A throwaway test page that ren
 ## Run
 
 - `pnpm spike:s5` fetches the pinned files, renders the CLI references, builds the page and serves it on http://localhost:4175 (needs Python 3.11+).
-- `SPIKE_S5_CSP=production pnpm spike:s5` serves with netlify.toml's exact headers. Pyodide then never starts, because the CSP lacks `'wasm-unsafe-eval'`.
+- `SPIKE_S5_CSP=production pnpm spike:s5` serves with the site policy's exact headers (`SITE_POLICY_HEADERS`). Pyodide then never starts, because the CSP lacks `'wasm-unsafe-eval'`.
 - `pnpm test:e2e -- --grep F-010` runs the end-to-end tests, which prepare, build and serve in `beforeAll`.
 
 ## Cache

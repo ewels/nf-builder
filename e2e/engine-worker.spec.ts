@@ -11,6 +11,7 @@ import { SMOKE_TAG } from "./browsers.ts";
 import { watchForCspViolations } from "./csp.ts";
 import { type EngineHook, parserChunks, readProject } from "./engine.ts";
 import { scriptActivity } from "./trace.ts";
+import { E2E_BASE_PATH } from "./urls.ts";
 
 const PARSER_MARKER =
   "check for an unclosed brace, bracket, parenthesis, or string";
@@ -62,9 +63,8 @@ test("F-113 step 2 QA-01 ADR-0033: the parser and the catalogue are built only i
       /catalogue\/(script|config)\.json$/,
     );
   }
-  // F-011: serves the app under /nf-builder/; initialJsFiles then needs the base path to match the HTML's asset URLs
   const html = readFileSync(join(WEB_DIST, "index.html"), "utf8");
-  const initial = new Set(initialJsFiles(manifest, html));
+  const initial = new Set(initialJsFiles(manifest, html, E2E_BASE_PATH));
   const worker = readWorkerManifest(WEB_DIST);
   const workerFiles = new Set(worker.map((c) => c.file));
   const parser = parserChunks();

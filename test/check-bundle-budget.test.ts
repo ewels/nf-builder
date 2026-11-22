@@ -71,6 +71,15 @@ const MANIFEST: Manifest = {
 const rand = (n: number) => randomBytes(n).toString("base64");
 
 describe("QA-01 bundle budget", () => {
+  it("QA-01 F-011: initialJsFiles strips the base path from script and modulepreload URLs, so a /nf-builder/ build counts the same files", () => {
+    const html = HTML.replaceAll('"/assets/', '"/nf-builder/assets/');
+    expect([...initialJsFiles(MANIFEST, html, "/nf-builder/")].sort()).toEqual([
+      "assets/index.js",
+      "assets/shared.js",
+      "assets/vendor.js",
+    ]);
+  });
+
   it("F-003 QA-01: initial JS is the HTML entry chunk plus its static imports, not dynamic imports", () => {
     expect([...initialJsFiles(MANIFEST, HTML)].sort()).toEqual([
       "assets/index.js",

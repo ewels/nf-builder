@@ -1,21 +1,24 @@
 import { expect, test } from "@playwright/test";
-import { readNetlifyConfig, siteHeaders } from "../scripts/netlify-config.ts";
+import { CONTENT_SECURITY_POLICY } from "../scripts/security-policy.ts";
 import { watchForCspViolations } from "./csp.ts";
 import { openProbe, PROBE_TITLE, runInPage } from "./s4-probe/page.ts";
 import { S4_TARGETS } from "./s4-probe/targets.ts";
-
-const expectedHeaders = siteHeaders(readNetlifyConfig());
 
 test("F-008 ADR-0009: the S4 probe page loads under the site CSP with no violations and records status, response type and timing for a same-origin target", async ({
   page,
 }) => {
   const watch = await watchForCspViolations(page);
-  const response = await openProbe(page);
-  expect(response?.headers()["content-security-policy"]).toBe(
-    expectedHeaders["Content-Security-Policy"],
-  );
+  await openProbe(page);
+  // ADR 0040: writeBundle stamps the public page with the same policy meta as the app.
+  expect(
+    await page.evaluate(() =>
+      document.head.firstElementChild?.getAttribute("content"),
+    ),
+  ).toBe(CONTENT_SECURITY_POLICY);
   await expect(page).toHaveTitle(PROBE_TITLE);
-  const results = await runInPage(page, [{ id: "self", url: "/version.json" }]);
+  const results = await runInPage(page, [
+    { id: "self", url: "../../version.json" },
+  ]);
   expect(results).toHaveLength(1);
   const [result] = results;
   expect(result).toMatchObject({

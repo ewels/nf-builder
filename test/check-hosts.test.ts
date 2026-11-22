@@ -6,12 +6,11 @@ import { afterEach, describe, expect, it } from "vitest";
 import { ALLOWED_ORIGINS } from "../scripts/allow-list.ts";
 import { REPO_ROOT } from "../scripts/check-common.ts";
 import { classifyUrl, findUrls, scanDist } from "../scripts/check-hosts.ts";
+import { NON_FETCHED_URLS } from "../scripts/non-fetched-urls.ts";
 import {
   CONNECT_SRC_ALLOW_LIST,
-  readNetlifyConfig,
-  siteHeaders,
-} from "../scripts/netlify-config.ts";
-import { NON_FETCHED_URLS } from "../scripts/non-fetched-urls.ts";
+  CONTENT_SECURITY_POLICY,
+} from "../scripts/security-policy.ts";
 
 const dirs: string[] = [];
 afterEach(() => {
@@ -49,6 +48,14 @@ describe("IO-41 host scan", () => {
     expect(found[0]).toMatchObject({ line: 1, column: 4 });
     expect(found[1]).toMatchObject({ line: 2, column: 4 });
     expect(found[3]).toMatchObject({ line: 4 });
+  });
+
+  it("IO-41 QA-30 F-011: a URL inside a CSP meta's connect-src does not carry the directive's closing semicolon", () => {
+    const meta = `<meta content="connect-src &#39;self&#39; https://registry.nextflow.io; worker-src &#39;self&#39;">`;
+    expect(findUrls(meta).map((f) => f.url)).toEqual([
+      "https://registry.nextflow.io",
+    ]);
+    expect(classifyUrl("https://registry.nextflow.io").kind).toBe("allowed");
   });
 
   it("IO-41: allows the ADR 0002 origins over https only", () => {
@@ -231,9 +238,7 @@ describe("IO-41 host scan", () => {
 
   it("IO-41 QA-30: the CSP connect-src and the host scan share the ADR 0002 allow-list", () => {
     expect(CONNECT_SRC_ALLOW_LIST).toEqual(["'self'", ...ALLOWED_ORIGINS]);
-    const csp = siteHeaders(readNetlifyConfig())["Content-Security-Policy"];
-    const connect = (csp ?? "")
-      .split(";")
+    const connect = CONTENT_SECURITY_POLICY.split(";")
       .map((p) => p.trim().split(/\s+/))
       .find(([name]) => name === "connect-src")
       ?.slice(1);

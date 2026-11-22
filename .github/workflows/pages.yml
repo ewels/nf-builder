@@ -1,0 +1,134 @@
+# Production hosting on GitHub Pages (F-011, ADRs 0040 and 0041). Builds the site with the base path from
+# actions/configure-pages and the registry snapshot, checks it, deploys it, then checks the live site.
+# It runs on every push to main, by hand (a dispatch from another branch only runs `build`, as a dry run), and when a
+# Registry snapshot run finishes on main, so a fresh snapshot is live minutes after it is published.
+name: Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Registry snapshot"]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: read
+
+# A deploy is never cancelled half way: the next one queues behind it, so `verify` always finishes first.
+# A dry run from another branch has its own group, so it can never cancel a pending deploy from main.
+concurrency:
+  group: ${{ github.ref == 'refs/heads/main' && 'pages' || format('pages-dry-run-{0}', github.ref) }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build and check the site
+    # A snapshot run triggers a deploy only when it succeeded and wasn't a pull request dry run.
+    if: github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event != 'pull_request')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      pages: read
+    outputs:
+      generated-at: ${{ steps.stamp.outputs.generated-at }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Read the Pages settings
+        id: pages
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+      - name: Look for the registry snapshot branch
+        id: snapshot
+        env:
+          GIT_TERMINAL_PROMPT: "0"
+          REPO_URL: https://github.com/${{ github.repository }}.git
+        run: |
+          set +e
+          git ls-remote --exit-code --heads "$REPO_URL" registry-snapshot > /dev/null
+          status=$?
+          set -e
+          if [ "$status" -eq 0 ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          elif [ "$status" -eq 2 ]; then
+            echo "No registry-snapshot branch yet: the site is deployed without /registry/."
+            echo "present=false" >> "$GITHUB_OUTPUT"
+          else
+            exit "$status"
+          fi
+      - name: Check out the registry snapshot
+        if: steps.snapshot.outputs.present == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: registry-snapshot
+          path: .cache/registry-snapshot
+          persist-credentials: false
+      - name: Build the site
+        env:
+          BASE_PATH: ${{ steps.pages.outputs.base_path }}
+          SITE_CONTEXT: production
+          # Absolute: Vite runs in apps/web, where a relative directory would not resolve.
+          REGISTRY_SNAPSHOT_DIR: ${{ steps.snapshot.outputs.present == 'true' && format('{0}/.cache/registry-snapshot', github.workspace) || '' }}
+        run: pnpm build
+      - name: Check the built site (QA-30)
+        env:
+          BASE_PATH: ${{ steps.pages.outputs.base_path }}
+        run: pnpm check:site
+      - name: Check the registry snapshot in the build
+        if: steps.snapshot.outputs.present == 'true'
+        run: pnpm check:registry apps/web/dist
+      - name: Read the generation time
+        id: stamp
+        if: steps.snapshot.outputs.present == 'true'
+        run: echo "generated-at=$(node -p "JSON.parse(require('fs').readFileSync('apps/web/dist/registry/index.json', 'utf8')).generatedAt")" >> "$GITHUB_OUTPUT"
+      - name: Upload the site
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: apps/web/dist
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    outputs:
+      page-url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
+
+  verify:
+    name: Check the deployed site
+    needs: [build, deploy]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+        with:
+          install: "false"
+      - name: Check the live commit, policy and entry script
+        env:
+          PAGE_URL: ${{ needs.deploy.outputs.page-url }}
+        run: pnpm check:site --url "$PAGE_URL" --commit "$GITHUB_SHA" --context production
+      - name: Check the live registry snapshot
+        if: github.event_name == 'workflow_run' && needs.build.outputs.generated-at != ''
+        env:
+          PAGE_URL: ${{ needs.deploy.outputs.page-url }}
+          GENERATED_AT: ${{ needs.build.outputs.generated-at }}
+        run: pnpm check:registry --url "$PAGE_URL" --generated-at "$GENERATED_AT"

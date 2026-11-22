@@ -1,10 +1,10 @@
 import { defineConfig, devices } from "@playwright/test";
 import { type BrowserName, selectedBrowsers } from "./browsers.ts";
-import { probeOrigin } from "./s4-probe/report.ts";
+import { probeSite } from "./s4-probe/report.ts";
 
 // Deployed-only probe (F-008, ADR 0023): `S4_PROBE_URL=<site> pnpm test:e2e -- --config e2e/s4-probe.config.ts`.
 // The root config never collects *.probe.ts. Fail fast on a missing or bad URL.
-const baseURL = probeOrigin(process.env.S4_PROBE_URL);
+const baseURL = probeSite(process.env.S4_PROBE_URL).url;
 
 const executablePath = process.env.PW_CHROMIUM_EXECUTABLE || undefined;
 const viewport = { width: 1440, height: 900 };

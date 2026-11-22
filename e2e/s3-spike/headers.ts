@@ -1,7 +1,7 @@
 import {
-  readNetlifyConfig,
-  siteHeaders,
-} from "../../scripts/netlify-config.ts";
+  CONTENT_SECURITY_POLICY,
+  SITE_POLICY_HEADERS,
+} from "../../scripts/security-policy.ts";
 import { CHEERPJ_ORIGIN } from "./protocol.ts";
 
 export type SpikeCsp = "cheerpj" | "qa30";
@@ -39,12 +39,9 @@ export function spikeCsp(kind: SpikeCsp, production: string): string {
   });
 }
 
-export function spikeHeaders(
-  kind: SpikeCsp,
-  production: Record<string, string> = siteHeaders(readNetlifyConfig()),
-): Record<string, string> {
-  const csp = production["Content-Security-Policy"];
-  if (csp === undefined)
-    throw new Error("netlify.toml has no Content-Security-Policy");
-  return { ...production, "Content-Security-Policy": spikeCsp(kind, csp) };
+export function spikeHeaders(kind: SpikeCsp): Record<string, string> {
+  return {
+    ...SITE_POLICY_HEADERS,
+    "Content-Security-Policy": spikeCsp(kind, CONTENT_SECURITY_POLICY),
+  };
 }
