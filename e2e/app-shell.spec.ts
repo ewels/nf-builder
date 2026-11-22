@@ -1,20 +1,31 @@
 import { expect, test } from "@playwright/test";
-import { DEEP_ROUTE } from "../scripts/check-deploy-headers.ts";
-import { readNetlifyConfig, siteHeaders } from "../scripts/netlify-config.ts";
+import { CONTENT_SECURITY_POLICY } from "../scripts/security-policy.ts";
 import { SMOKE_TAG } from "./browsers.ts";
 import { watchForCspViolations } from "./csp.ts";
 import { DEV_URL } from "./urls.ts";
 
-const expectedHeaders = siteHeaders(readNetlifyConfig());
+const DEEP_ROUTE = "/projects/example/pipeline";
 
 test("F-002: the app shell shows the header with the app name and three columns, with no CSP violations", {
   tag: SMOKE_TAG,
 }, async ({ page }) => {
   const watch = await watchForCspViolations(page);
-  const response = await page.goto("/");
-  expect(response?.headers()["content-security-policy"]).toBe(
-    expectedHeaders["Content-Security-Policy"],
-  );
+  await page.goto("/");
+  // ADR 0040: the policy is the first element of <head>, in a <meta http-equiv>, not a response header.
+  expect(
+    await page.evaluate(() => {
+      const first = document.head.firstElementChild;
+      return {
+        tag: first?.tagName,
+        httpEquiv: first?.getAttribute("http-equiv"),
+        content: first?.getAttribute("content"),
+      };
+    }),
+  ).toEqual({
+    tag: "META",
+    httpEquiv: "Content-Security-Policy",
+    content: CONTENT_SECURITY_POLICY,
+  });
   await expect(
     page
       .getByRole("banner")
@@ -62,13 +73,12 @@ test("F-002 step 1: pnpm dev serves the app and the header shows the app name", 
   ).toBeVisible();
 });
 
-test("F-002 step 2: vite preview sends every netlify.toml header on /, a deep route and a hashed asset", async ({
+test("F-002 step 2 ADR-0040: vite preview serves the build as GitHub Pages does: no security headers, a deep route is 404, and the entry script is served", async ({
   request,
 }) => {
   const root = await request.get("/");
   const deep = await request.get(DEEP_ROUTE);
-  expect(deep.status()).toBe(200);
-  expect(deep.headers()["content-type"]).toContain("text/html");
+  expect(deep.status()).toBe(404);
   const html = await root.text();
   const asset = /src="(\/assets\/[^"]+\.js)"/.exec(html)?.[1];
   expect(asset).toBeDefined();
@@ -76,10 +86,16 @@ test("F-002 step 2: vite preview sends every netlify.toml header on /, a deep ro
   expect(assetResponse.status()).toBe(200);
   for (const response of [root, deep, assetResponse]) {
     const actual = response.headers();
-    for (const [name, value] of Object.entries(expectedHeaders))
-      expect(actual[name.toLowerCase()], `${response.url()} ${name}`).toBe(
-        value,
-      );
+    for (const name of [
+      "content-security-policy",
+      "referrer-policy",
+      "x-frame-options",
+      "x-content-type-options",
+      "cross-origin-opener-policy",
+      "cross-origin-resource-policy",
+      "permissions-policy",
+    ])
+      expect(actual[name], `${response.url()} ${name}`).toBeUndefined();
   }
 });
 

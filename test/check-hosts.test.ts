@@ -6,12 +6,11 @@ import { afterEach, describe, expect, it } from "vitest";
 import { ALLOWED_ORIGINS } from "../scripts/allow-list.ts";
 import { REPO_ROOT } from "../scripts/check-common.ts";
 import { classifyUrl, findUrls, scanDist } from "../scripts/check-hosts.ts";
+import { NON_FETCHED_URLS } from "../scripts/non-fetched-urls.ts";
 import {
   CONNECT_SRC_ALLOW_LIST,
-  readNetlifyConfig,
-  siteHeaders,
-} from "../scripts/netlify-config.ts";
-import { NON_FETCHED_URLS } from "../scripts/non-fetched-urls.ts";
+  CONTENT_SECURITY_POLICY,
+} from "../scripts/security-policy.ts";
 
 const dirs: string[] = [];
 afterEach(() => {
@@ -205,9 +204,7 @@ describe("IO-41 host scan", () => {
 
   it("IO-41 QA-30: the CSP connect-src and the host scan share the ADR 0002 allow-list", () => {
     expect(CONNECT_SRC_ALLOW_LIST).toEqual(["'self'", ...ALLOWED_ORIGINS]);
-    const csp = siteHeaders(readNetlifyConfig())["Content-Security-Policy"];
-    const connect = (csp ?? "")
-      .split(";")
+    const connect = CONTENT_SECURITY_POLICY.split(";")
       .map((p) => p.trim().split(/\s+/))
       .find(([name]) => name === "connect-src")
       ?.slice(1);

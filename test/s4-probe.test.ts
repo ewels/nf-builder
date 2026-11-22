@@ -394,20 +394,15 @@ describe("S4 probe workflow", () => {
     "utf8",
   );
 
-  it("F-008 ADR-0023: the S4 probe workflow runs on dispatch and on pull requests touching the probe, waits for the head commit's deploy preview, probes in Chromium, Firefox and WebKit, and always uploads the results", () => {
-    expect(workflow).toMatch(/^ {2}pull_request:/m);
+  it("F-008 ADR-0023 ADR-0040: the S4 probe workflow runs on dispatch only, probes in Chromium, Firefox and WebKit, and always uploads the results", () => {
+    expect(workflow).not.toMatch(/^ {2}pull_request:/m);
     expect(workflow).toMatch(/^ {2}workflow_dispatch:/m);
-    for (const glob of [
-      "apps/web/public/spike/s4/**",
-      "e2e/s4-probe/**",
-      "e2e/s4-probe*",
-      ".github/workflows/s4-probe.yml",
-    ]) {
-      expect(workflow, glob).toContain(glob);
-    }
+    expect(workflow).not.toContain("check-deploy-headers");
+    expect(workflow).not.toContain("S4_EXPECTED_COMMIT");
     expect(workflow).toMatch(
-      /run: node scripts\/check-deploy-headers\.ts --url "\$S4_PROBE_URL" --commit "\$S4_EXPECTED_COMMIT"/,
+      /url:\n\s+description:[^\n]*\n\s+required: true\n/,
     );
+    expect(workflow).not.toMatch(/^\s+default:/m);
     expect(workflow).toMatch(/PW_BROWSERS: "?chromium,firefox,webkit"?/);
     expect(workflow).toMatch(
       /run: pnpm test:e2e -- --config e2e\/s4-probe\.config\.ts/,
@@ -417,9 +412,6 @@ describe("S4 probe workflow", () => {
       .find((step) => step.includes("upload-artifact"));
     expect(upload).toMatch(/^\s*if: always\(\)/m);
     expect(workflow).toMatch(/^permissions:\s*\n\s+contents: read/m);
-    expect(workflow).toContain(
-      "github.event.pull_request.head.repo.full_name == github.repository",
-    );
   });
 
   it("F-008 ADR-0023: the S4 probe workflow passes the dispatch input only through an env line, never into a shell command", () => {
