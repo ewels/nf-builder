@@ -1,0 +1,3 @@
+record Sample {
+    id
+}

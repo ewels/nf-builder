@@ -182,6 +182,17 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - The known-error fixture is also an oracle case; the S1 oracle and docs tests now filter to `s1-` cases.
 - Blockers: none.
 
+## 2026-11-22 · F-101 · Claude (autonomous)
+- Did: ported nf-lang's `DescriptiveErrorStrategy` (parse errors get upstream's messages and ranges) and the 90 parse-level inputs of `ScriptAstBuilderTest`, `ConfigAstBuilderTest` and `AgentParserTest` as 94 tests; steps 2 and 3 were delivered by F-006.
+- State: passing.
+- Next: F-109 in review, F-007 in review, then F-102 and F-103.
+- Decisions:
+  - Q14 answered: the ported "lexer cases" are those parse-level inputs; the 46 the grammar accepts are owned by F-102, F-103 and F-112 (notes).
+  - AGENTS.md: the ported inputs are exempt from "must pass the oracle"; their lint results are recorded and checked for consistency, not re-run (an oracle re-check was more than this feature needed).
+  - `docs/licences.md`: the upstream test inputs (Apache-2.0).
+  - `.gitattributes`: the ported inputs are byte-exact (`-text`).
+- Blockers: none.
+
 ## 2026-11-22 · F-109 · Claude (autonomous)
 - Did: `packages/lang-2610/palette.yaml` (45 items in UX-12's categories) with `pnpm gen:palette` writing the committed `palette.json`, a loader in the pack, validation tests against the catalogue and grammar, and `workflow_dispatch` on `ci.yml`; the catalogue itself came with F-006.
 - State: passing.
