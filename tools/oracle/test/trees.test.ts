@@ -14,6 +14,7 @@ import {
   AST_ERRORS_FILE,
   AST_FIXTURES_FILE,
   CONFIG_AST_ERRORS_FILE,
+  PROJECTION_FIXTURES_FILE,
 } from "../src/paths.ts";
 import { loadTreeManifest, runTree } from "../src/trees.ts";
 
@@ -217,6 +218,39 @@ describe("F-102 trees", () => {
     expect(
       rows.filter(
         (r) => r.caseId.startsWith("config-ast-errors:") && !r.matched,
+      ).length,
+    ).toBe(manifest.files.length);
+  });
+  it("F-106 ADR-0019: the projection type-probe tree loads, every file exists, and a plain oracle run checks it with positions", () => {
+    const manifest = loadTreeManifest(
+      PROJECTION_FIXTURES_FILE,
+      "projection-fixtures",
+    );
+    expect(manifest.files.length).toBeGreaterThan(0);
+    for (const f of manifest.files) {
+      expect(existsSync(join(manifest.dir, f.file)), f.file).toBe(true);
+      expect(f.lint.length, f.file).toBeGreaterThan(0);
+    }
+    const cache = tmp();
+    main([], {
+      pin: { version: "1.2.3", sha256: "a".repeat(64) },
+      exec: (args) =>
+        args[0] === "-version"
+          ? { ...lintJson([]), stdout: "version 1.2.3 build 1" }
+          : lintJson([]),
+      env: {},
+      oracleCache: cache,
+      write: () => {},
+    });
+    const rows = (
+      JSON.parse(readFileSync(join(cache, "results.json"), "utf8")) as {
+        results: { caseId: string; matched: boolean }[];
+      }
+    ).results;
+    // a fake that finds no errors cannot match the probe messages
+    expect(
+      rows.filter(
+        (r) => r.caseId.startsWith("projection-fixtures:") && !r.matched,
       ).length,
     ).toBe(manifest.files.length);
   });

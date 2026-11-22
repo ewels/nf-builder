@@ -39,3 +39,4 @@ Process: [0001](0001-record-decisions-as-adrs.md). Template: [template.md](templ
 | [0033](0033-declaration-fallback-and-source-file.md) | Fall back per declaration, print untouched code from its source, and load the parser lazily | Accepted (agent) |
 | [0034](0034-include-resolution-and-incremental-model.md) | Resolve includes as nf-lang 26.10 does, and re-model a changed file and its direct dependants | Accepted (agent) |
 | [0035](0035-registry-snapshot.md) | Build the registry snapshot in a scheduled workflow and publish it through a snapshot branch | Accepted (agent) |
+| [0036](0036-projection-node-keys-and-types.md) | Project typed workflows into plain-data graphs with name-based node keys and Channel/Value types | Accepted (agent) |

@@ -21,3 +21,5 @@ export const AST_ERRORS_FILE = `${REPO_ROOT}/packages/lang-2610/test/ast/errors.
 export const PRINTER_FIXTURES_FILE = `${REPO_ROOT}/packages/lang-2610/test/printer/fixtures.json`;
 /** Read by path, never imported: the F-103 config builder-error inputs and the lint errors recorded for each. */
 export const CONFIG_AST_ERRORS_FILE = `${REPO_ROOT}/packages/lang-2610/test/config-ast/errors.json`;
+/** Read by path, never imported: the F-106 type-probe tree; lint's error on each `def probeN: Boolean = <expr>` line reveals the type nf-lang infers. */
+export const PROJECTION_FIXTURES_FILE = `${REPO_ROOT}/packages/engine/test/projection/fixtures.json`;

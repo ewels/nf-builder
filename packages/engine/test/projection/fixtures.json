@@ -1,0 +1,95 @@
+{
+  "about": "F-106 type-probe fixture tree. Every `def probeN: Boolean = <expr>` line makes nextflow lint print the type nf-lang infers for <expr>; these messages are the only errors. Recorded from a real run of nextflow 26.10.7 (lint -o json, NXF_SYNTAX_PARSER=v2, NXF_OFFLINE=true), never written by hand.",
+  "fixtures": [
+    {
+      "file": "main.nf",
+      "lint": [
+        {
+          "line": 18,
+          "column": 5,
+          "message": "Assignment target with type Boolean cannot be assigned to value with type Channel<Path>"
+        },
+        {
+          "line": 19,
+          "column": 5,
+          "message": "Assignment target with type Boolean cannot be assigned to value with type Channel<String>"
+        },
+        {
+          "line": 20,
+          "column": 5,
+          "message": "Assignment target with type Boolean cannot be assigned to value with type Value<Path>"
+        },
+        {
+          "line": 23,
+          "column": 5,
+          "message": "Assignment target with type Boolean cannot be assigned to value with type Channel<String>"
+        },
+        {
+          "line": 25,
+          "column": 5,
+          "message": "Assignment target with type Boolean cannot be assigned to value with type Channel<String>"
+        },
+        {
+          "line": 28,
+          "column": 5,
+          "message": "Assignment target with type Boolean cannot be assigned to value with type Channel<String>"
+        },
+        {
+          "line": 29,
+          "column": 5,
+          "message": "Assignment target with type Boolean cannot be assigned to value with type Channel<Sample>"
+        },
+        {
+          "line": 30,
+          "column": 5,
+          "message": "Assignment target with type Boolean cannot be assigned to value with type Path"
+        },
+        {
+          "line": 32,
+          "column": 5,
+          "message": "Assignment target with type Boolean cannot be assigned to value with type Path"
+        },
+        {
+          "line": 37,
+          "column": 5,
+          "message": "Assignment target with type Boolean cannot be assigned to value with type Channel<Record>"
+        },
+        {
+          "line": 38,
+          "column": 5,
+          "message": "Assignment target with type Boolean cannot be assigned to value with type Record {\n    bams: Channel<Path>\n    logs: Channel<String>\n    index: Value<Path>\n}"
+        },
+        {
+          "line": 40,
+          "column": 5,
+          "message": "Assignment target with type Boolean cannot be assigned to value with type Channel<String>"
+        },
+        {
+          "line": 42,
+          "column": 5,
+          "message": "Assignment target with type Boolean cannot be assigned to value with type Value<String>"
+        }
+      ]
+    },
+    {
+      "file": "subworkflows/local/prepare/main.nf",
+      "lint": [
+        {
+          "line": 19,
+          "column": 5,
+          "message": "Assignment target with type Boolean cannot be assigned to value with type Value<Path>"
+        },
+        {
+          "line": 20,
+          "column": 5,
+          "message": "Assignment target with type Boolean cannot be assigned to value with type Record {\n    bam: Channel<Path>\n    log: Channel<String>\n}"
+        },
+        {
+          "line": 21,
+          "column": 5,
+          "message": "Assignment target with type Boolean cannot be assigned to value with type Channel<Path>"
+        }
+      ]
+    }
+  ]
+}

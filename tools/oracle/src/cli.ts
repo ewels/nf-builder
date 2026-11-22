@@ -28,6 +28,7 @@ import {
   FIXTURES_FILE,
   ORACLE_CACHE,
   PRINTER_FIXTURES_FILE,
+  PROJECTION_FIXTURES_FILE,
   REPO_ROOT,
 } from "./paths.ts";
 import { loadPin, type NextflowPin } from "./pin.ts";
@@ -45,7 +46,7 @@ export type OracleDeps = {
   oracleCache?: string;
   /** The fixtures manifest to lint. Default: tools/corpus/fixtures/fixtures.yaml, unless --manifest is given; --case always skips fixtures. */
   fixturesFile?: string;
-  /** The trees to lint as one run each. Default: F-102's AST fixtures and error inputs, on a plain run (no --case, no --manifest). */
+  /** The trees to lint as one run each. Default: F-102's AST fixtures and error inputs, F-103's config errors and F-106's type probes, on a plain run (no --case, no --manifest). */
   trees?: TreeManifest[];
   /** The printer fixture trees to format (`format` and `fixed-point` checks). Default: the pack's fixtures.json, on a plain run (no --case, no --manifest). */
   formatManifest?: FormatManifest;
@@ -104,6 +105,7 @@ export function main(argv: readonly string[], deps: OracleDeps = {}): number {
             loadTreeManifest(AST_FIXTURES_FILE, "ast-fixtures"),
             loadTreeManifest(AST_ERRORS_FILE, "ast-errors"),
             loadTreeManifest(CONFIG_AST_ERRORS_FILE, "config-ast-errors"),
+            loadTreeManifest(PROJECTION_FIXTURES_FILE, "projection-fixtures"),
           ]
         : []);
     const plain = values.case === undefined && values.manifest === undefined;

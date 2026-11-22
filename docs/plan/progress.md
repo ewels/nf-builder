@@ -332,3 +332,14 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
 - Decisions:
   - While #33 blocks CI, a feature may branch from an unmerged dependency's branch (stacked), as an exception to ADR 0018's "independent features only". Every PR still needs a green CI before it merges, and the stack merges bottom up. The exception ends when CI runs again.
 - Blockers: #33 (Actions billing), #31 (snapshot branch read access), #27 (build hook).
+
+## 2026-11-22 · F-106 · Claude (autonomous)
+- Did: the projection for typed workflows (`packages/engine/src/projection/`, types in lang-core): calls, chains, factories, takes, emits, `:params` and `:output` nodes with ports per LA-20 to LA-26, def-use edges with Channel/Value types (LA-28) from the catalogue and nf-lang's call rules, pipeline calls, inferred workflow emit types, code-node shells, and a shared scope API for F-107 and F-108. Probed types match `nextflow lint` in a new oracle tree; node ids survive whitespace-only re-parses.
+- State: passing.
+- Next: F-107 and F-108 in parallel, then F-111 and F-112.
+- Decisions:
+  - Types in lang-core, logic in the engine with catalogue data; the node-key grammar (entry workflow `""`, `~n` reassignment, `callee@n`, `:code@n`, `:take:`, `:emit:`, `:params`, `:output`), a stored format once F-207 writes the sidecar; plain values as their own kind; the type subset; calls with statuses; projector snapshots ([ADR 0036](../adr/0036-projection-node-keys-and-types.md); AR-11 points to it).
+  - Only the entry workflow gets the `:output` node.
+  - A type-probe oracle tree (`packages/engine/test/projection/fixtures.json`) ties the projection's kinds to lint.
+  - In memory only; no new dependency.
+- Blockers: none new.

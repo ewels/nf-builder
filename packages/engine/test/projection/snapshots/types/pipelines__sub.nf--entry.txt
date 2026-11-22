@@ -1,0 +1,10 @@
+workflow pipelines/sub.nf# typed
+pipelines/sub.nf#/:params params "params" @3:1
+  out input (input): Channel<String>
+pipelines/sub.nf#/upper chain ".map" steps=map @9:13
+  in in (in): -
+    <- pipelines/sub.nf#/:params[input] Channel<String> via params.input
+  out out (out): Channel<?>
+pipelines/sub.nf#/:output output "output" @15:1
+  in upper (upper): Channel<String>
+    <- pipelines/sub.nf#/upper[out] Channel<?> via upper

@@ -1,0 +1,4 @@
+workflow pipelines/rnaseq.nf# typed
+pipelines/rnaseq.nf#/:params params "params" @3:1
+  out input (input): String
+pipelines/rnaseq.nf#/:code@1 code "println params.input" @9:5
