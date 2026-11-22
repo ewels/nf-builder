@@ -1,6 +1,6 @@
 # 0009. Read the registry and GitHub straight from the browser, with a snapshot fallback
 
-- Status: Accepted (spike S4 to confirm)
+- Status: Accepted
 - Date: 2026-11-21
 
 ## Context
@@ -47,3 +47,11 @@ Private repos use a token and the blobs API. The token is held in memory unless 
 ## Spike result
 
 2026-11-22, spike S1 ([report](../research/2026-11-22-spike-s1-typed-legacy-interop.md)), Nextflow 26.10.7 source: `.module-info` is a Java properties file (written with `Properties.store`, so a `#<date>` comment line comes first and `:` in values is escaped as `\:`) with two keys: `checksum`, the SHA-256 of the installed module directory without `.module-info`, and `registryUrl`, the URL the bundle was downloaded from. Nextflow writes it on `module install`, uses it as the marker for `module list`, and compares the checksum to detect local changes; without it, `module remove` refuses the folder unless `-force` is given. The checksum comes from `io.seqera:npr-client` (`ModuleChecksum.computeDirectory`), whose file order and normalisation the spike couldn't read. Inserting a module therefore doesn't write `.module-info` yet; F-504 decides once the algorithm is verified with the oracle (`nextflow module list` on a written module). Spike S4 is still open.
+
+2026-11-22, spike S4 ([report](../research/2026-11-22-spike-s4-cors.md)), probe page on deploy preview #14 (commit dd44cf4) in Chromium 159, Firefox 159 and WebKit 27.2, all three agreeing:
+- `registry.nextflow.io` sends no `Access-Control-Allow-Origin` on any endpoint the app would use and answers preflights with 401, so browsers block every read from the app's origin. Module bundle downloads redirect (307) to `public-cr-prod.seqera.io`, which sends no CORS headers either. The live `RegistryClient` can't work today: the snapshot, this decision's fallback, is the registry source, and module bundles come from it. F-502's live step applies only if a re-run of the S4 probe shows access.
+- `raw.githubusercontent.com` and `api.github.com` (commits, recursive trees) send `Access-Control-Allow-Origin: *`: the GitHub import route stands as written.
+- `codeload.github.com` answers with `Access-Control-Allow-Origin: https://render.githubusercontent.com`, so archive downloads (direct, through the `zipball` API or through `github.com/.../archive/...`) are blocked. Zip import stays a user upload, and ADR 0014's possible `codeload.github.com` loosening isn't needed.
+- Endpoint paths were verified against the registry's OpenAPI 0.14.0: every path is under `/api/v1/`, and module names must be URL-encoded (`nf-core%2Ffastqc`).
+
+The decision stands.
