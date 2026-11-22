@@ -317,3 +317,10 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - `yaml` is a dependency of the build tool (already in the repo); no new browser runtime dependency.
   - Registry problems found while measuring are in `docs/research/upstream-bugs.md` (17 to 19).
 - Blockers: #31, give Netlify builds read access to the `registry-snapshot` branch (make the repository public, or set `REGISTRY_SNAPSHOT_TOKEN`); #27, the `NETLIFY_BUILD_HOOK` secret for daily deploys.
+
+## 2026-11-22 · F-501 follow-up · Claude (autonomous)
+- Did: dispatched the `Registry snapshot` workflow on `main` after the merge (run 45024203775): the build and check passed and the publish job pushed the first snapshot to branch `registry-snapshot`; the verify job skipped the deployed check because `NETLIFY_BUILD_HOOK` isn't set.
+- State: F-501 still not passing: Netlify builds can't read the branch while the repository is private (#31).
+- Next: once #31 is resolved, a production deploy should serve `/registry/`; then `pnpm check:registry --url https://nf-builder.netlify.app --generated-at <ts>` and set F-501 to passing in a PR.
+- Decisions: none.
+- Blockers: #31, #27.
