@@ -21,7 +21,7 @@ Spec IDs: <!-- e.g. UX-25, LA-29 -->
 
 ## Checks
 
-- [ ] CI is green: every job of the CI, Deploy check and Scope guard workflows
+- [ ] CI is green: every job of the CI and Scope guard workflows
 - [ ] `features.json`: only `passes` set and `notes` appended (the Scope guard job checks this), or the PR has the `scope-change` label and the decision is recorded
 - [ ] Budgets unchanged, or the raise and its reason are in `scripts/budgets.json` and below
 - [ ] No tests or visual baselines deleted, skipped or weakened

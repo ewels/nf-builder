@@ -1,6 +1,7 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { parse } from "yaml";
 import { REPO_ROOT } from "../scripts/check-common.ts";
 
 const WORKFLOWS = join(REPO_ROOT, ".github/workflows");
@@ -53,6 +54,7 @@ describe("CI workflows", () => {
       "e2e",
       "budget",
       "hosts",
+      "site",
       "adr-lint",
       "features",
       "audit",
@@ -69,13 +71,14 @@ describe("CI workflows", () => {
     }
     const jobs = ci.split(/^jobs:/m)[1] ?? "";
     const blocks = jobs.split(/^ {2}(?=[\w-]+:\s*$)/m).slice(1);
-    expect(blocks.length).toBe(12);
+    expect(blocks.length).toBe(13);
     for (const block of blocks) expect(block).toContain("timeout-minutes:");
     for (const command of [
       "pnpm check",
       "pnpm test:e2e",
       "pnpm check:budget",
       "pnpm check:hosts",
+      "pnpm check:site",
       "node scripts/check-adrs.ts",
       "node scripts/check-features.ts",
       "pnpm audit --audit-level high",
@@ -87,6 +90,27 @@ describe("CI workflows", () => {
     ]) {
       expect(ci, command).toContain(`run: ${command}`);
     }
+  });
+
+  it("F-011 step 2 ADR-0040: the site job builds with BASE_PATH=/nf-builder/ and runs pnpm check:site after pnpm build; budget and hosts use the same base", () => {
+    const ci = read(join(WORKFLOWS, "ci.yml"));
+    const job = (name: string) =>
+      (ci.split(new RegExp(`^ {2}${name}:\\s*$`, "m"))[1] ?? "").split(
+        /^ {2}[\w-]+:\s*$/m,
+      )[0] ?? "";
+    const site = job("site");
+    expect(site).toContain("name: Site build for GitHub Pages (QA-30)");
+    expect(site).toMatch(
+      /^ {4}env:\n {6}(?:#.*\n {6})?BASE_PATH: \/nf-builder\/$/m,
+    );
+    expect(site.indexOf("run: pnpm build")).toBeGreaterThan(-1);
+    expect(site.indexOf("run: pnpm check:site")).toBeGreaterThan(
+      site.indexOf("run: pnpm build"),
+    );
+    for (const name of ["budget", "hosts"])
+      expect(job(name), name).toMatch(
+        /^ {4}env:\n {6}BASE_PATH: \/nf-builder\/$/m,
+      );
   });
 
   it("F-005 ADR-0019: the oracle job sets up Temurin 21, caches .cache/nextflow keyed on upstream.json, prints the Nextflow version, runs pnpm oracle and uploads .cache/oracle even on failure", () => {
@@ -293,28 +317,18 @@ describe("CI workflows", () => {
       expect(pushes[0]).toContain("--force");
       expect(pushes[0]).toContain("HEAD:refs/heads/registry-snapshot");
       expect(pushes[0]).not.toMatch(/main/);
-      expect(publish).toContain('ignore = "exit 0"');
+      // ADR 0041: it commits only registry/**.
+      expect(publish).toContain("git add registry\n");
+      expect(publish).not.toMatch(/netlify|git add (?!registry\n)/);
       // The job that can write checks out nothing and installs nothing.
       expect(publish).not.toMatch(
         /actions\/checkout|\.\/\.github\/actions\/setup|pnpm install/,
       );
-      // The hook and the deployed-site check run in a separate read-only job.
-      const verify = job("verify");
-      expect(verify).toContain("needs: [build, publish]");
-      expect(verify).toContain(
-        "if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'",
-      );
-      expect(verify).toContain('install: "false"');
-      expect(verify).toMatch(
-        /NETLIFY_BUILD_HOOK: \$\{\{ secrets\.NETLIFY_BUILD_HOOK \}\}/,
-      );
-      expect(verify).toContain(
-        "pnpm check:registry --url https://nf-builder.netlify.app --generated-at",
-      );
-      expect(publish).not.toContain("NETLIFY_BUILD_HOOK");
+      // ADR 0041: the deployed-site check moved to the Pages workflow.
+      expect(workflow()).not.toMatch(/^ {2}verify:/m);
     });
 
-    it("F-501 step 1: the repository is private, so every git read or write of it carries the job token as an http.extraheader and never prompts", () => {
+    it("F-501 step 1: every git read or write of the repository carries the job token as an http.extraheader and never prompts", () => {
       const text = workflow();
       const gitCalls = [
         ...text.matchAll(
@@ -350,5 +364,208 @@ describe("CI workflows", () => {
       expect(build).toContain("name: registry-snapshot");
       expect(build).toContain("retention-days: 7");
     });
+  });
+});
+
+describe("Pages workflow", () => {
+  // The GitHub Actions expression delimiters, built so they aren't a template-string lookalike in the source.
+  const OPEN = ["$", "{{"].join("");
+  const expr = (body: string): string => `${OPEN} ${body} }}`;
+  const text = read(join(WORKFLOWS, "pages.yml"));
+  type Step = {
+    id?: string;
+    if?: string;
+    uses?: string;
+    run?: string;
+    env?: Record<string, string>;
+    with?: Record<string, string>;
+  };
+  type Job = {
+    needs?: string | string[];
+    if?: string;
+    permissions?: Record<string, string>;
+    environment?: { name: string; url: string };
+    "timeout-minutes"?: number;
+    outputs?: Record<string, string>;
+    steps: Step[];
+  };
+  const workflow = parse(text) as {
+    on: Record<string, unknown>;
+    concurrency: Record<string, unknown>;
+    permissions: Record<string, string>;
+    jobs: Record<string, Job>;
+  };
+  const { build, deploy, verify } = workflow.jobs as Record<string, Job>;
+  const step = (job: Job | undefined, needle: string): Step => {
+    const found = job?.steps.find(
+      (s) =>
+        s.run?.includes(needle) || s.uses?.includes(needle) || s.id === needle,
+    );
+    expect(found, needle).toBeDefined();
+    return found as Step;
+  };
+  const index = (job: Job | undefined, needle: string): number =>
+    (job?.steps ?? []).indexOf(step(job, needle));
+
+  it("F-011 step 1 ADR-0040: Pages runs on pushes to main, on dispatch, and on completed Registry snapshot runs on main", () => {
+    expect(workflow.on.push).toEqual({ branches: ["main"] });
+    expect(workflow.on).toHaveProperty("workflow_dispatch");
+    expect(workflow.on.workflow_run).toEqual({
+      workflows: ["Registry snapshot"],
+      types: ["completed"],
+      branches: ["main"],
+    });
+    expect(text).toMatch(/^name: Pages$/m);
+  });
+
+  it("F-011 step 5 ADR-0041: the build job runs for a workflow_run only when the snapshot run succeeded and wasn't a pull request", () => {
+    expect(build?.if).toBe(
+      "github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event != 'pull_request')",
+    );
+  });
+
+  it("F-011 ADR-0040: concurrency group pages on main (a separate group per dry-run branch) with cancel-in-progress false", () => {
+    expect(workflow.concurrency).toEqual({
+      group: expr(
+        "github.ref == 'refs/heads/main' && 'pages' || format('pages-dry-run-{0}', github.ref)",
+      ),
+      "cancel-in-progress": false,
+    });
+  });
+
+  it("F-011 ADR-0040: top-level permissions are contents: read; only deploy has pages: write and id-token: write, in environment github-pages; no job has contents: write", () => {
+    expect(workflow.permissions).toEqual({ contents: "read" });
+    expect(deploy?.permissions).toEqual({
+      pages: "write",
+      "id-token": "write",
+    });
+    expect(deploy?.environment?.name).toBe("github-pages");
+    expect(deploy?.environment?.url).toBe(
+      expr("steps.deployment.outputs.page_url"),
+    );
+    for (const [name, job] of Object.entries(workflow.jobs)) {
+      expect(job.permissions?.contents, name).not.toBe("write");
+      if (name !== "deploy") {
+        expect(job.permissions?.pages ?? "read", name).not.toBe("write");
+        expect(job.permissions?.["id-token"], name).toBeUndefined();
+      }
+    }
+    expect(text).not.toContain("contents: write");
+  });
+
+  it("F-011 ADR-0040: configure-pages v6.0.0, upload-pages-artifact v5.0.0 and deploy-pages v5.0.1 are pinned to the recorded SHAs", () => {
+    expect(text).toContain(
+      "actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0",
+    );
+    expect(text).toContain(
+      "actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0",
+    );
+    expect(text).toContain(
+      "actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1",
+    );
+  });
+
+  it("F-011 step 2 ADR-0040: the build takes BASE_PATH from configure-pages' base_path and runs pnpm check:site before uploading apps/web/dist", () => {
+    const pages = step(build, "pages");
+    expect(pages.uses).toContain("actions/configure-pages@");
+    for (const needle of ["pnpm build", "pnpm check:site"])
+      expect(step(build, needle).env?.BASE_PATH, needle).toBe(
+        expr("steps.pages.outputs.base_path"),
+      );
+    expect(step(build, "pnpm build").env?.SITE_CONTEXT).toBe("production");
+    expect(index(build, "pages")).toBeLessThan(index(build, "pnpm build"));
+    expect(index(build, "pnpm build")).toBeLessThan(
+      index(build, "pnpm check:site"),
+    );
+    expect(index(build, "pnpm check:site")).toBeLessThan(
+      index(build, "actions/upload-pages-artifact@"),
+    );
+    expect(step(build, "actions/upload-pages-artifact@").with?.path).toBe(
+      "apps/web/dist",
+    );
+    expect(build?.steps.some((s) => s.uses === "./.github/actions/setup")).toBe(
+      true,
+    );
+  });
+
+  it("F-011 step 5 ADR-0041: the snapshot branch is checked out without credentials only when ls-remote finds it, its absolute path goes to REGISTRY_SNAPSHOT_DIR, and pnpm check:registry apps/web/dist runs before the upload", () => {
+    const lsRemote = step(build, "git ls-remote");
+    expect(lsRemote.id).toBe("snapshot");
+    expect(lsRemote.run).toContain("--exit-code --heads");
+    expect(lsRemote.run).toContain('elif [ "$status" -eq 2 ]');
+    expect(lsRemote.run).toContain('exit "$status"');
+    const checkout = build?.steps.find(
+      (s) => s.with?.ref === "registry-snapshot",
+    );
+    expect(checkout?.if).toBe("steps.snapshot.outputs.present == 'true'");
+    expect(checkout?.with).toMatchObject({
+      path: ".cache/registry-snapshot",
+      "persist-credentials": false,
+    });
+    expect(step(build, "pnpm build").env?.REGISTRY_SNAPSHOT_DIR).toBe(
+      expr(
+        "steps.snapshot.outputs.present == 'true' && format('{0}/.cache/registry-snapshot', github.workspace) || ''",
+      ),
+    );
+    const check = step(build, "pnpm check:registry apps/web/dist");
+    expect(check.if).toBe("steps.snapshot.outputs.present == 'true'");
+    expect(index(build, "pnpm check:registry apps/web/dist")).toBeLessThan(
+      index(build, "actions/upload-pages-artifact@"),
+    );
+    expect(build?.outputs?.["generated-at"]).toBe(
+      expr("steps.stamp.outputs.generated-at"),
+    );
+  });
+
+  it("F-011 step 1 ADR-0040: deploy and verify run only on main; verify needs deploy and runs pnpm check:site --url with GITHUB_SHA", () => {
+    expect(deploy?.needs).toBe("build");
+    expect(deploy?.if).toBe("github.ref == 'refs/heads/main'");
+    expect(verify?.if).toBe("github.ref == 'refs/heads/main'");
+    expect(verify?.needs).toEqual(["build", "deploy"]);
+    expect(verify?.["timeout-minutes"]).toBe(30);
+    const setup = verify?.steps.find(
+      (s) => s.uses === "./.github/actions/setup",
+    );
+    expect(setup?.with).toEqual({ install: "false" });
+    const site = step(verify, "pnpm check:site --url");
+    expect(site.run).toContain('--url "$PAGE_URL"');
+    expect(site.run).toContain('--commit "$GITHUB_SHA"');
+    expect(site.run).toContain("--context production");
+    expect(site.env?.PAGE_URL).toBe(expr("needs.deploy.outputs.page-url"));
+    expect(deploy?.outputs?.["page-url"]).toBe(
+      expr("steps.deployment.outputs.page_url"),
+    );
+  });
+
+  it("F-011 step 5 ADR-0041: verify runs pnpm check:registry --url only on workflow_run, with generated-at from the build", () => {
+    const registry = step(verify, "pnpm check:registry --url");
+    expect(registry.if).toBe(
+      "github.event_name == 'workflow_run' && needs.build.outputs.generated-at != ''",
+    );
+    expect(registry.run).toContain('--url "$PAGE_URL"');
+    expect(registry.run).toContain('--generated-at "$GENERATED_AT"');
+    expect(registry.env?.GENERATED_AT).toBe(
+      expr("needs.build.outputs.generated-at"),
+    );
+  });
+
+  it("F-011: no expression appears in a run: line of pages.yml, and every job sets timeout-minutes", () => {
+    for (const job of Object.values(workflow.jobs)) {
+      expect(job["timeout-minutes"]).toBeGreaterThan(0);
+      for (const s of job.steps) expect(s.run ?? "").not.toContain(OPEN);
+    }
+    for (const line of text.split("\n"))
+      if (/^\s*(- )?run:/.test(line)) expect(line).not.toContain(OPEN);
+  });
+
+  it("F-011 ADR-0041: no workflow names netlify.app, NETLIFY_BUILD_HOOK or REGISTRY_SNAPSHOT_TOKEN, and deploy-check.yml is gone", () => {
+    const files = readdirSync(WORKFLOWS);
+    expect(files).not.toContain("deploy-check.yml");
+    for (const file of files) {
+      const content = read(join(WORKFLOWS, file));
+      expect(content, file).not.toContain("netlify.app");
+      expect(content, file).not.toContain("NETLIFY_BUILD_HOOK");
+      expect(content, file).not.toContain("REGISTRY_SNAPSHOT_TOKEN");
+    }
   });
 });

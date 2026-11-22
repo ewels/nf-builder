@@ -1,4 +1,4 @@
-import type { Page, Response } from "@playwright/test";
+import type { Page } from "@playwright/test";
 import type { BrowserResult, TargetInput } from "./report.ts";
 
 declare global {
@@ -9,14 +9,14 @@ declare global {
   }
 }
 
-export const PROBE_PATH = "/spike/s4/";
+/** Relative to the site base URL, so it works under /nf-builder/ (ADR 0040). */
+export const PROBE_PATH = "spike/s4/";
 export const PROBE_TITLE = "nf-builder: S4 CORS probe";
 
-/** Goes to /spike/s4/ (relative to baseURL), waits for window.s4Probe; returns the navigation response. */
-export async function openProbe(page: Page): Promise<Response | null> {
-  const response = await page.goto(PROBE_PATH);
+/** Goes to spike/s4/ (relative to baseURL) and waits for window.s4Probe. */
+export async function openProbe(page: Page): Promise<void> {
+  await page.goto(PROBE_PATH);
   await page.waitForFunction(() => window.s4Probe !== undefined);
-  return response;
 }
 
 /** Calls window.s4Probe.run in the page. */

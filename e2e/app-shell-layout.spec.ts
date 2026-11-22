@@ -36,7 +36,7 @@ test("F-201 step 1 UX-02 QA-30: dragging the separators resizes both side column
   page,
 }) => {
   const watch = await watchForCspViolations(page);
-  await page.goto("/");
+  await page.goto("./");
   await drag(page, leftSep(page), 100);
   expect(await width(left(page))).toBe(356);
   await expect(page.locator("html")).not.toHaveClass(/is-resizing/);
@@ -58,7 +58,7 @@ test("F-201 step 1 UX-02 QA-30: dragging the separators resizes both side column
 test("F-201 step 1 UX-02 UX-70: the separators resize with the arrow keys, Home and End, and the widths persist after reload", {
   tag: SMOKE_TAG,
 }, async ({ page }) => {
-  await page.goto("/");
+  await page.goto("./");
   await leftSep(page).focus();
   await page.keyboard.press("ArrowRight");
   await page.keyboard.press("ArrowRight");
@@ -83,7 +83,7 @@ test("F-201 step 1 UX-02 UX-70: the separators resize with the arrow keys, Home 
 test("F-201 step 1 UX-02: both side columns collapse and expand with their buttons, and stay collapsed after reload", async ({
   page,
 }) => {
-  await page.goto("/");
+  await page.goto("./");
   const centreBefore = await width(centre(page));
   await page
     .getByRole("button", { name: "Collapse components and files" })
@@ -111,7 +111,7 @@ test("F-201 step 1 UX-02: both side columns collapse and expand with their butto
 test("F-201 step 1 UX-02 UX-70: Enter on a separator collapses its column and moves focus to its expand button", async ({
   page,
 }) => {
-  await page.goto("/");
+  await page.goto("./");
   await leftSep(page).focus();
   await page.keyboard.press("Enter");
   const expand = page.getByRole("button", {
@@ -127,7 +127,7 @@ test("F-201 step 1 UX-02 UX-70: Enter on a separator collapses its column and mo
 test("F-201 UX-01: the header shows the project switcher, save state, Templates, Import, Export and a Nextflow version selector listing the installed packs", async ({
   page,
 }) => {
-  await page.goto("/");
+  await page.goto("./");
   const header = page.getByRole("banner");
   for (const name of ["No project", "Templates", "Import", "Export"])
     await expect(header.getByRole("button", { name })).toBeDisabled();
@@ -143,7 +143,7 @@ test("F-201 UX-01: the header shows the project switcher, save state, Templates,
 test("F-201 UX-03: the status bar shows problems and suggestions counts, node and channel counts, and the selected language version", async ({
   page,
 }) => {
-  await page.goto("/");
+  await page.goto("./");
   const version = await page
     .getByRole("combobox", { name: "Nextflow version" })
     .inputValue();
@@ -161,7 +161,7 @@ test("F-201 UX-03: the status bar shows problems and suggestions counts, node an
 test("F-201 UX-02: the centre column shows a tab strip above the canvas area", async ({
   page,
 }) => {
-  await page.goto("/");
+  await page.goto("./");
   const strip = centre(page).locator(".tab-strip");
   await expect(strip).toBeVisible();
   const s = await strip.boundingBox();
@@ -175,7 +175,7 @@ test(
     tag: VISUAL_TAG,
   },
   async ({ page }, testInfo) => {
-    await page.goto("/");
+    await page.goto("./");
     await page.getByRole("contentinfo").waitFor();
     await page
       .getByRole("button", { name: "Processes", exact: true })

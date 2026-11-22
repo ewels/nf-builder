@@ -9,35 +9,55 @@ import {
   openApiGetPaths,
   type ProbeRun,
   pickHeaders,
-  probeOrigin,
+  probeSite,
   RECORDED_HEADERS,
+  stripPolicyMeta,
   toMarkdown,
 } from "../e2e/s4-probe/report.ts";
 import { S4_TARGETS } from "../e2e/s4-probe/targets.ts";
+import { PRODUCTION_URL } from "../e2e/urls.ts";
 import { REPO_ROOT } from "../scripts/check-common.ts";
 import { findUrls } from "../scripts/check-hosts.ts";
+import { policyMetaHtml } from "../scripts/security-policy-meta.ts";
 
-const PAGE = "https://nf-builder.netlify.app";
+const PAGE = "https://ewels.github.io";
 
 describe("S4 probe model", () => {
-  it("F-008 step 1: S4_PROBE_URL accepts only the production site, its deploy previews and the local preview, over https except localhost", () => {
-    expect(probeOrigin("https://nf-builder.netlify.app/")).toBe(PAGE);
-    expect(
-      probeOrigin("https://deploy-preview-12--nf-builder.netlify.app"),
-    ).toBe("https://deploy-preview-12--nf-builder.netlify.app");
-    expect(probeOrigin("http://localhost:4173")).toBe("http://localhost:4173");
+  it("F-008 step 1 ADR-0040: S4_PROBE_URL accepts only the production Pages site and a local preview under its base path, over https except localhost", () => {
+    expect(probeSite(PRODUCTION_URL)).toEqual({
+      url: PRODUCTION_URL,
+      origin: "https://ewels.github.io",
+    });
+    expect(probeSite("https://ewels.github.io/nf-builder")).toEqual({
+      url: PRODUCTION_URL,
+      origin: "https://ewels.github.io",
+    });
+    expect(probeSite("http://localhost:4173/nf-builder/")).toEqual({
+      url: "http://localhost:4173/nf-builder/",
+      origin: "http://localhost:4173",
+    });
     for (const bad of [
       undefined,
       "",
-      "http://nf-builder.netlify.app",
-      "https://evil.example",
-      "https://nf-builder.netlify.app.evil.example",
-      "https://x--nf-builder.netlify.app.evil.example",
+      "http://ewels.github.io/nf-builder/",
+      "https://evil.example/nf-builder/",
+      "https://ewels.github.io.evil.example/nf-builder/",
+      "https://ewels.github.io/other/",
+      "https://nf-builder.netlify.app/",
+      "http://localhost:4173",
+      "http://localhost:4173/",
+      "http://localhost.evil.example:4173/nf-builder/",
     ]) {
-      expect(() => probeOrigin(bad), String(bad)).toThrow(
-        /nf-builder\.netlify\.app/,
-      );
+      expect(() => probeSite(bad), String(bad)).toThrow(/S4_PROBE_URL/);
     }
+  });
+
+  it("F-008 ADR-0023: stripPolicyMeta removes the CSP meta and nothing else, so the deployed probe measures CORS, not our CSP", () => {
+    const html = `<!doctype html><html><head>${policyMetaHtml()}<meta charset="utf-8"><title>x</title></head><body></body></html>`;
+    expect(stripPolicyMeta(html)).toBe(
+      '<!doctype html><html><head><meta name="referrer" content="no-referrer"><meta charset="utf-8"><title>x</title></head><body></body></html>',
+    );
+    expect(stripPolicyMeta("<p>none</p>")).toBe("<p>none</p>");
   });
 
   it("F-008 ADR-0009: after a cross-origin redirect to another origin the browser sends Origin null, otherwise the Origin is kept", () => {
@@ -268,8 +288,8 @@ describe("S4 OpenAPI and targets", () => {
     if (!first || !second) throw new Error("targets missing");
     const run: ProbeRun = {
       probedAt: "2026-11-22T10:00:00.000Z",
-      pageUrl: "https://deploy-preview-9--nf-builder.netlify.app/spike/s4/",
-      deployed: { commit: "abc1234", context: "deploy-preview" },
+      pageUrl: `${PRODUCTION_URL}spike/s4/`,
+      deployed: { commit: "abc1234", context: "production" },
       browserName: "chromium",
       browserVersion: "140.0",
       environment: "github-actions",
@@ -377,7 +397,7 @@ describe("S4 probe page", () => {
   it("F-008 QA-30: the S4 probe page loads one same-origin module script and has no inline script or style", () => {
     const html = readFileSync(join(PAGE_DIR, "index.html"), "utf8");
     expect(html.match(/<script\b[^>]*>[\s\S]*?<\/script>/g)).toEqual([
-      '<script type="module" src="/spike/s4/probe.js"></script>',
+      '<script type="module" src="probe.js"></script>',
     ]);
     expect(html.match(/<script/g)).toHaveLength(1);
     expect(html).not.toContain("<style");
@@ -394,20 +414,15 @@ describe("S4 probe workflow", () => {
     "utf8",
   );
 
-  it("F-008 ADR-0023: the S4 probe workflow runs on dispatch and on pull requests touching the probe, waits for the head commit's deploy preview, probes in Chromium, Firefox and WebKit, and always uploads the results", () => {
-    expect(workflow).toMatch(/^ {2}pull_request:/m);
+  it("F-008 ADR-0023 ADR-0040: the S4 probe workflow runs on dispatch only, probes in Chromium, Firefox and WebKit, and always uploads the results", () => {
+    expect(workflow).not.toMatch(/^ {2}pull_request:/m);
     expect(workflow).toMatch(/^ {2}workflow_dispatch:/m);
-    for (const glob of [
-      "apps/web/public/spike/s4/**",
-      "e2e/s4-probe/**",
-      "e2e/s4-probe*",
-      ".github/workflows/s4-probe.yml",
-    ]) {
-      expect(workflow, glob).toContain(glob);
-    }
+    expect(workflow).not.toContain("check-deploy-headers");
+    expect(workflow).not.toContain("S4_EXPECTED_COMMIT");
     expect(workflow).toMatch(
-      /run: node scripts\/check-deploy-headers\.ts --url "\$S4_PROBE_URL" --commit "\$S4_EXPECTED_COMMIT"/,
+      /url:\n\s+description:[^\n]*\n\s+required: true\n/,
     );
+    expect(workflow).not.toMatch(/^\s+default:/m);
     expect(workflow).toMatch(/PW_BROWSERS: "?chromium,firefox,webkit"?/);
     expect(workflow).toMatch(
       /run: pnpm test:e2e -- --config e2e\/s4-probe\.config\.ts/,
@@ -417,9 +432,6 @@ describe("S4 probe workflow", () => {
       .find((step) => step.includes("upload-artifact"));
     expect(upload).toMatch(/^\s*if: always\(\)/m);
     expect(workflow).toMatch(/^permissions:\s*\n\s+contents: read/m);
-    expect(workflow).toContain(
-      "github.event.pull_request.head.repo.full_name == github.repository",
-    );
   });
 
   it("F-008 ADR-0023: the S4 probe workflow passes the dispatch input only through an env line, never into a shell command", () => {

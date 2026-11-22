@@ -23,13 +23,13 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-207 layout sidecar | not started | [plan](plan-F-207.md). After F-205 and F-202. |
 | F-208 view modes and Code | not started | [plan](plan-F-208.md). After F-205. |
 | F-501 registry snapshot | merged, PR #29, **not passing** | Passes once the Pages deploy serves `/registry/` and `verify` passes (ADR 0041, F-011). F-502 to F-506, F-702, F-704 and F-705 depend on it. |
-| F-011 GitHub Pages hosting | `feat/F-011`, PR #37 | Reviewed, CI green; merge once Pages is enabled (#35), after merging `main`. |
+| F-011 GitHub Pages hosting | `feat/F-011`, in PR #37 | Pages enabled by the maintainer; the plan stays (ADR 0040 links it). |
 
 ## Merge order
 
 Branches are stacked: `feat/F-108` → `feat/F-107`; `feat/F-111` also merges F-107. Open PRs for F-108, F-107 and F-111 against `main` in that order (merge `main` into each first), each green before the next. Worktrees: `/home/user/wt-F-1xx`.
 
-Next free ADR number: 0044 (0040 and 0041 are F-011's, 0042 F-112's, 0043 F-113's).
+Next free ADR number: 0045 (0042 is F-112's, 0044 F-011's).
 
 ## Decisions already taken on the plans' open points
 
@@ -98,7 +98,7 @@ Next free ADR number: 0044 (0040 and 0041 are F-011's, 0042 F-112's, 0043 F-113'
 - Visual baselines: download the `playwright-chromium` artefact, view the `-actual.png`, commit it (ADR 0021).
 - Local e2e: `export PW_CHROMIUM_EXECUTABLE=/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell`; stale `vite preview` servers from other worktrees can hold ports 4173 and 5173. Spike ports: S5 4175, S3 4177 and 4178.
 
-### F-011 — [plan](plan-F-011.md)
+### F-011 (merged with its PR)
 - Accept every point in section 8:
   - build now, and merge only after Pages is enabled (#35);
   - ADR 0014 and ADR 0035 are superseded by ADRs 0040 and 0041, and ADR 0002 is amended;
@@ -109,7 +109,7 @@ Next free ADR number: 0044 (0040 and 0041 are F-011's, 0042 F-112's, 0043 F-113'
   - `SITE_CONTEXT=production`;
   - a fifth step for the frame guard;
   - the tests removed with their behaviour are mapped in the PR;
-  - the notice reads "nf-builder can't run inside another page." with an "Open in a new tab" link;
+  - the notice reads "nf-builder can't run inside another page." with an "Open in a new tab" link (superseded by ADR 0044: the maintainer wants the app to work in frames, so there is no guard);
   - `passes` is set in the PR, and F-501 flips in a follow-up after a snapshot-triggered `verify` passes.
 - `smol-toml` stays (section 6).
 - The plan's mention of #33 is stale: Actions runs again.

@@ -55,7 +55,8 @@ export function findUrls(text: string): FoundUrl[] {
     while (line + 1 < lineStarts.length && (lineStarts[line + 1] ?? 0) <= index)
       line++;
     found.push({
-      url: match[0].replace(/\\\//g, "/"),
+      // A trailing `;` ends a CSP directive (the policy sits in a <meta> element, ADR 0040), not the URL.
+      url: match[0].replace(/\\\//g, "/").replace(/;+$/, ""),
       index,
       line: line + 1,
       column: index - (lineStarts[line] ?? 0) + 1,

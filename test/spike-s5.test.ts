@@ -12,9 +12,8 @@ import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   cspProblems,
-  readNetlifyConfig,
-  siteHeaders,
-} from "../scripts/netlify-config.ts";
+  SITE_POLICY_HEADERS,
+} from "../scripts/security-policy.ts";
 import {
   addToScriptSrc,
   spikeS5Headers,
@@ -222,10 +221,10 @@ describe("F-010 spike S5 references", () => {
 });
 
 describe("F-010 spike S5 headers", () => {
-  const site = siteHeaders(readNetlifyConfig());
+  const site = SITE_POLICY_HEADERS;
   const CSP = "Content-Security-Policy";
 
-  it("F-010 QA-30 ADR-0014: spikeS5Headers is the netlify.toml header set with only 'wasm-unsafe-eval' added to script-src, and the CSP still passes cspProblems", () => {
+  it("F-010 QA-30 ADR-0014: spikeS5Headers is the site policy (`SITE_POLICY_HEADERS`) with only 'wasm-unsafe-eval' added to script-src, and the CSP still passes cspProblems", () => {
     const spike = spikeS5Headers();
     expect(Object.keys(spike)).toEqual(Object.keys(site));
     for (const [name, value] of Object.entries(site))

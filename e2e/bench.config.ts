@@ -1,5 +1,5 @@
 import { defineConfig, devices } from "@playwright/test";
-import { PREVIEW_URL } from "./urls.ts";
+import { E2E_BASE_PATH, PREVIEW_URL } from "./urls.ts";
 
 // F-113 (QA-03, QA-04): `pnpm bench`. Chromium only, one worker, run after `pnpm corpus:fetch`. The root config never
 // collects *.bench.ts.
@@ -13,7 +13,7 @@ export default defineConfig({
   timeout: 10 * 60_000,
   outputDir: "../test-results/bench",
   reporter: process.env.CI ? [["list"], ["github"]] : "list",
-  // F-011: the app is served under /nf-builder/, so the base URL (and the web server URL below) need that path
+  // The app is served under E2E_BASE_PATH, as on GitHub Pages (ADR 0040).
   use: { baseURL: PREVIEW_URL },
   projects: [
     {
@@ -26,9 +26,10 @@ export default defineConfig({
     },
   ],
   webServer: {
-    // Always a fresh production build, served with the netlify.toml headers.
+    // Always a fresh production build, served as GitHub Pages serves it (ADR 0040).
     command: "pnpm build && pnpm preview",
     url: PREVIEW_URL,
+    env: { BASE_PATH: E2E_BASE_PATH },
     timeout: 120_000,
   },
 });
