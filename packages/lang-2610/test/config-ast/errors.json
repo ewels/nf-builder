@@ -1,0 +1,261 @@
+{
+  "about": "F-103 inputs for errors nf-lang's ConfigAstBuilder reports (incomplete and invalid statements, escapes, number format, fatal errors, and the checks an invalid statement skips). Malformed on purpose. lint is what nextflow lint 26.10.7 printed for the tree; the config builder must report the same errors, in the same order.",
+  "upstream": {
+    "repo": "nextflow-io/nextflow",
+    "tag": "v26.10.7",
+    "commit": "0ad848ef3c3a22824cd9eb2ca14568385867702d"
+  },
+  "lintCheckedWith": "nextflow 26.10.7 lint -o json . (NXF_SYNTAX_PARSER=v2, NXF_OFFLINE=true, no network), 2026-11-22",
+  "cases": [
+    {
+      "file": "errors/p01-apply-not-plugins.config",
+      "lint": [
+        {
+          "line": 1,
+          "column": 1,
+          "message": "Config settings must be assigned with an equals sign (`=`)"
+        }
+      ]
+    },
+    {
+      "file": "errors/p02-incomplete.config",
+      "lint": [
+        {
+          "line": 1,
+          "column": 1,
+          "message": "Incomplete statement"
+        }
+      ]
+    },
+    {
+      "file": "errors/p03-incomplete-in-block.config",
+      "lint": [
+        {
+          "line": 2,
+          "column": 5,
+          "message": "Incomplete statement"
+        }
+      ]
+    },
+    {
+      "file": "errors/p04-incomplete-dot.config",
+      "lint": [
+        {
+          "line": 1,
+          "column": 1,
+          "message": "Incomplete statement"
+        }
+      ]
+    },
+    {
+      "file": "errors/p05-goto-keyword.config",
+      "lint": [
+        {
+          "line": 1,
+          "column": 26,
+          "message": "`goto` is not allowed as an identifier because it is a Groovy keyword"
+        },
+        {
+          "line": 1,
+          "column": 36,
+          "message": "`goto` is not allowed as an identifier because it is a Groovy keyword"
+        }
+      ]
+    },
+    {
+      "file": "errors/p06-invalid-assign-target.config",
+      "lint": [
+        {
+          "line": 1,
+          "column": 22,
+          "message": "Invalid assignment target -- must be a variable, index, or property expression"
+        }
+      ]
+    },
+    {
+      "file": "errors/p07-empty-list-comma.config",
+      "lint": [
+        {
+          "line": 1,
+          "column": 13,
+          "message": "Empty list literal should not contain any comma(,)"
+        }
+      ]
+    },
+    {
+      "file": "errors/p08-duplicate-named-argument.config",
+      "lint": [
+        {
+          "line": 1,
+          "column": 22,
+          "message": "Duplicated named argument 'a' found"
+        }
+      ]
+    },
+    {
+      "file": "errors/p09-nested-paren.config",
+      "lint": [
+        {
+          "line": 1,
+          "column": 22,
+          "message": "Nested parenthesis is not allowed in multiple assignment, e.g. ((a)) = b"
+        }
+      ]
+    },
+    {
+      "file": "errors/p10-number-format.config",
+      "lint": [
+        {
+          "line": 1,
+          "column": 12,
+          "message": "Number of value 99999999999 does not fit in the range of int, but int was enforced."
+        }
+      ]
+    },
+    {
+      "file": "errors/p17-two-escapes.config",
+      "lint": [
+        {
+          "line": 1,
+          "column": 14,
+          "message": "Invalid escape sequence: '\\q'"
+        },
+        {
+          "line": 1,
+          "column": 23,
+          "message": "Invalid escape sequence: '\\.'"
+        }
+      ]
+    },
+    {
+      "file": "errors/p18-two-invalid.config",
+      "lint": [
+        {
+          "line": 1,
+          "column": 1,
+          "message": "If statements cannot be mixed with config statements"
+        },
+        {
+          "line": 2,
+          "column": 1,
+          "message": "Variable declarations cannot be mixed with config statements"
+        }
+      ]
+    },
+    {
+      "file": "errors/p19-two-fatal.config",
+      "lint": [
+        {
+          "line": 1,
+          "column": 22,
+          "message": "Invalid assignment target -- must be a variable, index, or property expression"
+        }
+      ]
+    },
+    {
+      "file": "errors/q01-numfmt-then-escape.config",
+      "lint": [
+        {
+          "line": 1,
+          "column": 12,
+          "message": "Number of value 99999999999 does not fit in the range of int, but int was enforced."
+        },
+        {
+          "line": 2,
+          "column": 14,
+          "message": "Invalid escape sequence: '\\q'"
+        }
+      ]
+    },
+    {
+      "file": "errors/q02-escape-fatal-escape.config",
+      "lint": [
+        {
+          "line": 1,
+          "column": 14,
+          "message": "Invalid escape sequence: '\\q'"
+        },
+        {
+          "line": 2,
+          "column": 22,
+          "message": "Invalid assignment target -- must be a variable, index, or property expression"
+        }
+      ]
+    },
+    {
+      "file": "errors/q03-escapes-in-names.config",
+      "lint": [
+        {
+          "line": 5,
+          "column": 7,
+          "message": "Invalid escape sequence: '\\q'"
+        }
+      ]
+    },
+    {
+      "file": "errors/r01-if-escape-not-checked.config",
+      "lint": [
+        {
+          "line": 1,
+          "column": 1,
+          "message": "If statements cannot be mixed with config statements"
+        }
+      ]
+    },
+    {
+      "file": "errors/r02-def-list-comma-then-escape.config",
+      "lint": [
+        {
+          "line": 1,
+          "column": 1,
+          "message": "Variable declarations cannot be mixed with config statements"
+        },
+        {
+          "line": 2,
+          "column": 14,
+          "message": "Invalid escape sequence: '\\q'"
+        }
+      ]
+    },
+    {
+      "file": "errors/r03-def-number-format.config",
+      "lint": [
+        {
+          "line": 1,
+          "column": 1,
+          "message": "Variable declarations cannot be mixed with config statements"
+        }
+      ]
+    },
+    {
+      "file": "errors/r04-if-in-process-block.config",
+      "lint": [
+        {
+          "line": 2,
+          "column": 5,
+          "message": "If statements cannot be mixed with config statements"
+        }
+      ]
+    },
+    {
+      "file": "errors/r05-try-include-escape.config",
+      "lint": [
+        {
+          "line": 1,
+          "column": 1,
+          "message": "Try-catch blocks cannot be mixed with config statements"
+        }
+      ]
+    },
+    {
+      "file": "errors/r06-closure-body-checked.config",
+      "lint": [
+        {
+          "line": 1,
+          "column": 33,
+          "message": "Empty list literal should not contain any comma(,)"
+        }
+      ]
+    }
+  ]
+}

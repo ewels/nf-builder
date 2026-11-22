@@ -1,0 +1,37 @@
+ConfigFile 1:1-13:1
+  ConfigBlock process 1:1-1:132
+    ConfigSelector withName: 'BEDTOOLS_SORT' 1:11-1:130
+      ConfigAssign conda = String 1:39-1:128
+  ConfigBlock process 2:1-2:144
+    ConfigSelector withName: 'ENSEMBLVEP_DOWNLOAD' 2:11-2:142
+      ConfigAssign conda = String 2:45-2:140
+  ConfigBlock process 3:1-3:134
+    ConfigSelector withName: 'ENSEMBLVEP_VEP' 3:11-3:132
+      ConfigAssign conda = String 3:40-3:130
+  ConfigBlock process 4:1-4:118
+    ConfigSelector withName: 'FASTQC' 4:11-4:116
+      ConfigAssign conda = String 4:32-4:114
+  ConfigBlock process 5:1-5:136
+    ConfigSelector withName: 'GATK4_APPLYBQSR' 5:11-5:134
+      ConfigAssign conda = String 5:41-5:132
+  ConfigBlock process 6:1-6:152
+    ConfigSelector withName: 'GATK4_FILTERMUTECTCALLS' 6:11-6:150
+      ConfigAssign conda = String 6:49-6:148
+  ConfigBlock process 7:1-7:146
+    ConfigSelector withName: 'GATK4_MARKDUPLICATES' 7:11-7:144
+      ConfigAssign conda = String 7:46-7:142
+  ConfigBlock process 8:1-8:120
+    ConfigSelector withName: 'MULTIQC' 8:11-8:118
+      ConfigAssign conda = String 8:33-8:116
+  ConfigBlock process 9:1-9:158
+    ConfigSelector withName: 'VARLOCIRAPTOR_CALLVARIANTS' 9:11-9:156
+      ConfigAssign conda = String 9:52-9:154
+  ConfigBlock process 10:1-10:188
+    ConfigSelector withName: 'VARLOCIRAPTOR_ESTIMATEALIGNMENTPROPERTIES' 10:11-10:186
+      ConfigAssign conda = String 10:67-10:184
+  ConfigBlock process 11:1-11:152
+    ConfigSelector withName: 'VARLOCIRAPTOR_FILTERFDR' 11:11-11:150
+      ConfigAssign conda = String 11:49-11:148
+  ConfigBlock process 12:1-12:154
+    ConfigSelector withName: 'VARLOCIRAPTOR_PREPROCESS' 12:11-12:152
+      ConfigAssign conda = String 12:50-12:150

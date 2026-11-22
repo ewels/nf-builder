@@ -1,0 +1,28 @@
+ConfigFile 1:1-10:1
+  ConfigBlock process 1:1-1:132
+    ConfigSelector withName: 'BEDTOOLS_SORT' 1:11-1:130
+      ConfigAssign conda = String 1:39-1:128
+  ConfigBlock process 2:1-2:144
+    ConfigSelector withName: 'ENSEMBLVEP_DOWNLOAD' 2:11-2:142
+      ConfigAssign conda = String 2:45-2:140
+  ConfigBlock process 3:1-3:134
+    ConfigSelector withName: 'ENSEMBLVEP_VEP' 3:11-3:132
+      ConfigAssign conda = String 3:40-3:130
+  ConfigBlock process 4:1-4:118
+    ConfigSelector withName: 'FASTQC' 4:11-4:116
+      ConfigAssign conda = String 4:32-4:114
+  ConfigBlock process 5:1-5:120
+    ConfigSelector withName: 'MULTIQC' 5:11-5:118
+      ConfigAssign conda = String 5:33-5:116
+  ConfigBlock process 6:1-6:158
+    ConfigSelector withName: 'VARLOCIRAPTOR_CALLVARIANTS' 6:11-6:156
+      ConfigAssign conda = String 6:52-6:154
+  ConfigBlock process 7:1-7:188
+    ConfigSelector withName: 'VARLOCIRAPTOR_ESTIMATEALIGNMENTPROPERTIES' 7:11-7:186
+      ConfigAssign conda = String 7:67-7:184
+  ConfigBlock process 8:1-8:152
+    ConfigSelector withName: 'VARLOCIRAPTOR_FILTERFDR' 8:11-8:150
+      ConfigAssign conda = String 8:49-8:148
+  ConfigBlock process 9:1-9:154
+    ConfigSelector withName: 'VARLOCIRAPTOR_PREPROCESS' 9:11-9:152
+      ConfigAssign conda = String 9:50-9:150

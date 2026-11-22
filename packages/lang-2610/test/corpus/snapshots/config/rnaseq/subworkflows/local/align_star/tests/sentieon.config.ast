@@ -1,0 +1,11 @@
+ConfigFile 1:1-17:1
+  ConfigBlock process 1:1-9:2
+    ConfigSelector withName: 'STAR_GENOMEGENERATE.*' 2:5-4:6
+      ConfigAssign ext.args = String 3:9-3:45
+    ConfigSelector withName: '.*STAR_ALIGN.*' 6:5-8:6
+      ConfigAssign ext.args = String 7:9-7:129
+  ConfigBlock env 11:1-16:2
+    #line 12:5-12:42
+    ConfigAssign SENTIEON_LICENSE = MethodCall 13:5-13:62
+    ConfigAssign SENTIEON_AUTH_MECH = MethodCall 14:5-14:61
+    ConfigAssign SENTIEON_AUTH_DATA = Property 15:5-15:52

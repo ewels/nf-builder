@@ -1,0 +1,11 @@
+ConfigFile 1:1-25:1
+  #block 1:1-11:3
+  ConfigBlock params 13:1-24:2
+    ConfigAssign config_profile_name = String 14:5-14:69
+    ConfigAssign config_profile_description = String 15:5-15:92
+    #line 17:5-17:37
+    ConfigAssign input = String 18:5-18:119
+    #line 20:5-20:20
+    ConfigAssign tools = String 21:5-21:106
+    ConfigAssign split_fastq = Number 22:5-22:27
+    ConfigAssign filter_vcfs = Boolean 23:5-23:23

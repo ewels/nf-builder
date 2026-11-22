@@ -1,0 +1,46 @@
+ConfigFile 1:1-69:1
+  #block 1:1-9:3
+  ConfigBlock process 11:1-68:2
+    #line 13:5-13:58
+    ConfigAssign cpus = Closure 14:5-14:39
+    ConfigAssign memory = Closure 15:5-15:39
+    ConfigAssign time = Closure 16:5-16:39
+    ConfigAssign errorStrategy = Closure 18:5-18:96
+    ConfigAssign maxRetries = Number 19:5-19:22
+    ConfigAssign maxErrors = String 20:5-20:25
+    #line 22:5-22:46
+    #line 23:5-23:73
+    #line 24:5-24:103
+    #line 25:5-25:90
+    #line 26:5-26:48
+    #line 27:5-27:84
+    ConfigSelector withLabel: process_single 28:5-32:6
+      ConfigAssign cpus = Closure 29:9-29:41
+      ConfigAssign memory = Closure 30:9-30:41
+      ConfigAssign time = Closure 31:9-31:41
+    ConfigSelector withLabel: process_low 33:5-37:6
+      ConfigAssign cpus = Closure 34:9-34:42
+      ConfigAssign memory = Closure 35:9-35:42
+      ConfigAssign time = Closure 36:9-36:42
+    ConfigSelector withLabel: process_medium 38:5-42:6
+      ConfigAssign cpus = Closure 39:9-39:42
+      ConfigAssign memory = Closure 40:9-40:42
+      ConfigAssign time = Closure 41:9-41:42
+    ConfigSelector withLabel: process_high 43:5-47:6
+      ConfigAssign cpus = Closure 44:9-44:42
+      ConfigAssign memory = Closure 45:9-45:42
+      ConfigAssign time = Closure 46:9-46:42
+    ConfigSelector withLabel: process_long 48:5-50:6
+      ConfigAssign time = Closure 49:9-49:42
+    ConfigSelector withLabel: process_low_memory 51:5-53:6
+      ConfigAssign memory = Closure 52:9-52:41
+    ConfigSelector withLabel: process_high_memory 54:5-56:6
+      ConfigAssign memory = Closure 55:9-55:43
+    ConfigSelector withLabel: error_ignore 57:5-59:6
+      ConfigAssign errorStrategy = String 58:9-58:33
+    ConfigSelector withLabel: error_retry 60:5-63:6
+      ConfigAssign errorStrategy = String 61:9-61:32
+      ConfigAssign maxRetries = Number 62:9-62:26
+    ConfigSelector withLabel: process_gpu 64:5-67:6
+      ConfigAssign accelerator = Number 65:9-65:29
+      ConfigAssign containerOptions = Closure 66:9-66:146

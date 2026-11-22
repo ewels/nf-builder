@@ -1,0 +1,28 @@
+ConfigFile 1:1-47:1
+  #block 1:1-11:3
+  ConfigBlock params 13:1-46:2
+    ConfigAssign config_profile_name = String 14:5-14:55
+    ConfigAssign config_profile_description = String 15:5-15:104
+    #line 17:5-17:31
+    ConfigAssign prokaryotic = Boolean 18:5-18:23
+    #line 20:5-20:76
+    ConfigAssign gffread_transcript_fasta = Boolean 21:5-21:36
+    #line 23:5-23:58
+    #line 24:5-24:66
+    #line 25:5-25:66
+    ConfigAssign aligner = String 26:5-26:31
+    #line 28:5-28:74
+    ConfigAssign featurecounts_feature_type = String 29:5-29:39
+    #line 31:5-31:73
+    #line 32:5-32:82
+    #line 33:5-33:80
+    ConfigAssign rseqc_modules = String 34:5-34:65
+    ConfigAssign skip_dupradar = Boolean 35:5-35:25
+    ConfigAssign skip_qualimap = Boolean 36:5-36:25
+    #line 38:5-38:76
+    ConfigAssign skip_bigwig = Boolean 39:5-39:25
+    #line 41:5-41:78
+    #line 42:5-42:80
+    #line 43:5-43:79
+    #line 44:5-44:40
+    ConfigAssign skip_stringtie = Boolean 45:5-45:26

@@ -1,0 +1,18 @@
+ConfigFile 1:1-58:1
+  #block 1:1-12:3
+  #line 14:1-14:23
+  ConfigBlock process 16:1-57:2
+    ConfigSelector withName: 'SENTIEON_HAPLOTYPER' 18:5-27:6
+      ConfigAssign ext.prefix = Closure 19:9-19:129
+      ConfigAssign ext.when = Closure 20:9-20:103
+      ConfigAssign publishDir = Map 21:9-26:10
+    ConfigSelector withName: 'MERGE_SENTIEON_HAPLOTYPER_VCFS' 29:5-36:6
+      ConfigAssign ext.prefix = Closure 30:9-30:118
+      ConfigAssign publishDir = Map 31:9-35:10
+    ConfigSelector withName: 'MERGE_SENTIEON_HAPLOTYPER_GVCFS' 38:5-45:6
+      ConfigAssign ext.prefix = Closure 39:9-39:57
+      ConfigAssign publishDir = Map 40:9-44:10
+    ConfigSelector withName: '.*:SENTIEON_HAPLOTYPER_VCF_VARIANT_FILTERING_HAPLOTYPECALLER:FILTERVARIANTTRANCHES' 47:9-55:10
+      ConfigAssign ext.args = Closure 48:13-48:55
+      ConfigAssign ext.prefix = Closure 49:13-49:59
+      ConfigAssign publishDir = Map 50:13-54:14

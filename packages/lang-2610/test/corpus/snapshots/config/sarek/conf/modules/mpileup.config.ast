@@ -1,0 +1,36 @@
+ConfigFile 1:1-87:1
+  #block 1:1-12:3
+  #line 14:1-14:11
+  ConfigBlock process 16:1-86:2
+    ConfigSelector withName: 'CAT_MPILEUP' 18:5-22:6
+      ConfigAssign publishDir = Map 19:9-21:10
+    ConfigSelector withName: 'BCFTOOLS_MPILEUP' 24:5-35:6
+      ConfigAssign ext.args2 = Closure 25:9-25:49
+      ConfigAssign ext.args3 = Closure 26:9-26:53
+      #line 26:54-26:102
+      ConfigAssign ext.prefix = Closure 27:9-27:127
+      ConfigAssign ext.when = Closure 28:9-28:85
+      ConfigAssign publishDir = Map 29:9-34:10
+    ConfigSelector withName: 'MERGE_BCFTOOLS_MPILEUP' 37:5-44:6
+      ConfigAssign ext.prefix = Closure 38:9-38:45
+      ConfigAssign publishDir = Map 39:9-43:10
+    ConfigSelector withName: 'SAMTOOLS_MPILEUP' 46:5-52:6
+      ConfigAssign ext.when = Closure 47:9-47:90
+      ConfigAssign publishDir = Map 48:9-50:10
+    #line 54:1-54:24
+    ConfigSelector withName: 'NFCORE_SAREK:SAREK:BAM_VARIANT_CALLING_GERMLINE_ALL:BAM_VARIANT_CALLING_MPILEUP:SAMTOOLS_MPILEUP' 55:9-57:10
+      ConfigAssign ext.prefix = Closure 56:13-56:121
+    ConfigSelector withName: 'NFCORE_SAREK:SAREK:BAM_VARIANT_CALLING_GERMLINE_ALL:BAM_VARIANT_CALLING_MPILEUP:CAT_MPILEUP' 59:9-61:10
+      ConfigAssign ext.prefix = Closure 60:13-60:60
+    ConfigSelector withName: 'NFCORE_SAREK:SAREK:BAM_VARIANT_CALLING_SOMATIC_ALL:MPILEUP_NORMAL:SAMTOOLS_MPILEUP' 63:9-65:10
+      ConfigAssign ext.prefix = Closure 64:13-64:121
+    ConfigSelector withName: 'NFCORE_SAREK:SAREK:BAM_VARIANT_CALLING_SOMATIC_ALL:MPILEUP_NORMAL:CAT_MPILEUP' 67:9-69:10
+      ConfigAssign ext.prefix = Closure 68:13-68:60
+    ConfigSelector withName: 'NFCORE_SAREK:SAREK:BAM_VARIANT_CALLING_SOMATIC_ALL:MPILEUP_TUMOR:SAMTOOLS_MPILEUP' 71:9-73:10
+      ConfigAssign ext.prefix = Closure 72:13-72:119
+    ConfigSelector withName: 'NFCORE_SAREK:SAREK:BAM_VARIANT_CALLING_SOMATIC_ALL:MPILEUP_TUMOR:CAT_MPILEUP' 75:9-77:10
+      ConfigAssign ext.prefix = Closure 76:13-76:59
+    ConfigSelector withName: 'NFCORE_SAREK:SAREK:BAM_VARIANT_CALLING_TUMOR_ONLY_ALL:BAM_VARIANT_CALLING_MPILEUP:SAMTOOLS_MPILEUP' 79:9-81:10
+      ConfigAssign ext.prefix = Closure 80:13-80:119
+    ConfigSelector withName: 'NFCORE_SAREK:SAREK:BAM_VARIANT_CALLING_TUMOR_ONLY_ALL:BAM_VARIANT_CALLING_MPILEUP:CAT_MPILEUP' 83:9-85:10
+      ConfigAssign ext.prefix = Closure 84:13-84:59

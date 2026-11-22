@@ -1,0 +1,11 @@
+ConfigFile 1:1-58:1
+  ConfigBlock process 1:1-57:2
+    #line 3:5-3:39
+    #line 4:5-4:76
+    ConfigSelector withName: '.*:ALIGN_BOWTIE2:BOWTIE2_ALIGN' 6:5-56:6
+      ConfigAssign ext.args = Closure 7:9-36:10
+        #line 14:13-14:76
+        #line 15:13-15:80
+        #line 26:13-26:90
+        #line 27:13-27:71
+      ConfigAssign publishDir = List 37:9-55:10

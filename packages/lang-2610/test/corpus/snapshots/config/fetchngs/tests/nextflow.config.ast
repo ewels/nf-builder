@@ -1,0 +1,7 @@
+ConfigFile 1:1-14:1
+  #block 1:1-5:3
+  ConfigBlock params 7:1-10:2
+    ConfigAssign modules_testdata_base_path = String 8:5-8:81
+    ConfigAssign pipelines_testdata_base_path = String 9:5-9:99
+  #line 12:1-12:49
+  ConfigAssign aws.client.anonymous = Boolean 13:1-13:28

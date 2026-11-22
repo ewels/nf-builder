@@ -1,0 +1,33 @@
+ConfigFile 1:1-85:1
+  #block 1:1-12:3
+  #line 14:1-14:18
+  ConfigBlock process 16:1-84:2
+    ConfigSelector withName: 'GATK4_GENOMICSDBIMPORT' 18:5-26:6
+      ConfigAssign ext.args = Closure 19:9-21:103
+      ConfigAssign ext.prefix = Closure 22:9-22:56
+      ConfigAssign publishDir = Map 23:9-25:10
+    ConfigSelector withName: 'GATK4_GENOTYPEGVCFS' 28:5-33:6
+      ConfigAssign ext.prefix = Closure 29:9-29:45
+      ConfigAssign publishDir = Map 30:9-32:10
+    ConfigSelector withName: 'NFCORE_SAREK:SAREK:BAM_VARIANT_CALLING_GERMLINE_ALL:BAM_JOINT_CALLING_GERMLINE_GATK:BCFTOOLS_SORT' 35:9-40:10
+      ConfigAssign ext.prefix = Closure 36:13-36:61
+      ConfigAssign publishDir = Map 37:13-39:14
+    ConfigSelector withName: 'MERGE_GENOTYPEGVCFS' 42:5-49:6
+      ConfigAssign ext.prefix = Closure 43:9-43:42
+      ConfigAssign publishDir = Map 44:9-48:10
+    ConfigSelector withName: 'VARIANTRECALIBRATOR_INDEL' 51:5-57:6
+      ConfigAssign ext.args = Closure 52:9-52:102
+      ConfigAssign ext.prefix = Closure 53:9-53:44
+      ConfigAssign publishDir = Map 54:9-56:10
+    ConfigSelector withName: 'VARIANTRECALIBRATOR_SNP' 59:5-65:6
+      ConfigAssign ext.args = Closure 60:9-60:99
+      ConfigAssign ext.prefix = Closure 61:9-61:42
+      ConfigAssign publishDir = Map 62:9-64:10
+    ConfigSelector withName: 'GATK4_APPLYVQSR_SNP' 67:5-73:6
+      ConfigAssign ext.args = Closure 68:9-68:75
+      ConfigAssign ext.prefix = Closure 69:9-69:42
+      ConfigAssign publishDir = Map 70:9-72:10
+    ConfigSelector withName: 'GATK4_APPLYVQSR_INDEL' 75:5-83:6
+      ConfigAssign ext.args = Closure 76:9-76:77
+      ConfigAssign ext.prefix = Closure 77:9-77:55
+      ConfigAssign publishDir = Map 78:9-82:10

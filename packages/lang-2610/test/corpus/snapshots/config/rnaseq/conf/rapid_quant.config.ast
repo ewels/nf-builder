@@ -1,0 +1,18 @@
+ConfigFile 1:1-30:1
+  #block 1:1-10:3
+  ConfigBlock params 12:1-29:2
+    ConfigAssign config_profile_name = String 13:5-13:56
+    ConfigAssign config_profile_description = String 14:5-14:105
+    ConfigAssign skip_alignment = Boolean 16:5-16:38
+    ConfigAssign pseudo_aligner = String 17:5-17:42
+    ConfigAssign skip_quantification_merge = Boolean 18:5-18:38
+    ConfigAssign skip_multiqc = Boolean 19:5-19:39
+    ConfigAssign skip_bigwig = Boolean 20:5-20:38
+    ConfigAssign skip_stringtie = Boolean 21:5-21:38
+    ConfigAssign skip_markduplicates = Boolean 22:5-22:38
+    ConfigAssign skip_biotype_qc = Boolean 23:5-23:38
+    ConfigAssign skip_dupradar = Boolean 24:5-24:38
+    ConfigAssign skip_qualimap = Boolean 25:5-25:38
+    ConfigAssign skip_rseqc = Boolean 26:5-26:38
+    ConfigAssign skip_preseq = Boolean 27:5-27:38
+    ConfigAssign skip_deseq2_qc = Boolean 28:5-28:38

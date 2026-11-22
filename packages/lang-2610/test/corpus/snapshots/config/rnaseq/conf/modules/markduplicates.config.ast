@@ -1,0 +1,14 @@
+ConfigFile 1:1-39:1
+  ConfigBlock process 1:1-38:2
+    ConfigSelector withName: '.*:BAM_MARKDUPLICATES_PICARD:PICARD_MARKDUPLICATES' 2:5-17:6
+      ConfigAssign ext.args = String 3:9-3:116
+      ConfigAssign ext.prefix = Closure 4:9-4:53
+      ConfigAssign publishDir = List 5:9-16:10
+    ConfigSelector withName: '.*:BAM_MARKDUPLICATES_PICARD:SAMTOOLS_INDEX' 19:5-27:6
+      ConfigAssign ext.args = Closure 20:9-20:58
+      ConfigAssign ext.prefix = Closure 21:9-21:53
+      ConfigAssign publishDir = Map 22:9-26:10
+    ConfigSelector withName: '.*:BAM_MARKDUPLICATES_PICARD:BAM_STATS_SAMTOOLS:.*' 29:5-37:6
+      ConfigAssign ext.when = Closure 30:9-30:44
+      ConfigAssign ext.prefix = Closure 31:9-31:57
+      ConfigAssign publishDir = Map 32:9-36:10

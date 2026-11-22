@@ -1,0 +1,12 @@
+ConfigFile 1:1-26:1
+  #block 1:1-11:3
+  ConfigBlock params 13:1-25:2
+    ConfigAssign config_profile_name = String 14:5-14:64
+    ConfigAssign config_profile_description = String 15:5-15:128
+    #line 17:5-17:37
+    ConfigAssign input = String 18:5-18:119
+    #line 20:5-20:20
+    ConfigAssign tools = String 21:5-21:83
+    ConfigAssign intervals = String 22:5-22:69
+    ConfigAssign wes = Boolean 23:5-23:23
+    ConfigAssign trim_fastq = Boolean 24:5-24:23

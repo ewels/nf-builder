@@ -1,0 +1,4 @@
+ConfigFile 1:1-18:2
+  ConfigBlock process 1:1-18:2
+    ConfigSelector withName: 'FASTQDL' 2:5-17:6
+      ConfigAssign publishDir = List 3:9-16:10

@@ -1,0 +1,44 @@
+ConfigFile 1:1-99:1
+  #block 1:1-12:3
+  #line 14:1-14:7
+  ConfigBlock process 16:1-98:2
+    ConfigSelector withName: 'FASTQTOBAM' 18:5-26:6
+      #line 19:9-19:79
+      ConfigAssign ext.args = Closure 20:9-20:135
+      ConfigAssign ext.prefix = Closure 21:9-21:36
+      ConfigAssign publishDir = Map 22:9-25:10
+        #line 23:13-23:65
+    ConfigSelector withName: 'BAM2FASTQ' 28:5-35:6
+      ConfigAssign ext.args = String 29:9-29:29
+      ConfigAssign ext.when = Closure 30:9-30:51
+      ConfigAssign publishDir = Map 31:9-34:10
+        #line 32:13-32:65
+    ConfigSelector withName: 'NFCORE_SAREK:SAREK:FASTQ_PREPROCESS_GATK:FASTQ_CREATE_UMI_CONSENSUS_FGBIO:ALIGN_UMI:BWAMEM.*_MEM' 37:9-45:10
+      ConfigAssign ext.args = Closure 38:13-38:75
+      ConfigAssign ext.args2 = Closure 39:13-39:35
+      ConfigAssign ext.prefix = Closure 40:13-40:55
+      ConfigAssign publishDir = Map 41:13-44:14
+        #line 42:17-42:69
+    ConfigSelector withName: 'NFCORE_SAREK:SAREK:FASTQ_PREPROCESS_GATK:FASTQ_CREATE_UMI_CONSENSUS_FGBIO:ALIGN_UMI:DRAGMAP_ALIGN' 47:9-54:10
+      ConfigAssign ext.args2 = Closure 48:13-48:35
+      ConfigAssign ext.prefix = Closure 49:13-49:55
+      ConfigAssign publishDir = Map 50:13-53:14
+        #line 51:17-51:69
+    ConfigSelector withName: 'MERGE_CONSENSUS' 56:5-63:6
+      ConfigAssign ext.args = String 57:9-57:43
+      ConfigAssign ext.prefix = Closure 58:9-58:54
+      ConfigAssign publishDir = Map 59:9-62:10
+        #line 60:13-60:65
+    ConfigSelector withName: 'SAMTOOLS_FIXMATE' 65:5-71:6
+      ConfigAssign ext.prefix = Closure 66:9-66:44
+      ConfigAssign publishDir = Map 67:9-70:10
+        #line 68:13-68:65
+    ConfigSelector withName: 'GROUPREADSBYUMI' 73:5-79:6
+      ConfigAssign publishDir = Map 74:9-78:10
+    ConfigSelector withName: 'CALLUMICONSENSUS' 81:5-89:6
+      ConfigAssign ext.args = Closure 82:9-82:41
+      ConfigAssign ext.prefix = Closure 83:9-83:52
+      ConfigAssign publishDir = Map 84:9-88:10
+    ConfigSelector withName: 'FGBIO_COPYUMIFROMREADNAME' 91:5-96:6
+      ConfigAssign publishDir = Map 92:9-95:10
+        #line 93:13-93:65

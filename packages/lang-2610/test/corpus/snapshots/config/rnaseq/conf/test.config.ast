@@ -1,0 +1,32 @@
+ConfigFile 1:1-55:1
+  #block 1:1-11:3
+  ConfigBlock params 13:1-36:2
+    ConfigAssign config_profile_name = String 14:5-14:48
+    ConfigAssign config_profile_description = String 15:5-15:83
+    #line 17:5-17:18
+    ConfigAssign input = String 18:5-18:163
+    #line 20:5-20:25
+    ConfigAssign fasta = String 21:5-21:147
+    ConfigAssign gtf = String 22:5-22:162
+    ConfigAssign gff = String 23:5-23:147
+    ConfigAssign transcript_fasta = String 24:5-24:154
+    ConfigAssign additional_fasta = String 25:5-25:144
+    ConfigAssign bbsplit_fasta_list = String 27:5-27:157
+    ConfigAssign hisat2_index = String 28:5-28:148
+    ConfigAssign salmon_index = String 29:5-29:155
+    ConfigAssign kraken_db = String 30:5-30:172
+    #line 32:5-32:24
+    ConfigAssign skip_bbsplit = Boolean 33:5-33:32
+    ConfigAssign pseudo_aligner = String 34:5-34:35
+    ConfigAssign umitools_bc_pattern = String 35:5-35:33
+  ConfigBlock process 38:1-54:2
+    #line 39:5-39:78
+    ConfigSelector withName: 'RSEM_PREPAREREFERENCE_GENOME|SENTIEON_RSEMPREPAREREFERENCE_GENOME' 40:5-42:6
+      ConfigAssign ext.args2 = String 41:9-41:46
+    #line 44:5-44:59
+    ConfigSelector withName: '.*:BOWTIE2_ALIGN$' 45:5-47:6
+      ConfigAssign ext.args = String 46:9-46:63
+    ConfigSelector withName: '.*:BOWTIE2_ALIGN_PE$' 48:5-50:6
+      ConfigAssign ext.args = String 49:9-49:63
+    ConfigSelector withName: '.*:RIBODETECTOR' 51:5-53:6
+      ConfigAssign ext.args = String 52:9-52:30

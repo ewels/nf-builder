@@ -1,0 +1,28 @@
+ConfigFile 1:1-57:1
+  #block 1:1-15:3
+  ConfigBlock process 17:1-23:2
+    ConfigAssign resourceLimits = Map 18:5-22:6
+  ConfigBlock params 25:1-46:2
+    ConfigAssign config_profile_name = String 26:5-26:60
+    ConfigAssign config_profile_description = String 27:5-27:124
+    #line 29:5-29:50
+    ConfigAssign input = String 30:5-30:122
+    #line 32:5-32:66
+    ConfigAssign fasta = String 33:5-33:116
+    ConfigAssign gff = String 34:5-34:115
+    ConfigAssign gtf = Null 35:5-35:17
+    ConfigAssign transcript_fasta = Null 36:5-36:28
+    ConfigAssign additional_fasta = Null 37:5-37:28
+    #line 39:5-39:49
+    ConfigAssign skip_bbsplit = Boolean 40:5-40:30
+    ConfigAssign skip_preseq = Boolean 41:5-41:30
+    ConfigAssign skip_biotype_qc = Boolean 42:5-42:30
+    ConfigAssign skip_deseq2_qc = Boolean 43:5-43:30
+    ConfigAssign pseudo_aligner = Null 44:5-44:30
+    ConfigAssign min_trimmed_reads = Number 45:5-45:27
+  ConfigBlock process 48:1-56:2
+    #line 49:5-49:50
+    ConfigSelector withName: '.*:BOWTIE2_ALIGN$' 50:5-52:6
+      ConfigAssign ext.args = String 51:9-51:63
+    ConfigSelector withName: '.*:BOWTIE2_ALIGN_PE$' 53:5-55:6
+      ConfigAssign ext.args = String 54:9-54:63

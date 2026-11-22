@@ -1,0 +1,9 @@
+ConfigFile 1:1-14:1
+  ConfigBlock params 1:1-4:2
+    ConfigAssign publish_dir_mode = String 2:5-2:30
+    ConfigAssign extra_star_align_args = String 3:5-3:48
+  ConfigInclude String "../../../../conf/modules/align_star.config" 6:1-6:59
+  ConfigBlock process 8:1-13:2
+    #line 9:5-9:64
+    ConfigSelector withName: '.*SAMTOOLS_SORT.*' 10:5-12:6
+      ConfigAssign ext.prefix = String 11:9-11:31

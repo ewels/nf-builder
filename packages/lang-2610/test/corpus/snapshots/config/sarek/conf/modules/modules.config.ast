@@ -1,0 +1,48 @@
+ConfigFile 1:1-131:1
+  #block 1:1-12:3
+  ConfigBlock process 14:1-130:2
+    #line 15:5-15:10
+    ConfigSelector withName: 'FASTQC' 16:5-24:6
+      ConfigAssign ext.args = Closure 17:9-17:35
+      ConfigAssign ext.when = Closure 18:9-18:97
+      ConfigAssign publishDir = Map 19:9-23:10
+    ConfigSelector withName: 'MULTIQC' 26:5-28:6
+      ConfigAssign ext.args = Closure 27:9-27:89
+    ConfigSelector withName: 'NFCORE_SAREK:SAREK:CRAM_TO_BAM' 30:5-41:6
+      #line 31:9-31:85
+      #line 32:9-32:87
+      ConfigAssign ext.prefix = Closure 33:9-33:45
+      ConfigAssign publishDir = Map 34:9-40:10
+    ConfigSelector withName: 'NFCORE_SAREK:SAREK:FASTQ_PREPROCESS_GATK:CRAM_QC_NO_MD:SAMTOOLS_STATS' 43:5-51:6
+      ConfigAssign ext.prefix = Closure 44:9-44:50
+      ConfigAssign ext.when = Closure 45:9-45:99
+      ConfigAssign publishDir = Map 46:9-50:10
+    ConfigSelector withName: 'NFCORE_SAREK:SAREK:SPRING_DECOMPRESS_.*' 53:5-58:6
+      ConfigAssign ext.prefix = Closure 54:9-54:48
+      ConfigAssign publishDir = Map 55:9-57:10
+    ConfigSelector withName: 'MOSDEPTH' 60:5-82:6
+      ConfigAssign ext.args = Closure 61:9-66:10
+      ConfigAssign ext.prefix = Closure 67:9-75:10
+      ConfigAssign ext.when = Closure 76:9-76:99
+      ConfigAssign publishDir = Map 77:9-81:10
+    ConfigSelector withName: 'NFCORE_SAREK:SAREK:CRAM_SAMPLEQC:CRAM_QC_RECAL:MOSDEPTH' 84:9-86:10
+      ConfigAssign ext.prefix = Closure 85:13-85:48
+    ConfigSelector withName: 'NFCORE_SAREK:SAREK:CRAM_SAMPLEQC:CRAM_QC_RECAL:SAMTOOLS_STATS' 88:9-96:10
+      ConfigAssign ext.prefix = Closure 89:13-89:106
+      ConfigAssign ext.when = Closure 90:13-90:103
+      ConfigAssign publishDir = Map 91:13-95:14
+    #line 98:5-98:11
+    ConfigSelector withName: 'BCFTOOLS_STATS' 99:5-107:6
+      ConfigAssign ext.prefix = Closure 100:9-100:47
+      ConfigAssign ext.when = Closure 101:9-101:99
+      ConfigAssign publishDir = Map 102:9-106:10
+    ConfigSelector withName: 'VCFTOOLS_.*' 109:5-117:6
+      ConfigAssign ext.prefix = Closure 110:9-110:56
+      ConfigAssign ext.when = Closure 111:9-111:99
+      ConfigAssign publishDir = Map 112:9-116:10
+    ConfigSelector withName: 'VCFTOOLS_TSTV_COUNT' 119:5-121:6
+      ConfigAssign ext.args = Closure 120:9-120:43
+    ConfigSelector withName: 'VCFTOOLS_TSTV_QUAL' 123:5-125:6
+      ConfigAssign ext.args = Closure 124:9-124:42
+    ConfigSelector withName: 'VCFTOOLS_SUMMARY' 127:5-129:6
+      ConfigAssign ext.args = Closure 128:9-128:44

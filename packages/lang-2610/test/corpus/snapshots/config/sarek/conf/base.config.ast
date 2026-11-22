@@ -1,0 +1,78 @@
+ConfigFile 1:1-114:1
+  #block 1:1-9:3
+  ConfigBlock process 11:1-113:2
+    #line 13:5-13:58
+    ConfigAssign cpus = Closure 14:5-14:39
+    ConfigAssign memory = Closure 15:5-15:39
+    ConfigAssign time = Closure 16:5-16:39
+    ConfigAssign errorStrategy = Closure 18:5-18:96
+    ConfigAssign maxRetries = Number 19:5-19:22
+    ConfigAssign maxErrors = String 20:5-20:25
+    #line 22:5-22:46
+    #line 23:5-23:84
+    ConfigSelector withLabel: process_single 24:5-28:6
+      ConfigAssign cpus = Closure 25:9-25:41
+      ConfigAssign memory = Closure 26:9-26:41
+      ConfigAssign time = Closure 27:9-27:41
+    ConfigSelector withLabel: process_low 29:5-33:6
+      ConfigAssign cpus = Closure 30:9-30:42
+      ConfigAssign memory = Closure 31:9-31:42
+      ConfigAssign time = Closure 32:9-32:42
+    ConfigSelector withLabel: process_medium 34:5-38:6
+      ConfigAssign cpus = Closure 35:9-35:42
+      ConfigAssign memory = Closure 36:9-36:42
+      ConfigAssign time = Closure 37:9-37:42
+    ConfigSelector withLabel: process_high 39:5-43:6
+      ConfigAssign cpus = Closure 40:9-40:42
+      ConfigAssign memory = Closure 41:9-41:42
+      ConfigAssign time = Closure 42:9-42:42
+    ConfigSelector withLabel: process_long 44:5-46:6
+      ConfigAssign time = Closure 45:9-45:42
+    ConfigSelector withLabel: process_low_memory 47:5-49:6
+      ConfigAssign memory = Closure 48:9-48:41
+    ConfigSelector withLabel: process_high_memory 50:5-52:6
+      ConfigAssign memory = Closure 51:9-51:43
+    ConfigSelector withLabel: error_ignore 53:5-55:6
+      ConfigAssign errorStrategy = String 54:9-54:33
+    ConfigSelector withLabel: error_retry 56:5-59:6
+      ConfigAssign errorStrategy = String 57:9-57:32
+      ConfigAssign maxRetries = Number 58:9-58:26
+    ConfigSelector withLabel: process_gpu 60:5-62:6
+      ConfigAssign accelerator = Closure 61:9-61:70
+    ConfigSelector withName: 'UNZIP.*|UNTAR.*|TABIX.*|HTSLIB_BGZIPTABIX|BUILD_INTERVALS|CREATE_INTERVALS_BED|VCFTOOLS|BCFTOOLS.*|SAMTOOLS_INDEX' 63:5-66:6
+      ConfigAssign cpus = Closure 64:9-64:41
+      ConfigAssign memory = Closure 65:9-65:41
+    ConfigSelector withName: 'FASTQC' 67:5-70:6
+      ConfigAssign cpus = Closure 68:9-68:41
+      ConfigAssign memory = Closure 69:9-69:41
+    ConfigSelector withName: 'FASTP' 71:5-74:6
+      ConfigAssign cpus = Closure 72:9-72:41
+      ConfigAssign memory = Closure 73:9-73:41
+    ConfigSelector withName: 'BWAMEM1_MEM|BWAMEM2_MEM' 75:5-78:6
+      ConfigAssign cpus = Closure 76:9-76:42
+      ConfigAssign memory = Closure 77:9-77:42
+    ConfigSelector withName: 'PARABRICKS_FQ2BAM' 79:5-81:6
+      ConfigAssign accelerator = Number 80:9-80:24
+    ConfigSelector withName: 'CNVKIT_BATCH' 82:5-85:6
+      ConfigAssign cpus = Closure 83:9-83:42
+      ConfigAssign memory = Closure 84:9-84:42
+    ConfigSelector withName: 'GATK4_MARKDUPLICATES|GATK4SPARK_MARKDUPLICATES' 86:5-89:6
+      ConfigAssign cpus = Closure 87:9-87:42
+      ConfigAssign memory = Closure 88:9-88:42
+    ConfigSelector withName: 'GATK4_APPLYBQSR|GATK4SPARK_APPLYBQSR|GATK4_BASERECALIBRATOR|GATK4SPARK_BASERECALIBRATOR|GATK4_GATHERBQSRREPORTS' 90:5-93:6
+      ConfigAssign cpus = Closure 91:9-91:41
+      ConfigAssign memory = Closure 92:9-92:41
+    ConfigSelector withName: 'MOSDEPTH' 94:5-97:6
+      ConfigAssign cpus = Closure 95:9-95:41
+      ConfigAssign memory = Closure 96:9-96:41
+    ConfigSelector withName: 'STRELKA.*|MANTA.*' 98:5-101:6
+      ConfigAssign cpus = Closure 99:9-99:41
+      ConfigAssign memory = Closure 100:9-100:41
+    ConfigSelector withName: 'SAMTOOLS_CONVERT' 102:5-104:6
+      ConfigAssign memory = Closure 103:9-103:41
+    ConfigSelector withName: 'GATK4_MERGEVCFS' 105:5-108:6
+      ConfigAssign cpus = Closure 106:9-106:41
+      ConfigAssign memory = Closure 107:9-107:41
+    ConfigSelector withName: 'MULTIQC' 109:5-112:6
+      ConfigAssign cpus = Closure 110:9-110:42
+      ConfigAssign memory = Closure 111:9-111:42

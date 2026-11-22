@@ -1,0 +1,12 @@
+ConfigFile 1:1-20:1
+  ConfigBlock process 1:1-19:2
+    ConfigSelector withName: '.*:QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT:CUSTOM_TX2GENE' 2:5-4:6
+      ConfigAssign ext.prefix = Closure 3:9-3:48
+    ConfigSelector withName: '.*:QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT:TXIMETA_TXIMPORT' 6:5-8:6
+      ConfigAssign ext.prefix = Closure 7:9-7:48
+    ConfigSelector withName: '.*:QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT:SE_GENE_UNIFIED' 10:5-13:6
+      ConfigAssign ext.prefix = Closure 11:9-11:43
+      ConfigAssign ext.args = String 12:9-12:89
+    ConfigSelector withName: '.*:QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT:SE_TRANSCRIPT_UNIFIED' 15:5-18:6
+      ConfigAssign ext.prefix = Closure 16:9-16:49
+      ConfigAssign ext.args = String 17:9-17:54

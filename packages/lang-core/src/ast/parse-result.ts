@@ -1,3 +1,4 @@
+import type { ConfigAst } from "./config.ts";
 import type { ScriptAst } from "./script.ts";
 
 /** F-101's `ParseError` is assignable to this. */
@@ -27,3 +28,4 @@ export type ParseResult<Ast> =
     };
 
 export type ScriptParseResult = ParseResult<ScriptAst>;
+export type ConfigParseResult = ParseResult<ConfigAst>;

@@ -259,6 +259,19 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - `docs/licences.md`: ported AST classes, syntax-reference snippets, fastqc module. No new dependency.
 - Blockers: none.
 
+## 2026-11-22 · F-103 · Claude (autonomous)
+- Did: config AST (`parseConfigAst`, internal to `lang-2610`) on F-102's shared expression and statement builders: assignments, blocks, selectors, the `plugins` block, `includeConfig`, incomplete and invalid statements, with exact ranges; comments attached by the config path of the ported `CommentAttacher` (785 of 785 corpus config comments match nf-lang); every `ConfigAstBuilder` error at lint's positions (oracle tree `config-ast-errors`, 22 inputs); snapshots of all 228 corpus configs.
+- State: passing.
+- Next: F-104 and F-110 (in progress), then F-105.
+- Decisions:
+  - Config AST types in `lang-core`, builder in the pack, sharing ADR 0027's conventions; the AST and its snapshots are not a stored or exported format.
+  - Invalid statements are kept as `ConfigInvalid` (ADR 0004) and report only upstream's one message; after a fatal error inside one, the statement is omitted.
+  - Escape checks only on values, not on config names, blocks or selectors, as upstream; integer number-format errors ported, decimal ones left to F-112 (notes).
+  - Config error inputs are an oracle tree with recorded positions, replacing a message-only case in `cases.yaml` (AGENTS.md "Nextflow knowledge").
+  - Selector and include placement and include resolution are resolver checks for F-105 and F-112 (notes).
+  - `docs/licences.md`: `ConfigAstBuilder` joins the ported AST row; corpus-derived snapshot row. No new dependency.
+- Blockers: none.
+
 ## 2026-11-22 · F-110 · Claude (autonomous)
 - Did: a line-by-line port of nf-lang 26.10.7's formatter (`packages/lang-2610/src/printer/`, off the pack entry): `printScript`, `printDeclaration` and `createLayout` for every declaration kind, typed and legacy, plus feature flags, enums and agents; the 81 non-Harshil `ScriptFormatterTest` cases; synthesised and edited trees with a fresh layout; the oracle formats the printer fixtures with `nextflow lint -format` and checks fixed points; 335 of 342 corpus scripts print exactly as `lint -format` does.
 - State: passing.

@@ -1,0 +1,4 @@
+ConfigFile 1:1-12:1
+  ConfigBlock process 1:1-11:2
+    ConfigSelector withName: QUALIMAP_RNASEQ 2:5-10:6
+      ConfigAssign ext.args = Closure 3:9-9:10

@@ -1,0 +1,9 @@
+ConfigFile 1:1-28:1
+  #block 1:1-11:3
+  ConfigBlock process 13:1-19:2
+    ConfigAssign resourceLimits = Map 14:5-18:6
+  ConfigBlock params 21:1-27:2
+    ConfigAssign config_profile_name = String 22:5-22:48
+    ConfigAssign config_profile_description = String 23:5-23:83
+    #line 25:5-25:18
+    ConfigAssign input = String 26:5-26:145

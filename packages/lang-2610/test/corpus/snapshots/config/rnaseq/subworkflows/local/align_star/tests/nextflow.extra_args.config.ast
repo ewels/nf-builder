@@ -1,0 +1,21 @@
+ConfigFile 1:1-29:1
+  #line 1:1-1:55
+  #line 2:1-2:75
+  ConfigBlock params 4:1-15:2
+    ConfigAssign aligner = String 5:5-5:42
+    ConfigAssign outdir = String 6:5-6:38
+    ConfigAssign publish_dir_mode = String 7:5-7:35
+    ConfigAssign save_unaligned = Boolean 8:5-8:34
+    ConfigAssign save_align_intermeds = Boolean 9:5-9:34
+    ConfigAssign contaminant_screening = Null 10:5-10:33
+    ConfigAssign prokaryotic = Boolean 11:5-11:34
+    ConfigAssign extra_star_align_args = String 12:5-12:90
+    ConfigAssign seq_center = Null 13:5-13:33
+    ConfigAssign seq_platform = Null 14:5-14:33
+  ConfigInclude String "../../../../conf/modules/align_star.config" 17:1-17:59
+  ConfigBlock process 19:1-28:2
+    ConfigSelector withName: 'STAR_GENOMEGENERATE.*' 20:5-22:6
+      ConfigAssign ext.args = String 21:9-21:45
+    #line 24:5-24:39
+    ConfigSelector withName: '.*ALIGN_STAR:STAR_ALIGN|.*ALIGN_STAR:SENTIEON_STAR_ALIGN|.*ALIGN_STAR:PARABRICKS_RNA_FQ2BAM' 25:5-27:6
+      ConfigAssign publishDir = List 26:9-26:24

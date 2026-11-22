@@ -1,0 +1,43 @@
+ConfigFile 1:1-133:1
+  #block 1:1-12:3
+  #line 14:1-14:18
+  ConfigBlock process 16:1-132:2
+    ConfigSelector withName: 'NFCORE_SAREK:SAREK:FASTQ_PREPROCESS_GATK:(BAM_MARKDUPLICATES|BAM_MARKDUPLICATES_SPARK):CRAM_QC_MOSDEPTH_SAMTOOLS:SAMTOOLS_STATS' 18:5-26:6
+      ConfigAssign ext.prefix = Closure 19:9-19:96
+      ConfigAssign ext.when = Closure 20:9-20:99
+      ConfigAssign publishDir = Map 21:9-25:10
+    ConfigSelector withName: 'BAM_TO_CRAM_MAPPING' 28:5-45:6
+      ConfigAssign ext.args = String 29:9-29:53
+      ConfigAssign ext.prefix = Closure 30:9-30:45
+      #line 31:9-31:103
+      ConfigAssign ext.when = Binary 32:9-37:14
+      ConfigAssign publishDir = Map 38:9-44:10
+        #line 39:13-39:61
+    ConfigSelector withName: 'GATK4_ESTIMATELIBRARYCOMPLEXITY' 47:5-55:6
+      ConfigAssign ext.prefix = Closure 48:9-48:46
+      ConfigAssign ext.when = Closure 49:9-49:112
+      ConfigAssign publishDir = Map 50:9-54:10
+    ConfigSelector withName: 'GATK4_MARKDUPLICATES' 57:5-88:6
+      ConfigAssign ext.args = Closure 58:9-67:29
+        #line 61:13-61:92
+        #line 62:13-62:106
+      ConfigAssign ext.prefix = Closure 68:9-68:96
+      ConfigAssign ext.when = Closure 69:9-69:105
+      #line 70:9-70:86
+      #line 71:9-71:84
+      ConfigAssign publishDir = Map 72:9-87:10
+        #line 75:13-75:97
+        #line 76:13-76:92
+        #line 77:13-77:95
+        #line 82:17-82:101
+        #line 83:17-83:109
+    ConfigSelector withName: 'GATK4SPARK_MARKDUPLICATES' 90:5-112:6
+      ConfigAssign ext.args = Closure 91:9-95:29
+      ConfigAssign ext.prefix = Closure 96:9-96:96
+      #line 97:9-97:86
+      #line 98:9-98:84
+      ConfigAssign publishDir = Map 99:9-111:10
+    ConfigSelector withName: 'INDEX_MARKDUPLICATES' 114:5-130:6
+      #line 115:9-115:86
+      #line 116:9-116:84
+      ConfigAssign publishDir = Map 117:9-129:10

@@ -19,3 +19,5 @@ export const AST_FIXTURES_FILE = `${REPO_ROOT}/packages/lang-2610/test/ast/fixtu
 export const AST_ERRORS_FILE = `${REPO_ROOT}/packages/lang-2610/test/ast/errors.json`;
 /** Read by path, never imported: the F-110 printer fixture trees (inputs, `nextflow lint -format` goldens, printed outputs). */
 export const PRINTER_FIXTURES_FILE = `${REPO_ROOT}/packages/lang-2610/test/printer/fixtures.json`;
+/** Read by path, never imported: the F-103 config builder-error inputs and the lint errors recorded for each. */
+export const CONFIG_AST_ERRORS_FILE = `${REPO_ROOT}/packages/lang-2610/test/config-ast/errors.json`;

@@ -6,10 +6,11 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 
 | Feature | Branch | State |
 |---|---|---|
-| F-102 script AST | `feat/F-102`, PR #23 | Plan deleted in the PR that merges it. |
-| F-103 config AST | `feat/F-103` (pushed, stacked on `feat/F-102` at `83511c3`) | Built and committed: config AST, 228 corpus snapshots, range property test, ConfigAstBuilder errors, oracle cases. After F-102 merges: merge `main`; fill comment slots with F-102's `attachComments`; delete `src/ast/config/literal-errors.ts` and its number handling, since the shared builders now report escapes (`checkEscapes` in `stringLiteral`/`gstringText`), keyword and duplicate-argument errors, and number formats (call `cx.failOnNumberFormat()` at the end of the config unit); check config paths and block headers still get escape checks; records; PR. |
+| F-102 script AST | merged, PR #23 | |
+| F-103 config AST | `feat/F-103`, in PR | Plan deleted in its PR. |
 | F-104 round trip | not started | [plan](plan-F-104.md). Branch from `main` after F-102 (and F-103) merge. |
 | F-110 printer | `feat/F-110`, in PR | Plan deleted in its PR. |
+| F-105 semantic model | not started | [plan](plan-F-105.md). Branch from `main` after F-104 merges. |
 
 Next free ADR number: 0032.
 
@@ -20,7 +21,7 @@ Next free ADR number: 0032.
 - Report every ScriptAstBuilder error; `-1:-1` upstream errors at the real node; vendored nf-core/fastqc fixture module (MIT) allowed; oracle extended to lint the fixture and error trees (an AGENTS.md "Nextflow knowledge" line says the oracle reproduces `errors.json`); comment-dump oracle in `pnpm test:corpus`.
 - Records at landing: `docs/licences.md` rows for the ported `ScriptAstBuilder`, `CommentAttacher`, `Comments`, `EscapeUtils`, Groovy `StringUtils`/`Numbers` logic, the syntax-reference snippets in fixtures (Apache-2.0) and the vendored fastqc module (MIT); notes from the plan's section 9.
 
-### F-103 — [plan](plan-F-103.md)
+### F-103 (merged with its PR)
 - Reuses F-102's base types and expression/statement builders (the plan's tasks 1–2 are covered by F-102).
 - Snapshots all 228 corpus configs (one line per statement); fixture configs are oracle cases; integer number-format errors ported; `parseConfig` off the pack entry.
 - Records at landing: licences rows for ported `ConfigAstBuilder`, `EscapeUtils`, Groovy `Numbers` and the corpus-derived snapshots; AGENTS.md `pnpm test:corpus` row mentions `pnpm test:corpus config-ast -u`; F-112 notes for keyword checks, duplicate named arguments, decimal-number errors, selector placement and include resolution.
@@ -32,6 +33,10 @@ Next free ADR number: 0032.
 - One new ADR listing the upstream formatter bugs as known differences (ADR 0005), `NO_RANGE` for new nodes (amending ADR 0027) and the blank-line layout for new declarations.
 - Port legacy printing too; default formatter flags only; no pack loader in F-110 (the parser loader from F-104 or F-111 carries the printer); the plan's oracle extension; corpus parity in the `corpus-parse` job; reuse F-102's fixtures by path; statement-level printing left to F-111; no fast-check yet.
 - Spec gap: also print feature flags, enums and agents if cheap; record what LA-45 formats.
+
+### F-105 — [plan](plan-F-105.md)
+- Accept every recommendation in section 6: rules in the pack (`LanguagePack.includes`, new ADR); minimal `Diagnostic` in lang-core; nf-lang wording, our own for registry cases lint can't report; upstream registry fidelity (nested vendoring, `meta.yml`) with the AR-03 clarification; dynamic `includeConfig` counted as external; partial targets bind what they can; direct dependants only; F-112 keeps the typing, alias and duplicate checks; two lint-only oracle cases; `yaml` as an engine dev dependency.
+- Rebase the plan on F-104's names as built before task 2 (section 1.4 lists them).
 
 ## Process notes for the next session
 

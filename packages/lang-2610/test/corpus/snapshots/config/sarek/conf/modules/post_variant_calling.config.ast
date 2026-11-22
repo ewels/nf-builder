@@ -1,0 +1,43 @@
+ConfigFile 1:1-102:1
+  #block 1:1-12:3
+  #line 14:1-14:23
+  #line 15:1-15:73
+  ConfigBlock process 17:1-101:2
+    ConfigSelector withName: 'FILTER_VCFS' 19:5-29:6
+      ConfigAssign ext.args = Closure 20:9-22:41
+      ConfigAssign ext.prefix = Closure 23:9-23:70
+      ConfigAssign publishDir = Map 24:9-28:10
+    ConfigSelector withName: 'ADD_INFO_TO_VCF' 31:5-33:6
+      ConfigAssign publishDir = Map 32:9-32:40
+    ConfigSelector withName: 'TABIX_EXT_VCF' 35:5-38:6
+      ConfigAssign ext.prefix = Closure 36:9-36:41
+      ConfigAssign publishDir = Map 37:9-37:40
+    ConfigSelector withName: 'VCFS_NORM' 40:5-49:6
+      ConfigAssign ext.prefix = Closure 41:9-41:68
+      ConfigAssign ext.args = Closure 42:9-45:22
+        #line 43:38-43:158
+        #line 44:38-44:177
+      ConfigAssign publishDir = Map 46:9-48:10
+    ConfigSelector withName: 'VCFS_NORM_SORT' 51:5-59:6
+      ConfigAssign ext.prefix = Closure 52:9-52:59
+      ConfigAssign ext.args = String 53:9-53:57
+      ConfigAssign publishDir = Map 54:9-58:10
+    ConfigSelector withName: 'NFCORE_SAREK:SAREK:POST_VARIANTCALLING:CONSENSUS:BCFTOOLS_CONCAT' 61:5-65:6
+      ConfigAssign ext.args = Closure 62:9-62:78
+      ConfigAssign ext.prefix = Closure 63:9-63:46
+      ConfigAssign publishDir = Map 64:9-64:40
+    ConfigSelector withName: 'BCFTOOLS_ISEC' 67:5-76:6
+      #line 68:9-68:130
+      ConfigAssign ext.args = Closure 69:9-69:94
+      ConfigAssign ext.prefix = Closure 70:9-70:49
+      ConfigAssign publishDir = Map 71:9-75:10
+    ConfigSelector withName: 'CONSENSUS_FROM_SITES' 78:5-85:6
+      ConfigAssign ext.prefix = Closure 79:9-79:48
+      ConfigAssign publishDir = Map 80:9-84:10
+    ConfigSelector withName: 'GERMLINE_VCFS_CONCAT' 87:5-90:6
+      ConfigAssign ext.args = Closure 88:9-88:46
+      ConfigAssign publishDir = Map 89:9-89:40
+    ConfigSelector withName: 'GERMLINE_VCFS_CONCAT_SORT' 92:5-100:6
+      ConfigAssign ext.prefix = Closure 93:9-93:47
+      ConfigAssign ext.args = String 94:9-94:57
+      ConfigAssign publishDir = Map 95:9-99:10

@@ -1,0 +1,10 @@
+ConfigFile 1:1-57:1
+  ConfigBlock process 1:1-56:2
+    ConfigSelector withName: '.*:FASTQ_ALIGN_HISAT2:HISAT2_ALIGN' 2:5-55:6
+      ConfigAssign ext.args = Closure 3:9-35:10
+        #line 6:13-6:28
+        #line 13:13-13:95
+        #line 14:13-14:80
+        #line 25:13-25:90
+        #line 26:13-26:71
+      ConfigAssign publishDir = List 36:9-54:10

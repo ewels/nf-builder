@@ -1,0 +1,92 @@
+ConfigFile 1:1-166:1
+  ConfigBlock manifest 2:1-6:2
+    ConfigAssign description = String 3:5-3:85
+    ConfigAssign author = String 4:5-4:32
+    ConfigAssign nextflowVersion = String 5:5-5:34
+  #block 8:1-10:4
+  ConfigAssign params.reads = GString 12:1-12:59
+  ConfigAssign params.transcriptome = GString 13:1-13:95
+  ConfigAssign params.multiqc = GString 14:1-14:41
+  #block 16:1-18:4
+  ConfigAssign workflow.output.mode = String 20:1-20:30
+  #block 22:1-24:4
+  ConfigBlock profiles 26:1-165:2
+    ConfigBlock standard 27:5-29:6
+      ConfigAssign process.container = String 28:9-28:66
+    ConfigBlock 'all-reads' 31:5-33:6
+      ConfigAssign params.reads = GString 32:9-32:65
+    ConfigBlock arm64 35:5-37:6
+      ConfigAssign process.arch = String 36:9-36:31
+    ConfigBlock wave 39:5-42:6
+      ConfigAssign wave.enabled = Boolean 40:9-40:28
+      ConfigAssign wave.strategy = String 41:9-41:32
+    ConfigBlock 'wave-mirror' 44:5-49:6
+      ConfigAssign wave.enabled = Boolean 45:9-45:28
+      ConfigAssign wave.strategy = String 46:9-46:36
+      ConfigAssign wave.mirror = Boolean 47:9-47:27
+      ConfigAssign wave.build.repository = String 48:9-48:42
+    ConfigBlock docker 51:5-54:6
+      ConfigAssign process.container = String 52:9-52:66
+      ConfigAssign docker.enabled = Boolean 53:9-53:30
+    ConfigBlock singularity 56:5-60:6
+      ConfigAssign process.container = String 57:9-57:66
+      ConfigAssign singularity.enabled = Boolean 58:9-58:35
+      ConfigAssign singularity.autoMounts = Boolean 59:9-59:38
+    ConfigBlock conda 62:5-65:6
+      ConfigAssign conda.enabled = Boolean 63:9-63:29
+      ConfigAssign conda.channels = List 64:9-64:53
+    ConfigBlock mamba 67:5-71:6
+      ConfigAssign conda.enabled = Boolean 68:9-68:29
+      ConfigAssign conda.useMicromamba = Boolean 69:9-69:35
+      ConfigAssign conda.channels = List 70:9-70:53
+    ConfigBlock slurm 73:5-82:6
+      ConfigAssign process.container = String 74:9-74:66
+      ConfigAssign process.executor = String 75:9-75:35
+      #block 76:9-79:12
+      #line 80:9-80:44
+      ConfigAssign singularity.enabled = Boolean 81:9-81:35
+    ConfigBlock batch 84:5-106:6
+      ConfigAssign params.reads = String 85:9-85:64
+      ConfigAssign params.transcriptome = String 86:9-86:72
+      ConfigAssign process.container = String 87:9-87:66
+      ConfigAssign process.executor = String 88:9-88:38
+      #block 89:9-91:12
+      ConfigAssign process.queue = String 92:9-92:38
+      #block 93:9-95:12
+      ConfigAssign workDir = String 96:9-96:43
+      #block 97:9-99:12
+      ConfigAssign aws.region = String 100:9-100:33
+      #block 101:9-104:12
+      ConfigAssign aws.batch.cliPath = String 105:9-105:63
+    ConfigBlock 's3-data' 108:5-112:6
+      ConfigAssign process.container = String 109:9-109:66
+      ConfigAssign params.reads = String 110:9-110:64
+      ConfigAssign params.transcriptome = String 111:9-111:72
+    ConfigBlock 'google-batch' 114:5-128:6
+      ConfigAssign params.transcriptome = String 115:9-115:72
+      ConfigAssign params.reads = String 116:9-116:63
+      ConfigAssign params.multiqc = String 117:9-117:50
+      ConfigAssign process.executor = String 118:9-118:42
+      ConfigAssign process.container = String 119:9-119:66
+      #block 120:9-122:12
+      ConfigAssign workDir = String 123:9-123:43
+      #block 124:9-126:12
+      ConfigAssign google.location = String 127:9-127:41
+    ConfigBlock 'gs-data' 130:5-134:6
+      ConfigAssign process.container = String 131:9-131:66
+      ConfigAssign params.transcriptome = String 132:9-132:72
+      ConfigAssign params.reads = String 133:9-133:63
+    ConfigBlock 'azure-batch' 136:5-164:6
+      ConfigAssign process.container = String 137:9-137:66
+      #block 138:9-140:12
+      ConfigAssign workDir = String 141:9-141:41
+      ConfigAssign process.executor = String 142:9-142:40
+      #block 143:9-145:12
+      ConfigAssign process.queue = String 146:9-146:38
+      #block 148:9-155:12
+      ConfigBlock azure 156:9-163:10
+        ConfigBlock batch 157:13-162:14
+          #line 158:17-158:59
+          ConfigAssign location = String 159:17-159:40
+          ConfigAssign autoPoolMode = Boolean 160:17-160:36
+          ConfigAssign deletePoolsOnCompletion = Boolean 161:17-161:47

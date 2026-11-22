@@ -1,0 +1,44 @@
+ConfigFile 1:1-112:1
+  #block 1:1-10:3
+  ConfigBlock process 12:1-21:2
+    ConfigAssign resourceLimits = Map 13:5-17:6
+    ConfigSelector withName: BWAMEM2_INDEX 18:5-20:6
+      ConfigAssign memory = Closure 19:9-19:26
+  ConfigBlock params 23:1-48:2
+    ConfigAssign config_profile_name = String 24:5-24:48
+    ConfigAssign config_profile_description = String 25:5-25:83
+    #line 27:5-27:52
+    ConfigAssign modules_testdata_base_path = String 28:5-28:105
+    #line 30:5-30:18
+    ConfigAssign input = GString 31:5-31:59
+    #line 33:5-33:32
+    ConfigAssign igenomes_base = String 34:5-34:94
+    ConfigAssign genome = String 35:5-35:47
+    #line 37:5-37:30
+    ConfigAssign bcftools_annotations = GString 38:5-38:114
+    ConfigAssign bcftools_annotations_tbi = GString 39:5-39:118
+    ConfigAssign bcftools_header_lines = GString 40:5-40:83
+    #line 42:5-42:16
+    ConfigAssign sentieon_dnascope_model = String 43:5-43:138
+    #line 45:5-45:22
+    ConfigAssign split_fastq = Number 46:5-46:20
+    #line 46:29-46:50
+    ConfigAssign tools = String 47:5-47:28
+    #line 47:29-47:60
+  ConfigBlock process 50:1-111:2
+    ConfigSelector withName: '.*:FREEC_SOMATIC' 51:5-72:6
+      ConfigAssign ext.args = Closure 52:9-71:10
+    ConfigSelector withName: '.*:FILTERVARIANTTRANCHES' 74:5-76:6
+      ConfigAssign ext.args = Closure 75:9-75:61
+    ConfigSelector withName: '.*:PARABRICKS_MUTECTCALLER' 78:5-87:6
+      ConfigAssign ext.args = Closure 79:9-86:29
+        #line 83:13-83:83
+    ConfigSelector withName: '.*:PARABRICKS_FQ2BAM' 89:5-102:6
+      ConfigAssign accelerator = Number 90:9-90:24
+      ConfigAssign ext.args = Closure 91:9-101:29
+        #line 92:13-92:69
+        #line 97:13-97:44
+        #line 99:13-99:45
+    ConfigSelector withName: '.*:PARABRICKS_HAPLOTYPECALLER' 104:5-110:6
+      #line 105:9-105:91
+      ConfigAssign ext.args = Closure 106:9-109:29

@@ -1,0 +1,101 @@
+ConfigFile 1:1-233:1
+  #block 1:1-12:3
+  #line 14:1-14:17
+  #line 15:1-15:88
+  ConfigBlock process 17:1-232:2
+    #line 19:5-19:25
+    ConfigSelector withName: FILL_SCENARIO_FILE 20:5-26:6
+      ConfigAssign ext.prefix = Closure 21:9-21:61
+      ConfigAssign publishDir = Map 22:9-25:10
+    #line 28:5-28:7
+    #line 29:5-29:75
+    #line 30:5-30:7
+    ConfigSelector withName: VARLOCIRAPTOR_ESTIMATEALIGNMENTPROPERTIES 31:5-37:6
+      ConfigAssign ext.prefix = Closure 32:9-32:38
+      ConfigAssign publishDir = Map 33:9-36:10
+    ConfigSelector withName: '.*:VCF_VARLOCIRAPTOR_GERMLINE:RBT_VCFSPLIT|.*:VCF_VARLOCIRAPTOR_TUMOR_ONLY:RBT_VCFSPLIT' 39:5-44:6
+      ConfigAssign ext.prefix = Closure 40:9-40:66
+      ConfigAssign publishDir = Map 41:9-43:10
+    ConfigSelector withName: VARLOCIRAPTOR_PREPROCESS 46:5-52:6
+      ConfigAssign ext.prefix = Closure 47:9-47:85
+      ConfigAssign ext.args = Closure 48:9-48:99
+      ConfigAssign publishDir = Map 49:9-51:10
+    ConfigSelector withName: '.*:VCF_VARLOCIRAPTOR_GERMLINE:VARLOCIRAPTOR_CALLVARIANTS|.*:VCF_VARLOCIRAPTOR_TUMOR_ONLY:VARLOCIRAPTOR_CALLVARIANTS' 54:5-59:6
+      ConfigAssign ext.prefix = Closure 55:9-55:79
+      ConfigAssign publishDir = Map 56:9-58:10
+    ConfigSelector withName: SORT_CALLED_CHUNKS 61:5-68:6
+      ConfigAssign ext.args = Closure 62:9-62:61
+      ConfigAssign publishDir = Map 63:9-67:10
+    ConfigSelector withName: '.*:VCF_VARLOCIRAPTOR_GERMLINE:SORT_CALLED_CHUNKS' 70:5-72:6
+      ConfigAssign ext.prefix = Closure 71:9-71:177
+    ConfigSelector withName: '.*:VCF_VARLOCIRAPTOR_TUMOR_ONLY:SORT_CALLED_CHUNKS' 74:5-76:6
+      ConfigAssign ext.prefix = Closure 75:9-75:179
+    ConfigSelector withName: '.*:VCF_VARLOCIRAPTOR_GERMLINE:CONCAT_CALLED_CHUNKS' 78:5-84:6
+      ConfigAssign ext.prefix = Closure 79:9-79:90
+      ConfigAssign ext.args = Closure 80:9-80:60
+      ConfigAssign publishDir = Map 81:9-83:10
+    ConfigSelector withName: '.*:VCF_VARLOCIRAPTOR_GERMLINE:VARLOCIRAPTOR_FILTERFDR' 86:5-91:6
+      ConfigAssign ext.prefix = Closure 87:9-87:92
+      ConfigAssign publishDir = Map 88:9-90:10
+    ConfigSelector withName: '.*:VCF_VARLOCIRAPTOR_GERMLINE:SORT_FINAL_VCF' 93:5-101:6
+      ConfigAssign ext.prefix = Closure 94:9-94:83
+      ConfigAssign ext.args = Closure 95:9-95:61
+      ConfigAssign publishDir = Map 96:9-100:10
+    ConfigSelector withName: '.*:VCF_VARLOCIRAPTOR_TUMOR_ONLY:CONCAT_CALLED_CHUNKS' 103:5-109:6
+      ConfigAssign ext.prefix = Closure 104:9-104:92
+      ConfigAssign ext.args = Closure 105:9-105:60
+      ConfigAssign publishDir = Map 106:9-108:10
+    ConfigSelector withName: '.*:VCF_VARLOCIRAPTOR_TUMOR_ONLY:VARLOCIRAPTOR_FILTERFDR' 111:5-116:6
+      ConfigAssign ext.prefix = Closure 112:9-112:94
+      ConfigAssign publishDir = Map 113:9-115:10
+    ConfigSelector withName: '.*:VCF_VARLOCIRAPTOR_TUMOR_ONLY:SORT_FINAL_VCF' 118:5-126:6
+      ConfigAssign ext.prefix = Closure 119:9-119:85
+      ConfigAssign ext.args = Closure 120:9-120:61
+      ConfigAssign publishDir = Map 121:9-125:10
+    #line 128:5-128:7
+    #line 129:5-129:41
+    #line 130:5-130:7
+    ConfigSelector withName: '.*:VCF_VARLOCIRAPTOR_SOMATIC:ALIGNMENTPROPERTIES_NORMAL' 131:5-137:6
+      ConfigAssign ext.prefix = Closure 132:9-132:52
+      ConfigAssign publishDir = Map 133:9-136:10
+    ConfigSelector withName: '.*:VCF_VARLOCIRAPTOR_SOMATIC:TABIX_GERMLINE|.*:VCF_VARLOCIRAPTOR_SOMATIC:TABIX_SOMATIC' 139:5-144:6
+      ConfigAssign ext.prefix = Closure 140:9-140:41
+      ConfigAssign publishDir = Map 141:9-143:10
+    ConfigSelector withName: '.*:VCF_VARLOCIRAPTOR_SOMATIC:CONCAT_SOMATIC_STRELKA' 146:5-154:6
+      ConfigAssign ext.prefix = Closure 147:9-147:46
+      ConfigAssign ext.args = Closure 148:9-148:78
+      ConfigAssign publishDir = Map 149:9-153:10
+    ConfigSelector withName: '.*:VCF_VARLOCIRAPTOR_SOMATIC:MERGE_GERMLINE_SOMATIC_VCFS' 156:5-164:6
+      ConfigAssign ext.prefix = Closure 157:9-157:67
+      ConfigAssign ext.args = Closure 158:9-158:59
+      ConfigAssign publishDir = Map 159:9-163:10
+    ConfigSelector withName: '.*:VCF_VARLOCIRAPTOR_SOMATIC:RBT_VCFSPLIT' 166:5-171:6
+      ConfigAssign ext.prefix = Closure 167:9-167:66
+      ConfigAssign publishDir = Map 168:9-170:10
+    ConfigSelector withName: '.*:VCF_VARLOCIRAPTOR_SOMATIC:PREPROCESS_NORMAL' 173:5-179:6
+      ConfigAssign ext.prefix = Closure 174:9-174:92
+      ConfigAssign ext.args = Closure 175:9-175:99
+      ConfigAssign publishDir = Map 176:9-178:10
+    ConfigSelector withName: '.*:VCF_VARLOCIRAPTOR_SOMATIC:ALIGNMENTPROPERTIES_TUMOR' 181:5-187:6
+      ConfigAssign ext.prefix = Closure 182:9-182:50
+      ConfigAssign publishDir = Map 183:9-186:10
+    ConfigSelector withName: '.*:VCF_VARLOCIRAPTOR_SOMATIC:PREPROCESS_TUMOR' 189:5-195:6
+      ConfigAssign ext.prefix = Closure 190:9-190:91
+      ConfigAssign ext.args = Closure 191:9-191:99
+      ConfigAssign publishDir = Map 192:9-194:10
+    ConfigSelector withName: '.*:VCF_VARLOCIRAPTOR_SOMATIC:VARLOCIRAPTOR_CALLVARIANTS' 197:5-202:6
+      ConfigAssign ext.prefix = Closure 198:9-198:79
+      ConfigAssign publishDir = Map 199:9-201:10
+    ConfigSelector withName: '.*:VCF_VARLOCIRAPTOR_SOMATIC:SORT_CALLED_CHUNKS' 204:5-206:6
+      ConfigAssign ext.prefix = Closure 205:9-205:176
+    ConfigSelector withName: '.*:VCF_VARLOCIRAPTOR_SOMATIC:CONCAT_CALLED_CHUNKS' 208:5-214:6
+      ConfigAssign ext.prefix = Closure 209:9-209:89
+      ConfigAssign ext.args = Closure 210:9-210:60
+      ConfigAssign publishDir = Map 211:9-213:10
+    ConfigSelector withName: '.*:VCF_VARLOCIRAPTOR_SOMATIC:VARLOCIRAPTOR_FILTERFDR' 216:5-221:6
+      ConfigAssign ext.prefix = Closure 217:9-217:91
+      ConfigAssign publishDir = Map 218:9-220:10
+    ConfigSelector withName: '.*:VCF_VARLOCIRAPTOR_SOMATIC:SORT_FINAL_VCF' 223:5-231:6
+      ConfigAssign ext.prefix = Closure 224:9-224:82
+      ConfigAssign ext.args = Closure 225:9-225:61
+      ConfigAssign publishDir = Map 226:9-230:10

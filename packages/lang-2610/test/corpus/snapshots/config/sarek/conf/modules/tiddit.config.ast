@@ -1,0 +1,22 @@
+ConfigFile 1:1-58:1
+  #block 1:1-12:3
+  #line 14:1-14:10
+  ConfigBlock process 16:1-57:2
+    ConfigSelector withName: 'TIDDIT_SV' 18:5-27:6
+      ConfigAssign ext.args = Closure 19:9-19:60
+      ConfigAssign ext.prefix = Closure 20:9-20:45
+      ConfigAssign ext.when = Closure 21:9-21:84
+      ConfigAssign publishDir = Map 22:9-26:10
+    ConfigSelector withName: 'TABIX_BGZIP_TIDDIT_SV' 29:5-36:6
+      ConfigAssign ext.prefix = Closure 30:9-30:45
+      ConfigAssign publishDir = Map 31:9-35:10
+    #line 38:5-38:28
+    ConfigSelector withName: 'NFCORE_SAREK:SAREK:BAM_VARIANT_CALLING_SOMATIC_ALL:BAM_VARIANT_CALLING_SOMATIC_TIDDIT:TIDDIT_NORMAL:TABIX_BGZIP_TIDDIT_SV' 39:9-41:10
+      ConfigAssign ext.prefix = Closure 40:13-40:54
+    ConfigSelector withName: 'NFCORE_SAREK:SAREK:BAM_VARIANT_CALLING_SOMATIC_ALL:BAM_VARIANT_CALLING_SOMATIC_TIDDIT:TIDDIT_TUMOR:TABIX_BGZIP_TIDDIT_SV' 43:9-45:10
+      ConfigAssign ext.prefix = Closure 44:13-44:53
+    #line 47:9-47:16
+    ConfigSelector withName: 'NFCORE_SAREK:SAREK:BAM_VARIANT_CALLING_SOMATIC_ALL:BAM_VARIANT_CALLING_SOMATIC_TIDDIT:SVDB_MERGE' 48:9-56:10
+      ConfigAssign ext.args2 = Closure 49:13-49:65
+      ConfigAssign ext.prefix = Closure 50:13-50:58
+      ConfigAssign publishDir = Map 51:13-55:14

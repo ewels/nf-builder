@@ -37,3 +37,4 @@ export function parseScriptAst(text: string): ScriptParseResult {
     };
   }
 }
+export { parseConfigAst } from "./config/parse.ts";
