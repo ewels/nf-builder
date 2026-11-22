@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { projectorFor } from "../projection/open";
-import { accepted, commit, refused, stateFor, texts } from "./helpers";
+import {
+  accepted,
+  commit,
+  projection,
+  refused,
+  stateFor,
+  texts,
+} from "./helpers";
 
 const proc = (n: string) => `process ${n} {\n    script:\n    '${n}'\n}\n`;
 const main = [
@@ -29,13 +35,11 @@ const target = { path: "main.nf", workflow: null };
 describe("F-111 AddCall", () => {
   it("F-111 AR-21 AR-10: AddCall appends a bare call and the projection gains a call node", async () => {
     const state = await stateFor(files);
-    const count = async () => {
-      const p = (await projectorFor(state.model)).project("main.nf", null);
-      return p?.nodes.filter((n) => n.kind === "call").length ?? -1;
-    };
-    expect(await count()).toBe(1);
+    const count = () =>
+      projection(state).nodes.filter((n) => n.kind === "call").length;
+    expect(count()).toBe(1);
     commit(state, accepted(state, { kind: "addCall", target, callee: "B" }));
-    expect(await count()).toBe(2);
+    expect(count()).toBe(2);
     expect(state.model.file("main.nf")?.source.problems).toEqual([]);
   });
 

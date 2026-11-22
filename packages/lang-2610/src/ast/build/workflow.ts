@@ -2,13 +2,14 @@
 // `workflowDef` and its sections (Apache-2.0; see ../../../grammar/NOTICE). Items that are invalid in the kind of
 // workflow they are in are dropped, as upstream does: a statement as a take, a typed take or typed emit in a legacy
 // workflow, a publisher that is not an assignment.
-import type {
-  ExpressionStatement,
-  NamedOutput,
-  Section,
-  Statement,
-  TypedName,
-  WorkflowDef,
+import {
+  type ExpressionStatement,
+  MIXED_DEFINITIONS,
+  type NamedOutput,
+  type Section,
+  type Statement,
+  type TypedName,
+  type WorkflowDef,
 } from "@nf-builder/lang-core";
 import type { Token } from "antlr4ng";
 import type {
@@ -20,7 +21,7 @@ import type {
   WorkflowTakeContext,
   WorkflowTakesContext,
 } from "../../generated/ScriptParser.ts";
-import { type BuildContext, MIXED_DEFINITIONS } from "./context.ts";
+import type { BuildContext } from "./context.ts";
 import { expression } from "./expressions.ts";
 import { namedOutput } from "./process.ts";
 import { labelled, statementsRange, unlabelled } from "./sections.ts";

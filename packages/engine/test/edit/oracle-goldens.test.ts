@@ -1,40 +1,19 @@
-import { readdirSync } from "node:fs";
 import { join } from "node:path";
 import type { EditCommand } from "@nf-builder/lang-core";
 import { describe, expect, it } from "vitest";
+import type { EditState } from "../../src/edit/apply";
 import { readTree } from "../model/read-tree";
-import {
-  accepted,
-  commit,
-  type EditStateOf,
-  node,
-  port,
-  stateFor,
-  texts,
-} from "./helpers";
+import { accepted, commit, node, port, stateFor, texts } from "./helpers";
 
 const cases = new URL("../../../../tools/oracle/cases/", import.meta.url)
   .pathname;
-
-const files = (dir: string): string[] => {
-  const out: string[] = [];
-  const visit = (rel: string) => {
-    for (const e of readdirSync(join(dir, rel), { withFileTypes: true })) {
-      const path = rel === "" ? e.name : `${rel}/${e.name}`;
-      if (e.isDirectory()) visit(path);
-      else out.push(path);
-    }
-  };
-  visit("");
-  return out.sort();
-};
 
 const entry = { path: "main.nf", workflow: null };
 
 /** Runs `steps` one by one, each built from the projection of the state after the one before. */
 async function run(
   start: string,
-  steps: ((state: EditStateOf) => EditCommand)[],
+  steps: ((state: EditState) => EditCommand)[],
 ): Promise<Record<string, string>> {
   const state = await stateFor(
     Object.fromEntries(
@@ -52,33 +31,48 @@ const goldens = {
     expected: "f111-edits-typed",
     steps: [
       (): EditCommand => ({ kind: "addCall", target: entry, callee: "ALIGN" }),
-      (s: EditStateOf): EditCommand => ({
+      (s: EditState): EditCommand => ({
         kind: "connect",
         target: entry,
         from: port(s, "reads", "out"),
         to: port(s, "ALIGN@1", "sample"),
       }),
-      (s: EditStateOf): EditCommand => ({
+      (s: EditState): EditCommand => ({
         kind: "disconnect",
         target: entry,
         port: port(s, "ALIGN@1", "sample"),
       }),
-      (s: EditStateOf): EditCommand => ({
+      (s: EditState): EditCommand => ({
         kind: "connect",
         target: entry,
         from: port(s, "more", "out"),
         to: port(s, "ALIGN@1", "sample"),
       }),
-      (s: EditStateOf): EditCommand => ({
+      (s: EditState): EditCommand => ({
         kind: "connect",
         target: entry,
         from: port(s, "ALIGN@1", "out"),
         to: port(s, "COUNT@1", "aligned"),
       }),
-      (s: EditStateOf): EditCommand => ({
+      (s: EditState): EditCommand => ({
         kind: "deleteNode",
         target: entry,
         node: node(s, ".view@1").id,
+      }),
+      // a missing earlier positional input becomes `null`: PAIR(null, more)
+      (): EditCommand => ({ kind: "addCall", target: entry, callee: "PAIR" }),
+      (s: EditState): EditCommand => ({
+        kind: "connect",
+        target: entry,
+        from: port(s, "more", "out"),
+        to: port(s, "PAIR@1", "right"),
+      }),
+      // a multi-output call is read by output name, and moves above its consumer: COUNT_LINES(pair.b)
+      (s: EditState): EditCommand => ({
+        kind: "connect",
+        target: entry,
+        from: port(s, "PAIR@1", "b"),
+        to: port(s, "COUNT@1", "aligned"),
       }),
       (): EditCommand => ({
         kind: "createProcess",
@@ -98,7 +92,7 @@ const goldens = {
     start: "f111-start-legacy",
     expected: "f111-edits-legacy",
     steps: [
-      (s: EditStateOf): EditCommand => ({
+      (s: EditState): EditCommand => ({
         kind: "connect",
         target: entry,
         from: {
@@ -124,7 +118,7 @@ describe("F-111 oracle goldens", () => {
       for (const [path, text] of Object.entries(result))
         await expect(text).toMatchFileSnapshot(join(cases, g.expected, path));
       // no files beyond the result
-      expect(files(join(cases, g.expected))).toEqual(
+      expect(readTree(join(cases, g.expected)).map((f) => f.path)).toEqual(
         Object.keys(result).sort(),
       );
     });

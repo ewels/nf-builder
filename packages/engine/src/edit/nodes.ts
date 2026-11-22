@@ -4,11 +4,14 @@ import {
   type Assignment,
   type AstNode,
   type Comment,
+  childFields,
   type Expression,
   type ExpressionStatement,
   type Identifier,
   type Include,
+  isAstNode,
   type MethodCall,
+  type NamedOutput,
   NO_RANGE,
   type NullLiteral,
   type PropertyExpr,
@@ -23,7 +26,7 @@ type Slots = Pick<
   "leadingComments" | "trailingComments" | "danglingComments"
 >;
 
-const identifier = (name: string): Identifier => ({
+export const identifier = (name: string): Identifier => ({
   kind: "Identifier",
   name,
   range: NO_RANGE,
@@ -75,12 +78,10 @@ export const call = (
 
 export const expressionStatement = (
   expression: Expression,
-  slotsFrom?: Slots,
 ): ExpressionStatement => ({
   kind: "ExpressionStatement",
   expression,
   range: NO_RANGE,
-  ...copySlots(slotsFrom),
 });
 
 /** `name = value`; the comment slots of `slotsFrom` (the statement it replaces) move to the new statement. */
@@ -109,6 +110,15 @@ function copySlots(from: Slots | undefined): Slots {
   return out;
 }
 
+/** `name = value` as an emit or publish item. */
+export const namedOutput = (name: string, value: Expression): NamedOutput => ({
+  kind: "NamedOutput",
+  name: identifier(name),
+  type: null,
+  value,
+  range: NO_RANGE,
+});
+
 /** `include { name } from 'source'`. */
 export const includeOf = (name: string, source: string): Include => ({
   kind: "Include",
@@ -124,19 +134,6 @@ export const includeOf = (name: string, source: string): Include => ({
   range: NO_RANGE,
 });
 
-const NOT_CHILDREN = new Set([
-  "leadingComments",
-  "trailingComments",
-  "danglingComments",
-  "comments",
-  "shebang",
-]);
-const isNode = (v: unknown): v is AstNode =>
-  typeof v === "object" &&
-  v !== null &&
-  typeof (v as { kind?: unknown }).kind === "string" &&
-  typeof (v as { range?: unknown }).range === "object";
-
 /**
  * `root` with `target` (by identity) replaced; `null` removes it from its array, or sets a single field to null.
  * Untouched subtrees are shared; `root` itself comes back when `target` isn't in it.
@@ -149,19 +146,18 @@ export function replaceNode<T extends AstNode>(
   const visit = (node: AstNode): AstNode | null => {
     if (node === target) return replacement;
     let copy: Record<string, unknown> | null = null;
-    for (const [key, value] of Object.entries(node)) {
-      if (NOT_CHILDREN.has(key)) continue;
+    for (const [key, value] of childFields(node)) {
       let next: unknown = value;
       if (Array.isArray(value)) {
         let changed = false;
         const items: unknown[] = [];
         for (const item of value) {
-          const out = isNode(item) ? visit(item) : item;
+          const out = isAstNode(item) ? visit(item) : item;
           if (out !== item) changed = true;
           if (out !== null) items.push(out);
         }
         if (changed) next = items;
-      } else if (isNode(value)) {
+      } else if (isAstNode(value)) {
         next = visit(value);
       }
       if (next !== value) {
@@ -200,8 +196,8 @@ const EXPRESSIONS = new Set([
 ]);
 
 /** The outermost expression under `root` whose range is exactly `range`; null when there is none. */
-export function findByRange(root: AstNode, range: Range): AstNode | null {
-  let found: AstNode | null = null;
+export function findByRange(root: AstNode, range: Range): Expression | null {
+  let found: Expression | null = null;
   walk(root, (node) => {
     if (found) return false;
     if (
@@ -209,7 +205,7 @@ export function findByRange(root: AstNode, range: Range): AstNode | null {
       node.range.start === range.start &&
       node.range.end === range.end
     ) {
-      found = node;
+      found = node as Expression;
       return false;
     }
     return undefined;

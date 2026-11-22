@@ -85,7 +85,7 @@ describe("F-111 applyCommand", () => {
     expect(r).not.toHaveProperty("patches");
   });
 
-  it("F-113: createEditState passes a trace option to the model", async () => {
+  it("F-111 AR-20: createEditState passes a trace option to the model", async () => {
     const { createEditState } = await import("../../src/edit/apply");
     const events: string[] = [];
     await createEditState("26.10", [{ path: "main.nf", text: "" }], {

@@ -5,6 +5,19 @@ import { includeOf } from "../nodes";
 import { EditRefusal } from "../refusal";
 import { includeInsertion } from "../splice";
 
+const STATEMENT_KINDS = new Set([
+  "Block",
+  "ExpressionStatement",
+  "VariableDeclaration",
+  "Assignment",
+  "If",
+  "TryCatch",
+  "Return",
+  "Throw",
+  "Assert",
+  "EmptyStatement",
+]);
+
 /** A new typed process in `modules/local/<name>/main.nf`, included from the caller (LA-12). It adds no call. */
 export function createProcess(
   state: EditState,
@@ -26,6 +39,12 @@ export function createProcess(
     throw new EditRefusal(
       "invalid",
       `${caller} isn't a Nextflow script the builder can add an include to.`,
+      caller,
+    );
+  if (file.ast?.body.some((i) => STATEMENT_KINDS.has(i.kind)))
+    throw new EditRefusal(
+      "invalid",
+      `${caller} has statements outside a workflow block, and Nextflow doesn't allow an include next to them. Move them into a workflow first.`,
       caller,
     );
   const path = `${moduleDirectory(name)}/main.nf`;

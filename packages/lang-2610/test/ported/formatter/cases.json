@@ -790,6 +790,7 @@
       "kind": "check-format",
       "in": "cases/ScriptFormatterTest-L1302.in.nf",
       "out": "cases/ScriptFormatterTest-L1302.out.nf",
+      "printed": "cases/ScriptFormatterTest-L1302.printed.nf",
       "knownDifference": "string-reindent"
     },
     {
@@ -801,6 +802,7 @@
       "kind": "check-format",
       "in": "cases/ScriptFormatterTest-L1323.in.nf",
       "out": "cases/ScriptFormatterTest-L1323.out.nf",
+      "printed": "cases/ScriptFormatterTest-L1323.printed.nf",
       "knownDifference": "string-reindent"
     },
     {
@@ -812,6 +814,7 @@
       "kind": "check-format",
       "in": "cases/ScriptFormatterTest-L1349.in.nf",
       "out": "cases/ScriptFormatterTest-L1349.out.nf",
+      "printed": "cases/ScriptFormatterTest-L1349.printed.nf",
       "knownDifference": "string-reindent"
     },
     {

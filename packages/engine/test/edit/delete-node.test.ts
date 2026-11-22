@@ -2,10 +2,12 @@ import { describe, expect, it } from "vitest";
 import {
   accepted,
   commit,
+  main,
   node,
   projection,
   refused,
   stateFor,
+  texts,
 } from "./helpers";
 
 const B =
@@ -17,8 +19,6 @@ const open = (body: string[], extra = "") =>
     "b.nf": B,
     "main.nf": `${head}${extra}workflow {\n${body.map((l) => `    ${l}`).join("\n")}\n}\n`,
   });
-const main = (r: { files: readonly { path: string; text: string | null }[] }) =>
-  r.files.find((f) => f.path === "main.nf")?.text;
 
 describe("F-111 DeleteNode", () => {
   it("F-111 AR-21: DeleteNode removes the node's statement and clears direct arguments it fed", async () => {
@@ -80,5 +80,48 @@ describe("F-111 DeleteNode", () => {
     expect(
       refused(state, { kind: "deleteNode", target, node: "nope" }).code,
     ).toBe("not-found");
+  });
+
+  it("F-111 AR-21: DeleteNode of the only statement in main drops the empty main section when the workflow stays valid, and refuses when it would not", async () => {
+    const ok = await stateFor({
+      "b.nf": B,
+      "main.nf": `${head}workflow W {\n    take:\n    ids\n\n    main:\n    B(ids)\n\n    emit:\n    ids\n}\n`,
+    });
+    const w = { path: "main.nf", workflow: "W" };
+    const r = accepted(ok, {
+      kind: "deleteNode",
+      target: w,
+      node: node(ok, "B@1", "main.nf", "W").id,
+    });
+    expect(main(r)).toContain(
+      "workflow W {\n    take:\n    ids\n\n    emit:\n    ids\n}",
+    );
+    commit(ok, r);
+    expect(ok.model.file("main.nf")?.source.problems).toEqual([]);
+    // take with nothing after it doesn't parse, so the delete is refused
+    const takeOnly = await stateFor({
+      "b.nf": B,
+      "main.nf": `${head}workflow W {\n    take:\n    ids\n\n    main:\n    B(ids)\n}\n`,
+    });
+    const refusal = refused(takeOnly, {
+      kind: "deleteNode",
+      target: w,
+      node: node(takeOnly, "B@1", "main.nf", "W").id,
+    });
+    expect(refusal.code).toBe("invalid");
+    expect(refusal.message).toContain("only statement");
+    expect(texts(takeOnly)["main.nf"]).toContain("B(ids)");
+    // a workflow with no sections but main becomes empty
+    const bare = await stateFor({
+      "b.nf": B,
+      "main.nf": `${head}workflow W {\n    B()\n}\n\nworkflow {\n    W()\n}\n`,
+    });
+    const e = accepted(bare, {
+      kind: "deleteNode",
+      target: w,
+      node: node(bare, "B@1", "main.nf", "W").id,
+    });
+    commit(bare, e);
+    expect(bare.model.file("main.nf")?.source.problems).toEqual([]);
   });
 });

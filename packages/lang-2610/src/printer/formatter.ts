@@ -11,7 +11,6 @@ import {
   type Comment,
   type Expression,
   type FormalParameter,
-  hasPosition,
   type IfStatement,
   type LegacyType,
   type MapEntry,
@@ -24,13 +23,7 @@ import {
 } from "@nf-builder/lang-core";
 import { commentText } from "./comments.ts";
 import { FRESH_LAYOUT } from "./layout.ts";
-import {
-  argumentsLastLine,
-  column,
-  lastLine,
-  line,
-  methodLine,
-} from "./positions.ts";
+import { argumentsLastLine, lastLine, line, methodLine } from "./positions.ts";
 import {
   catchTypeName,
   hasLegacyType,

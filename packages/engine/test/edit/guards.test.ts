@@ -91,6 +91,14 @@ describe("F-111 guards", () => {
     expect(a.code).toBe("mixed-definitions");
     expect(a.message).toContain("Invalid input declaration in typed process");
     expect(a.problems.some((p) => p.code === "mixed-definitions")).toBe(true);
+    // the wrong-style definition is named under its own style, and nothing repeats
+    expect(a.message).toContain("legacy: L");
+    expect(a.message).not.toContain("none");
+    expect(
+      a.message.split("Invalid input declaration in typed process"),
+    ).toHaveLength(2);
+    const keys = a.problems.map((p) => `${p.message}@${p.line}:${p.column}`);
+    expect(new Set(keys).size).toBe(keys.length);
     const state2 = await stateFor({ "main.nf": legacy });
     const b = refused(state2, {
       kind: "replaceFileText",
@@ -100,6 +108,27 @@ describe("F-111 guards", () => {
     expect(b.code).toBe("mixed-definitions");
     expect(b.message).toContain(
       "Typed input declaration is not allowed in legacy process",
+    );
+    expect(b.message).toContain("typed: T");
+    expect(b.message).not.toContain("none");
+    expect(
+      b.message.split("Typed input declaration is not allowed").length,
+    ).toBe(2);
+  });
+
+  it("F-111 LA-13: the entry workflow is called the entry workflow in the refusal, and each nf-lang message is a sentence with its line", async () => {
+    const state = await stateFor({ "main.nf": `${flag}${typed}\n${wf}` });
+    const r = refused(state, {
+      kind: "replaceFileText",
+      path: "main.nf",
+      text: `${flag}${typed}\n${legacy}\n${wf}`,
+    });
+    expect(r.code).toBe("mixed-definitions");
+    expect(r.message).toContain("the entry workflow");
+    expect(r.message).toContain("typed: T, the entry workflow");
+    expect(r.message).not.toContain("none");
+    expect(r.message).toMatch(
+      /Invalid input declaration in typed process \(line \d+\)\./,
     );
   });
 

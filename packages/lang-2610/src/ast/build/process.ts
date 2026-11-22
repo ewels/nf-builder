@@ -4,17 +4,18 @@
 // A process is typed when `nextflow.enable.types = true` appeared before it (`cx.typesEnabled`). Like upstream, items
 // that are invalid in the kind of process they are in are dropped: a legacy input in a typed process, a typed input in
 // a legacy process, an invalid emit. `stage:` and `topic:` sections of a legacy process are dropped as well.
-import type {
-  AgentDef,
-  Expression,
-  ExpressionStatement,
-  NamedOutput,
-  ProcessDef,
-  ProcessInput,
-  RecordInput,
-  Section,
-  Statement,
-  TupleInput,
+import {
+  type AgentDef,
+  type Expression,
+  type ExpressionStatement,
+  MIXED_DEFINITIONS,
+  type NamedOutput,
+  type ProcessDef,
+  type ProcessInput,
+  type RecordInput,
+  type Section,
+  type Statement,
+  type TupleInput,
 } from "@nf-builder/lang-core";
 import {
   type AgentDefContext,
@@ -38,7 +39,7 @@ import {
   type ProcessWhenContext,
   type WorkflowEmitContext,
 } from "../../generated/ScriptParser.ts";
-import { type BuildContext, MIXED_DEFINITIONS } from "./context.ts";
+import type { BuildContext } from "./context.ts";
 import { expression } from "./expressions.ts";
 import {
   directive,

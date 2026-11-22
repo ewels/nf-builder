@@ -3,6 +3,7 @@
 import {
   EDIT_COMMAND_KINDS,
   type EditCommand,
+  MIXED_DEFINITIONS,
   type Projection,
   type ScriptSourceFile,
   type SourceFile,
@@ -192,7 +193,7 @@ const mixedStyle = (file: SourceFile | undefined): boolean => {
   return (
     (styles.typed.length > 0 && styles.legacy.length > 0) ||
     styles.tagged.length > 0 ||
-    file.problems.some((p) => p.code === "mixed-definitions")
+    file.problems.some((p) => p.code === MIXED_DEFINITIONS)
   );
 };
 
@@ -268,6 +269,11 @@ function checkAccepted(
     const before = state.model.file(f.path)?.source;
     const after = createSourceFile(f.path, f.text, state.parser);
     parsed.set(f.path, after);
+    // (a2) a modelled file stays modelled, and a new file is modelled
+    if (!before || before.status === "modelled")
+      expect(after.status, `${label}: ${f.path} is still modelled`).toBe(
+        "modelled",
+      );
     // (a) AR-24: no problem the file didn't have; new files are clean
     const have = new Map<string, number>();
     for (const k of before ? problemKeys(before) : [])
@@ -390,6 +396,17 @@ export function runSequence(
       ).toBeGreaterThan(0);
       expect(snapshot(state)).toEqual(before);
       stats.count(stats.refused, `${command.kind}:${result.code}`);
+      // a refusal of a command's own making is a bug: only a comment the reprint would lose is an expected `internal`
+      if (result.code === "internal")
+        expect(
+          result.message,
+          `${command.kind} refused as internal: ${result.message}`,
+        ).toMatch(/drop the comment/);
+      if (result.code === "does-not-parse")
+        expect(
+          command.kind,
+          `${command.kind} produced a result that doesn't parse: ${result.message}`,
+        ).toBe("replaceFileText");
       continue;
     }
     checkAccepted(state, command, result.patches, result.files);
@@ -402,4 +419,24 @@ export function runSequence(
   for (const inverse of history.reverse())
     current = applyPatches(current, inverse).files;
   expect(Object.fromEntries(current)).toEqual(Object.fromEntries(base));
+}
+
+/** Runs `numRuns` random sequences from `arb` (seed 111) against `state`, which is back at its start after each. */
+export function assertSequences(
+  state: EditState,
+  arb: fc.Arbitrary<readonly Choice[]>,
+  stats: Stats,
+  numRuns: number,
+) {
+  const base = snapshot(state);
+  fc.assert(
+    fc.property(arb, (choices) => {
+      try {
+        runSequence(state, choices, stats);
+      } finally {
+        reset(state, base);
+      }
+    }),
+    { seed: 111, numRuns },
+  );
 }

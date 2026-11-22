@@ -1,15 +1,14 @@
 // The two guards on every command result (AR-24, LA-13, F-111).
-import type {
-  FileText,
-  ParseProblem,
-  ScriptAst,
-  SourceFile,
-  SourceParser,
+import {
+  type FileText,
+  MIXED_DEFINITIONS,
+  type ParseProblem,
+  type ScriptAst,
+  type SourceFile,
+  type SourceParser,
 } from "@nf-builder/lang-core";
 import { createSourceFile } from "../source/source-file";
 import { EditRefusal } from "./refusal";
-
-const MIXED = "mixed-definitions";
 
 /** Every problem of a file: the whole-file ones and those on its `Unparsed` items. */
 function problemsOf(file: SourceFile): ParseProblem[] {
@@ -28,7 +27,21 @@ export function problemKeys(file: SourceFile): string[] {
   return problemsOf(file).map(keyOf).sort();
 }
 
-/** The processes and workflows of a script by style, and the `Unparsed` problems tagged `mixed-definitions`. */
+/** The name a definition goes by in a refusal message. */
+const displayName = (name: string | null | undefined): string =>
+  name ? name : "the entry workflow";
+
+/** The style a `mixed-definitions` message says a definition is written in: nf-lang names the style it expected. */
+function writtenStyle(message: string): "typed" | "legacy" | null {
+  const found = /\bin (typed|legacy) (?:process|workflow)\b/.exec(message);
+  if (!found) return null;
+  return found[1] === "typed" ? "legacy" : "typed";
+}
+
+/**
+ * The processes and workflows of a script by style, and the problems tagged `mixed-definitions` (once each). A
+ * definition that became `Unparsed` for being in the wrong style is listed under the style its message implies.
+ */
 export function definitionStyles(ast: ScriptAst): {
   typed: string[];
   legacy: string[];
@@ -41,13 +54,37 @@ export function definitionStyles(ast: ScriptAst): {
     if (item.kind === "Process" || item.kind === "Workflow") {
       const name =
         item.kind === "Workflow"
-          ? (item.name?.name ?? "workflow")
+          ? displayName(item.name?.name)
           : item.name.name;
       (item.typed ? typed : legacy).push(name);
-    } else if (item.kind === "Unparsed")
-      tagged.push(...item.problems.filter((p) => p.code === MIXED));
+    } else if (item.kind === "Unparsed") {
+      const own = item.problems.filter((p) => p.code === MIXED_DEFINITIONS);
+      tagged.push(...own);
+      const head = item.head;
+      const style = own.map((p) => writtenStyle(p.message)).find(Boolean);
+      if (
+        style &&
+        (head?.keyword === "process" || head?.keyword === "workflow")
+      )
+        (style === "typed" ? typed : legacy).push(
+          head.keyword === "workflow"
+            ? displayName(head.name)
+            : (head.name ?? "process"),
+        );
+    }
   }
-  return { typed, legacy, tagged };
+  return { typed, legacy, tagged: uniqueProblems(tagged) };
+}
+
+/** `problems` without repeats of the same message at the same position. */
+function uniqueProblems(problems: readonly ParseProblem[]): ParseProblem[] {
+  const seen = new Set<string>();
+  return problems.filter((p) => {
+    const key = `${p.message}@${p.line}:${p.column}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
 
 function mixedState(file: SourceFile | undefined): {
@@ -59,10 +96,10 @@ function mixedState(file: SourceFile | undefined): {
   if (file?.ast?.kind !== "Script")
     return { mixed: false, typed: [], legacy: [], tagged: [] };
   const styles = definitionStyles(file.ast);
-  const tagged = [
+  const tagged = uniqueProblems([
     ...styles.tagged,
-    ...file.problems.filter((p) => p.code === MIXED),
-  ];
+    ...file.problems.filter((p) => p.code === MIXED_DEFINITIONS),
+  ]);
   return {
     ...styles,
     tagged,
@@ -110,12 +147,15 @@ export function checkResult(
     if (file.language !== "nextflow") continue;
     const now = mixedState(file);
     if (!now.mixed || mixedState(before(file.path)).mixed) continue;
-    const list = (names: string[]) =>
-      names.length > 0 ? names.join(", ") : "none";
-    const details = now.tagged.map((p) => p.message);
+    const styles = [
+      now.typed.length > 0 ? `typed: ${now.typed.join(", ")}` : null,
+      now.legacy.length > 0 ? `legacy: ${now.legacy.join(", ")}` : null,
+    ].filter((part) => part !== null);
+    const named = styles.length > 0 ? ` (${styles.join("; ")})` : "";
+    const details = now.tagged.map((p) => `${p.message} (line ${p.line}).`);
     throw new EditRefusal(
       "mixed-definitions",
-      `This edit would put typed and legacy process or workflow definitions in \`${file.path}\` (typed: ${list(now.typed)}; legacy: ${list(now.legacy)}). A script can't mix them: keep legacy definitions in their own file, or migrate them to typed.${details.length > 0 ? ` ${details.join(" ")}` : ""}`,
+      `This edit would put typed and legacy process or workflow definitions in \`${file.path}\`${named}. A script can't mix them: keep legacy definitions in their own file, or migrate them to typed.${details.length > 0 ? ` ${details.join(" ")}` : ""}`,
       file.path,
       now.tagged,
     );

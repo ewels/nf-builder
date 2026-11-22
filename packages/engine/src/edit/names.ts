@@ -1,5 +1,9 @@
 // Names and paths for edit commands (LA-12, F-111).
-import { type WorkflowDef, walk } from "@nf-builder/lang-core";
+import {
+  type ScriptCatalogue,
+  type WorkflowDef,
+  walk,
+} from "@nf-builder/lang-core";
 
 const IDENTIFIER = /^[A-Za-z_][A-Za-z0-9_]*$/;
 
@@ -9,6 +13,17 @@ export const isIdentifier = (name: string): boolean => IDENTIFIER.test(name);
 export function freshName(base: string, taken: ReadonlySet<string>): string {
   if (!taken.has(base)) return base;
   for (let n = 2; ; n++) if (!taken.has(`${base}_${n}`)) return `${base}_${n}`;
+}
+
+/** Names a new variable must not shadow: the pack's global constants and functions, and the script-scope ones it doesn't list. */
+export function builtinNames(catalogue: ScriptCatalogue): Set<string> {
+  return new Set([
+    ...catalogue.constants.map((c) => c.name),
+    ...catalogue.functions.map((f) => f.name),
+    "params",
+    "Channel",
+    "task",
+  ]);
 }
 
 /** Every variable a workflow reads or declares, and its take names. */

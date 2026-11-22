@@ -4,9 +4,6 @@ import type { ParseProblem, Range } from "@nf-builder/lang-core";
 import type { CommonTokenStream, ParserRuleContext, Token } from "antlr4ng";
 import { contextRange, PositionIndex, tokenRange } from "../positions.ts";
 
-/** `ParseProblem.code` of an error about a definition in the other style, typed or legacy (LA-13, F-111). */
-export const MIXED_DEFINITIONS = "mixed-definitions";
-
 /** A builder error that stops the build (upstream `createParsingFailedException`): the file gets no tree. */
 export class FatalBuildError extends Error {
   readonly problem: ParseProblem;

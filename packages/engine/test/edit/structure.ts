@@ -1,4 +1,7 @@
-// Mirrors packages/lang-2610/test/printer/structure.ts (F-110): what a reprint must keep. Keep the two in step.
+// Based on packages/lang-2610/test/printer/structure.ts (F-110), but looser on purpose. F-111's reprint comparison
+// parses real corpus workflows, which the formatter rewrites in ways F-110's synthetic trees never hit: a last closure
+// argument becomes a trailing closure, a multi-catch becomes one catch per type, `catch` clauses are typed, `if` branches
+// are braced and an empty `else` is dropped. Those are normalised here and nowhere else, so F-110's own test stays strict.
 // The structure of an AST node for the round-trip tests: what the printer must keep. It drops ranges, comment slots and
 // the flags the printer derives (`parens`, `braced`, `trailingComma`, an empty closure parameter list).
 const DROPPED = new Set([

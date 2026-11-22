@@ -52,13 +52,11 @@ export type {
 } from "@nf-builder/lang-core";
 export {
   applyCommand,
-  applyPatches,
   commit,
   createEditState,
-  diffText,
   type EditState,
-  PatchError,
-} from "./edit";
+} from "./edit/apply";
+export { applyPatches, PatchError } from "./edit/patches";
 export type {
   Binding,
   ConfigIncludeModel,
@@ -88,7 +86,6 @@ export { formatNodeKey, parseNodeKey } from "./projection/keys";
 export { createProjector, type Projector } from "./projection/project";
 export { formatFlowType, formatType } from "./projection/types";
 export {
-  diffNodes,
   type Equivalence,
   equivalent,
   normaliseText,

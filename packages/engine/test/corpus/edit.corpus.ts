@@ -10,7 +10,7 @@ import { createEditState, type EditState } from "../../src/edit/apply";
 import { reprintDeclaration } from "../../src/edit/splice";
 import { installedPackVersions } from "../../src/packs";
 import { createSourceFile } from "../../src/source/source-file";
-import { choiceArb, reset, runSequence, Stats } from "../edit/harness";
+import { assertSequences, choiceArb, Stats } from "../edit/harness";
 import { structure } from "../edit/structure";
 import { readTree } from "../model/read-tree";
 
@@ -49,25 +49,13 @@ describe("F-111 step 1 corpus properties", () => {
   for (const [id, runs, longest] of PINS)
     it(`F-111 step 1 AR-22 AR-23 AR-24 LA-13: random command sequences on ${id} parse, keep untargeted declarations equivalent and undo to exact bytes`, () => {
       const state = states.get(id) as EditState;
-      const base = new Map(
-        state.model
-          .paths()
-          .map((p) => [p, state.model.file(p)?.source.text ?? ""]),
-      );
       const s = new Stats();
       stats.set(id, s);
-      fc.assert(
-        fc.property(
-          fc.array(choiceArb, { minLength: 1, maxLength: longest }),
-          (choices) => {
-            try {
-              runSequence(state, choices, s);
-            } finally {
-              reset(state, base);
-            }
-          },
-        ),
-        { seed: 111, numRuns: runs },
+      assertSequences(
+        state,
+        fc.array(choiceArb, { minLength: 1, maxLength: longest }),
+        s,
+        runs,
       );
       for (const kind of EDIT_COMMAND_KINDS)
         expect(

@@ -1,6 +1,9 @@
 import type { ConfigAst } from "./config.ts";
 import type { ScriptAst } from "./script.ts";
 
+/** `ParseProblem.code` of an error about a definition in the other style, typed or legacy (LA-13, F-111). */
+export const MIXED_DEFINITIONS = "mixed-definitions";
+
 /** F-101's `ParseError` is assignable to this. */
 export interface ParseProblem {
   readonly source: "lexer" | "parser" | "builder" | "internal";
@@ -14,7 +17,7 @@ export interface ParseProblem {
   /** Set on whole-file checks (such as a duplicate params block), which never isolate one declaration (F-104). */
   readonly scope?: "file";
   /**
-   * Set by a pack for problems callers act on. `"mixed-definitions"`: a process or workflow definition (or part of one)
+   * Set by a pack for problems callers act on. `MIXED_DEFINITIONS`: a process or workflow definition (or part of one)
    * is in the other style, typed or legacy, than the script's types flag allows (LA-13, F-111).
    */
   readonly code?: string;

@@ -4,10 +4,7 @@ import type { TextEdit, TextPatch } from "@nf-builder/lang-core";
 
 /** A patch list that cannot be applied: a programming error in a command, never a user refusal. */
 export class PatchError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "PatchError";
-  }
+  override name = "PatchError";
 }
 
 /**

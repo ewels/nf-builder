@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
+import type { EditState } from "../../src/edit/apply";
 import {
   accepted,
   commit,
+  main,
   node,
   port,
   projection,
@@ -20,7 +22,7 @@ const wf = (body: string[]) =>
   `${head}workflow {\n${body.map((l) => `    ${l}`).join("\n")}\n}\n`;
 const open = (body: string[]) => stateFor({ ...procs, "main.nf": wf(body) });
 const connect = (
-  state: Awaited<ReturnType<typeof open>>,
+  state: EditState,
   from: [string, string],
   to: [string, string],
 ) => ({
@@ -29,8 +31,6 @@ const connect = (
   from: port(state, ...from),
   to: port(state, ...to),
 });
-const main = (r: { files: readonly { path: string; text: string | null }[] }) =>
-  r.files.find((f) => f.path === "main.nf")?.text;
 
 describe("F-111 Connect", () => {
   it("F-111 UX-25 AR-21: Connect rewrites the argument feeding an input port", async () => {
@@ -126,10 +126,10 @@ describe("F-111 Connect", () => {
     expect(state.model.file("main.nf")?.source.problems).toEqual([]);
   });
 
-  it("F-111: Connect from take and params nodes reads the take and params.<name>", async () => {
+  it("F-111 UX-25: Connect from a take node reads the take, and from a params node reads params.<name>", async () => {
     const state = await stateFor({
       ...procs,
-      "main.nf": `nextflow.enable.types = true\n\ninclude { C } from './c.nf'\n\nparams {\n    reads: String\n}\n\nworkflow W {\n    take:\n    t: String\n\n    main:\n    C()\n    C()\n}\n`,
+      "main.nf": `nextflow.enable.types = true\n\ninclude { C } from './c.nf'\n\nworkflow W {\n    take:\n    t: String\n\n    main:\n    C()\n    C()\n}\n`,
     });
     const w = { path: "main.nf", workflow: "W" };
     const a = accepted(state, {
@@ -139,19 +139,88 @@ describe("F-111 Connect", () => {
       to: port(state, "C@1", "x", "main.nf", "W"),
     });
     expect(main(a)).toContain("C(t)");
-    // the params node is only in the entry workflow's projection when it reads params; use a code-free check
-    const params = projection(state, "main.nf", "W").nodes.find(
-      (n) => n.kind === "params",
-    );
-    if (params) {
-      const b = accepted(state, {
-        kind: "connect",
-        target: w,
-        from: { node: params.id, port: "reads" },
-        to: port(state, "C@1", "x", "main.nf", "W"),
+    // the entry workflow's projection has a params node once it reads params
+    const entry = await stateFor({
+      ...procs,
+      "main.nf": `nextflow.enable.types = true\n\ninclude { C } from './c.nf'\n\nparams {\n    reads: String\n}\n\nworkflow {\n    C()\n    d = params.reads\n    println(d)\n}\n`,
+    });
+    const params = projection(entry).nodes.find((n) => n.kind === "params");
+    expect(params).toBeDefined();
+    const b = accepted(entry, {
+      kind: "connect",
+      target,
+      from: { node: params?.id as string, port: "reads" },
+      to: port(entry, "C@1", "x"),
+    });
+    expect(main(b)).toContain("C(params.reads)");
+    commit(entry, b);
+    expect(entry.model.file("main.nf")?.source.problems).toEqual([]);
+  });
+
+  it("F-111 UX-25: Connect into a bare emit writes `name = value`, into a named emit replaces the value, and into a publish target sets its value", async () => {
+    const w = { path: "main.nf", workflow: "W" };
+    const inEmit = (
+      state: EditState,
+      local: string,
+      from: [string, string],
+    ) => ({
+      kind: "connect" as const,
+      target: w,
+      from: port(state, ...from, "main.nf", "W"),
+      to: port(state, local, "in", "main.nf", "W"),
+    });
+    for (const [label, flagLine] of [
+      ["typed", flag],
+      ["legacy", ""],
+    ] as const) {
+      const bare = await stateFor({
+        "main.nf": `${flagLine}workflow W {\n    take:\n    t\n\n    main:\n    x = t.map { v -> v }\n\n    emit:\n    x\n}\n`,
       });
-      expect(main(b)).toContain("C(params.reads)");
+      const a = accepted(bare, inEmit(bare, ":emit:x", [":take:t", "out"]));
+      expect(main(a), label).toContain("emit:\n    x = t\n");
+      commit(bare, a);
+      expect(bare.model.file("main.nf")?.source.problems, label).toEqual([]);
+      const named = await stateFor({
+        "main.nf": `${flagLine}workflow W {\n    take:\n    t\n\n    main:\n    x = t.map { v -> v }\n\n    emit:\n    out = x\n}\n`,
+      });
+      const b = accepted(named, inEmit(named, ":emit:out", [":take:t", "out"]));
+      expect(main(b), label).toContain("emit:\n    out = t\n");
     }
+    // a lone expression keeps its port name (`out`)
+    const lone = await stateFor({
+      "main.nf":
+        "workflow W {\n    take:\n    t\n\n    main:\n    x = t.map { v -> v }\n\n    emit:\n    x.map { v -> v }\n}\n",
+    });
+    const l = accepted(lone, inEmit(lone, ":emit:out", [":take:t", "out"]));
+    expect(main(l)).toContain("emit:\n    out = t\n");
+    // a publish target
+    const pub = await stateFor({
+      ...procs,
+      "main.nf": `${head}workflow {\n    main:\n    a = channel.of('a')\n    b = channel.of('b')\n    publish:\n    res = a\n}\n\noutput {\n    res {\n        path 'x'\n    }\n}\n`,
+    });
+    const p = accepted(pub, {
+      kind: "connect",
+      target,
+      from: port(pub, "b", "out"),
+      to: { node: node(pub, ":output").id, port: "res" },
+    });
+    expect(main(p)).toContain("publish:\n    res = b\n");
+    commit(pub, p);
+    expect(pub.model.file("main.nf")?.source.problems).toEqual([]);
+  });
+
+  it("F-111 UX-25: a new variable never shadows a built-in name", async () => {
+    const state = await stateFor({
+      "p.nf": `${flag}process PARAMS {\n    output:\n    file('x')\n\n    script:\n    'x'\n}\n`,
+      "c.nf": C,
+      "main.nf": `${flag}include { PARAMS } from './p.nf'\ninclude { C } from './c.nf'\n\nworkflow {\n    PARAMS()\n    C()\n}\n`,
+    });
+    const r = accepted(
+      state,
+      connect(state, ["PARAMS@1", "out"], ["C@1", "x"]),
+    );
+    expect(main(r)).not.toMatch(/\bparams = /);
+    expect(main(r)).toContain("params_2 = PARAMS()\n    C(params_2)");
   });
 
   it("F-111: Connect moves a later source statement before the target, and refuses a cycle or a reassignment", async () => {

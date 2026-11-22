@@ -34,7 +34,7 @@ function maskOutside(text: string, start: number, end: number): string {
 
 const usesCrlf = (text: string): boolean => /\r?\n/.exec(text)?.[0] === "\r\n";
 const withEndings = (file: ScriptSourceFile, text: string): string =>
-  usesCrlf(file.text) ? text.replace(/\n/g, "\r\n") : text;
+  usesCrlf(file.text) ? text.replace(/\r?\n/g, "\r\n") : text;
 const withoutFinalNewline = (text: string): string =>
   text.replace(/\r?\n$/, "");
 

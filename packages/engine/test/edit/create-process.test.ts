@@ -95,4 +95,17 @@ describe("F-111 CreateProcess", () => {
     expect(create("X", "README.md").code).toBe("invalid");
     expect(texts(state)["main.nf"]).toBe(typedMain);
   });
+
+  it("F-111 AR-24: CreateProcess refuses a script of top-level statements up front, as invalid rather than as a result that doesn't parse", async () => {
+    const text = "println('hi')\ndef x = 1\n";
+    const state = await stateFor({ "main.nf": text });
+    const r = refused(state, {
+      kind: "createProcess",
+      name: "X",
+      caller: "main.nf",
+    });
+    expect(r.code).toBe("invalid");
+    expect(r.message).toContain("statements outside a workflow");
+    expect(texts(state)["main.nf"]).toBe(text);
+  });
 });

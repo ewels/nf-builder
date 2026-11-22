@@ -10,10 +10,10 @@ import type {
   TextPatch,
 } from "@nf-builder/lang-core";
 import {
-  type ModelEvent,
   openProject,
   type ProjectFile,
   type ProjectModel,
+  type ProjectModelOptions,
 } from "../model/project";
 import { installedPacks } from "../packs";
 import { loadParser } from "../source/parser";
@@ -38,7 +38,7 @@ export interface EditState {
 export async function createEditState(
   version: string,
   files: Iterable<ProjectFile>,
-  options: { trace?: (event: ModelEvent) => void } = {},
+  options: Pick<ProjectModelOptions, "trace"> = {},
 ): Promise<EditState> {
   const pack = installedPacks.find((p) => p.version === version);
   if (!pack) throw new Error(`No language pack for ${version}`);

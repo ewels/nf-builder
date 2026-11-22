@@ -64,7 +64,7 @@ describe("F-111 splice", () => {
       "// about W\nworkflow {\n    println 'x' // tail\n}\n\nprocess P {\n    script:\n    'p'\n}\n",
     );
     const def = file.ast?.body[0];
-    if (!def || def.kind !== "Workflow") throw new Error("no workflow");
+    if (def?.kind !== "Workflow") throw new Error("no workflow");
     const span = itemSpan(def);
     expect(file.text.slice(span.start, span.end)).toBe(
       "// about W\nworkflow {\n    println 'x' // tail\n}",
@@ -87,7 +87,7 @@ describe("F-111 splice", () => {
     const file = script(text);
     expect(file.status).toBe("partial");
     const def = file.ast?.body[0];
-    if (!def || def.kind !== "Workflow") throw new Error("no workflow");
+    if (def?.kind !== "Workflow") throw new Error("no workflow");
     const out = applyEdit(
       text,
       reprintDeclaration(file, def, appendCall(def, "C"), parser.printer),
@@ -145,10 +145,29 @@ describe("F-111 splice", () => {
     expect(inc).toContain("include { N } from './n.nf'\r\n");
   });
 
+  it("F-111 AR-22 LA-45: a CRLF file with a multi-line string keeps single CRLF line breaks after a reprint", () => {
+    const text =
+      'process A {\n    script:\n    "a"\n}\n\nworkflow {\n    m = """\n      one\n      two\n      """\n    println(m)\n}\n'.replace(
+        /\n/g,
+        "\r\n",
+      );
+    const file = script(text);
+    const wf = file.ast?.body.find((i) => i.kind === "Workflow");
+    if (wf?.kind !== "Workflow") throw new Error("no workflow");
+    const out = applyEdit(
+      text,
+      reprintDeclaration(file, wf, appendCall(wf, "A"), parser.printer),
+    );
+    expect(out).not.toContain("\r\r");
+    expect(out.replace(/\r\n/g, "")).not.toMatch(/[\r\n]/);
+    expect(out).toContain('"""\r\n      one\r\n      two\r\n      """');
+    expect(script(out).problems).toEqual([]);
+  });
+
   it("F-111 ADR-0004: a reprint that would drop a comment is refused", () => {
     const file = script("workflow {\n    // note\n    A()\n    B()\n}\n");
     const def = file.ast?.body[0];
-    if (!def || def.kind !== "Workflow") throw new Error("no workflow");
+    if (def?.kind !== "Workflow") throw new Error("no workflow");
     const [first, second] = (def.main?.items ?? []) as [Statement, Statement];
     // replacing the commented statement with a new one drops its comment
     const dropped = {
@@ -173,7 +192,7 @@ describe("F-111 splice", () => {
       'workflow {\n    if (true) {\n    m = """\n      first\n        second\n      """\n    println(m)\n    }\n}\n';
     const file = script(text);
     const def = file.ast?.body[0];
-    if (!def || def.kind !== "Workflow") throw new Error("no workflow");
+    if (def?.kind !== "Workflow") throw new Error("no workflow");
     const out = applyEdit(
       text,
       reprintDeclaration(file, def, def, parser.printer),

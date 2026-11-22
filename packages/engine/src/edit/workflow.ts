@@ -5,6 +5,7 @@ import {
   type AstNode,
   type Expression,
   type GraphNode,
+  type Port,
   type PortRef,
   type Projection,
   type Range,
@@ -94,21 +95,27 @@ export function locateWorkflow(
   return { file, def, projection };
 }
 
-/** The graph node `ref` names; refuses an unknown node or port. */
-export function nodeOf(
+/** The graph node with this id; refuses an unknown one. */
+export function graphNode(projection: Projection, id: string): GraphNode {
+  const node = projection.nodes.find((n) => n.id === id);
+  if (!node) throw new EditRefusal("not-found", `There is no node ${id}.`);
+  return node;
+}
+
+/** The node and port `ref` names on the given side; refuses an unknown node or port. */
+export function portOf(
   projection: Projection,
   ref: PortRef,
   side: "inputs" | "outputs",
-): GraphNode {
-  const node = projection.nodes.find((n) => n.id === ref.node);
-  if (!node)
-    throw new EditRefusal("not-found", `There is no node ${ref.node}.`);
-  if (!node[side].some((p) => p.id === ref.port))
+): { node: GraphNode; port: Port } {
+  const node = graphNode(projection, ref.node);
+  const port = node[side].find((p) => p.id === ref.port);
+  if (!port)
     throw new EditRefusal(
       "not-found",
       `${node.label} has no ${side === "inputs" ? "input" : "output"} ${ref.port}.`,
     );
-  return node;
+  return { node, port };
 }
 
 const contains = (outer: Range, inner: Range) =>
@@ -122,7 +129,7 @@ export function topStatement(def: WorkflowDef, range: Range): number {
 }
 
 /** The expression a statement stands for: its expression, an assignment's value or an initialiser. */
-export function statementExpression(stmt: Statement): Expression | null {
+function statementExpression(stmt: Statement): Expression | null {
   switch (stmt.kind) {
     case "ExpressionStatement":
       return stmt.expression;
@@ -176,7 +183,7 @@ interface Owner {
 }
 
 /** The call whose argument list holds the expression with exactly this range; null for a receiver or a nested position. */
-export function argumentOwner(def: WorkflowDef, argument: Range): Owner | null {
+function argumentOwner(def: WorkflowDef, argument: Range): Owner | null {
   let found: Owner | null = null;
   walk(def, (node) => {
     if (found) return false;
@@ -199,37 +206,33 @@ export function argumentOwner(def: WorkflowDef, argument: Range): Owner | null {
 
 /**
  * The workflow without the argument at `argument`: a named argument, or the last positional one, is removed; an earlier
- * positional one becomes `null` so the later ones keep their position (LA-33). `removed` is what was taken out.
+ * positional one becomes `null` so the later ones keep their position (LA-33). `removed` is what was taken out. Null
+ * when the range isn't a plain argument of a call.
  */
 export function clearArgument(
   def: WorkflowDef,
   argument: Range,
-): { def: WorkflowDef; removed: AstNode } {
+): { def: WorkflowDef; removed: AstNode } | null {
   const found = argumentOwner(def, argument);
-  if (!found)
-    throw new EditRefusal(
-      "invalid",
-      "That argument isn't a plain argument of a call, so it can't be removed from here.",
-    );
+  if (!found) return null;
   const { owner, element } = found;
-  const positional = owner.args.filter((a) => a.kind !== "NamedArgument");
-  const last =
-    element.kind !== "NamedArgument" && positional.at(-1) === element;
-  const named = element.kind === "NamedArgument";
+  const remove =
+    element.kind === "NamedArgument" ||
+    owner.args.filter((a) => a.kind !== "NamedArgument").at(-1) === element;
   return {
-    def: replaceNode(def, element, named || last ? null : nullLiteral()),
+    def: replaceNode(def, element, remove ? null : nullLiteral()),
     removed: element,
   };
 }
 
-export interface SourceReference {
+interface SourceReference {
   readonly expression: Expression;
   /** The variable the expression reads, for the order checks; null for params. */
   readonly variable: string | null;
   /** The top-level statement that makes the value; -1 for takes and params. */
   readonly statement: number;
-  /** Set when the statement must first be assigned to a new variable. */
-  readonly introduce: { statement: number; name: string } | null;
+  /** Set when the statement must first be assigned to the new variable `variable`. */
+  readonly introduce: boolean;
 }
 
 const identifierPart = (text: string) => text.replace(/[^A-Za-z0-9_]/g, "_");
@@ -237,14 +240,13 @@ const identifierPart = (text: string) => text.replace(/[^A-Za-z0-9_]/g, "_");
 /** How a downstream node reads the output port `from` (Connect, step 1). `taken` lists names a new variable must avoid. */
 export function referenceTo(
   def: WorkflowDef,
-  projection: Projection,
-  from: PortRef,
+  node: GraphNode,
+  port: Port,
   taken: ReadonlySet<string>,
 ): SourceReference {
-  const node = nodeOf(projection, from, "outputs");
   const read = (base: string): Expression =>
     node.outputs.length > 1
-      ? property(variable(base), from.port)
+      ? property(variable(base), port.id)
       : variable(base);
   switch (node.kind) {
     case "take":
@@ -252,14 +254,14 @@ export function referenceTo(
         expression: variable(node.name),
         variable: node.name,
         statement: -1,
-        introduce: null,
+        introduce: false,
       };
     case "params":
       return {
-        expression: property(variable("params"), from.port),
+        expression: property(variable("params"), port.id),
         variable: null,
         statement: -1,
-        introduce: null,
+        introduce: false,
       };
     case "code": {
       const s = topStatement(def, node.range);
@@ -269,10 +271,10 @@ export function referenceTo(
           `${node.label} can't be connected from here.`,
         );
       return {
-        expression: variable(from.port),
-        variable: from.port,
+        expression: variable(port.id),
+        variable: port.id,
         statement: s,
-        introduce: null,
+        introduce: false,
       };
     }
     case "call":
@@ -290,7 +292,7 @@ export function referenceTo(
           expression: read(local.variable),
           variable: local.variable,
           statement: s,
-          introduce: null,
+          introduce: false,
         };
       const stmt = def.main?.items[s];
       if (stmt?.kind !== "ExpressionStatement")
@@ -309,7 +311,7 @@ export function referenceTo(
         expression: read(name),
         variable: name,
         statement: s,
-        introduce: { statement: s, name },
+        introduce: true,
       };
     }
     default:

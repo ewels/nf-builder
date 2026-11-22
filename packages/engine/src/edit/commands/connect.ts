@@ -1,69 +1,77 @@
 import type {
-  Argument,
   AstNode,
   Connect,
   Disconnect,
   Expression,
+  MethodCall,
   NamedOutput,
   Statement,
   TextPatch,
   WorkflowDef,
 } from "@nf-builder/lang-core";
 import type { EditState } from "../apply";
-import { namesInWorkflow } from "../names";
-import { assignment, findByRange, nullLiteral, replaceNode } from "../nodes";
+import { builtinNames, isIdentifier, namesInWorkflow } from "../names";
+import {
+  assignment,
+  findByRange,
+  namedOutput,
+  nullLiteral,
+  replaceNode,
+} from "../nodes";
 import { EditRefusal } from "../refusal";
 import { reprintDeclaration } from "../splice";
 import {
-  argumentOwner,
   assignedNames,
   clearArgument,
   locateWorkflow,
   mentionedNames,
-  nodeOf,
+  portOf,
   referenceTo,
   topStatement,
 } from "../workflow";
 
 const invalid = (message: string) => new EditRefusal("invalid", message);
 
-/** Sets the value of the emit or publish item whose range starts where the node's does, or the named publisher. */
+/**
+ * Sets the value of the emit or publish item chosen by `match`. A bare `emit: x` gets `x = <expression>`; a lone
+ * expression keeps the port name it had (`name`) by becoming a named output.
+ */
 function setValue(
   def: WorkflowDef,
   items: readonly (NamedOutput | Statement)[],
   match: (item: NamedOutput | Statement) => boolean,
   expression: Expression,
+  name: string,
 ): WorkflowDef {
   const item = items.find(match);
   if (!item) throw invalid("That output isn't in the workflow's code.");
-  const updated =
-    item.kind === "NamedOutput"
-      ? { ...item, value: expression }
-      : { ...item, expression };
-  return replaceNode(def, item as AstNode, updated as AstNode);
+  if (item.kind === "NamedOutput") {
+    const valued: NamedOutput = { ...item, value: expression };
+    return replaceNode(def, item, valued);
+  }
+  if (!isIdentifier(name))
+    throw invalid(
+      "That output has no name to keep, so its value can't be replaced from here. Name it in the code first.",
+    );
+  return replaceNode(def, item, namedOutput(name, expression));
 }
 
 /** Feeds the output port `from` into the input port `to` of the same workflow (UX-25). */
 export function connect(state: EditState, command: Connect): TextPatch[] {
   const { file, def, projection } = locateWorkflow(state, command.target);
-  const from = nodeOf(projection, command.from, "outputs");
-  const to = nodeOf(projection, command.to, "inputs");
+  const { node: from, port: out } = portOf(projection, command.from, "outputs");
+  const { node: to, port: input } = portOf(projection, command.to, "inputs");
   if (from.id === to.id)
     throw invalid(`${from.label} can't be connected to itself.`);
-  const input = to.inputs.find((p) => p.id === command.to.port);
-  if (!input) throw invalid("That input doesn't exist.");
-  if (
-    to.kind === "take" ||
-    to.kind === "factory" ||
-    to.kind === "params" ||
-    to.kind === "code"
-  )
-    throw invalid(`${to.label} has no input to connect to.`);
 
   const items = def.main?.items ?? [];
   const scope = state.model.file(file.path)?.scope.keys() ?? [];
-  const taken = new Set([...namesInWorkflow(def), ...scope]);
-  const source = referenceTo(def, projection, command.from, taken);
+  const taken = new Set([
+    ...namesInWorkflow(def),
+    ...scope,
+    ...builtinNames(state.catalogue),
+  ]);
+  const source = referenceTo(def, from, out, taken);
 
   // where the target reads: after all of `main` for emits and publishers
   const afterMain = to.kind === "emit" || to.kind === "output";
@@ -90,7 +98,7 @@ export function connect(state: EditState, command: Connect): TextPatch[] {
       throw invalid(
         `${to.label} comes before ${from.label} and ${from.label} depends on statements in between, so moving it up would create a cycle.`,
       );
-  } else if (s >= 0 && source.variable !== null && source.introduce === null) {
+  } else if (s >= 0 && source.variable !== null && !source.introduce) {
     const reassigned = items
       .slice(s + 1, t)
       .some((x) => assignedNames(x).includes(source.variable as string));
@@ -103,7 +111,23 @@ export function connect(state: EditState, command: Connect): TextPatch[] {
   // the target side
   const removed: AstNode[] = [];
   let updated: WorkflowDef;
-  if (input.argument) {
+  if (to.kind === "emit") {
+    updated = setValue(
+      def,
+      def.emits?.items ?? [],
+      (i) => i.range.start === to.range.start,
+      source.expression,
+      to.label,
+    );
+  } else if (to.kind === "output") {
+    updated = setValue(
+      def,
+      def.publishers?.items ?? [],
+      (i) => i.kind === "NamedOutput" && i.name.name === command.to.port,
+      source.expression,
+      command.to.port,
+    );
+  } else if (input.argument) {
     const old = findByRange(def, input.argument);
     if (!old)
       throw new EditRefusal(
@@ -113,26 +137,12 @@ export function connect(state: EditState, command: Connect): TextPatch[] {
       );
     removed.push(old);
     updated = replaceNode(def, old, source.expression);
-  } else if (to.kind === "emit") {
-    updated = setValue(
-      def,
-      def.emits?.items ?? [],
-      (i) => i.range.start === to.range.start,
-      source.expression,
-    );
-  } else if (to.kind === "output") {
-    updated = setValue(
-      def,
-      def.publishers?.items ?? [],
-      (i) => i.kind === "NamedOutput" && i.name.name === command.to.port,
-      source.expression,
-    );
   } else if (to.kind === "call") {
     const expression = findByRange(def, to.range);
     if (expression?.kind !== "MethodCall")
       throw invalid(`${to.label} can't take another argument.`);
-    const args = (expression as unknown as { args: readonly Argument[] }).args;
-    const index = to.inputs.findIndex((p) => p.id === command.to.port);
+    const args = expression.args;
+    const index = to.inputs.indexOf(input);
     const positional = args.filter((a) => a.kind !== "NamedArgument");
     if (positional.length > index)
       throw invalid(`${to.label} already has an argument there.`);
@@ -142,10 +152,8 @@ export function connect(state: EditState, command: Connect): TextPatch[] {
       source.expression,
     ];
     const named = args.filter((a) => a.kind === "NamedArgument");
-    updated = replaceNode(def, expression, {
-      ...expression,
-      args: [...padded, ...named],
-    } as AstNode);
+    const extended: MethodCall = { ...expression, args: [...padded, ...named] };
+    updated = replaceNode(def, expression, extended);
   } else {
     throw invalid(`${to.label} can't take another argument.`);
   }
@@ -156,7 +164,7 @@ export function connect(state: EditState, command: Connect): TextPatch[] {
     const stmt = list[s] as Statement & { expression: Expression };
     list = list.map((x, i) =>
       i === s
-        ? assignment(source.introduce?.name as string, stmt.expression, stmt)
+        ? assignment(source.variable as string, stmt.expression, stmt)
         : x,
     );
   }
@@ -183,8 +191,7 @@ export function connect(state: EditState, command: Connect): TextPatch[] {
 /** Removes the argument that feeds an input port. */
 export function disconnect(state: EditState, command: Disconnect): TextPatch[] {
   const { file, def, projection } = locateWorkflow(state, command.target);
-  const node = nodeOf(projection, command.port, "inputs");
-  const port = node.inputs.find((p) => p.id === command.port.port);
+  const { node, port } = portOf(projection, command.port, "inputs");
   if (node.kind === "emit" || node.kind === "output")
     throw invalid(
       `The value of ${node.label} can't be disconnected; change or delete it in the code.`,
@@ -193,15 +200,15 @@ export function disconnect(state: EditState, command: Disconnect): TextPatch[] {
     throw invalid(
       `${node.label} needs its input channel; connect another one instead.`,
     );
-  if (!port?.argument)
+  if (!port.argument)
     throw invalid(
       `${node.label} has nothing connected to ${command.port.port}.`,
     );
-  if (!argumentOwner(def, port.argument))
+  const cleared = clearArgument(def, port.argument);
+  if (!cleared)
     throw invalid(
       `The input of ${node.label} can't be disconnected from here.`,
     );
-  const cleared = clearArgument(def, port.argument);
   const edit = reprintDeclaration(
     file,
     def,
