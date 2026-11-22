@@ -62,19 +62,38 @@ test("F-011 step 3 ADR-0040: the site is served under the base path: /version.js
   ).toBe(E2E_BASE_PATH);
 });
 
-test('F-011 step 4 QA-30: inside a cross-origin frame the app does not mount and offers "Open in a new tab"', async ({
+test("F-011 step 4 QA-30: inside a cross-origin iframe the app loads and works", async ({
   page,
 }) => {
-  // about:blank to a different origin: the outer page is not localhost:4173, so the frame is cross-origin.
+  const watch = await watchForCspViolations(page);
+  // The setContent page is about:blank, so the frame is cross-origin to it.
   await page.setContent(
-    `<iframe id="app" src="${PREVIEW_URL}" width="900" height="600"></iframe>`,
+    `<iframe id="app" src="${PREVIEW_URL}" width="1200" height="800"></iframe>`,
   );
   const frame = page.frameLocator("#app");
   await expect(
-    frame.getByText("nf-builder can't run inside another page."),
+    frame.getByRole("banner").getByRole("heading", { name: "nf-builder" }),
   ).toBeVisible();
-  const link = frame.getByRole("link", { name: "Open in a new tab" });
-  await expect(link).toHaveAttribute("href", PREVIEW_URL);
-  await expect(link).toHaveAttribute("target", "_blank");
-  await expect(frame.getByRole("banner")).toHaveCount(0);
+  await expect(
+    frame.getByRole("complementary", { name: "Components and files" }),
+  ).toBeVisible();
+  await expect(
+    frame.getByRole("main", { name: "Canvas and editor" }),
+  ).toBeVisible();
+  await expect(
+    frame.getByRole("complementary", { name: "Details" }),
+  ).toBeVisible();
+  // The palette is loaded through the engine worker.
+  await expect(
+    frame
+      .getByRole("tabpanel", { name: "Components" })
+      .locator(".palette-item-label")
+      .first(),
+  ).toBeVisible();
+  const appFrame = page.frames().find((f) => f.url() === PREVIEW_URL);
+  expect(appFrame).toBeDefined();
+  expect(await appFrame?.evaluate(() => window.__cspViolations ?? [])).toEqual(
+    [],
+  );
+  expect(watch.consoleErrors).toEqual([]);
 });
