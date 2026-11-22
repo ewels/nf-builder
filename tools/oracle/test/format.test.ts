@@ -166,6 +166,28 @@ describe("F-110 format trees", () => {
     expect(rows[1]?.errors).toEqual(["X is not defined"]);
   });
 
+  it("F-110 step 1 ADR-0005: lint -format may rewrite a file with a known difference in the fixed-point run, and no other", () => {
+    const run = (known: boolean, rewrites: Record<string, string>) => {
+      const { manifest } = makePack();
+      if (known)
+        manifest.files[0] = {
+          ...(manifest.files[0] as FormatManifest["files"][number]),
+          knownDifference: "bug",
+        };
+      const exec = fakeFormat({
+        input: { rewrites: { "a.nf": "a = 1\n" }, result: report(1) },
+        expected: { rewrites, result: report(Object.keys(rewrites).length) },
+      });
+      return runFormatTrees(manifest, { exec, formatDir: tmp() })[1];
+    };
+    expect(run(true, { "a.nf": "a  = 1\n" })?.matched).toBe(true);
+    expect(run(false, { "a.nf": "a  = 1\n" })?.matched).toBe(false);
+    // the allowance is for the files named, not for more
+    expect(
+      run(true, { "a.nf": "a  = 1\n", "lib/b.nf": "b  = 2\n" })?.matched,
+    ).toBe(false);
+  });
+
   it("F-110 step 2: printed/ files are laid over formatted/ in the expected tree", () => {
     const { dir, manifest } = makePack();
     put(join(dir, "printed", "a.nf"), "a = 1  // ours\n");

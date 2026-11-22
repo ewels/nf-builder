@@ -1,107 +1,151 @@
-// Printer fixtures (F-110, ADR 0005, LA-45): the printer must print each input as `nextflow lint -format` formats it
-// (formatted*/, written by `pnpm oracle --write-format`). Until the declarations are ported, the run is limited to the
-// files that hold only statements and functions, listed below; that list and KNOWN go when they are.
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
+// Printer fixtures (F-110, ADR 0005, LA-45), listed in fixtures.json: the printer must print each input as
+// `nextflow lint -format` formats it (formatted*/, written by `pnpm oracle --write-format`), except where the manifest
+// records a known difference; there printed*/ holds what the printer prints, and the oracle checks it is a fixed point
+// with no lint error.
+import { existsSync, readFileSync } from "node:fs";
+import { join, resolve } from "node:path";
+import type { Declaration } from "@nf-builder/lang-core";
 import { describe, expect, it } from "vitest";
 import { parseScriptAst } from "../../src/ast/index.ts";
-import { createLayout, printScript } from "../../src/printer/index.ts";
+import {
+  createLayout,
+  printDeclaration,
+  printScript,
+} from "../../src/printer/index.ts";
 import { commentTexts } from "./comment-texts.ts";
 
-const root = join(import.meta.dirname, "..");
-const read = (...path: string[]) => readFileSync(join(root, ...path), "utf8");
-
-/** `ast` tree files that are code snippets or functions, and print as lint -format formats them. */
-const PRINTED = [
-  "comments.nf",
-  "shebang.nf",
-  "function.nf",
-  "stmt-separators.nf",
-  "stmt-variable-declaration.nf",
-  "stmt-assignment.nf",
-  "stmt-expression.nf",
-  "stmt-assert.nf",
-  "stmt-if-else.nf",
-  "stmt-return.nf",
-  "stmt-throw.nf",
-  "stmt-try-catch-legacy.nf",
-  "stmt-empty.nf",
-  "expr-literals.nf",
-  "expr-strings.nf",
-  "expr-gstrings.nf",
-  "expr-collections.nf",
-  "expr-closures.nf",
-  "expr-index-property.nf",
-  "expr-calls.nf",
-  "expr-operators.nf",
-];
-
-/** Files whose printed text differs from lint -format's in one line (the manifest's known differences). */
-const KNOWN: Record<
-  string,
-  { id: string; printed: string; formatted: string }
-> = {
-  "stmt-try-catch.nf": {
-    id: "catch-package",
-    printed: "catch (e: java.nio.file.AccessDeniedException) {",
-    formatted: "catch (e: AccessDeniedException) {",
-  },
-  "expr-constructor.nf": {
-    id: "type-rename",
-    printed: "def list = new ArrayList<String>()",
-    formatted: "def list = new List<String>()",
-  },
+type Tree = {
+  name: string;
+  input: string | null;
+  formatted: string;
+  printed: string;
 };
+type Entry = {
+  tree: string;
+  path: string;
+  kind: "parsed" | "support" | "synthesised" | "edited";
+  knownDifference?: string;
+};
+type Manifest = {
+  trees: Tree[];
+  knownDifferences: Record<string, string>;
+  files: Entry[];
+};
+
+const here = import.meta.dirname;
+const manifest = JSON.parse(
+  readFileSync(join(here, "fixtures.json"), "utf8"),
+) as Manifest;
+const trees = new Map(manifest.trees.map((t) => [t.name, t]));
+const dirOf = (tree: string, key: "input" | "formatted" | "printed") =>
+  resolve(here, (trees.get(tree) as Tree)[key] as string);
+const read = (
+  tree: string,
+  key: "input" | "formatted" | "printed",
+  path: string,
+) => readFileSync(join(dirOf(tree, key), path), "utf8");
 
 function print(text: string) {
   const parsed = parseScriptAst(text);
   expect(parsed.ok && parsed.errors).toEqual([]);
   if (!parsed.ok) throw new Error("parse failed");
-  return printScript(parsed.ast, { layout: createLayout(text) });
+  return {
+    ...printScript(parsed.ast, { layout: createLayout(text) }),
+    ast: parsed.ast,
+  };
 }
 
+const printable = manifest.files.filter(
+  (f) => f.kind === "parsed" || f.kind === "support",
+);
+
 describe("printer fixtures", () => {
-  for (const path of PRINTED) {
-    const input = read("ast/fixtures", path);
-    const formatted = read("printer/formatted-ast", path);
+  for (const f of printable) {
+    const label = `${f.tree}/${f.path}`;
+    const input = read(f.tree, "input", f.path);
+    const formatted = read(f.tree, "formatted", f.path);
 
-    it(`F-110 step 1 LA-45 ADR-0005: ast/${path} prints as nextflow lint -format formats it`, () => {
-      const result = print(input);
-      expect(result.text).toBe(formatted);
-      expect(result.missingComments).toEqual([]);
+    if (!f.knownDifference) {
+      it(`F-110 step 1 LA-45 ADR-0005: ${label} prints as nextflow lint -format formats it`, () => {
+        const result = print(input);
+        expect(result.text).toBe(formatted);
+        expect(result.missingComments).toEqual([]);
+      });
+    } else {
+      it(`F-110 step 1 ADR-0005: ${label} differs from lint -format only as ${f.knownDifference} says`, async () => {
+        const result = print(input);
+        await expect(result.text).toMatchFileSnapshot(
+          join(dirOf(f.tree, "printed"), f.path),
+        );
+        // a known difference that no longer differs must be removed from the manifest
+        expect(result.text).not.toBe(formatted);
+        expect(result.missingComments).toEqual([]);
+      });
+    }
+
+    // what the oracle's fixed-point check runs on: formatted/, overlaid with printed/
+    const printedPath = join(dirOf(f.tree, "printed"), f.path);
+    const expected =
+      f.knownDifference && existsSync(printedPath)
+        ? readFileSync(printedPath, "utf8")
+        : formatted;
+
+    it(`F-110 LA-45: printing ${label} again changes nothing`, () => {
+      expect(print(expected).text).toBe(expected);
     });
 
-    it(`F-110 LA-45: printing ast/${path} again changes nothing`, () => {
-      expect(print(formatted).text).toBe(formatted);
+    it(`F-110 LA-45: ${label} keeps every comment`, () => {
+      expect(commentTexts(expected)).toEqual(commentTexts(input));
     });
 
-    it(`F-110 LA-45: ast/${path} keeps every comment`, () => {
-      expect(commentTexts(print(input).text)).toEqual(commentTexts(input));
-    });
-
-    it(`F-110 step 2: ast/${path} as printed parses with no errors`, () => {
+    it(`F-110 step 2: ${label} as printed parses with no errors`, () => {
       expect(parseScriptAst(print(input).text)).toMatchObject({
         ok: true,
         errors: [],
       });
     });
+
+    it(`F-110 LA-45: printDeclaration prints each declaration of ${label} as printScript does`, () => {
+      const { ast } = print(expected);
+      const lines = expected.split("\n");
+      for (const item of ast.body) {
+        if (
+          !("range" in item) ||
+          [
+            "Block",
+            "ExpressionStatement",
+            "VariableDeclaration",
+            "Assignment",
+            "If",
+            "TryCatch",
+            "Return",
+            "Throw",
+            "Assert",
+            "EmptyStatement",
+            "InvalidDeclaration",
+          ].includes(item.kind)
+        )
+          continue;
+        const decl = item as Declaration;
+        const first = decl.leadingComments?.[0]?.range.line ?? decl.range.line;
+        const slice = `${lines.slice(first - 1, decl.range.endLine).join("\n")}\n`;
+        const result = printDeclaration(decl, {
+          layout: createLayout(expected),
+        });
+        expect(result.text).toBe(slice);
+        expect(result.missingComments).toEqual([]);
+      }
+    });
   }
 
-  for (const [path, known] of Object.entries(KNOWN)) {
-    const input = read("ast/fixtures", path);
-    const formatted = read("printer/formatted-ast", path);
-
-    it(`F-110 step 1 ADR-0005: ast/${path} differs from lint -format only as ${known.id} says`, () => {
-      const text = print(input).text;
-      expect(formatted).toContain(known.formatted);
-      expect(text).not.toBe(formatted);
-      expect(text).toBe(formatted.replace(known.formatted, known.printed));
-    });
-
-    it(`F-110 step 2: ast/${path} as printed parses with no errors and prints again unchanged`, () => {
-      const text = print(input).text;
-      expect(parseScriptAst(text)).toMatchObject({ ok: true, errors: [] });
-      expect(print(text).text).toBe(text);
-    });
-  }
+  it("F-110 ADR-0005: every known difference of the manifest is used and defined", () => {
+    const used = new Set(
+      manifest.files.flatMap((f) =>
+        f.knownDifference ? [f.knownDifference] : [],
+      ),
+    );
+    expect([...used].sort()).toEqual(
+      Object.keys(manifest.knownDifferences).sort(),
+    );
+  });
 });

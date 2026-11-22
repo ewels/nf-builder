@@ -268,7 +268,8 @@ function lintProblems(
  * - `format`: lint -format on a copy of `input/` must exit 0 with no errors, and every script must then equal
  *   `formatted/<path>` (with `write`, `formatted/` is written from the result instead);
  * - `fixed-point`: lint -format on `expected/` (the input tree with `formatted/` then `printed/` laid over it) must exit 0
- *   with no errors, format nothing and leave every script unchanged.
+ *   with no errors, format nothing and leave every script unchanged, except the scripts the manifest gives a known
+ *   difference, which lint -format may rewrite (at most that many files formatted).
  */
 export function runFormatTrees(
   manifest: FormatManifest,
@@ -363,9 +364,17 @@ export function runFormatTrees(
         writeFileSync(target, readFileSync(join(overlay, path)));
       }
     }
+    // A file with a known difference is one lint -format would write differently (that is the difference), so it may
+    // change here; it must still lint clean. Every other script must stay as it is.
+    const exempt = new Set(
+      manifest.files
+        .filter((f) => f.tree === tree.name && f.knownDifference !== null)
+        .map((f) => f.path),
+    );
     const before = new Map<string, string>();
     for (const path of listFiles(expectedDir).filter(isScript))
-      before.set(path, readFileSync(join(expectedDir, path), "utf8"));
+      if (!exempt.has(path))
+        before.set(path, readFileSync(join(expectedDir, path), "utf8"));
     results.push(
       check(tree, expectedDir, "fixed-point", (report) => {
         const compared = compareFiles(
@@ -374,9 +383,9 @@ export function runFormatTrees(
           "lint -format changed the file",
         );
         const problems = [...compared.problems];
-        if (report !== null && report.summary.filesFormatted !== 0)
+        if (report !== null && report.summary.filesFormatted > exempt.size)
           problems.push(
-            `lint -format reports ${report.summary.filesFormatted} file(s) formatted, expected 0`,
+            `lint -format reports ${report.summary.filesFormatted} file(s) formatted, expected ${exempt.size === 0 ? "0" : `at most ${exempt.size}`}`,
           );
         return { problems, diffs: compared.diffs };
       }),

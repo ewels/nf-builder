@@ -34,22 +34,6 @@ const upstream = JSON.parse(read("../../../upstream.json")) as {
   nextflow: { tag: string; commit: string };
 };
 
-/** What this task runs: an explicit filter, which the task that ports the declarations removes. */
-const SECTIONS = new Set([
-  "CODE SNIPPET",
-  "STATEMENTS",
-  "EXPRESSIONS",
-  "COMMENTS",
-]);
-/** Cases in those sections whose script holds a declaration other than a function, not ported yet. */
-const DEFERRED = new Set(
-  manifest.cases
-    .filter(
-      (c) => c.section === "COMMENTS" && c.line !== 1150, // the function case
-    )
-    .map((c) => c.id),
-);
-
 function format(text: string): string {
   const parsed = parseScriptAst(text);
   expect(parsed.ok && parsed.errors).toEqual([]);
@@ -61,7 +45,7 @@ function format(text: string): string {
 
 describe("ported nf-lang ScriptFormatterTest cases", () => {
   for (const c of manifest.cases) {
-    if (c.excluded || !SECTIONS.has(c.section) || DEFERRED.has(c.id)) continue;
+    if (c.excluded) continue;
     it(`F-110 LA-45 ADR-0005: nf-lang ScriptFormatterTest "${c.test}" (L${c.line}) formats as upstream`, () => {
       const input = read(c.in);
       if (c.kind === "format-contains") {

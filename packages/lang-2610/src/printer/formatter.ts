@@ -719,11 +719,11 @@ export class Formatter {
     const first = items[0];
     const named = first !== undefined && isGroup(first) ? first : null;
     const positional = (named ? items.slice(1) : items) as Expression[];
-    this.positionalArgs(positional, wrap);
-    if (named) {
-      if (positional.length > 0) this.append(wrap ? "," : ", ");
-      this.namedArgs(named, wrap);
-    }
+    // Known difference `named-args-comma` (plan F-110 4.6): upstream appends the comma between the positional and the
+    // named arguments here (L584), after `visitPositionalArgs` has already written its trailing comma and the trailing
+    // comment of the last argument. A wrapped call printed `a,,` or `a // c,`. The comma is written with the argument.
+    this.positionalArgs(positional, wrap, named !== null);
+    if (named) this.namedArgs(named, wrap);
   }
 
   /** L592 (`visitBinaryExpression`) is in `statement`; this is L637 (`visitTernaryExpression`). */
@@ -830,7 +830,11 @@ export class Formatter {
   }
 
   /** L764 */
-  protected positionalArgs(args: readonly Expression[], wrap: boolean): void {
+  protected positionalArgs(
+    args: readonly Expression[],
+    wrap: boolean,
+    followed = false,
+  ): void {
     const comma = wrap ? "," : ", ";
     const trailingComma = wrap && args.length > 1;
     for (const [i, arg] of args.entries()) {
@@ -840,7 +844,7 @@ export class Formatter {
         this.appendIndent();
       }
       this.expression(arg);
-      if (trailingComma || i + 1 < args.length) this.append(comma);
+      if (trailingComma || i + 1 < args.length || followed) this.append(comma);
       if (wrap) this.appendTrailingComment(arg);
     }
   }
