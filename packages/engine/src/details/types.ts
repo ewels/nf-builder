@@ -62,6 +62,8 @@ export interface WorkflowSummary {
   /** The workflow's name, or "Entry workflow". */
   readonly name: string;
   readonly path: string;
+  /** The entry workflow, which has parameters and outputs rather than take and emit. */
+  readonly entry: boolean;
   readonly typed: boolean | null;
   readonly takes: readonly SummaryPort[];
   readonly emits: readonly SummaryPort[];

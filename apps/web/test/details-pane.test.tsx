@@ -208,6 +208,7 @@ describe("F-206 details pane", () => {
     const summary: WorkflowSummary = {
       name: "SHOUT",
       path: "workflows.nf",
+      entry: false,
       typed: true,
       takes: [{ node: "t", name: "names", type: "Channel<String>" }],
       emits: [{ node: "e", name: "loud", type: null }],
@@ -226,15 +227,15 @@ describe("F-206 details pane", () => {
       modules: [{ module: "nf-core/wordcount", calls: ["WORDCOUNT"] }],
     };
     const out = renderToStaticMarkup(<WorkflowSummaryView summary={summary} />);
-    for (const heading of [
-      "Take",
-      "Emit",
-      "Calls",
-      "Registry modules",
-      "Parameters",
-      "Outputs",
-    ])
+    for (const heading of ["Take", "Emit", "Calls", "Registry modules"])
       expect(out).toMatch(new RegExp(`<h4[^>]*>${heading}</h4>`));
+    expect(out).not.toContain(">Parameters</h4>");
+    const entry = renderToStaticMarkup(
+      <WorkflowSummaryView summary={{ ...summary, entry: true }} />,
+    );
+    for (const heading of ["Parameters", "Outputs"])
+      expect(entry).toMatch(new RegExp(`<h4[^>]*>${heading}</h4>`));
+    expect(entry).not.toContain(">Take</h4>");
     for (const text of [
       "SHOUT",
       "names",
@@ -258,6 +259,8 @@ describe("F-206 details pane", () => {
     );
     expect(empty).not.toContain(">Registry modules</h4>");
     expect(empty).not.toContain(">Parameters</h4>");
+    expect(empty).toContain('<h4>Take</h4><p class="details-none">None</p>');
+    expect(empty).toContain('<h4>Emit</h4><p class="details-none">None</p>');
   });
 
   it("F-206 UX-32: a selected node's header has disabled Edit and Code buttons; with no selection there are none", () => {
@@ -311,5 +314,55 @@ describe("F-206 details pane", () => {
     );
     expect(summary).toContain('data-details-state="summary"');
     expect(summary).toContain("Entry workflow");
+    expect(summary).not.toContain("<h4>Take</h4>");
+    expect(summary).not.toContain("<h4>Emit</h4>");
+    // a selection shows the node, not the summary
+    const picked = renderToStaticMarkup(
+      <DetailsBody
+        content={{
+          status: "ready",
+          revision: 1,
+          projection: {
+            ...projection,
+            nodes: [
+              {
+                id: "main.nf#/:take:reads",
+                kind: "take",
+                name: "reads",
+                label: "reads",
+                range,
+                inputs: [],
+                outputs: [],
+              },
+            ],
+          } as unknown as Projection,
+        }}
+        selected="main.nf#/:take:reads"
+        details={{ status: "loading", node: "main.nf#/:take:reads" }}
+      />,
+    );
+    expect(picked).toContain('data-details-state="loading"');
+    expect(picked).toContain("reads");
+    expect(picked).not.toContain('data-details-state="summary"');
+    expect(picked).not.toContain("Entry workflow");
+    // a named workflow with no takes or emits says so, and has no parameters or outputs sections
+    const named = renderToStaticMarkup(
+      <DetailsBody
+        content={{
+          status: "ready",
+          revision: 1,
+          projection: {
+            ...projection,
+            workflow: { ...projection.workflow, name: "LIB" },
+          },
+        }}
+        selected={null}
+        details={{ status: "idle" }}
+      />,
+    );
+    expect(named).toContain('<h4>Take</h4><p class="details-none">None</p>');
+    expect(named).toContain('<h4>Emit</h4><p class="details-none">None</p>');
+    expect(named).not.toContain("<h4>Parameters</h4>");
+    expect(named).not.toContain("<h4>Outputs</h4>");
   });
 });

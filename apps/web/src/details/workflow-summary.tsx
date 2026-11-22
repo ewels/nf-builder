@@ -4,22 +4,29 @@ import type { JSX } from "react";
 function Ports({
   title,
   ports,
+  showNone = false,
 }: {
   readonly title: string;
   readonly ports: readonly SummaryPort[];
+  /** Say "None" when there are no ports, rather than leave the section out. */
+  readonly showNone?: boolean;
 }): JSX.Element | null {
-  if (ports.length === 0) return null;
+  if (ports.length === 0 && !showNone) return null;
   return (
     <section className="details-section">
       <h4>{title}</h4>
-      <ul className="details-list">
-        {ports.map((p) => (
-          <li key={p.node + p.name}>
-            <span className="details-port-name">{p.name}</span>{" "}
-            <span className="details-type">{p.type ?? "Unknown type"}</span>
-          </li>
-        ))}
-      </ul>
+      {ports.length === 0 ? (
+        <p className="details-none">None</p>
+      ) : (
+        <ul className="details-list">
+          {ports.map((p) => (
+            <li key={p.node + p.name}>
+              <span className="details-port-name">{p.name}</span>{" "}
+              <span className="details-type">{p.type ?? "Unknown type"}</span>
+            </li>
+          ))}
+        </ul>
+      )}
     </section>
   );
 }
@@ -37,10 +44,17 @@ export function WorkflowSummaryView({
         {summary.path}
         {summary.typed === null ? "" : summary.typed ? " · Typed" : " · Legacy"}
       </p>
-      <Ports title="Take" ports={summary.takes} />
-      <Ports title="Emit" ports={summary.emits} />
-      <Ports title="Parameters" ports={summary.params} />
-      <Ports title="Outputs" ports={summary.outputs} />
+      {summary.entry ? (
+        <>
+          <Ports title="Parameters" ports={summary.params} />
+          <Ports title="Outputs" ports={summary.outputs} />
+        </>
+      ) : (
+        <>
+          <Ports title="Take" ports={summary.takes} showNone />
+          <Ports title="Emit" ports={summary.emits} showNone />
+        </>
+      )}
       <section className="details-section">
         <h4>Calls</h4>
         {summary.calls.length === 0 ? (

@@ -76,6 +76,7 @@ export function workflowSummary(projection: Projection): WorkflowSummary {
   return {
     name: workflow.name ?? "Entry workflow",
     path: workflow.path,
+    entry: workflow.name === null,
     typed: workflow.typed,
     takes,
     emits,

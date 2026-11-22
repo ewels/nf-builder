@@ -24,8 +24,8 @@
   --tone-red-fg: #9b1c1c;
   --tone-red-bg: #fbe0e0;
   --color-error: #9b1c1c;
-  --color-warning: #8a5300; /* 6.3:1 on white (QA-13) */
-  --color-suggestion: #1f5f8b; /* 6.8:1 on white (QA-13) */
+  --color-warning: #8a5300; /* 5.85:1 on the details column's --color-surface-muted (QA-13) */
+  --color-suggestion: #1f5f8b; /* 6.33:1 on the details column's --color-surface-muted (QA-13) */
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;

@@ -20,7 +20,7 @@ export function DiagnosticList({
     <ul className="details-list">
       {diagnostics.map((d) => (
         <li
-          key={`${d.path}:${d.range.start}:${d.code}:${d.message}`}
+          key={`${d.path}:${d.range.start}:${d.range.end}:${d.code}:${d.message}`}
           className={`details-problem is-${d.severity}`}
         >
           <span className="details-problem-severity">

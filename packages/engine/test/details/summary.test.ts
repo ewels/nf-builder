@@ -29,7 +29,12 @@ describe("F-206 workflow summary", () => {
       "WF",
     );
     const s = workflowSummary(p);
-    expect([s.name, s.path, s.typed]).toEqual(["WF", "main.nf", true]);
+    expect([s.name, s.path, s.typed, s.entry]).toEqual([
+      "WF",
+      "main.nf",
+      true,
+      false,
+    ]);
     expect(s.takes).toEqual([
       { node: "t", name: "reads", type: "Channel<Path>" },
     ]);
@@ -68,6 +73,7 @@ describe("F-206 workflow summary", () => {
     };
     const s = workflowSummary(projection([params, call("a"), output]));
     expect(s.name).toBe("Entry workflow");
+    expect(s.entry).toBe(true);
     expect(s.takes).toEqual([]);
     expect(s.emits).toEqual([]);
     expect(s.params).toEqual([
