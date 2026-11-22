@@ -1,0 +1,106 @@
+{
+  "$comment": "Spike S5 (F-010, ADR 0024): every runtime file and input the test page serves, pinned by URL and sha256. prepare.ts fetches them into .cache/spikes/s5/public/<path>. Re-pin in its own PR.",
+  "pyodide": "314.0.8",
+  "nfMetro": {
+    "version": "2.1.0",
+    "commit": "2a92f3141eb428249f675a212f982fd5bf4f3e0c"
+  },
+  "assets": [
+    {
+      "path": "pyodide/pyodide.mjs",
+      "url": "https://cdn.jsdelivr.net/pyodide/v314.0.8/full/pyodide.mjs",
+      "sha256": "1bb8cc14f9405aaa7cd4e00c12edd0a8539de9cc026618d6ee5a9663f367dc70",
+      "bytes": 17758
+    },
+    {
+      "path": "pyodide/pyodide.asm.mjs",
+      "url": "https://cdn.jsdelivr.net/pyodide/v314.0.8/full/pyodide.asm.mjs",
+      "sha256": "22514b8be6980e28a02c8b1d6387ce8dfe666fc4edf8d547cff5dce29ff4d972",
+      "bytes": 1250259
+    },
+    {
+      "path": "pyodide/pyodide.asm.wasm",
+      "url": "https://cdn.jsdelivr.net/pyodide/v314.0.8/full/pyodide.asm.wasm",
+      "sha256": "e14d49ceca9b4a0e274ea918f3a898de2d3880b6e5573a6cfe1a2267ecc70329",
+      "bytes": 9597892
+    },
+    {
+      "path": "pyodide/python_stdlib.zip",
+      "url": "https://cdn.jsdelivr.net/pyodide/v314.0.8/full/python_stdlib.zip",
+      "sha256": "2bd3394a145bfbbe5bbc9d9d6ab9136abbb986c6fef6c142b3a2962227aa5c28",
+      "bytes": 2545550
+    },
+    {
+      "path": "pyodide/pyodide-lock.json",
+      "url": "https://cdn.jsdelivr.net/pyodide/v314.0.8/full/pyodide-lock.json",
+      "sha256": "5dc2fc119108bc148c7457dc86e7675b5c87e1cafd420b9c34c1eaef7b36c010",
+      "bytes": 119077
+    },
+    {
+      "path": "wheels/nf_metro-2.1.0-py3-none-any.whl",
+      "url": "https://files.pythonhosted.org/packages/46/6b/edf26d76843c71d5538e7f4780961eaae198fe769dee021ce2ceb71a583d/nf_metro-2.1.0-py3-none-any.whl",
+      "sha256": "d3fa5bdef156591f0dcc79b86793228fb4a8f825642941befb8729cf5c2a2f05",
+      "bytes": 1424432
+    },
+    {
+      "path": "wheels/lark-1.3.1-py3-none-any.whl",
+      "url": "https://files.pythonhosted.org/packages/82/3d/14ce75ef66813643812f3093ab17e46d3a206942ce7376d31ec2d36229e7/lark-1.3.1-py3-none-any.whl",
+      "sha256": "c629b661023a014c37da873b4ff58a817398d12635d3bbb2c5a03be7fe5d1e12",
+      "bytes": 113151
+    },
+    {
+      "path": "wheels/drawsvg-2.5.1-py3-none-any.whl",
+      "url": "https://files.pythonhosted.org/packages/76/b2/cc3c8f9edb007a380eeab5c5a886837e6a0575cdda1c59487cd880695285/drawsvg-2.5.1-py3-none-any.whl",
+      "sha256": "0792ffe1946e6f0d5aba1c2c90ac51cbc1a4a352a9a46b3fc56751197e6fc4e9",
+      "bytes": 44855
+    },
+    {
+      "path": "wheels/networkx-3.6.1-py3-none-any.whl",
+      "url": "https://cdn.jsdelivr.net/pyodide/v314.0.8/full/networkx-3.6.1-py3-none-any.whl",
+      "sha256": "58b21d3717a1c7a1a32facd972b9422b28a764abc8f2ff59b4fef03d4525cb54",
+      "bytes": 1084840
+    },
+    {
+      "path": "wheels/pillow-12.2.0-cp314-cp314-pyemscripten_2026_0_wasm32.whl",
+      "url": "https://cdn.jsdelivr.net/pyodide/v314.0.8/full/pillow-12.2.0-cp314-cp314-pyemscripten_2026_0_wasm32.whl",
+      "sha256": "e29838b7a756e4ee0f27a9cfa9a387ee0dfa2e9dd44be2dd595130b9f9d93ac3",
+      "bytes": 1037806
+    },
+    {
+      "path": "examples/rnaseq_metro.mmd",
+      "url": "https://raw.githubusercontent.com/seqeralabs/nf-metro/2a92f3141eb428249f675a212f982fd5bf4f3e0c/examples/rnaseq_metro.mmd",
+      "sha256": "023d72892b74fad6aedb3f3deabbc908aad207d2493b7653d8967b36b6715120",
+      "bytes": 11813
+    },
+    {
+      "path": "examples/sarek_metro.mmd",
+      "url": "https://raw.githubusercontent.com/seqeralabs/nf-metro/2a92f3141eb428249f675a212f982fd5bf4f3e0c/examples/sarek_metro.mmd",
+      "sha256": "c621553de2bc3acc7afbd1f45f41963f7dd97e9db4e39f0b2bc96d344364d80f",
+      "bytes": 9134
+    },
+    {
+      "path": "examples/nf-core-rnaseq_logo_light.png",
+      "url": "https://raw.githubusercontent.com/seqeralabs/nf-metro/2a92f3141eb428249f675a212f982fd5bf4f3e0c/examples/nf-core-rnaseq_logo_light.png",
+      "sha256": "5ef0b19e918513a4936e070aaeafb13b5e5fea42724736957c5d4f7e91d8ef45",
+      "bytes": 74201
+    },
+    {
+      "path": "examples/nf-core-rnaseq_logo_dark.png",
+      "url": "https://raw.githubusercontent.com/seqeralabs/nf-metro/2a92f3141eb428249f675a212f982fd5bf4f3e0c/examples/nf-core-rnaseq_logo_dark.png",
+      "sha256": "36acef20372a3a4587115f6dbc9a320fc5d0c40d7248cb24276f7e287fce2121",
+      "bytes": 26500
+    },
+    {
+      "path": "examples/nf-core-sarek_logo_light.png",
+      "url": "https://raw.githubusercontent.com/seqeralabs/nf-metro/2a92f3141eb428249f675a212f982fd5bf4f3e0c/examples/nf-core-sarek_logo_light.png",
+      "sha256": "95f20e1cfe0e3eb73ec93fd1c8beafb2dcda8fbead142c517755adc50c7d6a38",
+      "bytes": 82963
+    },
+    {
+      "path": "examples/nf-core-sarek_logo_dark.png",
+      "url": "https://raw.githubusercontent.com/seqeralabs/nf-metro/2a92f3141eb428249f675a212f982fd5bf4f3e0c/examples/nf-core-sarek_logo_dark.png",
+      "sha256": "7a1209a83ffe8111da3a117986e65c1d185cfda371c12768262e494941b8f310",
+      "bytes": 15513
+    }
+  ]
+}

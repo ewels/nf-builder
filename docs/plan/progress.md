@@ -147,3 +147,14 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - ADR 0009 confirmed and its status set to Accepted: the registry sends no CORS headers, so the snapshot is the registry source; GitHub import via `api.github.com` and `raw.githubusercontent.com` works; `codeload.github.com` is blocked, so zip import is an upload (spike result; notes on F-403, F-501, F-502).
   - `test/e2e-browsers.test.ts`: the Playwright listing tests get a 30 s timeout (they timed out under load).
 - Blockers: none.
+
+## 2026-11-22 · F-010 · Claude (autonomous)
+- Did: spike S5: `spikes/s5-nf-metro/` renders the nf-core rnaseq and sarek metro maps with nf-metro 2.1.0 in a Web Worker under self-hosted Pyodide 314.0.8; identical to the CLI (0 differing pixels); 16.5 MB served (10.5 MB gzip), first SVG after 8.6 s; [report](../research/2026-11-22-spike-s5-nf-metro.md). PR #15.
+- State: passing.
+- Next: F-006 in review, F-007 building, then M1 from F-101.
+- Decisions:
+  - Spike pages that needn't be deployed live in `spikes/<id>/`; Pyodide self-hosted and fetched at build time; `'wasm-unsafe-eval'` only in the spike's preview; build-time hosts cdn.jsdelivr.net, pypi.org, files.pythonhosted.org, raw.githubusercontent.com ([ADR 0024](../adr/0024-spike-s5-self-hosted-pyodide.md)).
+  - `playwright.config.ts`: spike specs run in their own one-worker `chromium-spikes` project (each repeat would otherwise build and serve the spike concurrently).
+  - ADR 0013 stands (spike result): no nf-metro patches; Pillow is needed for SVG too; FI-54 follow-ups in F-607's notes.
+  - No new npm dependency and no workflow edit; CI's Chromium job fetches about 17 MB of assets and 50 MB of CLI wheels until FI-54.
+- Blockers: none.
