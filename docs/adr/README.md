@@ -12,7 +12,7 @@ Process: [0001](0001-record-decisions-as-adrs.md). Template: [template.md](templ
 | [0006](0006-language-packs-per-version.md) | One language pack per Nextflow version; 26.10 only at launch | Accepted |
 | [0007](0007-typed-by-default.md) | Typed by default; legacy code accepted and editable | Accepted |
 | [0008](0008-canvas-model.md) | Canvas model: fixed node kinds, chain nodes, layout in a sidecar | Accepted |
-| [0009](0009-registry-and-github-access.md) | Read the registry and GitHub straight from the browser, with a snapshot fallback | Accepted (spike S4 to confirm) |
+| [0009](0009-registry-and-github-access.md) | Read the registry and GitHub straight from the browser, with a snapshot fallback | Accepted |
 | [0010](0010-language-server-spike.md) | Try the official language server in the browser; never depend on it | Accepted (spike S3 to confirm) |
 | [0011](0011-testing-with-real-pipelines-and-nextflow.md) | Test against real pipelines, with real Nextflow and nf-docs as oracles | Accepted |
 | [0012](0012-agent-workflow.md) | Agents work one feature per session against a fixed feature list | Accepted |
@@ -24,3 +24,4 @@ Process: [0001](0001-record-decisions-as-adrs.md). Template: [template.md](templ
 | [0018](0018-parallel-features-and-local-nextflow.md) | Allow parallel features and local Nextflow runs | Accepted |
 | [0019](0019-nextflow-oracle.md) | Run the Nextflow oracle from the pinned release, locally and in CI | Accepted (agent) |
 | [0021](0021-app-shell-layout.md) | Hand-roll the resizable shell and keep its layout in localStorage | Accepted (agent) |
+| [0023](0023-s4-probe.md) | Probe cross-origin access from the deployed site with a Playwright-driven page | Accepted (agent) |

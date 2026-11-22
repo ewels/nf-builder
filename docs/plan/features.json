@@ -169,8 +169,8 @@
         "Registry endpoint paths are verified against https://registry.nextflow.io/openapi/",
         "ADR 0009 updated with the outcome"
       ],
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Verified 2026-11-22 on PR #14: S4 probe run 44983841745 against deploy preview #14 (commit dd44cf4) in Chromium 159, Firefox 159 and WebKit 27.2 recorded status, CORS headers and timing for 16 targets (step 1); the @openapi test matched all 10 registry targets to OpenAPI 0.14.0 (step 2); ADR 0009 spike result appended (step 3). Report: docs/research/2026-11-22-spike-s4-cors.md. pnpm test:e2e -- --grep F-008 runs the two local page tests; the deployed probe runs under e2e/s4-probe.config.ts. Probe kept for re-runs until F-502."
     },
     {
       "id": "F-010",
@@ -948,7 +948,7 @@
         "A zip exceeding the limits is refused with a clear message"
       ],
       "passes": false,
-      "notes": ""
+      "notes": "From F-008 (S4): codeload.github.com only allows https://render.githubusercontent.com, so zip import is a file upload; no GitHub archive URL can be fetched in the browser."
     },
     {
       "id": "F-404",
@@ -1024,7 +1024,7 @@
         "Spot check: nf-core/fastqc ports match its meta.yml and it is marked legacy (as of 2026-11)"
       ],
       "passes": false,
-      "notes": ""
+      "notes": "From F-008 (S4): the snapshot is the browser's only registry source (registry.nextflow.io sends no CORS headers; bundle downloads redirect to public-cr-prod.seqera.io, also without CORS). Paths under /api/v1/, module names %2F-encoded; the list endpoint lacks port metadata, so fetch each module's release. See docs/research/2026-11-22-spike-s4-cors.md."
     },
     {
       "id": "F-502",
@@ -1042,7 +1042,7 @@
         "With live access (if S4 allowed it): palette shows live"
       ],
       "passes": false,
-      "notes": ""
+      "notes": "From F-008 (S4, 2026-11-22): the registry sends no CORS headers, so the live client can't work from the browser today; step 2 applies only if a re-run of the S4 probe (dispatch the S4 probe workflow) shows access. Delete the probe page and workflow here (ADR 0023)."
     },
     {
       "id": "F-503",

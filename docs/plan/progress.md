@@ -136,3 +136,14 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - `.module-info`: format recorded, writing deferred to F-504 (ADR 0009 spike result).
   - AGENTS.md: oracle cases marked `expect: error` are exempt from "must pass the oracle", like the corpus fixtures.
 - Blockers: none.
+
+## 2026-11-22 · F-008 · Claude (autonomous)
+- Did: spike S4: a host-free probe page at `/spike/s4/`, a deployed Playwright probe (`e2e/s4-probe/`, own config) and the `S4 probe` workflow; run against deploy preview #14 in Chromium, Firefox and WebKit; [report](../research/2026-11-22-spike-s4-cors.md). PR #14.
+- State: passing.
+- Next: F-006 (parse speed fix), F-010 in review, then F-007.
+- Decisions:
+  - Probe page shipped with every deploy, targets in test code, CSP stripped by route in the test (Playwright's `bypassCSP` fails in WebKit), the `S4 probe` workflow outside the CI-green list, probe kept until F-502 ([ADR 0023](../adr/0023-s4-probe.md)).
+  - `.github/workflows/s4-probe.yml`: new workflow, read-only token, SHA-pinned actions (ADR 0023).
+  - ADR 0009 confirmed and its status set to Accepted: the registry sends no CORS headers, so the snapshot is the registry source; GitHub import via `api.github.com` and `raw.githubusercontent.com` works; `codeload.github.com` is blocked, so zip import is an upload (spike result; notes on F-403, F-501, F-502).
+  - `test/e2e-browsers.test.ts`: the Playwright listing tests get a 30 s timeout (they timed out under load).
+- Blockers: none.
