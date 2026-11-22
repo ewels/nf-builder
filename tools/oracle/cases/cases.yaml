@@ -290,3 +290,12 @@ cases:
       - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/reference/syntax.mdx
     lint: { expect: ok, clean: true }
     run: { expect: ok }
+  - id: template-hello-world
+    dir: ../../../packages/lang-2610/templates/hello-world
+    about: The Hello world template, a params block, a typed process in modules/local and an output block, lints with no warning and stub-runs.
+    spec: [F-203, LA-02, LA-11, LA-12, LA-40]
+    sources:
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/process-typed.mdx
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/reference/syntax.mdx
+    lint: { expect: ok, clean: true }
+    run: { expect: ok, output: ["greeting.txt"] }
