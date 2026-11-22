@@ -47,7 +47,7 @@ export function TabPanel(): JSX.Element {
       <PanelLayout
         mode={tab.mode}
         canvas={<CanvasHost key="canvas" />}
-        code={<CodePane key={`code:${session}`} path={tab.path} />}
+        code={<CodePane key={`code:${session}:${tab.path}`} path={tab.path} />}
       />
     </div>
   );

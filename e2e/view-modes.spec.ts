@@ -282,3 +282,27 @@ test("F-208 ADR-0004 IO-01: a draft in one project never reaches another project
     .poll(() => readFile(page, "main.nf"))
     .toBe(`${b}\n// edited in project B`);
 });
+
+test("F-208 UX-27: the sync status of one file's code does not carry over to another tab", async ({
+  page,
+}) => {
+  await page.goto("./");
+  await openFixture(page);
+  await canvasReady(page);
+  await openWorkflow(page, "workflows.nf", "SHOUT");
+  await canvasReady(page);
+  await radio(page, "Code").click();
+  await expect(editor(page)).toBeVisible();
+  await page.getByRole("tab", { name: "main.nf" }).click();
+  await radio(page, "Code").click();
+  await expect(editor(page)).toBeVisible();
+  // line 24 of the f205 fixture is `greeted = GREET(ch_names, params.greeting)`
+  await appendToLine(page, 24, " )");
+  await expect(syncStatus(page)).toHaveAttribute("data-sync", "refused");
+  await page.getByRole("tab", { name: "SHOUT" }).click();
+  await expect(page.locator(".code-pane")).toHaveAccessibleName(
+    "Code of workflows.nf",
+  );
+  await expect(syncStatus(page)).toHaveAttribute("data-sync", "idle");
+  await expect(syncStatus(page)).toHaveText("");
+});
