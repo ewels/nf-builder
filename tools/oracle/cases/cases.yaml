@@ -290,3 +290,20 @@ cases:
     run:
       expect: ok
       args: ["-stub", "--words", "data/words.txt"]
+  # F-208: the Code view fixture, before and after its one valid edit.
+  - id: f208-code-edit
+    about: A typed entry workflow with two processes and one call, the start of the Code view end-to-end edits; the valid edit adds one call (f208-code-edit-after).
+    spec: [F-208, UX-27, AR-24, ADR-0039]
+    sources:
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/process-typed.mdx
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/workflow-typed.mdx
+    lint: { expect: ok }
+    run: { expect: ok }
+  - id: f208-code-edit-after
+    about: The f208-code-edit tree after the valid edit, which adds the call to the second process.
+    spec: [F-208, UX-27, AR-24, ADR-0039]
+    sources:
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/process-typed.mdx
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/workflow-typed.mdx
+    lint: { expect: ok }
+    run: { expect: ok }
