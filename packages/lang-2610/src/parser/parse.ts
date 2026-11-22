@@ -2,7 +2,6 @@
 // listeners, then, if that fails with a parser error, LL with a listener that records the first error. One syntax error per file.
 import {
   type ATN,
-  BailErrorStrategy,
   BaseErrorListener,
   CharStream,
   CommonTokenStream,
@@ -13,7 +12,6 @@ import {
   type ParserRuleContext,
   PredictionContextCache,
   PredictionMode,
-  type RecognitionException,
   type Recognizer,
   Token,
   type TokenStream,
@@ -29,12 +27,16 @@ import {
   ScriptParser,
 } from "../generated/ScriptParser.ts";
 import { LexerSyntaxError } from "./abstract-lexer.ts";
+import { DescriptiveErrorStrategy } from "./descriptive-error-strategy.ts";
 
 export type ParseError = {
   source: "lexer" | "parser";
   message: string;
   line: number;
   column: number;
+  endLine: number;
+  /** Exclusive. As nf-lang: the start column plus the offending token's length in UTF-16 units (the start is in code points). */
+  endColumn: number;
 };
 export type ParseOutcome<T> =
   | { ok: true; tree: T; mode: "SLL" | "LL" }
@@ -45,16 +47,23 @@ class FirstErrorListener extends BaseErrorListener {
 
   override syntaxError(
     _recognizer: Recognizer<never>,
-    _offendingSymbol: unknown,
+    offendingSymbol: unknown,
     line: number,
     charPositionInLine: number,
     message: string,
   ): void {
+    const token = offendingSymbol as Token | null;
+    const column = charPositionInLine + 1;
     this.first ??= {
       source: "parser",
       message,
       line,
-      column: charPositionInLine + 1,
+      column,
+      endLine: line,
+      endColumn:
+        token && token.type !== Token.EOF && token.text != null
+          ? column + token.text.length
+          : column + 1,
     };
   }
 }
@@ -102,33 +111,11 @@ const llDecisions = (atn: ATN, ruleNames: string[]) => {
 const SCRIPT_LL = llDecisions(ScriptParser._ATN, ScriptParser.ruleNames);
 const CONFIG_LL = llDecisions(ConfigParser._ATN, ConfigParser.ruleNames);
 
-const EOF_MESSAGE =
-  "Unexpected end of file -- check for an unclosed brace, bracket, parenthesis, or string";
-
-/** nf-lang's DescriptiveErrorStrategy wording for an input mismatch: the offending token, quoted and escaped. */
-function describe(token: Token | null | undefined): string {
-  if (!token || token.type === Token.EOF) return EOF_MESSAGE;
-  const text = (token.text ?? "")
-    .replaceAll("\n", "\\n")
-    .replaceAll("\r", "\\r")
-    .replaceAll("\t", "\\t");
-  return `Unexpected input: '${text}'`;
-}
-
-/** The error behind a bail-out: the listener's if it heard one, else the recognition exception's offending token. */
-function errorOf(
-  error: ParseCancellationException,
-  listener: FirstErrorListener,
-): ParseError {
-  if (listener.first) return listener.first;
-  const cause = error.cause as RecognitionException | undefined;
-  const token = cause?.offendingToken;
-  return {
-    source: "parser",
-    message: cause?.message || describe(token),
-    line: token?.line ?? 1,
-    column: (token?.column ?? 0) + 1,
-  };
+/** Never happens: in LL mode the strategy reports before it bails out. Fail loudly rather than invent a message. */
+function unheard(error: ParseCancellationException): never {
+  throw new Error("The parser failed without reporting an error", {
+    cause: error,
+  });
 }
 
 function run<P extends ScriptParser | ConfigParser, T>(
@@ -142,7 +129,7 @@ function run<P extends ScriptParser | ConfigParser, T>(
   const tokens = new CommonTokenStream(lexer);
   const parser = makeParser(tokens);
   parser.removeErrorListeners();
-  parser.errorHandler = new BailErrorStrategy();
+  parser.errorHandler = new DescriptiveErrorStrategy();
   const base = parser.interpreter as ParserATNSimulator;
   const stage1 = new Stage1Simulator(
     parser,
@@ -162,6 +149,8 @@ function run<P extends ScriptParser | ConfigParser, T>(
         message: error.message,
         line: error.line,
         column: error.column,
+        endLine: error.line,
+        endColumn: error.column + 1,
       },
     }) as const;
 
@@ -183,7 +172,7 @@ function run<P extends ScriptParser | ConfigParser, T>(
   } catch (error) {
     if (error instanceof LexerSyntaxError) return lexerError(error, "LL");
     if (!(error instanceof ParseCancellationException)) throw error;
-    return { ok: false, mode: "LL", error: errorOf(error, listener) };
+    return { ok: false, mode: "LL", error: listener.first ?? unheard(error) };
   }
 }
 
