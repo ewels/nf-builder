@@ -2,16 +2,10 @@
 // (Apache-2.0; see ../../grammar/NOTICE and ../../grammar/LICENSE). The text is kept exact, not normalised.
 import type { Comment, CommentKind } from "@nf-builder/lang-core";
 import { type Token, Token as TokenClass } from "antlr4ng";
-import { nlTokenType, type PositionIndex } from "./positions.ts";
+import { codePoints, nlTokenType, type PositionIndex } from "./positions.ts";
 
 const isComment = (text: string) =>
   text.startsWith("//") || text.startsWith("/*") || text.startsWith("#!");
-
-const codePoints = (text: string) => {
-  let n = 0;
-  for (const _ of text) n++;
-  return n;
-};
 
 /**
  * Collect the comments from a filled token buffer. Comments are `NL` tokens whose text starts with `//`, `/*` or `#!`;

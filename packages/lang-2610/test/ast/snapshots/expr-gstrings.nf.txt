@@ -15,7 +15,9 @@ Script typesEnabled=false 1:1-17:1
             receiver Variable 2:19-2:24 "names"
             method Identifier 2:25-2:29 "join"
             args[0] String value=" and " quote="'" 2:30-2:37 "' and '"
+            closures=[]
         parts[2] GStringText 2:39-2:40 "!"
+      closures=[]
   body[2] VariableDeclaration def=true multiple=false 4:1-4:56
     targets[0] TypedName 4:5-4:9
       name Identifier 4:5-4:9 "name"
@@ -41,6 +43,7 @@ Script typesEnabled=false 1:1-17:1
             object Variable 5:30-5:34 "name"
             property Identifier 5:35-5:39 "last"
         parts[4] GStringText 5:39-5:40 "!"
+      closures=[]
   body[4] VariableDeclaration def=true multiple=false 7:1-7:23
     targets[0] TypedName 7:5-7:10
       name Identifier 7:5-7:10 "input"

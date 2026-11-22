@@ -6,7 +6,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 
 | Feature | Branch | State |
 |---|---|---|
-| F-102 script AST | merged (PR) | Plan deleted on merge. |
+| F-102 script AST | `feat/F-102`, PR #23 | Plan deleted in the PR that merges it. |
 | F-103 config AST | `feat/F-103` (pushed, stacked on `feat/F-102` at `83511c3`) | Built and committed: config AST, 228 corpus snapshots, range property test, ConfigAstBuilder errors, oracle cases. After F-102 merges: merge `main`; fill comment slots with F-102's `attachComments`; delete `src/ast/config/literal-errors.ts` and its number handling, since the shared builders now report escapes (`checkEscapes` in `stringLiteral`/`gstringText`), keyword and duplicate-argument errors, and number formats (call `cx.failOnNumberFormat()` at the end of the config unit); check config paths and block headers still get escape checks; records; PR. |
 | F-104 round trip | not started | [plan](plan-F-104.md). Branch from `main` after F-102 (and F-103) merge. |
 | F-110 printer | not started | [plan](plan-F-110.md). Branch from `main` after F-102 merges; can run alongside F-104. |

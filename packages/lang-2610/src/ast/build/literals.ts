@@ -1,7 +1,9 @@
 // Ported from nextflow-io/nextflow v26.10.7, modules/nf-lang/src/main/java/nextflow/script/parser/ScriptAstBuilder.java
-// `string`, `stringLiteral`, `gstring`, `gstringText`, `gstringPath`, `integerLiteral` and `floatingPointLiteral`
-// (Apache-2.0; see ../../../grammar/NOTICE), with the unescaping of apache/groovy GROOVY_4_0_33
-// org.apache.groovy.parser.antlr4.util.StringUtils (`replaceEscapes`, `removeCR`, `trimQuotations`).
+// (`string`, `stringLiteral`, `gstring`, `gstringText`, `gstringPath`, `integerLiteral`, `floatingPointLiteral`) and
+// nextflow/script/parser/EscapeUtils (the invalid-escape check in `checkEscapes`), all Apache-2.0; see
+// ../../../grammar/NOTICE. The unescaping (`replaceEscapes`, `removeCR`, `trimQuotations`) follows apache/groovy
+// GROOVY_4_0_33 org.apache.groovy.parser.antlr4.util.StringUtils, and the number-range messages follow its
+// org.apache.groovy.parser.antlr4.util.Numbers (also Apache-2.0).
 import type {
   Expression,
   GString,
@@ -22,7 +24,7 @@ import type {
   IntegerLiteralAltContext,
   StringLiteralContext,
 } from "../../generated/ScriptParser.ts";
-import { spanRanges } from "../positions.ts";
+import { codePoints, spanRanges } from "../positions.ts";
 import { has, hasAny } from "./alt.ts";
 import type { BuildContext } from "./context.ts";
 import { expression } from "./expressions.ts";
@@ -162,13 +164,9 @@ export function stringLiteral(
   const text = ctx.getText();
   const at = cx.range(ctx);
   if (checkEscapesToo)
-    for (const problem of checkEscapes(
-      text,
-      at.line,
-      at.column,
-      text.startsWith("/"),
-    ))
-      cx.report(problem);
+    cx.errors.push(
+      ...checkEscapes(text, at.line, at.column, text.startsWith("/")),
+    );
   return {
     kind: "String",
     text,
@@ -191,12 +189,6 @@ export function numberLiteral(
   return { kind: "Number", text, integer, range };
 }
 
-const codePoints = (text: string) => {
-  let n = 0;
-  for (const _ of text) n++;
-  return n;
-};
-
 function gstringText(
   ctx: ParserRuleContext,
   triple: boolean,
@@ -204,8 +196,7 @@ function gstringText(
 ): GStringText {
   const text = ctx.getText();
   const range = cx.range(ctx);
-  for (const problem of checkEscapes(text, range.line, range.column, false))
-    cx.report(problem);
+  cx.errors.push(...checkEscapes(text, range.line, range.column, false));
   return {
     kind: "GStringText",
     text,

@@ -96,6 +96,7 @@ ConfigFile 1:1-62:1
     path[0] ConfigName form="identifier" 15:1-15:7 "params"
     path[1] ConfigName form="identifier" 15:8-15:13 "empty"
     value Map trailingComma=false 15:16-15:19 "[:]"
+      entries=[]
   statements[11] ConfigAssign 16:1-16:38
     path[0] ConfigName form="identifier" 16:1-16:7 "params"
     path[1] ConfigName form="identifier" 16:8-16:14 "nested"
@@ -143,14 +144,18 @@ ConfigFile 1:1-62:1
     value MethodCall trailingComma=false parens=true 20:15-20:26
       method Identifier 20:15-20:18 "env"
       args[0] String value="HOME" quote="'" 20:19-20:25 "'HOME'"
+      closures=[]
   statements[16] ConfigAssign 21:1-21:50
     path[0] ConfigName form="identifier" 21:1-21:7 "params"
     path[1] ConfigName form="identifier" 21:8-21:12 "date"
     value MethodCall navigation="." trailingComma=false parens=true 21:15-21:50
       receiver New trailingComma=false 21:15-21:35
         type TypeRef nullable=false 21:19-21:33 "java.util.Date"
+          typeArguments=[]
+        args=[]
       method Identifier 21:36-21:42 "format"
       args[0] String value="yyyy" quote="'" 21:43-21:49 "'yyyy'"
+      closures=[]
   statements[17] ConfigAssign 22:1-22:40
     path[0] ConfigName form="identifier" 22:1-22:7 "params"
     path[1] ConfigName form="identifier" 22:8-22:11 "ops"
@@ -270,6 +275,7 @@ ConfigFile 1:1-62:1
         object Variable 29:15-29:21 "params"
         property Identifier 29:22-29:23 "x"
       type TypeRef nullable=false 29:27-29:34 "Integer"
+        typeArguments=[]
   statements[25] ConfigAssign 30:1-30:72
     path[0] ConfigName form="identifier" 30:1-30:7 "params"
     path[1] ConfigName form="identifier" 30:8-30:16 "instance"
@@ -279,11 +285,13 @@ ConfigFile 1:1-62:1
           object Variable 30:19-30:25 "params"
           property Identifier 30:26-30:27 "x"
         type TypeRef nullable=false 30:39-30:43 "List"
+          typeArguments=[]
       right TypeTest operator="!instanceof" 30:47-30:72
         operand Property navigation="." 30:47-30:55
           object Variable 30:47-30:53 "params"
           property Identifier 30:54-30:55 "y"
         type TypeRef nullable=false 30:68-30:72 "List"
+          typeArguments=[]
   statements[26] ConfigAssign 31:1-31:70
     path[0] ConfigName form="identifier" 31:1-31:7 "params"
     path[1] ConfigName form="identifier" 31:8-31:15 "ternary"
@@ -347,6 +355,7 @@ ConfigFile 1:1-62:1
         elements[0] Number integer=true 35:20-35:21 "1"
         elements[1] Number integer=true 35:23-35:24 "2"
       method Identifier 35:26-35:33 "collect"
+      args=[]
       closures[0] Closure 35:34-35:44
         body[0] ExpressionStatement 35:36-35:42
           expression Binary operator="*" 35:36-35:42
@@ -388,10 +397,12 @@ ConfigFile 1:1-62:1
       params[0] Parameter def=false 38:23-38:31
         legacyType LegacyType dimensions=0 38:23-38:29
           type TypeRef nullable=false 38:23-38:29 "String"
+            typeArguments=[]
         name Identifier 38:30-38:31 "a"
       params[1] Parameter def=false 38:33-38:42
         legacyType LegacyType dimensions=0 38:33-38:36
           type TypeRef nullable=false 38:33-38:36 "int"
+            typeArguments=[]
         name Identifier 38:37-38:38 "b"
         defaultValue Number integer=true 38:41-38:42 "1"
       body[0] ExpressionStatement 38:46-38:51
@@ -418,12 +429,14 @@ ConfigFile 1:1-62:1
       body[2] VariableDeclaration def=false multiple=false 42:5-42:19
         legacyType LegacyType dimensions=0 42:5-42:11
           type TypeRef nullable=false 42:5-42:11 "String"
+            typeArguments=[]
         targets[0] TypedName 42:12-42:13
           name Identifier 42:12-42:13 "s"
         initializer String value="x" quote="'" 42:16-42:19 "'x'"
       body[3] VariableDeclaration def=false multiple=false 43:5-43:14
         legacyType LegacyType dimensions=0 43:5-43:8
           type TypeRef nullable=false 43:5-43:8 "int"
+            typeArguments=[]
         targets[0] TypedName 43:9-43:10
           name Identifier 43:9-43:10 "n"
         initializer Number integer=true 43:13-43:14 "2"
@@ -448,13 +461,16 @@ ConfigFile 1:1-62:1
             expression Variable 48:9-48:10 "v"
         catches[0] Catch legacy=true 50:5-52:6
           types[0] TypeRef nullable=false 50:12-50:23 "IOException"
+            typeArguments=[]
           types[1] TypeRef nullable=false 50:26-50:47 "IllegalStateException"
+            typeArguments=[]
           variable Identifier 50:48-50:49 "e"
           body Block 50:52-52:6
             statements[0] Throw 51:9-51:16
               value Variable 51:15-51:16 "e"
         catches[1] Catch legacy=true 53:5-55:6
           types[0] TypeRef nullable=false 53:12-53:21 "Exception"
+            typeArguments=[]
           variable Identifier 53:22-53:23 "e"
           body Block 53:26-55:6
             statements[0] Return 54:9-54:17
@@ -467,6 +483,7 @@ ConfigFile 1:1-62:1
           expression MethodCall trailingComma=false parens=false 56:17-56:30
             method Identifier 56:17-56:24 "println"
             args[0] String value="big" quote="'" 56:25-56:30 "'big'"
+            closures=[]
         alternate If 57:10-57:41
           condition Binary operator="<" 57:14-57:19
             left Variable 57:14-57:15 "v"
@@ -476,9 +493,11 @@ ConfigFile 1:1-62:1
               expression MethodCall trailingComma=false parens=false 57:24-57:39
                 method Identifier 57:24-57:31 "println"
                 args[0] String value="small" quote="'" 57:32-57:39 "'small'"
+                closures=[]
       body[9] ExpressionStatement 58:5-58:14
         expression MethodCall trailingComma=false parens=false 58:5-58:14
           method Identifier 58:5-58:12 "println"
           args[0] Variable 58:13-58:14 "v"
+          closures=[]
       body[10] Return 60:5-60:13
         value Variable 60:12-60:13 "v"

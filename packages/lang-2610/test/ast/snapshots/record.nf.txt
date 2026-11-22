@@ -4,9 +4,12 @@ Script typesEnabled=false 1:1-6:1
     fields[0] TypedName 2:5-2:15
       name Identifier 2:5-2:7 "id"
       type TypeRef nullable=false 2:9-2:15 "String"
+        typeArguments=[]
     fields[1] TypedName 3:5-3:18
       name Identifier 3:5-3:12 "fastq_1"
       type TypeRef nullable=false 3:14-3:18 "Path"
+        typeArguments=[]
     fields[2] TypedName 4:5-4:18
       name Identifier 4:5-4:12 "fastq_2"
       type TypeRef nullable=false 4:14-4:18 "Path"
+        typeArguments=[]

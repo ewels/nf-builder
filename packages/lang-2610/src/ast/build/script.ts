@@ -14,6 +14,7 @@ import type {
 import { reparseDeclaration } from "../reparse.ts";
 import type { BuildContext } from "./context.ts";
 import { scriptDeclaration } from "./declarations.ts";
+import { unparen } from "./sections.ts";
 import { statement } from "./statements.ts";
 
 const SCRIPT_DEF_NAMES = ["agent", "process", "workflow", "output"] as const;
@@ -21,8 +22,7 @@ const SCRIPT_DEF_NAMES = ["agent", "process", "workflow", "output"] as const;
 /** The name of the call a statement is, as Groovy's `getMethodAsString` says it (the receiver is ignored). */
 function calledName(stmt: Statement): string | null {
   if (stmt.kind !== "ExpressionStatement") return null;
-  let e = stmt.expression;
-  while (e.kind === "Parenthesized") e = e.expression;
+  const e = unparen(stmt.expression);
   if (e.kind !== "MethodCall") return null;
   return e.method.kind === "String" ? e.method.value : e.method.name;
 }
@@ -101,11 +101,15 @@ export function buildScript(
   }
 
   // a top-level call named like a declaration is one that failed to parse as such
+  const statements: Statement[] = [];
   for (const { index, ctx } of topStatements) {
     const stmt = body[index] as Statement;
     const name = calledName(stmt);
     const keyword = SCRIPT_DEF_NAMES.find((n) => n === name);
-    if (!keyword) continue;
+    if (!keyword) {
+      statements.push(stmt);
+      continue;
+    }
     const { rejected, error } = reparseDeclaration(ctx, cx.tokens);
     if (error) cx.errors.push(error);
     else if (!rejected)
@@ -123,12 +127,11 @@ export function buildScript(
   }
 
   if (hasDeclarations)
-    for (const item of body)
-      if (isStatement(item))
-        cx.error(
-          "Statements cannot be mixed with script declarations -- move statements into a process, workflow, or function",
-          item.range,
-        );
+    for (const item of statements)
+      cx.error(
+        "Statements cannot be mixed with script declarations -- move statements into a process, workflow, or function",
+        item.range,
+      );
 
   if (!entry && params)
     cx.error(
@@ -153,18 +156,3 @@ export function buildScript(
     range: cx.index.range(0, cx.index.size),
   };
 }
-
-const STATEMENT_KINDS = new Set([
-  "Block",
-  "ExpressionStatement",
-  "VariableDeclaration",
-  "Assignment",
-  "If",
-  "TryCatch",
-  "Return",
-  "Throw",
-  "Assert",
-  "EmptyStatement",
-]);
-const isStatement = (item: ScriptItem): item is Statement =>
-  STATEMENT_KINDS.has(item.kind);

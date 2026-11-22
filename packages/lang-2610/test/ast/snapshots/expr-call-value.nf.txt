@@ -21,7 +21,10 @@ Script typesEnabled=false 1:1-9:1
             callee MethodCall trailingComma=false parens=true 6:13-6:21
               method Identifier 6:13-6:18 "adder"
               args[0] Number integer=true 6:19-6:20 "1"
+              closures=[]
             args[0] Number integer=true 6:22-6:23 "2"
+            closures=[]
+          closures=[]
       items[1] ExpressionStatement 7:5-7:26
         expression Call trailingComma=false parens=true 7:5-7:26
           callee MethodCall trailingComma=false parens=true 7:5-7:23
@@ -29,4 +32,7 @@ Script typesEnabled=false 1:1-9:1
             args[0] MethodCall trailingComma=false parens=true 7:14-7:22
               method Identifier 7:14-7:19 "adder"
               args[0] Number integer=true 7:20-7:21 "3"
+              closures=[]
+            closures=[]
           args[0] Number integer=true 7:24-7:25 "4"
+          closures=[]

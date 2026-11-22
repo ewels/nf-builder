@@ -106,7 +106,7 @@ beforeAll(() => {
 });
 
 const missingHint = (id: string) =>
-  `${id}: missing ${dirOf(id)} or ${join(LINT, `${id}.json`)}; run pnpm corpus:fetch and then pnpm corpus:lint`;
+  `${id}: missing ${dirOf(id)} or ${join(LINT, `${id}.json`)}; run pnpm corpus:fetch and then pnpm corpus:lint with the pinned dist (.cache/nextflow/<version>/nextflow-<version>-dist); the comment dump needs it`;
 const rejectedByLint = (b: Built) =>
   (state.lint.get(b.pipeline)?.errors ?? []).some((e) => e.filename === b.file);
 const okBuilds = () =>
@@ -129,7 +129,7 @@ describe("corpus AST", () => {
     );
     expect(
       missing.map(missingHint),
-      "run pnpm corpus:fetch, then pnpm corpus:lint",
+      "run pnpm corpus:fetch, then pnpm corpus:lint with the pinned dist (.cache/nextflow/<version>/nextflow-<version>-dist): the comment dump is written only for it",
     ).toEqual([]);
     expect(state.built.length).toBeGreaterThan(300);
   });
@@ -198,7 +198,13 @@ describe("corpus AST", () => {
       const file = state.dumps
         .get(b.pipeline)
         ?.files.find((f) => f.file === b.file);
-      if (!file?.comments) continue; // the builder rejected the file upstream too
+      if (!file) {
+        differences.push(
+          `${b.pipeline}/${b.file}: no entry in the comment dump`,
+        );
+        continue;
+      }
+      if (!file.comments) continue; // the builder rejected the file upstream too
       upstream += file.comments.length;
       const ours = attachments(b.ast);
       const keys = file.comments.map((r) => `${r.line}:${r.column}`);

@@ -27,3 +27,4 @@ Script typesEnabled=false 1:1-10:1
             parts[1] Interpolation braced=true 8:21-8:28
               expression Variable 8:23-8:27 "name"
             parts[2] GStringText 8:28-8:29 "!"
+          closures=[]

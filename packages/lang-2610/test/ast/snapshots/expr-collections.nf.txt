@@ -17,6 +17,7 @@ Script typesEnabled=false 1:1-8:1
     targets[0] TypedName 3:5-3:10
       name Identifier 3:5-3:10 "empty"
     initializer List trailingComma=false 3:13-3:15 "[]"
+      elements=[]
   body[3] VariableDeclaration def=true multiple=false 4:1-4:40
     targets[0] TypedName 4:5-4:8
       name Identifier 4:5-4:8 "map"
@@ -34,6 +35,7 @@ Script typesEnabled=false 1:1-8:1
     targets[0] TypedName 5:5-5:13
       name Identifier 5:5-5:13 "emptyMap"
     initializer Map trailingComma=false 5:16-5:19 "[:]"
+      entries=[]
   body[5] VariableDeclaration def=true multiple=false 6:1-6:16
     targets[0] TypedName 6:5-6:6
       name Identifier 6:5-6:6 "x"

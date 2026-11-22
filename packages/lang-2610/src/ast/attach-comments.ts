@@ -34,6 +34,7 @@ import type {
   Statement,
   TryCatch,
 } from "@nf-builder/lang-core";
+import { unparen } from "./build/sections.ts";
 
 type Node = AstNode & Record<string, unknown>;
 type StatementLike = Statement | NamedOutput;
@@ -90,9 +91,6 @@ class Container {
   }
 }
 
-const startOf = (comment: Comment) => start(comment);
-const endOf = (comment: Comment) => end(comment);
-
 export function attachComments(
   script: ScriptAst,
   comments: readonly Comment[],
@@ -129,13 +127,8 @@ class Attacher {
       false,
     );
     for (const item of script.body) {
-      if (isDeclaration(item)) {
-        this.addChild(root, item);
-        this.declaration(item, root);
-      } else {
-        // top-level statements are an implicit workflow with no position upstream
-        this.statements([item], root);
-      }
+      this.addChild(root, item);
+      this.declaration(item as Node, root);
     }
     for (const comment of comments) this.attach(comment, root);
     flush(this.leading, "leadingComments");
@@ -171,15 +164,12 @@ class Attacher {
     let following: Slot | null = null;
     let enclosing: Slot | null = null;
     for (const child of container.children) {
-      if (child.end <= startOf(comment)) {
+      if (child.end <= start(comment)) {
         if (preceding === null || child.end >= preceding.end) preceding = child;
-      } else if (child.start >= endOf(comment)) {
+      } else if (child.start >= end(comment)) {
         if (following === null || child.start < following.start)
           following = child;
-      } else if (
-        child.start <= startOf(comment) &&
-        endOf(comment) <= child.end
-      ) {
+      } else if (child.start <= start(comment) && end(comment) <= child.end) {
         // innermost enclosing child
         if (enclosing === null || child.start >= enclosing.start)
           enclosing = child;
@@ -338,6 +328,9 @@ class Attacher {
         this.statements(items(decl.onError), c);
         break;
       }
+      default:
+        // a top-level statement: an implicit workflow with no position upstream
+        this.statement(decl as unknown as StatementLike, parent);
     }
   }
 
@@ -613,24 +606,6 @@ class Attacher {
 
 // Helpers
 
-const DECLARATIONS = new Set([
-  "FeatureFlag",
-  "Include",
-  "Import",
-  "ParamsBlock",
-  "LegacyParam",
-  "Record",
-  "Enum",
-  "Process",
-  "Agent",
-  "Workflow",
-  "OutputBlock",
-  "Function",
-  "IncompleteDeclaration",
-]);
-const isDeclaration = (node: AstNode): node is Node =>
-  DECLARATIONS.has(node.kind);
-
 /** The items of a section, or none. */
 function items(section: unknown): AstNode[] {
   return section ? ((section as Section<AstNode>).items as AstNode[]) : [];
@@ -657,12 +632,6 @@ function boundaryOf(block: Statement, next: number): number {
   return Math.min(pos(block.range.endLine + 1, 0), next);
 }
 
-const unparen = (e: Expression): Expression => {
-  let result = e;
-  while (result.kind === "Parenthesized") result = result.expression;
-  return result;
-};
-
 /** A call that is a link of a chain: a method call with a receiver, or a call of a value (upstream `.call`). */
 const isLink = (e: Expression): e is MethodCall | CallExpr =>
   (e.kind === "MethodCall" && e.receiver !== null) || e.kind === "Call";
@@ -681,16 +650,12 @@ function chainRoot(node: StatementLike): Expression | null {
       expr = node.expression;
       break;
     case "Return":
-      expr = node.value;
-      break;
     case "Assignment":
+    case "NamedOutput":
       expr = node.value;
       break;
     case "VariableDeclaration":
       expr = node.initializer;
-      break;
-    case "NamedOutput":
-      expr = node.value;
       break;
     default:
       return null;

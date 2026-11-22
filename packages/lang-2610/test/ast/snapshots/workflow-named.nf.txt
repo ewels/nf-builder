@@ -10,6 +10,7 @@ Script typesEnabled=false 1:1-11:1
         value MethodCall navigation="." trailingComma=false parens=false 6:16-6:50
           receiver Variable 6:16-6:25 "greetings"
           method Identifier 6:26-6:29 "map"
+          args=[]
           closures[0] Closure 6:30-6:50
             params[0] Parameter def=false 6:32-6:33
               name Identifier 6:32-6:33 "v"

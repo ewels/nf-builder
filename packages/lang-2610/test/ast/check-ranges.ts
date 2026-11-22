@@ -8,27 +8,16 @@ import {
 } from "@nf-builder/lang-core";
 import { CharStream } from "antlr4ng";
 import { ScriptLexer } from "../../src/generated/ScriptLexer.ts";
-import { hasRule, notReparsed, reparse } from "./parse-rule.ts";
+import {
+  DECLARATION_KINDS,
+  hasRule,
+  notReparsed,
+  reparse,
+} from "./parse-rule.ts";
 import { shape } from "./shape.ts";
 
 // F-102 step 2: every AST node's range slices back to its exact source text. `checkRanges` returns the problems found;
 // an empty list is a pass. It uses its own, naive position arithmetic, not `PositionIndex`, so a bug there shows up here.
-
-const DECLARATION_KINDS = new Set([
-  "FeatureFlag",
-  "Include",
-  "Import",
-  "ParamsBlock",
-  "LegacyParam",
-  "Record",
-  "Enum",
-  "Process",
-  "Agent",
-  "Workflow",
-  "OutputBlock",
-  "Function",
-  "IncompleteDeclaration",
-]);
 
 export type CheckOptions = {
   /** Which nodes to re-parse: all of them, only declarations, or none. Default "all". */
@@ -71,12 +60,7 @@ function lexBoundaries(text: string): Boundaries {
     }
     starts.add(start);
     ends.add(end);
-    if (
-      tokenText.startsWith("$") &&
-      /^\$\w/.test(tokenText) &&
-      tokenText.length > 1 &&
-      !tokenText.startsWith("${")
-    ) {
+    if (/^\$\w/.test(tokenText)) {
       // a GString path `$a.b.c`: the names inside the token are nodes too
       let at = start + 1;
       for (const [i, name] of tokenText.slice(1).split(".").entries()) {

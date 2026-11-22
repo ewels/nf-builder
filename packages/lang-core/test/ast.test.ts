@@ -14,7 +14,7 @@ type MissingKinds = Exclude<
   (typeof SCRIPT_NODE_KINDS)[number]
 >;
 // Compile-time half of the exhaustiveness test: `MissingKinds` must be `never`.
-const noMissingKinds: MissingKinds[] = [];
+const exhaustive: [MissingKinds] extends [never] ? true : false = true;
 
 const range = (start: number, end: number): Range => ({
   start,
@@ -32,7 +32,7 @@ const identifier = (name: string, start: number) => ({
 
 describe("F-102 AR-02: the script AST types and walker", () => {
   it("F-102 AR-02: SCRIPT_NODE_KINDS lists every node kind once", () => {
-    expect(noMissingKinds).toEqual([]);
+    expect(exhaustive).toBe(true);
     expect(new Set(SCRIPT_NODE_KINDS).size).toBe(SCRIPT_NODE_KINDS.length);
   });
 

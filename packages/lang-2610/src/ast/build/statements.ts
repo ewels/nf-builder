@@ -22,6 +22,7 @@ import type {
   BlockStatementsContext,
   CatchClauseContext,
   ExpressionStmtAltContext,
+  IdentifierContext,
   IfElseStmtAltContext,
   MultipleAssignmentStmtAltContext,
   ReturnStmtAltContext,
@@ -145,25 +146,21 @@ function variableDeclaration(
   const init = s._initializer;
   const initializer = init ? expression(init, cx) : null;
   const range = cx.range(ctx);
-  const common = {
-    kind: "VariableDeclaration" as const,
-    def: s.DEF() !== null,
+  const untyped = (i: IdentifierContext): TypedName => {
+    const at = cx.range(i);
+    checkVariableName(i.getText(), at, cx);
+    return {
+      kind: "TypedName",
+      name: identifier(i, cx),
+      type: null,
+      range: at,
+    };
   };
-
   // The config grammar has `DEF variableNames = ...` where the script grammar has `DEF nameTypePairs = ...`, and no
-  // `DEF nameTypePair`.
+  // `DEF nameTypePair`. Only the last alternative has a legacy type.
   const pairs = has<VariableDeclarationContext>(s, "nameTypePairs")
     ? s.nameTypePairs()
     : null;
-  if (pairs)
-    return {
-      ...common,
-      legacyType: null,
-      targets: pairs.nameTypePair().map((p) => typedName(p, cx)),
-      multiple: true,
-      initializer,
-      range,
-    };
   const names = has<
     {
       variableNames(): VariableNamesContext | null;
@@ -171,51 +168,23 @@ function variableDeclaration(
   >(s, "variableNames")
     ? s.variableNames()
     : null;
-  if (names)
-    return {
-      ...common,
-      legacyType: null,
-      targets: names.identifier().map((i): TypedName => {
-        const range = cx.range(i);
-        checkVariableName(i.getText(), range, cx);
-        return {
-          kind: "TypedName",
-          name: identifier(i, cx),
-          type: null,
-          range,
-        };
-      }),
-      multiple: true,
-      initializer,
-      range,
-    };
   const pair = has<VariableDeclarationContext>(s, "nameTypePair")
     ? s.nameTypePair()
     : null;
-  if (pair)
-    return {
-      ...common,
-      legacyType: null,
-      targets: [typedName(pair, cx)],
-      multiple: false,
-      initializer,
-      range,
-    };
+  const targets = pairs
+    ? pairs.nameTypePair().map((p) => typedName(p, cx))
+    : names
+      ? names.identifier().map(untyped)
+      : pair
+        ? [typedName(pair, cx)]
+        : [untyped(s.identifier() as IdentifierContext)];
   const legacy = s.legacyType();
-  const name = s.identifier() as NonNullable<ReturnType<typeof s.identifier>>;
-  checkVariableName(name.getText(), cx.range(name), cx);
   return {
-    ...common,
+    kind: "VariableDeclaration",
+    def: s.DEF() !== null,
     legacyType: legacy ? legacyType(legacy, cx) : null,
-    targets: [
-      {
-        kind: "TypedName",
-        name: identifier(name, cx),
-        type: null,
-        range: cx.range(name),
-      },
-    ],
-    multiple: false,
+    targets,
+    multiple: pairs !== null || names !== null,
     initializer,
     range,
   };

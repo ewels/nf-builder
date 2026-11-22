@@ -7,9 +7,11 @@ Script typesEnabled=true 1:1-29:1
     fields[0] TypedName 4:5-4:15
       name Identifier 4:5-4:7 "id"
       type TypeRef nullable=false 4:9-4:15 "String"
+        typeArguments=[]
     fields[1] TypedName 5:5-5:16
       name Identifier 5:5-5:10 "fastq"
       type TypeRef nullable=false 5:12-5:16 "Path"
+        typeArguments=[]
   body[2] Workflow typed=true 8:1-16:2
     main Section label="main" labelRange=9:5-9:10 9:5-11:41
       items[0] Assignment operator="=" 10:5-10:66
@@ -27,11 +29,15 @@ Script typesEnabled=true 1:1-29:1
               value MethodCall trailingComma=false parens=true 10:49-10:64
                 method Identifier 10:49-10:53 "file"
                 args[0] String value="a.fastq" quote="'" 10:54-10:63 "'a.fastq'"
+                closures=[]
+            closures=[]
+          closures=[]
       items[1] Assignment operator="=" 11:5-11:41
         target Variable 11:5-11:19 "summary_report"
         value MethodCall trailingComma=false parens=true 11:22-11:41
           method Identifier 11:22-11:26 "file"
           args[0] String value="report.html" quote="'" 11:27-11:40 "'report.html'"
+          closures=[]
     publishers Section label="publish" labelRange=13:5-13:13 13:5-15:36
       items[0] NamedOutput 14:5-14:22
         name Identifier 14:5-14:12 "samples"
@@ -44,24 +50,30 @@ Script typesEnabled=true 1:1-29:1
       name Identifier 19:5-19:12 "samples"
       type TypeRef name="Channel" nullable=false 19:14-19:29
         typeArguments[0] TypeRef nullable=false 19:22-19:28 "Sample"
+          typeArguments=[]
       body Block 19:30-24:6
         statements[0] ExpressionStatement 20:9-20:21
           expression MethodCall trailingComma=false parens=false 20:9-20:21
             method Identifier 20:9-20:13 "path"
             args[0] String value="fastq" quote="'" 20:14-20:21 "'fastq'"
+            closures=[]
         statements[1] ExpressionStatement 21:9-23:10
           expression MethodCall trailingComma=false parens=false 21:9-23:10
             method Identifier 21:9-21:14 "index"
+            args=[]
             closures[0] Closure 21:15-23:10
               body[0] ExpressionStatement 22:13-22:29
                 expression MethodCall trailingComma=false parens=false 22:13-22:29
                   method Identifier 22:13-22:17 "path"
                   args[0] String value="index.csv" quote="'" 22:18-22:29 "'index.csv'"
+                  closures=[]
     outputs[1] Output 25:5-27:6
       name Identifier 25:5-25:19 "summary_report"
       type TypeRef nullable=false 25:21-25:25 "Path"
+        typeArguments=[]
       body Block 25:26-27:6
         statements[0] ExpressionStatement 26:9-26:17
           expression MethodCall trailingComma=false parens=false 26:9-26:17
             method Identifier 26:9-26:13 "path"
             args[0] String value="." quote="'" 26:14-26:17 "'.'"
+            closures=[]
