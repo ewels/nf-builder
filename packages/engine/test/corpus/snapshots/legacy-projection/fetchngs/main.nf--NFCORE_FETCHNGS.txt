@@ -1,0 +1,37 @@
+workflow main.nf#NFCORE_FETCHNGS legacy
+statements 1, modelled 1
+main.nf#NFCORE_FETCHNGS/:params params "params" @30:1
+  out outdir (outdir): -
+  out dbgap_key (dbgap_key): -
+  out download_method (download_method): -
+  out ena_metadata_fields (ena_metadata_fields): -
+  out nf_core_pipeline (nf_core_pipeline): -
+  out nf_core_rnaseq_strandedness (nf_core_rnaseq_strandedness): -
+  out sample_mapping_fields (sample_mapping_fields): -
+  out skip_fastq_download (skip_fastq_download): -
+main.nf#NFCORE_FETCHNGS/:take:ids take "ids" @32:5
+  out out (out): -
+main.nf#NFCORE_FETCHNGS/FETCHNGS@1 call "FETCHNGS" callee=FETCHNGS:workflow:modelled:legacy @38:5
+  in ids (ids): -
+    <- main.nf#NFCORE_FETCHNGS/:take:ids[out] ? via ids
+  in outdir (outdir): -
+    <- main.nf#NFCORE_FETCHNGS/:params[outdir] ? via params.outdir
+  in dbgap_key (dbgap_key): -
+    <- main.nf#NFCORE_FETCHNGS/:params[dbgap_key] ? via params.dbgap_key indirect
+  in download_method (download_method): -
+    <- main.nf#NFCORE_FETCHNGS/:params[download_method] ? via params.download_method
+  in ena_metadata_fields (ena_metadata_fields): -
+    <- main.nf#NFCORE_FETCHNGS/:params[ena_metadata_fields] ? via params.ena_metadata_fields indirect
+  in nf_core_pipeline (nf_core_pipeline): -
+    <- main.nf#NFCORE_FETCHNGS/:params[nf_core_pipeline] ? via params.nf_core_pipeline indirect
+  in nf_core_rnaseq_strandedness (nf_core_rnaseq_strandedness): -
+    <- main.nf#NFCORE_FETCHNGS/:params[nf_core_rnaseq_strandedness] ? via params.nf_core_rnaseq_strandedness indirect
+  in sample_mapping_fields (sample_mapping_fields): -
+    <- main.nf#NFCORE_FETCHNGS/:params[sample_mapping_fields] ? via params.sample_mapping_fields
+  in skip_fastq_download (skip_fastq_download): -
+    <- main.nf#NFCORE_FETCHNGS/:params[skip_fastq_download] ? via params.skip_fastq_download
+  out samplesheet (samplesheet): Channel<?>
+  out mappings (mappings): Channel<?>
+  out sample_mappings (sample_mappings): Channel<Path>
+  out sra_metadata (sra_metadata): ?
+  out versions (versions): ?

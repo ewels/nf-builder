@@ -1,0 +1,59 @@
+workflow subworkflows/local/bam_variant_calling_somatic_parabricks_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_PARABRICKS_DEEPSOMATIC legacy
+statements 6, modelled 6
+subworkflows/local/bam_variant_calling_somatic_parabricks_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_PARABRICKS_DEEPSOMATIC/:take:cram take "cram" @10:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_parabricks_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_PARABRICKS_DEEPSOMATIC/:take:fasta take "fasta" @11:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_parabricks_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_PARABRICKS_DEEPSOMATIC/:take:intervals_bed_combined take "intervals_bed_combined" @12:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_parabricks_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_PARABRICKS_DEEPSOMATIC/intervals_bed chain ".map" steps=map @15:21
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_parabricks_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_PARABRICKS_DEEPSOMATIC/:take:intervals_bed_combined[out] ? via intervals_bed_combined
+  out out (out): ?
+subworkflows/local/bam_variant_calling_somatic_parabricks_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_PARABRICKS_DEEPSOMATIC/cram_intervals chain ".combine.map" steps=combine,map @17:22
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_parabricks_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_PARABRICKS_DEEPSOMATIC/:take:cram[out] ? via cram
+  in 1:1 (combine(right)): -
+    <- subworkflows/local/bam_variant_calling_somatic_parabricks_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_PARABRICKS_DEEPSOMATIC/intervals_bed[out] ? via intervals_bed
+  out out (out): ?
+subworkflows/local/bam_variant_calling_somatic_parabricks_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_PARABRICKS_DEEPSOMATIC/PARABRICKS_DEEPSOMATIC@1 call "PARABRICKS_DEEPSOMATIC" callee=PARABRICKS_DEEPSOMATIC:process:modelled:legacy @23:5
+  in $1 (tuple(meta, input_tumor, index_tumor, input_normal, index_normal, intervals)): Tuple
+    <- subworkflows/local/bam_variant_calling_somatic_parabricks_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_PARABRICKS_DEEPSOMATIC/cram_intervals[out] ? via cram_intervals
+  in $2 (tuple(ref_meta, fasta)): Tuple
+    <- subworkflows/local/bam_variant_calling_somatic_parabricks_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_PARABRICKS_DEEPSOMATIC/:take:fasta[out] ? via fasta
+  out vcf (vcf): Channel<Tuple>
+  out gvcf (gvcf): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out compatible_versions (compatible_versions): Channel<Path>
+  out versions_parabricks (versions_parabricks): Channel<Tuple>
+subworkflows/local/bam_variant_calling_somatic_parabricks_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_PARABRICKS_DEEPSOMATIC/.map@1 chain ".map" steps=map @26:9
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_parabricks_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_PARABRICKS_DEEPSOMATIC/PARABRICKS_DEEPSOMATIC@1[vcf] Channel<Tuple> via PARABRICKS_DEEPSOMATIC.out.vcf
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_somatic_parabricks_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_PARABRICKS_DEEPSOMATIC/TABIX_VC_PARABRICKS_DEEPSOMATIC@1 call "TABIX_VC_PARABRICKS_DEEPSOMATIC" callee=TABIX_VC_PARABRICKS_DEEPSOMATIC:process:modelled:legacy @25:5
+  in $1 (tuple(meta, infile, infile_tbi, regions)): Tuple
+    <- subworkflows/local/bam_variant_calling_somatic_parabricks_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_PARABRICKS_DEEPSOMATIC/.map@1[out] Channel<?>
+  in action (action): -
+    = 'compress' : String
+  in make_index (make_index): -
+    = true : Boolean
+  in out_ext (out_ext): -
+    = 'vcf' : String
+  out output (output): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out versions_htslib (versions_htslib): Channel<Tuple>
+  out versions_xz (versions_xz): Channel<Tuple>
+subworkflows/local/bam_variant_calling_somatic_parabricks_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_PARABRICKS_DEEPSOMATIC/vcf chain ".map" steps=map @32:11
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_parabricks_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_PARABRICKS_DEEPSOMATIC/TABIX_VC_PARABRICKS_DEEPSOMATIC@1[output] Channel<Tuple> via TABIX_VC_PARABRICKS_DEEPSOMATIC.out.output
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_somatic_parabricks_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_PARABRICKS_DEEPSOMATIC/tbi chain ".map" steps=map @34:11
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_parabricks_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_PARABRICKS_DEEPSOMATIC/TABIX_VC_PARABRICKS_DEEPSOMATIC@1[index] Channel<Tuple> via TABIX_VC_PARABRICKS_DEEPSOMATIC.out.index
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_somatic_parabricks_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_PARABRICKS_DEEPSOMATIC/:emit:vcf emit "vcf" @37:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_parabricks_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_PARABRICKS_DEEPSOMATIC/vcf[out] Channel<?> via vcf
+subworkflows/local/bam_variant_calling_somatic_parabricks_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_PARABRICKS_DEEPSOMATIC/:emit:tbi emit "tbi" @38:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_parabricks_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_PARABRICKS_DEEPSOMATIC/tbi[out] Channel<?> via tbi

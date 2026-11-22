@@ -1,0 +1,199 @@
+workflow subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM legacy
+statements 23, modelled 23
+subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/:take:samplesheet take "samplesheet" @16:5
+  out out (out): -
+subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/:take:reads take "reads" @17:5
+  out out (out): -
+subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/:take:index take "index" @18:5
+  out out (out): -
+subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/:take:gtf take "gtf" @19:5
+  out out (out): -
+subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/:take:gtf_id_attribute take "gtf_id_attribute" @20:5
+  out out (out): -
+subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/:take:gtf_extra_attribute take "gtf_extra_attribute" @21:5
+  out out (out): -
+subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/:take:use_sentieon_star take "use_sentieon_star" @22:5
+  out out (out): -
+subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/:take:skip_merge take "skip_merge" @23:5
+  out out (out): -
+subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/SENTIEON_RSEMCALCULATEEXPRESSION@1 call "SENTIEON_RSEMCALCULATEEXPRESSION" callee=SENTIEON_RSEMCALCULATEEXPRESSION:process:modelled:legacy @32:9
+  guards then of use_sentieon_star
+  in $1 (tuple(meta, reads)): Tuple
+    <- subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/:take:reads[out] ? via reads
+  in index (index): Path
+    <- subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/:take:index[out] ? via index
+  out counts_gene (counts_gene): Channel<Tuple>
+  out counts_transcript (counts_transcript): Channel<Tuple>
+  out stat (stat): Channel<Tuple>
+  out logs (logs): Channel<Tuple>
+  out bam_star (bam_star): Channel<Tuple>
+  out bam_genome (bam_genome): Channel<Tuple>
+  out bam_transcript (bam_transcript): Channel<Tuple>
+  out versions_rsem (versions_rsem): Channel<Tuple>
+  out versions_star (versions_star): Channel<Tuple>
+  out versions_sentieon (versions_sentieon): Channel<Tuple>
+subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/RSEM_CALCULATEEXPRESSION@1 call "RSEM_CALCULATEEXPRESSION" callee=RSEM_CALCULATEEXPRESSION:process:modelled:legacy @35:9
+  guards else of use_sentieon_star
+  in $1 (tuple(meta, reads)): Tuple
+    <- subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/:take:reads[out] ? via reads
+  in index (index): Path
+    <- subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/:take:index[out] ? via index
+  out counts_gene (counts_gene): Channel<Tuple>
+  out counts_transcript (counts_transcript): Channel<Tuple>
+  out stat (stat): Channel<Tuple>
+  out logs (logs): Channel<Tuple>
+  out versions_rsem (versions_rsem): Channel<Tuple>
+  out bam_star (bam_star): Channel<Tuple>
+  out bam_genome (bam_genome): Channel<Tuple>
+  out bam_transcript (bam_transcript): Channel<Tuple>
+subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/ch_merged_counts_gene factory "channel.empty" factory=channel.empty @47:35
+  out out (out): Channel<?>
+subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/ch_merged_tpm_gene factory "channel.empty" factory=channel.empty @48:35
+  out out (out): Channel<?>
+subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/ch_merged_counts_transcript factory "channel.empty" factory=channel.empty @49:35
+  out out (out): Channel<?>
+subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/ch_merged_tpm_transcript factory "channel.empty" factory=channel.empty @50:35
+  out out (out): Channel<?>
+subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/ch_merged_genes_long factory "channel.empty" factory=channel.empty @51:35
+  out out (out): Channel<?>
+subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/ch_merged_isoforms_long factory "channel.empty" factory=channel.empty @52:35
+  out out (out): Channel<?>
+subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/.toSortedList@1 chain ".toSortedList.filter.map" steps=toSortedList,filter,map @62:13
+  guards then of !skip_merge
+  in in (in): -
+    <- subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/SENTIEON_RSEMCALCULATEEXPRESSION@1[counts_gene] Channel<Tuple> via ch_counts_gene indirect
+    <- subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/RSEM_CALCULATEEXPRESSION@1[counts_gene] Channel<Tuple> via ch_counts_gene indirect
+  out out (out): ?
+subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/.toSortedList@2 chain ".toSortedList.filter.map" steps=toSortedList,filter,map @66:13
+  guards then of !skip_merge
+  in in (in): -
+    <- subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/SENTIEON_RSEMCALCULATEEXPRESSION@1[counts_transcript] Channel<Tuple> via ch_counts_transcript indirect
+    <- subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/RSEM_CALCULATEEXPRESSION@1[counts_transcript] Channel<Tuple> via ch_counts_transcript indirect
+  out out (out): ?
+subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/CUSTOM_RSEMMERGECOUNTS@1 call "CUSTOM_RSEMMERGECOUNTS" callee=CUSTOM_RSEMMERGECOUNTS:process:modelled:legacy @61:9
+  guards then of !skip_merge
+  in $1 (tuple(meta, genes/*)): Tuple
+    <- subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/.toSortedList@1[out] ?
+  in $2 (isoforms/*): Path
+    <- subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/.toSortedList@2[out] ?
+  out counts_gene (counts_gene): Channel<Tuple>
+  out tpm_gene (tpm_gene): Channel<Tuple>
+  out counts_transcript (counts_transcript): Channel<Tuple>
+  out tpm_transcript (tpm_transcript): Channel<Tuple>
+  out genes_long (genes_long): Channel<Tuple>
+  out isoforms_long (isoforms_long): Channel<Tuple>
+  out versions_sed (versions_sed): Channel<Tuple>
+subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT@1 call "QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT" callee=QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT:workflow:modelled:legacy @82:5
+  in samplesheet (samplesheet): -
+    <- subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/:take:samplesheet[out] ? via samplesheet
+  in quant_results (quant_results): -
+    <- subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/SENTIEON_RSEMCALCULATEEXPRESSION@1[counts_transcript] Channel<Tuple> via ch_counts_transcript indirect
+    <- subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/RSEM_CALCULATEEXPRESSION@1[counts_transcript] Channel<Tuple> via ch_counts_transcript indirect
+  in gtf (gtf): -
+    <- subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/:take:gtf[out] ? via gtf
+  in gtf_id_attribute (gtf_id_attribute): -
+    <- subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/:take:gtf_id_attribute[out] ? via gtf_id_attribute
+  in gtf_extra_attribute (gtf_extra_attribute): -
+    <- subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/:take:gtf_extra_attribute[out] ? via gtf_extra_attribute
+  in quant_type (quant_type): -
+    = 'rsem' : String
+  in skip_merge (skip_merge): -
+    <- subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/:take:skip_merge[out] ? via skip_merge
+  out tx2gene (tx2gene): Channel<Tuple>
+  out tx2gene_augmented (tx2gene_augmented): Channel<Tuple>
+  out tpm_gene (tpm_gene): Channel<Tuple>
+  out counts_gene (counts_gene): Channel<Tuple>
+  out lengths_gene (lengths_gene): Channel<Tuple>
+  out counts_gene_length_scaled (counts_gene_length_scaled): Channel<Tuple>
+  out counts_gene_scaled (counts_gene_scaled): Channel<Tuple>
+  out tpm_transcript (tpm_transcript): Channel<Tuple>
+  out counts_transcript (counts_transcript): Channel<Tuple>
+  out lengths_transcript (lengths_transcript): Channel<Tuple>
+  out merged_gene_rds (merged_gene_rds): ?
+  out merged_transcript_rds (merged_transcript_rds): ?
+subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/:emit:raw_counts_gene emit "raw_counts_gene" @94:5
+  in in (in): -
+    <- subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/SENTIEON_RSEMCALCULATEEXPRESSION@1[counts_gene] Channel<Tuple> via ch_counts_gene indirect
+    <- subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/RSEM_CALCULATEEXPRESSION@1[counts_gene] Channel<Tuple> via ch_counts_gene indirect
+subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/:emit:raw_counts_transcript emit "raw_counts_transcript" @95:5
+  in in (in): -
+    <- subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/SENTIEON_RSEMCALCULATEEXPRESSION@1[counts_transcript] Channel<Tuple> via ch_counts_transcript indirect
+    <- subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/RSEM_CALCULATEEXPRESSION@1[counts_transcript] Channel<Tuple> via ch_counts_transcript indirect
+subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/:emit:stat emit "stat" @96:5
+  in in (in): -
+    <- subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/SENTIEON_RSEMCALCULATEEXPRESSION@1[stat] Channel<Tuple> via ch_stat indirect
+    <- subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/RSEM_CALCULATEEXPRESSION@1[stat] Channel<Tuple> via ch_stat indirect
+subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/:emit:logs emit "logs" @97:5
+  in in (in): -
+    <- subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/SENTIEON_RSEMCALCULATEEXPRESSION@1[logs] Channel<Tuple> via ch_logs indirect
+    <- subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/RSEM_CALCULATEEXPRESSION@1[logs] Channel<Tuple> via ch_logs indirect
+subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/:emit:merged_counts_gene emit "merged_counts_gene" @100:5
+  in in (in): -
+    <- subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/ch_merged_counts_gene[out] Channel<?> via ch_merged_counts_gene indirect
+    <- subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/CUSTOM_RSEMMERGECOUNTS@1[counts_gene] Channel<Tuple> via ch_merged_counts_gene indirect
+subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/:emit:merged_tpm_gene emit "merged_tpm_gene" @101:5
+  in in (in): -
+    <- subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/ch_merged_tpm_gene[out] Channel<?> via ch_merged_tpm_gene indirect
+    <- subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/CUSTOM_RSEMMERGECOUNTS@1[tpm_gene] Channel<Tuple> via ch_merged_tpm_gene indirect
+subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/:emit:merged_counts_transcript emit "merged_counts_transcript" @102:5
+  in in (in): -
+    <- subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/ch_merged_counts_transcript[out] Channel<?> via ch_merged_counts_transcript indirect
+    <- subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/CUSTOM_RSEMMERGECOUNTS@1[counts_transcript] Channel<Tuple> via ch_merged_counts_transcript indirect
+subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/:emit:merged_tpm_transcript emit "merged_tpm_transcript" @103:5
+  in in (in): -
+    <- subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/ch_merged_tpm_transcript[out] Channel<?> via ch_merged_tpm_transcript indirect
+    <- subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/CUSTOM_RSEMMERGECOUNTS@1[tpm_transcript] Channel<Tuple> via ch_merged_tpm_transcript indirect
+subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/:emit:merged_genes_long emit "merged_genes_long" @104:5
+  in in (in): -
+    <- subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/ch_merged_genes_long[out] Channel<?> via ch_merged_genes_long indirect
+    <- subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/CUSTOM_RSEMMERGECOUNTS@1[genes_long] Channel<Tuple> via ch_merged_genes_long indirect
+subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/:emit:merged_isoforms_long emit "merged_isoforms_long" @105:5
+  in in (in): -
+    <- subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/ch_merged_isoforms_long[out] Channel<?> via ch_merged_isoforms_long indirect
+    <- subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/CUSTOM_RSEMMERGECOUNTS@1[isoforms_long] Channel<Tuple> via ch_merged_isoforms_long indirect
+subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/:emit:tpm_gene emit "tpm_gene" @108:5
+  in in (in): -
+    <- subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT@1[tpm_gene] Channel<Tuple> via QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT.out.tpm_gene
+subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/:emit:counts_gene emit "counts_gene" @109:5
+  in in (in): -
+    <- subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT@1[counts_gene] Channel<Tuple> via QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT.out.counts_gene
+subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/:emit:counts_gene_length_scaled emit "counts_gene_length_scaled" @110:5
+  in in (in): -
+    <- subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT@1[counts_gene_length_scaled] Channel<Tuple> via QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT.out.counts_gene_length_scaled
+subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/:emit:counts_gene_scaled emit "counts_gene_scaled" @111:5
+  in in (in): -
+    <- subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT@1[counts_gene_scaled] Channel<Tuple> via QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT.out.counts_gene_scaled
+subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/:emit:lengths_gene emit "lengths_gene" @112:5
+  in in (in): -
+    <- subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT@1[lengths_gene] Channel<Tuple> via QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT.out.lengths_gene
+subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/:emit:tpm_transcript emit "tpm_transcript" @113:5
+  in in (in): -
+    <- subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT@1[tpm_transcript] Channel<Tuple> via QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT.out.tpm_transcript
+subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/:emit:counts_transcript emit "counts_transcript" @114:5
+  in in (in): -
+    <- subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT@1[counts_transcript] Channel<Tuple> via QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT.out.counts_transcript
+subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/:emit:lengths_transcript emit "lengths_transcript" @115:5
+  in in (in): -
+    <- subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT@1[lengths_transcript] Channel<Tuple> via QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT.out.lengths_transcript
+subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/:emit:merged_gene_rds_unified emit "merged_gene_rds_unified" @118:5
+  in in (in): -
+    <- subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT@1[merged_gene_rds] ? via QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT.out.merged_gene_rds
+subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/:emit:merged_transcript_rds_unified emit "merged_transcript_rds_unified" @119:5
+  in in (in): -
+    <- subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT@1[merged_transcript_rds] ? via QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT.out.merged_transcript_rds
+subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/:emit:tx2gene emit "tx2gene" @122:5
+  in in (in): -
+    <- subworkflows/nf-core/quantify_rsem/main.nf#QUANTIFY_RSEM/QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT@1[tx2gene] Channel<Tuple> via QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT.out.tx2gene
+bound @30:5 ch_rsem_out
+bound @33:9 ch_rsem_out
+bound @36:9 ch_rsem_out
+bound @39:5 ch_counts_gene
+bound @40:5 ch_counts_transcript
+bound @41:5 ch_stat
+bound @42:5 ch_logs
+bound @71:9 ch_merged_counts_gene
+bound @72:9 ch_merged_tpm_gene
+bound @73:9 ch_merged_counts_transcript
+bound @74:9 ch_merged_tpm_transcript
+bound @75:9 ch_merged_genes_long
+bound @76:9 ch_merged_isoforms_long

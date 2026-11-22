@@ -1,0 +1,35 @@
+workflow subworkflows/nf-core/cache_download_ensemblvep_snpeff/main.nf#CACHE_DOWNLOAD_ENSEMBLVEP_SNPEFF legacy
+statements 2, modelled 2
+subworkflows/nf-core/cache_download_ensemblvep_snpeff/main.nf#CACHE_DOWNLOAD_ENSEMBLVEP_SNPEFF/:take:ensemblvep_info take "ensemblvep_info" @10:5
+  out out (out): -
+subworkflows/nf-core/cache_download_ensemblvep_snpeff/main.nf#CACHE_DOWNLOAD_ENSEMBLVEP_SNPEFF/:take:snpeff_info take "snpeff_info" @11:5
+  out out (out): -
+subworkflows/nf-core/cache_download_ensemblvep_snpeff/main.nf#CACHE_DOWNLOAD_ENSEMBLVEP_SNPEFF/:take:ensemblvep_preflight_check take "ensemblvep_preflight_check" @12:5
+  out out (out): -
+subworkflows/nf-core/cache_download_ensemblvep_snpeff/main.nf#CACHE_DOWNLOAD_ENSEMBLVEP_SNPEFF/ENSEMBLVEP_DOWNLOAD@1 call "ENSEMBLVEP_DOWNLOAD" callee=ENSEMBLVEP_DOWNLOAD:process:modelled:legacy @15:5
+  in $1 (tuple(meta, assembly, species, cache_version)): Tuple
+    <- subworkflows/nf-core/cache_download_ensemblvep_snpeff/main.nf#CACHE_DOWNLOAD_ENSEMBLVEP_SNPEFF/:take:ensemblvep_info[out] ? via ensemblvep_info
+  in preflight_check (preflight_check): -
+    <- subworkflows/nf-core/cache_download_ensemblvep_snpeff/main.nf#CACHE_DOWNLOAD_ENSEMBLVEP_SNPEFF/:take:ensemblvep_preflight_check[out] ? via ensemblvep_preflight_check
+  out cache (cache): Channel<Tuple>
+  out versions_ensemblvep (versions_ensemblvep): Channel<Tuple>
+  out versions_perlmathcdf (versions_perlmathcdf): Channel<Tuple>
+subworkflows/nf-core/cache_download_ensemblvep_snpeff/main.nf#CACHE_DOWNLOAD_ENSEMBLVEP_SNPEFF/SNPEFF_DOWNLOAD@1 call "SNPEFF_DOWNLOAD" callee=SNPEFF_DOWNLOAD:process:modelled:legacy @16:5
+  in $1 (tuple(meta, snpeff_db)): Tuple
+    <- subworkflows/nf-core/cache_download_ensemblvep_snpeff/main.nf#CACHE_DOWNLOAD_ENSEMBLVEP_SNPEFF/:take:snpeff_info[out] ? via snpeff_info
+  out cache (cache): Channel<Tuple>
+  out versions_snpeff (versions_snpeff): Channel<Tuple>
+subworkflows/nf-core/cache_download_ensemblvep_snpeff/main.nf#CACHE_DOWNLOAD_ENSEMBLVEP_SNPEFF/.collect@1 chain ".collect" steps=collect @19:24
+  in in (in): -
+    <- subworkflows/nf-core/cache_download_ensemblvep_snpeff/main.nf#CACHE_DOWNLOAD_ENSEMBLVEP_SNPEFF/ENSEMBLVEP_DOWNLOAD@1[cache] Channel<Tuple> via ENSEMBLVEP_DOWNLOAD.out.cache
+  out out (out): Value<Bag<Tuple>>
+subworkflows/nf-core/cache_download_ensemblvep_snpeff/main.nf#CACHE_DOWNLOAD_ENSEMBLVEP_SNPEFF/:emit:ensemblvep_cache emit "ensemblvep_cache" @19:5
+  in in (in): -
+    <- subworkflows/nf-core/cache_download_ensemblvep_snpeff/main.nf#CACHE_DOWNLOAD_ENSEMBLVEP_SNPEFF/.collect@1[out] Value<Bag<Tuple>>
+subworkflows/nf-core/cache_download_ensemblvep_snpeff/main.nf#CACHE_DOWNLOAD_ENSEMBLVEP_SNPEFF/.collect@2 chain ".collect" steps=collect @20:24
+  in in (in): -
+    <- subworkflows/nf-core/cache_download_ensemblvep_snpeff/main.nf#CACHE_DOWNLOAD_ENSEMBLVEP_SNPEFF/SNPEFF_DOWNLOAD@1[cache] Channel<Tuple> via SNPEFF_DOWNLOAD.out.cache
+  out out (out): Value<Bag<Tuple>>
+subworkflows/nf-core/cache_download_ensemblvep_snpeff/main.nf#CACHE_DOWNLOAD_ENSEMBLVEP_SNPEFF/:emit:snpeff_cache emit "snpeff_cache" @20:5
+  in in (in): -
+    <- subworkflows/nf-core/cache_download_ensemblvep_snpeff/main.nf#CACHE_DOWNLOAD_ENSEMBLVEP_SNPEFF/.collect@2[out] Value<Bag<Tuple>>

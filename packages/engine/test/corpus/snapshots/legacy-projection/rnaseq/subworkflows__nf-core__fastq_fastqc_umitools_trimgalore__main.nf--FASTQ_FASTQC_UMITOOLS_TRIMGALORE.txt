@@ -1,0 +1,143 @@
+workflow subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE legacy
+statements 29, modelled 29
+subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/:take:reads take "reads" @33:5
+  out out (out): -
+subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/:take:skip_fastqc take "skip_fastqc" @34:5
+  out out (out): -
+subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/:take:with_umi take "with_umi" @35:5
+  out out (out): -
+subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/:take:skip_umi_extract take "skip_umi_extract" @36:5
+  out out (out): -
+subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/:take:skip_trimming take "skip_trimming" @37:5
+  out out (out): -
+subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/:take:umi_discard_read take "umi_discard_read" @38:5
+  out out (out): -
+subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/:take:min_trimmed_reads take "min_trimmed_reads" @39:5
+  out out (out): -
+subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/ch_fastqc_html factory "channel.empty" factory=channel.empty @42:22
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/ch_fastqc_zip factory "channel.empty" factory=channel.empty @43:21
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/FASTQC@1 call "FASTQC" callee=FASTQC:process:modelled:legacy @45:9
+  guards then of !skip_fastqc
+  in $1 (tuple(meta, reads)): Tuple
+    <- subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/:take:reads[out] ? via reads
+  out html (html): Channel<Tuple>
+  out zip (zip): Channel<Tuple>
+  out versions_fastqc (versions_fastqc): Channel<Tuple>
+subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/ch_umi_log factory "channel.empty" factory=channel.empty @51:18
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/ch_umi_reads factory "channel.empty" factory=channel.empty @52:20
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/UMITOOLS_EXTRACT@1 call "UMITOOLS_EXTRACT" callee=UMITOOLS_EXTRACT:process:modelled:legacy @54:9
+  guards then of with_umi && !skip_umi_extract
+  in $1 (tuple(meta, reads)): Tuple
+    <- subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/:take:reads[out] ? via reads
+  out reads (reads): Channel<Tuple>
+  out log (log): Channel<Tuple>
+  out versions_umitools (versions_umitools): Channel<Tuple>
+subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/ch_trimmer_reads chain ".map" steps=map @61:13
+  guards then of with_umi && !skip_umi_extract; then of umi_discard_read in [1, 2]
+  in in (in): -
+    <- subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/UMITOOLS_EXTRACT@1[reads] Channel<Tuple> via UMITOOLS_EXTRACT.out.reads
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/ch_trim_unpaired factory "channel.empty" factory=channel.empty @70:24
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/ch_trim_html factory "channel.empty" factory=channel.empty @71:20
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/ch_trim_zip factory "channel.empty" factory=channel.empty @72:19
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/ch_trim_log factory "channel.empty" factory=channel.empty @73:19
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/ch_trim_json factory "channel.empty" factory=channel.empty @74:20
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/ch_trim_read_count factory "channel.empty" factory=channel.empty @75:26
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/TRIMGALORE@1 call "TRIMGALORE" callee=TRIMGALORE:process:modelled:legacy @77:9
+  guards then of !skip_trimming
+  in $1 (tuple(meta, reads)): Tuple
+    <- subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/:take:reads[out] ? via ch_trimmer_reads indirect
+    <- subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/UMITOOLS_EXTRACT@1[reads] Channel<Tuple> via ch_trimmer_reads indirect
+    <- subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/ch_trimmer_reads[out] Channel<?> via ch_trimmer_reads indirect
+  out reads (reads): Channel<Tuple>
+  out log (log): Channel<Tuple>
+  out json (json): Channel<Tuple>
+  out unpaired (unpaired): Channel<Tuple>
+  out html (html): Channel<Tuple>
+  out zip (zip): Channel<Tuple>
+  out versions_trimgalore (versions_trimgalore): Channel<Tuple>
+subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/ch_num_trimmed_reads chain ".join.map" steps=join,map @87:9
+  guards then of !skip_trimming
+  in in (in): -
+    <- subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/TRIMGALORE@1[reads] Channel<Tuple> via TRIMGALORE.out.reads
+  in 1:1 (join(right)): -
+    <- subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/TRIMGALORE@1[log] Channel<Tuple> via ch_trim_log
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/ch_trim_reads chain ".filter.map" steps=filter,map @100:9
+  guards then of !skip_trimming
+  in in (in): -
+    <- subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/ch_num_trimmed_reads[out] Channel<?> via ch_num_trimmed_reads
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/ch_trim_read_count~2 chain ".map" steps=map @105:9
+  guards then of !skip_trimming
+  in in (in): -
+    <- subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/ch_num_trimmed_reads[out] Channel<?> via ch_num_trimmed_reads
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/:emit:reads emit "reads" @111:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/:take:reads[out] ? via ch_trim_reads indirect
+    <- subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/UMITOOLS_EXTRACT@1[reads] Channel<Tuple> via ch_trim_reads indirect
+    <- subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/ch_trimmer_reads[out] Channel<?> via ch_trim_reads indirect
+    <- subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/ch_trim_reads[out] Channel<?> via ch_trim_reads indirect
+subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/:emit:fastqc_html emit "fastqc_html" @112:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/ch_fastqc_html[out] Channel<?> via ch_fastqc_html indirect
+    <- subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/FASTQC@1[html] Channel<Tuple> via ch_fastqc_html indirect
+subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/:emit:fastqc_zip emit "fastqc_zip" @113:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/ch_fastqc_zip[out] Channel<?> via ch_fastqc_zip indirect
+    <- subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/FASTQC@1[zip] Channel<Tuple> via ch_fastqc_zip indirect
+subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/:emit:umi_log emit "umi_log" @114:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/ch_umi_log[out] Channel<?> via ch_umi_log indirect
+    <- subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/UMITOOLS_EXTRACT@1[log] Channel<Tuple> via ch_umi_log indirect
+subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/:emit:umi_reads emit "umi_reads" @115:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/ch_umi_reads[out] Channel<?> via ch_umi_reads indirect
+    <- subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/UMITOOLS_EXTRACT@1[reads] Channel<Tuple> via ch_umi_reads indirect
+subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/:emit:trim_unpaired emit "trim_unpaired" @116:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/ch_trim_unpaired[out] Channel<?> via ch_trim_unpaired indirect
+    <- subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/TRIMGALORE@1[unpaired] Channel<Tuple> via ch_trim_unpaired indirect
+subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/:emit:trim_html emit "trim_html" @117:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/ch_trim_html[out] Channel<?> via ch_trim_html indirect
+    <- subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/TRIMGALORE@1[html] Channel<Tuple> via ch_trim_html indirect
+subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/:emit:trim_zip emit "trim_zip" @118:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/ch_trim_zip[out] Channel<?> via ch_trim_zip indirect
+    <- subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/TRIMGALORE@1[zip] Channel<Tuple> via ch_trim_zip indirect
+subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/:emit:trim_log emit "trim_log" @119:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/ch_trim_log[out] Channel<?> via ch_trim_log indirect
+    <- subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/TRIMGALORE@1[log] Channel<Tuple> via ch_trim_log indirect
+subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/:emit:trim_json emit "trim_json" @120:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/ch_trim_json[out] Channel<?> via ch_trim_json indirect
+    <- subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/TRIMGALORE@1[json] Channel<Tuple> via ch_trim_json indirect
+subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/:emit:trim_read_count emit "trim_read_count" @121:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/ch_trim_read_count[out] Channel<?> via ch_trim_read_count indirect
+    <- subworkflows/nf-core/fastq_fastqc_umitools_trimgalore/main.nf#FASTQ_FASTQC_UMITOOLS_TRIMGALORE/ch_trim_read_count~2[out] Channel<?> via ch_trim_read_count indirect
+bound @46:9 ch_fastqc_html
+bound @47:9 ch_fastqc_zip
+bound @50:5 ch_trimmer_reads
+bound @55:9 ch_trimmer_reads
+bound @56:9 ch_umi_reads
+bound @57:9 ch_umi_log
+bound @69:5 ch_trim_reads
+bound @78:9 ch_trim_unpaired
+bound @79:9 ch_trim_html
+bound @80:9 ch_trim_zip
+bound @81:9 ch_trim_log
+bound @82:9 ch_trim_json

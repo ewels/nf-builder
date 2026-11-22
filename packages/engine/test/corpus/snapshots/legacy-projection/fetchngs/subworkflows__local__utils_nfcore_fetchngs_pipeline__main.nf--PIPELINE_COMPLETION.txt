@@ -1,0 +1,28 @@
+workflow subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_COMPLETION legacy
+statements 3, modelled 0
+subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_COMPLETION/:take:email take "email" @144:5
+  out out (out): -
+subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_COMPLETION/:take:email_on_fail take "email_on_fail" @145:5
+  out out (out): -
+subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_COMPLETION/:take:plaintext_email take "plaintext_email" @146:5
+  out out (out): -
+subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_COMPLETION/:take:outdir take "outdir" @147:5
+  out out (out): -
+subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_COMPLETION/:take:monochrome_logs take "monochrome_logs" @148:5
+  out out (out): -
+subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_COMPLETION/summary_params code "summary_params = paramsSummaryMap(workflow, parameters_sche…" @151:5
+  out summary_params (summary_params): -
+subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_COMPLETION/:code@1 code "workflow.onComplete {" @156:5
+  in email (email): -
+    <- subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_COMPLETION/:take:email[out] ? via email indirect
+  in email_on_fail (email_on_fail): -
+    <- subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_COMPLETION/:take:email_on_fail[out] ? via email_on_fail indirect
+  in summary_params (summary_params): -
+    <- subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_COMPLETION/summary_params[summary_params] ? via summary_params indirect
+  in plaintext_email (plaintext_email): -
+    <- subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_COMPLETION/:take:plaintext_email[out] ? via plaintext_email indirect
+  in outdir (outdir): -
+    <- subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_COMPLETION/:take:outdir[out] ? via outdir indirect
+  in monochrome_logs (monochrome_logs): -
+    <- subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_COMPLETION/:take:monochrome_logs[out] ? via monochrome_logs indirect
+subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_COMPLETION/:code@2 code "workflow.onError {" @173:5

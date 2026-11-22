@@ -1,0 +1,26 @@
+workflow subworkflows/nf-core/bedgraph_bedclip_bedgraphtobigwig/main.nf#BEDGRAPH_BEDCLIP_BEDGRAPHTOBIGWIG legacy
+statements 2, modelled 2
+subworkflows/nf-core/bedgraph_bedclip_bedgraphtobigwig/main.nf#BEDGRAPH_BEDCLIP_BEDGRAPHTOBIGWIG/:take:bedgraph take "bedgraph" @13:5
+  out out (out): -
+subworkflows/nf-core/bedgraph_bedclip_bedgraphtobigwig/main.nf#BEDGRAPH_BEDCLIP_BEDGRAPHTOBIGWIG/:take:sizes take "sizes" @14:5
+  out out (out): -
+subworkflows/nf-core/bedgraph_bedclip_bedgraphtobigwig/main.nf#BEDGRAPH_BEDCLIP_BEDGRAPHTOBIGWIG/UCSC_BEDCLIP@1 call "UCSC_BEDCLIP" callee=UCSC_BEDCLIP:process:modelled:legacy @21:5
+  in $1 (tuple(meta, bedgraph)): Tuple
+    <- subworkflows/nf-core/bedgraph_bedclip_bedgraphtobigwig/main.nf#BEDGRAPH_BEDCLIP_BEDGRAPHTOBIGWIG/:take:bedgraph[out] ? via bedgraph
+  in sizes (sizes): Path
+    <- subworkflows/nf-core/bedgraph_bedclip_bedgraphtobigwig/main.nf#BEDGRAPH_BEDCLIP_BEDGRAPHTOBIGWIG/:take:sizes[out] ? via sizes
+  out bedgraph (bedgraph): Channel<Tuple>
+  out versions_ucsc (versions_ucsc): Channel<Tuple>
+subworkflows/nf-core/bedgraph_bedclip_bedgraphtobigwig/main.nf#BEDGRAPH_BEDCLIP_BEDGRAPHTOBIGWIG/UCSC_BEDGRAPHTOBIGWIG@1 call "UCSC_BEDGRAPHTOBIGWIG" callee=UCSC_BEDGRAPHTOBIGWIG:process:modelled:legacy @26:5
+  in $1 (tuple(meta, bedgraph)): Tuple
+    <- subworkflows/nf-core/bedgraph_bedclip_bedgraphtobigwig/main.nf#BEDGRAPH_BEDCLIP_BEDGRAPHTOBIGWIG/UCSC_BEDCLIP@1[bedgraph] Channel<Tuple> via UCSC_BEDCLIP.out.bedgraph
+  in sizes (sizes): Path
+    <- subworkflows/nf-core/bedgraph_bedclip_bedgraphtobigwig/main.nf#BEDGRAPH_BEDCLIP_BEDGRAPHTOBIGWIG/:take:sizes[out] ? via sizes
+  out bigwig (bigwig): Channel<Tuple>
+  out versions_ucsc (versions_ucsc): Channel<Tuple>
+subworkflows/nf-core/bedgraph_bedclip_bedgraphtobigwig/main.nf#BEDGRAPH_BEDCLIP_BEDGRAPHTOBIGWIG/:emit:bigwig emit "bigwig" @29:5
+  in in (in): -
+    <- subworkflows/nf-core/bedgraph_bedclip_bedgraphtobigwig/main.nf#BEDGRAPH_BEDCLIP_BEDGRAPHTOBIGWIG/UCSC_BEDGRAPHTOBIGWIG@1[bigwig] Channel<Tuple> via UCSC_BEDGRAPHTOBIGWIG.out.bigwig
+subworkflows/nf-core/bedgraph_bedclip_bedgraphtobigwig/main.nf#BEDGRAPH_BEDCLIP_BEDGRAPHTOBIGWIG/:emit:bedgraph emit "bedgraph" @30:5
+  in in (in): -
+    <- subworkflows/nf-core/bedgraph_bedclip_bedgraphtobigwig/main.nf#BEDGRAPH_BEDCLIP_BEDGRAPHTOBIGWIG/UCSC_BEDCLIP@1[bedgraph] Channel<Tuple> via UCSC_BEDCLIP.out.bedgraph

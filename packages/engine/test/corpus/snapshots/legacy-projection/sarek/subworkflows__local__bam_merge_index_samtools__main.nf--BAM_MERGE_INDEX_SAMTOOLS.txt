@@ -1,0 +1,43 @@
+workflow subworkflows/local/bam_merge_index_samtools/main.nf#BAM_MERGE_INDEX_SAMTOOLS legacy
+statements 5, modelled 5
+subworkflows/local/bam_merge_index_samtools/main.nf#BAM_MERGE_INDEX_SAMTOOLS/:take:bam take "bam" @12:5
+  out out (out): -
+subworkflows/local/bam_merge_index_samtools/main.nf#BAM_MERGE_INDEX_SAMTOOLS/bam_to_merge chain ".branch" steps=branch @17:20
+  in in (in): -
+    <- subworkflows/local/bam_merge_index_samtools/main.nf#BAM_MERGE_INDEX_SAMTOOLS/:take:bam[out] ? via bam
+  out out (out): Record
+subworkflows/local/bam_merge_index_samtools/main.nf#BAM_MERGE_INDEX_SAMTOOLS/.map@1 chain ".map" steps=map @25:15
+  in in (in): -
+    <- subworkflows/local/bam_merge_index_samtools/main.nf#BAM_MERGE_INDEX_SAMTOOLS/bam_to_merge[out] Record via bam_to_merge indirect
+  out out (out): ?
+subworkflows/local/bam_merge_index_samtools/main.nf#BAM_MERGE_INDEX_SAMTOOLS/MERGE_BAM@1 call "MERGE_BAM" callee=MERGE_BAM:process:modelled:legacy @25:5
+  in $1 (tuple(meta, input_files, index_files)): Tuple
+    <- subworkflows/local/bam_merge_index_samtools/main.nf#BAM_MERGE_INDEX_SAMTOOLS/.map@1[out] ?
+  in $2 (tuple(meta2, fasta, fai, gzi)): Tuple
+    = [ [ id:'null' ], [], [], [] ] : List
+  in index_format (index_format): -
+    = '' : String
+  out bam (bam): Channel<Tuple>
+  out cram (cram): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out versions_samtools (versions_samtools): Channel<Tuple>
+subworkflows/local/bam_merge_index_samtools/main.nf#BAM_MERGE_INDEX_SAMTOOLS/bam_all chain ".mix" steps=mix @28:15
+  in in (in): -
+    <- subworkflows/local/bam_merge_index_samtools/main.nf#BAM_MERGE_INDEX_SAMTOOLS/MERGE_BAM@1[bam] Channel<Tuple> via MERGE_BAM.out.bam
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/bam_merge_index_samtools/main.nf#BAM_MERGE_INDEX_SAMTOOLS/bam_to_merge[out] Record via bam_to_merge indirect
+  out out (out): Channel<Tuple>
+subworkflows/local/bam_merge_index_samtools/main.nf#BAM_MERGE_INDEX_SAMTOOLS/INDEX_MERGE_BAM@1 call "INDEX_MERGE_BAM" callee=INDEX_MERGE_BAM:process:modelled:legacy @31:5
+  in $1 (tuple(meta, input)): Tuple
+    <- subworkflows/local/bam_merge_index_samtools/main.nf#BAM_MERGE_INDEX_SAMTOOLS/bam_all[out] Channel<Tuple> via bam_all
+  out index (index): Channel<Tuple>
+  out versions_samtools (versions_samtools): Channel<Tuple>
+subworkflows/local/bam_merge_index_samtools/main.nf#BAM_MERGE_INDEX_SAMTOOLS/bam_bai chain ".join" steps=join @34:15
+  in in (in): -
+    <- subworkflows/local/bam_merge_index_samtools/main.nf#BAM_MERGE_INDEX_SAMTOOLS/bam_all[out] Channel<Tuple> via bam_all
+  in 1:1 (join(right)): -
+    <- subworkflows/local/bam_merge_index_samtools/main.nf#BAM_MERGE_INDEX_SAMTOOLS/INDEX_MERGE_BAM@1[index] Channel<Tuple> via INDEX_MERGE_BAM.out.index
+  out out (out): Channel<Record>
+subworkflows/local/bam_merge_index_samtools/main.nf#BAM_MERGE_INDEX_SAMTOOLS/:emit:bam_bai emit "bam_bai" @37:5
+  in in (in): -
+    <- subworkflows/local/bam_merge_index_samtools/main.nf#BAM_MERGE_INDEX_SAMTOOLS/bam_bai[out] Channel<Record> via bam_bai

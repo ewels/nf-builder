@@ -69,7 +69,7 @@ describe("F-108 code nodes", () => {
     expect(ids(n.outputs)).toEqual(["mode"]);
     expect(ids(n.inputs)).toEqual(["params.reads"]);
     expect(into(p, n.id)).toEqual(["main.nf#W/:params[reads] -> params.reads"]);
-    expect(into(p, "main.nf#W/res")).toEqual(["main.nf#W/mode[mode] -> $1"]);
+    expect(into(p, "main.nf#W/res")).toEqual(["main.nf#W/mode[mode] -> x"]);
     expect(p.nodes.filter((x) => x.kind === "code")).toHaveLength(1);
   });
 
@@ -91,7 +91,8 @@ describe("F-108 code nodes", () => {
     expect(ids(log?.inputs ?? [])).toEqual(["a", "b", "params.reads"]);
     expect(into(p, log?.id ?? "")).toEqual([
       "main.nf#W/a~2[a] -> a",
-      "main.nf#W/b[b] -> b",
+      // F-107: `b = ch` is an alias, so the read of b reaches the take itself
+      "main.nf#W/:take:ch[out] -> b",
       "main.nf#W/:params[reads] -> params.reads",
     ]);
   });
@@ -153,7 +154,7 @@ describe("F-108 code nodes", () => {
 
   it("F-108 LA-28: single-assignment outputs keep F-106's inline type; edges into code nodes are indirect and carry the source type", async () => {
     const p = await project(
-      ["f = file('x.txt')", "g = f", "h = [f, ch]"].join("\n"),
+      ["f = file('x.txt')", "g = f", "h = [f, ch]", "i = [g, 1]"].join("\n"),
     );
     const type = (id: string, port: string) =>
       formatFlowType(
@@ -163,7 +164,15 @@ describe("F-108 code nodes", () => {
         },
       );
     expect(type("main.nf#W/f", "f")).toBe("Path");
-    expect(type("main.nf#W/g", "g")).toBe("Path");
+    // F-107 AR-10: `g = f` is an alias of a graph value, so it makes no node
+    expect(p.nodes.some((n) => n.id === "main.nf#W/g")).toBe(false);
+    // a read through the alias carries the aliased value's type
+    const viaAlias = p.edges.find((e) => e.to.node === "main.nf#W/i");
+    expect(viaAlias).toMatchObject({
+      from: { node: "main.nf#W/f", port: "f" },
+      variable: "g",
+    });
+    expect(formatFlowType(viaAlias?.type as never)).toBe("Path");
     expect(p.edges.filter((e) => e.to.node === "main.nf#W/h")).toEqual([
       expect.objectContaining({ direct: false }),
       expect.objectContaining({ direct: false }),
@@ -222,11 +231,23 @@ describe("F-108 code nodes", () => {
     expect(into(p, "main.nf#W/y")).toEqual(["main.nf#W/x[x] -> x"]);
   });
 
+  it("F-107 AR-10 F-108: a property of a code node's value is not an alias in a ternary branch, a set or a pipe source", async () => {
+    const ternary = await project(
+      ["x = [x: 1]", "y = params.flag ? x.x : null"].join("\n"),
+    );
+    expect(into(ternary, "main.nf#W/y")).toContain("main.nf#W/x[x] -> x");
+    const set = await project(["x = [x: 1]", "x.x.set { y }"].join("\n"));
+    expect(into(set, "main.nf#W/y")).toEqual(["main.nf#W/x[x] -> x"]);
+    const pipe = await project(["x = [x: 1]", "x.x | FOO"].join("\n"));
+    expect(into(pipe, "main.nf#W/:code@1")).toEqual(["main.nf#W/x[x] -> x"]);
+    expect(pipe.nodes.some((n) => n.kind === "call")).toBe(false);
+  });
+
   it("F-108 AR-10 LA-27: a spread property is not a port name, so FOO(a*.name) reads a whole", async () => {
     const p = await project(
       ["a = [[name: 'n']]", "res = FOO(a*.name)", "b = a*.name"].join("\n"),
     );
-    expect(into(p, "main.nf#W/res")).toEqual(["main.nf#W/a[a] -> $1"]);
+    expect(into(p, "main.nf#W/res")).toEqual(["main.nf#W/a[a] -> x"]);
     expect(into(p, "main.nf#W/b")).toEqual(["main.nf#W/a[a] -> a"]);
   });
 });

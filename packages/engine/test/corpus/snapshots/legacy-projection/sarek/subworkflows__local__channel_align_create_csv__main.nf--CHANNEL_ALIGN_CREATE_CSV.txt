@@ -1,0 +1,16 @@
+workflow subworkflows/local/channel_align_create_csv/main.nf#CHANNEL_ALIGN_CREATE_CSV legacy
+statements 1, modelled 1
+subworkflows/local/channel_align_create_csv/main.nf#CHANNEL_ALIGN_CREATE_CSV/:take:bam_indexed take "bam_indexed" @7:9
+  out out (out): -
+subworkflows/local/channel_align_create_csv/main.nf#CHANNEL_ALIGN_CREATE_CSV/:take:outdir take "outdir" @8:9
+  out out (out): -
+subworkflows/local/channel_align_create_csv/main.nf#CHANNEL_ALIGN_CREATE_CSV/:take:save_output_as_bam take "save_output_as_bam" @9:9
+  out out (out): -
+subworkflows/local/channel_align_create_csv/main.nf#CHANNEL_ALIGN_CREATE_CSV/:take:parabricks take "parabricks" @10:9
+  out out (out): -
+subworkflows/local/channel_align_create_csv/main.nf#CHANNEL_ALIGN_CREATE_CSV/.collectFile@1 chain ".collectFile" steps=collectFile @14:9
+  in in (in): -
+    <- subworkflows/local/channel_align_create_csv/main.nf#CHANNEL_ALIGN_CREATE_CSV/:take:bam_indexed[out] ? via bam_indexed
+  in 1:4 (collectFile(opts)): -
+    <- subworkflows/local/channel_align_create_csv/main.nf#CHANNEL_ALIGN_CREATE_CSV/:take:outdir[out] ? via outdir indirect
+  out out (out): Channel<?>

@@ -1,0 +1,152 @@
+workflow subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER legacy
+statements 15, modelled 15
+subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/:take:cram take "cram" @10:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/:take:fasta take "fasta" @11:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/:take:fasta_fai take "fasta_fai" @12:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/:take:dict take "dict" @13:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/:take:force_call_alleles take "force_call_alleles" @14:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/:take:force_call_alleles_tbi take "force_call_alleles_tbi" @15:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/:take:germline_resource take "germline_resource" @16:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/:take:germline_resource_tbi take "germline_resource_tbi" @17:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/:take:contamination_resource take "contamination_resource" @18:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/:take:contamination_resource_tbi take "contamination_resource_tbi" @19:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/:take:panel_of_normals take "panel_of_normals" @20:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/:take:panel_of_normals_tbi take "panel_of_normals_tbi" @21:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/:take:intervals_bed_combined take "intervals_bed_combined" @22:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/:take:intervals take "intervals" @23:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/:take:contamination_resource_provided take "contamination_resource_provided" @24:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/intervals_bed chain ".map" steps=map @27:21
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/:take:intervals_bed_combined[out] ? via intervals_bed_combined
+  out out (out): ?
+subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/cram_intervals chain ".combine.map" steps=combine,map @29:22
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/:take:cram[out] ? via cram
+  in 1:1 (combine(right)): -
+    <- subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/intervals_bed[out] ? via intervals_bed
+  out out (out): ?
+subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/.map@1 chain ".map" steps=map @35:36
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/:take:fasta_fai[out] ? via fasta_fai
+  out out (out): ?
+subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/fasta_with_fai chain ".combine.collect" steps=combine,collect @35:22
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/:take:fasta[out] ? via fasta
+  in 1:1 (combine(right)): -
+    <- subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/.map@1[out] ?
+  out out (out): Value<Bag<?>>
+subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/PARABRICKS_MUTECTCALLER@1 call "PARABRICKS_MUTECTCALLER" callee=PARABRICKS_MUTECTCALLER:process:modelled:legacy @37:5
+  in $1 (tuple(meta, tumor_bam, tumor_bam_index, normal_bam, normal_bam_index, intervals)): Tuple
+    <- subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/cram_intervals[out] ? via cram_intervals
+  in $2 (tuple(meta2, fasta, fasta_fai)): Tuple
+    <- subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/fasta_with_fai[out] Value<Bag<?>> via fasta_with_fai
+  in panel_of_normals (panel_of_normals): Path
+    <- subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/:take:panel_of_normals[out] ? via panel_of_normals
+  in panel_of_normals_index (panel_of_normals_index): Path
+    <- subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/:take:panel_of_normals_tbi[out] ? via panel_of_normals_tbi
+  in germline_resource (germline_resource): Path
+    <- subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/:take:germline_resource[out] ? via germline_resource
+  in germline_resource_index (germline_resource_index): Path
+    <- subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/:take:germline_resource_tbi[out] ? via germline_resource_tbi
+  in alleles (alleles): Path
+    <- subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/:take:force_call_alleles[out] ? via force_call_alleles
+  in alleles_index (alleles_index): Path
+    <- subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/:take:force_call_alleles_tbi[out] ? via force_call_alleles_tbi
+  out vcf (vcf): Channel<Tuple>
+  out tbi (tbi): Channel<Tuple>
+  out stats (stats): Channel<Tuple>
+  out f1r2 (f1r2): Channel<Tuple>
+  out compatible_versions (compatible_versions): Channel<Path>
+  out versions_parabricks (versions_parabricks): Channel<Tuple>
+subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/calls chain ".join.join.join" steps=join,join,join @39:13
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/PARABRICKS_MUTECTCALLER@1[vcf] Channel<Tuple> via PARABRICKS_MUTECTCALLER.out.vcf
+  in 1:1 (join(right)): -
+    <- subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/PARABRICKS_MUTECTCALLER@1[tbi] Channel<Tuple> via PARABRICKS_MUTECTCALLER.out.tbi
+  in 2:1 (join(right)): -
+    <- subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/PARABRICKS_MUTECTCALLER@1[stats] Channel<Tuple> via PARABRICKS_MUTECTCALLER.out.stats
+  in 3:1 (join(right)): -
+    <- subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/PARABRICKS_MUTECTCALLER@1[f1r2] Channel<Tuple> via PARABRICKS_MUTECTCALLER.out.f1r2
+  out out (out): Channel<Record>
+subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/VCF_VARIANT_FILTERING_MUTECT2@1 call "VCF_VARIANT_FILTERING_MUTECT2" callee=VCF_VARIANT_FILTERING_MUTECT2:workflow:modelled:legacy @44:5
+  in calls_in (calls_in): -
+    <- subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/calls[out] Channel<Record> via calls
+  in cram_in (cram_in): -
+    <- subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/:take:cram[out] ? via cram
+  in intervals (intervals): -
+    <- subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/:take:intervals[out] ? via intervals
+  in fasta (fasta): -
+    <- subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/:take:fasta[out] ? via fasta
+  in fai (fai): -
+    <- subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/:take:fasta_fai[out] ? via fasta_fai
+  in dict (dict): -
+    <- subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/:take:dict[out] ? via dict
+  in contamination_resource (contamination_resource): -
+    <- subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/:take:contamination_resource[out] ? via contamination_resource
+  in contamination_resource_tbi (contamination_resource_tbi): -
+    <- subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/:take:contamination_resource_tbi[out] ? via contamination_resource_tbi
+  in contamination_resource_provided (contamination_resource_provided): -
+    <- subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/:take:contamination_resource_provided[out] ? via contamination_resource_provided
+  in joint (joint): -
+    = false : Boolean
+  in variantcaller (variantcaller): -
+    = 'parabricks_mutectcaller' : String
+  out vcf (vcf): Channel<Tuple>
+  out tbi (tbi): Channel<Tuple>
+  out stats_filtered (stats_filtered): Channel<Tuple>
+  out artifact_priors (artifact_priors): Channel<Tuple>
+  out contamination_table (contamination_table): ?
+  out segmentation_table (segmentation_table): ?
+  out pileup_table_normal (pileup_table_normal): ?
+  out pileup_table_tumor (pileup_table_tumor): ?
+subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/:emit:vcf emit "vcf" @69:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/VCF_VARIANT_FILTERING_MUTECT2@1[vcf] Channel<Tuple> via vcf
+subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/:emit:tbi emit "tbi" @70:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/VCF_VARIANT_FILTERING_MUTECT2@1[tbi] Channel<Tuple> via tbi
+subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/:emit:stats emit "stats" @71:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/PARABRICKS_MUTECTCALLER@1[stats] Channel<Tuple> via stats
+subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/:emit:stats_filtered emit "stats_filtered" @72:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/VCF_VARIANT_FILTERING_MUTECT2@1[stats_filtered] Channel<Tuple> via stats_filtered
+subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/:emit:artifact_priors emit "artifact_priors" @73:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/VCF_VARIANT_FILTERING_MUTECT2@1[artifact_priors] Channel<Tuple> via artifact_priors
+subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/:emit:contamination_table emit "contamination_table" @74:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/VCF_VARIANT_FILTERING_MUTECT2@1[contamination_table] ? via contamination_table
+subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/:emit:segmentation_table emit "segmentation_table" @75:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/VCF_VARIANT_FILTERING_MUTECT2@1[segmentation_table] ? via segmentation_table
+subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/:emit:pileup_table_normal emit "pileup_table_normal" @76:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/VCF_VARIANT_FILTERING_MUTECT2@1[pileup_table_normal] ? via pileup_table_normal
+subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/:emit:pileup_table_tumor emit "pileup_table_tumor" @77:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_parabricks_mutectcaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER/VCF_VARIANT_FILTERING_MUTECT2@1[pileup_table_tumor] ? via pileup_table_tumor
+bound @58:5 vcf
+bound @59:5 tbi
+bound @60:5 stats
+bound @61:5 stats_filtered
+bound @62:5 artifact_priors
+bound @63:5 contamination_table
+bound @64:5 segmentation_table
+bound @65:5 pileup_table_normal
+bound @66:5 pileup_table_tumor

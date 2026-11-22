@@ -1,0 +1,68 @@
+workflow subworkflows/local/bam_variant_calling_somatic_tiddit/main.nf#BAM_VARIANT_CALLING_SOMATIC_TIDDIT legacy
+statements 5, modelled 5
+subworkflows/local/bam_variant_calling_somatic_tiddit/main.nf#BAM_VARIANT_CALLING_SOMATIC_TIDDIT/:take:cram_normal take "cram_normal" @13:9
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_tiddit/main.nf#BAM_VARIANT_CALLING_SOMATIC_TIDDIT/:take:cram_tumor take "cram_tumor" @14:9
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_tiddit/main.nf#BAM_VARIANT_CALLING_SOMATIC_TIDDIT/:take:fasta take "fasta" @15:9
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_tiddit/main.nf#BAM_VARIANT_CALLING_SOMATIC_TIDDIT/:take:fasta_fai take "fasta_fai" @16:9
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_tiddit/main.nf#BAM_VARIANT_CALLING_SOMATIC_TIDDIT/:take:bwa take "bwa" @17:9
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_tiddit/main.nf#BAM_VARIANT_CALLING_SOMATIC_TIDDIT/TIDDIT_NORMAL@1 call "TIDDIT_NORMAL" callee=TIDDIT_NORMAL:workflow:modelled:legacy @21:5
+  in cram (cram): -
+    <- subworkflows/local/bam_variant_calling_somatic_tiddit/main.nf#BAM_VARIANT_CALLING_SOMATIC_TIDDIT/:take:cram_normal[out] ? via cram_normal
+  in fasta (fasta): -
+    <- subworkflows/local/bam_variant_calling_somatic_tiddit/main.nf#BAM_VARIANT_CALLING_SOMATIC_TIDDIT/:take:fasta[out] ? via fasta
+  in fasta_fai (fasta_fai): -
+    <- subworkflows/local/bam_variant_calling_somatic_tiddit/main.nf#BAM_VARIANT_CALLING_SOMATIC_TIDDIT/:take:fasta_fai[out] ? via fasta_fai
+  in bwa (bwa): -
+    <- subworkflows/local/bam_variant_calling_somatic_tiddit/main.nf#BAM_VARIANT_CALLING_SOMATIC_TIDDIT/:take:bwa[out] ? via bwa
+  out ploidy (ploidy): Channel<Tuple>
+  out vcf (vcf): Channel<?>
+  out tbi (tbi): Channel<?>
+subworkflows/local/bam_variant_calling_somatic_tiddit/main.nf#BAM_VARIANT_CALLING_SOMATIC_TIDDIT/TIDDIT_TUMOR@1 call "TIDDIT_TUMOR" callee=TIDDIT_TUMOR:workflow:modelled:legacy @22:5
+  in cram (cram): -
+    <- subworkflows/local/bam_variant_calling_somatic_tiddit/main.nf#BAM_VARIANT_CALLING_SOMATIC_TIDDIT/:take:cram_tumor[out] ? via cram_tumor
+  in fasta (fasta): -
+    <- subworkflows/local/bam_variant_calling_somatic_tiddit/main.nf#BAM_VARIANT_CALLING_SOMATIC_TIDDIT/:take:fasta[out] ? via fasta
+  in fasta_fai (fasta_fai): -
+    <- subworkflows/local/bam_variant_calling_somatic_tiddit/main.nf#BAM_VARIANT_CALLING_SOMATIC_TIDDIT/:take:fasta_fai[out] ? via fasta_fai
+  in bwa (bwa): -
+    <- subworkflows/local/bam_variant_calling_somatic_tiddit/main.nf#BAM_VARIANT_CALLING_SOMATIC_TIDDIT/:take:bwa[out] ? via bwa
+  out ploidy (ploidy): Channel<Tuple>
+  out vcf (vcf): Channel<?>
+  out tbi (tbi): Channel<?>
+subworkflows/local/bam_variant_calling_somatic_tiddit/main.nf#BAM_VARIANT_CALLING_SOMATIC_TIDDIT/.join@1 chain ".join.map" steps=join,map @24:16
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_tiddit/main.nf#BAM_VARIANT_CALLING_SOMATIC_TIDDIT/TIDDIT_NORMAL@1[vcf] Channel<?> via TIDDIT_NORMAL.out.vcf
+  in 1:1 (join(right)): -
+    <- subworkflows/local/bam_variant_calling_somatic_tiddit/main.nf#BAM_VARIANT_CALLING_SOMATIC_TIDDIT/TIDDIT_TUMOR@1[vcf] Channel<?> via TIDDIT_TUMOR.out.vcf
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_somatic_tiddit/main.nf#BAM_VARIANT_CALLING_SOMATIC_TIDDIT/SVDB_MERGE@1 call "SVDB_MERGE" callee=SVDB_MERGE:process:modelled:legacy @24:5
+  in $1 (tuple(meta, vcfs)): Tuple
+    <- subworkflows/local/bam_variant_calling_somatic_tiddit/main.nf#BAM_VARIANT_CALLING_SOMATIC_TIDDIT/.join@1[out] Channel<?>
+  in input_priority (input_priority): -
+    = false : Boolean
+  in sort_inputs (sort_inputs): -
+    = true : Boolean
+  out vcf (vcf): Channel<Tuple>
+  out tbi (tbi): Channel<Tuple>
+  out csi (csi): Channel<Tuple>
+  out versions_svdb (versions_svdb): Channel<Tuple>
+  out versions_bcftools (versions_bcftools): Channel<Tuple>
+subworkflows/local/bam_variant_calling_somatic_tiddit/main.nf#BAM_VARIANT_CALLING_SOMATIC_TIDDIT/vcf chain ".map" steps=map @26:11
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_tiddit/main.nf#BAM_VARIANT_CALLING_SOMATIC_TIDDIT/SVDB_MERGE@1[vcf] Channel<Tuple> via SVDB_MERGE.out.vcf
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_somatic_tiddit/main.nf#BAM_VARIANT_CALLING_SOMATIC_TIDDIT/tbi chain ".map" steps=map @27:11
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_tiddit/main.nf#BAM_VARIANT_CALLING_SOMATIC_TIDDIT/SVDB_MERGE@1[tbi] Channel<Tuple> via SVDB_MERGE.out.tbi
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_somatic_tiddit/main.nf#BAM_VARIANT_CALLING_SOMATIC_TIDDIT/:emit:vcf emit "vcf" @30:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_tiddit/main.nf#BAM_VARIANT_CALLING_SOMATIC_TIDDIT/vcf[out] Channel<?> via vcf
+subworkflows/local/bam_variant_calling_somatic_tiddit/main.nf#BAM_VARIANT_CALLING_SOMATIC_TIDDIT/:emit:tbi emit "tbi" @31:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_tiddit/main.nf#BAM_VARIANT_CALLING_SOMATIC_TIDDIT/tbi[out] Channel<?> via tbi

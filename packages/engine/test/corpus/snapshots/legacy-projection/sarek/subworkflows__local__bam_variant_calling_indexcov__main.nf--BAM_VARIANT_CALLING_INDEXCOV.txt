@@ -1,0 +1,38 @@
+workflow subworkflows/local/bam_variant_calling_indexcov/main.nf#BAM_VARIANT_CALLING_INDEXCOV legacy
+statements 3, modelled 3
+subworkflows/local/bam_variant_calling_indexcov/main.nf#BAM_VARIANT_CALLING_INDEXCOV/:take:cram take "cram" @13:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_indexcov/main.nf#BAM_VARIANT_CALLING_INDEXCOV/:take:fasta take "fasta" @14:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_indexcov/main.nf#BAM_VARIANT_CALLING_INDEXCOV/:take:fasta_fai take "fasta_fai" @15:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_indexcov/main.nf#BAM_VARIANT_CALLING_INDEXCOV/reindex_ch call "SAMTOOLS_REINDEX_BAM" callee=SAMTOOLS_REINDEX_BAM:process:modelled:legacy @19:18
+  in $1 (tuple(meta, input, input_index)): Tuple
+    <- subworkflows/local/bam_variant_calling_indexcov/main.nf#BAM_VARIANT_CALLING_INDEXCOV/:take:cram[out] ? via cram
+  in $2 (tuple(meta2, fasta)): Tuple
+    <- subworkflows/local/bam_variant_calling_indexcov/main.nf#BAM_VARIANT_CALLING_INDEXCOV/:take:fasta[out] ? via fasta
+  in $3 (tuple(meta3, fai)): Tuple
+    <- subworkflows/local/bam_variant_calling_indexcov/main.nf#BAM_VARIANT_CALLING_INDEXCOV/:take:fasta_fai[out] ? via fasta_fai
+  out output (output): Channel<Tuple>
+  out versions_samtools (versions_samtools): Channel<Tuple>
+subworkflows/local/bam_variant_calling_indexcov/main.nf#BAM_VARIANT_CALLING_INDEXCOV/indexcov_input_ch chain ".map.groupTuple" steps=map,groupTuple @26:25
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_indexcov/main.nf#BAM_VARIANT_CALLING_INDEXCOV/reindex_ch[output] Channel<Tuple> via reindex_ch.output
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_indexcov/main.nf#BAM_VARIANT_CALLING_INDEXCOV/goleft_ch call "GOLEFT_INDEXCOV" callee=GOLEFT_INDEXCOV:process:modelled:legacy @28:17
+  in $1 (tuple(meta, bams, indexes)): Tuple
+    <- subworkflows/local/bam_variant_calling_indexcov/main.nf#BAM_VARIANT_CALLING_INDEXCOV/indexcov_input_ch[out] Channel<?> via indexcov_input_ch
+  in $2 (tuple(meta2, fai)): Tuple
+    <- subworkflows/local/bam_variant_calling_indexcov/main.nf#BAM_VARIANT_CALLING_INDEXCOV/:take:fasta_fai[out] ? via fasta_fai
+  out output (output): Channel<Tuple>
+  out ped (ped): Channel<Tuple>
+  out bed (bed): Channel<Tuple>
+  out bed_index (bed_index): Channel<Tuple>
+  out roc (roc): Channel<Tuple>
+  out html (html): Channel<Tuple>
+  out png (png): Channel<Tuple>
+  out versions_goleft (versions_goleft): Channel<Tuple>
+  out versions_tabix (versions_tabix): Channel<Tuple>
+subworkflows/local/bam_variant_calling_indexcov/main.nf#BAM_VARIANT_CALLING_INDEXCOV/:emit:out_indexcov emit "out_indexcov" @35:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_indexcov/main.nf#BAM_VARIANT_CALLING_INDEXCOV/goleft_ch[output] Channel<Tuple> via goleft_ch.output

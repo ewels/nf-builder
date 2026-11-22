@@ -1,0 +1,92 @@
+workflow subworkflows/local/bam_variant_calling_single_strelka/main.nf#BAM_VARIANT_CALLING_SINGLE_STRELKA legacy
+statements 11, modelled 11
+subworkflows/local/bam_variant_calling_single_strelka/main.nf#BAM_VARIANT_CALLING_SINGLE_STRELKA/:take:cram take "cram" @13:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_single_strelka/main.nf#BAM_VARIANT_CALLING_SINGLE_STRELKA/:take:dict take "dict" @14:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_single_strelka/main.nf#BAM_VARIANT_CALLING_SINGLE_STRELKA/:take:fasta take "fasta" @15:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_single_strelka/main.nf#BAM_VARIANT_CALLING_SINGLE_STRELKA/:take:fasta_fai take "fasta_fai" @16:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_single_strelka/main.nf#BAM_VARIANT_CALLING_SINGLE_STRELKA/:take:intervals take "intervals" @17:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_single_strelka/main.nf#BAM_VARIANT_CALLING_SINGLE_STRELKA/cram_intervals chain ".combine.map" steps=combine,map @22:22
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_single_strelka/main.nf#BAM_VARIANT_CALLING_SINGLE_STRELKA/:take:cram[out] ? via cram
+  in 1:1 (combine(right)): -
+    <- subworkflows/local/bam_variant_calling_single_strelka/main.nf#BAM_VARIANT_CALLING_SINGLE_STRELKA/:take:intervals[out] ? via intervals
+  out out (out): ?
+subworkflows/local/bam_variant_calling_single_strelka/main.nf#BAM_VARIANT_CALLING_SINGLE_STRELKA/STRELKA_SINGLE@1 call "STRELKA_SINGLE" callee=STRELKA_SINGLE:process:modelled:legacy @26:5
+  in $1 (tuple(meta, input, input_index, target_bed, target_bed_index)): Tuple
+    <- subworkflows/local/bam_variant_calling_single_strelka/main.nf#BAM_VARIANT_CALLING_SINGLE_STRELKA/cram_intervals[out] ? via cram_intervals
+  in fasta (fasta): Path
+    <- subworkflows/local/bam_variant_calling_single_strelka/main.nf#BAM_VARIANT_CALLING_SINGLE_STRELKA/:take:fasta[out] ? via fasta
+  in fai (fai): Path
+    <- subworkflows/local/bam_variant_calling_single_strelka/main.nf#BAM_VARIANT_CALLING_SINGLE_STRELKA/:take:fasta_fai[out] ? via fasta_fai
+  out vcf (vcf): Channel<Tuple>
+  out vcf_tbi (vcf_tbi): Channel<Tuple>
+  out genome_vcf (genome_vcf): Channel<Tuple>
+  out genome_vcf_tbi (genome_vcf_tbi): Channel<Tuple>
+  out versions_strelka (versions_strelka): Channel<Tuple>
+subworkflows/local/bam_variant_calling_single_strelka/main.nf#BAM_VARIANT_CALLING_SINGLE_STRELKA/genome_vcf chain ".branch" steps=branch @29:18
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_single_strelka/main.nf#BAM_VARIANT_CALLING_SINGLE_STRELKA/STRELKA_SINGLE@1[genome_vcf] Channel<Tuple> via STRELKA_SINGLE.out.genome_vcf
+  out out (out): Record
+subworkflows/local/bam_variant_calling_single_strelka/main.nf#BAM_VARIANT_CALLING_SINGLE_STRELKA/vcf_out chain ".branch" steps=branch @36:15
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_single_strelka/main.nf#BAM_VARIANT_CALLING_SINGLE_STRELKA/STRELKA_SINGLE@1[vcf] Channel<Tuple> via STRELKA_SINGLE.out.vcf
+  out out (out): Record
+subworkflows/local/bam_variant_calling_single_strelka/main.nf#BAM_VARIANT_CALLING_SINGLE_STRELKA/tbi_out chain ".branch" steps=branch @43:15
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_single_strelka/main.nf#BAM_VARIANT_CALLING_SINGLE_STRELKA/STRELKA_SINGLE@1[vcf_tbi] Channel<Tuple> via STRELKA_SINGLE.out.vcf_tbi
+  out out (out): Record
+subworkflows/local/bam_variant_calling_single_strelka/main.nf#BAM_VARIANT_CALLING_SINGLE_STRELKA/genome_vcf_to_merge chain ".map.groupTuple" steps=map,groupTuple @50:27
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_single_strelka/main.nf#BAM_VARIANT_CALLING_SINGLE_STRELKA/genome_vcf[out] Record via genome_vcf indirect
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_single_strelka/main.nf#BAM_VARIANT_CALLING_SINGLE_STRELKA/vcf_to_merge chain ".map.groupTuple" steps=map,groupTuple @51:27
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_single_strelka/main.nf#BAM_VARIANT_CALLING_SINGLE_STRELKA/vcf_out[out] Record via vcf_out indirect
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_single_strelka/main.nf#BAM_VARIANT_CALLING_SINGLE_STRELKA/MERGE_STRELKA@1 call "MERGE_STRELKA" callee=MERGE_STRELKA:process:modelled:legacy @53:5
+  in $1 (tuple(meta, vcf)): Tuple
+    <- subworkflows/local/bam_variant_calling_single_strelka/main.nf#BAM_VARIANT_CALLING_SINGLE_STRELKA/vcf_to_merge[out] Channel<?> via vcf_to_merge
+  in $2 (tuple(meta2, dict)): Tuple
+    <- subworkflows/local/bam_variant_calling_single_strelka/main.nf#BAM_VARIANT_CALLING_SINGLE_STRELKA/:take:dict[out] ? via dict
+  out vcf (vcf): Channel<Tuple>
+  out tbi (tbi): Channel<Tuple>
+  out versions_gatk4 (versions_gatk4): Channel<Tuple>
+subworkflows/local/bam_variant_calling_single_strelka/main.nf#BAM_VARIANT_CALLING_SINGLE_STRELKA/MERGE_STRELKA_GENOME@1 call "MERGE_STRELKA_GENOME" callee=MERGE_STRELKA_GENOME:process:modelled:legacy @54:5
+  in $1 (tuple(meta, vcf)): Tuple
+    <- subworkflows/local/bam_variant_calling_single_strelka/main.nf#BAM_VARIANT_CALLING_SINGLE_STRELKA/genome_vcf_to_merge[out] Channel<?> via genome_vcf_to_merge
+  in $2 (tuple(meta2, dict)): Tuple
+    <- subworkflows/local/bam_variant_calling_single_strelka/main.nf#BAM_VARIANT_CALLING_SINGLE_STRELKA/:take:dict[out] ? via dict
+  out vcf (vcf): Channel<Tuple>
+  out tbi (tbi): Channel<Tuple>
+  out versions_gatk4 (versions_gatk4): Channel<Tuple>
+subworkflows/local/bam_variant_calling_single_strelka/main.nf#BAM_VARIANT_CALLING_SINGLE_STRELKA/channel.empty@1 factory "channel.empty" factory=channel.empty @58:11
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_single_strelka/main.nf#BAM_VARIANT_CALLING_SINGLE_STRELKA/vcf chain ".mix.map" steps=mix,map @58:11
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_single_strelka/main.nf#BAM_VARIANT_CALLING_SINGLE_STRELKA/channel.empty@1[out] Channel<?>
+  in 1:1 (mix(1)): -
+    <- subworkflows/local/bam_variant_calling_single_strelka/main.nf#BAM_VARIANT_CALLING_SINGLE_STRELKA/MERGE_STRELKA@1[vcf] Channel<Tuple> via MERGE_STRELKA.out.vcf
+  in 1:2 (mix(2)): -
+    <- subworkflows/local/bam_variant_calling_single_strelka/main.nf#BAM_VARIANT_CALLING_SINGLE_STRELKA/vcf_out[out] Record via vcf_out indirect
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_single_strelka/main.nf#BAM_VARIANT_CALLING_SINGLE_STRELKA/channel.empty@2 factory "channel.empty" factory=channel.empty @62:11
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_single_strelka/main.nf#BAM_VARIANT_CALLING_SINGLE_STRELKA/tbi chain ".mix.map" steps=mix,map @62:11
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_single_strelka/main.nf#BAM_VARIANT_CALLING_SINGLE_STRELKA/channel.empty@2[out] Channel<?>
+  in 1:1 (mix(1)): -
+    <- subworkflows/local/bam_variant_calling_single_strelka/main.nf#BAM_VARIANT_CALLING_SINGLE_STRELKA/MERGE_STRELKA@1[tbi] Channel<Tuple> via MERGE_STRELKA.out.tbi
+  in 1:2 (mix(2)): -
+    <- subworkflows/local/bam_variant_calling_single_strelka/main.nf#BAM_VARIANT_CALLING_SINGLE_STRELKA/tbi_out[out] Record via tbi_out indirect
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_single_strelka/main.nf#BAM_VARIANT_CALLING_SINGLE_STRELKA/:emit:vcf emit "vcf" @67:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_single_strelka/main.nf#BAM_VARIANT_CALLING_SINGLE_STRELKA/vcf[out] Channel<?> via vcf
+subworkflows/local/bam_variant_calling_single_strelka/main.nf#BAM_VARIANT_CALLING_SINGLE_STRELKA/:emit:tbi emit "tbi" @68:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_single_strelka/main.nf#BAM_VARIANT_CALLING_SINGLE_STRELKA/tbi[out] Channel<?> via tbi

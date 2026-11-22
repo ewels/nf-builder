@@ -41,5 +41,6 @@ Process: [0001](0001-record-decisions-as-adrs.md). Template: [template.md](templ
 | [0035](0035-registry-snapshot.md) | Build the registry snapshot in a scheduled workflow and publish it through a snapshot branch | Superseded by 0041 |
 | [0036](0036-projection-node-keys-and-types.md) | Project typed workflows into plain-data graphs with name-based node keys and Channel/Value types | Accepted (agent) |
 | [0037](0037-code-nodes-and-free-variables.md) | Wire code nodes to the variables they read and write | Accepted (agent) |
+| [0038](0038-legacy-projection.md) | Project legacy dataflow forms, including aliases and dataflow conditionals | Accepted (agent) |
 | [0040](0040-github-pages-hosting.md) | Host on GitHub Pages, with the security policy in meta elements | Accepted |
 | [0041](0041-registry-snapshot-deploy.md) | Deploy the registry snapshot with the site from Actions | Accepted (agent) |

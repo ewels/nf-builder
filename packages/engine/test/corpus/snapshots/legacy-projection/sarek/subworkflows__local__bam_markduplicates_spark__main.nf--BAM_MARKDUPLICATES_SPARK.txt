@@ -1,0 +1,101 @@
+workflow subworkflows/local/bam_markduplicates_spark/main.nf#BAM_MARKDUPLICATES_SPARK legacy
+statements 8, modelled 8
+subworkflows/local/bam_markduplicates_spark/main.nf#BAM_MARKDUPLICATES_SPARK/:take:bam take "bam" @14:5
+  out out (out): -
+subworkflows/local/bam_markduplicates_spark/main.nf#BAM_MARKDUPLICATES_SPARK/:take:dict take "dict" @15:5
+  out out (out): -
+subworkflows/local/bam_markduplicates_spark/main.nf#BAM_MARKDUPLICATES_SPARK/:take:fasta take "fasta" @16:5
+  out out (out): -
+subworkflows/local/bam_markduplicates_spark/main.nf#BAM_MARKDUPLICATES_SPARK/:take:fasta_fai take "fasta_fai" @17:5
+  out out (out): -
+subworkflows/local/bam_markduplicates_spark/main.nf#BAM_MARKDUPLICATES_SPARK/:take:intervals_bed_combined take "intervals_bed_combined" @18:5
+  out out (out): -
+subworkflows/local/bam_markduplicates_spark/main.nf#BAM_MARKDUPLICATES_SPARK/reports factory "channel.empty" factory=channel.empty @21:15
+  out out (out): Channel<?>
+subworkflows/local/bam_markduplicates_spark/main.nf#BAM_MARKDUPLICATES_SPARK/.map@1 chain ".map" steps=map @24:36
+  in in (in): -
+    <- subworkflows/local/bam_markduplicates_spark/main.nf#BAM_MARKDUPLICATES_SPARK/:take:fasta[out] ? via fasta
+  out out (out): ?
+subworkflows/local/bam_markduplicates_spark/main.nf#BAM_MARKDUPLICATES_SPARK/.map@2 chain ".map" steps=map @24:78
+  in in (in): -
+    <- subworkflows/local/bam_markduplicates_spark/main.nf#BAM_MARKDUPLICATES_SPARK/:take:fasta_fai[out] ? via fasta_fai
+  out out (out): ?
+subworkflows/local/bam_markduplicates_spark/main.nf#BAM_MARKDUPLICATES_SPARK/.map@3 chain ".map" steps=map @24:132
+  in in (in): -
+    <- subworkflows/local/bam_markduplicates_spark/main.nf#BAM_MARKDUPLICATES_SPARK/:take:dict[out] ? via dict
+  out out (out): ?
+subworkflows/local/bam_markduplicates_spark/main.nf#BAM_MARKDUPLICATES_SPARK/GATK4SPARK_MARKDUPLICATES@1 call "GATK4SPARK_MARKDUPLICATES" callee=GATK4SPARK_MARKDUPLICATES:process:modelled:legacy @24:5
+  in $1 (tuple(meta, bam)): Tuple
+    <- subworkflows/local/bam_markduplicates_spark/main.nf#BAM_MARKDUPLICATES_SPARK/:take:bam[out] ? via bam
+  in fasta (fasta): Path
+    <- subworkflows/local/bam_markduplicates_spark/main.nf#BAM_MARKDUPLICATES_SPARK/.map@1[out] ?
+  in fasta_fai (fasta_fai): Path
+    <- subworkflows/local/bam_markduplicates_spark/main.nf#BAM_MARKDUPLICATES_SPARK/.map@2[out] ?
+  in dict (dict): Path
+    <- subworkflows/local/bam_markduplicates_spark/main.nf#BAM_MARKDUPLICATES_SPARK/.map@3[out] ?
+  out output (output): Channel<Tuple>
+  out bam_index (bam_index): Channel<Tuple>
+  out metrics (metrics): Channel<Tuple>
+  out versions_gatk4 (versions_gatk4): Channel<Tuple>
+subworkflows/local/bam_markduplicates_spark/main.nf#BAM_MARKDUPLICATES_SPARK/INDEX_MARKDUPLICATES@1 call "INDEX_MARKDUPLICATES" callee=INDEX_MARKDUPLICATES:process:modelled:legacy @27:5
+  in $1 (tuple(meta, input)): Tuple
+    <- subworkflows/local/bam_markduplicates_spark/main.nf#BAM_MARKDUPLICATES_SPARK/GATK4SPARK_MARKDUPLICATES@1[output] Channel<Tuple> via GATK4SPARK_MARKDUPLICATES.out.output
+  out index (index): Channel<Tuple>
+  out versions_samtools (versions_samtools): Channel<Tuple>
+subworkflows/local/bam_markduplicates_spark/main.nf#BAM_MARKDUPLICATES_SPARK/alignment chain ".join" steps=join @30:17
+  in in (in): -
+    <- subworkflows/local/bam_markduplicates_spark/main.nf#BAM_MARKDUPLICATES_SPARK/GATK4SPARK_MARKDUPLICATES@1[output] Channel<Tuple> via GATK4SPARK_MARKDUPLICATES.out.output
+  in 1:1 (join(right)): -
+    <- subworkflows/local/bam_markduplicates_spark/main.nf#BAM_MARKDUPLICATES_SPARK/INDEX_MARKDUPLICATES@1[index] Channel<Tuple> via INDEX_MARKDUPLICATES.out.index
+  out out (out): Channel<Record>
+subworkflows/local/bam_markduplicates_spark/main.nf#BAM_MARKDUPLICATES_SPARK/CRAM_QC_MOSDEPTH_SAMTOOLS@1 call "CRAM_QC_MOSDEPTH_SAMTOOLS" callee=CRAM_QC_MOSDEPTH_SAMTOOLS:workflow:modelled:legacy @34:5
+  in cram (cram): -
+    <- subworkflows/local/bam_markduplicates_spark/main.nf#BAM_MARKDUPLICATES_SPARK/alignment[out] Channel<Record> via alignment
+  in fasta (fasta): -
+    <- subworkflows/local/bam_markduplicates_spark/main.nf#BAM_MARKDUPLICATES_SPARK/:take:fasta[out] ? via fasta
+  in fasta_fai (fasta_fai): -
+    <- subworkflows/local/bam_markduplicates_spark/main.nf#BAM_MARKDUPLICATES_SPARK/:take:fasta_fai[out] ? via fasta_fai
+  in intervals (intervals): -
+    <- subworkflows/local/bam_markduplicates_spark/main.nf#BAM_MARKDUPLICATES_SPARK/:take:intervals_bed_combined[out] ? via intervals_bed_combined
+  out reports (reports): Channel<?>
+subworkflows/local/bam_markduplicates_spark/main.nf#BAM_MARKDUPLICATES_SPARK/.map@4 chain ".map" steps=map @37:42
+  in in (in): -
+    <- subworkflows/local/bam_markduplicates_spark/main.nf#BAM_MARKDUPLICATES_SPARK/:take:fasta[out] ? via fasta
+  out out (out): ?
+subworkflows/local/bam_markduplicates_spark/main.nf#BAM_MARKDUPLICATES_SPARK/.map@5 chain ".map" steps=map @37:84
+  in in (in): -
+    <- subworkflows/local/bam_markduplicates_spark/main.nf#BAM_MARKDUPLICATES_SPARK/:take:fasta_fai[out] ? via fasta_fai
+  out out (out): ?
+subworkflows/local/bam_markduplicates_spark/main.nf#BAM_MARKDUPLICATES_SPARK/.map@6 chain ".map" steps=map @37:138
+  in in (in): -
+    <- subworkflows/local/bam_markduplicates_spark/main.nf#BAM_MARKDUPLICATES_SPARK/:take:dict[out] ? via dict
+  out out (out): ?
+subworkflows/local/bam_markduplicates_spark/main.nf#BAM_MARKDUPLICATES_SPARK/GATK4_ESTIMATELIBRARYCOMPLEXITY@1 call "GATK4_ESTIMATELIBRARYCOMPLEXITY" callee=GATK4_ESTIMATELIBRARYCOMPLEXITY:process:modelled:legacy @37:5
+  in $1 (tuple(meta, input)): Tuple
+    <- subworkflows/local/bam_markduplicates_spark/main.nf#BAM_MARKDUPLICATES_SPARK/:take:bam[out] ? via bam
+  in fasta (fasta): Path
+    <- subworkflows/local/bam_markduplicates_spark/main.nf#BAM_MARKDUPLICATES_SPARK/.map@4[out] ?
+  in fai (fai): Path
+    <- subworkflows/local/bam_markduplicates_spark/main.nf#BAM_MARKDUPLICATES_SPARK/.map@5[out] ?
+  in dict (dict): Path
+    <- subworkflows/local/bam_markduplicates_spark/main.nf#BAM_MARKDUPLICATES_SPARK/.map@6[out] ?
+  out metrics (metrics): Channel<Tuple>
+  out versions_gatk4 (versions_gatk4): Channel<Tuple>
+subworkflows/local/bam_markduplicates_spark/main.nf#BAM_MARKDUPLICATES_SPARK/reports~2 chain ".mix" steps=mix @40:15
+  in in (in): -
+    <- subworkflows/local/bam_markduplicates_spark/main.nf#BAM_MARKDUPLICATES_SPARK/reports[out] Channel<?> via reports
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/bam_markduplicates_spark/main.nf#BAM_MARKDUPLICATES_SPARK/GATK4_ESTIMATELIBRARYCOMPLEXITY@1[metrics] Channel<Tuple> via GATK4_ESTIMATELIBRARYCOMPLEXITY.out.metrics
+  out out (out): Channel<?>
+subworkflows/local/bam_markduplicates_spark/main.nf#BAM_MARKDUPLICATES_SPARK/reports~3 chain ".mix" steps=mix @41:15
+  in in (in): -
+    <- subworkflows/local/bam_markduplicates_spark/main.nf#BAM_MARKDUPLICATES_SPARK/reports~2[out] Channel<?> via reports
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/bam_markduplicates_spark/main.nf#BAM_MARKDUPLICATES_SPARK/CRAM_QC_MOSDEPTH_SAMTOOLS@1[reports] Channel<?> via CRAM_QC_MOSDEPTH_SAMTOOLS.out.reports
+  out out (out): Channel<?>
+subworkflows/local/bam_markduplicates_spark/main.nf#BAM_MARKDUPLICATES_SPARK/:emit:alignment emit "alignment" @45:5
+  in in (in): -
+    <- subworkflows/local/bam_markduplicates_spark/main.nf#BAM_MARKDUPLICATES_SPARK/alignment[out] Channel<Record> via alignment
+subworkflows/local/bam_markduplicates_spark/main.nf#BAM_MARKDUPLICATES_SPARK/:emit:reports emit "reports" @46:5
+  in in (in): -
+    <- subworkflows/local/bam_markduplicates_spark/main.nf#BAM_MARKDUPLICATES_SPARK/reports~3[out] Channel<?> via reports

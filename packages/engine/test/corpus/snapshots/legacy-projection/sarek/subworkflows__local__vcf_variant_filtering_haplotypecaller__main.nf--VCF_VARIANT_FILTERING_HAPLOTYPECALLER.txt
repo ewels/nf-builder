@@ -1,0 +1,76 @@
+workflow subworkflows/local/vcf_variant_filtering_haplotypecaller/main.nf#VCF_VARIANT_FILTERING_HAPLOTYPECALLER legacy
+statements 5, modelled 5
+subworkflows/local/vcf_variant_filtering_haplotypecaller/main.nf#VCF_VARIANT_FILTERING_HAPLOTYPECALLER/:take:vcf take "vcf" @7:5
+  out out (out): -
+subworkflows/local/vcf_variant_filtering_haplotypecaller/main.nf#VCF_VARIANT_FILTERING_HAPLOTYPECALLER/:take:fasta take "fasta" @8:5
+  out out (out): -
+subworkflows/local/vcf_variant_filtering_haplotypecaller/main.nf#VCF_VARIANT_FILTERING_HAPLOTYPECALLER/:take:fasta_fai take "fasta_fai" @9:5
+  out out (out): -
+subworkflows/local/vcf_variant_filtering_haplotypecaller/main.nf#VCF_VARIANT_FILTERING_HAPLOTYPECALLER/:take:dict take "dict" @10:5
+  out out (out): -
+subworkflows/local/vcf_variant_filtering_haplotypecaller/main.nf#VCF_VARIANT_FILTERING_HAPLOTYPECALLER/:take:intervals_bed_combined take "intervals_bed_combined" @11:5
+  out out (out): -
+subworkflows/local/vcf_variant_filtering_haplotypecaller/main.nf#VCF_VARIANT_FILTERING_HAPLOTYPECALLER/:take:known_sites take "known_sites" @12:5
+  out out (out): -
+subworkflows/local/vcf_variant_filtering_haplotypecaller/main.nf#VCF_VARIANT_FILTERING_HAPLOTYPECALLER/:take:known_sites_tbi take "known_sites_tbi" @13:5
+  out out (out): -
+subworkflows/local/vcf_variant_filtering_haplotypecaller/main.nf#VCF_VARIANT_FILTERING_HAPLOTYPECALLER/cnn_in chain ".combine.map" steps=combine,map @19:14
+  in in (in): -
+    <- subworkflows/local/vcf_variant_filtering_haplotypecaller/main.nf#VCF_VARIANT_FILTERING_HAPLOTYPECALLER/:take:vcf[out] ? via vcf
+  in 1:1 (combine(right)): -
+    <- subworkflows/local/vcf_variant_filtering_haplotypecaller/main.nf#VCF_VARIANT_FILTERING_HAPLOTYPECALLER/:take:intervals_bed_combined[out] ? via intervals_bed_combined
+  out out (out): ?
+subworkflows/local/vcf_variant_filtering_haplotypecaller/main.nf#VCF_VARIANT_FILTERING_HAPLOTYPECALLER/CNNSCOREVARIANTS@1 call "CNNSCOREVARIANTS" callee=CNNSCOREVARIANTS:process:modelled:legacy @21:5
+  in $1 (tuple(meta, vcf, tbi, aligned_input, intervals)): Tuple
+    <- subworkflows/local/vcf_variant_filtering_haplotypecaller/main.nf#VCF_VARIANT_FILTERING_HAPLOTYPECALLER/cnn_in[out] ? via cnn_in
+  in fasta (fasta): Path
+    <- subworkflows/local/vcf_variant_filtering_haplotypecaller/main.nf#VCF_VARIANT_FILTERING_HAPLOTYPECALLER/:take:fasta[out] ? via fasta
+  in fai (fai): Path
+    <- subworkflows/local/vcf_variant_filtering_haplotypecaller/main.nf#VCF_VARIANT_FILTERING_HAPLOTYPECALLER/:take:fasta_fai[out] ? via fasta_fai
+  in dict (dict): Path
+    <- subworkflows/local/vcf_variant_filtering_haplotypecaller/main.nf#VCF_VARIANT_FILTERING_HAPLOTYPECALLER/:take:dict[out] ? via dict
+  in architecture (architecture): Path
+    = [] : List
+  in weights (weights): Path
+    = [] : List
+  out vcf (vcf): Channel<Tuple>
+  out tbi (tbi): Channel<Tuple>
+  out versions_gatk4 (versions_gatk4): Channel<Tuple>
+subworkflows/local/vcf_variant_filtering_haplotypecaller/main.nf#VCF_VARIANT_FILTERING_HAPLOTYPECALLER/.join@1 chain ".join.combine" steps=join,combine @23:27
+  in in (in): -
+    <- subworkflows/local/vcf_variant_filtering_haplotypecaller/main.nf#VCF_VARIANT_FILTERING_HAPLOTYPECALLER/CNNSCOREVARIANTS@1[vcf] Channel<Tuple> via CNNSCOREVARIANTS.out.vcf
+  in 1:1 (join(right)): -
+    <- subworkflows/local/vcf_variant_filtering_haplotypecaller/main.nf#VCF_VARIANT_FILTERING_HAPLOTYPECALLER/CNNSCOREVARIANTS@1[tbi] Channel<Tuple> via CNNSCOREVARIANTS.out.tbi
+  in 2:1 (combine(right)): -
+    <- subworkflows/local/vcf_variant_filtering_haplotypecaller/main.nf#VCF_VARIANT_FILTERING_HAPLOTYPECALLER/:take:intervals_bed_combined[out] ? via intervals_bed_combined
+  out out (out): Channel<Tuple>
+subworkflows/local/vcf_variant_filtering_haplotypecaller/main.nf#VCF_VARIANT_FILTERING_HAPLOTYPECALLER/FILTERVARIANTTRANCHES@1 call "FILTERVARIANTTRANCHES" callee=FILTERVARIANTTRANCHES:process:modelled:legacy @23:5
+  in $1 (tuple(meta, vcf, tbi, intervals)): Tuple
+    <- subworkflows/local/vcf_variant_filtering_haplotypecaller/main.nf#VCF_VARIANT_FILTERING_HAPLOTYPECALLER/.join@1[out] Channel<Tuple>
+  in resources (resources): Path
+    <- subworkflows/local/vcf_variant_filtering_haplotypecaller/main.nf#VCF_VARIANT_FILTERING_HAPLOTYPECALLER/:take:known_sites[out] ? via known_sites
+  in resources_index (resources_index): Path
+    <- subworkflows/local/vcf_variant_filtering_haplotypecaller/main.nf#VCF_VARIANT_FILTERING_HAPLOTYPECALLER/:take:known_sites_tbi[out] ? via known_sites_tbi
+  in fasta (fasta): Path
+    <- subworkflows/local/vcf_variant_filtering_haplotypecaller/main.nf#VCF_VARIANT_FILTERING_HAPLOTYPECALLER/:take:fasta[out] ? via fasta
+  in fai (fai): Path
+    <- subworkflows/local/vcf_variant_filtering_haplotypecaller/main.nf#VCF_VARIANT_FILTERING_HAPLOTYPECALLER/:take:fasta_fai[out] ? via fasta_fai
+  in dict (dict): Path
+    <- subworkflows/local/vcf_variant_filtering_haplotypecaller/main.nf#VCF_VARIANT_FILTERING_HAPLOTYPECALLER/:take:dict[out] ? via dict
+  out vcf (vcf): Channel<Tuple>
+  out tbi (tbi): Channel<Tuple>
+  out versions_gatk4 (versions_gatk4): Channel<Tuple>
+subworkflows/local/vcf_variant_filtering_haplotypecaller/main.nf#VCF_VARIANT_FILTERING_HAPLOTYPECALLER/filtered_vcf chain ".map" steps=map @25:20
+  in in (in): -
+    <- subworkflows/local/vcf_variant_filtering_haplotypecaller/main.nf#VCF_VARIANT_FILTERING_HAPLOTYPECALLER/FILTERVARIANTTRANCHES@1[vcf] Channel<Tuple> via FILTERVARIANTTRANCHES.out.vcf
+  out out (out): Channel<?>
+subworkflows/local/vcf_variant_filtering_haplotypecaller/main.nf#VCF_VARIANT_FILTERING_HAPLOTYPECALLER/filtered_tbi chain ".map" steps=map @29:20
+  in in (in): -
+    <- subworkflows/local/vcf_variant_filtering_haplotypecaller/main.nf#VCF_VARIANT_FILTERING_HAPLOTYPECALLER/FILTERVARIANTTRANCHES@1[tbi] Channel<Tuple> via FILTERVARIANTTRANCHES.out.tbi
+  out out (out): Channel<?>
+subworkflows/local/vcf_variant_filtering_haplotypecaller/main.nf#VCF_VARIANT_FILTERING_HAPLOTYPECALLER/:emit:filtered_vcf emit "filtered_vcf" @35:5
+  in in (in): -
+    <- subworkflows/local/vcf_variant_filtering_haplotypecaller/main.nf#VCF_VARIANT_FILTERING_HAPLOTYPECALLER/filtered_vcf[out] Channel<?> via filtered_vcf
+subworkflows/local/vcf_variant_filtering_haplotypecaller/main.nf#VCF_VARIANT_FILTERING_HAPLOTYPECALLER/:emit:filtered_tbi emit "filtered_tbi" @36:5
+  in in (in): -
+    <- subworkflows/local/vcf_variant_filtering_haplotypecaller/main.nf#VCF_VARIANT_FILTERING_HAPLOTYPECALLER/filtered_tbi[out] Channel<?> via filtered_tbi

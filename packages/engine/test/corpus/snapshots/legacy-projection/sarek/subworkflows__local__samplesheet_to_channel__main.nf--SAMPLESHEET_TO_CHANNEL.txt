@@ -1,0 +1,301 @@
+workflow subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL legacy
+statements 34, modelled 9
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:ch_from_samplesheet take "ch_from_samplesheet" @5:5
+  out out (out): -
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:aligner take "aligner" @6:5
+  out out (out): -
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:ascat_alleles take "ascat_alleles" @7:5
+  out out (out): -
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:ascat_loci take "ascat_loci" @8:5
+  out out (out): -
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:ascat_loci_gc take "ascat_loci_gc" @9:5
+  out out (out): -
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:ascat_loci_rt take "ascat_loci_rt" @10:5
+  out out (out): -
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:bcftools_annotations take "bcftools_annotations" @11:5
+  out out (out): -
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:bcftools_annotations_tbi take "bcftools_annotations_tbi" @12:5
+  out out (out): -
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:bcftools_header_lines take "bcftools_header_lines" @13:5
+  out out (out): -
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:build_only_index take "build_only_index" @14:5
+  out out (out): -
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:contamination_resource take "contamination_resource" @15:5
+  out out (out): -
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:dbsnp take "dbsnp" @16:5
+  out out (out): -
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:fasta take "fasta" @17:5
+  out out (out): -
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:germline_resource take "germline_resource" @18:5
+  out out (out): -
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:intervals take "intervals" @19:5
+  out out (out): -
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:joint_germline take "joint_germline" @20:5
+  out out (out): -
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:joint_mutect2 take "joint_mutect2" @21:5
+  out out (out): -
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:known_indels take "known_indels" @22:5
+  out out (out): -
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:known_snps take "known_snps" @23:5
+  out out (out): -
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:no_intervals take "no_intervals" @24:5
+  out out (out): -
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:pon take "pon" @25:5
+  out out (out): -
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:sentieon_dnascope_emit_mode take "sentieon_dnascope_emit_mode" @26:5
+  out out (out): -
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:sentieon_haplotyper_emit_mode take "sentieon_haplotyper_emit_mode" @27:5
+  out out (out): -
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:seq_center take "seq_center" @28:5
+  out out (out): -
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:seq_platform take "seq_platform" @29:5
+  out out (out): -
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:skip_tools take "skip_tools" @30:5
+  out out (out): -
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:snpeff_cache take "snpeff_cache" @31:5
+  out out (out): -
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:snpeff_db take "snpeff_db" @32:5
+  out out (out): -
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:step take "step" @33:5
+  out out (out): -
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:tools take "tools" @34:5
+  out out (out): -
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:umi_length take "umi_length" @35:5
+  out out (out): -
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:umi_location take "umi_location" @36:5
+  out out (out): -
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:umi_in_read_header take "umi_in_read_header" @37:5
+  out out (out): -
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:umi_read_structure take "umi_read_structure" @38:5
+  out out (out): -
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:wes take "wes" @39:5
+  out out (out): -
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/.dump@1 chain ".dump" steps=dump @42:5
+  in in (in): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:ch_from_samplesheet[out] ? via ch_from_samplesheet
+  out out (out): Channel<?>
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/.map@1 chain ".map.unique.groupTuple.map" steps=map,unique,groupTuple,map @44:5
+  in in (in): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:ch_from_samplesheet[out] ? via ch_from_samplesheet
+  out out (out): Channel<?>
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/duplicate_key_fields code "def duplicate_key_fields = step == 'annotate'" @64:5
+  in step (step): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:step[out] ? via step indirect
+  out duplicate_key_fields (duplicate_key_fields): -
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/.map@2 chain ".map.groupTuple.map" steps=map,groupTuple,map @68:5
+  in in (in): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:ch_from_samplesheet[out] ? via ch_from_samplesheet
+  out out (out): Channel<?>
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/.map@3 chain ".map.unique.groupTuple.map.flatMap.groupTuple.map" steps=map,unique,groupTuple,map,flatMap,groupTuple,map @85:5
+  in in (in): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:ch_from_samplesheet[out] ? via ch_from_samplesheet
+  out out (out): Channel<?>
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/ch_with_patient_sample chain ".map" steps=map @114:20
+  in in (in): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:ch_from_samplesheet[out] ? via ch_from_samplesheet
+  out out (out): ?
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/input_sample chain ".groupTuple.map.combine.map" steps=groupTuple,map,combine,map @114:20
+  in in (in): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/ch_with_patient_sample[out] ?
+  in 3:1 (combine(1)): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/ch_with_patient_sample[out] ? via ch_with_patient_sample
+  out out (out): Channel<?>
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:code@1 code "if (joint_germline && (!tools || !(tools.split(',').contain…" @247:5
+  in joint_germline (joint_germline): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:joint_germline[out] ? via joint_germline indirect
+  in tools (tools): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:tools[out] ? via tools indirect
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/.filter@1 chain ".filter.ifEmpty" steps=filter,ifEmpty @255:9
+  guards then of step != 'annotate' && tools && !build_only_index
+  in in (in): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/input_sample[out] Channel<?> via input_sample
+  out out (out): Channel<?>
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/.filter@2 chain ".filter.ifEmpty" steps=filter,ifEmpty @273:9
+  guards then of step != 'annotate' && tools && !build_only_index
+  in in (in): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/input_sample[out] Channel<?> via input_sample
+  out out (out): Channel<?>
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:code@2 code "if (wes && !step == 'annotate') {" @291:5
+  in wes (wes): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:wes[out] ? via wes indirect
+  in step (step): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:step[out] ? via step indirect
+  in intervals (intervals): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:intervals[out] ? via intervals indirect
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:code@3 code "if (step == 'mapping' && aligner.contains("dragmap") && !(s…" @303:5
+  in step (step): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:step[out] ? via step indirect
+  in aligner (aligner): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:aligner[out] ? via aligner indirect
+  in skip_tools (skip_tools): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:skip_tools[out] ? via skip_tools indirect
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:code@4 code "if (step == 'mapping' && (aligner.contains("parabricks") ||…" @307:5
+  in step (step): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:step[out] ? via step indirect
+  in aligner (aligner): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:aligner[out] ? via aligner indirect
+  in umi_read_structure (umi_read_structure): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:umi_read_structure[out] ? via umi_read_structure indirect
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:code@5 code "if (step == 'mapping' && aligner.contains("parabricks" ) &&…" @311:5
+  in step (step): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:step[out] ? via step indirect
+  in aligner (aligner): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:aligner[out] ? via aligner indirect
+  in umi_in_read_header (umi_in_read_header): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:umi_in_read_header[out] ? via umi_in_read_header indirect
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:code@6 code "if (step == 'mapping' && aligner.contains("parabricks")  &&…" @315:5
+  in step (step): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:step[out] ? via step indirect
+  in aligner (aligner): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:aligner[out] ? via aligner indirect
+  in umi_location (umi_location): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:umi_location[out] ? via umi_location indirect
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:code@7 code "if (step == 'mapping' && umi_read_structure && umi_location…" @319:5
+  in step (step): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:step[out] ? via step indirect
+  in umi_read_structure (umi_read_structure): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:umi_read_structure[out] ? via umi_read_structure indirect
+  in umi_location (umi_location): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:umi_location[out] ? via umi_location indirect
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:code@8 code "if (step == 'mapping' && umi_read_structure && umi_in_read_…" @323:5
+  in step (step): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:step[out] ? via step indirect
+  in umi_read_structure (umi_read_structure): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:umi_read_structure[out] ? via umi_read_structure indirect
+  in umi_in_read_header (umi_in_read_header): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:umi_in_read_header[out] ? via umi_in_read_header indirect
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:code@9 code "if (step == 'mapping' && umi_in_read_header && umi_location…" @331:5
+  in step (step): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:step[out] ? via step indirect
+  in umi_in_read_header (umi_in_read_header): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:umi_in_read_header[out] ? via umi_in_read_header indirect
+  in umi_location (umi_location): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:umi_location[out] ? via umi_location indirect
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:code@10 code "if (step == 'mapping' && umi_location && !umi_length) {" @335:5
+  in step (step): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:step[out] ? via step indirect
+  in umi_location (umi_location): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:umi_location[out] ? via umi_location indirect
+  in umi_length (umi_length): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:umi_length[out] ? via umi_length indirect
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:code@11 code "if (tools && tools.split(',').contains("sentieon_haplotyper…" @339:5
+  in tools (tools): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:tools[out] ? via tools indirect
+  in joint_germline (joint_germline): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:joint_germline[out] ? via joint_germline indirect
+  in sentieon_haplotyper_emit_mode (sentieon_haplotyper_emit_mode): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:sentieon_haplotyper_emit_mode[out] ? via sentieon_haplotyper_emit_mode indirect
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:code@12 code "if (tools && tools.split(',').contains('markduplicates_spar…" @344:5
+  in tools (tools): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:tools[out] ? via tools indirect
+  in umi_in_read_header (umi_in_read_header): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:umi_in_read_header[out] ? via umi_in_read_header indirect
+  in umi_location (umi_location): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:umi_location[out] ? via umi_location indirect
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:code@13 code "if( umi_read_structure) {" @350:5
+  in umi_read_structure (umi_read_structure): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:umi_read_structure[out] ? via umi_read_structure indirect
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:code@14 code "if (tools && tools.split(',').contains('ascat')) {" @373:5
+  in tools (tools): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:tools[out] ? via tools indirect
+  in ascat_alleles (ascat_alleles): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:ascat_alleles[out] ? via ascat_alleles indirect
+  in ascat_loci (ascat_loci): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:ascat_loci[out] ? via ascat_loci indirect
+  in ascat_loci_gc (ascat_loci_gc): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:ascat_loci_gc[out] ? via ascat_loci_gc indirect
+  in ascat_loci_rt (ascat_loci_rt): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:ascat_loci_rt[out] ? via ascat_loci_rt indirect
+  in wes (wes): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:wes[out] ? via wes indirect
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:code@15 code "[mutect2: 'Mutect2', parabricks_mutectcaller: 'Parabricks M…" @389:5
+  in tools (tools): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:tools[out] ? via tools indirect
+  in pon (pon): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:pon[out] ? via pon indirect
+  in germline_resource (germline_resource): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:germline_resource[out] ? via germline_resource indirect
+  in contamination_resource (contamination_resource): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:contamination_resource[out] ? via contamination_resource indirect
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:code@16 code "if (!dbsnp && !known_indels) {" @408:5
+  in dbsnp (dbsnp): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:dbsnp[out] ? via dbsnp indirect
+  in known_indels (known_indels): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:known_indels[out] ? via known_indels indirect
+  in step (step): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:step[out] ? via step indirect
+  in skip_tools (skip_tools): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:skip_tools[out] ? via skip_tools indirect
+  in tools (tools): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:tools[out] ? via tools indirect
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:code@17 code "if (tools && tools.split(',').contains('haplotypecaller') &…" @416:5
+  in tools (tools): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:tools[out] ? via tools indirect
+  in joint_germline (joint_germline): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:joint_germline[out] ? via joint_germline indirect
+  in no_intervals (no_intervals): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:no_intervals[out] ? via no_intervals indirect
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:code@18 code "if (tools && (tools.split(',').contains('haplotypecaller') …" @421:5
+  in tools (tools): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:tools[out] ? via tools indirect
+  in joint_germline (joint_germline): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:joint_germline[out] ? via joint_germline indirect
+  in dbsnp (dbsnp): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:dbsnp[out] ? via dbsnp indirect
+  in known_indels (known_indels): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:known_indels[out] ? via known_indels indirect
+  in known_snps (known_snps): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:known_snps[out] ? via known_snps indirect
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:code@19 code "if (tools && tools.split(',').contains('sentieon_dnascope')…" @427:5
+  in tools (tools): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:tools[out] ? via tools indirect
+  in joint_germline (joint_germline): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:joint_germline[out] ? via joint_germline indirect
+  in sentieon_dnascope_emit_mode (sentieon_dnascope_emit_mode): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:sentieon_dnascope_emit_mode[out] ? via sentieon_dnascope_emit_mode indirect
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:code@20 code "if (tools && tools.split(',').contains('sentieon_haplotyper…" @431:5
+  in tools (tools): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:tools[out] ? via tools indirect
+  in joint_germline (joint_germline): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:joint_germline[out] ? via joint_germline indirect
+  in sentieon_haplotyper_emit_mode (sentieon_haplotyper_emit_mode): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:sentieon_haplotyper_emit_mode[out] ? via sentieon_haplotyper_emit_mode indirect
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:code@21 code "if (joint_mutect2 && (!tools || !tools.split(',').contains(…" @437:5
+  in joint_mutect2 (joint_mutect2): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:joint_mutect2[out] ? via joint_mutect2 indirect
+  in tools (tools): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:tools[out] ? via tools indirect
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:code@22 code "if ((step == 'variant_calling' || step == 'annotate') && !t…" @442:5
+  in step (step): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:step[out] ? via step indirect
+  in tools (tools): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:tools[out] ? via tools indirect
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/.map@4 chain ".map" steps=map @448:9
+  guards then of tools && (tools.split(',').contains('ascat') || tools.split(',').contains('controlfreec') || tools.split(',').contains('varlociraptor'))
+  in in (in): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/input_sample[out] Channel<?> via input_sample
+  out out (out): Channel<?>
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/.map@5 chain ".map" steps=map @457:9
+  guards then of tools && tools.split(',').contains('varlociraptor')
+  in in (in): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/input_sample[out] Channel<?> via input_sample
+  out out (out): Channel<?>
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:code@23 code "if (tools && tools.split(',').contains('bcfann') && !(bcfto…" @465:5
+  in tools (tools): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:tools[out] ? via tools indirect
+  in bcftools_annotations (bcftools_annotations): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:bcftools_annotations[out] ? via bcftools_annotations indirect
+  in bcftools_annotations_tbi (bcftools_annotations_tbi): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:bcftools_annotations_tbi[out] ? via bcftools_annotations_tbi indirect
+  in bcftools_header_lines (bcftools_header_lines): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:bcftools_header_lines[out] ? via bcftools_header_lines indirect
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:code@24 code "if ((snpeff_cache && tools && (tools.split(',').contains("s…" @470:5
+  in snpeff_cache (snpeff_cache): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:snpeff_cache[out] ? via snpeff_cache indirect
+  in tools (tools): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:tools[out] ? via tools indirect
+  in snpeff_db (snpeff_db): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:take:snpeff_db[out] ? via snpeff_db indirect
+subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/:emit:input_sample emit "input_sample" @475:5
+  in in (in): -
+    <- subworkflows/local/samplesheet_to_channel/main.nf#SAMPLESHEET_TO_CHANNEL/input_sample[out] Channel<?> via input_sample

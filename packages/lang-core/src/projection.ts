@@ -71,6 +71,8 @@ interface NodeShape<K extends GraphNodeKind> {
   readonly inputs: readonly Port[];
   readonly outputs: readonly Port[];
   readonly range: Range;
+  /** The `if` branches the node sits in, outer to inner (F-107); empty at the top level. */
+  readonly guards: readonly Guard[];
 }
 
 export interface CallNode extends NodeShape<"call"> {
@@ -133,10 +135,31 @@ export interface WorkflowRef {
   readonly range: Range;
 }
 
+/** A branch of an `if` a statement sits in (F-107). */
+export interface Guard {
+  readonly condition: Range;
+  readonly branch: "then" | "else";
+}
+
+/** One main statement of a workflow and what it produced (F-107 step 2). */
+export interface ProjectedStatement {
+  readonly range: Range;
+  /** The ids of the nodes the statement created, in order. */
+  readonly nodes: readonly string[];
+  /** The names the statement bound. */
+  readonly binds: readonly string[];
+  /** True when the statement produced no code node. */
+  readonly modelled: boolean;
+  /** The branches around the statement, outer to inner. */
+  readonly guards: readonly Guard[];
+}
+
 export interface Projection {
   readonly workflow: WorkflowRef;
   readonly nodes: readonly GraphNode[];
   readonly edges: readonly GraphEdge[];
+  /** Every main statement in order; a transparent `if` is replaced by its branch statements. */
+  readonly statements: readonly ProjectedStatement[];
 }
 
 /** The part of a node key after `/` (AR-11). `occurrence` counts from 1. */

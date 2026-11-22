@@ -1,0 +1,42 @@
+workflow subworkflows/local/prepare_snpsift_databases/main.nf#PREPARE_SNPSIFT_DATABASES legacy
+statements 6, modelled 6
+subworkflows/local/prepare_snpsift_databases/main.nf#PREPARE_SNPSIFT_DATABASES/:take:val_db_configs take "val_db_configs" @9:5
+  out out (out): -
+subworkflows/local/prepare_snpsift_databases/main.nf#PREPARE_SNPSIFT_DATABASES/ch_configs factory "channel.fromList" factory=channel.fromList @12:18
+  out out (out): Channel<?>
+subworkflows/local/prepare_snpsift_databases/main.nf#PREPARE_SNPSIFT_DATABASES/ch_branched chain ".branch" steps=branch @15:19
+  in in (in): -
+    <- subworkflows/local/prepare_snpsift_databases/main.nf#PREPARE_SNPSIFT_DATABASES/ch_configs[out] Channel<?> via ch_configs
+  out out (out): Record
+subworkflows/local/prepare_snpsift_databases/main.nf#PREPARE_SNPSIFT_DATABASES/.map@1 chain ".map" steps=map @23:9
+  in in (in): -
+    <- subworkflows/local/prepare_snpsift_databases/main.nf#PREPARE_SNPSIFT_DATABASES/ch_branched[out] Record via ch_branched indirect
+  out out (out): ?
+subworkflows/local/prepare_snpsift_databases/main.nf#PREPARE_SNPSIFT_DATABASES/SNPSIFT_ANNMEMCREATE@1 call "SNPSIFT_ANNMEMCREATE" callee=SNPSIFT_ANNMEMCREATE:process:modelled:legacy @22:5
+  in $1 (tuple(meta, db_vcf, db_vcf_tbi, db_fields)): Tuple
+    <- subworkflows/local/prepare_snpsift_databases/main.nf#PREPARE_SNPSIFT_DATABASES/.map@1[out] ?
+  out database (database): Channel<Tuple>
+  out versions_snpsift (versions_snpsift): Channel<Tuple>
+subworkflows/local/prepare_snpsift_databases/main.nf#PREPARE_SNPSIFT_DATABASES/.map@2 chain ".map" steps=map @29:15
+  in in (in): -
+    <- subworkflows/local/prepare_snpsift_databases/main.nf#PREPARE_SNPSIFT_DATABASES/ch_branched[out] Record via ch_branched indirect
+  out out (out): ?
+subworkflows/local/prepare_snpsift_databases/main.nf#PREPARE_SNPSIFT_DATABASES/ch_created chain ".map.join.map" steps=map,join,map @27:18
+  in in (in): -
+    <- subworkflows/local/prepare_snpsift_databases/main.nf#PREPARE_SNPSIFT_DATABASES/SNPSIFT_ANNMEMCREATE@1[database] Channel<Tuple> via SNPSIFT_ANNMEMCREATE.out.database
+  in 2:1 (join(1)): -
+    <- subworkflows/local/prepare_snpsift_databases/main.nf#PREPARE_SNPSIFT_DATABASES/.map@2[out] ?
+  out out (out): Channel<?>
+subworkflows/local/prepare_snpsift_databases/main.nf#PREPARE_SNPSIFT_DATABASES/ch_prebuilt chain ".map" steps=map @33:19
+  in in (in): -
+    <- subworkflows/local/prepare_snpsift_databases/main.nf#PREPARE_SNPSIFT_DATABASES/ch_branched[out] Record via ch_branched indirect
+  out out (out): ?
+subworkflows/local/prepare_snpsift_databases/main.nf#PREPARE_SNPSIFT_DATABASES/ch_db_tuple chain ".mix.toList.map" steps=mix,toList,map @40:19
+  in in (in): -
+    <- subworkflows/local/prepare_snpsift_databases/main.nf#PREPARE_SNPSIFT_DATABASES/ch_prebuilt[out] ? via ch_prebuilt
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/prepare_snpsift_databases/main.nf#PREPARE_SNPSIFT_DATABASES/ch_created[out] Channel<?> via ch_created
+  out out (out): Value<?>
+subworkflows/local/prepare_snpsift_databases/main.nf#PREPARE_SNPSIFT_DATABASES/:emit:db_tuple emit "db_tuple" @46:5
+  in in (in): -
+    <- subworkflows/local/prepare_snpsift_databases/main.nf#PREPARE_SNPSIFT_DATABASES/ch_db_tuple[out] Value<?> via ch_db_tuple

@@ -1,0 +1,127 @@
+workflow subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE legacy
+statements 13, modelled 2
+subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/:take:ensemblvep_cache take "ensemblvep_cache" @13:5
+  out out (out): -
+subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/:take:ensemblvep_cache_version take "ensemblvep_cache_version" @14:5
+  out out (out): -
+subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/:take:ensemblvep_custom_args take "ensemblvep_custom_args" @15:5
+  out out (out): -
+subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/:take:ensemblvep_genome take "ensemblvep_genome" @16:5
+  out out (out): -
+subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/:take:ensemblvep_species take "ensemblvep_species" @17:5
+  out out (out): -
+subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/:take:ensemblvep_enabled take "ensemblvep_enabled" @18:5
+  out out (out): -
+subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/:take:snpeff_cache take "snpeff_cache" @19:5
+  out out (out): -
+subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/:take:snpeff_db take "snpeff_db" @20:5
+  out out (out): -
+subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/:take:snpeff_enabled take "snpeff_enabled" @21:5
+  out out (out): -
+subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/:take:help_message take "help_message" @22:5
+  out out (out): -
+subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/ensemblvep_annotation_cache_key code "def ensemblvep_annotation_cache_key = isCloudUrl(ensemblvep…" @26:9
+  guards then of ensemblvep_enabled
+  in ensemblvep_cache (ensemblvep_cache): -
+    <- subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/:take:ensemblvep_cache[out] ? via ensemblvep_cache indirect
+  in ensemblvep_cache_version (ensemblvep_cache_version): -
+    <- subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/:take:ensemblvep_cache_version[out] ? via ensemblvep_cache_version indirect
+  in ensemblvep_genome (ensemblvep_genome): -
+    <- subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/:take:ensemblvep_genome[out] ? via ensemblvep_genome indirect
+  out ensemblvep_annotation_cache_key (ensemblvep_annotation_cache_key): -
+subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/ensemblvep_species_suffix code "def ensemblvep_species_suffix = ensemblvep_custom_args.cont…" @27:9
+  guards then of ensemblvep_enabled
+  in ensemblvep_custom_args (ensemblvep_custom_args): -
+    <- subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/:take:ensemblvep_custom_args[out] ? via ensemblvep_custom_args indirect
+  out ensemblvep_species_suffix (ensemblvep_species_suffix): -
+subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/ensemblvep_cache_dir code "def ensemblvep_cache_dir = "${ensemblvep_annotation_cache_k…" @28:9
+  guards then of ensemblvep_enabled
+  in ensemblvep_annotation_cache_key (ensemblvep_annotation_cache_key): -
+    <- subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/ensemblvep_annotation_cache_key[ensemblvep_annotation_cache_key] ? via ensemblvep_annotation_cache_key indirect
+  in ensemblvep_species (ensemblvep_species): -
+    <- subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/:take:ensemblvep_species[out] ? via ensemblvep_species indirect
+  in ensemblvep_species_suffix (ensemblvep_species_suffix): -
+    <- subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/ensemblvep_species_suffix[ensemblvep_species_suffix] ? via ensemblvep_species_suffix indirect
+  in ensemblvep_cache_version (ensemblvep_cache_version): -
+    <- subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/:take:ensemblvep_cache_version[out] ? via ensemblvep_cache_version indirect
+  in ensemblvep_genome (ensemblvep_genome): -
+    <- subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/:take:ensemblvep_genome[out] ? via ensemblvep_genome indirect
+  out ensemblvep_cache_dir (ensemblvep_cache_dir): String
+subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/ensemblvep_cache_path_full code "def ensemblvep_cache_path_full = file("${ensemblvep_cache}/…" @29:9
+  guards then of ensemblvep_enabled
+  in ensemblvep_cache (ensemblvep_cache): -
+    <- subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/:take:ensemblvep_cache[out] ? via ensemblvep_cache indirect
+  in ensemblvep_cache_dir (ensemblvep_cache_dir): -
+    <- subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/ensemblvep_cache_dir[ensemblvep_cache_dir] String via ensemblvep_cache_dir indirect
+  out ensemblvep_cache_path_full (ensemblvep_cache_path_full): Path
+subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/:code@1 code "if (!ensemblvep_cache_path_full.exists() || !ensemblvep_cac…" @30:9
+  guards then of ensemblvep_enabled
+  in ensemblvep_cache_path_full (ensemblvep_cache_path_full): -
+    <- subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/ensemblvep_cache_path_full[ensemblvep_cache_path_full] Path via ensemblvep_cache_path_full indirect
+  in ensemblvep_cache (ensemblvep_cache): -
+    <- subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/:take:ensemblvep_cache[out] ? via ensemblvep_cache indirect
+  in ensemblvep_cache_dir (ensemblvep_cache_dir): -
+    <- subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/ensemblvep_cache_dir[ensemblvep_cache_dir] String via ensemblvep_cache_dir indirect
+  in help_message (help_message): -
+    <- subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/:take:help_message[out] ? via help_message indirect
+subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/channel.fromPath@1 factory "channel.fromPath" factory=channel.fromPath @38:28
+  guards then of ensemblvep_enabled
+  out out (out): Channel<Path>
+subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/ensemblvep_cache chain ".collect.map" steps=collect,map @38:28
+  guards then of ensemblvep_enabled
+  in in (in): -
+    <- subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/channel.fromPath@1[out] Channel<Path>
+  out out (out): Value<?>
+subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/ensemblvep_cache~2 code "ensemblvep_cache = []" @43:9
+  guards else of ensemblvep_enabled
+  out ensemblvep_cache (ensemblvep_cache): List
+subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/snpeff_annotation_cache_key code "def snpeff_annotation_cache_key = isCloudUrl(snpeff_cache) …" @47:9
+  guards then of snpeff_enabled
+  in snpeff_cache (snpeff_cache): -
+    <- subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/:take:snpeff_cache[out] ? via snpeff_cache indirect
+  in snpeff_db (snpeff_db): -
+    <- subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/:take:snpeff_db[out] ? via snpeff_db indirect
+  out snpeff_annotation_cache_key (snpeff_annotation_cache_key): -
+subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/snpeff_cache_dir code "def snpeff_cache_dir = "${snpeff_annotation_cache_key}${snp…" @48:9
+  guards then of snpeff_enabled
+  in snpeff_annotation_cache_key (snpeff_annotation_cache_key): -
+    <- subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/snpeff_annotation_cache_key[snpeff_annotation_cache_key] ? via snpeff_annotation_cache_key indirect
+  in snpeff_db (snpeff_db): -
+    <- subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/:take:snpeff_db[out] ? via snpeff_db indirect
+  out snpeff_cache_dir (snpeff_cache_dir): String
+subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/snpeff_cache_path_full code "def snpeff_cache_path_full = file("${snpeff_cache}/${snpeff…" @49:9
+  guards then of snpeff_enabled
+  in snpeff_cache (snpeff_cache): -
+    <- subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/:take:snpeff_cache[out] ? via snpeff_cache indirect
+  in snpeff_cache_dir (snpeff_cache_dir): -
+    <- subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/snpeff_cache_dir[snpeff_cache_dir] String via snpeff_cache_dir indirect
+  out snpeff_cache_path_full (snpeff_cache_path_full): Path
+subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/:code@2 code "if (!snpeff_cache_path_full.exists() || !snpeff_cache_path_…" @50:9
+  guards then of snpeff_enabled
+  in snpeff_cache_path_full (snpeff_cache_path_full): -
+    <- subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/snpeff_cache_path_full[snpeff_cache_path_full] Path via snpeff_cache_path_full indirect
+  in snpeff_cache (snpeff_cache): -
+    <- subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/:take:snpeff_cache[out] ? via snpeff_cache indirect
+  in snpeff_cache_dir (snpeff_cache_dir): -
+    <- subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/snpeff_cache_dir[snpeff_cache_dir] String via snpeff_cache_dir indirect
+  in help_message (help_message): -
+    <- subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/:take:help_message[out] ? via help_message indirect
+subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/channel.fromPath@2 factory "channel.fromPath" factory=channel.fromPath @58:24
+  guards then of snpeff_enabled
+  out out (out): Channel<Path>
+subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/snpeff_cache chain ".collect.map" steps=collect,map @58:24
+  guards then of snpeff_enabled
+  in in (in): -
+    <- subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/channel.fromPath@2[out] Channel<Path>
+  out out (out): Value<?>
+subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/snpeff_cache~2 code "snpeff_cache = []" @63:9
+  guards else of snpeff_enabled
+  out snpeff_cache (snpeff_cache): List
+subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/:emit:ensemblvep_cache emit "ensemblvep_cache" @67:5
+  in in (in): -
+    <- subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/ensemblvep_cache[out] Value<?> via ensemblvep_cache indirect
+    <- subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/ensemblvep_cache~2[ensemblvep_cache] List via ensemblvep_cache indirect
+subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/:emit:snpeff_cache emit "snpeff_cache" @68:5
+  in in (in): -
+    <- subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/snpeff_cache[out] Value<?> via snpeff_cache indirect
+    <- subworkflows/nf-core/utils_annotation_cache/main.nf#UTILS_ANNOTATION_CACHE/snpeff_cache~2[snpeff_cache] List via snpeff_cache indirect

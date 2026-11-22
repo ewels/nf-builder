@@ -1,0 +1,124 @@
+workflow subworkflows/local/bam_variant_calling_somatic_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC legacy
+statements 14, modelled 14
+subworkflows/local/bam_variant_calling_somatic_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC/:take:cram take "cram" @11:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC/:take:dict take "dict" @12:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC/:take:fasta take "fasta" @13:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC/:take:fasta_fai take "fasta_fai" @14:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC/:take:intervals take "intervals" @15:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC/cram_intervals chain ".combine.map" steps=combine,map @18:22
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC/:take:cram[out] ? via cram
+  in 1:1 (combine(right)): -
+    <- subworkflows/local/bam_variant_calling_somatic_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC/:take:intervals[out] ? via intervals
+  out out (out): ?
+subworkflows/local/bam_variant_calling_somatic_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC/DEEPSOMATIC@1 call "DEEPSOMATIC" callee=DEEPSOMATIC:process:modelled:legacy @24:5
+  in $1 (tuple(meta, input_normal, index_normal, input_tumor, index_tumor, intervals)): Tuple
+    <- subworkflows/local/bam_variant_calling_somatic_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC/cram_intervals[out] ? via cram_intervals
+  in $2 (tuple(meta2, fasta)): Tuple
+    <- subworkflows/local/bam_variant_calling_somatic_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC/:take:fasta[out] ? via fasta
+  in $3 (tuple(meta3, fai)): Tuple
+    <- subworkflows/local/bam_variant_calling_somatic_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC/:take:fasta_fai[out] ? via fasta_fai
+  in $4 (tuple(meta4, gzi)): Tuple
+    = [[id: 'no_gzi'], []] : List
+  out vcf (vcf): Channel<Tuple>
+  out vcf_tbi (vcf_tbi): Channel<Tuple>
+  out gvcf (gvcf): Channel<Tuple>
+  out gvcf_tbi (gvcf_tbi): Channel<Tuple>
+  out versions_deepsomatic (versions_deepsomatic): Channel<Tuple>
+subworkflows/local/bam_variant_calling_somatic_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC/vcf_branch chain ".branch" steps=branch @31:18
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC/DEEPSOMATIC@1[vcf] Channel<Tuple> via DEEPSOMATIC.out.vcf
+  out out (out): Record
+subworkflows/local/bam_variant_calling_somatic_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC/tbi_branch chain ".branch" steps=branch @36:18
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC/DEEPSOMATIC@1[vcf_tbi] Channel<Tuple> via DEEPSOMATIC.out.vcf_tbi
+  out out (out): Record
+subworkflows/local/bam_variant_calling_somatic_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC/vcf_to_merge chain ".map.groupTuple" steps=map,groupTuple @41:20
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC/vcf_branch[out] Record via vcf_branch indirect
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_somatic_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC/MERGE_DEEPSOMATIC_VCF@1 call "MERGE_DEEPSOMATIC_VCF" callee=MERGE_DEEPSOMATIC_VCF:process:modelled:legacy @45:5
+  in $1 (tuple(meta, vcf)): Tuple
+    <- subworkflows/local/bam_variant_calling_somatic_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC/vcf_to_merge[out] Channel<?> via vcf_to_merge
+  in $2 (tuple(meta2, dict)): Tuple
+    <- subworkflows/local/bam_variant_calling_somatic_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC/:take:dict[out] ? via dict
+  out vcf (vcf): Channel<Tuple>
+  out tbi (tbi): Channel<Tuple>
+  out versions_gatk4 (versions_gatk4): Channel<Tuple>
+subworkflows/local/bam_variant_calling_somatic_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC/gvcf_branch chain ".branch" steps=branch @47:19
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC/DEEPSOMATIC@1[gvcf] Channel<Tuple> via DEEPSOMATIC.out.gvcf
+  out out (out): Record
+subworkflows/local/bam_variant_calling_somatic_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC/gvcf_tbi_branch chain ".branch" steps=branch @52:23
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC/DEEPSOMATIC@1[gvcf_tbi] Channel<Tuple> via DEEPSOMATIC.out.gvcf_tbi
+  out out (out): Record
+subworkflows/local/bam_variant_calling_somatic_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC/gvcf_to_merge chain ".map.groupTuple" steps=map,groupTuple @57:21
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC/gvcf_branch[out] Record via gvcf_branch indirect
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_somatic_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC/MERGE_DEEPSOMATIC_GVCF@1 call "MERGE_DEEPSOMATIC_GVCF" callee=MERGE_DEEPSOMATIC_GVCF:process:modelled:legacy @61:5
+  in $1 (tuple(meta, vcf)): Tuple
+    <- subworkflows/local/bam_variant_calling_somatic_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC/gvcf_to_merge[out] Channel<?> via gvcf_to_merge
+  in $2 (tuple(meta2, dict)): Tuple
+    <- subworkflows/local/bam_variant_calling_somatic_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC/:take:dict[out] ? via dict
+  out vcf (vcf): Channel<Tuple>
+  out tbi (tbi): Channel<Tuple>
+  out versions_gatk4 (versions_gatk4): Channel<Tuple>
+subworkflows/local/bam_variant_calling_somatic_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC/channel.empty@1 factory "channel.empty" factory=channel.empty @63:11
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_somatic_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC/vcf chain ".mix.map" steps=mix,map @63:11
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC/channel.empty@1[out] Channel<?>
+  in 1:1 (mix(1)): -
+    <- subworkflows/local/bam_variant_calling_somatic_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC/MERGE_DEEPSOMATIC_VCF@1[vcf] Channel<Tuple> via MERGE_DEEPSOMATIC_VCF.out.vcf
+  in 1:2 (mix(2)): -
+    <- subworkflows/local/bam_variant_calling_somatic_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC/vcf_branch[out] Record via vcf_branch indirect
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_somatic_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC/channel.empty@2 factory "channel.empty" factory=channel.empty @67:11
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_somatic_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC/tbi chain ".mix.map" steps=mix,map @67:11
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC/channel.empty@2[out] Channel<?>
+  in 1:1 (mix(1)): -
+    <- subworkflows/local/bam_variant_calling_somatic_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC/MERGE_DEEPSOMATIC_VCF@1[tbi] Channel<Tuple> via MERGE_DEEPSOMATIC_VCF.out.tbi
+  in 1:2 (mix(2)): -
+    <- subworkflows/local/bam_variant_calling_somatic_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC/tbi_branch[out] Record via tbi_branch indirect
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_somatic_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC/channel.empty@3 factory "channel.empty" factory=channel.empty @71:12
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_somatic_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC/gvcf chain ".mix.map" steps=mix,map @71:12
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC/channel.empty@3[out] Channel<?>
+  in 1:1 (mix(1)): -
+    <- subworkflows/local/bam_variant_calling_somatic_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC/MERGE_DEEPSOMATIC_GVCF@1[vcf] Channel<Tuple> via MERGE_DEEPSOMATIC_GVCF.out.vcf
+  in 1:2 (mix(2)): -
+    <- subworkflows/local/bam_variant_calling_somatic_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC/gvcf_branch[out] Record via gvcf_branch indirect
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_somatic_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC/channel.empty@4 factory "channel.empty" factory=channel.empty @75:16
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_somatic_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC/gvcf_tbi chain ".mix.map" steps=mix,map @75:16
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC/channel.empty@4[out] Channel<?>
+  in 1:1 (mix(1)): -
+    <- subworkflows/local/bam_variant_calling_somatic_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC/MERGE_DEEPSOMATIC_GVCF@1[tbi] Channel<Tuple> via MERGE_DEEPSOMATIC_GVCF.out.tbi
+  in 1:2 (mix(2)): -
+    <- subworkflows/local/bam_variant_calling_somatic_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC/gvcf_tbi_branch[out] Record via gvcf_tbi_branch indirect
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_somatic_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC/:emit:vcf emit "vcf" @80:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC/vcf[out] Channel<?> via vcf
+subworkflows/local/bam_variant_calling_somatic_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC/:emit:tbi emit "tbi" @81:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC/tbi[out] Channel<?> via tbi
+subworkflows/local/bam_variant_calling_somatic_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC/:emit:gvcf emit "gvcf" @82:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC/gvcf[out] Channel<?> via gvcf
+subworkflows/local/bam_variant_calling_somatic_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC/:emit:gvcf_tbi emit "gvcf_tbi" @83:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_deepsomatic/main.nf#BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC/gvcf_tbi[out] Channel<?> via gvcf_tbi

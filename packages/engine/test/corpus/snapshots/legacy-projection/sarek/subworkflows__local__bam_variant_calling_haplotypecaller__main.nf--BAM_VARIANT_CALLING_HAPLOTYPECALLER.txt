@@ -1,0 +1,126 @@
+workflow subworkflows/local/bam_variant_calling_haplotypecaller/main.nf#BAM_VARIANT_CALLING_HAPLOTYPECALLER legacy
+statements 15, modelled 15
+subworkflows/local/bam_variant_calling_haplotypecaller/main.nf#BAM_VARIANT_CALLING_HAPLOTYPECALLER/:take:cram take "cram" @13:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_haplotypecaller/main.nf#BAM_VARIANT_CALLING_HAPLOTYPECALLER/:take:fasta take "fasta" @14:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_haplotypecaller/main.nf#BAM_VARIANT_CALLING_HAPLOTYPECALLER/:take:fasta_fai take "fasta_fai" @15:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_haplotypecaller/main.nf#BAM_VARIANT_CALLING_HAPLOTYPECALLER/:take:dict take "dict" @16:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_haplotypecaller/main.nf#BAM_VARIANT_CALLING_HAPLOTYPECALLER/:take:dbsnp take "dbsnp" @17:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_haplotypecaller/main.nf#BAM_VARIANT_CALLING_HAPLOTYPECALLER/:take:dbsnp_tbi take "dbsnp_tbi" @18:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_haplotypecaller/main.nf#BAM_VARIANT_CALLING_HAPLOTYPECALLER/:take:intervals take "intervals" @19:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_haplotypecaller/main.nf#BAM_VARIANT_CALLING_HAPLOTYPECALLER/vcf factory "channel.empty" factory=channel.empty @23:21
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_haplotypecaller/main.nf#BAM_VARIANT_CALLING_HAPLOTYPECALLER/realigned_bam factory "channel.empty" factory=channel.empty @24:21
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_haplotypecaller/main.nf#BAM_VARIANT_CALLING_HAPLOTYPECALLER/cram_intervals chain ".combine.map" steps=combine,map @27:22
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_haplotypecaller/main.nf#BAM_VARIANT_CALLING_HAPLOTYPECALLER/:take:cram[out] ? via cram
+  in 1:1 (combine(right)): -
+    <- subworkflows/local/bam_variant_calling_haplotypecaller/main.nf#BAM_VARIANT_CALLING_HAPLOTYPECALLER/:take:intervals[out] ? via intervals
+  out out (out): ?
+subworkflows/local/bam_variant_calling_haplotypecaller/main.nf#BAM_VARIANT_CALLING_HAPLOTYPECALLER/GATK4_HAPLOTYPECALLER@1 call "GATK4_HAPLOTYPECALLER" callee=GATK4_HAPLOTYPECALLER:process:modelled:legacy @32:5
+  in $1 (tuple(meta, input, input_index, intervals, dragstr_model)): Tuple
+    <- subworkflows/local/bam_variant_calling_haplotypecaller/main.nf#BAM_VARIANT_CALLING_HAPLOTYPECALLER/cram_intervals[out] ? via cram_intervals
+  in $2 (tuple(meta2, fasta)): Tuple
+    <- subworkflows/local/bam_variant_calling_haplotypecaller/main.nf#BAM_VARIANT_CALLING_HAPLOTYPECALLER/:take:fasta[out] ? via fasta
+  in $3 (tuple(meta3, fai)): Tuple
+    <- subworkflows/local/bam_variant_calling_haplotypecaller/main.nf#BAM_VARIANT_CALLING_HAPLOTYPECALLER/:take:fasta_fai[out] ? via fasta_fai
+  in $4 (tuple(meta4, dict)): Tuple
+    <- subworkflows/local/bam_variant_calling_haplotypecaller/main.nf#BAM_VARIANT_CALLING_HAPLOTYPECALLER/:take:dict[out] ? via dict
+  in $5 (tuple(meta5, dbsnp)): Tuple
+    <- subworkflows/local/bam_variant_calling_haplotypecaller/main.nf#BAM_VARIANT_CALLING_HAPLOTYPECALLER/:take:dbsnp[out] ? via dbsnp
+  in $6 (tuple(meta6, dbsnp_tbi)): Tuple
+    <- subworkflows/local/bam_variant_calling_haplotypecaller/main.nf#BAM_VARIANT_CALLING_HAPLOTYPECALLER/:take:dbsnp_tbi[out] ? via dbsnp_tbi
+  out vcf (vcf): Channel<Tuple>
+  out tbi (tbi): Channel<Tuple>
+  out bam (bam): Channel<Tuple>
+  out versions_gatk4 (versions_gatk4): Channel<Tuple>
+subworkflows/local/bam_variant_calling_haplotypecaller/main.nf#BAM_VARIANT_CALLING_HAPLOTYPECALLER/gvcf_tbi_intervals chain ".join.join.map" steps=join,join,map @41:26
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_haplotypecaller/main.nf#BAM_VARIANT_CALLING_HAPLOTYPECALLER/GATK4_HAPLOTYPECALLER@1[vcf] Channel<Tuple> via GATK4_HAPLOTYPECALLER.out.vcf
+  in 1:1 (join(right)): -
+    <- subworkflows/local/bam_variant_calling_haplotypecaller/main.nf#BAM_VARIANT_CALLING_HAPLOTYPECALLER/GATK4_HAPLOTYPECALLER@1[tbi] Channel<Tuple> via GATK4_HAPLOTYPECALLER.out.tbi
+  in 2:1 (join(right)): -
+    <- subworkflows/local/bam_variant_calling_haplotypecaller/main.nf#BAM_VARIANT_CALLING_HAPLOTYPECALLER/cram_intervals[out] ? via cram_intervals
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_haplotypecaller/main.nf#BAM_VARIANT_CALLING_HAPLOTYPECALLER/haplotypecaller_vcf chain ".map.branch" steps=map,branch @47:27
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_haplotypecaller/main.nf#BAM_VARIANT_CALLING_HAPLOTYPECALLER/GATK4_HAPLOTYPECALLER@1[vcf] Channel<Tuple> via GATK4_HAPLOTYPECALLER.out.vcf
+  out out (out): Record
+subworkflows/local/bam_variant_calling_haplotypecaller/main.nf#BAM_VARIANT_CALLING_HAPLOTYPECALLER/haplotypecaller_tbi chain ".map.branch" steps=map,branch @57:27
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_haplotypecaller/main.nf#BAM_VARIANT_CALLING_HAPLOTYPECALLER/GATK4_HAPLOTYPECALLER@1[tbi] Channel<Tuple> via GATK4_HAPLOTYPECALLER.out.tbi
+  out out (out): Record
+subworkflows/local/bam_variant_calling_haplotypecaller/main.nf#BAM_VARIANT_CALLING_HAPLOTYPECALLER/haplotypecaller_bam chain ".map.branch" steps=map,branch @66:27
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_haplotypecaller/main.nf#BAM_VARIANT_CALLING_HAPLOTYPECALLER/GATK4_HAPLOTYPECALLER@1[bam] Channel<Tuple> via GATK4_HAPLOTYPECALLER.out.bam
+  out out (out): Record
+subworkflows/local/bam_variant_calling_haplotypecaller/main.nf#BAM_VARIANT_CALLING_HAPLOTYPECALLER/.map@1 chain ".map.groupTuple" steps=map,groupTuple @75:27
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_haplotypecaller/main.nf#BAM_VARIANT_CALLING_HAPLOTYPECALLER/haplotypecaller_vcf[out] Record via haplotypecaller_vcf indirect
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_haplotypecaller/main.nf#BAM_VARIANT_CALLING_HAPLOTYPECALLER/MERGE_HAPLOTYPECALLER@1 call "MERGE_HAPLOTYPECALLER" callee=MERGE_HAPLOTYPECALLER:process:modelled:legacy @75:5
+  in $1 (tuple(meta, vcf)): Tuple
+    <- subworkflows/local/bam_variant_calling_haplotypecaller/main.nf#BAM_VARIANT_CALLING_HAPLOTYPECALLER/.map@1[out] Channel<?>
+  in $2 (tuple(meta2, dict)): Tuple
+    <- subworkflows/local/bam_variant_calling_haplotypecaller/main.nf#BAM_VARIANT_CALLING_HAPLOTYPECALLER/:take:dict[out] ? via dict
+  out vcf (vcf): Channel<Tuple>
+  out tbi (tbi): Channel<Tuple>
+  out versions_gatk4 (versions_gatk4): Channel<Tuple>
+subworkflows/local/bam_variant_calling_haplotypecaller/main.nf#BAM_VARIANT_CALLING_HAPLOTYPECALLER/channel.empty@1 factory "channel.empty" factory=channel.empty @77:27
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_haplotypecaller/main.nf#BAM_VARIANT_CALLING_HAPLOTYPECALLER/haplotypecaller_vcf~2 chain ".mix" steps=mix @77:27
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_haplotypecaller/main.nf#BAM_VARIANT_CALLING_HAPLOTYPECALLER/channel.empty@1[out] Channel<?>
+  in 1:1 (mix(1)): -
+    <- subworkflows/local/bam_variant_calling_haplotypecaller/main.nf#BAM_VARIANT_CALLING_HAPLOTYPECALLER/MERGE_HAPLOTYPECALLER@1[vcf] Channel<Tuple> via MERGE_HAPLOTYPECALLER.out.vcf
+  in 1:2 (mix(2)): -
+    <- subworkflows/local/bam_variant_calling_haplotypecaller/main.nf#BAM_VARIANT_CALLING_HAPLOTYPECALLER/haplotypecaller_vcf[out] Record via haplotypecaller_vcf indirect
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_haplotypecaller/main.nf#BAM_VARIANT_CALLING_HAPLOTYPECALLER/channel.empty@2 factory "channel.empty" factory=channel.empty @81:27
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_haplotypecaller/main.nf#BAM_VARIANT_CALLING_HAPLOTYPECALLER/haplotypecaller_tbi~2 chain ".mix" steps=mix @81:27
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_haplotypecaller/main.nf#BAM_VARIANT_CALLING_HAPLOTYPECALLER/channel.empty@2[out] Channel<?>
+  in 1:1 (mix(1)): -
+    <- subworkflows/local/bam_variant_calling_haplotypecaller/main.nf#BAM_VARIANT_CALLING_HAPLOTYPECALLER/MERGE_HAPLOTYPECALLER@1[tbi] Channel<Tuple> via MERGE_HAPLOTYPECALLER.out.tbi
+  in 1:2 (mix(2)): -
+    <- subworkflows/local/bam_variant_calling_haplotypecaller/main.nf#BAM_VARIANT_CALLING_HAPLOTYPECALLER/haplotypecaller_tbi[out] Record via haplotypecaller_tbi indirect
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_haplotypecaller/main.nf#BAM_VARIANT_CALLING_HAPLOTYPECALLER/.map@2 chain ".map.groupTuple.mix" steps=map,groupTuple,mix @86:30
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_haplotypecaller/main.nf#BAM_VARIANT_CALLING_HAPLOTYPECALLER/haplotypecaller_bam[out] Record via haplotypecaller_bam indirect
+  in 3:1 (mix(other)): -
+    <- subworkflows/local/bam_variant_calling_haplotypecaller/main.nf#BAM_VARIANT_CALLING_HAPLOTYPECALLER/haplotypecaller_bam[out] Record via haplotypecaller_bam indirect
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_haplotypecaller/main.nf#BAM_VARIANT_CALLING_HAPLOTYPECALLER/BAM_MERGE_INDEX_SAMTOOLS@1 call "BAM_MERGE_INDEX_SAMTOOLS" callee=BAM_MERGE_INDEX_SAMTOOLS:workflow:modelled:legacy @86:5
+  in bam (bam): -
+    <- subworkflows/local/bam_variant_calling_haplotypecaller/main.nf#BAM_VARIANT_CALLING_HAPLOTYPECALLER/.map@2[out] Channel<?>
+  out bam_bai (bam_bai): Channel<Record>
+subworkflows/local/bam_variant_calling_haplotypecaller/main.nf#BAM_VARIANT_CALLING_HAPLOTYPECALLER/vcf~2 chain ".map" steps=map @95:11
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_haplotypecaller/main.nf#BAM_VARIANT_CALLING_HAPLOTYPECALLER/haplotypecaller_vcf~2[out] Channel<?> via haplotypecaller_vcf
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_haplotypecaller/main.nf#BAM_VARIANT_CALLING_HAPLOTYPECALLER/tbi chain ".map" steps=map @96:11
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_haplotypecaller/main.nf#BAM_VARIANT_CALLING_HAPLOTYPECALLER/haplotypecaller_tbi~2[out] Channel<?> via haplotypecaller_tbi
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_haplotypecaller/main.nf#BAM_VARIANT_CALLING_HAPLOTYPECALLER/:emit:gvcf_tbi_intervals emit "gvcf_tbi_intervals" @99:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_haplotypecaller/main.nf#BAM_VARIANT_CALLING_HAPLOTYPECALLER/gvcf_tbi_intervals[out] Channel<?> via gvcf_tbi_intervals
+subworkflows/local/bam_variant_calling_haplotypecaller/main.nf#BAM_VARIANT_CALLING_HAPLOTYPECALLER/:emit:realigned_bam emit "realigned_bam" @100:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_haplotypecaller/main.nf#BAM_VARIANT_CALLING_HAPLOTYPECALLER/BAM_MERGE_INDEX_SAMTOOLS@1[bam_bai] Channel<Record> via realigned_bam
+subworkflows/local/bam_variant_calling_haplotypecaller/main.nf#BAM_VARIANT_CALLING_HAPLOTYPECALLER/:emit:vcf emit "vcf" @101:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_haplotypecaller/main.nf#BAM_VARIANT_CALLING_HAPLOTYPECALLER/vcf~2[out] Channel<?> via vcf
+subworkflows/local/bam_variant_calling_haplotypecaller/main.nf#BAM_VARIANT_CALLING_HAPLOTYPECALLER/:emit:tbi emit "tbi" @102:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_haplotypecaller/main.nf#BAM_VARIANT_CALLING_HAPLOTYPECALLER/tbi[out] Channel<?> via tbi
+bound @91:5 realigned_bam

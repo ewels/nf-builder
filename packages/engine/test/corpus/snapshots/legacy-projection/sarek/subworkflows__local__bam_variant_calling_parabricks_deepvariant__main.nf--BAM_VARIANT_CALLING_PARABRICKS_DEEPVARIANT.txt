@@ -1,0 +1,64 @@
+workflow subworkflows/local/bam_variant_calling_parabricks_deepvariant/main.nf#BAM_VARIANT_CALLING_PARABRICKS_DEEPVARIANT legacy
+statements 7, modelled 7
+subworkflows/local/bam_variant_calling_parabricks_deepvariant/main.nf#BAM_VARIANT_CALLING_PARABRICKS_DEEPVARIANT/:take:cram take "cram" @10:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_parabricks_deepvariant/main.nf#BAM_VARIANT_CALLING_PARABRICKS_DEEPVARIANT/:take:fasta take "fasta" @11:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_parabricks_deepvariant/main.nf#BAM_VARIANT_CALLING_PARABRICKS_DEEPVARIANT/:take:intervals_bed_combined take "intervals_bed_combined" @12:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_parabricks_deepvariant/main.nf#BAM_VARIANT_CALLING_PARABRICKS_DEEPVARIANT/intervals_bed chain ".map" steps=map @19:21
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_parabricks_deepvariant/main.nf#BAM_VARIANT_CALLING_PARABRICKS_DEEPVARIANT/:take:intervals_bed_combined[out] ? via intervals_bed_combined
+  out out (out): ?
+subworkflows/local/bam_variant_calling_parabricks_deepvariant/main.nf#BAM_VARIANT_CALLING_PARABRICKS_DEEPVARIANT/cram_intervals chain ".combine" steps=combine @21:22
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_parabricks_deepvariant/main.nf#BAM_VARIANT_CALLING_PARABRICKS_DEEPVARIANT/:take:cram[out] ? via cram
+  in 1:1 (combine(right)): -
+    <- subworkflows/local/bam_variant_calling_parabricks_deepvariant/main.nf#BAM_VARIANT_CALLING_PARABRICKS_DEEPVARIANT/intervals_bed[out] ? via intervals_bed
+  out out (out): ?
+subworkflows/local/bam_variant_calling_parabricks_deepvariant/main.nf#BAM_VARIANT_CALLING_PARABRICKS_DEEPVARIANT/PARABRICKS_DEEPVARIANT@1 call "PARABRICKS_DEEPVARIANT" callee=PARABRICKS_DEEPVARIANT:process:modelled:legacy @23:5
+  in $1 (tuple(meta, input, input_index, intervals)): Tuple
+    <- subworkflows/local/bam_variant_calling_parabricks_deepvariant/main.nf#BAM_VARIANT_CALLING_PARABRICKS_DEEPVARIANT/cram_intervals[out] ? via cram_intervals
+  in $2 (tuple(ref_meta, fasta)): Tuple
+    <- subworkflows/local/bam_variant_calling_parabricks_deepvariant/main.nf#BAM_VARIANT_CALLING_PARABRICKS_DEEPVARIANT/:take:fasta[out] ? via fasta
+  out vcf (vcf): Channel<Tuple>
+  out gvcf (gvcf): Channel<Tuple>
+  out compatible_versions (compatible_versions): Channel<Path>
+  out versions_parabricks (versions_parabricks): Channel<Tuple>
+subworkflows/local/bam_variant_calling_parabricks_deepvariant/main.nf#BAM_VARIANT_CALLING_PARABRICKS_DEEPVARIANT/.map@1 chain ".map" steps=map @29:37
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_parabricks_deepvariant/main.nf#BAM_VARIANT_CALLING_PARABRICKS_DEEPVARIANT/PARABRICKS_DEEPVARIANT@1[vcf] Channel<Tuple> via PARABRICKS_DEEPVARIANT.out.vcf
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_parabricks_deepvariant/main.nf#BAM_VARIANT_CALLING_PARABRICKS_DEEPVARIANT/TABIX_VC_PARABRICKS_DEEPVARIANT@1 call "TABIX_VC_PARABRICKS_DEEPVARIANT" callee=TABIX_VC_PARABRICKS_DEEPVARIANT:process:modelled:legacy @29:5
+  in $1 (tuple(meta, infile, infile_tbi, regions)): Tuple
+    <- subworkflows/local/bam_variant_calling_parabricks_deepvariant/main.nf#BAM_VARIANT_CALLING_PARABRICKS_DEEPVARIANT/.map@1[out] Channel<?>
+  in action (action): -
+    = 'compress' : String
+  in make_index (make_index): -
+    = true : Boolean
+  in out_ext (out_ext): -
+    = 'vcf' : String
+  out output (output): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out versions_htslib (versions_htslib): Channel<Tuple>
+  out versions_xz (versions_xz): Channel<Tuple>
+subworkflows/local/bam_variant_calling_parabricks_deepvariant/main.nf#BAM_VARIANT_CALLING_PARABRICKS_DEEPVARIANT/vcf_tbi chain ".join" steps=join @31:15
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_parabricks_deepvariant/main.nf#BAM_VARIANT_CALLING_PARABRICKS_DEEPVARIANT/TABIX_VC_PARABRICKS_DEEPVARIANT@1[output] Channel<Tuple> via TABIX_VC_PARABRICKS_DEEPVARIANT.out.output
+  in 1:1 (join(1)): -
+    <- subworkflows/local/bam_variant_calling_parabricks_deepvariant/main.nf#BAM_VARIANT_CALLING_PARABRICKS_DEEPVARIANT/TABIX_VC_PARABRICKS_DEEPVARIANT@1[index] Channel<Tuple> via TABIX_VC_PARABRICKS_DEEPVARIANT.out.index
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_parabricks_deepvariant/main.nf#BAM_VARIANT_CALLING_PARABRICKS_DEEPVARIANT/vcf chain ".map" steps=map @33:11
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_parabricks_deepvariant/main.nf#BAM_VARIANT_CALLING_PARABRICKS_DEEPVARIANT/vcf_tbi[out] Channel<?> via vcf_tbi
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_parabricks_deepvariant/main.nf#BAM_VARIANT_CALLING_PARABRICKS_DEEPVARIANT/tbi chain ".map" steps=map @34:11
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_parabricks_deepvariant/main.nf#BAM_VARIANT_CALLING_PARABRICKS_DEEPVARIANT/vcf_tbi[out] Channel<?> via vcf_tbi
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_parabricks_deepvariant/main.nf#BAM_VARIANT_CALLING_PARABRICKS_DEEPVARIANT/:emit:vcf emit "vcf" @37:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_parabricks_deepvariant/main.nf#BAM_VARIANT_CALLING_PARABRICKS_DEEPVARIANT/vcf[out] Channel<?> via vcf
+subworkflows/local/bam_variant_calling_parabricks_deepvariant/main.nf#BAM_VARIANT_CALLING_PARABRICKS_DEEPVARIANT/:emit:tbi emit "tbi" @38:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_parabricks_deepvariant/main.nf#BAM_VARIANT_CALLING_PARABRICKS_DEEPVARIANT/tbi[out] Channel<?> via tbi

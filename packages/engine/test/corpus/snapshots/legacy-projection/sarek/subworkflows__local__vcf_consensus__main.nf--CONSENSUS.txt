@@ -1,0 +1,52 @@
+workflow subworkflows/local/vcf_consensus/main.nf#CONSENSUS legacy
+statements 7, modelled 7
+subworkflows/local/vcf_consensus/main.nf#CONSENSUS/:take:vcfs take "vcfs" @12:5
+  out out (out): -
+subworkflows/local/vcf_consensus/main.nf#CONSENSUS/ch_vcfs chain ".branch" steps=branch @15:15
+  in in (in): -
+    <- subworkflows/local/vcf_consensus/main.nf#CONSENSUS/:take:vcfs[out] ? via vcfs
+  out out (out): Record
+subworkflows/local/vcf_consensus/main.nf#CONSENSUS/ch_strelka_grouped chain ".map.groupTuple" steps=map,groupTuple @25:26
+  in in (in): -
+    <- subworkflows/local/vcf_consensus/main.nf#CONSENSUS/ch_vcfs[out] Record via ch_vcfs indirect
+  out out (out): Channel<?>
+subworkflows/local/vcf_consensus/main.nf#CONSENSUS/BCFTOOLS_CONCAT@1 call "BCFTOOLS_CONCAT" callee=BCFTOOLS_CONCAT:process:modelled:legacy @32:5
+  in $1 (tuple(meta, vcfs, tbi)): Tuple
+    <- subworkflows/local/vcf_consensus/main.nf#CONSENSUS/ch_strelka_grouped[out] Channel<?> via ch_strelka_grouped
+  out vcf (vcf): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out versions_bcftools (versions_bcftools): Channel<Tuple>
+subworkflows/local/vcf_consensus/main.nf#CONSENSUS/.join@1 chain ".join" steps=join @37:30
+  in in (in): -
+    <- subworkflows/local/vcf_consensus/main.nf#CONSENSUS/BCFTOOLS_CONCAT@1[vcf] Channel<Tuple> via BCFTOOLS_CONCAT.out.vcf
+  in 1:1 (join(1)): -
+    <- subworkflows/local/vcf_consensus/main.nf#CONSENSUS/BCFTOOLS_CONCAT@1[index] Channel<Tuple> via BCFTOOLS_CONCAT.out.index
+  out out (out): Channel<?>
+subworkflows/local/vcf_consensus/main.nf#CONSENSUS/ch_consensus_in chain ".mix.map.groupTuple.map" steps=mix,map,groupTuple,map @36:23
+  in in (in): -
+    <- subworkflows/local/vcf_consensus/main.nf#CONSENSUS/ch_vcfs[out] Record via ch_vcfs indirect
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/vcf_consensus/main.nf#CONSENSUS/.join@1[out] Channel<?>
+  out out (out): Channel<?>
+subworkflows/local/vcf_consensus/main.nf#CONSENSUS/BCFTOOLS_ISEC@1 call "BCFTOOLS_ISEC" callee=BCFTOOLS_ISEC:process:modelled:legacy @59:5
+  in $1 (tuple(meta, vcfs, tbis, file_list, targets_file, regions_file)): Tuple
+    <- subworkflows/local/vcf_consensus/main.nf#CONSENSUS/ch_consensus_in[out] Channel<?> via ch_consensus_in
+  out results (results): Channel<Tuple>
+  out versions_bcftools (versions_bcftools): Channel<Tuple>
+subworkflows/local/vcf_consensus/main.nf#CONSENSUS/ch_isec_with_results chain ".filter" steps=filter @62:28
+  in in (in): -
+    <- subworkflows/local/vcf_consensus/main.nf#CONSENSUS/BCFTOOLS_ISEC@1[results] Channel<Tuple> via BCFTOOLS_ISEC.out.results
+  out out (out): Channel<Tuple>
+subworkflows/local/vcf_consensus/main.nf#CONSENSUS/CONSENSUS_FROM_SITES@1 call "CONSENSUS_FROM_SITES" callee=CONSENSUS_FROM_SITES:process:modelled:legacy @69:5
+  in $1 (tuple(meta, isec_dir)): Tuple
+    <- subworkflows/local/vcf_consensus/main.nf#CONSENSUS/ch_isec_with_results[out] Channel<Tuple> via ch_isec_with_results
+  out vcf (vcf): Channel<Tuple>
+  out tbi (tbi): Channel<Tuple>
+  out versions_gawk (versions_gawk): Channel<Tuple>
+  out versions_htslib (versions_htslib): Channel<Tuple>
+subworkflows/local/vcf_consensus/main.nf#CONSENSUS/:emit:vcfs emit "vcfs" @72:5
+  in in (in): -
+    <- subworkflows/local/vcf_consensus/main.nf#CONSENSUS/CONSENSUS_FROM_SITES@1[vcf] Channel<Tuple> via CONSENSUS_FROM_SITES.out.vcf
+subworkflows/local/vcf_consensus/main.nf#CONSENSUS/:emit:tbis emit "tbis" @73:5
+  in in (in): -
+    <- subworkflows/local/vcf_consensus/main.nf#CONSENSUS/CONSENSUS_FROM_SITES@1[tbi] Channel<Tuple> via CONSENSUS_FROM_SITES.out.tbi

@@ -1,0 +1,39 @@
+workflow subworkflows/local/prepare_reference_cnvkit/main.nf#PREPARE_REFERENCE_CNVKIT legacy
+statements 2, modelled 2
+subworkflows/local/prepare_reference_cnvkit/main.nf#PREPARE_REFERENCE_CNVKIT/:take:fasta take "fasta" @6:5
+  out out (out): -
+subworkflows/local/prepare_reference_cnvkit/main.nf#PREPARE_REFERENCE_CNVKIT/:take:intervals_bed_combined take "intervals_bed_combined" @7:5
+  out out (out): -
+subworkflows/local/prepare_reference_cnvkit/main.nf#PREPARE_REFERENCE_CNVKIT/.flatten@1 chain ".flatten.map" steps=flatten,map @11:23
+  in in (in): -
+    <- subworkflows/local/prepare_reference_cnvkit/main.nf#PREPARE_REFERENCE_CNVKIT/:take:intervals_bed_combined[out] ? via intervals_bed_combined
+  out out (out): Channel<?>
+subworkflows/local/prepare_reference_cnvkit/main.nf#PREPARE_REFERENCE_CNVKIT/CNVKIT_ANTITARGET@1 call "CNVKIT_ANTITARGET" callee=CNVKIT_ANTITARGET:process:modelled:legacy @11:5
+  in $1 (tuple(meta, targets)): Tuple
+    <- subworkflows/local/prepare_reference_cnvkit/main.nf#PREPARE_REFERENCE_CNVKIT/.flatten@1[out] Channel<?>
+  out bed (bed): Channel<Tuple>
+  out versions_cnvkit (versions_cnvkit): Channel<Tuple>
+subworkflows/local/prepare_reference_cnvkit/main.nf#PREPARE_REFERENCE_CNVKIT/.map@1 chain ".map" steps=map @12:22
+  in in (in): -
+    <- subworkflows/local/prepare_reference_cnvkit/main.nf#PREPARE_REFERENCE_CNVKIT/:take:fasta[out] ? via fasta
+  out out (out): ?
+subworkflows/local/prepare_reference_cnvkit/main.nf#PREPARE_REFERENCE_CNVKIT/.map@2 chain ".map" steps=map @12:87
+  in in (in): -
+    <- subworkflows/local/prepare_reference_cnvkit/main.nf#PREPARE_REFERENCE_CNVKIT/CNVKIT_ANTITARGET@1[bed] Channel<Tuple> via CNVKIT_ANTITARGET.out.bed
+  out out (out): Channel<?>
+subworkflows/local/prepare_reference_cnvkit/main.nf#PREPARE_REFERENCE_CNVKIT/CNVKIT_REFERENCE@1 call "CNVKIT_REFERENCE" callee=CNVKIT_REFERENCE:process:modelled:legacy @12:5
+  in fasta (fasta): Path
+    <- subworkflows/local/prepare_reference_cnvkit/main.nf#PREPARE_REFERENCE_CNVKIT/.map@1[out] ?
+  in targets (targets): Path
+    <- subworkflows/local/prepare_reference_cnvkit/main.nf#PREPARE_REFERENCE_CNVKIT/:take:intervals_bed_combined[out] ? via intervals_bed_combined
+  in antitargets (antitargets): Path
+    <- subworkflows/local/prepare_reference_cnvkit/main.nf#PREPARE_REFERENCE_CNVKIT/.map@2[out] Channel<?>
+  out cnn (cnn): Channel<Path>
+  out versions_cnvkit (versions_cnvkit): Channel<Tuple>
+subworkflows/local/prepare_reference_cnvkit/main.nf#PREPARE_REFERENCE_CNVKIT/.collect@1 chain ".collect" steps=collect @15:24
+  in in (in): -
+    <- subworkflows/local/prepare_reference_cnvkit/main.nf#PREPARE_REFERENCE_CNVKIT/CNVKIT_REFERENCE@1[cnn] Channel<Path> via CNVKIT_REFERENCE.out.cnn
+  out out (out): Value<Bag<Path>>
+subworkflows/local/prepare_reference_cnvkit/main.nf#PREPARE_REFERENCE_CNVKIT/:emit:cnvkit_reference emit "cnvkit_reference" @15:5
+  in in (in): -
+    <- subworkflows/local/prepare_reference_cnvkit/main.nf#PREPARE_REFERENCE_CNVKIT/.collect@1[out] Value<Bag<Path>>

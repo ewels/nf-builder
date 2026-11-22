@@ -1,0 +1,500 @@
+workflow main.nf#NFCORE_SAREK legacy
+statements 33, modelled 26
+main.nf#NFCORE_SAREK/:params params "params" @92:1
+  out ascat_alleles (ascat_alleles): -
+  out ascat_loci (ascat_loci): -
+  out ascat_loci_gc (ascat_loci_gc): -
+  out ascat_loci_rt (ascat_loci_rt): -
+  out bbsplit_fasta_list (bbsplit_fasta_list): -
+  out bbsplit_index (bbsplit_index): -
+  out bcftools_annotations (bcftools_annotations): -
+  out bcftools_annotations_tbi (bcftools_annotations_tbi): -
+  out bwa (bwa): -
+  out bwamem2 (bwamem2): -
+  out chr_dir (chr_dir): -
+  out contamination_resource (contamination_resource): -
+  out contamination_resource_tbi (contamination_resource_tbi): -
+  out dbsnp (dbsnp): -
+  out dbsnp_tbi (dbsnp_tbi): -
+  out dict (dict): -
+  out dragmap (dragmap): -
+  out fasta (fasta): -
+  out fasta_fai (fasta_fai): -
+  out force_call_alleles (force_call_alleles): -
+  out force_call_alleles_tbi (force_call_alleles_tbi): -
+  out germline_resource (germline_resource): -
+  out germline_resource_tbi (germline_resource_tbi): -
+  out known_indels (known_indels): -
+  out known_indels_tbi (known_indels_tbi): -
+  out known_snps (known_snps): -
+  out known_snps_tbi (known_snps_tbi): -
+  out msisensor2_models (msisensor2_models): -
+  out msisensorpro_scan (msisensorpro_scan): -
+  out pon (pon): -
+  out pon_tbi (pon_tbi): -
+  out aligner (aligner): -
+  out step (step): -
+  out tools (tools): -
+  out vep_include_fasta (vep_include_fasta): -
+  out no_intervals (no_intervals): -
+  out nucleotides_per_second (nucleotides_per_second): -
+  out outdir (outdir): -
+  out wes (wes): -
+  out cnvkit_reference (cnvkit_reference): -
+  out snv_consensus_calling (snv_consensus_calling): -
+  out normalize_vcfs (normalize_vcfs): -
+  out download_cache (download_cache): -
+  out vep_cache_version (vep_cache_version): -
+  out vep_genome (vep_genome): -
+  out vep_species (vep_species): -
+  out snpeff_db (snpeff_db): -
+  out vep_cache_preflight_check (vep_cache_preflight_check): -
+  out vep_cache (vep_cache): -
+  out vep_custom_args (vep_custom_args): -
+  out snpeff_cache (snpeff_cache): -
+  out dbnsfp (dbnsfp): -
+  out dbnsfp_tbi (dbnsfp_tbi): -
+  out spliceai_snv (spliceai_snv): -
+  out spliceai_snv_tbi (spliceai_snv_tbi): -
+  out spliceai_indel (spliceai_indel): -
+  out spliceai_indel_tbi (spliceai_indel_tbi): -
+  out phenotypes_file (phenotypes_file): -
+  out phenotypes_file_tbi (phenotypes_file_tbi): -
+  out snpsift_databases (snpsift_databases): -
+  out group_by_umi_strategy (group_by_umi_strategy): -
+  out skip_tools (skip_tools): -
+  out bcftools_columns (bcftools_columns): -
+  out bcftools_header_lines (bcftools_header_lines): -
+  out cf_chrom_len (cf_chrom_len): -
+  out dbsnp_vqsr (dbsnp_vqsr): -
+  out known_indels_vqsr (known_indels_vqsr): -
+  out known_snps_vqsr (known_snps_vqsr): -
+  out mappability (mappability): -
+  out ngscheckmate_bed (ngscheckmate_bed): -
+  out sentieon_dnascope_model (sentieon_dnascope_model): -
+  out varlociraptor_chunk_size (varlociraptor_chunk_size): -
+  out varlociraptor_events_germline (varlociraptor_events_germline): -
+  out varlociraptor_events_somatic (varlociraptor_events_somatic): -
+  out varlociraptor_events_tumor_only (varlociraptor_events_tumor_only): -
+  out varlociraptor_fdr (varlociraptor_fdr): -
+  out varlociraptor_scenario_germline (varlociraptor_scenario_germline): -
+  out varlociraptor_scenario_somatic (varlociraptor_scenario_somatic): -
+  out varlociraptor_scenario_tumor_only (varlociraptor_scenario_tumor_only): -
+main.nf#NFCORE_SAREK/:take:samplesheet take "samplesheet" @94:5
+  out out (out): -
+main.nf#NFCORE_SAREK/PREPARE_GENOME@1 call "PREPARE_GENOME" callee=PREPARE_GENOME:workflow:modelled:legacy @98:5
+  in ascat_alleles_in (ascat_alleles_in): -
+    <- main.nf#NFCORE_SAREK/:params[ascat_alleles] ? via params.ascat_alleles
+  in ascat_loci_in (ascat_loci_in): -
+    <- main.nf#NFCORE_SAREK/:params[ascat_loci] ? via params.ascat_loci
+  in ascat_loci_gc_in (ascat_loci_gc_in): -
+    <- main.nf#NFCORE_SAREK/:params[ascat_loci_gc] ? via params.ascat_loci_gc
+  in ascat_loci_rt_in (ascat_loci_rt_in): -
+    <- main.nf#NFCORE_SAREK/:params[ascat_loci_rt] ? via params.ascat_loci_rt
+  in bbsplit_fasta_list_in (bbsplit_fasta_list_in): -
+    <- main.nf#NFCORE_SAREK/:params[bbsplit_fasta_list] ? via params.bbsplit_fasta_list
+  in bbsplit_index_in (bbsplit_index_in): -
+    <- main.nf#NFCORE_SAREK/:params[bbsplit_index] ? via params.bbsplit_index
+  in bcftools_annotations_in (bcftools_annotations_in): -
+    <- main.nf#NFCORE_SAREK/:params[bcftools_annotations] ? via params.bcftools_annotations
+  in bcftools_annotations_tbi_in (bcftools_annotations_tbi_in): -
+    <- main.nf#NFCORE_SAREK/:params[bcftools_annotations_tbi] ? via params.bcftools_annotations_tbi
+  in bwa_in (bwa_in): -
+    <- main.nf#NFCORE_SAREK/:params[bwa] ? via params.bwa
+  in bwamem2_in (bwamem2_in): -
+    <- main.nf#NFCORE_SAREK/:params[bwamem2] ? via params.bwamem2
+  in chr_dir_in (chr_dir_in): -
+    <- main.nf#NFCORE_SAREK/:params[chr_dir] ? via params.chr_dir
+  in contamination_resource_in (contamination_resource_in): -
+    <- main.nf#NFCORE_SAREK/:params[contamination_resource] ? via params.contamination_resource
+  in contamination_resource_tbi_in (contamination_resource_tbi_in): -
+    <- main.nf#NFCORE_SAREK/:params[contamination_resource_tbi] ? via params.contamination_resource_tbi
+  in dbsnp_in (dbsnp_in): -
+    <- main.nf#NFCORE_SAREK/:params[dbsnp] ? via params.dbsnp
+  in dbsnp_tbi_in (dbsnp_tbi_in): -
+    <- main.nf#NFCORE_SAREK/:params[dbsnp_tbi] ? via params.dbsnp_tbi
+  in dict_in (dict_in): -
+    <- main.nf#NFCORE_SAREK/:params[dict] ? via params.dict
+  in dragmap_in (dragmap_in): -
+    <- main.nf#NFCORE_SAREK/:params[dragmap] ? via params.dragmap
+  in fasta_in (fasta_in): -
+    <- main.nf#NFCORE_SAREK/:params[fasta] ? via params.fasta
+  in fasta_fai_in (fasta_fai_in): -
+    <- main.nf#NFCORE_SAREK/:params[fasta_fai] ? via params.fasta_fai
+  in force_call_alleles_in (force_call_alleles_in): -
+    <- main.nf#NFCORE_SAREK/:params[force_call_alleles] ? via params.force_call_alleles
+  in force_call_alleles_tbi_in (force_call_alleles_tbi_in): -
+    <- main.nf#NFCORE_SAREK/:params[force_call_alleles_tbi] ? via params.force_call_alleles_tbi
+  in germline_resource_in (germline_resource_in): -
+    <- main.nf#NFCORE_SAREK/:params[germline_resource] ? via params.germline_resource
+  in germline_resource_tbi_in (germline_resource_tbi_in): -
+    <- main.nf#NFCORE_SAREK/:params[germline_resource_tbi] ? via params.germline_resource_tbi
+  in known_indels_in (known_indels_in): -
+    <- main.nf#NFCORE_SAREK/:params[known_indels] ? via params.known_indels
+  in known_indels_tbi_in (known_indels_tbi_in): -
+    <- main.nf#NFCORE_SAREK/:params[known_indels_tbi] ? via params.known_indels_tbi
+  in known_snps_in (known_snps_in): -
+    <- main.nf#NFCORE_SAREK/:params[known_snps] ? via params.known_snps
+  in known_snps_tbi_in (known_snps_tbi_in): -
+    <- main.nf#NFCORE_SAREK/:params[known_snps_tbi] ? via params.known_snps_tbi
+  in msisensor2_models_in (msisensor2_models_in): -
+    <- main.nf#NFCORE_SAREK/:params[msisensor2_models] ? via params.msisensor2_models
+  in msisensorpro_scan_in (msisensorpro_scan_in): -
+    <- main.nf#NFCORE_SAREK/:params[msisensorpro_scan] ? via params.msisensorpro_scan
+  in pon_in (pon_in): -
+    <- main.nf#NFCORE_SAREK/:params[pon] ? via params.pon
+  in pon_tbi_in (pon_tbi_in): -
+    <- main.nf#NFCORE_SAREK/:params[pon_tbi] ? via params.pon_tbi
+  in aligner (aligner): -
+    <- main.nf#NFCORE_SAREK/:params[aligner] ? via params.aligner
+  in step (step): -
+    <- main.nf#NFCORE_SAREK/:params[step] ? via params.step
+  in tools (tools): -
+    <- main.nf#NFCORE_SAREK/:params[tools] ? via params.tools indirect
+  in vep_include_fasta (vep_include_fasta): -
+    <- main.nf#NFCORE_SAREK/:params[vep_include_fasta] ? via params.vep_include_fasta
+  out ascat_alleles (ascat_alleles): ?
+  out ascat_loci (ascat_loci): ?
+  out ascat_loci_gc (ascat_loci_gc): ?
+  out ascat_loci_rt (ascat_loci_rt): ?
+  out bbsplit_index (bbsplit_index): ?
+  out bcftools_annotations (bcftools_annotations): ?
+  out bcftools_annotations_tbi (bcftools_annotations_tbi): ?
+  out chr_dir (chr_dir): ?
+  out contamination_resource (contamination_resource): ?
+  out contamination_resource_tbi (contamination_resource_tbi): ?
+  out dbsnp (dbsnp): ?
+  out dbsnp_tbi (dbsnp_tbi): ?
+  out dict (dict): ?
+  out fasta (fasta): ?
+  out fasta_fai (fasta_fai): ?
+  out force_call_alleles (force_call_alleles): ?
+  out force_call_alleles_tbi (force_call_alleles_tbi): ?
+  out germline_resource (germline_resource): ?
+  out germline_resource_tbi (germline_resource_tbi): ?
+  out index_alignment (index_alignment): ?
+  out known_indels (known_indels): ?
+  out known_indels_tbi (known_indels_tbi): ?
+  out known_sites_indels (known_sites_indels): Value<Bag<?>>
+  out known_sites_indels_tbi (known_sites_indels_tbi): Value<Bag<?>>
+  out known_sites_snps (known_sites_snps): Value<Bag<?>>
+  out known_sites_snps_tbi (known_sites_snps_tbi): Value<Bag<?>>
+  out known_snps (known_snps): ?
+  out known_snps_tbi (known_snps_tbi): ?
+  out msisensor2_models (msisensor2_models): ?
+  out msisensorpro_scan (msisensorpro_scan): ?
+  out pon (pon): ?
+  out pon_tbi (pon_tbi): ?
+  out vep_fasta (vep_fasta): ?
+main.nf#NFCORE_SAREK/PREPARE_INTERVALS@1 call "PREPARE_INTERVALS" callee=PREPARE_INTERVALS:workflow:modelled:legacy @137:5
+  in fasta_fai (fasta_fai): -
+    <- main.nf#NFCORE_SAREK/PREPARE_GENOME@1[fasta_fai] ? via PREPARE_GENOME.out.fasta_fai
+  in intervals (intervals): -
+  in no_intervals (no_intervals): -
+    <- main.nf#NFCORE_SAREK/:params[no_intervals] ? via params.no_intervals
+  in nucleotides_per_second (nucleotides_per_second): -
+    <- main.nf#NFCORE_SAREK/:params[nucleotides_per_second] ? via params.nucleotides_per_second
+  in outdir (outdir): -
+    <- main.nf#NFCORE_SAREK/:params[outdir] ? via params.outdir
+  in step (step): -
+    <- main.nf#NFCORE_SAREK/:params[step] ? via params.step
+  in fai_checked (fai_checked): -
+  out intervals_bed (intervals_bed): ?
+  out intervals_bed_gz_tbi (intervals_bed_gz_tbi): ?
+  out intervals_bed_combined (intervals_bed_combined): Value<Bag<?>>
+  out intervals_bed_gz_tbi_combined (intervals_bed_gz_tbi_combined): Value<Bag<?>>
+main.nf#NFCORE_SAREK/intervals_bed_combined factory "channel.value" factory=channel.value @141:52
+  guards then of params.no_intervals
+  out out (out): Value<List>
+main.nf#NFCORE_SAREK/intervals_bed_gz_tbi_combined factory "channel.value" factory=channel.value @142:59
+  guards then of params.no_intervals
+  out out (out): Value<List>
+main.nf#NFCORE_SAREK/intervals_for_preprocessing chain ".map.collect" steps=map,collect @147:11
+  guards then of params.wes
+  in in (in): -
+    <- main.nf#NFCORE_SAREK/PREPARE_INTERVALS@1[intervals_bed_combined] Value<Bag<?>> via intervals_bed_combined indirect
+    <- main.nf#NFCORE_SAREK/intervals_bed_combined[out] Value<List> via intervals_bed_combined indirect
+  out out (out): Value<Bag<?>>
+main.nf#NFCORE_SAREK/intervals_for_preprocessing~2 factory "channel.value" factory=channel.value @148:11
+  guards else of params.wes
+  out out (out): Value<List>
+main.nf#NFCORE_SAREK/intervals_and_num_intervals chain ".map" steps=map @154:35
+  in in (in): -
+    <- main.nf#NFCORE_SAREK/PREPARE_INTERVALS@1[intervals_bed] ? via intervals
+  out out (out): ?
+main.nf#NFCORE_SAREK/intervals_bed_gz_tbi_and_num_intervals chain ".map" steps=map @158:46
+  in in (in): -
+    <- main.nf#NFCORE_SAREK/PREPARE_INTERVALS@1[intervals_bed_gz_tbi] ? via intervals_bed_gz_tbi
+  out out (out): ?
+main.nf#NFCORE_SAREK/channel.fromPath@1 factory "channel.fromPath" factory=channel.fromPath @164:32
+  guards then of params.tools && params.tools.split(',').contains('cnvkit'); then of params.cnvkit_reference
+  out out (out): Channel<Path>
+main.nf#NFCORE_SAREK/cnvkit_reference chain ".collect" steps=collect @164:32
+  guards then of params.tools && params.tools.split(',').contains('cnvkit'); then of params.cnvkit_reference
+  in in (in): -
+    <- main.nf#NFCORE_SAREK/channel.fromPath@1[out] Channel<Path>
+  out out (out): Value<Bag<Path>>
+main.nf#NFCORE_SAREK/PREPARE_REFERENCE_CNVKIT@1 call "PREPARE_REFERENCE_CNVKIT" callee=PREPARE_REFERENCE_CNVKIT:workflow:modelled:legacy @167:13
+  guards then of params.tools && params.tools.split(',').contains('cnvkit'); else of params.cnvkit_reference
+  in fasta (fasta): -
+    <- main.nf#NFCORE_SAREK/PREPARE_GENOME@1[fasta] ? via PREPARE_GENOME.out.fasta
+  in intervals_bed_combined (intervals_bed_combined): -
+    <- main.nf#NFCORE_SAREK/PREPARE_INTERVALS@1[intervals_bed_combined] Value<Bag<?>> via intervals_bed_combined indirect
+    <- main.nf#NFCORE_SAREK/intervals_bed_combined[out] Value<List> via intervals_bed_combined indirect
+  out cnvkit_reference (cnvkit_reference): Value<Bag<Path>>
+main.nf#NFCORE_SAREK/cnvkit_reference~2 factory "channel.value" factory=channel.value @172:28
+  guards else of params.tools && params.tools.split(',').contains('cnvkit')
+  out out (out): Value<List>
+main.nf#NFCORE_SAREK/:code@1 code "if (params.snv_consensus_calling && !params.normalize_vcfs)…" @176:5
+  in params.snv_consensus_calling (params.snv_consensus_calling): -
+    <- main.nf#NFCORE_SAREK/:params[snv_consensus_calling] ? via params.snv_consensus_calling indirect
+  in params.normalize_vcfs (params.normalize_vcfs): -
+    <- main.nf#NFCORE_SAREK/:params[normalize_vcfs] ? via params.normalize_vcfs indirect
+main.nf#NFCORE_SAREK/ensemblvep_info factory "channel.of" factory=channel.of @184:27
+  guards then of params.download_cache
+  out out (out): Channel<List>
+main.nf#NFCORE_SAREK/snpeff_info factory "channel.of" factory=channel.of @185:23
+  guards then of params.download_cache
+  out out (out): Channel<List>
+main.nf#NFCORE_SAREK/CACHE_DOWNLOAD_ENSEMBLVEP_SNPEFF@1 call "CACHE_DOWNLOAD_ENSEMBLVEP_SNPEFF" callee=CACHE_DOWNLOAD_ENSEMBLVEP_SNPEFF:workflow:modelled:legacy @186:9
+  guards then of params.download_cache
+  in ensemblvep_info (ensemblvep_info): -
+    <- main.nf#NFCORE_SAREK/ensemblvep_info[out] Channel<List> via ensemblvep_info
+  in snpeff_info (snpeff_info): -
+    <- main.nf#NFCORE_SAREK/snpeff_info[out] Channel<List> via snpeff_info
+  in ensemblvep_preflight_check (ensemblvep_preflight_check): -
+    <- main.nf#NFCORE_SAREK/:params[vep_cache_preflight_check] ? via params.vep_cache_preflight_check
+  out ensemblvep_cache (ensemblvep_cache): Value<Bag<Tuple>>
+  out snpeff_cache (snpeff_cache): Value<Bag<Tuple>>
+main.nf#NFCORE_SAREK/UTILS_ANNOTATION_CACHE@1 call "UTILS_ANNOTATION_CACHE" callee=UTILS_ANNOTATION_CACHE:workflow:modelled:legacy @192:9
+  guards else of params.download_cache
+  in ensemblvep_cache (ensemblvep_cache): -
+    <- main.nf#NFCORE_SAREK/:params[vep_cache] ? via params.vep_cache
+  in ensemblvep_cache_version (ensemblvep_cache_version): -
+    <- main.nf#NFCORE_SAREK/:params[vep_cache_version] ? via params.vep_cache_version
+  in ensemblvep_custom_args (ensemblvep_custom_args): -
+    <- main.nf#NFCORE_SAREK/:params[vep_custom_args] ? via params.vep_custom_args
+  in ensemblvep_genome (ensemblvep_genome): -
+    <- main.nf#NFCORE_SAREK/:params[vep_genome] ? via params.vep_genome
+  in ensemblvep_species (ensemblvep_species): -
+    <- main.nf#NFCORE_SAREK/:params[vep_species] ? via params.vep_species
+  in ensemblvep_enabled (ensemblvep_enabled): -
+    <- main.nf#NFCORE_SAREK/:params[tools] ? via params.tools indirect
+    <- main.nf#NFCORE_SAREK/:params[vep_cache] ? via params.vep_cache indirect
+  in snpeff_cache (snpeff_cache): -
+    <- main.nf#NFCORE_SAREK/:params[snpeff_cache] ? via params.snpeff_cache
+  in snpeff_db (snpeff_db): -
+    <- main.nf#NFCORE_SAREK/:params[snpeff_db] ? via params.snpeff_db
+  in snpeff_enabled (snpeff_enabled): -
+    <- main.nf#NFCORE_SAREK/:params[tools] ? via params.tools indirect
+    <- main.nf#NFCORE_SAREK/:params[snpeff_cache] ? via params.snpeff_cache indirect
+  in help_message (help_message): -
+    = "Please refer to https://nf-co.re/sarek/docs/usage/#how-to-customise-snpeff-and-vep-annotation for more information." : String
+  out ensemblvep_cache (ensemblvep_cache): ?
+  out snpeff_cache (snpeff_cache): ?
+main.nf#NFCORE_SAREK/vep_extra_files code "vep_extra_files = []" @209:5
+  out vep_extra_files (vep_extra_files): List
+main.nf#NFCORE_SAREK/:code@2 code "if (params.dbnsfp && params.dbnsfp_tbi) {" @211:5
+  in params.dbnsfp (params.dbnsfp): -
+    <- main.nf#NFCORE_SAREK/:params[dbnsfp] ? via params.dbnsfp indirect
+  in params.dbnsfp_tbi (params.dbnsfp_tbi): -
+    <- main.nf#NFCORE_SAREK/:params[dbnsfp_tbi] ? via params.dbnsfp_tbi indirect
+  in vep_extra_files (vep_extra_files): -
+    <- main.nf#NFCORE_SAREK/vep_extra_files[vep_extra_files] List via vep_extra_files indirect
+main.nf#NFCORE_SAREK/:code@3 code "if (params.spliceai_snv && params.spliceai_snv_tbi && param…" @221:5
+  in params.spliceai_snv (params.spliceai_snv): -
+    <- main.nf#NFCORE_SAREK/:params[spliceai_snv] ? via params.spliceai_snv indirect
+  in params.spliceai_snv_tbi (params.spliceai_snv_tbi): -
+    <- main.nf#NFCORE_SAREK/:params[spliceai_snv_tbi] ? via params.spliceai_snv_tbi indirect
+  in params.spliceai_indel (params.spliceai_indel): -
+    <- main.nf#NFCORE_SAREK/:params[spliceai_indel] ? via params.spliceai_indel indirect
+  in params.spliceai_indel_tbi (params.spliceai_indel_tbi): -
+    <- main.nf#NFCORE_SAREK/:params[spliceai_indel_tbi] ? via params.spliceai_indel_tbi indirect
+  in vep_extra_files (vep_extra_files): -
+    <- main.nf#NFCORE_SAREK/vep_extra_files[vep_extra_files] List via vep_extra_files indirect
+main.nf#NFCORE_SAREK/:code@4 code "if (params.phenotypes_file) {" @228:5
+  in params.phenotypes_file (params.phenotypes_file): -
+    <- main.nf#NFCORE_SAREK/:params[phenotypes_file] ? via params.phenotypes_file indirect
+  in vep_extra_files (vep_extra_files): -
+    <- main.nf#NFCORE_SAREK/vep_extra_files[vep_extra_files] List via vep_extra_files indirect
+  in params.phenotypes_file_tbi (params.phenotypes_file_tbi): -
+    <- main.nf#NFCORE_SAREK/:params[phenotypes_file_tbi] ? via params.phenotypes_file_tbi indirect
+main.nf#NFCORE_SAREK/snpsift_db_configs code "snpsift_db_configs = []" @242:5
+  out snpsift_db_configs (snpsift_db_configs): List
+main.nf#NFCORE_SAREK/:code@5 code "if (params.snpsift_databases) {" @244:5
+  in params.snpsift_databases (params.snpsift_databases): -
+    <- main.nf#NFCORE_SAREK/:params[snpsift_databases] ? via params.snpsift_databases indirect
+  in snpsift_db_configs (snpsift_db_configs): -
+    <- main.nf#NFCORE_SAREK/snpsift_db_configs[snpsift_db_configs] List via snpsift_db_configs indirect
+main.nf#NFCORE_SAREK/ch_snpsift_db factory "channel.value" factory=channel.value @272:21
+  out out (out): Value<List>
+main.nf#NFCORE_SAREK/PREPARE_SNPSIFT_DATABASES@1 call "PREPARE_SNPSIFT_DATABASES" callee=PREPARE_SNPSIFT_DATABASES:workflow:modelled:legacy @274:9
+  guards then of params.tools && params.tools.split(',').contains('snpsift') && snpsift_db_configs
+  in val_db_configs (val_db_configs): -
+    <- main.nf#NFCORE_SAREK/snpsift_db_configs[snpsift_db_configs] List via snpsift_db_configs
+  out db_tuple (db_tuple): Value<?>
+main.nf#NFCORE_SAREK/SAREK@1 call "SAREK" callee=SAREK:workflow:modelled:legacy @281:5
+  in input_sample (input_sample): -
+    <- main.nf#NFCORE_SAREK/:take:samplesheet[out] ? via samplesheet
+  in aligner (aligner): -
+    <- main.nf#NFCORE_SAREK/:params[aligner] ? via params.aligner
+  in group_by_umi_strategy (group_by_umi_strategy): -
+    <- main.nf#NFCORE_SAREK/:params[group_by_umi_strategy] ? via params.group_by_umi_strategy
+  in skip_tools (skip_tools): -
+    <- main.nf#NFCORE_SAREK/:params[skip_tools] ? via params.skip_tools indirect
+  in step (step): -
+    <- main.nf#NFCORE_SAREK/:params[step] ? via params.step
+  in tools (tools): -
+    <- main.nf#NFCORE_SAREK/:params[tools] ? via params.tools indirect
+  in wes (wes): -
+    <- main.nf#NFCORE_SAREK/:params[wes] ? via params.wes
+  in ascat_alleles (ascat_alleles): -
+    <- main.nf#NFCORE_SAREK/PREPARE_GENOME@1[ascat_alleles] ? via PREPARE_GENOME.out.ascat_alleles
+  in ascat_loci (ascat_loci): -
+    <- main.nf#NFCORE_SAREK/PREPARE_GENOME@1[ascat_loci] ? via PREPARE_GENOME.out.ascat_loci
+  in ascat_loci_gc (ascat_loci_gc): -
+    <- main.nf#NFCORE_SAREK/PREPARE_GENOME@1[ascat_loci_gc] ? via PREPARE_GENOME.out.ascat_loci_gc
+  in ascat_loci_rt (ascat_loci_rt): -
+    <- main.nf#NFCORE_SAREK/PREPARE_GENOME@1[ascat_loci_rt] ? via PREPARE_GENOME.out.ascat_loci_rt
+  in bbsplit_index (bbsplit_index): -
+    <- main.nf#NFCORE_SAREK/PREPARE_GENOME@1[bbsplit_index] ? via PREPARE_GENOME.out.bbsplit_index
+  in bcftools_annotations (bcftools_annotations): -
+    <- main.nf#NFCORE_SAREK/PREPARE_GENOME@1[bcftools_annotations] ? via PREPARE_GENOME.out.bcftools_annotations
+  in bcftools_annotations_tbi (bcftools_annotations_tbi): -
+    <- main.nf#NFCORE_SAREK/PREPARE_GENOME@1[bcftools_annotations_tbi] ? via PREPARE_GENOME.out.bcftools_annotations_tbi
+  in bcftools_columns (bcftools_columns): -
+    <- main.nf#NFCORE_SAREK/:params[bcftools_columns] ? via params.bcftools_columns indirect
+  in bcftools_header_lines (bcftools_header_lines): -
+    <- main.nf#NFCORE_SAREK/:params[bcftools_header_lines] ? via params.bcftools_header_lines indirect
+  in cf_chrom_len (cf_chrom_len): -
+    <- main.nf#NFCORE_SAREK/:params[cf_chrom_len] ? via params.cf_chrom_len indirect
+  in chr_files (chr_files): -
+    <- main.nf#NFCORE_SAREK/PREPARE_GENOME@1[chr_dir] ? via PREPARE_GENOME.out.chr_dir
+  in cnvkit_reference (cnvkit_reference): -
+    <- main.nf#NFCORE_SAREK/cnvkit_reference[out] Value<Bag<Path>> via cnvkit_reference indirect
+    <- main.nf#NFCORE_SAREK/PREPARE_REFERENCE_CNVKIT@1[cnvkit_reference] Value<Bag<Path>> via cnvkit_reference indirect
+    <- main.nf#NFCORE_SAREK/cnvkit_reference~2[out] Value<List> via cnvkit_reference indirect
+  in dbsnp (dbsnp): -
+    <- main.nf#NFCORE_SAREK/PREPARE_GENOME@1[dbsnp] ? via PREPARE_GENOME.out.dbsnp
+  in dbsnp_tbi (dbsnp_tbi): -
+    <- main.nf#NFCORE_SAREK/PREPARE_GENOME@1[dbsnp_tbi] ? via PREPARE_GENOME.out.dbsnp_tbi
+  in dbsnp_vqsr (dbsnp_vqsr): -
+    <- main.nf#NFCORE_SAREK/:params[dbsnp_vqsr] ? via params.dbsnp_vqsr indirect
+  in dict (dict): -
+    <- main.nf#NFCORE_SAREK/PREPARE_GENOME@1[dict] ? via PREPARE_GENOME.out.dict
+  in fasta (fasta): -
+    <- main.nf#NFCORE_SAREK/PREPARE_GENOME@1[fasta] ? via PREPARE_GENOME.out.fasta
+  in fasta_fai (fasta_fai): -
+    <- main.nf#NFCORE_SAREK/PREPARE_GENOME@1[fasta_fai] ? via PREPARE_GENOME.out.fasta_fai
+  in force_call_alleles (force_call_alleles): -
+    <- main.nf#NFCORE_SAREK/PREPARE_GENOME@1[force_call_alleles] ? via PREPARE_GENOME.out.force_call_alleles
+  in force_call_alleles_tbi (force_call_alleles_tbi): -
+    <- main.nf#NFCORE_SAREK/PREPARE_GENOME@1[force_call_alleles_tbi] ? via PREPARE_GENOME.out.force_call_alleles_tbi
+  in germline_resource (germline_resource): -
+    <- main.nf#NFCORE_SAREK/PREPARE_GENOME@1[germline_resource] ? via PREPARE_GENOME.out.germline_resource
+  in germline_resource_tbi (germline_resource_tbi): -
+    <- main.nf#NFCORE_SAREK/PREPARE_GENOME@1[germline_resource_tbi] ? via PREPARE_GENOME.out.germline_resource_tbi
+  in contamination_resource (contamination_resource): -
+    <- main.nf#NFCORE_SAREK/PREPARE_GENOME@1[contamination_resource] ? via PREPARE_GENOME.out.contamination_resource
+  in contamination_resource_tbi (contamination_resource_tbi): -
+    <- main.nf#NFCORE_SAREK/PREPARE_GENOME@1[contamination_resource_tbi] ? via PREPARE_GENOME.out.contamination_resource_tbi
+  in contamination_resource_provided (contamination_resource_provided): -
+    <- main.nf#NFCORE_SAREK/:params[contamination_resource] ? via params.contamination_resource indirect
+    <- main.nf#NFCORE_SAREK/:params[germline_resource] ? via params.germline_resource indirect
+  in index_alignment (index_alignment): -
+    <- main.nf#NFCORE_SAREK/PREPARE_GENOME@1[index_alignment] ? via PREPARE_GENOME.out.index_alignment
+  in intervals_and_num_intervals (intervals_and_num_intervals): -
+    <- main.nf#NFCORE_SAREK/intervals_and_num_intervals[out] ? via intervals_and_num_intervals
+  in intervals_bed_combined (intervals_bed_combined): -
+    <- main.nf#NFCORE_SAREK/PREPARE_INTERVALS@1[intervals_bed_combined] Value<Bag<?>> via intervals_bed_combined indirect
+    <- main.nf#NFCORE_SAREK/intervals_bed_combined[out] Value<List> via intervals_bed_combined indirect
+  in intervals_bed_combined_for_variant_calling (intervals_bed_combined_for_variant_calling): -
+    <- main.nf#NFCORE_SAREK/PREPARE_INTERVALS@1[intervals_bed_combined] Value<Bag<?>> via intervals_bed_combined_for_variant_calling
+  in intervals_bed_gz_tbi_and_num_intervals (intervals_bed_gz_tbi_and_num_intervals): -
+    <- main.nf#NFCORE_SAREK/intervals_bed_gz_tbi_and_num_intervals[out] ? via intervals_bed_gz_tbi_and_num_intervals
+  in intervals_bed_gz_tbi_combined (intervals_bed_gz_tbi_combined): -
+    <- main.nf#NFCORE_SAREK/PREPARE_INTERVALS@1[intervals_bed_gz_tbi_combined] Value<Bag<?>> via intervals_bed_gz_tbi_combined indirect
+    <- main.nf#NFCORE_SAREK/intervals_bed_gz_tbi_combined[out] Value<List> via intervals_bed_gz_tbi_combined indirect
+  in intervals_for_preprocessing (intervals_for_preprocessing): -
+    <- main.nf#NFCORE_SAREK/intervals_for_preprocessing[out] Value<Bag<?>> via intervals_for_preprocessing indirect
+    <- main.nf#NFCORE_SAREK/intervals_for_preprocessing~2[out] Value<List> via intervals_for_preprocessing indirect
+  in known_indels_vqsr (known_indels_vqsr): -
+    <- main.nf#NFCORE_SAREK/:params[known_indels_vqsr] ? via params.known_indels_vqsr indirect
+  in known_sites_indels (known_sites_indels): -
+    <- main.nf#NFCORE_SAREK/PREPARE_GENOME@1[known_sites_indels] Value<Bag<?>> via PREPARE_GENOME.out.known_sites_indels
+  in known_sites_indels_tbi (known_sites_indels_tbi): -
+    <- main.nf#NFCORE_SAREK/PREPARE_GENOME@1[known_sites_indels_tbi] Value<Bag<?>> via PREPARE_GENOME.out.known_sites_indels_tbi
+  in known_sites_snps (known_sites_snps): -
+    <- main.nf#NFCORE_SAREK/PREPARE_GENOME@1[known_sites_snps] Value<Bag<?>> via PREPARE_GENOME.out.known_sites_snps
+  in known_sites_snps_tbi (known_sites_snps_tbi): -
+    <- main.nf#NFCORE_SAREK/PREPARE_GENOME@1[known_sites_snps_tbi] Value<Bag<?>> via PREPARE_GENOME.out.known_sites_snps_tbi
+  in known_snps_vqsr (known_snps_vqsr): -
+    <- main.nf#NFCORE_SAREK/:params[known_snps_vqsr] ? via params.known_snps_vqsr indirect
+  in mappability (mappability): -
+    <- main.nf#NFCORE_SAREK/:params[mappability] ? via params.mappability indirect
+  in msisensor2_models (msisensor2_models): -
+    <- main.nf#NFCORE_SAREK/PREPARE_GENOME@1[msisensor2_models] ? via PREPARE_GENOME.out.msisensor2_models
+  in msisensorpro_scan (msisensorpro_scan): -
+    <- main.nf#NFCORE_SAREK/PREPARE_GENOME@1[msisensorpro_scan] ? via PREPARE_GENOME.out.msisensorpro_scan
+  in ngscheckmate_bed (ngscheckmate_bed): -
+    <- main.nf#NFCORE_SAREK/:params[ngscheckmate_bed] ? via params.ngscheckmate_bed indirect
+  in pon (pon): -
+    <- main.nf#NFCORE_SAREK/PREPARE_GENOME@1[pon] ? via PREPARE_GENOME.out.pon
+  in pon_tbi (pon_tbi): -
+    <- main.nf#NFCORE_SAREK/PREPARE_GENOME@1[pon_tbi] ? via PREPARE_GENOME.out.pon_tbi
+  in sentieon_dnascope_model (sentieon_dnascope_model): -
+    <- main.nf#NFCORE_SAREK/:params[sentieon_dnascope_model] ? via params.sentieon_dnascope_model indirect
+  in varlociraptor_chunk_size (varlociraptor_chunk_size): -
+    <- main.nf#NFCORE_SAREK/:params[varlociraptor_chunk_size] ? via params.varlociraptor_chunk_size
+  in varlociraptor_events_germline (varlociraptor_events_germline): -
+    <- main.nf#NFCORE_SAREK/:params[varlociraptor_events_germline] ? via params.varlociraptor_events_germline
+  in varlociraptor_events_somatic (varlociraptor_events_somatic): -
+    <- main.nf#NFCORE_SAREK/:params[varlociraptor_events_somatic] ? via params.varlociraptor_events_somatic
+  in varlociraptor_events_tumor_only (varlociraptor_events_tumor_only): -
+    <- main.nf#NFCORE_SAREK/:params[varlociraptor_events_tumor_only] ? via params.varlociraptor_events_tumor_only
+  in varlociraptor_fdr (varlociraptor_fdr): -
+    <- main.nf#NFCORE_SAREK/:params[varlociraptor_fdr] ? via params.varlociraptor_fdr
+  in varlociraptor_scenario_germline (varlociraptor_scenario_germline): -
+    <- main.nf#NFCORE_SAREK/:params[varlociraptor_scenario_germline] ? via params.varlociraptor_scenario_germline indirect
+  in varlociraptor_scenario_somatic (varlociraptor_scenario_somatic): -
+    <- main.nf#NFCORE_SAREK/:params[varlociraptor_scenario_somatic] ? via params.varlociraptor_scenario_somatic indirect
+  in varlociraptor_scenario_tumor_only (varlociraptor_scenario_tumor_only): -
+    <- main.nf#NFCORE_SAREK/:params[varlociraptor_scenario_tumor_only] ? via params.varlociraptor_scenario_tumor_only indirect
+  in snpeff_cache (snpeff_cache): -
+    <- main.nf#NFCORE_SAREK/CACHE_DOWNLOAD_ENSEMBLVEP_SNPEFF@1[snpeff_cache] Value<Bag<Tuple>> via snpeff_cache indirect
+    <- main.nf#NFCORE_SAREK/UTILS_ANNOTATION_CACHE@1[snpeff_cache] ? via snpeff_cache indirect
+  in snpeff_db (snpeff_db): -
+    <- main.nf#NFCORE_SAREK/:params[snpeff_db] ? via params.snpeff_db
+  in vep_cache (vep_cache): -
+    <- main.nf#NFCORE_SAREK/CACHE_DOWNLOAD_ENSEMBLVEP_SNPEFF@1[ensemblvep_cache] Value<Bag<Tuple>> via vep_cache indirect
+    <- main.nf#NFCORE_SAREK/UTILS_ANNOTATION_CACHE@1[ensemblvep_cache] ? via vep_cache indirect
+  in vep_cache_version (vep_cache_version): -
+    <- main.nf#NFCORE_SAREK/:params[vep_cache_version] ? via params.vep_cache_version
+  in vep_extra_files (vep_extra_files): -
+    <- main.nf#NFCORE_SAREK/vep_extra_files[vep_extra_files] List via vep_extra_files
+  in vep_fasta (vep_fasta): -
+    <- main.nf#NFCORE_SAREK/PREPARE_GENOME@1[vep_fasta] ? via PREPARE_GENOME.out.vep_fasta
+  in vep_genome (vep_genome): -
+    <- main.nf#NFCORE_SAREK/:params[vep_genome] ? via params.vep_genome
+  in vep_species (vep_species): -
+    <- main.nf#NFCORE_SAREK/:params[vep_species] ? via params.vep_species
+  in snpsift_db (snpsift_db): -
+    <- main.nf#NFCORE_SAREK/ch_snpsift_db[out] Value<List> via ch_snpsift_db indirect
+    <- main.nf#NFCORE_SAREK/PREPARE_SNPSIFT_DATABASES@1[db_tuple] Value<?> via ch_snpsift_db indirect
+  out multiqc_report (multiqc_report): Value<?>
+  out multiqc_publish (multiqc_publish): Channel<?>
+main.nf#NFCORE_SAREK/:emit:multiqc_publish emit "multiqc_publish" @354:5
+  in in (in): -
+    <- main.nf#NFCORE_SAREK/SAREK@1[multiqc_publish] Channel<?> via SAREK.out.multiqc_publish
+main.nf#NFCORE_SAREK/:emit:multiqc_report emit "multiqc_report" @355:5
+  in in (in): -
+    <- main.nf#NFCORE_SAREK/SAREK@1[multiqc_report] Value<?> via SAREK.out.multiqc_report
+bound @143:5 intervals_bed_combined_for_variant_calling
+bound @150:5 intervals
+bound @152:5 intervals_bed_gz_tbi
+bound @168:13 cnvkit_reference
+bound @187:9 snpeff_cache
+bound @188:9 vep_cache
+bound @205:9 snpeff_cache
+bound @206:9 vep_cache
+bound @275:9 ch_snpsift_db

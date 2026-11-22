@@ -3,6 +3,13 @@ import type { IncludeRules } from "./includes.ts";
 import type { PaletteDefinition } from "./palette.ts";
 import type { SourceParser } from "./source-file.ts";
 
+/** An operator that legacy workflows call but the catalogue lacks (AR-14, F-107): its result kind from the docs. */
+export interface LegacyOperator {
+  readonly name: string;
+  /** `assign` marks `set` and `tap`, which bind a variable rather than give a result. */
+  readonly result: "channel" | "value" | "assign";
+}
+
 /** A language pack (ADR 0006). M1 features grow this towards the architecture.md sketch. */
 export interface LanguagePack {
   readonly version: string;
@@ -10,6 +17,8 @@ export interface LanguagePack {
   readonly palette: PaletteDefinition;
   /** Include resolution rules (AR-03, F-105): pure, loaded with the pack. */
   readonly includes: IncludeRules;
+  /** Legacy-only operators, with their result kinds (F-107): pure, loaded with the pack. */
+  readonly legacyOperators: readonly LegacyOperator[];
   /** The generated catalogue, loaded on first call (a dynamic import, so it stays out of the initial bundle; ADR 0028). */
   loadCatalogue(): Promise<Catalogue>;
   /** The parser with declaration-level fallback, loaded on first call (a dynamic import; ADR 0004, ADR 0027). */
@@ -73,12 +82,14 @@ export type {
   GraphEdge,
   GraphNode,
   GraphNodeKind,
+  Guard,
   NodeKey,
   NodeKeyLocal,
   OutputNode,
   ParamsNode,
   Port,
   PortRef,
+  ProjectedStatement,
   Projection,
   TakeNode,
   TypeExpr,

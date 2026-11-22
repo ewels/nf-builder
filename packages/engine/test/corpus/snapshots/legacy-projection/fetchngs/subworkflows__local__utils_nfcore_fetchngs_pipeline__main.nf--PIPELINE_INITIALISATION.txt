@@ -1,0 +1,85 @@
+workflow subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_INITIALISATION legacy
+statements 18, modelled 1
+subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_INITIALISATION/:take:version take "version" @33:5
+  out out (out): -
+subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_INITIALISATION/:take:validate_params take "validate_params" @34:5
+  out out (out): -
+subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_INITIALISATION/:take:monochrome_logs take "monochrome_logs" @35:5
+  out out (out): -
+subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_INITIALISATION/:take:nextflow_cli_args take "nextflow_cli_args" @36:5
+  out out (out): -
+subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_INITIALISATION/:take:outdir take "outdir" @37:5
+  out out (out): -
+subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_INITIALISATION/:take:input take "input" @38:5
+  out out (out): -
+subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_INITIALISATION/:take:ena_metadata_fields take "ena_metadata_fields" @39:5
+  out out (out): -
+subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_INITIALISATION/:take:help take "help" @40:5
+  out out (out): -
+subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_INITIALISATION/:take:help_full take "help_full" @41:5
+  out out (out): -
+subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_INITIALISATION/:take:show_hidden take "show_hidden" @42:5
+  out out (out): -
+subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_INITIALISATION/:code@1 code "if (version) {" @49:5
+  in version (version): -
+    <- subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_INITIALISATION/:take:version[out] ? via version indirect
+subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_INITIALISATION/:code@2 code "if (outdir) {" @54:5
+  in outdir (outdir): -
+    <- subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_INITIALISATION/:take:outdir[out] ? via outdir indirect
+subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_INITIALISATION/:code@3 code "if (workflow.profile.tokenize(',').intersect(['conda', 'mam…" @58:5
+subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_INITIALISATION/before_text code "def before_text = """ @66:5
+  out before_text (before_text): String
+subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_INITIALISATION/after_text code "def after_text = """ @67:5
+  out after_text (after_text): String
+subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_INITIALISATION/before_text~2 code "before_text = """" @68:5
+  out before_text (before_text): String
+subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_INITIALISATION/after_text~2 code "after_text = """${workflow.manifest.doi ? "\n* The pipeline…" @78:5
+  out after_text (after_text): String
+subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_INITIALISATION/before_text~3 code "if (monochrome_logs) {" @85:5
+  in monochrome_logs (monochrome_logs): -
+    <- subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_INITIALISATION/:take:monochrome_logs[out] ? via monochrome_logs indirect
+  in before_text (before_text): -
+    <- subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_INITIALISATION/before_text~2[before_text] String via before_text indirect
+  out before_text (before_text): -
+subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_INITIALISATION/command code "command = "nextflow run ${workflow.manifest.name} -profile …" @89:5
+  out command (command): String
+subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_INITIALISATION/help_options code "if (help || help_full) {" @91:5
+  in help (help): -
+    <- subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_INITIALISATION/:take:help[out] ? via help indirect
+  in help_full (help_full): -
+    <- subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_INITIALISATION/:take:help_full[out] ? via help_full indirect
+  in before_text (before_text): -
+    <- subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_INITIALISATION/before_text~3[before_text] ? via before_text indirect
+  in after_text (after_text): -
+    <- subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_INITIALISATION/after_text~2[after_text] String via after_text indirect
+  in command (command): -
+    <- subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_INITIALISATION/command[command] String via command indirect
+  in show_hidden (show_hidden): -
+    <- subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_INITIALISATION/:take:show_hidden[out] ? via show_hidden indirect
+  out help_options (help_options): -
+subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_INITIALISATION/:code@4 code "checkProfileProvided(nextflow_cli_args)" @108:5
+  in nextflow_cli_args (nextflow_cli_args): -
+    <- subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_INITIALISATION/:take:nextflow_cli_args[out] ? via nextflow_cli_args indirect
+subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_INITIALISATION/:code@5 code "log.info(before_text)" @110:5
+  in before_text (before_text): -
+    <- subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_INITIALISATION/before_text~3[before_text] ? via before_text indirect
+subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_INITIALISATION/:code@6 code "log.info(paramsSummaryLog([:], workflow))" @111:5
+subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_INITIALISATION/:code@7 code "log.info(after_text)" @112:5
+  in after_text (after_text): -
+    <- subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_INITIALISATION/after_text~2[after_text] String via after_text indirect
+subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_INITIALISATION/:code@8 code "if (validate_params) {" @114:5
+  in validate_params (validate_params): -
+    <- subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_INITIALISATION/:take:validate_params[out] ? via validate_params indirect
+subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_INITIALISATION/:code@9 code "checkConfigProvided()" @121:5
+subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_INITIALISATION/:code@10 code "sraCheckENAMetadataFields(ena_metadata_fields)" @124:5
+  in ena_metadata_fields (ena_metadata_fields): -
+    <- subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_INITIALISATION/:take:ena_metadata_fields[out] ? via ena_metadata_fields indirect
+subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_INITIALISATION/channel.fromList@1 factory "channel.fromList" factory=channel.fromList @129:14
+  out out (out): Channel<?>
+subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_INITIALISATION/ch_ids chain ".unique" steps=unique @129:14
+  in in (in): -
+    <- subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_INITIALISATION/channel.fromList@1[out] Channel<?>
+  out out (out): Channel<?>
+subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_INITIALISATION/:emit:ids emit "ids" @133:5
+  in in (in): -
+    <- subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf#PIPELINE_INITIALISATION/ch_ids[out] Channel<?> via ch_ids

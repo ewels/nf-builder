@@ -1,0 +1,54 @@
+workflow subworkflows/local/vcf_normalization/main.nf#NORMALIZE_VCFS legacy
+statements 4, modelled 4
+subworkflows/local/vcf_normalization/main.nf#NORMALIZE_VCFS/:take:vcfs take "vcfs" @12:5
+  out out (out): -
+subworkflows/local/vcf_normalization/main.nf#NORMALIZE_VCFS/:take:fasta take "fasta" @13:5
+  out out (out): -
+subworkflows/local/vcf_normalization/main.nf#NORMALIZE_VCFS/ADD_INFO_TO_VCF@1 call "ADD_INFO_TO_VCF" callee=ADD_INFO_TO_VCF:process:modelled:legacy @17:5
+  in $1 (tuple(meta, vcf_gz)): Tuple
+    <- subworkflows/local/vcf_normalization/main.nf#NORMALIZE_VCFS/:take:vcfs[out] ? via vcfs
+  out vcf (vcf): Channel<Tuple>
+  out versions_gawk (versions_gawk): Channel<Tuple>
+subworkflows/local/vcf_normalization/main.nf#NORMALIZE_VCFS/.map@1 chain ".map" steps=map @20:19
+  in in (in): -
+    <- subworkflows/local/vcf_normalization/main.nf#NORMALIZE_VCFS/ADD_INFO_TO_VCF@1[vcf] Channel<Tuple> via ADD_INFO_TO_VCF.out.vcf
+  out out (out): Channel<?>
+subworkflows/local/vcf_normalization/main.nf#NORMALIZE_VCFS/TABIX_EXT_VCF@1 call "TABIX_EXT_VCF" callee=TABIX_EXT_VCF:process:modelled:legacy @20:5
+  in $1 (tuple(meta, infile, infile_tbi, regions)): Tuple
+    <- subworkflows/local/vcf_normalization/main.nf#NORMALIZE_VCFS/.map@1[out] Channel<?>
+  in action (action): -
+    = 'compress' : String
+  in make_index (make_index): -
+    = true : Boolean
+  in out_ext (out_ext): -
+    = 'vcf' : String
+  out output (output): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out versions_htslib (versions_htslib): Channel<Tuple>
+  out versions_xz (versions_xz): Channel<Tuple>
+subworkflows/local/vcf_normalization/main.nf#NORMALIZE_VCFS/.join@1 chain ".join" steps=join @23:15
+  in in (in): -
+    <- subworkflows/local/vcf_normalization/main.nf#NORMALIZE_VCFS/TABIX_EXT_VCF@1[output] Channel<Tuple> via TABIX_EXT_VCF.out.output
+  in 1:1 (join(1)): -
+    <- subworkflows/local/vcf_normalization/main.nf#NORMALIZE_VCFS/TABIX_EXT_VCF@1[index] Channel<Tuple> via TABIX_EXT_VCF.out.index
+  out out (out): Channel<?>
+subworkflows/local/vcf_normalization/main.nf#NORMALIZE_VCFS/VCFS_NORM@1 call "VCFS_NORM" callee=VCFS_NORM:process:modelled:legacy @23:5
+  in $1 (tuple(meta, vcf, tbi)): Tuple
+    <- subworkflows/local/vcf_normalization/main.nf#NORMALIZE_VCFS/.join@1[out] Channel<?>
+  in $2 (tuple(meta2, fasta)): Tuple
+    <- subworkflows/local/vcf_normalization/main.nf#NORMALIZE_VCFS/:take:fasta[out] ? via fasta
+  out vcf (vcf): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out versions_bcftools (versions_bcftools): Channel<Tuple>
+subworkflows/local/vcf_normalization/main.nf#NORMALIZE_VCFS/VCFS_NORM_SORT@1 call "VCFS_NORM_SORT" callee=VCFS_NORM_SORT:process:modelled:legacy @26:5
+  in $1 (tuple(meta, vcf)): Tuple
+    <- subworkflows/local/vcf_normalization/main.nf#NORMALIZE_VCFS/VCFS_NORM@1[vcf] Channel<Tuple> via VCFS_NORM.out.vcf
+  out vcf (vcf): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out versions_bcftools (versions_bcftools): Channel<Tuple>
+subworkflows/local/vcf_normalization/main.nf#NORMALIZE_VCFS/:emit:vcfs emit "vcfs" @29:5
+  in in (in): -
+    <- subworkflows/local/vcf_normalization/main.nf#NORMALIZE_VCFS/VCFS_NORM_SORT@1[vcf] Channel<Tuple> via VCFS_NORM_SORT.out.vcf
+subworkflows/local/vcf_normalization/main.nf#NORMALIZE_VCFS/:emit:tbis emit "tbis" @30:5
+  in in (in): -
+    <- subworkflows/local/vcf_normalization/main.nf#NORMALIZE_VCFS/VCFS_NORM_SORT@1[index] Channel<Tuple> via VCFS_NORM_SORT.out.index

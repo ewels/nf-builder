@@ -1,0 +1,67 @@
+workflow subworkflows/nf-core/utils_nfschema_plugin/main.nf#UTILS_NFSCHEMA_PLUGIN legacy
+statements 7, modelled 0
+subworkflows/nf-core/utils_nfschema_plugin/main.nf#UTILS_NFSCHEMA_PLUGIN/:take:input_workflow take "input_workflow" @12:5
+  out out (out): -
+subworkflows/nf-core/utils_nfschema_plugin/main.nf#UTILS_NFSCHEMA_PLUGIN/:take:validate_params take "validate_params" @13:5
+  out out (out): -
+subworkflows/nf-core/utils_nfschema_plugin/main.nf#UTILS_NFSCHEMA_PLUGIN/:take:parameters_schema take "parameters_schema" @14:5
+  out out (out): -
+subworkflows/nf-core/utils_nfschema_plugin/main.nf#UTILS_NFSCHEMA_PLUGIN/:take:help take "help" @19:5
+  out out (out): -
+subworkflows/nf-core/utils_nfschema_plugin/main.nf#UTILS_NFSCHEMA_PLUGIN/:take:help_full take "help_full" @20:5
+  out out (out): -
+subworkflows/nf-core/utils_nfschema_plugin/main.nf#UTILS_NFSCHEMA_PLUGIN/:take:show_hidden take "show_hidden" @21:5
+  out out (out): -
+subworkflows/nf-core/utils_nfschema_plugin/main.nf#UTILS_NFSCHEMA_PLUGIN/:take:before_text take "before_text" @22:5
+  out out (out): -
+subworkflows/nf-core/utils_nfschema_plugin/main.nf#UTILS_NFSCHEMA_PLUGIN/:take:after_text take "after_text" @23:5
+  out out (out): -
+subworkflows/nf-core/utils_nfschema_plugin/main.nf#UTILS_NFSCHEMA_PLUGIN/:take:command take "command" @24:5
+  out out (out): -
+subworkflows/nf-core/utils_nfschema_plugin/main.nf#UTILS_NFSCHEMA_PLUGIN/:take:cli_typecast take "cli_typecast" @25:5
+  out out (out): -
+subworkflows/nf-core/utils_nfschema_plugin/main.nf#UTILS_NFSCHEMA_PLUGIN/help_options code "if(help || help_full) {" @29:5
+  in help (help): -
+    <- subworkflows/nf-core/utils_nfschema_plugin/main.nf#UTILS_NFSCHEMA_PLUGIN/:take:help[out] ? via help indirect
+  in help_full (help_full): -
+    <- subworkflows/nf-core/utils_nfschema_plugin/main.nf#UTILS_NFSCHEMA_PLUGIN/:take:help_full[out] ? via help_full indirect
+  in before_text (before_text): -
+    <- subworkflows/nf-core/utils_nfschema_plugin/main.nf#UTILS_NFSCHEMA_PLUGIN/:take:before_text[out] ? via before_text indirect
+  in after_text (after_text): -
+    <- subworkflows/nf-core/utils_nfschema_plugin/main.nf#UTILS_NFSCHEMA_PLUGIN/:take:after_text[out] ? via after_text indirect
+  in command (command): -
+    <- subworkflows/nf-core/utils_nfschema_plugin/main.nf#UTILS_NFSCHEMA_PLUGIN/:take:command[out] ? via command indirect
+  in show_hidden (show_hidden): -
+    <- subworkflows/nf-core/utils_nfschema_plugin/main.nf#UTILS_NFSCHEMA_PLUGIN/:take:show_hidden[out] ? via show_hidden indirect
+  in parameters_schema (parameters_schema): -
+    <- subworkflows/nf-core/utils_nfschema_plugin/main.nf#UTILS_NFSCHEMA_PLUGIN/:take:parameters_schema[out] ? via parameters_schema indirect
+  out help_options (help_options): -
+subworkflows/nf-core/utils_nfschema_plugin/main.nf#UTILS_NFSCHEMA_PLUGIN/summary_options code "summary_options = [:]" @52:5
+  out summary_options (summary_options): Map
+subworkflows/nf-core/utils_nfschema_plugin/main.nf#UTILS_NFSCHEMA_PLUGIN/:code@1 code "if(parameters_schema) {" @53:5
+  in parameters_schema (parameters_schema): -
+    <- subworkflows/nf-core/utils_nfschema_plugin/main.nf#UTILS_NFSCHEMA_PLUGIN/:take:parameters_schema[out] ? via parameters_schema indirect
+  in summary_options (summary_options): -
+    <- subworkflows/nf-core/utils_nfschema_plugin/main.nf#UTILS_NFSCHEMA_PLUGIN/summary_options[summary_options] Map via summary_options indirect
+subworkflows/nf-core/utils_nfschema_plugin/main.nf#UTILS_NFSCHEMA_PLUGIN/:code@2 code "log.info before_text" @56:5
+  in before_text (before_text): -
+    <- subworkflows/nf-core/utils_nfschema_plugin/main.nf#UTILS_NFSCHEMA_PLUGIN/:take:before_text[out] ? via before_text indirect
+subworkflows/nf-core/utils_nfschema_plugin/main.nf#UTILS_NFSCHEMA_PLUGIN/:code@3 code "log.info paramsSummaryLog(summary_options, input_workflow)" @57:5
+  in summary_options (summary_options): -
+    <- subworkflows/nf-core/utils_nfschema_plugin/main.nf#UTILS_NFSCHEMA_PLUGIN/summary_options[summary_options] Map via summary_options indirect
+  in input_workflow (input_workflow): -
+    <- subworkflows/nf-core/utils_nfschema_plugin/main.nf#UTILS_NFSCHEMA_PLUGIN/:take:input_workflow[out] ? via input_workflow indirect
+subworkflows/nf-core/utils_nfschema_plugin/main.nf#UTILS_NFSCHEMA_PLUGIN/:code@4 code "log.info after_text" @58:5
+  in after_text (after_text): -
+    <- subworkflows/nf-core/utils_nfschema_plugin/main.nf#UTILS_NFSCHEMA_PLUGIN/:take:after_text[out] ? via after_text indirect
+subworkflows/nf-core/utils_nfschema_plugin/main.nf#UTILS_NFSCHEMA_PLUGIN/validateOptions code "if(validate_params) {" @64:5
+  in validate_params (validate_params): -
+    <- subworkflows/nf-core/utils_nfschema_plugin/main.nf#UTILS_NFSCHEMA_PLUGIN/:take:validate_params[out] ? via validate_params indirect
+  in parameters_schema (parameters_schema): -
+    <- subworkflows/nf-core/utils_nfschema_plugin/main.nf#UTILS_NFSCHEMA_PLUGIN/:take:parameters_schema[out] ? via parameters_schema indirect
+  in cli_typecast (cli_typecast): -
+    <- subworkflows/nf-core/utils_nfschema_plugin/main.nf#UTILS_NFSCHEMA_PLUGIN/:take:cli_typecast[out] ? via cli_typecast indirect
+  out validateOptions (validateOptions): -
+subworkflows/nf-core/utils_nfschema_plugin/main.nf#UTILS_NFSCHEMA_PLUGIN/:emit:dummy_emit emit "dummy_emit" @76:5
+  in in (in): -
+    = true : Boolean

@@ -1,0 +1,129 @@
+workflow workflows/fetchngs.nf#FETCHNGS legacy
+statements 15, modelled 14
+workflows/fetchngs.nf#FETCHNGS/:take:ids take "ids" @32:5
+  out out (out): -
+workflows/fetchngs.nf#FETCHNGS/:take:outdir take "outdir" @33:5
+  out out (out): -
+workflows/fetchngs.nf#FETCHNGS/:take:dbgap_key take "dbgap_key" @34:5
+  out out (out): -
+workflows/fetchngs.nf#FETCHNGS/:take:download_method take "download_method" @35:5
+  out out (out): -
+workflows/fetchngs.nf#FETCHNGS/:take:ena_metadata_fields take "ena_metadata_fields" @36:5
+  out out (out): -
+workflows/fetchngs.nf#FETCHNGS/:take:nf_core_pipeline take "nf_core_pipeline" @37:5
+  out out (out): -
+workflows/fetchngs.nf#FETCHNGS/:take:nf_core_rnaseq_strandedness take "nf_core_rnaseq_strandedness" @38:5
+  out out (out): -
+workflows/fetchngs.nf#FETCHNGS/:take:sample_mapping_fields take "sample_mapping_fields" @39:5
+  out out (out): -
+workflows/fetchngs.nf#FETCHNGS/:take:skip_fastq_download take "skip_fastq_download" @40:5
+  out out (out): -
+workflows/fetchngs.nf#FETCHNGS/SRA_IDS_TO_RUNINFO@1 call "SRA_IDS_TO_RUNINFO" callee=SRA_IDS_TO_RUNINFO:process:modelled:legacy @47:5
+  in id (id): -
+    <- workflows/fetchngs.nf#FETCHNGS/:take:ids[out] ? via ids
+  in fields (fields): -
+    <- workflows/fetchngs.nf#FETCHNGS/:take:ena_metadata_fields[out] ? via ena_metadata_fields
+  out tsv (tsv): Channel<Path>
+  out versions_python (versions_python): Channel<Tuple>
+workflows/fetchngs.nf#FETCHNGS/SRA_RUNINFO_TO_FTP@1 call "SRA_RUNINFO_TO_FTP" callee=SRA_RUNINFO_TO_FTP:process:modelled:legacy @52:5
+  in runinfo (runinfo): Path
+    <- workflows/fetchngs.nf#FETCHNGS/SRA_IDS_TO_RUNINFO@1[tsv] Channel<Path> via SRA_IDS_TO_RUNINFO.out.tsv
+  out tsv (tsv): Channel<Path>
+  out versions_python (versions_python): Channel<Tuple>
+workflows/fetchngs.nf#FETCHNGS/ch_sra_metadata chain ".filter.splitCsv.map.unique" steps=filter,splitCsv,map,unique @54:23
+  in in (in): -
+    <- workflows/fetchngs.nf#FETCHNGS/SRA_RUNINFO_TO_FTP@1[tsv] Channel<Path> via SRA_RUNINFO_TO_FTP.out.tsv
+  out out (out): Channel<?>
+workflows/fetchngs.nf#FETCHNGS/ch_sra_reads chain ".branch" steps=branch @62:24
+  guards then of !skip_fastq_download
+  in in (in): -
+    <- workflows/fetchngs.nf#FETCHNGS/ch_sra_metadata[out] Channel<?> via ch_sra_metadata
+  out out (out): Record
+workflows/fetchngs.nf#FETCHNGS/SRA_FASTQ_FTP@1 call "SRA_FASTQ_FTP" callee=SRA_FASTQ_FTP:process:modelled:legacy @89:9
+  guards then of !skip_fastq_download
+  in $1 (tuple(meta, fastq)): Tuple
+    <- workflows/fetchngs.nf#FETCHNGS/ch_sra_reads[out] Record via ch_sra_reads indirect
+  out fastq (fastq): Channel<Tuple>
+  out md5 (md5): Channel<Tuple>
+  out versions_wget (versions_wget): Channel<Tuple>
+workflows/fetchngs.nf#FETCHNGS/FASTQ_DOWNLOAD_PREFETCH_FASTERQDUMP_SRATOOLS@1 call "FASTQ_DOWNLOAD_PREFETCH_FASTERQDUMP_SRATOOLS" callee=FASTQ_DOWNLOAD_PREFETCH_FASTERQDUMP_SRATOOLS:workflow:modelled:legacy @94:9
+  guards then of !skip_fastq_download
+  in ch_sra_ids (ch_sra_ids): -
+    <- workflows/fetchngs.nf#FETCHNGS/ch_sra_reads[out] Record via ch_sra_reads indirect
+  in ch_dbgap_key (ch_dbgap_key): -
+    <- workflows/fetchngs.nf#FETCHNGS/:take:dbgap_key[out] ? via dbgap_key
+  out reads (reads): Channel<Tuple>
+workflows/fetchngs.nf#FETCHNGS/ASPERA_CLI@1 call "ASPERA_CLI" callee=ASPERA_CLI:process:modelled:legacy @99:9
+  guards then of !skip_fastq_download
+  in $1 (tuple(meta, fastq)): Tuple
+    <- workflows/fetchngs.nf#FETCHNGS/ch_sra_reads[out] Record via ch_sra_reads indirect
+  in user (user): -
+    = 'era-fasp' : String
+  out fastq (fastq): Channel<Tuple>
+  out md5 (md5): Channel<Tuple>
+  out versions_aspera_cli (versions_aspera_cli): Channel<Tuple>
+workflows/fetchngs.nf#FETCHNGS/FASTQDL@1 call "FASTQDL" callee=FASTQDL:process:modelled:legacy @101:9
+  guards then of !skip_fastq_download
+  in $1 (tuple(meta, accession)): Tuple
+    <- workflows/fetchngs.nf#FETCHNGS/ch_sra_reads[out] Record via ch_sra_reads indirect
+  out fastq (fastq): Channel<Tuple>
+  out runinfo (runinfo): Channel<Tuple>
+  out runmergers (runmergers): Channel<Tuple>
+  out versions_fastqdl (versions_fastqdl): Channel<Tuple>
+workflows/fetchngs.nf#FETCHNGS/ch_sra_metadata~2 chain ".mix.mix.mix.map" steps=mix,mix,mix,map @104:27
+  guards then of !skip_fastq_download
+  in in (in): -
+    <- workflows/fetchngs.nf#FETCHNGS/SRA_FASTQ_FTP@1[fastq] Channel<Tuple> via SRA_FASTQ_FTP.out.fastq
+  in 1:1 (mix(other)): -
+    <- workflows/fetchngs.nf#FETCHNGS/FASTQ_DOWNLOAD_PREFETCH_FASTERQDUMP_SRATOOLS@1[reads] Channel<Tuple> via FASTQ_DOWNLOAD_PREFETCH_FASTERQDUMP_SRATOOLS.out.reads
+  in 2:1 (mix(other)): -
+    <- workflows/fetchngs.nf#FETCHNGS/ASPERA_CLI@1[fastq] Channel<Tuple> via ASPERA_CLI.out.fastq
+  in 3:1 (mix(other)): -
+    <- workflows/fetchngs.nf#FETCHNGS/FASTQDL@1[fastq] Channel<Tuple> via FASTQDL.out.fastq
+  out out (out): Channel<?>
+workflows/fetchngs.nf#FETCHNGS/CHANNEL_SRA_CREATE_CSV@1 call "CHANNEL_SRA_CREATE_CSV" callee=CHANNEL_SRA_CREATE_CSV:workflow:modelled:legacy @118:5
+  in ch_sra_metadata (ch_sra_metadata): -
+    <- workflows/fetchngs.nf#FETCHNGS/ch_sra_metadata[out] Channel<?> via ch_sra_metadata indirect
+    <- workflows/fetchngs.nf#FETCHNGS/ch_sra_metadata~2[out] Channel<?> via ch_sra_metadata indirect
+  in pipeline (pipeline): -
+    <- workflows/fetchngs.nf#FETCHNGS/:take:nf_core_pipeline[out] ? via nf_core_pipeline
+  in strandedness (strandedness): -
+    <- workflows/fetchngs.nf#FETCHNGS/:take:nf_core_rnaseq_strandedness[out] ? via nf_core_rnaseq_strandedness
+  in mapping_fields (mapping_fields): -
+    <- workflows/fetchngs.nf#FETCHNGS/:take:sample_mapping_fields[out] ? via sample_mapping_fields
+  in outdir (outdir): -
+    <- workflows/fetchngs.nf#FETCHNGS/:take:outdir[out] ? via outdir
+  out samplesheet (samplesheet): Channel<?>
+  out mappings (mappings): Channel<?>
+workflows/fetchngs.nf#FETCHNGS/.filter@1 chain ".filter" steps=filter @126:29
+  in in (in): -
+    <- workflows/fetchngs.nf#FETCHNGS/CHANNEL_SRA_CREATE_CSV@1[mappings] Channel<?> via ch_mappings
+  out out (out): Channel<?>
+workflows/fetchngs.nf#FETCHNGS/MULTIQC_MAPPINGS_CONFIG@1 call "MULTIQC_MAPPINGS_CONFIG" callee=MULTIQC_MAPPINGS_CONFIG:process:modelled:legacy @126:5
+  in csv (csv): Path
+    <- workflows/fetchngs.nf#FETCHNGS/.filter@1[out] Channel<?>
+  out yml (yml): Channel<Path>
+  out versions_python (versions_python): Channel<Tuple>
+workflows/fetchngs.nf#FETCHNGS/ch_collated_versions code "def ch_collated_versions = softwareVersionsToYAML(" @132:5
+  in outdir (outdir): -
+    <- workflows/fetchngs.nf#FETCHNGS/:take:outdir[out] ? via outdir indirect
+  out ch_collated_versions (ch_collated_versions): -
+workflows/fetchngs.nf#FETCHNGS/:emit:samplesheet emit "samplesheet" @143:5
+  in in (in): -
+    <- workflows/fetchngs.nf#FETCHNGS/CHANNEL_SRA_CREATE_CSV@1[samplesheet] Channel<?> via ch_samplesheet
+workflows/fetchngs.nf#FETCHNGS/:emit:mappings emit "mappings" @144:5
+  in in (in): -
+    <- workflows/fetchngs.nf#FETCHNGS/CHANNEL_SRA_CREATE_CSV@1[mappings] Channel<?> via ch_mappings
+workflows/fetchngs.nf#FETCHNGS/:emit:sample_mappings emit "sample_mappings" @145:5
+  in in (in): -
+    <- workflows/fetchngs.nf#FETCHNGS/MULTIQC_MAPPINGS_CONFIG@1[yml] Channel<Path> via ch_sample_mappings_yml
+workflows/fetchngs.nf#FETCHNGS/:emit:sra_metadata emit "sra_metadata" @146:5
+  in in (in): -
+    <- workflows/fetchngs.nf#FETCHNGS/ch_sra_metadata[out] Channel<?> via ch_sra_metadata indirect
+    <- workflows/fetchngs.nf#FETCHNGS/ch_sra_metadata~2[out] Channel<?> via ch_sra_metadata indirect
+workflows/fetchngs.nf#FETCHNGS/:emit:versions emit "versions" @147:5
+  in in (in): -
+    <- workflows/fetchngs.nf#FETCHNGS/ch_collated_versions[ch_collated_versions] ? via ch_collated_versions
+bound @120:5 ch_samplesheet
+bound @121:5 ch_mappings
+bound @127:5 ch_sample_mappings_yml

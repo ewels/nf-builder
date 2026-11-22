@@ -1,0 +1,101 @@
+workflow subworkflows/nf-core/bam_dedup_stats_samtools_umitools/main.nf#BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS legacy
+statements 8, modelled 8
+subworkflows/nf-core/bam_dedup_stats_samtools_umitools/main.nf#BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS/:take:ch_bam_bai take "ch_bam_bai" @16:5
+  out out (out): -
+subworkflows/nf-core/bam_dedup_stats_samtools_umitools/main.nf#BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS/:take:val_get_dedup_stats take "val_get_dedup_stats" @17:5
+  out out (out): -
+subworkflows/nf-core/bam_dedup_stats_samtools_umitools/main.nf#BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS/:take:val_primary_only take "val_primary_only" @18:5
+  out out (out): -
+subworkflows/nf-core/bam_dedup_stats_samtools_umitools/main.nf#BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS/SAMTOOLS_VIEW_PRIMARY@1 call "SAMTOOLS_VIEW_PRIMARY" callee=SAMTOOLS_VIEW_PRIMARY:process:modelled:legacy @26:9
+  guards then of val_primary_only
+  in $1 (tuple(meta, input, index)): Tuple
+    <- subworkflows/nf-core/bam_dedup_stats_samtools_umitools/main.nf#BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS/:take:ch_bam_bai[out] ? via ch_bam_bai
+  in $2 (tuple(meta2, fasta, fai)): Tuple
+    = [[], [], []] : List
+  in $3 (tuple(meta3, qname)): Tuple
+    = [[], []] : List
+  in $4 (tuple(meta4, bed)): Tuple
+    = [[], []] : List
+  in index_format (index_format): -
+    = [] : List
+  out bam (bam): Channel<Tuple>
+  out cram (cram): Channel<Tuple>
+  out sam (sam): Channel<Tuple>
+  out bai (bai): Channel<Tuple>
+  out csi (csi): Channel<Tuple>
+  out crai (crai): Channel<Tuple>
+  out unselected (unselected): Channel<Tuple>
+  out unselected_index (unselected_index): Channel<Tuple>
+  out versions_samtools (versions_samtools): Channel<Tuple>
+subworkflows/nf-core/bam_dedup_stats_samtools_umitools/main.nf#BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS/SAMTOOLS_INDEX_PRIMARY@1 call "SAMTOOLS_INDEX_PRIMARY" callee=SAMTOOLS_INDEX_PRIMARY:process:modelled:legacy @34:9
+  guards then of val_primary_only
+  in $1 (tuple(meta, input)): Tuple
+    <- subworkflows/nf-core/bam_dedup_stats_samtools_umitools/main.nf#BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS/SAMTOOLS_VIEW_PRIMARY@1[bam] Channel<Tuple> via SAMTOOLS_VIEW_PRIMARY.out.bam
+  out index (index): Channel<Tuple>
+  out versions_samtools (versions_samtools): Channel<Tuple>
+subworkflows/nf-core/bam_dedup_stats_samtools_umitools/main.nf#BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS/ch_dedup_input chain ".join" steps=join @36:26
+  guards then of val_primary_only
+  in in (in): -
+    <- subworkflows/nf-core/bam_dedup_stats_samtools_umitools/main.nf#BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS/SAMTOOLS_VIEW_PRIMARY@1[bam] Channel<Tuple> via SAMTOOLS_VIEW_PRIMARY.out.bam
+  in 1:1 (join(right)): -
+    <- subworkflows/nf-core/bam_dedup_stats_samtools_umitools/main.nf#BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS/SAMTOOLS_INDEX_PRIMARY@1[index] Channel<Tuple> via SAMTOOLS_INDEX_PRIMARY.out.index
+  out out (out): Channel<Record>
+subworkflows/nf-core/bam_dedup_stats_samtools_umitools/main.nf#BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS/UMITOOLS_DEDUP@1 call "UMITOOLS_DEDUP" callee=UMITOOLS_DEDUP:process:modelled:legacy @45:5
+  in $1 (tuple(meta, bam, bai)): Tuple
+    <- subworkflows/nf-core/bam_dedup_stats_samtools_umitools/main.nf#BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS/:take:ch_bam_bai[out] ? via ch_dedup_input indirect
+    <- subworkflows/nf-core/bam_dedup_stats_samtools_umitools/main.nf#BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS/ch_dedup_input[out] Channel<Record> via ch_dedup_input indirect
+  in get_output_stats (get_output_stats): -
+    <- subworkflows/nf-core/bam_dedup_stats_samtools_umitools/main.nf#BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS/:take:val_get_dedup_stats[out] ? via val_get_dedup_stats
+  out bam (bam): Channel<Tuple>
+  out log (log): Channel<Tuple>
+  out tsv_edit_distance (tsv_edit_distance): Channel<Tuple>
+  out tsv_per_umi (tsv_per_umi): Channel<Tuple>
+  out tsv_umi_per_position (tsv_umi_per_position): Channel<Tuple>
+  out versions_umitools (versions_umitools): Channel<Tuple>
+subworkflows/nf-core/bam_dedup_stats_samtools_umitools/main.nf#BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS/SAMTOOLS_INDEX@1 call "SAMTOOLS_INDEX" callee=SAMTOOLS_INDEX:process:modelled:legacy @50:5
+  in $1 (tuple(meta, input)): Tuple
+    <- subworkflows/nf-core/bam_dedup_stats_samtools_umitools/main.nf#BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS/UMITOOLS_DEDUP@1[bam] Channel<Tuple> via UMITOOLS_DEDUP.out.bam
+  out index (index): Channel<Tuple>
+  out versions_samtools (versions_samtools): Channel<Tuple>
+subworkflows/nf-core/bam_dedup_stats_samtools_umitools/main.nf#BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS/ch_bam_bai_dedup chain ".join" steps=join @52:24
+  in in (in): -
+    <- subworkflows/nf-core/bam_dedup_stats_samtools_umitools/main.nf#BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS/UMITOOLS_DEDUP@1[bam] Channel<Tuple> via UMITOOLS_DEDUP.out.bam
+  in 1:1 (join(right)): -
+    <- subworkflows/nf-core/bam_dedup_stats_samtools_umitools/main.nf#BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS/SAMTOOLS_INDEX@1[index] Channel<Tuple> via SAMTOOLS_INDEX.out.index
+  out out (out): Channel<Record>
+subworkflows/nf-core/bam_dedup_stats_samtools_umitools/main.nf#BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS/BAM_STATS_SAMTOOLS@1 call "BAM_STATS_SAMTOOLS" callee=BAM_STATS_SAMTOOLS:workflow:modelled:legacy @54:5
+  in ch_bam_bai (ch_bam_bai): -
+    <- subworkflows/nf-core/bam_dedup_stats_samtools_umitools/main.nf#BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS/ch_bam_bai_dedup[out] Channel<Record> via ch_bam_bai_dedup
+  in ch_fasta_fai (ch_fasta_fai): -
+    = [[:], [], []] : List
+  out stats (stats): Channel<Tuple>
+  out flagstat (flagstat): Channel<Tuple>
+  out idxstats (idxstats): Channel<Tuple>
+subworkflows/nf-core/bam_dedup_stats_samtools_umitools/main.nf#BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS/:emit:bam emit "bam" @57:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_dedup_stats_samtools_umitools/main.nf#BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS/UMITOOLS_DEDUP@1[bam] Channel<Tuple> via UMITOOLS_DEDUP.out.bam
+subworkflows/nf-core/bam_dedup_stats_samtools_umitools/main.nf#BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS/:emit:deduplog emit "deduplog" @58:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_dedup_stats_samtools_umitools/main.nf#BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS/UMITOOLS_DEDUP@1[log] Channel<Tuple> via UMITOOLS_DEDUP.out.log
+subworkflows/nf-core/bam_dedup_stats_samtools_umitools/main.nf#BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS/:emit:tsv_edit_distance emit "tsv_edit_distance" @59:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_dedup_stats_samtools_umitools/main.nf#BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS/UMITOOLS_DEDUP@1[tsv_edit_distance] Channel<Tuple> via UMITOOLS_DEDUP.out.tsv_edit_distance
+subworkflows/nf-core/bam_dedup_stats_samtools_umitools/main.nf#BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS/:emit:tsv_per_umi emit "tsv_per_umi" @60:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_dedup_stats_samtools_umitools/main.nf#BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS/UMITOOLS_DEDUP@1[tsv_per_umi] Channel<Tuple> via UMITOOLS_DEDUP.out.tsv_per_umi
+subworkflows/nf-core/bam_dedup_stats_samtools_umitools/main.nf#BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS/:emit:tsv_umi_per_position emit "tsv_umi_per_position" @61:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_dedup_stats_samtools_umitools/main.nf#BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS/UMITOOLS_DEDUP@1[tsv_umi_per_position] Channel<Tuple> via UMITOOLS_DEDUP.out.tsv_umi_per_position
+subworkflows/nf-core/bam_dedup_stats_samtools_umitools/main.nf#BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS/:emit:index emit "index" @62:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_dedup_stats_samtools_umitools/main.nf#BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS/SAMTOOLS_INDEX@1[index] Channel<Tuple> via SAMTOOLS_INDEX.out.index
+subworkflows/nf-core/bam_dedup_stats_samtools_umitools/main.nf#BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS/:emit:stats emit "stats" @63:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_dedup_stats_samtools_umitools/main.nf#BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS/BAM_STATS_SAMTOOLS@1[stats] Channel<Tuple> via BAM_STATS_SAMTOOLS.out.stats
+subworkflows/nf-core/bam_dedup_stats_samtools_umitools/main.nf#BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS/:emit:flagstat emit "flagstat" @64:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_dedup_stats_samtools_umitools/main.nf#BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS/BAM_STATS_SAMTOOLS@1[flagstat] Channel<Tuple> via BAM_STATS_SAMTOOLS.out.flagstat
+subworkflows/nf-core/bam_dedup_stats_samtools_umitools/main.nf#BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS/:emit:idxstats emit "idxstats" @65:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_dedup_stats_samtools_umitools/main.nf#BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS/BAM_STATS_SAMTOOLS@1[idxstats] Channel<Tuple> via BAM_STATS_SAMTOOLS.out.idxstats
+bound @39:9 ch_dedup_input

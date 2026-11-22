@@ -1,0 +1,80 @@
+workflow subworkflows/nf-core/fastq_subsample_fq_salmon/main.nf#FASTQ_SUBSAMPLE_FQ_SALMON legacy
+statements 6, modelled 6
+subworkflows/nf-core/fastq_subsample_fq_salmon/main.nf#FASTQ_SUBSAMPLE_FQ_SALMON/:take:ch_reads take "ch_reads" @15:5
+  out out (out): -
+subworkflows/nf-core/fastq_subsample_fq_salmon/main.nf#FASTQ_SUBSAMPLE_FQ_SALMON/:take:ch_genome_fasta take "ch_genome_fasta" @16:5
+  out out (out): -
+subworkflows/nf-core/fastq_subsample_fq_salmon/main.nf#FASTQ_SUBSAMPLE_FQ_SALMON/:take:ch_transcript_fasta take "ch_transcript_fasta" @17:5
+  out out (out): -
+subworkflows/nf-core/fastq_subsample_fq_salmon/main.nf#FASTQ_SUBSAMPLE_FQ_SALMON/:take:ch_gtf take "ch_gtf" @18:5
+  out out (out): -
+subworkflows/nf-core/fastq_subsample_fq_salmon/main.nf#FASTQ_SUBSAMPLE_FQ_SALMON/:take:ch_index take "ch_index" @19:5
+  out out (out): -
+subworkflows/nf-core/fastq_subsample_fq_salmon/main.nf#FASTQ_SUBSAMPLE_FQ_SALMON/:take:make_index take "make_index" @20:5
+  out out (out): -
+subworkflows/nf-core/fastq_subsample_fq_salmon/main.nf#FASTQ_SUBSAMPLE_FQ_SALMON/ch_gtf_transcript_fasta chain ".combine" steps=combine @24:31
+  in in (in): -
+    <- subworkflows/nf-core/fastq_subsample_fq_salmon/main.nf#FASTQ_SUBSAMPLE_FQ_SALMON/:take:ch_gtf[out] ? via ch_gtf
+  in 1:1 (combine(right)): -
+    <- subworkflows/nf-core/fastq_subsample_fq_salmon/main.nf#FASTQ_SUBSAMPLE_FQ_SALMON/:take:ch_transcript_fasta[out] ? via ch_transcript_fasta
+  out out (out): ?
+subworkflows/nf-core/fastq_subsample_fq_salmon/main.nf#FASTQ_SUBSAMPLE_FQ_SALMON/.map@1 chain ".map" steps=map @33:22
+  guards then of make_index
+  in in (in): -
+    <- subworkflows/nf-core/fastq_subsample_fq_salmon/main.nf#FASTQ_SUBSAMPLE_FQ_SALMON/:take:ch_genome_fasta[out] ? via ch_genome_fasta
+  out out (out): ?
+subworkflows/nf-core/fastq_subsample_fq_salmon/main.nf#FASTQ_SUBSAMPLE_FQ_SALMON/ch_index_input chain ".combine.map" steps=combine,map @32:9
+  guards then of make_index
+  in in (in): -
+    <- subworkflows/nf-core/fastq_subsample_fq_salmon/main.nf#FASTQ_SUBSAMPLE_FQ_SALMON/:take:ch_transcript_fasta[out] ? via ch_transcript_fasta
+  in 1:1 (combine(right)): -
+    <- subworkflows/nf-core/fastq_subsample_fq_salmon/main.nf#FASTQ_SUBSAMPLE_FQ_SALMON/.map@1[out] ?
+  out out (out): ?
+subworkflows/nf-core/fastq_subsample_fq_salmon/main.nf#FASTQ_SUBSAMPLE_FQ_SALMON/SALMON_INDEX@1 call "SALMON_INDEX" callee=SALMON_INDEX:process:modelled:legacy @37:20
+  guards then of make_index
+  in $1 (tuple(meta, transcript_fasta, genome_fasta)): Tuple
+    <- subworkflows/nf-core/fastq_subsample_fq_salmon/main.nf#FASTQ_SUBSAMPLE_FQ_SALMON/ch_index_input[out] ? via ch_index_input
+  out index (index): Channel<Tuple>
+  out versions_salmon (versions_salmon): Channel<Tuple>
+subworkflows/nf-core/fastq_subsample_fq_salmon/main.nf#FASTQ_SUBSAMPLE_FQ_SALMON/ch_index chain ".map" steps=map @40:20
+  guards else of make_index
+  in in (in): -
+    <- subworkflows/nf-core/fastq_subsample_fq_salmon/main.nf#FASTQ_SUBSAMPLE_FQ_SALMON/:take:ch_index[out] ? via ch_index
+  out out (out): ?
+subworkflows/nf-core/fastq_subsample_fq_salmon/main.nf#FASTQ_SUBSAMPLE_FQ_SALMON/FQ_SUBSAMPLE@1 call "FQ_SUBSAMPLE" callee=FQ_SUBSAMPLE:process:modelled:legacy @46:5
+  in $1 (tuple(meta, fastq)): Tuple
+    <- subworkflows/nf-core/fastq_subsample_fq_salmon/main.nf#FASTQ_SUBSAMPLE_FQ_SALMON/:take:ch_reads[out] ? via ch_reads
+  out fastq (fastq): Channel<Tuple>
+  out versions_fq (versions_fq): Channel<Tuple>
+subworkflows/nf-core/fastq_subsample_fq_salmon/main.nf#FASTQ_SUBSAMPLE_FQ_SALMON/.combine@1 chain ".combine.first" steps=combine,first @51:44
+  in in (in): -
+    <- subworkflows/nf-core/fastq_subsample_fq_salmon/main.nf#FASTQ_SUBSAMPLE_FQ_SALMON/SALMON_INDEX@1[index] Channel<Tuple> via ch_index indirect
+    <- subworkflows/nf-core/fastq_subsample_fq_salmon/main.nf#FASTQ_SUBSAMPLE_FQ_SALMON/ch_index[out] ? via ch_index indirect
+  in 1:1 (combine(right)): -
+    <- subworkflows/nf-core/fastq_subsample_fq_salmon/main.nf#FASTQ_SUBSAMPLE_FQ_SALMON/ch_gtf_transcript_fasta[out] ? via ch_gtf_transcript_fasta
+  out out (out): Value<?>
+subworkflows/nf-core/fastq_subsample_fq_salmon/main.nf#FASTQ_SUBSAMPLE_FQ_SALMON/SALMON_QUANT@1 call "SALMON_QUANT" callee=SALMON_QUANT:process:modelled:legacy @51:5
+  in $1 (tuple(meta, reads)): Tuple
+    <- subworkflows/nf-core/fastq_subsample_fq_salmon/main.nf#FASTQ_SUBSAMPLE_FQ_SALMON/FQ_SUBSAMPLE@1[fastq] Channel<Tuple> via FQ_SUBSAMPLE.out.fastq
+  in $2 (tuple(meta2, index, gtf, transcript_fasta)): Tuple
+    <- subworkflows/nf-core/fastq_subsample_fq_salmon/main.nf#FASTQ_SUBSAMPLE_FQ_SALMON/.combine@1[out] Value<?>
+  out results (results): Channel<Tuple>
+  out json_info (json_info): Channel<Tuple>
+  out lib_format_counts (lib_format_counts): Channel<Tuple>
+  out versions_salmon (versions_salmon): Channel<Tuple>
+subworkflows/nf-core/fastq_subsample_fq_salmon/main.nf#FASTQ_SUBSAMPLE_FQ_SALMON/:emit:index emit "index" @54:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_subsample_fq_salmon/main.nf#FASTQ_SUBSAMPLE_FQ_SALMON/SALMON_INDEX@1[index] Channel<Tuple> via ch_index indirect
+    <- subworkflows/nf-core/fastq_subsample_fq_salmon/main.nf#FASTQ_SUBSAMPLE_FQ_SALMON/ch_index[out] ? via ch_index indirect
+subworkflows/nf-core/fastq_subsample_fq_salmon/main.nf#FASTQ_SUBSAMPLE_FQ_SALMON/:emit:reads emit "reads" @56:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_subsample_fq_salmon/main.nf#FASTQ_SUBSAMPLE_FQ_SALMON/FQ_SUBSAMPLE@1[fastq] Channel<Tuple> via FQ_SUBSAMPLE.out.fastq
+subworkflows/nf-core/fastq_subsample_fq_salmon/main.nf#FASTQ_SUBSAMPLE_FQ_SALMON/:emit:results emit "results" @58:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_subsample_fq_salmon/main.nf#FASTQ_SUBSAMPLE_FQ_SALMON/SALMON_QUANT@1[results] Channel<Tuple> via SALMON_QUANT.out.results
+subworkflows/nf-core/fastq_subsample_fq_salmon/main.nf#FASTQ_SUBSAMPLE_FQ_SALMON/:emit:json_info emit "json_info" @59:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_subsample_fq_salmon/main.nf#FASTQ_SUBSAMPLE_FQ_SALMON/SALMON_QUANT@1[json_info] Channel<Tuple> via SALMON_QUANT.out.json_info
+subworkflows/nf-core/fastq_subsample_fq_salmon/main.nf#FASTQ_SUBSAMPLE_FQ_SALMON/:emit:lib_format_counts emit "lib_format_counts" @60:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_subsample_fq_salmon/main.nf#FASTQ_SUBSAMPLE_FQ_SALMON/SALMON_QUANT@1[lib_format_counts] Channel<Tuple> via SALMON_QUANT.out.lib_format_counts

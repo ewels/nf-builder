@@ -1,0 +1,65 @@
+workflow subworkflows/local/bam_variant_calling_single_tiddit/main.nf#BAM_VARIANT_CALLING_SINGLE_TIDDIT legacy
+statements 5, modelled 5
+subworkflows/local/bam_variant_calling_single_tiddit/main.nf#BAM_VARIANT_CALLING_SINGLE_TIDDIT/:take:cram take "cram" @12:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_single_tiddit/main.nf#BAM_VARIANT_CALLING_SINGLE_TIDDIT/:take:fasta take "fasta" @13:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_single_tiddit/main.nf#BAM_VARIANT_CALLING_SINGLE_TIDDIT/:take:fasta_fai take "fasta_fai" @14:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_single_tiddit/main.nf#BAM_VARIANT_CALLING_SINGLE_TIDDIT/:take:bwa take "bwa" @15:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_single_tiddit/main.nf#BAM_VARIANT_CALLING_SINGLE_TIDDIT/.combine@1 chain ".combine.map" steps=combine,map @19:21
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_single_tiddit/main.nf#BAM_VARIANT_CALLING_SINGLE_TIDDIT/:take:fasta[out] ? via fasta
+  in 1:1 (combine(right)): -
+    <- subworkflows/local/bam_variant_calling_single_tiddit/main.nf#BAM_VARIANT_CALLING_SINGLE_TIDDIT/:take:fasta_fai[out] ? via fasta_fai
+  out out (out): ?
+subworkflows/local/bam_variant_calling_single_tiddit/main.nf#BAM_VARIANT_CALLING_SINGLE_TIDDIT/TIDDIT_SV@1 call "TIDDIT_SV" callee=TIDDIT_SV:process:modelled:legacy @19:5
+  in $1 (tuple(meta, input, input_index)): Tuple
+    <- subworkflows/local/bam_variant_calling_single_tiddit/main.nf#BAM_VARIANT_CALLING_SINGLE_TIDDIT/:take:cram[out] ? via cram
+  in $2 (tuple(meta2, fasta, fai)): Tuple
+    <- subworkflows/local/bam_variant_calling_single_tiddit/main.nf#BAM_VARIANT_CALLING_SINGLE_TIDDIT/.combine@1[out] ?
+  in $3 (tuple(meta3, bwa_index)): Tuple
+    <- subworkflows/local/bam_variant_calling_single_tiddit/main.nf#BAM_VARIANT_CALLING_SINGLE_TIDDIT/:take:bwa[out] ? via bwa
+  out vcf (vcf): Channel<Tuple>
+  out ploidy (ploidy): Channel<Tuple>
+  out versions_tiddit (versions_tiddit): Channel<Tuple>
+subworkflows/local/bam_variant_calling_single_tiddit/main.nf#BAM_VARIANT_CALLING_SINGLE_TIDDIT/.map@1 chain ".map" steps=map @21:27
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_single_tiddit/main.nf#BAM_VARIANT_CALLING_SINGLE_TIDDIT/TIDDIT_SV@1[vcf] Channel<Tuple> via TIDDIT_SV.out.vcf
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_single_tiddit/main.nf#BAM_VARIANT_CALLING_SINGLE_TIDDIT/TABIX_BGZIP_TIDDIT_SV@1 call "TABIX_BGZIP_TIDDIT_SV" callee=TABIX_BGZIP_TIDDIT_SV:process:modelled:legacy @21:5
+  in $1 (tuple(meta, infile, infile_tbi, regions)): Tuple
+    <- subworkflows/local/bam_variant_calling_single_tiddit/main.nf#BAM_VARIANT_CALLING_SINGLE_TIDDIT/.map@1[out] Channel<?>
+  in action (action): -
+    = 'compress' : String
+  in make_index (make_index): -
+    = true : Boolean
+  in out_ext (out_ext): -
+    = 'vcf' : String
+  out output (output): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out versions_htslib (versions_htslib): Channel<Tuple>
+  out versions_xz (versions_xz): Channel<Tuple>
+subworkflows/local/bam_variant_calling_single_tiddit/main.nf#BAM_VARIANT_CALLING_SINGLE_TIDDIT/vcf chain ".join.map" steps=join,map @24:11
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_single_tiddit/main.nf#BAM_VARIANT_CALLING_SINGLE_TIDDIT/TABIX_BGZIP_TIDDIT_SV@1[output] Channel<Tuple> via TABIX_BGZIP_TIDDIT_SV.out.output
+  in 1:1 (join(1)): -
+    <- subworkflows/local/bam_variant_calling_single_tiddit/main.nf#BAM_VARIANT_CALLING_SINGLE_TIDDIT/TABIX_BGZIP_TIDDIT_SV@1[index] Channel<Tuple> via TABIX_BGZIP_TIDDIT_SV.out.index
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_single_tiddit/main.nf#BAM_VARIANT_CALLING_SINGLE_TIDDIT/tbi chain ".join.map" steps=join,map @25:11
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_single_tiddit/main.nf#BAM_VARIANT_CALLING_SINGLE_TIDDIT/TABIX_BGZIP_TIDDIT_SV@1[output] Channel<Tuple> via TABIX_BGZIP_TIDDIT_SV.out.output
+  in 1:1 (join(1)): -
+    <- subworkflows/local/bam_variant_calling_single_tiddit/main.nf#BAM_VARIANT_CALLING_SINGLE_TIDDIT/TABIX_BGZIP_TIDDIT_SV@1[index] Channel<Tuple> via TABIX_BGZIP_TIDDIT_SV.out.index
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_single_tiddit/main.nf#BAM_VARIANT_CALLING_SINGLE_TIDDIT/:emit:ploidy emit "ploidy" @28:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_single_tiddit/main.nf#BAM_VARIANT_CALLING_SINGLE_TIDDIT/TIDDIT_SV@1[ploidy] Channel<Tuple> via ploidy
+subworkflows/local/bam_variant_calling_single_tiddit/main.nf#BAM_VARIANT_CALLING_SINGLE_TIDDIT/:emit:vcf emit "vcf" @29:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_single_tiddit/main.nf#BAM_VARIANT_CALLING_SINGLE_TIDDIT/vcf[out] Channel<?> via vcf
+subworkflows/local/bam_variant_calling_single_tiddit/main.nf#BAM_VARIANT_CALLING_SINGLE_TIDDIT/:emit:tbi emit "tbi" @30:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_single_tiddit/main.nf#BAM_VARIANT_CALLING_SINGLE_TIDDIT/tbi[out] Channel<?> via tbi
+bound @23:5 ploidy

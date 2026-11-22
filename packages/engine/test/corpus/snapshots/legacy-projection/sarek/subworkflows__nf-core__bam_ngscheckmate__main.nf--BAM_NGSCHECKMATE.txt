@@ -1,0 +1,68 @@
+workflow subworkflows/nf-core/bam_ngscheckmate/main.nf#BAM_NGSCHECKMATE legacy
+statements 5, modelled 5
+subworkflows/nf-core/bam_ngscheckmate/main.nf#BAM_NGSCHECKMATE/:take:ch_input take "ch_input" @7:5
+  out out (out): -
+subworkflows/nf-core/bam_ngscheckmate/main.nf#BAM_NGSCHECKMATE/:take:ch_snp_bed take "ch_snp_bed" @8:5
+  out out (out): -
+subworkflows/nf-core/bam_ngscheckmate/main.nf#BAM_NGSCHECKMATE/:take:ch_fasta take "ch_fasta" @9:5
+  out out (out): -
+subworkflows/nf-core/bam_ngscheckmate/main.nf#BAM_NGSCHECKMATE/ch_input_bed chain ".combine.map" steps=combine,map @12:20
+  in in (in): -
+    <- subworkflows/nf-core/bam_ngscheckmate/main.nf#BAM_NGSCHECKMATE/:take:ch_input[out] ? via ch_input
+  in 1:1 (combine(right)): -
+    <- subworkflows/nf-core/bam_ngscheckmate/main.nf#BAM_NGSCHECKMATE/:take:ch_snp_bed[out] ? via ch_snp_bed
+  out out (out): ?
+subworkflows/nf-core/bam_ngscheckmate/main.nf#BAM_NGSCHECKMATE/.collect@1 chain ".collect" steps=collect @18:37
+  in in (in): -
+    <- subworkflows/nf-core/bam_ngscheckmate/main.nf#BAM_NGSCHECKMATE/:take:ch_fasta[out] ? via ch_fasta
+  out out (out): Value<Bag<?>>
+subworkflows/nf-core/bam_ngscheckmate/main.nf#BAM_NGSCHECKMATE/BCFTOOLS_MPILEUP@1 call "BCFTOOLS_MPILEUP" callee=BCFTOOLS_MPILEUP:process:modelled:legacy @18:5
+  in $1 (tuple(meta, bam, intervals_mpileup, intervals_call)): Tuple
+    <- subworkflows/nf-core/bam_ngscheckmate/main.nf#BAM_NGSCHECKMATE/ch_input_bed[out] ? via ch_input_bed
+  in $2 (tuple(meta2, fasta, fai)): Tuple
+    <- subworkflows/nf-core/bam_ngscheckmate/main.nf#BAM_NGSCHECKMATE/.collect@1[out] Value<Bag<?>>
+  in save_mpileup (save_mpileup): -
+    = false : Boolean
+  out vcf (vcf): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out stats (stats): Channel<Tuple>
+  out mpileup (mpileup): Channel<Tuple>
+  out versions_bcftools (versions_bcftools): Channel<Tuple>
+subworkflows/nf-core/bam_ngscheckmate/main.nf#BAM_NGSCHECKMATE/ch_collected_vcfs chain ".map.collect.map" steps=map,collect,map @20:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_ngscheckmate/main.nf#BAM_NGSCHECKMATE/BCFTOOLS_MPILEUP@1[vcf] Channel<Tuple> via BCFTOOLS_MPILEUP.out.vcf
+  out out (out): Value<?>
+subworkflows/nf-core/bam_ngscheckmate/main.nf#BAM_NGSCHECKMATE/ch_vcfs chain ".map.combine" steps=map,combine @28:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_ngscheckmate/main.nf#BAM_NGSCHECKMATE/:take:ch_snp_bed[out] ? via ch_snp_bed
+  in 2:1 (combine(right)): -
+    <- subworkflows/nf-core/bam_ngscheckmate/main.nf#BAM_NGSCHECKMATE/ch_collected_vcfs[out] Value<?> via ch_collected_vcfs
+  out out (out): ?
+subworkflows/nf-core/bam_ngscheckmate/main.nf#BAM_NGSCHECKMATE/NGSCHECKMATE_NCM@1 call "NGSCHECKMATE_NCM" callee=NGSCHECKMATE_NCM:process:modelled:legacy @33:5
+  in $1 (tuple(meta, files)): Tuple
+    <- subworkflows/nf-core/bam_ngscheckmate/main.nf#BAM_NGSCHECKMATE/ch_vcfs[out] ? via ch_vcfs
+  in $2 (tuple(meta2, snp_bed)): Tuple
+    <- subworkflows/nf-core/bam_ngscheckmate/main.nf#BAM_NGSCHECKMATE/:take:ch_snp_bed[out] ? via ch_snp_bed
+  in $3 (tuple(meta3, fasta, fai)): Tuple
+    <- subworkflows/nf-core/bam_ngscheckmate/main.nf#BAM_NGSCHECKMATE/:take:ch_fasta[out] ? via ch_fasta
+  out corr_matrix (corr_matrix): Channel<Tuple>
+  out matched (matched): Channel<Tuple>
+  out all (all): Channel<Tuple>
+  out pdf (pdf): Channel<Tuple>
+  out vcf (vcf): Channel<Tuple>
+  out versions_ngscheckmate (versions_ngscheckmate): Channel<Tuple>
+subworkflows/nf-core/bam_ngscheckmate/main.nf#BAM_NGSCHECKMATE/:emit:corr_matrix emit "corr_matrix" @36:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_ngscheckmate/main.nf#BAM_NGSCHECKMATE/NGSCHECKMATE_NCM@1[corr_matrix] Channel<Tuple> via NGSCHECKMATE_NCM.out.corr_matrix
+subworkflows/nf-core/bam_ngscheckmate/main.nf#BAM_NGSCHECKMATE/:emit:matched emit "matched" @37:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_ngscheckmate/main.nf#BAM_NGSCHECKMATE/NGSCHECKMATE_NCM@1[matched] Channel<Tuple> via NGSCHECKMATE_NCM.out.matched
+subworkflows/nf-core/bam_ngscheckmate/main.nf#BAM_NGSCHECKMATE/:emit:all emit "all" @38:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_ngscheckmate/main.nf#BAM_NGSCHECKMATE/NGSCHECKMATE_NCM@1[all] Channel<Tuple> via NGSCHECKMATE_NCM.out.all
+subworkflows/nf-core/bam_ngscheckmate/main.nf#BAM_NGSCHECKMATE/:emit:vcf emit "vcf" @39:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_ngscheckmate/main.nf#BAM_NGSCHECKMATE/BCFTOOLS_MPILEUP@1[vcf] Channel<Tuple> via BCFTOOLS_MPILEUP.out.vcf
+subworkflows/nf-core/bam_ngscheckmate/main.nf#BAM_NGSCHECKMATE/:emit:pdf emit "pdf" @40:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_ngscheckmate/main.nf#BAM_NGSCHECKMATE/NGSCHECKMATE_NCM@1[pdf] Channel<Tuple> via NGSCHECKMATE_NCM.out.pdf

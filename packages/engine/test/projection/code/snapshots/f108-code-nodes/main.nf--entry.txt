@@ -1,4 +1,5 @@
 workflow main.nf# legacy
+statements 23, modelled 9
 main.nf#/:params params "params" @40:1
   out reads (reads): -
   out threshold (threshold): -
@@ -61,9 +62,9 @@ main.nf#/meta_ch chain ".map" steps=map @79:15
     <- main.nf#/reads_ch[out] Channel<String> via reads_ch
   out out (out): Channel<?>
 main.nf#/annotated call "ANNOTATE" callee=ANNOTATE:process:modelled:legacy @80:17
-  in $1 ($1): -
+  in $1 (tuple(meta, mode)): Tuple
     <- main.nf#/meta_ch[out] Channel<?> via meta_ch
-  out out (out): -
+  out txt (txt): Channel<Tuple>
 main.nf#/summarised call "SUMMARISE" callee=SUMMARISE:workflow:modelled:legacy @81:18
   in pairs (pairs): -
     <- main.nf#/res[res] ? via res
@@ -77,8 +78,8 @@ main.nf#/:code@5 code "workflow.onComplete {" @84:5
     <- main.nf#/count~2[count] ? via count indirect
 main.nf#/.view@1 chain ".view" steps=view @88:5
   in in (in): -
-    <- main.nf#/annotated[out] ? via annotated indirect
-  out out (out): ?
+    <- main.nf#/annotated[txt] Channel<Tuple> via annotated.txt
+  out out (out): Channel<Tuple>
 main.nf#/.view@2 chain ".view" steps=view @89:5
   in in (in): -
     <- main.nf#/summarised[tagged] ? via summarised.tagged
