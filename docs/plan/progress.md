@@ -343,3 +343,13 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - A type-probe oracle tree (`packages/engine/test/projection/fixtures.json`) ties the projection's kinds to lint.
   - In memory only; no new dependency.
 - Blockers: none new.
+
+## 2026-11-22 · F-108 · Claude (autonomous)
+- Did: code nodes wired by free-variable analysis (`packages/engine/src/projection/free-variables.ts`, `code.ts`): an input per resolved variable a statement reads, an output per variable it writes, exact source text; a lint-only probe tree checks the free reads against `nextflow lint`; code-node text round-trips.
+- State: passing (stacked on F-106; merges after it once CI runs, #33).
+- Next: F-107 and F-111 in progress.
+- Decisions:
+  - Closure reads are inputs; mutations are reads only; a conditional write replaces the binding; no port for `params` as a whole; keys from the first output; a lint-only free-variable oracle tree ([ADR 0037](../adr/0037-code-nodes-and-free-variables.md)).
+  - `CodeNode` gains `text`; no new dependency.
+  - Upstream: lint reports some variable errors one column early (`docs/research/upstream-bugs.md` 22).
+- Blockers: #33.

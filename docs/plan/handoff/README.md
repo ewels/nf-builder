@@ -13,7 +13,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-105 semantic model | merged, PR #30 | |
 | F-106 typed projection | `feat/F-106`, in PR | Plan deleted in its PR. |
 | F-107 legacy projection | not started | [plan](plan-F-107.md). After F-106; parallel with F-108. |
-| F-108 code nodes | not started | [plan](plan-F-108.md). After F-106; parallel with F-107. |
+| F-108 code nodes | `feat/F-108` (stacked on F-106), in PR | Plan deleted in its PR. |
 | F-111 edit commands | not started | [plan](plan-F-111.md). Tasks 1–6 need only F-105; 7 onwards need F-106. |
 | F-112 diagnostics | not started | [plan](plan-F-112.md). After F-106 (and F-111 for fixes). |
 | F-113 engine worker | not started | [plan](plan-F-113.md). After F-111. |
@@ -21,7 +21,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-205 canvas | not started | [plan](plan-F-205.md). After F-113 (and F-106); parallel with F-202. |
 | F-501 registry snapshot | merged, PR #29, **not passing** | Blocked on #31 (Netlify can't read the snapshot branch of a private repository). F-502 to F-506, F-702, F-704 and F-705 depend on it. #27 (build hook). |
 
-Next free ADR number: 0037.
+Next free ADR number: 0040 (0037 is F-108's, 0038 F-107's, 0039 F-111's).
 
 ## Decisions already taken on the plans' open points
 
@@ -56,7 +56,7 @@ Next free ADR number: 0037.
 ### F-107 — [plan](plan-F-107.md)
 - Accept every recommendation in section 6. Step 2's 90% needs alias statements, call-result properties, callee aliases and transparent dataflow `if`s and ternaries as well as AR-14's four forms (74% without them): keep them in F-107, amend AR-14 and record it in the F-107 ADR. Legacy operator data in the pack (`LanguagePack.legacyOperators`). Commit all 119 corpus workflow snapshots with a licences row.
 
-### F-108 — [plan](plan-F-108.md)
+### F-108 (merged with its PR)
 - Accept every recommendation in section 6: closure reads are code-node inputs; mutations are reads only; conditional writes replace the binding; no port for `params` as a whole; keys from the first output; a lint-only free-variable oracle tree. One ADR for the LA-27 readings.
 
 ### F-111 — [plan](plan-F-111.md)
