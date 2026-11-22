@@ -405,7 +405,7 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
 ## 2026-11-22 · F-112 · Claude (autonomous)
 - Did:
   - Pack lint rules behind a lazy `loadLints()`, and an engine diagnoser that combines parse problems, model diagnostics and the rules.
-  - 29 codes, each with lint-recorded fixtures; the 15 lint-origin codes match `nextflow lint` on the fixtures and the whole pinned corpus.
+  - 30 codes, each with lint-recorded fixtures; the 16 lint-origin codes match `nextflow lint` on the fixtures and the whole pinned corpus.
   - nf-lang wording plus advice; text-edit quick fixes for four codes.
   - The oracle and the corpus lint cache now record warnings.
 - State: passing.
@@ -418,8 +418,8 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
     - `QuickFix { title, path, edits }` sharing F-111's `TextEdit`;
     - the v0.1 code set;
     - name-resolution parity deferred, with no new feature.
-  - LA-33 amended: a missing argument or a `null` for a typed input that isn't nullable is an error, an unused output a warning. LA-31 extended. New LA-37. AR-05 and the architecture sketch updated.
-  - `duplicate-call` (ours) covers upstream bug 24, on the same branch path only (sarek calls a process in two exclusive `if`s).
+  - LA-33 amended: a missing argument (`call-arity`) or a `null` for a typed input that isn't nullable (`null-argument`, ours) is an error, an unused output a warning. LA-31 extended. New LA-37. AR-05 and the architecture sketch updated.
+  - `duplicate-call` (ours) covers upstream bug 24, on the same branch path only (sarek calls a process in two exclusive `if`s; ternaries and `&&`/`||` count as branches too).
   - Paranoid checks are reported at the spec's severity.
   - No new dependency; diagnostics are in memory.
 - Blockers: none new.

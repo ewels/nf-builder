@@ -704,7 +704,7 @@
         "Delete an edge: the call argument is removed and the code still parses"
       ],
       "passes": false,
-      "notes": "From F-005 (S1): nextflow lint doesn't check a legacy tuple input's arity, so connecting to a legacy tuple input compares arity with its declaration (LA-14). From F-111: a refused Connect serves as the invalid-target dry run; type checks and LA-14 arity are F-112's. Disconnect writes null for a missing earlier positional input (ADR 0039). From F-112: lints.connection(source, target) dims invalid targets while dragging; a type-mismatch diagnostic's range is the port's argument, used to draw the edge red (UX-24). LA-14 tuple arity is yours (and F-504's): nextflow lint doesn't check it."
+      "notes": "From F-005 (S1): nextflow lint doesn't check a legacy tuple input's arity, so connecting to a legacy tuple input compares arity with its declaration (LA-14). From F-111: a refused Connect serves as the invalid-target dry run; type checks and LA-14 arity are F-112's. Disconnect writes null for a missing earlier positional input (ADR 0039). From F-112: lints.connection(source, node, port) dims invalid targets while dragging; a type-mismatch diagnostic's range is the port's argument, used to draw the edge red (UX-24). LA-14 tuple arity is yours (and F-504's): nextflow lint doesn't check it."
     },
     {
       "id": "F-303",
