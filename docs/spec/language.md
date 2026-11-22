@@ -6,7 +6,7 @@
 |---|---|
 | LA-01 | Each project has a `languageVersion`. At launch the only pack is `26.10` (ADR 0006). |
 | LA-02 | All version-specific behaviour comes from the pack: grammar, catalogue, palette, printer, lints, templates, defaults. Code outside `packages/lang-*` contains no Nextflow version literals. |
-| LA-03 | New projects set `manifest.nextflowVersion` to the pack's recommended floor. For 26.10 that is `>=26.10.6`, per nf-core's guidance on record hashing and the `stage` block; confirm the release exists in M0, otherwise use the latest released 26.10 patch. |
+| LA-03 | New projects set `manifest.nextflowVersion` to the pack's recommended floor. For 26.10 that is `>=26.10.6` (released 2026-11-12; spike S1 confirmed it and found 26.10.7, released 2026-11-20, as the latest patch), per nf-core's guidance on record hashing and the `stage` block. |
 | LA-04 | A pack may provide upgrade steps from the previous pack. "Upgrade project" runs them, then lints, and shows a diff before applying. |
 
 ## Typed and legacy code
@@ -17,7 +17,7 @@
 | LA-11 | Anything created from the palette or a template is typed and follows the best practices in LA-40. |
 | LA-12 | A new process or named workflow is written to its own file, with `nextflow.enable.types = true` at the top: `modules/local/<name>/main.nf` or `subworkflows/local/<name>/main.nf`. The app adds the `include` to the calling script. |
 | LA-13 | The app never puts typed and legacy process or workflow definitions in the same script, because Nextflow forbids it. An edit that would do so is refused with an explanation. |
-| LA-14 | Whether a typed workflow may call a legacy process from another file is settled by spike S1. Until then, inserting a legacy registry module into a typed workflow shows a warning. |
+| LA-14 | A typed workflow may call a legacy process or workflow included from another file, and a legacy workflow may call a typed one (spike S1, Nextflow 26.10.7, ADR 0007). Inserting a legacy registry module into a typed workflow needs no warning. The typed workflow passes a legacy `tuple` input as `tuple(...)`, one argument per declared component (a mixed list literal fails `nextflow lint`), and reads the module's outputs by assignment and name, never through `.out`. `nextflow lint` doesn't check a legacy input's shape, so the connection check compares the tuple's arity with the legacy declaration. |
 
 ## Ports and types
 
