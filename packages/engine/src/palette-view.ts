@@ -1,0 +1,122 @@
+import type {
+  Catalogue,
+  CatalogueEntry,
+  ConfigNode,
+  PaletteDefinition,
+  PaletteItem,
+  PaletteView,
+  PaletteViewItem,
+} from "@nf-builder/lang-core";
+
+const READ_MORE = /^\[Read more\]\([^)]*\)$/;
+
+/** Markdown description to plain text: drops "Read more" paragraphs, reduces links to their text, removes backticks. */
+export function plainText(markdown: string): string {
+  return markdown
+    .split(/\n{2,}/)
+    .map((p) => p.trim())
+    .filter((p) => p !== "" && !READ_MORE.test(p))
+    .map((p) =>
+      p
+        .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
+        .replaceAll("`", "")
+        .replace(/\s+/g, " ")
+        .trim(),
+    )
+    .join("\n\n");
+}
+
+/** The first paragraph of plain text. */
+export function firstParagraph(text: string): string {
+  return text.split("\n\n")[0] ?? "";
+}
+
+const first = <T>(
+  list: readonly T[],
+  preferred?: (x: T) => boolean,
+): T | undefined => (preferred ? list.find(preferred) : undefined) ?? list[0];
+
+function operatorDescription(catalogue: Catalogue, name: string) {
+  const entries = catalogue.script.operators.filter((o) => o.name === name);
+  const modern = entries.filter((o) => !o.deprecated);
+  return (first(modern, (o) => o.receiver === "Channel") ?? first(entries))
+    ?.description;
+}
+
+function factoryDescription(catalogue: Catalogue, name: string) {
+  const entries: CatalogueEntry[] = catalogue.script.factories.filter(
+    (f) => f.name === name,
+  );
+  return first(entries, (f) => !f.deprecated)?.description;
+}
+
+function configDescription(catalogue: Catalogue, name: string) {
+  const node: ConfigNode | undefined = catalogue.config.scopes.find(
+    (n) => n.name === name,
+  );
+  return node?.description;
+}
+
+function resolveItem(
+  version: string,
+  item: PaletteItem,
+  categoryIcon: PaletteViewItem["icon"],
+  catalogue: Catalogue,
+): PaletteViewItem {
+  const key = item.kind === "construct" ? item.id : `${item.kind}:${item.name}`;
+  let label: string;
+  let markdown: string | undefined;
+  if (item.kind === "construct") {
+    label = item.label;
+    markdown = item.description;
+  } else {
+    label = item.name;
+    markdown =
+      item.kind === "operator"
+        ? operatorDescription(catalogue, item.name)
+        : item.kind === "factory"
+          ? factoryDescription(catalogue, item.name)
+          : configDescription(catalogue, item.name);
+    if (markdown === undefined)
+      throw new Error(
+        `palette item ${key}: no ${item.kind} "${item.name}" in the ${version} catalogue`,
+      );
+  }
+  const description = plainText(markdown);
+  return {
+    key,
+    kind: item.kind,
+    name: item.kind === "construct" ? item.id : item.name,
+    label,
+    summary: firstParagraph(description),
+    description,
+    keywords: item.keywords ?? [],
+    icon: item.icon ?? categoryIcon,
+    preview: item.preview === true,
+    ...(item.docs === undefined ? {} : { docs: item.docs }),
+  };
+}
+
+/** Resolves every palette item against the catalogue, in palette order. Throws for a name the catalogue lacks. */
+export function resolvePaletteView(
+  version: string,
+  palette: PaletteDefinition,
+  catalogue: Catalogue,
+): PaletteView {
+  const resolve = (item: PaletteItem, icon: PaletteViewItem["icon"]) =>
+    resolveItem(version, item, icon, catalogue);
+  return {
+    version,
+    categories: palette.categories.map((c) => ({
+      id: c.id,
+      label: c.label,
+      icon: c.icon,
+      items: (c.items ?? []).map((i) => resolve(i, c.icon)),
+      groups: (c.groups ?? []).map((g) => ({
+        id: g.id,
+        label: g.label,
+        items: g.items.map((i) => resolve(i, c.icon)),
+      })),
+    })),
+  };
+}

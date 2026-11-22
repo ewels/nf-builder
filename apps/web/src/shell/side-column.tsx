@@ -6,6 +6,8 @@ interface SideColumnProps {
   readonly side: Side;
   readonly label: string;
   readonly title: string;
+  /** Replaces the title; hidden while collapsed. */
+  readonly header?: ReactNode;
   readonly children?: ReactNode;
 }
 
@@ -13,6 +15,7 @@ export function SideColumn({
   side,
   label,
   title,
+  header,
   children,
 }: SideColumnProps): JSX.Element {
   const id = `column-${side}`;
@@ -28,7 +31,9 @@ export function SideColumn({
       className={`column column-${side}${collapsed ? " is-collapsed" : ""}`}
     >
       <div className="column-header">
-        {collapsed ? null : <h2 className="column-title">{title}</h2>}
+        {collapsed
+          ? null
+          : (header ?? <h2 className="column-title">{title}</h2>)}
         <button
           type="button"
           id={`${id}-toggle`}

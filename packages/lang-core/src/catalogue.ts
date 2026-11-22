@@ -74,3 +74,9 @@ export type ConfigNode =
   | { kind: "dsl"; name: string; description: string; dsl: string };
 
 export type ConfigCatalogue = { source: CatalogueSource; scopes: ConfigNode[] };
+
+/** A pack's generated catalogue (ADR 0005, ADR 0020). */
+export type Catalogue = {
+  readonly script: ScriptCatalogue;
+  readonly config: ConfigCatalogue;
+};

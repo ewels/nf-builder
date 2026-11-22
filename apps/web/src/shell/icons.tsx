@@ -1,9 +1,15 @@
 import type { JSX } from "react";
 
+const CHEVRON_PATHS = {
+  left: "M10 3 5 8l5 5",
+  right: "M6 3l5 5-5 5",
+  down: "M3 6l5 5 5-5",
+} as const;
+
 export function ChevronIcon({
   direction,
 }: {
-  readonly direction: "left" | "right";
+  readonly direction: "left" | "right" | "down";
 }): JSX.Element {
   return (
     <svg
@@ -18,7 +24,7 @@ export function ChevronIcon({
       aria-hidden="true"
       focusable="false"
     >
-      <path d={direction === "left" ? "M10 3 5 8l5 5" : "M6 3l5 5-5 5"} />
+      <path d={CHEVRON_PATHS[direction]} />
     </svg>
   );
 }

@@ -37,4 +37,10 @@ export const NON_FETCHED_URLS: readonly NonFetchedUrl[] = [
     reason:
       "React production error messages link to their explanation; shown as text, never fetched",
   },
+  {
+    match: "prefix",
+    url: "https://docs.seqera.io/nextflow/",
+    reason:
+      "Documentation links in the palette (palette.json `docs`); shown as links for the user to open, never fetched by the app",
+  },
 ];

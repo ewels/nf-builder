@@ -3,6 +3,7 @@ import type { JSX } from "react";
 import { COLLAPSED_WIDTH, useLayout } from "./layout/layout-store";
 import { AppHeader } from "./shell/app-header";
 import { ColumnSeparator } from "./shell/column-separator";
+import { LeftColumn } from "./shell/left-column";
 import { SideColumn } from "./shell/side-column";
 import { StatusBar } from "./shell/status-bar";
 import { TabStrip } from "./shell/tab-strip";
@@ -23,9 +24,7 @@ export function AppShell(): JSX.Element {
           gridTemplateColumns: `${leftWidth}px minmax(0, 1fr) ${rightWidth}px`,
         }}
       >
-        <SideColumn side="left" label="Components and files" title="Components">
-          <p className="muted">No project open</p>
-        </SideColumn>
+        <LeftColumn languageVersion={languageVersions[0]} />
         {left.collapsed ? null : (
           <ColumnSeparator side="left" label="Resize components and files" />
         )}
