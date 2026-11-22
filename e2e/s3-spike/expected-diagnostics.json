@@ -1,0 +1,20 @@
+{
+  "uri": "file:///spike/main.nf",
+  "diagnostics": [
+    {
+      "range": {
+        "start": {
+          "line": 486,
+          "character": 4
+        },
+        "end": {
+          "line": 486,
+          "character": 21
+        }
+      },
+      "severity": 1,
+      "source": "nextflow",
+      "message": "`undefined_channel` is not defined"
+    }
+  ]
+}

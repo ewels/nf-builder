@@ -13,7 +13,7 @@ Process: [0001](0001-record-decisions-as-adrs.md). Template: [template.md](templ
 | [0007](0007-typed-by-default.md) | Typed by default; legacy code accepted and editable | Accepted |
 | [0008](0008-canvas-model.md) | Canvas model: fixed node kinds, chain nodes, layout in a sidecar | Accepted |
 | [0009](0009-registry-and-github-access.md) | Read the registry and GitHub straight from the browser, with a snapshot fallback | Accepted |
-| [0010](0010-language-server-spike.md) | Try the official language server in the browser; never depend on it | Accepted (spike S3 to confirm) |
+| [0010](0010-language-server-spike.md) | Try the official language server in the browser; never depend on it | Superseded by 0026 |
 | [0011](0011-testing-with-real-pipelines-and-nextflow.md) | Test against real pipelines, with real Nextflow and nf-docs as oracles | Accepted |
 | [0012](0012-agent-workflow.md) | Agents work one feature per session against a fixed feature list | Accepted |
 | [0013](0013-nf-docs-integration.md) | Write docs in nf-docs format, generate an nf-metro map, publish to GitHub Pages | Accepted |
@@ -25,5 +25,7 @@ Process: [0001](0001-record-decisions-as-adrs.md). Template: [template.md](templ
 | [0019](0019-nextflow-oracle.md) | Run the Nextflow oracle from the pinned release, locally and in CI | Accepted (agent) |
 | [0020](0020-parser-and-catalogue-generation.md) | Generate the parser with antlr-ng and the catalogue from the language server jar | Accepted (agent) |
 | [0021](0021-app-shell-layout.md) | Hand-roll the resizable shell and keep its layout in localStorage | Accepted (agent) |
+| [0022](0022-s3-spike-local.md) | Run spike S3 locally, with its own header set and no CI job | Accepted (agent) |
 | [0023](0023-s4-probe.md) | Probe cross-origin access from the deployed site with a Playwright-driven page | Accepted (agent) |
 | [0024](0024-spike-s5-self-hosted-pyodide.md) | Run spike S5 as a local test page with pinned, self-hosted Pyodide | Accepted (agent) |
+| [0026](0026-no-language-server-in-v0-1.md) | Keep the CheerpJ language server out of v0.1 | Accepted (agent) |

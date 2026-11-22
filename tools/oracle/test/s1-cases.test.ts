@@ -22,7 +22,9 @@ const files = (dir: string, ext: string): string[] =>
     .filter((f) => f.endsWith(ext))
     .map((f) => join(dir, f));
 const read = (file: string): string => readFileSync(file, "utf8");
-const nfFiles = manifest.cases.flatMap((c) => files(c.dir, ".nf"));
+const nfFiles = manifest.cases
+  .filter((c) => c.id.startsWith("s1-"))
+  .flatMap((c) => files(c.dir, ".nf"));
 
 describe("F-005 S1 cases", () => {
   it("F-005 LA-14 ADR-0007: cases.yaml has every S1 scenario with a lint and a run check", () => {
