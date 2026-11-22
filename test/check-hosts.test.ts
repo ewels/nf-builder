@@ -186,6 +186,32 @@ describe("IO-41 host scan", () => {
     });
   });
 
+  it("F-113 IO-41 ADR-0028: a worker chunk built from JSON is skipped; a worker code chunk is scanned", () => {
+    const code = `x="https://docs.example.com/x"`;
+    const workerManifest = JSON.stringify([
+      {
+        file: "assets/script-1.js",
+        src: "../../packages/lang-2610/catalogue/script.json",
+        isEntry: false,
+        dynamicImports: [],
+      },
+      {
+        file: "assets/engine.worker-2.js",
+        src: "src/engine/engine.worker.ts",
+        isEntry: true,
+        dynamicImports: [],
+      },
+    ]);
+    const dist = makeDist({
+      ".vite/worker-manifest.json": workerManifest,
+      "assets/script-1.js": code,
+      "assets/engine.worker-2.js": code,
+    });
+    const { problems } = scanDist(dist);
+    expect(problems).toHaveLength(1);
+    expect(problems[0]?.file).toContain("engine.worker-2.js");
+  });
+
   it("IO-41: notes ignore-list entries that matched nothing without failing", () => {
     const dist = makeDist({ "a.js": `"https://api.github.com/x"` });
     const { problems, unusedIgnores } = scanDist(dist);
