@@ -25,3 +25,5 @@ export const CONFIG_AST_ERRORS_FILE = `${REPO_ROOT}/packages/lang-2610/test/conf
 export const PROJECTION_FIXTURES_FILE = `${REPO_ROOT}/packages/engine/test/projection/fixtures.json`;
 /** Read by path, never imported: the F-108 free-variable probe tree; lint's "is not defined" errors in each probe statement are its free reads. */
 export const FREE_VARIABLE_PROBES_FILE = `${REPO_ROOT}/packages/engine/test/projection/code/free-variables.json`;
+/** Read by path, never imported: the F-112 lint fixtures and the errors and warnings recorded for each. Absent until the fixtures are recorded. */
+export const LINT_FIXTURES_FILE = `${REPO_ROOT}/packages/lang-2610/test/lints/fixtures.json`;

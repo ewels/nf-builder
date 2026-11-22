@@ -12,6 +12,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import {
   hasFormat,
+  hasWarnings,
   isCached,
   type LintResult,
   lintDir,
@@ -91,8 +92,31 @@ describe("corpus lint", () => {
       message: "Unexpected input: '='",
     });
     const clean = parseLintJson(fixture("lint-rnaseq-nf.json"));
-    expect(clean).toEqual({ filesChecked: 7, errors: [] });
+    expect(clean.filesChecked).toBe(7);
+    expect(clean.errors).toEqual([]);
     expect(() => parseLintJson("not json")).toThrow(/not JSON/);
+  });
+
+  it("F-112: parseLintJson keeps warnings; a cache file without warnings is re-linted", () => {
+    const clean = parseLintJson(fixture("lint-rnaseq-nf.json"));
+    expect(clean.warnings).toEqual([
+      {
+        filename: "main.nf",
+        startLine: 51,
+        startColumn: 20,
+        message:
+          "Parameter was not used -- prefix with `_` to suppress warning",
+      },
+    ]);
+    expect(parseLintJson(fixture("lint-fixtures.json")).warnings).toEqual([]);
+    const file = join(temp(), "x.json");
+    const base = { id: "x", sha: "a".repeat(40), nextflowVersion: "26.10.7" };
+    writeFileSync(file, JSON.stringify({ ...base, errors: [] }));
+    expect(hasWarnings(file)).toBe(false);
+    writeFileSync(file, JSON.stringify({ ...base, errors: [], warnings: [] }));
+    expect(hasWarnings(file)).toBe(true);
+    writeFileSync(file, "{broken");
+    expect(hasWarnings(file)).toBe(false);
   });
 
   it("F-006 step 2: a cached lint result is reused only when the pin SHA and Nextflow version match", () => {
@@ -103,6 +127,7 @@ describe("corpus lint", () => {
       nextflowVersion: "26.10.7",
       filesChecked: 1,
       errors: [],
+      warnings: [],
     };
     expect(isCached(file, result.sha, "26.10.7")).toBe(false);
     writeFileSync(file, JSON.stringify(result));
