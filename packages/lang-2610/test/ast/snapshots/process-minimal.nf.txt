@@ -1,0 +1,6 @@
+Script typesEnabled=false 1:1-6:1
+  body[0] Process typed=false 1:1-5:2
+    name Identifier 1:9-1:14 "hello"
+    exec Section 2:5-4:8
+      items[0] ExpressionStatement 2:5-4:8
+        expression String value="\n    echo 'Hello world!'\n    " quote="\"\"\"" 2:5-4:8 "\"\"\"\n    echo 'Hello world!'\n    \"\"\""

@@ -1,8 +1,12 @@
 // Ported from nextflow-io/nextflow v26.10.7, modules/nf-lang/src/main/java/nextflow/script/parser/ScriptAstBuilder.java
 // `compilationUnit` (Apache-2.0; see ../../../grammar/NOTICE).
 import type { ScriptAst, ScriptItem } from "@nf-builder/lang-core";
-import type { CompilationUnitContext } from "../../generated/ScriptParser.ts";
+import type {
+  CompilationUnitContext,
+  ScriptDeclarationContext,
+} from "../../generated/ScriptParser.ts";
 import type { BuildContext } from "./context.ts";
+import { scriptDeclaration } from "./declarations.ts";
 import { statement } from "./statements.ts";
 
 /**
@@ -16,8 +20,15 @@ export function buildScript(
   const body: ScriptItem[] = [];
   for (const item of tree.scriptDeclarationOrStatement()) {
     const stmt = item.statement();
-    if (stmt) body.push(statement(stmt, cx));
-    else throw new Error("Script declarations are built by F-102 task 3");
+    if (stmt) {
+      body.push(statement(stmt, cx));
+      continue;
+    }
+    const declaration = scriptDeclaration(
+      item.scriptDeclaration() as ScriptDeclarationContext,
+      cx,
+    );
+    if (declaration) body.push(declaration);
   }
   return {
     kind: "Script",

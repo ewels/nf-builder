@@ -240,8 +240,12 @@ function pathElement(
     ? ctx.closureWithLabels()
     : (ctx as unknown as { closure(): ClosureContext }).closure();
   const trailing = closure(closureCtx, cx);
-  if (object.kind === "MethodCall" || object.kind === "Call")
-    return { ...object, closures: [...object.closures, trailing], range };
+  // Upstream adds the closure to the call's arguments even when the call is in parentheses (`(foo(1)) { }`,
+  // ScriptAstBuilder.java#L1547-L1553), so the parentheses are dropped there.
+  let target = object;
+  while (target.kind === "Parenthesized") target = target.expression;
+  if (target.kind === "MethodCall" || target.kind === "Call")
+    return { ...target, closures: [...target.closures, trailing], range };
   return methodCall(
     object,
     { args: [], trailingComma: false },

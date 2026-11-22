@@ -39,18 +39,21 @@ Script typesEnabled=false 1:1-10:1
       args[0] Property navigation="." 6:9-6:20
         object Variable 6:9-6:15 "myFile"
         property Identifier 6:16-6:20 "text"
+    trailingComments[0] line 6:27-6:33 "// dot"
   body[6] ExpressionStatement 7:1-7:22
     expression MethodCall trailingComma=false parens=false 7:1-7:22
       method Identifier 7:1-7:8 "println"
       args[0] Property navigation="*." 7:9-7:22
         object Variable 7:9-7:16 "myFiles"
         property Identifier 7:18-7:22 "text"
+    trailingComments[0] line 7:27-7:84 "// spread dot:  myFiles.collect { myFile -> myFile.text }"
   body[7] ExpressionStatement 8:1-8:21
     expression MethodCall trailingComma=false parens=false 8:1-8:21
       method Identifier 8:1-8:8 "println"
       args[0] Property navigation="?." 8:9-8:21
         object Variable 8:9-8:15 "myFile"
         property Identifier 8:17-8:21 "text"
+    trailingComments[0] line 8:27-8:78 "// safe dot:    myFile != null ? myFile.text : null"
   body[8] ExpressionStatement 9:1-9:22
     expression MethodCall trailingComma=false parens=false 9:1-9:22
       method Identifier 9:1-9:8 "println"

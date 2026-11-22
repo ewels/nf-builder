@@ -3,6 +3,7 @@
 // the engine through a worker (ADR 0027).
 import type { ParseProblem, ScriptParseResult } from "@nf-builder/lang-core";
 import { parseScript } from "../parser/parse.ts";
+import { attachComments } from "./attach-comments.ts";
 import { BuildContext, FatalBuildError } from "./build/context.ts";
 import { buildScript } from "./build/script.ts";
 import { collectComments } from "./comments.ts";
@@ -25,11 +26,9 @@ export function parseScriptAst(text: string): ScriptParseResult {
       outcome.tokens.getTokens(),
       cx.index,
     );
-    return {
-      ok: true,
-      ast: { ...script, shebang, comments },
-      errors: cx.errors.sort(byPosition),
-    };
+    const ast = { ...script, shebang, comments };
+    attachComments(ast, comments);
+    return { ok: true, ast, errors: cx.errors.sort(byPosition) };
   } catch (error) {
     if (!(error instanceof FatalBuildError)) throw error;
     return {

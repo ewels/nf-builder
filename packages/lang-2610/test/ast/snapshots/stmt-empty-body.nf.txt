@@ -1,0 +1,13 @@
+Script typesEnabled=false 1:1-6:1
+  body[0] Workflow typed=false 1:1-5:2
+    main Section 2:5-4:19
+      items[0] Assignment operator="=" 2:5-2:13
+        target Variable 2:5-2:6 "x"
+        value Boolean 2:9-2:13 "true"
+      items[1] If 3:5-3:14
+        condition Variable 3:9-3:10 "x"
+        consequent EmptyStatement 3:13-3:14 ";"
+      items[2] ExpressionStatement 4:5-4:19
+        expression MethodCall trailingComma=false parens=false 4:5-4:19
+          method Identifier 4:5-4:12 "println"
+          args[0] String value="done" quote="'" 4:13-4:19 "'done'"

@@ -1,0 +1,324 @@
+Script typesEnabled=false 1:1-61:1
+  comments[0] line 1:1-1:73 "// Copyright (c) the nf-core community under an open-source MIT license."
+  comments[1] line 2:1-2:114 "// See https://github.com/nf-core/modules for full license, file patching instructions and upstream contributing."
+  comments[2] line 27:5-27:91 "// Make list of old name and new name pairs to use for renaming in the bash while loop"
+  comments[3] line 32:5-32:147 "// The total amount of allocated RAM by FastQC is equal to the number of threads defined (--threads) time the amount of RAM defined (--memory)"
+  comments[4] line 33:5-33:106 "// https://github.com/s-andrews/FastQC/blob/1faeea0412093224d7f6a07f777fad60a5650795/fastqc#L211-L222"
+  comments[5] line 34:5-34:101 "// Dividing the task.memory by task.cpus allows to stick to requested amount of RAM in the label"
+  comments[6] line 38:5-38:55 "// FastQC memory value allowed range (100 - 10000)"
+  body[0] Process typed=false 4:1-60:2
+    leadingComments[0] line 1:1-1:73 "// Copyright (c) the nf-core community under an open-source MIT license."
+    leadingComments[1] line 2:1-2:114 "// See https://github.com/nf-core/modules for full license, file patching instructions and upstream contributing."
+    name Identifier 4:9-4:15 "FASTQC"
+    directives Section 5:5-11:80
+      items[0] ExpressionStatement 5:5-5:21
+        expression MethodCall trailingComma=false parens=false 5:5-5:21
+          method Identifier 5:5-5:8 "tag"
+          args[0] GString quote="\"" 5:9-5:21
+            parts[0] Interpolation braced=true 5:10-5:20
+              expression Property navigation="." 5:12-5:19
+                object Variable 5:12-5:16 "meta"
+                property Identifier 5:17-5:19 "id"
+      items[1] ExpressionStatement 6:5-6:24
+        expression MethodCall trailingComma=false parens=false 6:5-6:24
+          method Identifier 6:5-6:10 "label"
+          args[0] String value="process_low" quote="'" 6:11-6:24 "'process_low'"
+      items[2] ExpressionStatement 8:5-8:41
+        expression MethodCall trailingComma=false parens=false 8:5-8:41
+          method Identifier 8:5-8:10 "conda"
+          args[0] GString quote="\"" 8:11-8:41
+            parts[0] Interpolation braced=true 8:12-8:24
+              expression Variable 8:14-8:23 "moduleDir"
+            parts[1] GStringText 8:24-8:40 "/environment.yml"
+      items[3] ExpressionStatement 9:5-11:80
+        expression MethodCall trailingComma=false parens=false 9:5-11:80
+          method Identifier 9:5-9:14 "container"
+          args[0] GString quote="\"" 9:15-11:80
+            parts[0] Interpolation braced=true 9:16-11:79
+              expression Ternary 9:19-11:77
+                condition Binary operator="&&" 9:19-9:122
+                  left Binary operator="in" 9:19-9:75
+                    left Property navigation="." 9:19-9:43
+                      object Variable 9:19-9:27 "workflow"
+                      property Identifier 9:28-9:43 "containerEngine"
+                    right List trailingComma=false 9:47-9:75
+                      elements[0] String value="singularity" quote="'" 9:48-9:61 "'singularity'"
+                      elements[1] String value="apptainer" quote="'" 9:63-9:74 "'apptainer'"
+                  right Unary operator="!" 9:79-9:122
+                    operand Property navigation="." 9:80-9:122
+                      object Property navigation="." 9:80-9:88
+                        object Variable 9:80-9:84 "task"
+                        property Identifier 9:85-9:88 "ext"
+                      property Identifier 9:89-9:122 "singularity_pull_docker_container"
+                consequent String value="https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/81/816bda6dd014e810753f642611232443ddeabb2b47f9681ad43f9044816f00ff/data" quote="'" 10:11-10:153 "'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/81/816bda6dd014e810753f642611232443ddeabb2b47f9681ad43f9044816f00ff/data'"
+                alternate String value="community.wave.seqera.io/library/fastqc:0.13.0--b342db7b694c9af4" quote="'" 11:11-11:77 "'community.wave.seqera.io/library/fastqc:0.13.0--b342db7b694c9af4'"
+    inputs Section label="input" labelRange=13:5-13:11 13:5-14:49
+      items[0] ExpressionStatement 14:5-14:49
+        expression MethodCall trailingComma=false parens=false 14:5-14:49
+          method Identifier 14:5-14:10 "tuple"
+          args[0] MethodCall trailingComma=false parens=true 14:11-14:20
+            method Identifier 14:11-14:14 "val"
+            args[0] Variable 14:15-14:19 "meta"
+          args[1] MethodCall trailingComma=false parens=true 14:22-14:49
+            method Identifier 14:22-14:26 "path"
+            args[0] Variable 14:27-14:32 "reads"
+            args[1] NamedArgument 14:34-14:48
+              name Identifier 14:34-14:41 "stageAs"
+              value String value="?/*" quote="'" 14:43-14:48 "'?/*'"
+    outputs Section label="output" labelRange=16:5-16:12 16:5-19:144
+      items[0] ExpressionStatement 17:5-17:48
+        expression MethodCall trailingComma=false parens=false 17:5-17:48
+          method Identifier 17:5-17:10 "tuple"
+          args[0] MethodCall trailingComma=false parens=true 17:11-17:20
+            method Identifier 17:11-17:14 "val"
+            args[0] Variable 17:15-17:19 "meta"
+          args[1] MethodCall trailingComma=false parens=true 17:22-17:36
+            method Identifier 17:22-17:26 "path"
+            args[0] String value="*.html" quote="\"" 17:27-17:35 "\"*.html\""
+          args[2] NamedArgument 17:38-17:48
+            name Identifier 17:38-17:42 "emit"
+            value Variable 17:44-17:48 "html"
+      items[1] ExpressionStatement 18:5-18:46
+        expression MethodCall trailingComma=false parens=false 18:5-18:46
+          method Identifier 18:5-18:10 "tuple"
+          args[0] MethodCall trailingComma=false parens=true 18:11-18:20
+            method Identifier 18:11-18:14 "val"
+            args[0] Variable 18:15-18:19 "meta"
+          args[1] MethodCall trailingComma=false parens=true 18:22-18:35
+            method Identifier 18:22-18:26 "path"
+            args[0] String value="*.zip" quote="\"" 18:27-18:34 "\"*.zip\""
+          args[2] NamedArgument 18:37-18:46
+            name Identifier 18:37-18:41 "emit"
+            value Variable 18:43-18:46 "zip"
+      items[2] ExpressionStatement 19:5-19:144
+        expression MethodCall trailingComma=false parens=false 19:5-19:144
+          method Identifier 19:5-19:10 "tuple"
+          args[0] MethodCall trailingComma=false parens=true 19:11-19:33
+            method Identifier 19:11-19:14 "val"
+            args[0] GString quote="\"" 19:15-19:32
+              parts[0] Interpolation braced=true 19:16-19:31
+                expression Property navigation="." 19:18-19:30
+                  object Variable 19:18-19:22 "task"
+                  property Identifier 19:23-19:30 "process"
+          args[1] MethodCall trailingComma=false parens=true 19:35-19:48
+            method Identifier 19:35-19:38 "val"
+            args[0] String value="fastqc" quote="'" 19:39-19:47 "'fastqc'"
+          args[2] MethodCall trailingComma=false parens=true 19:50-19:104
+            method Identifier 19:50-19:54 "eval"
+            args[0] String value="fastqc --version | sed \"/FastQC v/!d; s/.*v//\"" quote="'" 19:55-19:103 "'fastqc --version | sed \"/FastQC v/!d; s/.*v//\"'"
+          args[3] NamedArgument 19:106-19:127
+            name Identifier 19:106-19:110 "emit"
+            value Variable 19:112-19:127 "versions_fastqc"
+          args[4] NamedArgument 19:129-19:144
+            name Identifier 19:129-19:134 "topic"
+            value Variable 19:136-19:144 "versions"
+    when Section label="when" labelRange=21:5-21:10 21:5-22:43
+      items[0] Binary operator="||" 22:5-22:43
+        left Binary operator="==" 22:5-22:26
+          left Property navigation="." 22:5-22:18
+            object Property navigation="." 22:5-22:13
+              object Variable 22:5-22:9 "task"
+              property Identifier 22:10-22:13 "ext"
+            property Identifier 22:14-22:18 "when"
+          right Null 22:22-22:26 "null"
+        right Property navigation="." 22:30-22:43
+          object Property navigation="." 22:30-22:38
+            object Variable 22:30-22:34 "task"
+            property Identifier 22:35-22:38 "ext"
+          property Identifier 22:39-22:43 "when"
+    exec Section label="script" labelRange=24:5-24:12 24:5-52:8
+      items[0] VariableDeclaration def=true multiple=false 25:5-25:35
+        targets[0] TypedName 25:9-25:13
+          name Identifier 25:9-25:13 "args"
+        initializer Elvis 25:16-25:35
+          condition Property navigation="." 25:16-25:29
+            object Property navigation="." 25:16-25:24
+              object Variable 25:16-25:20 "task"
+              property Identifier 25:21-25:24 "ext"
+            property Identifier 25:25-25:29 "args"
+          alternate String value="" quote="'" 25:33-25:35 "''"
+      items[1] VariableDeclaration def=true multiple=false 26:5-26:49
+        targets[0] TypedName 26:9-26:15
+          name Identifier 26:9-26:15 "prefix"
+        initializer Elvis 26:18-26:49
+          condition Property navigation="." 26:18-26:33
+            object Property navigation="." 26:18-26:26
+              object Variable 26:18-26:22 "task"
+              property Identifier 26:23-26:26 "ext"
+            property Identifier 26:27-26:33 "prefix"
+          alternate GString quote="\"" 26:37-26:49
+            parts[0] Interpolation braced=true 26:38-26:48
+              expression Property navigation="." 26:40-26:47
+                object Variable 26:40-26:44 "meta"
+                property Identifier 26:45-26:47 "id"
+      items[2] VariableDeclaration def=true multiple=false 28:5-28:212
+        leadingComments[0] line 27:5-27:91 "// Make list of old name and new name pairs to use for renaming in the bash while loop"
+        targets[0] TypedName 28:9-28:22
+          name Identifier 28:9-28:22 "old_new_pairs"
+        initializer Ternary 28:25-28:212
+          condition Binary operator="||" 28:25-28:67
+            left TypeTest operator="instanceof" 28:25-28:46
+              operand Variable 28:25-28:30 "reads"
+              type TypeRef nullable=false 28:42-28:46 "Path"
+            right Binary operator="==" 28:50-28:67
+              left MethodCall navigation="." trailingComma=false parens=true 28:50-28:62
+                receiver Variable 28:50-28:55 "reads"
+                method Identifier 28:56-28:60 "size"
+              right Number integer=true 28:66-28:67 "1"
+          consequent List trailingComma=false 28:70-28:111
+            elements[0] List trailingComma=false 28:71-28:110
+              elements[0] Variable 28:72-28:77 "reads"
+              elements[1] GString quote="\"" 28:79-28:109
+                parts[0] Interpolation braced=true 28:80-28:89
+                  expression Variable 28:82-28:88 "prefix"
+                parts[1] GStringText 28:89-28:90 "."
+                parts[2] Interpolation braced=true 28:90-28:108
+                  expression Property navigation="." 28:92-28:107
+                    object Variable 28:92-28:97 "reads"
+                    property Identifier 28:98-28:107 "extension"
+          alternate MethodCall navigation="." trailingComma=false parens=false 28:114-28:212
+            receiver MethodCall navigation="." trailingComma=false parens=true 28:114-28:131
+              receiver Variable 28:114-28:119 "reads"
+              method Identifier 28:120-28:129 "withIndex"
+            method Identifier 28:132-28:139 "collect"
+            closures[0] Closure 28:140-28:212
+              params[0] Parameter def=false 28:142-28:147
+                name Identifier 28:142-28:147 "entry"
+              params[1] Parameter def=false 28:149-28:154
+                name Identifier 28:149-28:154 "index"
+              body[0] ExpressionStatement 28:158-28:210
+                expression List trailingComma=false 28:158-28:210
+                  elements[0] Variable 28:159-28:164 "entry"
+                  elements[1] GString quote="\"" 28:166-28:209
+                    parts[0] Interpolation braced=true 28:167-28:176
+                      expression Variable 28:169-28:175 "prefix"
+                    parts[1] GStringText 28:176-28:177 "_"
+                    parts[2] Interpolation braced=true 28:177-28:189
+                      expression Binary operator="+" 28:179-28:188
+                        left Variable 28:179-28:184 "index"
+                        right Number integer=true 28:187-28:188 "1"
+                    parts[3] GStringText 28:189-28:190 "."
+                    parts[4] Interpolation braced=true 28:190-28:208
+                      expression Property navigation="." 28:192-28:207
+                        object Variable 28:192-28:197 "entry"
+                        property Identifier 28:198-28:207 "extension"
+      items[3] VariableDeclaration def=true multiple=false 29:5-29:55
+        targets[0] TypedName 29:9-29:18
+          name Identifier 29:9-29:18 "rename_to"
+        initializer MethodCall navigation="." trailingComma=false parens=true 29:21-29:55
+          receiver MethodCall navigation="*." trailingComma=false parens=true 29:21-29:45
+            receiver Variable 29:21-29:34 "old_new_pairs"
+            method Identifier 29:36-29:40 "join"
+            args[0] String value=" " quote="'" 29:41-29:44 "' '"
+          method Identifier 29:46-29:50 "join"
+          args[0] String value=" " quote="'" 29:51-29:54 "' '"
+      items[4] VariableDeclaration def=true multiple=false 30:5-30:92
+        targets[0] TypedName 30:9-30:22
+          name Identifier 30:9-30:22 "renamed_files"
+        initializer MethodCall navigation="." trailingComma=false parens=true 30:25-30:92
+          receiver MethodCall navigation="." trailingComma=false parens=false 30:25-30:82
+            receiver Variable 30:25-30:38 "old_new_pairs"
+            method Identifier 30:39-30:46 "collect"
+            closures[0] Closure 30:47-30:82
+              params[0] Parameter def=false 30:49-30:58
+                name Identifier 30:49-30:58 "_old_name"
+              params[1] Parameter def=false 30:60-30:68
+                name Identifier 30:60-30:68 "new_name"
+              body[0] ExpressionStatement 30:72-30:80
+                expression Variable 30:72-30:80 "new_name"
+          method Identifier 30:83-30:87 "join"
+          args[0] String value=" " quote="'" 30:88-30:91 "' '"
+      items[5] VariableDeclaration def=true multiple=false 35:5-37:15
+        leadingComments[0] line 32:5-32:147 "// The total amount of allocated RAM by FastQC is equal to the number of threads defined (--threads) time the amount of RAM defined (--memory)"
+        leadingComments[1] line 33:5-33:106 "// https://github.com/s-andrews/FastQC/blob/1faeea0412093224d7f6a07f777fad60a5650795/fastqc#L211-L222"
+        leadingComments[2] line 34:5-34:101 "// Dividing the task.memory by task.cpus allows to stick to requested amount of RAM in the label"
+        targets[0] TypedName 35:9-35:21
+          name Identifier 35:9-35:21 "memory_in_mb"
+        initializer Ternary 35:24-37:15
+          condition Property navigation="." 35:24-35:35
+            object Variable 35:24-35:28 "task"
+            property Identifier 35:29-35:35 "memory"
+          consequent MethodCall navigation="." trailingComma=false parens=true 36:11-36:60
+            receiver Parenthesized 36:11-36:49
+              expression Binary operator="/" 36:12-36:48
+                left MethodCall navigation="." trailingComma=false parens=true 36:12-36:36
+                  receiver Property navigation="." 36:12-36:23
+                    object Variable 36:12-36:16 "task"
+                    property Identifier 36:17-36:23 "memory"
+                  method Identifier 36:24-36:30 "toUnit"
+                  args[0] String value="MB" quote="'" 36:31-36:35 "'MB'"
+                right Property navigation="." 36:39-36:48
+                  object Variable 36:39-36:43 "task"
+                  property Identifier 36:44-36:48 "cpus"
+            method Identifier 36:50-36:58 "intValue"
+          alternate Null 37:11-37:15 "null"
+      items[6] VariableDeclaration def=true multiple=false 39:5-39:97
+        leadingComments[0] line 38:5-38:55 "// FastQC memory value allowed range (100 - 10000)"
+        targets[0] TypedName 39:9-39:22
+          name Identifier 39:9-39:22 "fastqc_memory"
+        initializer Ternary 39:25-39:97
+          condition Binary operator=">" 39:25-39:45
+            left Variable 39:25-39:37 "memory_in_mb"
+            right Number integer=true 39:40-39:45 "10000"
+          consequent Number integer=true 39:48-39:53 "10000"
+          alternate Parenthesized 39:56-39:97
+            expression Ternary 39:57-39:96
+              condition Binary operator="<" 39:57-39:75
+                left Variable 39:57-39:69 "memory_in_mb"
+                right Number integer=true 39:72-39:75 "100"
+              consequent Number integer=true 39:78-39:81 "100"
+              alternate Variable 39:84-39:96 "memory_in_mb"
+      items[7] VariableDeclaration def=true multiple=false 40:5-40:77
+        targets[0] TypedName 40:9-40:26
+          name Identifier 40:9-40:26 "fastqc_memory_arg"
+        initializer Ternary 40:29-40:77
+          condition Variable 40:29-40:42 "fastqc_memory"
+          consequent GString quote="\"" 40:45-40:72
+            parts[0] GStringText 40:46-40:55 "--memory "
+            parts[1] Interpolation braced=true 40:55-40:71
+              expression Variable 40:57-40:70 "fastqc_memory"
+          alternate String value="" quote="'" 40:75-40:77 "''"
+      items[8] ExpressionStatement 42:5-52:8
+        expression GString quote="\"\"\"" 42:5-52:8
+          parts[0] GStringText value="\n    printf \"%s %s\\n\" " 42:8-43:23 "\n    printf \"%s %s\\\\n\" "
+          parts[1] Interpolation braced=true 43:23-43:35
+            expression Variable 43:25-43:34 "rename_to"
+          parts[2] GStringText value=" | while read old_name new_name; do\n        [ -f \"${new_name}\" ] || ln -s $old_name $new_name\n    done\n\n    fastqc \\\n        " 43:35-48:9 " | while read old_name new_name; do\n        [ -f \"\\${new_name}\" ] || ln -s \\$old_name \\$new_name\n    done\n\n    fastqc \\\\\n        "
+          parts[3] Interpolation braced=true 48:9-48:16
+            expression Variable 48:11-48:15 "args"
+          parts[4] GStringText value=" \\\n        --threads " 48:16-49:19 " \\\\\n        --threads "
+          parts[5] Interpolation braced=true 49:19-49:31
+            expression Property navigation="." 49:21-49:30
+              object Variable 49:21-49:25 "task"
+              property Identifier 49:26-49:30 "cpus"
+          parts[6] GStringText value=" \\\n        " 49:31-50:9 " \\\\\n        "
+          parts[7] Interpolation braced=true 50:9-50:29
+            expression Variable 50:11-50:28 "fastqc_memory_arg"
+          parts[8] GStringText value=" \\\n        " 50:29-51:9 " \\\\\n        "
+          parts[9] Interpolation braced=true 51:9-51:25
+            expression Variable 51:11-51:24 "renamed_files"
+          parts[10] GStringText 51:25-52:5 "\n    "
+    stub Section label="stub" labelRange=54:5-54:10 54:5-59:8
+      items[0] VariableDeclaration def=true multiple=false 55:5-55:49
+        targets[0] TypedName 55:9-55:15
+          name Identifier 55:9-55:15 "prefix"
+        initializer Elvis 55:18-55:49
+          condition Property navigation="." 55:18-55:33
+            object Property navigation="." 55:18-55:26
+              object Variable 55:18-55:22 "task"
+              property Identifier 55:23-55:26 "ext"
+            property Identifier 55:27-55:33 "prefix"
+          alternate GString quote="\"" 55:37-55:49
+            parts[0] Interpolation braced=true 55:38-55:48
+              expression Property navigation="." 55:40-55:47
+                object Variable 55:40-55:44 "meta"
+                property Identifier 55:45-55:47 "id"
+      items[1] ExpressionStatement 56:5-59:8
+        expression GString quote="\"\"\"" 56:5-59:8
+          parts[0] GStringText 56:8-57:11 "\n    touch "
+          parts[1] Interpolation braced=true 57:11-57:20
+            expression Variable 57:13-57:19 "prefix"
+          parts[2] GStringText 57:20-58:11 ".html\n    touch "
+          parts[3] Interpolation braced=true 58:11-58:20
+            expression Variable 58:13-58:19 "prefix"
+          parts[4] GStringText 58:20-59:5 ".zip\n    "

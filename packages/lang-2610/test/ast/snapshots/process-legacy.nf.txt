@@ -1,0 +1,49 @@
+Script typesEnabled=false 1:1-23:1
+  comments[0] line 2:5-2:18 "// directives"
+  comments[1] line 13:13-13:24 "// or exec:"
+  body[0] Process typed=false 1:1-22:2
+    name Identifier 1:9-1:14 "greet"
+    directives Section 3:5-4:34
+      items[0] ExpressionStatement 3:5-3:26
+        leadingComments[0] line 2:5-2:18 "// directives"
+        expression MethodCall trailingComma=false parens=false 3:5-3:26
+          method Identifier 3:5-3:18 "errorStrategy"
+          args[0] String value="retry" quote="'" 3:19-3:26 "'retry'"
+      items[1] ExpressionStatement 4:5-4:34
+        expression MethodCall trailingComma=false parens=false 4:5-4:34
+          method Identifier 4:5-4:8 "tag"
+          closures[0] Closure 4:9-4:34
+            body[0] ExpressionStatement 4:11-4:32
+              expression GString quote="\"" 4:11-4:32
+                parts[0] Interpolation braced=true 4:12-4:23
+                  expression Variable 4:14-4:22 "greeting"
+                parts[1] GStringText 4:23-4:24 "/"
+                parts[2] Interpolation braced=true 4:24-4:31
+                  expression Variable 4:26-4:30 "name"
+    inputs Section label="input" labelRange=6:5-6:11 6:5-8:13
+      items[0] ExpressionStatement 7:5-7:17
+        expression MethodCall trailingComma=false parens=false 7:5-7:17
+          method Identifier 7:5-7:8 "val"
+          args[0] Variable 7:9-7:17 "greeting"
+      items[1] ExpressionStatement 8:5-8:13
+        expression MethodCall trailingComma=false parens=false 8:5-8:13
+          method Identifier 8:5-8:8 "val"
+          args[0] Variable 8:9-8:13 "name"
+    outputs Section label="output" labelRange=10:5-10:12 10:5-11:11
+      items[0] ExpressionStatement 11:5-11:11
+        expression MethodCall trailingComma=false parens=false 11:5-11:11
+          method Identifier 11:5-11:11 "stdout"
+    exec Section label="script" labelRange=13:5-13:12 13:5-16:8
+      items[0] ExpressionStatement 14:5-16:8
+        leadingComments[0] line 13:13-13:24 "// or exec:"
+        expression GString quote="\"\"\"" 14:5-16:8
+          parts[0] GStringText 14:8-15:11 "\n    echo '"
+          parts[1] Interpolation braced=true 15:11-15:22
+            expression Variable 15:13-15:21 "greeting"
+          parts[2] GStringText 15:22-15:24 ", "
+          parts[3] Interpolation braced=true 15:24-15:31
+            expression Variable 15:26-15:30 "name"
+          parts[4] GStringText 15:31-16:5 "!'\n    "
+    stub Section label="stub" labelRange=18:5-18:10 18:5-21:8
+      items[0] ExpressionStatement 19:5-21:8
+        expression String value="\n    # do nothing\n    " quote="\"\"\"" 19:5-21:8 "\"\"\"\n    # do nothing\n    \"\"\""

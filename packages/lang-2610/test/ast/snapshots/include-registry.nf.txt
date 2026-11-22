@@ -1,0 +1,5 @@
+Script typesEnabled=false 1:1-2:1
+  body[0] Include 1:1-1:41
+    entries[0] IncludeEntry 1:11-1:17
+      name Identifier 1:11-1:17 "FASTQC"
+    source String value="nf-core/fastqc" quote="'" 1:25-1:41 "'nf-core/fastqc'"

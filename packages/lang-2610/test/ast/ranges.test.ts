@@ -142,4 +142,22 @@ describe("F-102 step 2: every node's range slices back to its exact source text"
     // the unchanged tree passes
     expect(checkRanges(build(text), text)).toEqual([]);
   });
+
+  it("F-102 step 2 ADR-0005: every ported nf-lang case that builds has exact ranges", () => {
+    const cases = JSON.parse(
+      readFileSync(join(dir, "../ported/cases.json"), "utf8"),
+    ) as { cases: { id: string; file: string }[] };
+    let built = 0;
+    for (const c of cases.cases) {
+      if (!c.file.endsWith(".nf")) continue;
+      const text = readFileSync(join(dir, "../ported", c.file), "utf8");
+      const result = parseScriptAst(text);
+      if (!result.ok) continue;
+      built++;
+      expect(checkRanges(result.ast, text, { reparse: "all" }), c.id).toEqual(
+        [],
+      );
+    }
+    expect(built).toBeGreaterThan(20);
+  });
 });
