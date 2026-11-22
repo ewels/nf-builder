@@ -73,7 +73,7 @@ describe("F-205 step 1 step 2: the f205-canvas fixture", () => {
       "emit",
     ]);
     expect(new Set(view.edges.map((e) => e.dataflow))).toEqual(
-      new Set(["channel", "value", "plain"]),
+      new Set(["channel", "value", "plain", "unknown"]),
     );
   });
 

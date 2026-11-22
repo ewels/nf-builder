@@ -1,24 +1,26 @@
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { expect, test } from "@playwright/test";
+import { expect, type Locator, test } from "@playwright/test";
 import {
   initialJsFiles,
   type Manifest,
 } from "../scripts/check-bundle-budget.ts";
-import { WEB_DIST } from "../scripts/check-common.ts";
-import { SMOKE_TAG } from "./browsers.ts";
+import { REPO_ROOT, WEB_DIST } from "../scripts/check-common.ts";
+import { SMOKE_TAG, VISUAL_TAG } from "./browsers.ts";
 import {
   BAD_DECLARATION,
   canvasReady,
+  expectBaseline,
   NODE,
   node,
+  nodeClip,
   openFixture,
   openProject,
   openWorkflow,
   viewportZoom,
 } from "./canvas.ts";
 import { watchForCspViolations } from "./csp.ts";
-import type { EngineHook } from "./engine.ts";
+import { type EngineHook, readProject } from "./engine.ts";
 import { E2E_BASE_PATH } from "./urls.ts";
 
 interface Counts {
@@ -222,6 +224,14 @@ test("F-205 step 2 UX-24 QA-12 LA-28: value edges are dashed, channel edges soli
   expect(await dash("channel")).toBe("none");
   expect(await dash("value")).toMatch(/^6(px)?[ ,]+4(px)?$/);
   expect(await dash("plain")).toMatch(/^1(px)?[ ,]+4(px)?$/);
+  // unknown: solid like a channel, but muted and thinner than the accent hover (the legacy workflow's output)
+  expect(await dash("unknown")).toBe("none");
+  const stroke = (cls: string) =>
+    page
+      .locator(`.react-flow__edge-path.edge-${cls}`)
+      .first()
+      .evaluate((el) => getComputedStyle(el).stroke);
+  expect(await stroke("unknown")).not.toBe(await stroke("channel"));
 });
 
 test("F-205 step 3 UX-24: hovering an edge shows its type and source", async ({
@@ -248,6 +258,8 @@ test("F-205 step 3 UX-24: hovering an edge shows its type and source", async ({
   await expect(tooltip).toHaveText(/^Value<.+> · .+/);
   await hover("channel");
   await expect(tooltip).toHaveText(/^Channel<.+> · .+/);
+  await hover("unknown");
+  await expect(tooltip).toHaveText("Unknown type · tail");
   await page.mouse.move(2, 2);
   await expect(tooltip).toHaveCount(0);
 });
@@ -277,3 +289,102 @@ test("F-205 QA-01 ADR-0003: React Flow is only in a lazy chunk", () => {
     ),
   ).toBe(true);
 });
+
+test.describe("F-205 node baselines", () => {
+  // At this size the fit stays at zoom 1, so a clip is the node at its real size (the test asserts it).
+  test.use({ viewport: { width: 2560, height: 1440 } });
+
+  const KINDS: readonly (readonly [string, string])[] = [
+    ["process", `.react-flow__node[data-id="${NODE.greeted}"]`],
+    ["process-legacy", `.react-flow__node[data-id="${NODE.counted}"]`],
+    ["module", `.react-flow__node[data-id="${NODE.wc}"]`],
+    ["workflow", `.react-flow__node[data-id="${NODE.shouted}"]`],
+    ["workflow-legacy", `.react-flow__node[data-id="${NODE.tail}"]`],
+    ["chain", `.react-flow__node[data-id="${NODE.total}"]`],
+    ["factory", `.react-flow__node[data-id="${NODE.names}"]`],
+    ["params", `.react-flow__node[data-id="${NODE.params}"]`],
+    ["output", `.react-flow__node[data-id="${NODE.output}"]`],
+    ["code", `.react-flow__node[data-id="${NODE.code}"]`],
+  ];
+
+  test(
+    "F-205 step 1 UX-21 UX-22 UX-23: each node kind matches its approved baseline",
+    {
+      tag: VISUAL_TAG,
+    },
+    async ({ page }, testInfo) => {
+      await page.goto("./");
+      await openFixture(page);
+      await canvasReady(page);
+      expect(await viewportZoom(page), "fit stays at zoom 1").toBeCloseTo(1, 2);
+      const problems: string[] = [];
+      const check = async (name: string, target: Locator) => {
+        try {
+          await expectBaseline(page, testInfo, `canvas-node-${name}.png`, {
+            clip: await nodeClip(target),
+          });
+        } catch (error) {
+          problems.push(String(error instanceof Error ? error.message : error));
+        }
+      };
+      for (const [name, selector] of KINDS)
+        await check(name, page.locator(selector));
+      await page.getByRole("button", { name: "Hide port labels" }).click();
+      await expect(page.locator(".canvas-port")).toHaveCount(0);
+      await check("process-compact", node(page, NODE.greeted));
+      await page.getByRole("button", { name: "Show port labels" }).click();
+      // take and emit are in the typed named workflow
+      await openWorkflow(page, "workflows.nf", "SHOUT");
+      await canvasReady(page);
+      expect(await viewportZoom(page), "fit stays at zoom 1").toBeCloseTo(1, 2);
+      await check("take", page.locator(".canvas-node.is-take").first());
+      await check("emit", page.locator(".canvas-node.is-emit").first());
+      await page.goto("./");
+      await openProject(page, [
+        { path: "main.nf", text: readFileSync(BAD_DECLARATION, "utf8") },
+      ]);
+      await canvasReady(page);
+      expect(await viewportZoom(page), "fit stays at zoom 1").toBeCloseTo(1, 2);
+      await check("unparsed", page.locator(".canvas-node.is-unparsed"));
+      expect(problems, problems.join("\n")).toEqual([]);
+    },
+  );
+});
+
+test(
+  "F-205 step 1 UX-20 UX-24 UX-26: the rnaseq-nf-typed corpus pipeline's canvases match their approved baselines",
+  {
+    tag: VISUAL_TAG,
+  },
+  async ({ page }, testInfo) => {
+    const dir = join(REPO_ROOT, ".cache/corpus/rnaseq-nf-typed");
+    if (!existsSync(dir))
+      throw new Error(
+        "The rnaseq-nf-typed corpus is missing: run pnpm corpus:fetch",
+      );
+    await page.goto("./");
+    await openProject(page, readProject(dir));
+    await canvasReady(page);
+    const centre = page.locator(".column-centre");
+    const problems: string[] = [];
+    const check = async (name: string) => {
+      try {
+        await expectBaseline(
+          page,
+          testInfo,
+          `canvas-rnaseq-nf-typed-${name}.png`,
+          {
+            target: centre,
+          },
+        );
+      } catch (error) {
+        problems.push(String(error instanceof Error ? error.message : error));
+      }
+    };
+    await check("entry");
+    await openWorkflow(page, "modules/rnaseq.nf", "RNASEQ");
+    await canvasReady(page);
+    await check("rnaseq");
+    expect(problems, problems.join("\n")).toEqual([]);
+  },
+);

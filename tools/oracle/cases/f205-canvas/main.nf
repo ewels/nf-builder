@@ -35,6 +35,7 @@ workflow {
     counts = counted.txt
     total = total
     uppers = upper
+    tails = tail
 }
 
 output {
@@ -49,5 +50,8 @@ output {
     }
     uppers: Channel<String> {
         path 'uppers'
+    }
+    tails: Channel<String> {
+        path 'tails'
     }
 }

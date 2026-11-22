@@ -1,6 +1,12 @@
 // Helpers for the canvas end-to-end tests (F-205). The workspace hook is `window.nfBuilderWorkspace`.
+import { existsSync } from "node:fs";
 import { join } from "node:path";
-import type { Locator, Page } from "@playwright/test";
+import {
+  expect,
+  type Locator,
+  type Page,
+  type TestInfo,
+} from "@playwright/test";
 import { REPO_ROOT } from "../scripts/check-common.ts";
 import { readProject } from "./engine.ts";
 
@@ -28,6 +34,9 @@ export const NODE = {
   tail: "main.nf#/tail",
   upper: "main.nf#/upper",
   output: "main.nf#/:output",
+  names: "main.nf#/ch_names",
+  total: "main.nf#/total",
+  code: "main.nf#/:code@1",
 } as const;
 
 /** Opens a project in the UI with the version the header selects. */
@@ -83,4 +92,56 @@ export function viewportZoom(page: Page): Promise<number> {
     const m = new DOMMatrixReadOnly(getComputedStyle(el).transform);
     return m.a;
   });
+}
+
+const BASELINE_GUIDANCE =
+  "No approved baseline, or the canvas changed: download the playwright-chromium artifact, view the -actual.png and commit it as the baseline (ADR 0021)";
+
+/**
+ * Compares `target` (or a clip of the page) with its approved baseline. With updateSnapshots "none" Playwright writes
+ * no -actual.png for a missing baseline, so write and attach it here before failing.
+ */
+export async function expectBaseline(
+  page: Page,
+  testInfo: TestInfo,
+  name: string,
+  options: { target?: Locator; clip?: Clip } = {},
+): Promise<void> {
+  const shot = {
+    animations: "disabled",
+    caret: "hide",
+  } as const;
+  if (!existsSync(testInfo.snapshotPath(name))) {
+    const actual = testInfo.outputPath(name.replace(/\.png$/, "-actual.png"));
+    if (options.target !== undefined)
+      await options.target.screenshot({ path: actual, ...shot });
+    else await page.screenshot({ path: actual, clip: options.clip, ...shot });
+    await testInfo.attach(name.replace(/\.png$/, "-actual.png"), {
+      path: actual,
+      contentType: "image/png",
+    });
+    throw new Error(
+      `${BASELINE_GUIDANCE}. Expected at ${testInfo.snapshotPath(name)}`,
+    );
+  }
+  if (options.target !== undefined)
+    await expect(options.target, BASELINE_GUIDANCE).toHaveScreenshot(name);
+  else
+    await expect(page, BASELINE_GUIDANCE).toHaveScreenshot(name, {
+      clip: options.clip,
+    });
+}
+
+type Clip = { x: number; y: number; width: number; height: number };
+
+/** The page rectangle of a node with `pad` pixels around it. */
+export async function nodeClip(locator: Locator, pad = 16): Promise<Clip> {
+  const box = await locator.boundingBox();
+  if (box === null) throw new Error("the node has no box");
+  return {
+    x: Math.max(0, Math.floor(box.x - pad)),
+    y: Math.max(0, Math.floor(box.y - pad)),
+    width: Math.ceil(box.width + 2 * pad),
+    height: Math.ceil(box.height + 2 * pad),
+  };
 }
