@@ -324,3 +324,11 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
 - Next: once #31 is resolved, a production deploy should serve `/registry/`; then `pnpm check:registry --url https://nf-builder.netlify.app --generated-at <ts>` and set F-501 to passing in a PR.
 - Decisions: none.
 - Blockers: #31, #27.
+
+## 2026-11-22 · process · Claude (autonomous)
+- Did: GitHub Actions stopped starting jobs at 13:17 UTC ("recent account payments have failed or your spending limit needs to be increased"); opened maintainer issue #33.
+- State: no PR can get a green CI, so nothing merges until #33 is resolved. F-106 (PR #32) is built and in review.
+- Next: keep building in order on branches with the CI checks run locally (`pnpm check`, `pnpm oracle`, `pnpm test:corpus`, Chromium end-to-end tests, `pnpm build` with `check:budget` and `check:hosts`); merge each PR in order once CI is green again.
+- Decisions:
+  - While #33 blocks CI, a feature may branch from an unmerged dependency's branch (stacked), as an exception to ADR 0018's "independent features only". Every PR still needs a green CI before it merges, and the stack merges bottom up. The exception ends when CI runs again.
+- Blockers: #33 (Actions billing), #31 (snapshot branch read access), #27 (build hook).
