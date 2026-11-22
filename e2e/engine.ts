@@ -1,6 +1,5 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { join, relative } from "node:path";
-import type { Page } from "@playwright/test";
 import { WEB_DIST } from "../scripts/check-common.ts";
 import { readWorkerManifest } from "../scripts/worker-manifest.ts";
 
@@ -50,6 +49,3 @@ export interface EngineHook {
   }>;
   project(path: string, workflow: string | null): Promise<unknown>;
 }
-
-export const hasEngine = (page: Page) =>
-  page.evaluate(() => "nfBuilderEngine" in window);

@@ -10,6 +10,7 @@ import { readWorkerManifest } from "../scripts/worker-manifest.ts";
 import { SMOKE_TAG } from "./browsers.ts";
 import { watchForCspViolations } from "./csp.ts";
 import { type EngineHook, parserChunks, readProject } from "./engine.ts";
+import { scriptActivity } from "./trace.ts";
 
 const PARSER_MARKER =
   "check for an unclosed brace, bracket, parenthesis, or string";
@@ -81,4 +82,55 @@ test("F-113 step 2 QA-01 ADR-0033: the parser and the catalogue are built only i
   expect(worker.some((c) => c.src?.endsWith(".json"))).toBe(true);
   const entry = worker.find((c) => c.isEntry);
   expect(entry?.dynamicImports.some((f) => parser.includes(f))).toBe(true);
+});
+
+test("F-113 step 2 AR-04: the main thread does no parsing (Chromium performance trace)", async ({
+  page,
+  browser,
+  browserName,
+}) => {
+  test.skip(browserName !== "chromium", "performance traces are Chromium only");
+  await page.goto("/");
+  const files = readProject(
+    join(REPO_ROOT, "tools/oracle/cases/f105-includes-resolve"),
+  );
+  const main = files.find((f) => f.path === "main.nf")?.text ?? "";
+  await browser.startTracing(page, {
+    categories: [
+      "devtools.timeline",
+      "disabled-by-default-devtools.timeline",
+      "v8.execute",
+      "v8",
+      "toplevel",
+      "disabled-by-default-v8.cpu_profiler",
+    ],
+  });
+  const applied = await page.evaluate(
+    async ({ files, main }) => {
+      const engine = (window as unknown as { nfBuilderEngine: EngineHook })
+        .nfBuilderEngine;
+      const summary = await engine.open({ version: "26.10", files });
+      const result = await engine.apply(
+        {
+          kind: "replaceFileText",
+          path: "main.nf",
+          text: `${main}\n// edited\n`,
+        },
+        summary.revision,
+      );
+      await engine.project("main.nf", null);
+      return result.ok;
+    },
+    { files, main },
+  );
+  const trace = JSON.parse((await browser.stopTracing()).toString("utf8"));
+  expect(applied).toBe(true);
+  const parser = parserChunks();
+  expect(parser.length).toBeGreaterThan(0);
+  const activity = scriptActivity(trace, (url) =>
+    parser.some((file) => url.endsWith(`/${file}`)),
+  );
+  expect(activity.get("CrRendererMain")).toEqual({ samples: 0, compiles: 0 });
+  // positive control: the same analysis sees the parser run on the worker thread
+  expect(activity.get("DedicatedWorker thread")?.samples).toBeGreaterThan(0);
 });
