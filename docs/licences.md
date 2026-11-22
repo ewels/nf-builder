@@ -12,6 +12,8 @@ Every vendored file and runtime dependency with terms beyond a standard permissi
 | Ported nf-lang AST logic (`packages/lang-2610/src/ast/`: `ScriptAstBuilder`, `CommentAttacher`, `Comments`, `EscapeUtils`, and Groovy `StringUtils`/`Numbers` number and escape rules) at v26.10.7 | Script AST builder and comment attachment (F-102, ADR 0027) | Apache-2.0 | Attribution headers in each file |
 | Syntax-reference snippets (`docs/reference/syntax.mdx` at the pinned commit) in `packages/lang-2610/test/ast/fixtures/` | AST snapshot fixtures (F-102) | Apache-2.0 | Test data only; `fixtures.json` cites each source line range |
 | nf-core/modules `fastqc` module (`packages/lang-2610/test/ast/fixtures/modules/nf-core/fastqc/`) | Registry-include fixture linted offline by the oracle (F-102) | MIT | Test data only; committed as `nextflow lint` installed it |
+| Ported nf-lang formatter (`packages/lang-2610/src/printer/`: `Formatter`, `ScriptFormattingVisitor`, and parts of `Types` and `Comments`) at v26.10.7 | Printer (F-110, ADR 0032) | Apache-2.0 | Attribution headers in each file |
+| nf-lang `ScriptFormatterTest` cases (`packages/lang-2610/test/ported/formatter/`) at v26.10.7 | Ported formatter tests (F-110) | Apache-2.0 | Test data only; `cases.json` cites each upstream line |
 | antlr4ng | ANTLR runtime for the generated parser (ADR 0020) | BSD-3-Clause | Runtime dependency of `@nf-builder/lang-2610`; a third-party notices page in the app is F-704's |
 | CheerpJ | Spike S3 only (`e2e/s3-spike/`, loaded from its CDN in local test runs); not shipped (ADR 0026) | Commercial; free for FOSS projects | Q3 answered: not needed for v0.1 |
 | Nextflow TextMate grammar (via Shiki) | Syntax highlighting in Monaco (ADR 0003) | Check during F-304 | |

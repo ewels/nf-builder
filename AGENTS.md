@@ -37,7 +37,7 @@ This table lists every root `package.json` script that `pnpm check` doesn't alre
 | `pnpm corpus:fetch` | Fetch the pinned pipeline corpus into `.cache/corpus/` (git over github.com; second run is a no-op) |
 | `pnpm spike:s5` | Spike S5 (F-010): fetch the pinned Pyodide and nf-metro files, render the CLI references, then serve the test page on http://localhost:4175 (needs Python 3.11+) |
 | `pnpm nextflow -- <args>` | Run the pinned Nextflow (`packages/lang-2610/upstream.json`, Java 17 to 26): downloads the release once into `.cache/nextflow/`, checks its SHA-256, runs offline |
-| `pnpm oracle` | After changing Nextflow fixtures, templates or the printer: `nextflow lint` and `nextflow run -stub` on every case in `tools/oracle/cases/cases.yaml`; report in `.cache/oracle/report.md` (CI job `oracle`) |
+| `pnpm oracle` | After changing Nextflow fixtures, templates or the printer: `nextflow lint` and `nextflow run -stub` on every case in `tools/oracle/cases/cases.yaml`, and `nextflow lint -format` on the printer fixtures (`packages/lang-2610/test/printer/fixtures.json`); `--write-format` regenerates their `formatted*/` goldens; report in `.cache/oracle/report.md` (CI job `oracle`) |
 | `pnpm gen:grammar 26.10` | After changing `packages/lang-2610/grammar/` (vendored `.g4` or `port.ts`): regenerate `src/generated/`; `--check` only compares |
 | `pnpm gen:catalogue 26.10` | Regenerate `packages/lang-2610/catalogue/*.json` from the pinned language server jar (needs a JDK 17+); `--check` compares; CI job `catalogue` runs it on every PR |
 | `pnpm gen:palette 26.10` | After editing `packages/lang-2610/palette.yaml`: regenerate `palette.json`; `--check` compares (a unit test runs it in `pnpm check`) |
@@ -79,6 +79,7 @@ Never edit these. Regenerate them.
 - `packages/lang-*/src/generated/**`: `pnpm gen:grammar <version>`
 - `packages/lang-*/catalogue/*.json`: `pnpm gen:catalogue <version>` (CI job `catalogue` checks it)
 - `packages/lang-*/palette.json`: `pnpm gen:palette <version>` from the hand-edited `palette.yaml`
+- `packages/lang-*/test/printer/formatted*/**`: `pnpm oracle --write-format`
 - `apps/web/public/registry/**`: CI job `registry-snapshot`
 - `.claude/skills/*/**` (vendored Nextflow skills): `.claude/skills/sync.sh`
 
@@ -96,7 +97,7 @@ If your change adds a dependency, moves a package boundary, changes a stored or 
 - Use the Nextflow agent skills:
   - Claude Code: eight skills from `seqeralabs/nextflow-plugin` are vendored in `.claude/skills/` (see its README), so cloud sessions get them too;
   - other agents: `npx skills add seqeralabs/nextflow-plugin`.
-- Nextflow code in templates and fixtures must pass the oracle (`pnpm oracle`, CI job `oracle`: `nextflow lint` and `nextflow run -stub` on 26.10). In typed code, build a legacy `tuple` input with `tuple(...)`, never a mixed list literal (spike S1). The exceptions are malformed on purpose: in `tools/corpus/fixtures/` the oracle must reproduce the `lint` result recorded in `fixtures.yaml` (ADR 0017), and an oracle case marked `expect: error` in `tools/oracle/cases/cases.yaml` must fail as recorded (ADR 0019). The upstream test inputs in `packages/lang-*/test/ported/` are kept as nf-lang wrote them; their recorded `lint` results are checked for consistency, not re-run (F-101). The AST fixtures and error inputs in `packages/lang-*/test/ast/` are linted by the oracle, which must reproduce the `lint` lists recorded in `fixtures.json` (empty) and `errors.json` (F-102).
+- Nextflow code in templates and fixtures must pass the oracle (`pnpm oracle`, CI job `oracle`: `nextflow lint` and `nextflow run -stub` on 26.10). In typed code, build a legacy `tuple` input with `tuple(...)`, never a mixed list literal (spike S1). The exceptions are malformed on purpose: in `tools/corpus/fixtures/` the oracle must reproduce the `lint` result recorded in `fixtures.yaml` (ADR 0017), and an oracle case marked `expect: error` in `tools/oracle/cases/cases.yaml` must fail as recorded (ADR 0019). The upstream test inputs in `packages/lang-*/test/ported/` are kept as nf-lang wrote them; their recorded `lint` results are checked for consistency, not re-run (F-101). The AST fixtures and error inputs in `packages/lang-*/test/ast/` are linted by the oracle, which must reproduce the `lint` lists recorded in `fixtures.json` (empty) and `errors.json` (F-102). Printer fixtures must be lint-clean and their printed form a lint-clean fixed point under `nextflow lint -format`, apart from the known differences in ADR 0032.
 
 ## Conventions that tools don't enforce
 

@@ -9,7 +9,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-102 script AST | `feat/F-102`, PR #23 | Plan deleted in the PR that merges it. |
 | F-103 config AST | `feat/F-103` (pushed, stacked on `feat/F-102` at `83511c3`) | Built and committed: config AST, 228 corpus snapshots, range property test, ConfigAstBuilder errors, oracle cases. After F-102 merges: merge `main`; fill comment slots with F-102's `attachComments`; delete `src/ast/config/literal-errors.ts` and its number handling, since the shared builders now report escapes (`checkEscapes` in `stringLiteral`/`gstringText`), keyword and duplicate-argument errors, and number formats (call `cx.failOnNumberFormat()` at the end of the config unit); check config paths and block headers still get escape checks; records; PR. |
 | F-104 round trip | not started | [plan](plan-F-104.md). Branch from `main` after F-102 (and F-103) merge. |
-| F-110 printer | not started | [plan](plan-F-110.md). Branch from `main` after F-102 merges; can run alongside F-104. |
+| F-110 printer | `feat/F-110`, in PR | Plan deleted in its PR. |
 
 Next free ADR number: 0032.
 
@@ -28,7 +28,7 @@ Next free ADR number: 0032.
 ### F-104 — [plan](plan-F-104.md)
 - Accept the plan's recommendations: a new ADR for `LanguagePack.loadParser()` (lazy, like ADR 0028's `loadCatalogue()`) replacing the synchronous parse methods in the architecture sketch; `Unparsed` joins the AST unions; the plan's isolation and verbatim rules; its reading of the glossary's "equivalent"; chunks parsed by slicing and shifting; `SourceFile` in memory only; `yaml` as a lang-2610 dev dependency and Node types for engine tests are fine.
 
-### F-110 — [plan](plan-F-110.md)
+### F-110 (merged with its PR)
 - One new ADR listing the upstream formatter bugs as known differences (ADR 0005), `NO_RANGE` for new nodes (amending ADR 0027) and the blank-line layout for new declarations.
 - Port legacy printing too; default formatter flags only; no pack loader in F-110 (the parser loader from F-104 or F-111 carries the printer); the plan's oracle extension; corpus parity in the `corpus-parse` job; reuse F-102's fixtures by path; statement-level printing left to F-111; no fast-check yet.
 - Spec gap: also print feature flags, enums and agents if cheap; record what LA-45 formats.
