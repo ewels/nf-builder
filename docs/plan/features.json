@@ -474,8 +474,8 @@
         "Resize and collapse both side columns; widths persist after reload",
         "Visual snapshot matches the approved baseline"
       ],
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Verified 2026-11-22 on PR #12: step 1 by the F-201 e2e tests (drag, keyboard, collapse, reload persistence; the keyboard and persistence test also runs on Firefox and WebKit as @smoke); step 2 by the @visual test against the CI-rendered baseline e2e/__screenshots__/app-shell-layout.spec.ts/app-shell-default-chromium-linux.png, viewed and approved by the orchestrator (ADR 0021)."
     },
     {
       "id": "F-202",
