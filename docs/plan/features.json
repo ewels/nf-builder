@@ -245,8 +245,8 @@
         "Snapshot tests on every corpus `nextflow.config` and `conf/*.config`",
         "Ranges slice back to exact source"
       ],
-      "passes": false,
-      "notes": "From F-101: 7 ported ConfigAstBuilderTest inputs (L059, L076, L097, L113, L129, L163, L175) parse at grammar level and must be rejected by the config AST builder here (owner F-103 in packages/lang-2610/test/ported/cases.json). Also from F-101: the ported valid-escape cases must stay error-free once the config AST builder checks escapes (EscapeUtils). From F-102: SourceFile (AR-01: path, text, language, AST, comment map, parse status) is not in lang-core yet; F-104 adds it with LanguagePack.loadParser, and F-103's config parse result is part of its union."
+      "passes": true,
+      "notes": "From F-101: 7 ported ConfigAstBuilderTest inputs (L059, L076, L097, L113, L129, L163, L175) parse at grammar level and must be rejected by the config AST builder here (owner F-103 in packages/lang-2610/test/ported/cases.json). Also from F-101: the ported valid-escape cases must stay error-free once the config AST builder checks escapes (EscapeUtils). From F-102: SourceFile (AR-01: path, text, language, AST, comment map, parse status) is not in lang-core yet; F-104 adds it with LanguagePack.loadParser, and F-103's config parse result is part of its union. Verified 2026-11-22: step 1 by packages/lang-2610/test/corpus/config-ast.corpus.ts in pnpm test:corpus (CI corpus-parse): statement-level snapshots of all 228 lint-checked corpus configs under test/corpus/snapshots/config/, plus unit snapshots of the construct fixtures (test/config-ast/); step 2 by the same file's range checks (exact slices, nesting, re-parse of every statement and value) and the unit range tests. nf-lang's ConfigAstBuilder errors, including the 7 ported inputs, match nextflow lint 26.10.7 at the same positions (oracle tree config-ast-errors, 22 inputs). Comments: CommentAttacher's config path, 785 of 785 corpus config comments match nf-lang. No Playwright test (no UI)."
     },
     {
       "id": "F-104",
@@ -267,7 +267,7 @@
         "Malformed fixtures: the bad declaration is isolated, the rest of the file is modelled"
       ],
       "passes": false,
-      "notes": "From F-102: parseScriptAst (lang-2610, internal) returns ScriptParseResult; declarations with builder errors are listed in errors by range; section-order.nf gives an InvalidDeclaration. Add LanguagePack.loadParser and SourceFile (AR-01) here."
+      "notes": "From F-102: parseScriptAst (lang-2610, internal) returns ScriptParseResult; declarations with builder errors are listed in errors by range; section-order.nf gives an InvalidDeclaration. Add LanguagePack.loadParser and SourceFile (AR-01) here. From F-103: parseConfigAst (packages/lang-2610/src/ast/config/parse.ts, internal) gives top-level ConfigAssign/ConfigBlock/ConfigInclude/ConfigApplyBlock statements with ranges (fixtures.yaml names: assign <path>, block <name>), ConfigInvalid (statement omitted after a fatal error) and ConfigIncomplete kept, and every comment attached once with the root list in order."
     },
     {
       "id": "F-105",
@@ -285,7 +285,7 @@
         "Changing one file re-models only that file and its dependants (asserted via instrumentation)"
       ],
       "passes": false,
-      "notes": ""
+      "notes": "From F-103: includeConfig sources are ConfigInclude nodes with the source expression; resolving them (and reporting 'Invalid include source') is F-105's."
     },
     {
       "id": "F-106",
@@ -437,7 +437,7 @@
         "Every message states what to do; mechanical cases carry a quick-fix command"
       ],
       "passes": false,
-      "notes": "From F-101: 8 ported AgentParserTest inputs (L485-L491, L518: agent output types, eval not defined) parse and are rejected only by name and type resolution (owner F-112 in packages/lang-2610/test/ported/cases.json). From F-102: AST-builder errors come with nf-lang wording in ScriptParseResult.errors (source builder or parser); warnings (ScriptAstBuilder.java #L597, #L619, #L634, #L695, #L824, #L836, #L977, #L1059) and resolver errors are F-112's."
+      "notes": "From F-101: 8 ported AgentParserTest inputs (L485-L491, L518: agent output types, eval not defined) parse and are rejected only by name and type resolution (owner F-112 in packages/lang-2610/test/ported/cases.json). From F-102: AST-builder errors come with nf-lang wording in ScriptParseResult.errors (source builder or parser); warnings (ScriptAstBuilder.java #L597, #L619, #L634, #L695, #L824, #L836, #L977, #L1059) and resolver errors are F-112's. From F-103: selector placement, includeConfig placement and include resolution are resolver checks, not AST-builder errors (lint 26.10.7: a selector inside docker passes lint; includeConfig inside process gives 'Config includes are only allowed at the top-level or in a profile'); decimal number-format errors are not ported."
     },
     {
       "id": "F-113",
@@ -1160,7 +1160,7 @@
         "An unknown option in an imported config is kept and flagged"
       ],
       "passes": false,
-      "notes": ""
+      "notes": "From F-103: the config AST is syntactic. Profiles, params and env are ConfigBlocks; selectors are ConfigSelector with the kind as written; plugins is ConfigApplyBlock; mapping to catalogue/config.json is F-601's."
     },
     {
       "id": "F-602",
