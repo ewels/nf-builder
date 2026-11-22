@@ -10,6 +10,7 @@ include { LEGACY_COUNT } from './modules/local/legacy_count'
 include { WORDCOUNT } from 'nf-core/wordcount'
 include { SHOUT } from './workflows.nf'
 include { LEGACY_TAIL } from './legacy.nf'
+include { workflow as UPPER } from './pipelines/upper.nf'
 
 params {
     greeting: String = 'hello'
@@ -26,12 +27,14 @@ workflow {
     wc = WORDCOUNT(ch_pairs)
     shouted = SHOUT(greeted, params.words)
     tail = LEGACY_TAIL(shouted)
+    upper = UPPER(record(input: shouted))
     total = greeted.map { g -> g.length() }.collect()
 
     publish:
     greetings = greeted
     counts = counted.txt
     total = total
+    uppers = upper
 }
 
 output {
@@ -43,5 +46,8 @@ output {
     }
     total: Value<Bag<Integer>> {
         path 'total'
+    }
+    uppers: Channel<String> {
+        path 'uppers'
     }
 }
