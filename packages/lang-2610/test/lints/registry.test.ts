@@ -43,4 +43,47 @@ describe("F-112 lint registry", () => {
         fixable: false,
       });
   });
+
+  it("F-112: the registry holds exactly the planned codes", () => {
+    expect(lints.codes.map((c) => c.code).sort()).toEqual(
+      [
+        "syntax",
+        "include-target",
+        "include-not-parsed",
+        "include-name",
+        "deprecated-when",
+        "deprecated-shell",
+        "deprecated-channel",
+        "implicit-it",
+        "deprecated-directive",
+        "legacy-process",
+        "legacy-workflow",
+        "legacy-params",
+        "params-outside-entry",
+        "tuple-where-record",
+        "publish-dir",
+        "missing-type",
+        "typed-process-outputs",
+        "publish-type-ignored",
+        "feature-flag",
+        "pipeline-include-types",
+        "config-include-placement",
+        "agent-output",
+        "include-alias",
+        "duplicate-name",
+        "call-arity",
+        "unused-output",
+        "type-mismatch",
+        "multiple-channels",
+      ].sort(),
+    );
+    // every code but the parser and model ones has a rule, and every rule a code
+    const codes = new Set(lints.codes.map((c) => c.code));
+    for (const rule of lints.rules)
+      expect(codes, rule.code).toContain(rule.code);
+    const ruled = new Set(lints.rules.map((r) => r.code));
+    for (const c of lints.codes)
+      if (c.origin !== "parser" && c.origin !== "model")
+        expect(ruled, c.code).toContain(c.code);
+  });
 });

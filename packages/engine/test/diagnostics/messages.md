@@ -103,3 +103,23 @@
 ## duplicate-name
 
 - `hello` is already included -- remove the duplicate, or rename one or alias it with `as`
+
+## call-arity
+
+- Incorrect number of call arguments, expected 1 but received 2 -- pass one argument for each input: `x`
+- Process `hello` expects 2 argument(s) but received 1 -- pass one argument for each input: `x`, `y`
+
+## unused-output
+
+- The outputs of `hello` are never used -- connect it, publish it, or remove the call
+
+## type-mismatch
+
+- Argument with type Channel<Integer> is not compatible with parameter of type Channel<String> -- pass a Channel<String>
+- Argument with type Integer is not compatible with process input of type String -- pass a String, or a channel or value of String
+- Workflow emit `greeted` with type Channel<Integer> cannot be assigned to value with type Channel<String> -- change the declared type, or emit a Channel<String>
+- Workflow output `summary` with type Integer cannot be assigned to value with type Path -- change the output's type in the output block, or publish a value of type Integer
+
+## multiple-channels
+
+- Process `pair` was called with multiple channel arguments which can lead to non-deterministic behavior -- make sure that at most one argument is a channel and that all other arguments are dataflow values

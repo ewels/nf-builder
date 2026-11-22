@@ -1,6 +1,11 @@
 import type { LintFinding, LintRule } from "@nf-builder/lang-core";
 import { describe, expect, it } from "vitest";
 import {
+  callArity,
+  declaredInputs,
+  unusedOutput,
+} from "../../src/lints/calls.ts";
+import {
   DIRECTIVE_ADVICE,
   deprecatedChannel,
   deprecatedDirective,
@@ -256,5 +261,253 @@ describe("F-112 LA-35 LA-36 legacy patterns", () => {
     const ctx = context(text);
     for (const rule of [deprecatedWhen, legacyProcess, publishDir, implicitIt])
       expect(rule.check(ctx)).toEqual([]);
+  });
+});
+
+describe("F-112 LA-33 calls", () => {
+  const PROCESS = `process p {
+    input:
+    val x
+
+    script:
+    'echo'
+}
+`;
+
+  it("F-112 LA-33: argument counts follow nf-lang: named arguments count once, closures count", () => {
+    const text = `${PROCESS}
+workflow {
+    p(1, 2)
+    p(a: 1)
+    p(1, a: 2)
+    p { it }
+    p()
+    p(1)
+    x.p(1, 2)
+    unknown(1, 2)
+}
+`;
+    const found = run(callArity, text);
+    expect(found.map((f) => f.message)).toEqual([
+      "Incorrect number of call arguments, expected 1 but received 2 -- pass one argument for each input: `x`",
+      "Incorrect number of call arguments, expected 1 but received 2 -- pass one argument for each input: `x`",
+      "Incorrect number of call arguments, expected 1 but received 0 -- pass one argument for each input: `x`",
+    ]);
+    // a legacy script reports at the call
+    expect(at(text, found)).toEqual(["p(1, 2)", "p(1, a: 2)", "p()"]);
+  });
+
+  it("F-112 LA-33: a typed script reports at the method name, for processes, agents and workflows, and skips the entry workflow", () => {
+    const text = `nextflow.enable.types = true
+
+process p {
+    input:
+    a: String
+    b: String
+
+    output:
+    stdout()
+
+    script:
+    'echo'
+}
+
+workflow w {
+    take:
+    c: Channel<String>
+
+    main:
+    x = c
+
+    emit:
+    x
+}
+
+workflow {
+    p('a')
+    w()
+    w(channel.of('a'))
+    p('a', 'b', 'c')
+}
+`;
+    const found = run(callArity, text);
+    expect(found.map((f) => f.message)).toEqual([
+      "Process `p` expects 2 argument(s) but received 1 -- pass one argument for each input: `a`, `b`",
+      "Workflow `w` expects 1 argument(s) but received 0 -- pass one argument for each input: `c`",
+      "Process `p` expects 2 argument(s) but received 3 -- pass one argument for each input: `a`, `b`",
+    ]);
+    expect(at(text, found)).toEqual(["p", "w", "p"]);
+  });
+
+  it("F-112 LA-33: a null argument for a typed process input that isn't nullable is an unconnected input (nextflow run fails, lint accepts)", () => {
+    const text = `nextflow.enable.types = true
+
+process hello {
+    input:
+    name: String
+    other: String?
+    path: Path
+
+    output:
+    stdout()
+
+    script:
+    'echo'
+}
+
+workflow {
+    hello(null, null, file('x'))
+    hello('a', null, null)
+}
+`;
+    const found = run(callArity, text);
+    expect(found.map((f) => f.message)).toEqual([
+      "Input `name` of process `hello` is not nullable but receives `null` -- pass a value, or add `?` to the input's type",
+      "Input `path` of process `hello` is not nullable but receives `null` -- pass a value, or add `?` to the input's type",
+    ]);
+    expect(at(text, found)).toEqual(["null", "null"]);
+    // a legacy script and a legacy process are left alone
+    expect(run(callArity, `${PROCESS}\nworkflow {\n    p(null)\n}\n`)).toEqual(
+      [],
+    );
+  });
+
+  it("F-112 LA-33: declared inputs are the take names, the typed input names or the legacy qualifier arguments", () => {
+    const names = (text: string, kind: string): readonly string[] | null => {
+      const ctx = context(text);
+      const decl = (
+        ctx.file as unknown as { ast: { body: { kind: string }[] } }
+      ).ast.body.find((d) => d.kind === kind);
+      return declaredInputs(decl as never);
+    };
+    expect(
+      names(
+        "process p {\n input:\n val x\n tuple val(a), path(b)\n path 'f.txt'\n stdin\n script:\n 'x'\n}",
+        "Process",
+      ),
+    ).toEqual(["x", "tuple(a, b)", "path", "stdin"]);
+    expect(
+      names(
+        "nextflow.enable.types = true\nprocess p {\n input:\n a: String\n record(b: String)\n tuple(c: String, d: Path)\n script:\n 'x'\n}",
+        "Process",
+      ),
+    ).toEqual(["a", "record(b)", "tuple(c, d)"]);
+    expect(
+      names("workflow w {\n take:\n a\n b\n main:\n x = a\n}", "Workflow"),
+    ).toEqual(["a", "b"]);
+    expect(names("process p {\n script:\n 'x'\n}", "Process")).toEqual([]);
+    expect(names("def f(a) { a }", "Function")).toBeNull();
+  });
+
+  const UNUSED = (extra = "") => `process hello {
+${extra}    output:
+    path 'a.txt'
+
+    script:
+    'echo'
+}
+process quiet {
+    script:
+    'echo'
+}
+`;
+  it("F-112 LA-33: unused outputs follow the reads after the call; topic, publishDir and config publishDir exempt", () => {
+    const flagged = (body: string, head = UNUSED(), configs: string[] = []) => {
+      const ctx = context(`${head}\nworkflow {\n${body}\n}\n`);
+      return unusedOutput.check({
+        ...ctx,
+        configs: () =>
+          configs.map(
+            (c) => (context(c, "config").file as unknown as { ast: never }).ast,
+          ),
+      });
+    };
+    // a bare call, and a call without outputs
+    expect(flagged("    hello()\n    quiet()").map((f) => f.message)).toEqual([
+      "The outputs of `hello` are never used -- connect it, publish it, or remove the call",
+    ]);
+    // a call whose result feeds something, or is assigned and read later
+    expect(flagged("    hello().view()")).toEqual([]);
+    expect(flagged("    hello() | view")).toEqual([]);
+    expect(flagged("    r = hello()\n    r.view()")).toEqual([]);
+    expect(flagged('    def r = hello()\n    println "${r}"')).toEqual([]);
+    expect(flagged("    r = hello()\n    emit:\n    r")).toEqual([]);
+    expect(flagged("    r = hello()\n    publish:\n    out = r")).toEqual([]);
+    expect(flagged("    r = hello()\n    channel.of(1).map { r }")).toEqual([]);
+    // an assigned result that is never read, also inside an if
+    expect(flagged("    r = hello()").map((f) => f.message)).toEqual([
+      "The result of `hello` is never used -- connect it, publish it, or remove the call",
+    ]);
+    expect(flagged("    if (params.x) {\n        hello()\n    }")).toHaveLength(
+      1,
+    );
+    // a read before the statement does not count
+    expect(flagged("    r = 1\n    r.view()\n    r = hello()")).toHaveLength(1);
+    // a legacy script reads `.out` anywhere in the workflow
+    expect(flagged("    hello()\n    hello.out.view()")).toEqual([]);
+    expect(flagged("    hello()\n    hello.other.view()")).toHaveLength(1);
+    // exemptions
+    expect(flagged("    hello()", UNUSED("    publishDir 'out'\n"))).toEqual(
+      [],
+    );
+    expect(
+      flagged("    hello()", UNUSED(), ["process.publishDir = 'out'"]),
+    ).toEqual([]);
+    expect(
+      flagged("    hello()", UNUSED(), [
+        "process {\n withName: hello {\n publishDir = 'x'\n }\n}",
+      ]),
+    ).toEqual([]);
+    expect(
+      flagged("    hello()", UNUSED(), ["docker.enabled = true"]),
+    ).toHaveLength(1);
+    expect(
+      flagged(
+        "    hello()",
+        UNUSED().replace("path 'a.txt'", "path 'a.txt', topic: 'versions'"),
+      ),
+    ).toEqual([]);
+  });
+
+  it("F-112 LA-33: a typed call with several outputs warns once per output that is never read", () => {
+    const head = `nextflow.enable.types = true
+
+process two {
+    output:
+    a: String = 'a'
+    b: String = 'b'
+
+    script:
+    'echo'
+}
+process topical {
+    output:
+    a: String = 'a'
+
+    topic:
+    a >> 'versions'
+
+    script:
+    'echo'
+}
+`;
+    const flagged = (body: string) =>
+      unusedOutput
+        .check(context(`${head}\nworkflow {\n${body}\n}\n`))
+        .map((f) => f.message);
+    expect(flagged("    r = two()\n    r.a.view()")).toEqual([
+      "Output `b` of `two` is never used -- connect it, publish it, or remove the call",
+    ]);
+    expect(flagged("    r = two()\n    r.a.view()\n    r.b.view()")).toEqual(
+      [],
+    );
+    expect(flagged("    r = two()\n    r.view()")).toEqual([]);
+    expect(flagged("    r = two()")).toEqual([
+      "The result of `two` is never used -- connect it, publish it, or remove the call",
+    ]);
+    expect(flagged("    two()")).toEqual([
+      "The outputs of `two` are never used -- connect it, publish it, or remove the call",
+    ]);
+    expect(flagged("    topical()")).toEqual([]);
   });
 });

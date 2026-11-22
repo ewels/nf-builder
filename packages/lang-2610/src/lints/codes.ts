@@ -19,6 +19,7 @@ const includeCode = (code: string): DiagnosticCode => ({
 const NF_LANG = "modules/nf-lang/src/main/java/nextflow";
 const BUILDER = `${NF_LANG}/script/parser/ScriptAstBuilder.java`;
 const RESOLVE_INCLUDE = `${NF_LANG}/script/control/ResolveIncludeVisitor.java`;
+const TYPE_CHECK = `${NF_LANG}/script/control/TypeCheckingVisitor.java`;
 const SCRIPT_SCOPE = `${NF_LANG}/script/control/VariableScopeVisitor.java`;
 
 /** A code with no verbatim messages and no fix unless the caller says so. */
@@ -235,5 +236,46 @@ export const CODES: readonly DiagnosticCode[] = [
     ],
     lintPattern: /is already (included|declared)$/,
     fixable: true,
+  }),
+  code({
+    code: "call-arity",
+    severity: "error",
+    spec: ["LA-33"],
+    origin: "lint",
+    upstream: [
+      `${TYPE_CHECK}#L648`,
+      `${NF_LANG}/script/control/CallArityVisitor.java#L73`,
+    ],
+    lintPattern:
+      /^(Incorrect number of call arguments|(Process|Agent|Workflow) `[^`]+` expects \d+ argument\(s\))/,
+  }),
+  code({
+    code: "unused-output",
+    severity: "warning",
+    spec: ["LA-33"],
+    origin: "ours",
+  }),
+  code({
+    code: "type-mismatch",
+    severity: "error",
+    spec: ["LA-29", "LA-32"],
+    origin: "lint",
+    upstream: [
+      `${TYPE_CHECK}#L1007`,
+      `${TYPE_CHECK}#L829`,
+      `${TYPE_CHECK}#L525`,
+      `${TYPE_CHECK}#L267`,
+    ],
+    lintPattern:
+      /^(Argument with type .+ is not compatible with (process input|agent input|parameter)|(Workflow emit `[^`]+`|Workflow output `[^`]+`|Assignment target) with type .+ cannot be assigned to value with type )/,
+  }),
+  code({
+    code: "multiple-channels",
+    severity: "error",
+    spec: ["LA-32"],
+    origin: "lint",
+    upstream: [`${TYPE_CHECK}#L1013`],
+    lintPattern: /was called with multiple channel arguments/,
+    verbatim: [/ -- make sure that at most one argument is a channel/],
   }),
 ];

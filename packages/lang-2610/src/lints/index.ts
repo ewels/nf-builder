@@ -1,5 +1,6 @@
 import type { PackLints } from "@nf-builder/lang-core";
 import { advise } from "./advice.ts";
+import { callArity, unusedOutput } from "./calls.ts";
 import { CODES } from "./codes.ts";
 import {
   deprecatedChannel,
@@ -29,6 +30,7 @@ import {
   publishTypeIgnored,
   typedProcessOutputs,
 } from "./typed.ts";
+import { connection, multipleChannels, typeMismatch } from "./types.ts";
 
 /** The pack's lints (F-112): one lazy chunk, loaded through `LanguagePack.loadLints`. */
 export const lints: PackLints = {
@@ -54,8 +56,11 @@ export const lints: PackLints = {
     agentOutput,
     includeAlias,
     duplicateName,
+    callArity,
+    unusedOutput,
+    typeMismatch,
+    multipleChannels,
   ],
   advise,
-  // Type compatibility arrives with the type rules (F-112, LA-32); until then nothing is known to be incompatible.
-  connection: () => "unknown",
+  connection,
 };

@@ -4,13 +4,20 @@ import {
   type AstNode,
   type CatchClause,
   type Closure,
+  type ConfigAst,
+  type ConfigStatement,
   childNodes,
   type LintContext,
   type MethodCall,
+  type NamedOutput,
   type ProcessDef,
+  type PropertyExpr,
   type ScriptAst,
+  type Statement,
   type Variable,
   type VariableDeclaration,
+  type WorkflowDef,
+  walk,
 } from "@nf-builder/lang-core";
 
 /** The file's script AST, or null for a config or a file nothing could be modelled in. */
@@ -85,4 +92,151 @@ export function directiveCalls(
     )
       out.push(statement.expression);
   return out;
+}
+
+/** What reads of a name look like: the whole value (`r`) or one property (`r.out`, `r.txt`). */
+export interface Read {
+  readonly whole: boolean;
+  readonly property: string | null;
+}
+
+/**
+ * The reads of each variable name under `nodes`, counting closures, GStrings and the implicit read of an emit or
+ * output written as `name: Type` with no value. Only reads that start at or after `after` count.
+ */
+export function readsIn(
+  nodes: readonly AstNode[],
+  after = 0,
+): ReadonlyMap<string, readonly Read[]> {
+  const reads = new Map<string, Read[]>();
+  const add = (name: string, read: Read): void => {
+    const list = reads.get(name);
+    if (list) list.push(read);
+    else reads.set(name, [read]);
+  };
+  for (const root of nodes)
+    walk(root, (node, parent) => {
+      if (node.range.end <= after) return false;
+      if (node.kind === "NamedOutput") {
+        const output = node as unknown as NamedOutput;
+        if (output.value === null)
+          add(output.name.name, { whole: true, property: null });
+      } else if (node.kind === "Variable") {
+        const name = (node as Variable).name;
+        const owner =
+          parent?.kind === "Property" ? (parent as PropertyExpr) : null;
+        if (owner && owner.object === node) {
+          const property =
+            owner.property.kind === "Identifier"
+              ? owner.property.name
+              : owner.property.value;
+          add(name, { whole: false, property });
+        } else add(name, { whole: true, property: null });
+      }
+      return undefined;
+    });
+  return reads;
+}
+
+/** The positional arguments of a call, plus one if it has named arguments, plus its closures (nf-lang's argument count). */
+export function argumentCount(call: MethodCall): number {
+  const positional = call.args.filter((a) => a.kind !== "NamedArgument").length;
+  const named = call.args.some((a) => a.kind === "NamedArgument") ? 1 : 0;
+  return positional + named + call.closures.length;
+}
+
+export interface WorkflowCall {
+  readonly call: MethodCall;
+  readonly statement: Statement;
+  /** The variable the result is assigned to, `null` for a bare call. */
+  readonly assigned: string | null;
+}
+
+const isBareCall = (e: unknown): e is MethodCall =>
+  (e as MethodCall | null)?.kind === "MethodCall" &&
+  (e as MethodCall).receiver === null;
+
+/**
+ * The calls in a workflow's `main` that stand as a whole statement: `CALL(...)`, `v = CALL(...)` and `def v = CALL(...)`,
+ * also inside `if` branches. A call that is an argument, receiver or pipe operand is used, so it isn't listed.
+ */
+export function workflowCalls(def: WorkflowDef): readonly WorkflowCall[] {
+  const out: WorkflowCall[] = [];
+  const visit = (statement: Statement): void => {
+    switch (statement.kind) {
+      case "ExpressionStatement":
+        if (isBareCall(statement.expression))
+          out.push({ call: statement.expression, statement, assigned: null });
+        break;
+      case "Assignment":
+        if (
+          statement.operator === "=" &&
+          statement.target.kind === "Variable" &&
+          isBareCall(statement.value)
+        )
+          out.push({
+            call: statement.value,
+            statement,
+            assigned: statement.target.name,
+          });
+        break;
+      case "VariableDeclaration": {
+        const [target] = statement.targets;
+        if (
+          !statement.multiple &&
+          statement.targets.length === 1 &&
+          target &&
+          isBareCall(statement.initializer)
+        )
+          out.push({
+            call: statement.initializer,
+            statement,
+            assigned: target.name.name,
+          });
+        break;
+      }
+      case "If":
+        visit(statement.consequent);
+        if (statement.alternate) visit(statement.alternate);
+        break;
+      case "Block":
+        for (const inner of statement.statements) visit(inner);
+        break;
+    }
+  };
+  for (const statement of def.main?.items ?? []) visit(statement);
+  return out;
+}
+
+/** Whether any config assigns `publishDir` for processes: `process.publishDir`, or inside a `process` block or selector. */
+export function configPublishes(configs: readonly ConfigAst[]): boolean {
+  const search = (
+    statements: readonly ConfigStatement[],
+    inProcess: boolean,
+  ): boolean =>
+    statements.some((s) => {
+      switch (s.kind) {
+        case "ConfigAssign": {
+          const names = s.path.map((n) => n.name);
+          return (
+            names[names.length - 1] === "publishDir" &&
+            (inProcess || names.includes("process"))
+          );
+        }
+        case "ConfigBlock":
+          return search(s.statements, inProcess || s.name.name === "process");
+        case "ConfigSelector":
+          return search(s.statements, true);
+        default:
+          return false;
+      }
+    });
+  return configs.some((config) =>
+    search(
+      config.statements.filter(
+        (s) => s.kind !== "Unparsed",
+      ) as ConfigStatement[],
+      false,
+    ),
+  );
 }

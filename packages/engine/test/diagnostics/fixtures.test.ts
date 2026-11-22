@@ -106,6 +106,18 @@ const PARITY: Record<
     cut: null,
   },
   "duplicate-name": { lint: /is already (included|declared)$/, cut: null },
+  "call-arity": {
+    lint: /^(Incorrect number of call arguments|(Process|Agent|Workflow) `[^`]+` expects)/,
+    cut: null,
+  },
+  "type-mismatch": {
+    lint: /^(Argument with type .+ is not compatible with (process input|agent input|parameter)|(Workflow emit|Workflow output|Assignment target).+ cannot be assigned to value)/,
+    cut: null,
+  },
+  "multiple-channels": {
+    lint: /was called with multiple channel arguments/,
+    cut: null,
+  },
 };
 const VERBS = new Set([
   "add",
@@ -144,9 +156,7 @@ describe("F-112 fixtures", () => {
     const unregistered = [...new Set(dirs.map((d) => d.code))].filter(
       (c) => !known.has(c),
     );
-    // codes whose rules land in later F-112 tasks; each task removes its own
-    expect(unregistered.length).toBeLessThanOrEqual(PENDING.length);
-    for (const c of unregistered) expect(PENDING, c).toContain(c);
+    expect(unregistered).toEqual([]);
   });
 
   for (const { code, severity, fixable, spec } of codes) {
@@ -263,11 +273,3 @@ describe("F-112 fixtures", () => {
     await expect(lines.join("\n")).toMatchFileSnapshot("./messages.md");
   });
 });
-
-/** Fixture codes whose rules a later F-112 task adds. */
-const PENDING = [
-  "call-arity",
-  "multiple-channels",
-  "type-mismatch",
-  "unused-output",
-];

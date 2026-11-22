@@ -5,7 +5,7 @@ workflow numbers {
     names: Channel<String>
 
     main:
-    greeted = names.map { n -> n.toUpperCase() }
+    greeted = names
 
     emit:
     greeted: Channel<String>
