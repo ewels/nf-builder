@@ -1,7 +1,10 @@
 import { expect, type Page, test } from "@playwright/test";
+import { VISUAL_TAG } from "./browsers.ts";
 import {
   canvasReady,
   clickEmptyCanvas,
+  expectBaseline,
+  layoutSettled,
   NODE,
   node,
   openBadDeclaration,
@@ -262,3 +265,41 @@ test("F-206 UX-32: Edit and Code show, disabled, only while a node is selected",
   await expect(column.getByRole("button", { name: "Edit" })).toHaveCount(0);
   await expect(column.getByRole("button", { name: "Code" })).toHaveCount(0);
 });
+
+const detailsColumn = (page: Page) =>
+  page.getByRole("complementary", { name: "Details" });
+
+test(
+  "F-206 UX-30 UX-32: a typed process's details match the approved baseline @visual",
+  { tag: VISUAL_TAG },
+  async ({ page }, testInfo) => {
+    await page.goto("./");
+    await openDetailsFixture(page);
+    await canvasReady(page);
+    await selectNode(page, TRIM_ID);
+    await detailsReady(page);
+    await expect(detailsPane(page).locator(".details-name")).toHaveText("TRIM");
+    await layoutSettled(page);
+    await expectBaseline(page, testInfo, "details-process-trim.png", {
+      target: detailsColumn(page),
+    });
+  },
+);
+
+test(
+  "F-206 UX-31: the entry workflow summary matches the approved baseline @visual",
+  { tag: VISUAL_TAG },
+  async ({ page }, testInfo) => {
+    await page.goto("./");
+    await openFixture(page);
+    await canvasReady(page);
+    await expect(detailsPane(page)).toHaveAttribute(
+      "data-details-state",
+      "summary",
+    );
+    await layoutSettled(page);
+    await expectBaseline(page, testInfo, "details-entry-summary.png", {
+      target: detailsColumn(page),
+    });
+  },
+);
