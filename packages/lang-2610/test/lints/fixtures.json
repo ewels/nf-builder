@@ -153,6 +153,21 @@
       ]
     },
     {
+      "file": "duplicate-call/negative/hello.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "duplicate-call/negative/main.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "duplicate-call/positive/main.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
       "file": "duplicate-name/fixed/hello.nf",
       "lint": [],
       "warnings": []

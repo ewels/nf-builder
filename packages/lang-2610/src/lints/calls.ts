@@ -3,7 +3,10 @@
 import type {
   AgentDef,
   Argument,
+  AstNode,
+  BinaryExpr,
   Expression,
+  IfStatement,
   IncludableDeclaration,
   LintContext,
   LintFinding,
@@ -12,7 +15,7 @@ import type {
   ProcessDef,
   WorkflowDef,
 } from "@nf-builder/lang-core";
-import { walk } from "@nf-builder/lang-core";
+import { childNodes, walk } from "@nf-builder/lang-core";
 import {
   argumentCount,
   configPublishes,
@@ -274,6 +277,72 @@ export const unusedOutput: LintRule = {
                 message: `Output \`${output}\` of \`${name}\` is never used -- ${TRY}`,
               });
       }
+    }
+    return out;
+  },
+};
+
+/**
+ * Ours (AR-05, LA-33): a process called twice in one workflow. Nextflow 26.10.7 stops the run with "Process 'X' was called
+ * twice", and `nextflow lint` accepts it (upstream bug 24). A call, or a name used as a pipe operand, counts; reading
+ * `X.out` doesn't. Only a certain repeat is reported: the earlier call must run whenever the later one does, so both
+ * sit in the same branch or the later one is nested in the earlier one's. Calls under different conditions (the two
+ * branches of an `if`, or two separate `if` statements as in sarek's `fastq_preprocess_gatk`) may be alternatives, and
+ * the pack can't tell. A workflow may be called twice.
+ */
+export const duplicateCall: LintRule = {
+  code: "duplicate-call",
+  check: (context) => {
+    const ast = scriptOf(context);
+    if (!ast) return [];
+    const out: LintFinding[] = [];
+    const isProcess = (name: string): boolean =>
+      context.lookup(name)?.declaration?.kind === "Process";
+    for (const def of ast.body) {
+      if (def.kind !== "Workflow" || !def.main) continue;
+      // the branch of each enclosing `if`: "<if number>.then" or "<if number>.else"
+      const path: string[] = [];
+      let ifs = 0;
+      const seen = new Map<string, string[][]>();
+      const note = (name: string, range: LintFinding["range"]): void => {
+        if (!isProcess(name)) return;
+        const earlier = seen.get(name) ?? [];
+        if (
+          earlier.some((before) => before.every((step, i) => path[i] === step))
+        )
+          out.push({
+            range,
+            message: `Process \`${name}\` is already called in this workflow -- include it again under another name (\`include { ${name} as ${name}_2 }\`) to call it twice`,
+          });
+        seen.set(name, [...earlier, [...path]]);
+      };
+      const go = (node: AstNode): void => {
+        if (node.kind === "If") {
+          const branch = node as IfStatement;
+          const id = ifs++;
+          go(branch.condition);
+          path.push(`${id}.then`);
+          go(branch.consequent);
+          path.pop();
+          if (branch.alternate) {
+            path.push(`${id}.else`);
+            go(branch.alternate);
+            path.pop();
+          }
+          return;
+        }
+        if (node.kind === "MethodCall") {
+          const call = node as MethodCall;
+          if (call.receiver === null) note(methodName(call), call.range);
+        } else if (node.kind === "Binary") {
+          const pipe = node as BinaryExpr;
+          if (pipe.operator === "|")
+            for (const side of [pipe.left, pipe.right])
+              if (side.kind === "Variable") note(side.name, side.range);
+        }
+        for (const child of childNodes(node)) go(child);
+      };
+      go(def.main as unknown as AstNode);
     }
     return out;
   },

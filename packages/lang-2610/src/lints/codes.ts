@@ -250,6 +250,12 @@ export const CODES: readonly DiagnosticCode[] = [
       /^(Incorrect number of call arguments|(Process|Agent|Workflow) `[^`]+` expects \d+ argument\(s\))/,
   }),
   code({
+    code: "duplicate-call",
+    severity: "error",
+    spec: ["AR-05", "LA-33"],
+    origin: "ours",
+  }),
+  code({
     code: "unused-output",
     severity: "warning",
     spec: ["LA-33"],

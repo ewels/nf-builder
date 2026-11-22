@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   callArity,
   declaredInputs,
+  duplicateCall,
   unusedOutput,
 } from "../../src/lints/calls.ts";
 import {
@@ -509,5 +510,76 @@ process topical {
       "The outputs of `two` are never used -- connect it, publish it, or remove the call",
     ]);
     expect(flagged("    topical()")).toEqual([]);
+  });
+});
+
+describe("F-112 AR-05 LA-33 duplicate-call", () => {
+  const proc = "process HELLO {\n    script:\n    'echo'\n}\n";
+  const lookupText = (body: string) => `${proc}workflow {\n${body}\n}\n`;
+
+  it("F-112 AR-05 LA-33: the second and later calls of a process in one workflow are reported, pipes included", () => {
+    const text = lookupText(
+      "    HELLO()\n    HELLO()\n    channel.of(1) | HELLO\n    HELLO()",
+    );
+    const found = run(duplicateCall, text);
+    expect(found.map((f) => f.range.line)).toEqual([7, 8, 9]);
+    expect(found[0]?.message).toBe(
+      "Process `HELLO` is already called in this workflow -- include it again under another name (`include { HELLO as HELLO_2 }`) to call it twice",
+    );
+  });
+
+  it("F-112 AR-05 LA-33: reading X.out is not a call, and a workflow may be called twice", () => {
+    expect(
+      run(duplicateCall, lookupText("    HELLO()\n    HELLO.out.view()")),
+    ).toEqual([]);
+    const text = `workflow W {\n    main:\n    println 1\n}\nworkflow {\n    W()\n    W()\n}\n`;
+    expect(run(duplicateCall, text)).toEqual([]);
+  });
+
+  it("F-112 AR-05 LA-33: only a certain repeat is reported: alternatives and separate conditions are not, a call nested under an earlier one is", () => {
+    const body = (lines: string[]) => lookupText(lines.join("\n"));
+    expect(
+      run(
+        duplicateCall,
+        body([
+          "    if (params.a) {",
+          "        HELLO()",
+          "    } else {",
+          "        HELLO()",
+          "    }",
+        ]),
+      ),
+    ).toEqual([]);
+    // two separate conditions may exclude each other (sarek's fastq_preprocess_gatk), so the pack stays silent
+    expect(
+      run(
+        duplicateCall,
+        body([
+          "    if (params.a) {",
+          "        HELLO()",
+          "    }",
+          "    if (params.b) {",
+          "        HELLO()",
+          "    }",
+        ]),
+      ),
+    ).toEqual([]);
+    const nested = run(
+      duplicateCall,
+      body(["    HELLO()", "    if (params.a) {", "        HELLO()", "    }"]),
+    );
+    expect(nested.map((f) => f.range.line)).toEqual([8]);
+    const both = run(
+      duplicateCall,
+      body([
+        "    if (params.a) {",
+        "        HELLO()",
+        "        HELLO()",
+        "    }",
+      ]),
+    );
+    expect(both.map((f) => f.range.line)).toEqual([8]);
+    const two = `${proc}workflow A {\n    main:\n    HELLO()\n}\nworkflow {\n    HELLO()\n}\n`;
+    expect(run(duplicateCall, two)).toEqual([]);
   });
 });

@@ -72,6 +72,7 @@ describe("F-112 lint registry", () => {
         "include-alias",
         "duplicate-name",
         "call-arity",
+        "duplicate-call",
         "unused-output",
         "type-mismatch",
         "multiple-channels",

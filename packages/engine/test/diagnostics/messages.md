@@ -109,6 +109,11 @@
 - Incorrect number of call arguments, expected 1 but received 2 -- pass one argument for each input: `x`
 - Process `hello` expects 2 argument(s) but received 1 -- pass one argument for each input: `x`, `y`
 
+## duplicate-call
+
+- Process `BYE` is already called in this workflow -- include it again under another name (`include { BYE as BYE_2 }`) to call it twice
+- Process `HELLO` is already called in this workflow -- include it again under another name (`include { HELLO as HELLO_2 }`) to call it twice
+
 ## unused-output
 
 - The outputs of `hello` are never used -- connect it, publish it, or remove the call

@@ -129,6 +129,7 @@ const VERBS = new Set([
   "enable",
   "fix",
   "give",
+  "include",
   "keep",
   "make",
   "migrate",
@@ -159,7 +160,7 @@ describe("F-112 fixtures", () => {
     expect(unregistered).toEqual([]);
   });
 
-  for (const { code, severity, fixable, spec } of codes) {
+  for (const { code, severity, fixable, spec, origin } of codes) {
     const label = `${code}`;
     it(`F-112 step 1: ${label} has a positive and a negative fixture`, () => {
       expect(treeOf(code, "positive"), "positive").toBeDefined();
@@ -209,7 +210,9 @@ describe("F-112 fixtures", () => {
     it(`F-112 ADR-0005: ${label}'s severity matches the oracle`, () => {
       const errors = recorded(code, "positive", "lint");
       const warnings = recorded(code, "positive", "warnings");
-      if (severity === "error") expect(errors.length).toBeGreaterThan(0);
+      // lint accepts a process called twice in one workflow (upstream bug 24), so an own error has no counterpart
+      if (severity === "error" && origin !== "ours")
+        expect(errors.length).toBeGreaterThan(0);
       else expect(errors).toEqual([]);
       if (severity === "suggestion") expect(warnings).toEqual([]);
       for (const kind of ["negative", "fixed"])
