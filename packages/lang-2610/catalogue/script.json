@@ -1260,7 +1260,7 @@
       },
       {
         "name": "stageAs",
-        "description": "Stage a file into the task directory under the given alias.",
+        "description": "Stage a collection of files into the task directory under the given alias.",
         "deprecated": false,
         "signatures": [
           {
@@ -1530,7 +1530,7 @@
     },
     {
       "name": "combine",
-      "description": "The `combine` operator emits every pairwise combination of two channels.\n\n[Read more](https://docs.seqera.io/nextflow/reference/stdlib-types/channel#combine)",
+      "description": "When the `combine` operator is called on a channel of records with named arguments, the named arguments are appended to each record in the source channel. Each named argument can be a value or dataflow value.\n\n[Read more](https://docs.seqera.io/nextflow/reference/stdlib-types/channel#combine)",
       "deprecated": false,
       "signatures": [
         {
@@ -2255,7 +2255,7 @@
     },
     {
       "name": "combine",
-      "description": "Combine two dataflow values.\n\n[Read more](https://docs.seqera.io/nextflow/reference/stdlib-types/value#combine)",
+      "description": "Augment a record by adding each named argument as a record field. Each named argument can be a value or dataflow value.\n\n[Read more](https://docs.seqera.io/nextflow/reference/stdlib-types/value#combine)",
       "deprecated": false,
       "signatures": [
         {
@@ -2978,7 +2978,7 @@
     },
     {
       "name": "println",
-      "description": "Print a value to standard output with a newline.",
+      "description": "Print a newline to standard output.",
       "deprecated": false,
       "signatures": [
         {
@@ -3964,7 +3964,7 @@
         },
         {
           "name": "combine",
-          "description": "The `combine` operator emits every pairwise combination of two channels.\n\n[Read more](https://docs.seqera.io/nextflow/reference/stdlib-types/channel#combine)",
+          "description": "When the `combine` operator is called on a channel of records with named arguments, the named arguments are appended to each record in the source channel. Each named argument can be a value or dataflow value.\n\n[Read more](https://docs.seqera.io/nextflow/reference/stdlib-types/channel#combine)",
           "deprecated": false,
           "signatures": [
             {
@@ -4814,7 +4814,7 @@
       "members": [
         {
           "name": "combine",
-          "description": "Combine two dataflow values.\n\n[Read more](https://docs.seqera.io/nextflow/reference/stdlib-types/value#combine)",
+          "description": "Augment a record by adding each named argument as a record field. Each named argument can be a value or dataflow value.\n\n[Read more](https://docs.seqera.io/nextflow/reference/stdlib-types/value#combine)",
           "deprecated": false,
           "signatures": [
             {
@@ -5439,7 +5439,7 @@
         },
         {
           "name": "join",
-          "description": "Concatenates the string representation of each element in the iterable, with the given string as the separator between each element.",
+          "description": "Concatenates the string representation of each element in the iterable.",
           "deprecated": false,
           "signatures": [
             {
@@ -5463,7 +5463,7 @@
         },
         {
           "name": "max",
-          "description": "Returns the maximum element in the iterable according to the given closure. The closure should follow the same semantics as the closure parameter of `toSorted()`.",
+          "description": "Returns the maximum element in the iterable.",
           "deprecated": false,
           "signatures": [
             {
@@ -5498,7 +5498,7 @@
         },
         {
           "name": "min",
-          "description": "Returns the minimum element in the iterable according to the given closure. The closure should follow the same semantics as the closure parameter of `toSorted()`.",
+          "description": "Returns the minimum element in the iterable.",
           "deprecated": false,
           "signatures": [
             {
@@ -5596,7 +5596,7 @@
         },
         {
           "name": "toSorted",
-          "description": "Returns the iterable as a list sorted according to the given closure. The closure should accept one parameter and transform each element into the value that will be used for comparisons.",
+          "description": "Returns a sorted list of the iterable's elements.",
           "deprecated": false,
           "signatures": [
             {
@@ -5631,7 +5631,7 @@
         },
         {
           "name": "toUnique",
-          "description": "Returns a shallow copy of the iterable with duplicate elements excluded. The closure should follow the same semantics as the closure parameter of `toSorted()`.",
+          "description": "Returns a shallow copy of the iterable with duplicate elements excluded.",
           "deprecated": false,
           "signatures": [
             {
@@ -5672,7 +5672,7 @@
       "members": [
         {
           "name": "collate",
-          "description": "Collates the list into a list of sub-lists of length `size`, stepping through the list `step` elements for each sub-list. If `keepRemainder` is `true`, any remaining elements are included as a partial sub-list, otherwise they are excluded.",
+          "description": "Collates the list into a list of sub-lists of length `size`. If `keepRemainder` is `true`, any remaining elements are included as a partial sub-list, otherwise they are excluded.",
           "deprecated": false,
           "signatures": [
             {
@@ -7068,7 +7068,7 @@
         },
         {
           "name": "indexOf",
-          "description": "Returns the index within the string of the first occurrence of the given substring. Returns -1 if the string does not contain the substring.",
+          "description": "Returns the index within the string of the first occurrence of the given substring, starting the search at the given index. Returns -1 if the string does not contain the substring.",
           "deprecated": false,
           "signatures": [
             {
@@ -7537,7 +7537,7 @@
         },
         {
           "name": "tokenize",
-          "description": "Splits the string into a list of substrings using the given delimiters. Each character in the delimiter string is treated as a separate delimiter.",
+          "description": "Splits the string into a list of substrings using whitespace as the delimiter.",
           "deprecated": false,
           "signatures": [
             {

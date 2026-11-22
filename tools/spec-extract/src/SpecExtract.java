@@ -132,7 +132,10 @@ public class SpecExtract {
         }
         List<Map<String, Object>> out = new ArrayList<>();
         for (Map.Entry<String, List<Method>> e : byName.entrySet()) {
-            List<Method> methods = e.getValue();
+            // getDeclaredMethods has no defined order and differs between JVM builds; the description is taken from
+            // the first overload that has one, so put the overloads in a stable order first.
+            List<Method> methods = new ArrayList<>(e.getValue());
+            methods.sort(Comparator.comparing((Method m) -> signature(m).toString()));
             if (methods.stream().noneMatch(any)) continue;
             String description = "";
             for (Method m : methods) {

@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   ensureJar,
+  firstDifferences,
   main,
   normalise,
   packDir,
@@ -161,6 +162,65 @@ describe("gen:catalogue", () => {
     expect(errors.join("\n")).toContain(
       "catalogue/script.json differs from the generator output; never hand-edit it, run pnpm gen:catalogue 26.10",
     );
+  });
+
+  it("ADR-0005: shuffled raw input (overloads, flags, scopes, option types) normalises to identical output", () => {
+    const raw = {
+      ...structuredClone(RAW_SCRIPT),
+      featureFlags: [] as {
+        name: string;
+        description: string;
+        type: string;
+        preview: boolean;
+      }[],
+    };
+    raw.featureFlags = ["b", "a", "c"].map((name) => ({
+      name,
+      description: "",
+      type: "boolean",
+      preview: false,
+    }));
+    const shuffled = structuredClone(raw);
+    shuffled.featureFlags.reverse();
+    for (const d of shuffled.directives) d.signatures.reverse();
+    const config = [
+      {
+        kind: "scope",
+        name: "b",
+        description: "",
+        children: [
+          {
+            kind: "option",
+            name: "y",
+            description: "",
+            types: ["Map", "List"],
+          },
+          { kind: "option", name: "x", description: "", types: ["Int"] },
+        ],
+      },
+      { kind: "scope", name: "a", description: "", children: [] },
+    ];
+    const flipped = structuredClone(config);
+    flipped.reverse();
+    (flipped[1] as { children: { types: string[] }[] }).children.reverse();
+    for (const c of (flipped[1] as { children: { types: string[] }[] })
+      .children)
+      c.types.reverse();
+    expect(serialise(normalise(shuffled, SOURCE, "script"))).toBe(
+      serialise(normalise(raw, SOURCE, "script")),
+    );
+    expect(serialise(normalise(flipped, SOURCE, "config"))).toBe(
+      serialise(normalise(config, SOURCE, "config")),
+    );
+  });
+
+  it("ADR-0005: --check output names the first differing lines", () => {
+    expect(firstDifferences("a\nb\nc\n", "a\nX\nc\n")).toEqual([
+      '  line 2: expected "b", actual "X"',
+    ]);
+    expect(firstDifferences("a", "a\nb", 3)).toEqual([
+      '  line 2: expected "(end of file)", actual "b"',
+    ]);
   });
 
   it("ADR-0005: a missing java gives an actionable message", () => {

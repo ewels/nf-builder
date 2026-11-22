@@ -21,7 +21,8 @@ import { parseArgs } from "node:util";
 
 export const REPO_ROOT = fileURLToPath(new URL("../../..", import.meta.url));
 const JAVA_FILE = fileURLToPath(new URL("SpecExtract.java", import.meta.url));
-const USAGE = "Usage: pnpm gen:catalogue <version> [--check] [--jar <path>]";
+const USAGE =
+  "Usage: pnpm gen:catalogue <version> [--check] [--jar <path>] [--out <dir>]";
 
 export type Pin = { tag: string; nfLang: string; url: string; sha256: string };
 export type CatalogueSource = {
@@ -271,6 +272,24 @@ export function normalise(
   };
 }
 
+/** The first few differing lines of two texts, as "line N: expected ... / actual ...". */
+export function firstDifferences(
+  expected: string,
+  actual: string,
+  limit = 6,
+): string[] {
+  const a = expected.split("\n");
+  const b = actual.split("\n");
+  const out: string[] = [];
+  for (let i = 0; i < Math.max(a.length, b.length) && out.length < limit; i++) {
+    if (a[i] !== b[i])
+      out.push(
+        `  line ${i + 1}: expected ${JSON.stringify(a[i] ?? "(end of file)")}, actual ${JSON.stringify(b[i] ?? "(end of file)")}`,
+      );
+  }
+  return out;
+}
+
 export const serialise = (value: unknown): string =>
   `${JSON.stringify(value, null, 2)}\n`;
 
@@ -299,14 +318,18 @@ function defaultExtract(jar: string): Extracted {
 export function main(argv: readonly string[], io: MainIo = {}): number {
   const args = argv[0] === "--" ? argv.slice(1) : argv;
   const repoRoot = io.repoRoot ?? REPO_ROOT;
-  let values: { check?: boolean; jar?: string };
+  let values: { check?: boolean; jar?: string; out?: string };
   let positionals: string[];
   try {
     const result = parseArgs({
       args: [...args],
       allowPositionals: true,
       strict: true,
-      options: { check: { type: "boolean" }, jar: { type: "string" } },
+      options: {
+        check: { type: "boolean" },
+        jar: { type: "string" },
+        out: { type: "string" },
+      },
     });
     values = result.values;
     positionals = result.positionals;
@@ -350,10 +373,13 @@ export function main(argv: readonly string[], io: MainIo = {}): number {
       let differs = 0;
       for (const [name, text] of Object.entries(files)) {
         const file = join(dir, name);
-        if (!existsSync(file) || readFileSync(file, "utf8") !== text) {
+        const current = existsSync(file) ? readFileSync(file, "utf8") : "";
+        if (current !== text) {
           console.error(
             `catalogue/${name} differs from the generator output; never hand-edit it, run pnpm gen:catalogue ${version}`,
           );
+          for (const line of firstDifferences(current, text))
+            console.error(line);
           differs++;
         }
       }
@@ -361,9 +387,11 @@ export function main(argv: readonly string[], io: MainIo = {}): number {
       console.log(`catalogue: ${Object.keys(files).length} files up to date`);
       return 0;
     }
-    mkdirSync(dir, { recursive: true });
+    // --out writes elsewhere (CI uploads it when the check fails).
+    const target = values.out ? resolve(values.out) : dir;
+    mkdirSync(target, { recursive: true });
     for (const [name, text] of Object.entries(files))
-      writeFileSync(join(dir, name), text);
+      writeFileSync(join(target, name), text);
     console.log(`catalogue: wrote ${Object.keys(files).join(", ")}`);
     return 0;
   } catch (error) {

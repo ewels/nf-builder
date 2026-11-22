@@ -171,6 +171,14 @@ describe("CI workflows", () => {
     expect(order).toEqual([...order].sort((a, b) => a - b));
     expect(job).toMatch(/hashFiles\('packages\/lang-\*\/upstream\.json'\)/);
     expect(job).toContain("timeout-minutes: 10");
+    // On a diff, the generated files are uploaded so the log and the artifact show what differs.
+    expect(job).toContain(
+      "run: pnpm gen:catalogue 26.10 --out .cache/catalogue-actual",
+    );
+    expect(job).toMatch(
+      /if: failure\(\)\n\s+uses: actions\/upload-artifact@[0-9a-f]{40}/,
+    );
+    expect(job).toContain("path: .cache/catalogue-actual/");
   });
 
   it("F-009: the setup action only enables the pnpm cache when it installs", () => {
