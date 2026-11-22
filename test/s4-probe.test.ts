@@ -1,3 +1,5 @@
+import { readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   classify,
@@ -12,6 +14,8 @@ import {
   toMarkdown,
 } from "../e2e/s4-probe/report.ts";
 import { S4_TARGETS } from "../e2e/s4-probe/targets.ts";
+import { REPO_ROOT } from "../scripts/check-common.ts";
+import { findUrls } from "../scripts/check-hosts.ts";
 
 const PAGE = "https://nf-builder.netlify.app";
 
@@ -345,5 +349,79 @@ describe("S4 OpenAPI and targets", () => {
     expect(rows[0]).toContain("blocked-by-cors");
     expect(rows[1]).toContain("allowed");
     expect(rows[1]).toContain("150");
+  });
+});
+
+const PAGE_DIR = join(REPO_ROOT, "apps/web/public/spike/s4");
+
+describe("S4 probe page", () => {
+  it("F-008 ADR-0002 IO-41: the S4 probe page names no absolute URL, so the built app still contacts only allow-listed hosts", () => {
+    const files = readdirSync(PAGE_DIR);
+    expect(files.sort()).toEqual(["index.html", "probe.js"]);
+    for (const file of files) {
+      expect(
+        findUrls(readFileSync(join(PAGE_DIR, file), "utf8")),
+        file,
+      ).toEqual([]);
+    }
+  });
+
+  it("F-008 QA-30: the S4 probe page loads one same-origin module script and has no inline script or style", () => {
+    const html = readFileSync(join(PAGE_DIR, "index.html"), "utf8");
+    expect(html.match(/<script\b[^>]*>[\s\S]*?<\/script>/g)).toEqual([
+      '<script type="module" src="/spike/s4/probe.js"></script>',
+    ]);
+    expect(html.match(/<script/g)).toHaveLength(1);
+    expect(html).not.toContain("<style");
+    expect(html).not.toMatch(/\sstyle=/);
+    expect(readFileSync(join(PAGE_DIR, "probe.js"), "utf8")).not.toContain(
+      "innerHTML",
+    );
+  });
+});
+
+describe("S4 probe workflow", () => {
+  const workflow = readFileSync(
+    join(REPO_ROOT, ".github/workflows/s4-probe.yml"),
+    "utf8",
+  );
+
+  it("F-008 ADR-0023: the S4 probe workflow runs on dispatch and on pull requests touching the probe, waits for the head commit's deploy preview, probes in Chromium, Firefox and WebKit, and always uploads the results", () => {
+    expect(workflow).toMatch(/^ {2}pull_request:/m);
+    expect(workflow).toMatch(/^ {2}workflow_dispatch:/m);
+    for (const glob of [
+      "apps/web/public/spike/s4/**",
+      "e2e/s4-probe/**",
+      "e2e/s4-probe*",
+      ".github/workflows/s4-probe.yml",
+    ]) {
+      expect(workflow, glob).toContain(glob);
+    }
+    expect(workflow).toMatch(
+      /run: node scripts\/check-deploy-headers\.ts --url "\$S4_PROBE_URL" --commit "\$S4_EXPECTED_COMMIT"/,
+    );
+    expect(workflow).toMatch(/PW_BROWSERS: "?chromium,firefox,webkit"?/);
+    expect(workflow).toMatch(
+      /run: pnpm test:e2e -- --config e2e\/s4-probe\.config\.ts/,
+    );
+    const upload = workflow
+      .split(/^ {6}- /m)
+      .find((step) => step.includes("upload-artifact"));
+    expect(upload).toMatch(/^\s*if: always\(\)/m);
+    expect(workflow).toMatch(/^permissions:\s*\n\s+contents: read/m);
+    expect(workflow).toContain(
+      "github.event.pull_request.head.repo.full_name == github.repository",
+    );
+  });
+
+  it("F-008 ADR-0023: the S4 probe workflow passes the dispatch input only through an env line, never into a shell command", () => {
+    const uses = workflow
+      .split("\n")
+      .filter((line) => line.includes("inputs.url"));
+    expect(uses).toHaveLength(1);
+    expect(uses[0]).toMatch(/^\s+S4_PROBE_URL:/);
+    for (const line of workflow.split("\n")) {
+      if (/^\s*(- )?run:/.test(line)) expect(line).not.toContain("${{");
+    }
   });
 });
