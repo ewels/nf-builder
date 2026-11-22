@@ -1,10 +1,9 @@
-import { type JSX, type KeyboardEvent, type PointerEvent, useRef } from "react";
+import { type JSX, type KeyboardEvent, useRef } from "react";
 import { COLUMN_LIMITS, type Side, useLayout } from "../layout/layout-store";
 import { dragWidth, separatorKeyAction } from "../layout/separator";
 
-export interface ColumnSeparatorProps {
+interface ColumnSeparatorProps {
   readonly side: Side;
-  readonly controls: string;
   readonly label: string;
 }
 
@@ -12,7 +11,6 @@ const RESIZING_CLASS = "is-resizing";
 
 export function ColumnSeparator({
   side,
-  controls,
   label,
 }: ColumnSeparatorProps): JSX.Element {
   const width = useLayout((s) => s[side].width);
@@ -22,13 +20,11 @@ export function ColumnSeparator({
     undefined,
   );
   const { min, max } = COLUMN_LIMITS[side];
+  const controls = `column-${side}`;
 
-  const end = (event: PointerEvent<HTMLElement>) => {
-    if (!drag.current) return;
+  const end = () => {
     drag.current = undefined;
     document.documentElement.classList.remove(RESIZING_CLASS);
-    if (event.currentTarget.hasPointerCapture(event.pointerId))
-      event.currentTarget.releasePointerCapture(event.pointerId);
   };
 
   const onKeyDown = (event: KeyboardEvent<HTMLElement>) => {
@@ -71,8 +67,7 @@ export function ColumnSeparator({
           ),
         );
       }}
-      onPointerUp={end}
-      onPointerCancel={end}
+      onLostPointerCapture={end}
       onKeyDown={onKeyDown}
     />
   );

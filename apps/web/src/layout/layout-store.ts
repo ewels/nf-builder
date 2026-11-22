@@ -7,23 +7,23 @@ import {
 import { createStore, type StoreApi } from "zustand/vanilla";
 
 export type Side = "left" | "right";
-export interface ColumnLayout {
+interface ColumnLayout {
   readonly width: number;
   readonly collapsed: boolean;
 }
-export interface LayoutState {
+interface LayoutState {
   readonly left: ColumnLayout;
   readonly right: ColumnLayout;
 }
-export interface LayoutActions {
+interface LayoutActions {
   setWidth(side: Side, width: number): void;
   setCollapsed(side: Side, collapsed: boolean): void;
   toggleCollapsed(side: Side): void;
 }
-export type LayoutStore = LayoutState & LayoutActions;
+type LayoutStore = LayoutState & LayoutActions;
 
 export const LAYOUT_STORAGE_KEY = "nf-builder:layout";
-export const LAYOUT_STORAGE_VERSION = 1;
+const LAYOUT_STORAGE_VERSION = 1;
 export const COLUMN_LIMITS: Readonly<
   Record<
     Side,
@@ -40,7 +40,7 @@ export const DEFAULT_LAYOUT: LayoutState = {
   right: { width: COLUMN_LIMITS.right.initial, collapsed: false },
 };
 
-export function clampWidth(side: Side, width: number): number {
+function clampWidth(side: Side, width: number): number {
   const { min, max } = COLUMN_LIMITS[side];
   return Math.min(max, Math.max(min, Math.round(width)));
 }
@@ -62,7 +62,7 @@ function sanitiseColumn(side: Side, value: unknown): ColumnLayout {
 }
 
 /** Validates data read from storage: unknown shape gives defaults; widths are clamped; non-boolean collapsed is false. */
-export function sanitiseLayout(value: unknown): LayoutState {
+function sanitiseLayout(value: unknown): LayoutState {
   if (!isRecord(value)) return DEFAULT_LAYOUT;
   return {
     left: sanitiseColumn("left", value.left),
@@ -71,7 +71,7 @@ export function sanitiseLayout(value: unknown): LayoutState {
 }
 
 /** Wraps a storage getter so that blocked, missing or full storage never throws. */
-export function safeStorage(getStorage: () => StateStorage): StateStorage {
+function safeStorage(getStorage: () => StateStorage): StateStorage {
   const attempt = <T>(fn: (storage: StateStorage) => T, fallback: T): T => {
     try {
       return fn(getStorage());
@@ -123,7 +123,7 @@ export function createLayoutStore(
   );
 }
 
-export const layoutStore = createLayoutStore();
+const layoutStore = createLayoutStore();
 
 export function useLayout<T>(selector: (state: LayoutStore) => T): T {
   return useStore(layoutStore, selector);

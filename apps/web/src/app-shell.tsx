@@ -23,20 +23,11 @@ export function AppShell(): JSX.Element {
           gridTemplateColumns: `${leftWidth}px minmax(0, 1fr) ${rightWidth}px`,
         }}
       >
-        <SideColumn
-          side="left"
-          id="column-left"
-          label="Components and files"
-          title="Components"
-        >
+        <SideColumn side="left" label="Components and files" title="Components">
           <p className="muted">No project open</p>
         </SideColumn>
         {left.collapsed ? null : (
-          <ColumnSeparator
-            side="left"
-            controls="column-left"
-            label="Resize components and files"
-          />
+          <ColumnSeparator side="left" label="Resize components and files" />
         )}
         <main className="column column-centre" aria-label="Canvas and editor">
           <TabStrip />
@@ -45,18 +36,9 @@ export function AppShell(): JSX.Element {
           </div>
         </main>
         {right.collapsed ? null : (
-          <ColumnSeparator
-            side="right"
-            controls="column-right"
-            label="Resize details"
-          />
+          <ColumnSeparator side="right" label="Resize details" />
         )}
-        <SideColumn
-          side="right"
-          id="column-right"
-          label="Details"
-          title="Details"
-        >
+        <SideColumn side="right" label="Details" title="Details">
           <p className="muted">Nothing selected</p>
         </SideColumn>
       </div>

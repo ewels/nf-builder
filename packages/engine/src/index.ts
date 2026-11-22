@@ -1,1 +1,1 @@
-export { installedPacks, installedPackVersions } from "./packs";
+export { installedPackVersions } from "./packs";

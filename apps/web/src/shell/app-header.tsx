@@ -2,7 +2,7 @@ import type { JSX } from "react";
 
 const APP_NAME = "nf-builder";
 
-export interface AppHeaderProps {
+interface AppHeaderProps {
   readonly languageVersions: readonly string[];
 }
 
@@ -12,7 +12,7 @@ export function AppHeader({ languageVersions }: AppHeaderProps): JSX.Element {
       <h1 className="app-name">{APP_NAME}</h1>
       <button
         type="button"
-        className="header-button project-switcher"
+        className="header-button"
         aria-haspopup="menu"
         disabled
       >
@@ -33,10 +33,7 @@ export function AppHeader({ languageVersions }: AppHeaderProps): JSX.Element {
         </button>
         <label className="version-picker">
           <span className="version-label">Nextflow</span>
-          <select
-            aria-label="Nextflow version"
-            defaultValue={languageVersions[0]}
-          >
+          <select aria-label="Nextflow version">
             {languageVersions.map((version) => (
               <option key={version} value={version}>
                 {version}

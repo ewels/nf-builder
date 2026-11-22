@@ -35,11 +35,11 @@ async function drag(page: Page, sep: Locator, dx: number) {
 test("F-201 step 1 UX-02 QA-30: dragging the separators resizes both side columns within their limits, the widths persist after reload, and no CSP violation occurs", async ({
   page,
 }) => {
-  await page.setViewportSize({ width: 1440, height: 900 });
   const watch = await watchForCspViolations(page);
   await page.goto("/");
   await drag(page, leftSep(page), 100);
   expect(await width(left(page))).toBe(356);
+  await expect(page.locator("html")).not.toHaveClass(/is-resizing/);
   await expect(leftSep(page)).toHaveAttribute("aria-valuenow", "356");
   await drag(page, rightSep(page), -60);
   expect(await width(right(page))).toBe(356);
@@ -58,7 +58,6 @@ test("F-201 step 1 UX-02 QA-30: dragging the separators resizes both side column
 test("F-201 step 1 UX-02 UX-70: the separators resize with the arrow keys, Home and End, and the widths persist after reload", {
   tag: SMOKE_TAG,
 }, async ({ page }) => {
-  await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/");
   await leftSep(page).focus();
   await page.keyboard.press("ArrowRight");
@@ -84,7 +83,6 @@ test("F-201 step 1 UX-02 UX-70: the separators resize with the arrow keys, Home 
 test("F-201 step 1 UX-02: both side columns collapse and expand with their buttons, and stay collapsed after reload", async ({
   page,
 }) => {
-  await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/");
   const centreBefore = await width(centre(page));
   await page
@@ -176,11 +174,7 @@ test(
   {
     tag: VISUAL_TAG,
   },
-  async ({ browser }, testInfo) => {
-    const context = await browser.newContext({
-      viewport: { width: 1440, height: 900 },
-    });
-    const page = await context.newPage();
+  async ({ page }, testInfo) => {
     await page.goto("/");
     await page.getByRole("contentinfo").waitFor();
     const guidance =
@@ -202,6 +196,5 @@ test(
       );
     }
     await expect(page, guidance).toHaveScreenshot(BASELINE);
-    await context.close();
   },
 );

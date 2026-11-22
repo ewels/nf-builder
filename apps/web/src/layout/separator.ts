@@ -2,7 +2,7 @@ import { COLUMN_LIMITS, type Side } from "./layout-store";
 
 export const KEYBOARD_STEP = 16;
 
-export type SeparatorAction =
+type SeparatorAction =
   | { readonly type: "resize"; readonly width: number }
   | { readonly type: "collapse" };
 
@@ -30,7 +30,7 @@ export function separatorKeyAction(
   }
 }
 
-/** Left: startWidth + (x - startX); right: startWidth - (x - startX). Unclamped. */
+/** Unclamped. */
 export function dragWidth(
   side: Side,
   startWidth: number,

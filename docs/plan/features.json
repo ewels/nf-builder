@@ -827,7 +827,7 @@
         "Apply a quick fix (for example `Channel.of` → `channel.of`): the suggestion disappears and one undo step reverts it"
       ],
       "passes": false,
-      "notes": ""
+      "notes": "From F-201: the status bar's suggestions count is plain text until the problems panel exists; F-309 makes it link to the panel (UX-03)."
     },
     {
       "id": "F-310",

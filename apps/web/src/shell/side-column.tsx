@@ -2,9 +2,8 @@ import type { JSX, ReactNode } from "react";
 import { type Side, useLayout } from "../layout/layout-store";
 import { ChevronIcon } from "./icons";
 
-export interface SideColumnProps {
+interface SideColumnProps {
   readonly side: Side;
-  readonly id: string;
   readonly label: string;
   readonly title: string;
   readonly children?: ReactNode;
@@ -12,16 +11,16 @@ export interface SideColumnProps {
 
 export function SideColumn({
   side,
-  id,
   label,
   title,
   children,
 }: SideColumnProps): JSX.Element {
+  const id = `column-${side}`;
   const collapsed = useLayout((s) => s[side].collapsed);
   const toggle = useLayout((s) => s.toggleCollapsed);
   const name = `${collapsed ? "Expand" : "Collapse"} ${label.toLowerCase()}`;
   // The chevron points where the column will move: collapsing the left column points left.
-  const direction = (side === "left") === !collapsed ? "left" : "right";
+  const direction = collapsed ? (side === "left" ? "right" : "left") : side;
   return (
     <aside
       id={id}

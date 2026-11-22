@@ -1,7 +1,7 @@
 import type { JSX } from "react";
 import { CheckIcon } from "./icons";
 
-export interface StatusBarProps {
+interface StatusBarProps {
   readonly problems: number;
   readonly suggestions: number;
   readonly nodes: number;
