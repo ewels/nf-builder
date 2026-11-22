@@ -13,11 +13,12 @@ import {
   useReactFlow,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { type JSX, useEffect, useMemo, useState } from "react";
+import { type JSX, type MouseEvent, useEffect, useMemo, useState } from "react";
 import "./canvas.css";
 import { NODE_TYPES } from "./canvas-nodes";
+import { EdgeTooltip, type EdgeTooltipState } from "./edge-tooltip";
 import { EDGE_TYPES } from "./flow-edge";
-import { toFlowEdges, toFlowNodes } from "./flow-elements";
+import { type CanvasFlowEdge, toFlowEdges, toFlowNodes } from "./flow-elements";
 
 /** Sentence-case labels with no delete wording (nodes can't be deleted yet). */
 export const CANVAS_ARIA_LABELS = {
@@ -68,6 +69,14 @@ function CanvasInner({
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   useEffect(() => setNodes(initialNodes), [initialNodes, setNodes]);
   const edges = useMemo(() => toFlowEdges(view), [view]);
+  const [tooltip, setTooltip] = useState<EdgeTooltipState | null>(null);
+  const showTooltip = (event: MouseEvent, edge: CanvasFlowEdge) => {
+    setTooltip({
+      text: edge.data?.tooltip ?? "",
+      x: event.clientX,
+      y: event.clientY,
+    });
+  };
   const initialized = useNodesInitialized();
   const { fitView } = useReactFlow();
   const [ready, setReady] = useState(false);
@@ -100,6 +109,9 @@ function CanvasInner({
         deleteKeyCode={null}
         ariaLabelConfig={CANVAS_ARIA_LABELS}
         attributionPosition="bottom-center"
+        onEdgeMouseEnter={(e, edge) => showTooltip(e, edge as CanvasFlowEdge)}
+        onEdgeMouseMove={(e, edge) => showTooltip(e, edge as CanvasFlowEdge)}
+        onEdgeMouseLeave={() => setTooltip(null)}
       >
         <Background variant={BackgroundVariant.Dots} gap={20} />
         <Controls showInteractive={false}>
@@ -114,6 +126,7 @@ function CanvasInner({
         </Controls>
         <MiniMap ariaLabel="Minimap" pannable zoomable />
       </ReactFlow>
+      <EdgeTooltip tooltip={tooltip} />
     </div>
   );
 }

@@ -184,4 +184,38 @@
 .react-flow__edge-path {
   stroke: var(--color-muted);
   stroke-width: 1.5;
+  fill: none;
+}
+
+/* Dataflow reads from the stroke pattern, not the colour (QA-12). */
+.react-flow__edge-path.edge-channel {
+  stroke-dasharray: none;
+}
+.react-flow__edge-path.edge-value {
+  stroke-dasharray: 6 4;
+}
+.react-flow__edge-path.edge-plain {
+  stroke-dasharray: 1 4;
+  stroke-linecap: round;
+}
+.react-flow__edge-path.edge-unknown {
+  stroke-dasharray: none;
+  stroke: #8a93a6;
+}
+
+.react-flow__edge:hover .react-flow__edge-path {
+  stroke: var(--color-accent);
+  stroke-width: 2.5;
+}
+
+.edge-tooltip {
+  position: fixed;
+  z-index: 10;
+  max-width: 320px;
+  padding: var(--space-1) var(--space-2);
+  font-size: 12px;
+  color: var(--color-header-text);
+  background: var(--color-header);
+  border-radius: 6px;
+  pointer-events: none;
 }

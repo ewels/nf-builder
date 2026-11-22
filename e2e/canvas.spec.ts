@@ -208,6 +208,50 @@ test('F-205 UX-22: an unparsed callee draws with an error outline and "could not
   await expect(bad.locator("[data-glyph='unparsed'] svg")).toBeVisible();
 });
 
+test("F-205 step 2 UX-24 QA-12 LA-28: value edges are dashed, channel edges solid, plain edges dotted", async ({
+  page,
+}) => {
+  await page.goto("./");
+  await openFixture(page);
+  await canvasReady(page);
+  const dash = (cls: string) =>
+    page
+      .locator(`.react-flow__edge-path.edge-${cls}`)
+      .first()
+      .evaluate((el) => getComputedStyle(el).strokeDasharray);
+  expect(await dash("channel")).toBe("none");
+  expect(await dash("value")).toMatch(/^6(px)?[ ,]+4(px)?$/);
+  expect(await dash("plain")).toMatch(/^1(px)?[ ,]+4(px)?$/);
+});
+
+test("F-205 step 3 UX-24: hovering an edge shows its type and source", async ({
+  page,
+}) => {
+  await page.goto("./");
+  await openFixture(page);
+  await canvasReady(page);
+  const hover = async (cls: string) => {
+    const path = page.locator(`.react-flow__edge-path.edge-${cls}`).first();
+    const point = await path.evaluate((el) => {
+      const p = el as unknown as SVGPathElement;
+      const pt = p.getPointAtLength(p.getTotalLength() / 2);
+      const m = p.getScreenCTM();
+      if (m === null) throw new Error("no CTM");
+      const s = new DOMPoint(pt.x, pt.y).matrixTransform(m);
+      return { x: s.x, y: s.y };
+    });
+    await page.mouse.move(point.x, point.y);
+  };
+  const tooltip = page.getByRole("tooltip");
+  await hover("value");
+  await expect(tooltip).toBeVisible();
+  await expect(tooltip).toHaveText(/^Value<.+> · .+/);
+  await hover("channel");
+  await expect(tooltip).toHaveText(/^Channel<.+> · .+/);
+  await page.mouse.move(2, 2);
+  await expect(tooltip).toHaveCount(0);
+});
+
 test("F-205 QA-01 ADR-0003: React Flow is only in a lazy chunk", () => {
   const manifest = JSON.parse(
     readFileSync(join(WEB_DIST, ".vite/manifest.json"), "utf8"),
