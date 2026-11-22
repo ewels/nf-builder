@@ -117,35 +117,31 @@ export function modelFile(
         node.source.value,
         recorder.tree,
       );
-      const entries: ResolvedEntry[] = [];
-      if (target.kind === "missing") {
+      const targetFile =
+        target.kind === "file" ? parsed(target.path) : undefined;
+      const parsedTarget = targetFile !== undefined && parsedOk(targetFile);
+      if (target.kind === "missing")
         diagnostic(node, "include-target", target.message);
-        for (const entry of node.entries)
-          entries.push({ entry, declaration: null, pipeline: false });
-      } else if (target.kind === "file") {
-        const targetFile = parsed(target.path);
-        const notParsed = !targetFile || !parsedOk(targetFile);
-        if (notParsed) {
-          diagnostic(node, "include-not-parsed", rules.notParsed(target.path));
-        }
-        for (const entry of node.entries) {
-          const found = targetFile?.declarations.get(entry.name.name);
-          entries.push({
-            entry,
-            declaration: found?.declaration ?? null,
-            pipeline: found?.pipeline ?? false,
-          });
-          if (!found && !notParsed)
-            diagnostic(
-              node,
-              "include-name",
-              rules.notDefined(entry.name.name, target.path),
-            );
-        }
-      } else {
-        for (const entry of node.entries)
-          entries.push({ entry, declaration: null, pipeline: false });
-      }
+      else if (target.kind === "file" && !parsedTarget)
+        diagnostic(node, "include-not-parsed", rules.notParsed(target.path));
+      const entries = node.entries.map((entry): ResolvedEntry => {
+        const found = targetFile?.declarations.get(entry.name.name);
+        // an item upstream turns into an InvalidDeclaration is not defined there, though it still binds by its head
+        const invalid =
+          found?.declaration.kind === "Unparsed" &&
+          found.declaration.invalidDeclaration === true;
+        if (target.kind === "file" && parsedTarget && (!found || invalid))
+          diagnostic(
+            node,
+            "include-name",
+            rules.notDefined(entry.name.name, target.path),
+          );
+        return {
+          entry,
+          declaration: found?.declaration ?? null,
+          pipeline: found?.pipeline ?? false,
+        };
+      });
       includes.push({ kind: "script", node, target, entries });
     }
   } else if (source.language === "config" && source.ast) {

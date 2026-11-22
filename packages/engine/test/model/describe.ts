@@ -1,16 +1,30 @@
-import type { IncludeRules, SourceParser } from "@nf-builder/lang-core";
+import type {
+  IncludeRules,
+  LanguagePack,
+  SourceParser,
+} from "@nf-builder/lang-core";
 import {
   type FileModel,
   modelFile,
   type ParsedFile,
   parseFile,
 } from "../../src/model/file-model";
+import type { ProjectFile } from "../../src/model/project";
 import { FileTree } from "../../src/model/tree";
-import type { TreeFile } from "./read-tree";
+import { installedPacks } from "../../src/packs";
+import { loadParser } from "../../src/source/parser";
+
+/** The parser and include rules of the installed pack for `version`. */
+export async function loadPack(version: string) {
+  const pack = installedPacks.find(
+    (p) => p.version === version,
+  ) as LanguagePack;
+  return { parser: await loadParser(version), rules: pack.includes };
+}
 
 /** Models every file of a project from scratch. */
 export function modelAll(
-  files: readonly TreeFile[],
+  files: readonly ProjectFile[],
   parser: SourceParser,
   rules: IncludeRules,
 ): Map<string, FileModel> {

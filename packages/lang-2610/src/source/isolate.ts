@@ -53,6 +53,9 @@ export function isolate<I extends AstNode>(
     text: text.slice(range.start, range.end),
     head: scanHead(text, range.start, grammar),
     problems: found,
+    ...(from?.kind === "InvalidDeclaration"
+      ? { invalidDeclaration: true as const }
+      : {}),
     ...(from?.leadingComments ? { leadingComments: from.leadingComments } : {}),
     ...(from?.trailingComments
       ? { trailingComments: from.trailingComments }

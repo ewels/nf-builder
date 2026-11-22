@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import type { ScriptAst } from "@nf-builder/lang-core";
+import type { ScriptAst, Unparsed } from "@nf-builder/lang-core";
 import { describe, expect, it } from "vitest";
 import { includable } from "../../src/includes/includable.ts";
 import { parseScriptSource } from "../../src/source/parse-source.ts";
@@ -136,7 +136,11 @@ def params() {
     }
     expect(out).toEqual([
       ["partial", ["HELLO:Unparsed", "GOODBYE:Process"]],
-      ["partial", ["LATE_INPUT:Unparsed", "ON_TIME:Process"]],
+      // LATE_INPUT is an InvalidDeclaration upstream, a statement that makes the unnamed workflow
+      [
+        "partial",
+        ["workflow:Script", "LATE_INPUT:Unparsed", "ON_TIME:Process"],
+      ],
     ]);
     const partial = parseScriptSource(`process GOOD {
     script:
@@ -173,8 +177,47 @@ params.x = 1
 output {
 }
 
-println 'hi'
 `);
     expect([...includable(ast).keys()]).toEqual([]);
+  });
+
+  it("F-105 AR-03 ADR-0004: only a builder-rejected declaration is marked invalidDeclaration; a declaration with a builder error is not", () => {
+    const flag = fixture(
+      "../../../../tools/corpus/fixtures/typed-without-flag.nf",
+    );
+    const order = fixture("../../../../tools/corpus/fixtures/section-order.nf");
+    const unparsed = (text: string) =>
+      (astOf(text).body.filter((i) => i.kind === "Unparsed") as Unparsed[]).map(
+        (u) => [u.head?.name, u.invalidDeclaration ?? false],
+      );
+    expect(unparsed(flag)).toEqual([["HELLO", false]]);
+    expect(unparsed(order)).toEqual([["LATE_INPUT", true]]);
+  });
+
+  it("F-105 AR-03: statements make an unnamed workflow, includable as workflow (ScriptAstBuilder L276-L283)", () => {
+    for (const text of [
+      "println 'hello'\n",
+      "nextflow.enable.types = true\nprintln 'hello'\n",
+      "process P {\n    script:\n    'x'\n}\nprintln 'hello'\n",
+    ]) {
+      const ast = astOf(text);
+      expect(includable(ast).get("workflow"), text).toEqual({
+        declaration: ast,
+        pipeline: true,
+      });
+    }
+    // an explicit entry workflow claims the name first, and no statements means no workflow
+    const explicit = astOf("workflow {\n    println 'x'\n}\nprintln 'hello'\n");
+    expect(includable(explicit).get("workflow")?.declaration.kind).toBe(
+      "Workflow",
+    );
+    expect(
+      includable(astOf("include { A } from './a'\n")).has("workflow"),
+    ).toBe(false);
+    expect(
+      includable(astOf("process P {\n    script:\n    'x'\n}\n")).has(
+        "workflow",
+      ),
+    ).toBe(false);
   });
 });

@@ -42,6 +42,30 @@ export function registryBase(from: string): string {
   return segments.includes("modules") ? dir : "";
 }
 
+/**
+ * `Files.isDirectory` on the path as `Path.resolve` leaves it, before `normalize()`: a `..` after a component needs that
+ * component to exist, as the filesystem resolves it. A path that leaves the project never exists.
+ */
+function isDirectoryRaw(
+  tree: ProjectTree,
+  dir: string,
+  source: string,
+): boolean {
+  if (source.startsWith("/")) return tree.isDirectory(resolvePath(dir, source));
+  const stack = dir.split("/").filter((p) => p !== "");
+  const known = stack.length; // the including file's own directories exist
+  for (const part of source.split("/")) {
+    if (part === "" || part === ".") continue;
+    if (part !== "..") stack.push(part);
+    else if (stack.length > 0 && stack[stack.length - 1] !== "..") {
+      if (stack.length > known && !tree.isDirectory(stack.join("/")))
+        return false;
+      stack.pop();
+    } else stack.push("..");
+  }
+  return tree.isDirectory(stack.join("/"));
+}
+
 export function scriptInclude(
   from: string,
   source: string,
@@ -52,7 +76,7 @@ export function scriptInclude(
   }
   if (isLocalModule(source)) {
     const resolved = resolvePath(dirname(from), source);
-    const target = tree.isDirectory(resolved)
+    const target = isDirectoryRaw(tree, dirname(from), source)
       ? joinPath(resolved, "main.nf")
       : source.endsWith(".nf")
         ? resolved
@@ -94,6 +118,26 @@ export function scriptInclude(
   return { kind: "file", path: main, module: reference };
 }
 
+/** Groovy `ConstantExpression.getText()`: the value of a string, number, boolean or null constant; null for anything else. */
+function constantText(e: Expression): string | null {
+  switch (e.kind) {
+    case "String":
+      return e.value;
+    case "Boolean":
+      return String(e.value);
+    case "Null":
+      return "null";
+    case "Number": {
+      const t = e.text.replaceAll("_", "");
+      if (/^0[xXbB]/.test(t))
+        return BigInt(t.replace(/[lLiIgG]$/, "")).toString();
+      return t.replace(/[lLiIgGfFdD]$/, "");
+    }
+    default:
+      return null;
+  }
+}
+
 export function configInclude(
   from: string,
   source: Expression,
@@ -103,8 +147,8 @@ export function configInclude(
   while (expression.kind === "Parenthesized") {
     expression = expression.expression;
   }
-  if (expression.kind !== "String") return { kind: "external" };
-  const value = expression.value;
+  const value = constantText(expression);
+  if (value === null) return { kind: "external" };
   const scheme = /^([A-Za-z][A-Za-z0-9+.-]*):/.exec(value);
   let path: string;
   if (scheme) {

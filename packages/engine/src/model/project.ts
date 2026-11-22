@@ -5,7 +5,6 @@
 import type {
   Diagnostic,
   IncludeRules,
-  LanguagePack,
   SourceParser,
 } from "@nf-builder/lang-core";
 import { installedPacks } from "../packs";
@@ -37,8 +36,6 @@ export interface ModelChange {
   /** The files whose model was recomputed, sorted. */
   remodelled: readonly string[];
 }
-
-const byPath = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
 
 function index(map: Map<string, Set<string>>, key: string, value: string) {
   const set = map.get(key) ?? new Set<string>();
@@ -92,7 +89,7 @@ export class ProjectModel {
   }
 
   #remodel(paths: ReadonlySet<string>): ModelChange {
-    const todo = [...paths].filter((p) => this.#parsed.has(p)).sort(byPath);
+    const todo = [...paths].filter((p) => this.#parsed.has(p)).sort();
     for (const path of todo) {
       this.#options.trace?.({ kind: "model", path });
       this.#drop(path);
@@ -112,7 +109,7 @@ export class ProjectModel {
             i.target.kind === "file" ? [i.target.path] : [],
           ),
         ),
-      ].sort(byPath);
+      ].sort();
       this.#targets.set(path, targets);
       for (const t of targets) index(this.#resolvedBy, t, path);
     }
@@ -148,7 +145,7 @@ export class ProjectModel {
   }
 
   paths(): readonly string[] {
-    return [...this.#parsed.keys()].sort(byPath);
+    return [...this.#parsed.keys()].sort();
   }
 
   /** The project files this file's includes resolve to. */
@@ -158,7 +155,7 @@ export class ProjectModel {
 
   /** The files with an include that resolves to this file. */
   dependants(path: string): readonly string[] {
-    return [...(this.#resolvedBy.get(path) ?? [])].sort(byPath);
+    return [...(this.#resolvedBy.get(path) ?? [])].sort();
   }
 
   lookup(path: string, name: string): Binding | undefined {
@@ -174,18 +171,13 @@ export class ProjectModel {
 export async function openProject(
   version: string,
   files: Iterable<ProjectFile>,
-  options: {
-    trace?: (event: ModelEvent) => void;
-    packs?: readonly LanguagePack[];
-  } = {},
+  options: Pick<ProjectModelOptions, "trace"> = {},
 ): Promise<ProjectModel> {
-  const packs = options.packs ?? installedPacks;
-  const pack = packs.find((p) => p.version === version);
+  const pack = installedPacks.find((p) => p.version === version);
   if (!pack) throw new Error(`No language pack for ${version}`);
-  const parser = await loadParser(version, packs);
   return new ProjectModel(files, {
-    parser,
+    ...options,
+    parser: await loadParser(version),
     includes: pack.includes,
-    ...(options.trace ? { trace: options.trace } : {}),
   });
 }

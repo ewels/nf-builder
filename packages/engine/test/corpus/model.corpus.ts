@@ -2,15 +2,8 @@
 // resolves (or gets a diagnostic naming the missing path), every entry binds, and a change re-models only the changed
 // file and its dependants. The project is every file under each pin except `.git`. Run by `pnpm test:corpus` after
 // `pnpm corpus:fetch` and `pnpm corpus:lint`; writes .cache/reports/model-corpus.md.
-import {
-  existsSync,
-  mkdirSync,
-  readdirSync,
-  readFileSync,
-  writeFileSync,
-} from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import type { IncludeRules } from "@nf-builder/lang-core";
 import { beforeAll, describe, expect, it } from "vitest";
 import {
   installedPackVersions,
@@ -19,7 +12,8 @@ import {
   type ProjectFile,
   type ProjectModel,
 } from "../../src/index";
-import { describeModel, modelAll } from "../model/describe";
+import { describeModel, loadPack, modelAll } from "../model/describe";
+import { readTree } from "../model/read-tree";
 
 const ROOT = join(import.meta.dirname, "../../../..");
 const CORPUS = join(ROOT, ".cache/corpus");
@@ -33,21 +27,6 @@ const IDS = [
   ),
 ].map((m) => m[1] as string);
 
-function readProject(id: string): ProjectFile[] {
-  const dir = join(CORPUS, id);
-  const out: ProjectFile[] = [];
-  const visit = (rel: string) => {
-    for (const e of readdirSync(join(dir, rel), { withFileTypes: true })) {
-      if (e.name === ".git") continue;
-      const path = rel === "" ? e.name : `${rel}/${e.name}`;
-      if (e.isDirectory()) visit(path);
-      else out.push({ path, text: readFileSync(join(dir, path), "utf8") });
-    }
-  };
-  visit("");
-  return out;
-}
-
 interface Pin {
   id: string;
   files: ProjectFile[];
@@ -60,7 +39,7 @@ beforeAll(async () => {
   for (const id of IDS) {
     if (!existsSync(join(CORPUS, id)) || !existsSync(join(LINT, `${id}.json`)))
       continue;
-    const files = readProject(id);
+    const files = readTree(join(CORPUS, id));
     const events: ModelEvent[] = [];
     const project = await openProject(version, files, {
       trace: (e) => events.push(e),
@@ -179,17 +158,6 @@ describe("F-105 step 1: include resolution over the corpus", () => {
               expect(i.target.kind, where).toBe("external");
             }
           }
-          if (i.target.kind === "missing") {
-            const d = diagnostics.find(
-              (x) =>
-                x.path === path &&
-                x.range.start === i.node.range.start &&
-                x.message.includes(
-                  i.target.kind === "missing" ? (i.target.path as string) : "",
-                ),
-            );
-            expect(d, where).toBeDefined();
-          }
         }
       }
       // lint reports no errors over the corpus, so parity means no include diagnostics
@@ -238,6 +206,18 @@ describe("F-105 step 1: include resolution over the corpus", () => {
             missing.length,
             `${pin.id} ${path} after deleting ${target}`,
           ).toBeGreaterThan(0);
+          // every missing include has a diagnostic at its node that names the path checked
+          for (const i of missing) {
+            const checked = i.target.kind === "missing" ? i.target.path : null;
+            expect(
+              model?.diagnostics.some(
+                (d) =>
+                  d.range.start === i.node.range.start &&
+                  d.message.includes(checked as string),
+              ),
+              `${pin.id} ${path}:${i.node.range.line} names ${checked}`,
+            ).toBe(true);
+          }
           const named = model?.diagnostics.filter(
             (d) =>
               d.code === "include-target" &&
@@ -302,14 +282,7 @@ describe("F-105 step 2 AR-04: incremental updates over the corpus", () => {
   });
 
   it("F-105 step 2 AR-04: after the changes every pipeline's model equals a fresh build", async () => {
-    const { installedPacks } = await import("../../src/packs");
-    const { loadParser } = await import("../../src/index");
-    const parser = await loadParser(version);
-    const rules = (
-      installedPacks.find((p) => p.version === version) as {
-        includes: IncludeRules;
-      }
-    ).includes;
+    const { parser, rules } = await loadPack(version);
     for (const pin of pins) {
       const fresh = modelAll(pin.files, parser, rules);
       expect(pin.project.paths()).toEqual([...fresh.keys()].sort());

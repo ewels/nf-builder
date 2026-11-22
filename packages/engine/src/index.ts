@@ -18,7 +18,6 @@ export type {
   Binding,
   ConfigIncludeModel,
   FileModel,
-  ParsedFile,
   ResolvedEntry,
   ResolvedInclude,
   ScriptIncludeModel,

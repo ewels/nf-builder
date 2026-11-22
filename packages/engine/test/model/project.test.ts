@@ -6,20 +6,14 @@ import {
   type ProjectFile,
   ProjectModel,
 } from "../../src/model/project";
-import { installedPacks, installedPackVersions } from "../../src/packs";
-import { loadParser } from "../../src/source/parser";
-import { describeModel, modelAll } from "./describe";
+import { installedPackVersions } from "../../src/packs";
+import { describeModel, loadPack, modelAll } from "./describe";
 
 const version = installedPackVersions()[0] as string;
 let parser: SourceParser;
 let rules: IncludeRules;
 beforeAll(async () => {
-  parser = await loadParser(version);
-  rules = (
-    installedPacks.find((p) => p.version === version) as {
-      includes: IncludeRules;
-    }
-  ).includes;
+  ({ parser, rules } = await loadPack(version));
 });
 
 const proc = (name: string) => `process ${name} {\n    script:\n    'x'\n}\n`;

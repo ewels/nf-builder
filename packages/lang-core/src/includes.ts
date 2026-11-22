@@ -43,7 +43,9 @@ export type IncludableDeclaration =
   | RecordDef
   | EnumDef
   | ParamsBlock
-  | Unparsed;
+  | Unparsed
+  /** The unnamed workflow of a script with statements (nf-lang wraps them); includable as `workflow`. */
+  | ScriptAst;
 
 export interface Includable {
   readonly declaration: IncludableDeclaration;

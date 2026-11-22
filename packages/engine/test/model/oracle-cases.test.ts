@@ -3,9 +3,8 @@ import { fileURLToPath } from "node:url";
 import type { IncludeRules, SourceParser } from "@nf-builder/lang-core";
 import { beforeAll, describe, expect, it } from "vitest";
 import { parse } from "yaml";
-import { installedPacks, installedPackVersions } from "../../src/packs";
-import { loadParser } from "../../src/source/parser";
-import { modelAll } from "./describe";
+import { installedPackVersions } from "../../src/packs";
+import { loadPack, modelAll } from "./describe";
 import { readTree } from "./read-tree";
 
 const cases = fileURLToPath(
@@ -15,13 +14,7 @@ const cases = fileURLToPath(
 let parser: SourceParser;
 let rules: IncludeRules;
 beforeAll(async () => {
-  const version = installedPackVersions()[0] as string;
-  parser = await loadParser(version);
-  rules = (
-    installedPacks.find((p) => p.version === version) as {
-      includes: IncludeRules;
-    }
-  ).includes;
+  ({ parser, rules } = await loadPack(installedPackVersions()[0] as string));
 });
 
 interface Manifest {
@@ -40,8 +33,11 @@ describe("oracle cases f105-includes-*", () => {
     );
     const ours = [...models.values()].flatMap((m) => m.diagnostics);
     const recorded = recordedErrors("f105-includes-missing");
-    expect(recorded.length).toBe(7);
-    for (const text of recorded) {
+    expect(recorded.length).toBe(9);
+    // the two grammar errors are the targets' own parse errors, checked below
+    for (const text of recorded.filter(
+      (t) => !t.startsWith("Unexpected input"),
+    )) {
       expect(
         ours.filter((d) => d.message.includes(text)).length,
         text,
@@ -53,6 +49,7 @@ describe("oracle cases f105-includes-*", () => {
     ).toEqual([
       "conf/inc.config 2:1 include-target",
       "conf/inc.config 4:12 include-target",
+      "late.nf 1:1 include-name",
       "main.nf 2:1 include-target",
       "main.nf 3:1 include-name",
       "main.nf 4:1 include-target",
@@ -68,6 +65,33 @@ describe("oracle cases f105-includes-*", () => {
       2,
       1,
       "Unexpected end of file -- check for an unclosed brace, bracket, parenthesis, or string",
+    ]);
+    const order = models.get("section-order.nf");
+    expect(
+      order?.source.problems.map((p) => [p.line, p.column, p.message]),
+    ).toContainEqual([8, 10, "Unexpected input: ':'"]);
+  });
+
+  it("F-105 step 1: lint finds the unnamed workflow of a statements-only script includable as workflow", () => {
+    const models = modelAll(
+      readTree(`${cases}f105-includes-implicit`),
+      parser,
+      rules,
+    );
+    expect(recordedErrors("f105-includes-implicit").join("\n")).not.toContain(
+      "is not defined",
+    );
+    const uses = models.get("uses.nf");
+    expect(uses?.diagnostics).toEqual([]);
+    expect(
+      uses?.includes.flatMap((i) =>
+        i.kind === "script"
+          ? i.entries.map((e) => [e.declaration?.kind, e.pipeline])
+          : [],
+      ),
+    ).toEqual([
+      ["Script", true],
+      ["Script", true],
     ]);
   });
 

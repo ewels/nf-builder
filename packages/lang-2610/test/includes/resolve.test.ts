@@ -306,4 +306,58 @@ describe("config include resolution", () => {
       message: "Invalid include source: '/x'",
     });
   });
+
+  it("F-105 FI-05: a Number, Boolean or Null constant is the path nf-lang's getText() gives", () => {
+    const t = tree("conf/inc.config");
+    const num = (text: string): Expression => ({
+      kind: "Number",
+      range: NO_RANGE,
+      text,
+      integer: !/[.eE]|[fFdD]$/.test(text),
+    });
+    const missingPath = (e: Expression) => {
+      const r = configInclude("conf/inc.config", e, t);
+      return r.kind === "missing" ? [r.path, r.message] : r.kind;
+    };
+    expect(missingPath(num("42"))).toEqual([
+      "conf/42",
+      "Invalid include source: 'conf/42'",
+    ]);
+    expect(missingPath(num("1_0"))?.[0]).toBe("conf/10");
+    expect(missingPath(num("7L"))?.[0]).toBe("conf/7");
+    expect(missingPath(num("0x10"))?.[0]).toBe("conf/16");
+    expect(missingPath(num("1.5f"))?.[0]).toBe("conf/1.5");
+    expect(
+      missingPath({ kind: "Boolean", range: NO_RANGE, value: true })?.[0],
+    ).toBe("conf/true");
+    expect(missingPath({ kind: "Null", range: NO_RANGE })?.[0]).toBe(
+      "conf/null",
+    );
+    const present = tree("conf/42");
+    expect(configInclude("conf/inc.config", num("42"), present)).toMatchObject({
+      kind: "file",
+      path: "conf/42",
+    });
+  });
+});
+
+describe("script include directory check", () => {
+  it("F-105 AR-03: the directory check is made on the unnormalised path, as ModuleResolver.getLocalIncludeUri does", () => {
+    const t = tree("x/a.txt", "y/main.nf", "y.nf");
+    // ./x/../y: x exists, so the path is a directory
+    expect(scriptInclude("main.nf", "./x/../y", t)).toMatchObject({
+      kind: "file",
+      path: "y/main.nf",
+    });
+    // ./nox/../y: nox does not exist, so the filesystem cannot resolve it and it is not a directory: y.nf
+    expect(scriptInclude("main.nf", "./nox/../y", t)).toMatchObject({
+      kind: "file",
+      path: "y.nf",
+    });
+    // a plain directory is unaffected
+    expect(scriptInclude("a/main.nf", "../y", t)).toMatchObject({
+      kind: "file",
+      path: "y/main.nf",
+    });
+  });
 });

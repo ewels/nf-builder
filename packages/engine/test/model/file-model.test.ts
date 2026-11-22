@@ -2,21 +2,14 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import type { IncludeRules, SourceParser } from "@nf-builder/lang-core";
 import { beforeAll, describe, expect, it } from "vitest";
-import { installedPacks, installedPackVersions } from "../../src/packs";
-import { loadParser } from "../../src/source/parser";
-import { modelAll } from "./describe";
+import { installedPackVersions } from "../../src/packs";
+import { loadPack, modelAll } from "./describe";
 import { readTree } from "./read-tree";
 
 let parser: SourceParser;
 let rules: IncludeRules;
 beforeAll(async () => {
-  const version = installedPackVersions()[0] as string;
-  parser = await loadParser(version);
-  rules = (
-    installedPacks.find((p) => p.version === version) as {
-      includes: IncludeRules;
-    }
-  ).includes;
+  ({ parser, rules } = await loadPack(installedPackVersions()[0] as string));
 });
 
 const fixtures = fileURLToPath(
@@ -159,12 +152,17 @@ include { NOPE } from './typed-without-flag'
       main?.diagnostics.map((d) => [d.code, d.range.line, d.range.column]),
     ).toEqual([
       ["include-not-parsed", 1, 1],
+      ["include-name", 3, 1],
       ["include-name", 4, 1],
     ]);
     expect(main?.diagnostics[0]?.message).toBe(
       "Module could not be parsed: 'q.nf'",
     );
+    // lint: LATE_INPUT is an InvalidDeclaration upstream, so it is not defined, though it still binds by its head
     expect(main?.diagnostics[1]?.message).toBe(
+      "Included name 'LATE_INPUT' is not defined in module 'section-order.nf'",
+    );
+    expect(main?.diagnostics[2]?.message).toBe(
       "Included name 'NOPE' is not defined in module 'typed-without-flag.nf'",
     );
     const first = main?.includes[0];
@@ -182,7 +180,7 @@ include { NOPE } from './typed-without-flag'
     ]);
     const third = main?.includes[2];
     if (third?.kind !== "script") throw new Error("not a script include");
-    // a builder-only target (lint resolves it): ON_TIME is modelled, LATE_INPUT binds by its head
+    // section-order.nf has no grammar failure (lint resolves it): ON_TIME is modelled, LATE_INPUT binds by its head
     expect(third.entries.map((e) => e.declaration?.kind)).toEqual([
       "Process",
       "Unparsed",

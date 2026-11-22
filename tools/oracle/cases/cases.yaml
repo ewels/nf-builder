@@ -142,4 +142,19 @@ cases:
           "outside/d.nf'",
           "conf/missing.config'",
           "conf/test'",
+          "Included name 'LATE_INPUT' is not defined in module '",
+          "Unexpected input: ':'",
+        ]
+  - id: f105-includes-implicit
+    about: A statements-only script has an unnamed workflow that is includable as workflow, so including it reports no unknown name (lint reports only the typing rules of pipeline includes and the mixed statements).
+    spec: [F-105, AR-03]
+    sources:
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/modules/nf-lang/src/main/java/nextflow/script/parser/ScriptAstBuilder.java#L276-L283
+    lint:
+      expect: error
+      errors:
+        [
+          "Statements cannot be mixed with script declarations",
+          "Including a pipeline requires `nextflow.enable.types = true` in the including script",
+          "An included pipeline must enable static typing",
         ]
