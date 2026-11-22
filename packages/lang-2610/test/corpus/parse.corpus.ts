@@ -4,7 +4,19 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { cpus } from "node:os";
 import { join } from "node:path";
+import {
+  BailErrorStrategy,
+  CharStream,
+  CommonTokenStream,
+  ParseCancellationException,
+  PredictionMode,
+  Trees,
+} from "antlr4ng";
 import { beforeAll, describe, expect, it } from "vitest";
+import { ConfigLexer } from "../../src/generated/ConfigLexer.ts";
+import { ConfigParser } from "../../src/generated/ConfigParser.ts";
+import { ScriptLexer } from "../../src/generated/ScriptLexer.ts";
+import { ScriptParser } from "../../src/generated/ScriptParser.ts";
 import { parseConfig, parseScript } from "../../src/index.ts";
 import {
   compare,
@@ -73,6 +85,36 @@ function parseAll(id: string): Pass {
   }
   return { files, ms: performance.now() - started };
 }
+
+/** The tree (as a string) of a pure LL parse with no stage 1, or undefined if it fails. */
+function pureLl(kind: "script" | "config", text: string): string | undefined {
+  const input = CharStream.fromString(text);
+  const [lexer, parser] =
+    kind === "script"
+      ? (() => {
+          const l = new ScriptLexer(input);
+          return [l, new ScriptParser(new CommonTokenStream(l))] as const;
+        })()
+      : (() => {
+          const l = new ConfigLexer(input);
+          return [l, new ConfigParser(new CommonTokenStream(l))] as const;
+        })();
+  lexer.removeErrorListeners();
+  parser.removeErrorListeners();
+  parser.errorHandler = new BailErrorStrategy();
+  parser.interpreter.predictionMode = PredictionMode.LL;
+  try {
+    return Trees.toStringTree(parser.compilationUnit(), parser.ruleNames);
+  } catch (error) {
+    if (error instanceof ParseCancellationException) return undefined;
+    // A lexer error is a failure for the parser under test too.
+    return undefined;
+  }
+}
+
+// Pure LL on all of sarek takes about a minute, so compare every file of the small pipelines and a fixed sample of sarek.
+const TREE_CHECKED = ["rnaseq-nf", "rnaseq-nf-typed", "fetchngs", "fixtures"];
+const SAREK_SAMPLE = 20;
 
 const state = {
   lint: new Map<string, LintFile>(),
@@ -196,6 +238,38 @@ describe("corpus parse", () => {
         `fixtures/${file}: lint rejects it; the parser accepts it and no cause is listed`,
       ).toBe(true);
     }
+  });
+
+  it("F-006 QA-03: the hybrid stage 1 tree equals the pure LL tree for every file of the small pipelines and a sample of sarek", () => {
+    const mismatches: string[] = [];
+    let compared = 0;
+    for (const id of [...TREE_CHECKED, "sarek"]) {
+      let sources = listSources(dirOf(id));
+      if (id === "sarek") {
+        const step = Math.max(1, Math.floor(sources.length / SAREK_SAMPLE));
+        sources = sources
+          .filter((_, i) => i % step === 0)
+          .slice(0, SAREK_SAMPLE);
+      }
+      for (const source of sources) {
+        const text = readFileSync(join(dirOf(id), source.path), "utf8");
+        const expected = pureLl(source.kind, text);
+        const outcome =
+          source.kind === "script" ? parseScript(text) : parseConfig(text);
+        const actual = outcome.ok
+          ? Trees.toStringTree(
+              outcome.tree,
+              source.kind === "script"
+                ? ScriptParser.ruleNames
+                : ConfigParser.ruleNames,
+            )
+          : undefined;
+        compared++;
+        if (actual !== expected) mismatches.push(`${id}/${source.path}`);
+      }
+    }
+    expect(compared).toBeGreaterThan(SAREK_SAMPLE);
+    expect(mismatches).toEqual([]);
   });
 
   it("F-006 step 1: writes the parse report with pass rate per pipeline and sarek cold and warm parse time", () => {

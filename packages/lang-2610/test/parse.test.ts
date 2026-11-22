@@ -1,4 +1,13 @@
+import {
+  BailErrorStrategy,
+  CharStream,
+  CommonTokenStream,
+  PredictionMode,
+  Trees,
+} from "antlr4ng";
 import { describe, expect, it } from "vitest";
+import { ScriptLexer } from "../src/generated/ScriptLexer.ts";
+import { ScriptParser } from "../src/generated/ScriptParser.ts";
 import { parseConfig, parseScript } from "../src/parser/parse.ts";
 
 const TYPED_AND_LEGACY = `nextflow.enable.types = true
@@ -169,5 +178,59 @@ describe("parseConfig", () => {
     expect(outcome.ok).toBe(false);
     if (outcome.ok) return;
     expect(outcome.error.source).toBe("parser");
+  });
+});
+
+const BLANK_BEFORE_EMIT = `workflow {
+    take:
+    x
+
+    main:
+    y = x
+
+    emit:
+    out = y
+}
+`;
+
+const INSTANCEOF_TERNARY = `workflow {
+    main:
+    v = x instanceof List ? a : b
+}
+`;
+
+function pureLlTree(text: string): string {
+  const lexer = new ScriptLexer(CharStream.fromString(text));
+  lexer.removeErrorListeners();
+  const parser = new ScriptParser(new CommonTokenStream(lexer));
+  parser.removeErrorListeners();
+  parser.errorHandler = new BailErrorStrategy();
+  parser.interpreter.predictionMode = PredictionMode.LL;
+  return Trees.toStringTree(parser.compilationUnit(), ScriptParser.ruleNames);
+}
+
+describe("stage 1 prediction", () => {
+  it("F-006 QA-03: a workflow with a blank line before emit: parses in stage 1 without falling back to full LL", () => {
+    expect(parseScript(BLANK_BEFORE_EMIT)).toMatchObject({
+      ok: true,
+      mode: "SLL",
+    });
+  });
+
+  it("F-006 QA-03: a ternary on an instanceof test parses in stage 1", () => {
+    expect(parseScript(INSTANCEOF_TERNARY)).toMatchObject({
+      ok: true,
+      mode: "SLL",
+    });
+  });
+
+  it("F-006 QA-03: the stage 1 tree equals the pure LL tree", () => {
+    for (const text of [BLANK_BEFORE_EMIT, INSTANCEOF_TERNARY]) {
+      const outcome = parseScript(text);
+      if (!outcome.ok) throw new Error(outcome.error.message);
+      expect(Trees.toStringTree(outcome.tree, ScriptParser.ruleNames)).toBe(
+        pureLlTree(text),
+      );
+    }
   });
 });

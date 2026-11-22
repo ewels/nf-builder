@@ -1,15 +1,22 @@
 // Parses a script or config the way nf-lang's ScriptAstBuilder.buildCST does: SLL first with a bail-out strategy and no
 // listeners, then, if that fails with a parser error, LL with a listener that records the first error. One syntax error per file.
 import {
+  type ATN,
   BailErrorStrategy,
   BaseErrorListener,
   CharStream,
   CommonTokenStream,
+  type DFA,
   ParseCancellationException,
+  type Parser,
+  ParserATNSimulator,
+  type ParserRuleContext,
+  PredictionContextCache,
   PredictionMode,
   type RecognitionException,
   type Recognizer,
   type Token,
+  type TokenStream,
 } from "antlr4ng";
 import { ConfigLexer } from "../generated/ConfigLexer.ts";
 import {
@@ -54,6 +61,50 @@ class FirstErrorListener extends BaseErrorListener {
   }
 }
 
+/**
+ * Stage 1 is SLL, except for the decisions inside rules `sep` and `type`, which are predicted with LL. SLL cannot see the
+ * caller of `sep : (NL | SEMI)+` (a blank line before `emit:`), nor tell `x instanceof List ? a : b` from a nullable type,
+ * so it fails and drops to full LL for most real files (sarek: about 50 s instead of about 1 s). Upstream's two-stage
+ * parse falls back on the same files. Stage 2 stays pure LL, and the trees are identical (checked on the corpus).
+ */
+class Stage1Simulator extends ParserATNSimulator {
+  constructor(
+    parser: Parser,
+    atn: ATN,
+    dfa: DFA[],
+    private readonly ll: ReadonlySet<number>,
+  ) {
+    super(parser, atn, dfa, new PredictionContextCache());
+  }
+
+  override adaptivePredict(
+    input: TokenStream,
+    decision: number,
+    outerContext: ParserRuleContext | null,
+  ): number {
+    if (this.predictionMode !== PredictionMode.SLL || !this.ll.has(decision)) {
+      return super.adaptivePredict(input, decision, outerContext);
+    }
+    this.predictionMode = PredictionMode.LL;
+    try {
+      return super.adaptivePredict(input, decision, outerContext);
+    } finally {
+      this.predictionMode = PredictionMode.SLL;
+    }
+  }
+}
+
+const llDecisions = (atn: ATN, ruleNames: string[]) => {
+  const rules = ["sep", "type"].map((r) => ruleNames.indexOf(r));
+  return new Set(
+    atn.decisionToState.flatMap((state, d) =>
+      rules.includes(state.ruleIndex) ? [d] : [],
+    ),
+  );
+};
+const SCRIPT_LL = llDecisions(ScriptParser._ATN, ScriptParser.ruleNames);
+const CONFIG_LL = llDecisions(ConfigParser._ATN, ConfigParser.ruleNames);
+
 const isCancellation = (error: unknown): error is ParseCancellationException =>
   error instanceof ParseCancellationException;
 
@@ -87,7 +138,15 @@ function run<T>(
   const parser = makeParser(tokens);
   parser.removeErrorListeners();
   parser.errorHandler = new BailErrorStrategy();
-  parser.interpreter.predictionMode = PredictionMode.SLL;
+  const base = parser.interpreter as ParserATNSimulator;
+  const stage1 = new Stage1Simulator(
+    parser,
+    parser.atn,
+    base.decisionToDFA,
+    parser instanceof ScriptParser ? SCRIPT_LL : CONFIG_LL,
+  );
+  stage1.predictionMode = PredictionMode.SLL;
+  parser.interpreter = stage1;
 
   const lexerError = (error: LexerSyntaxError, mode: "SLL" | "LL") =>
     ({
@@ -112,7 +171,8 @@ function run<T>(
   parser.reset();
   const listener = new FirstErrorListener();
   parser.addErrorListener(listener);
-  parser.interpreter.predictionMode = PredictionMode.LL;
+  parser.interpreter = base;
+  base.predictionMode = PredictionMode.LL;
   try {
     return { ok: true, tree: start(parser), mode: "LL" };
   } catch (error) {
