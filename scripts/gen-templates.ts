@@ -65,10 +65,15 @@ export function readTemplateTree(dir: string): TemplateFile[] {
       if (bytes.includes(0)) throw new Error(`${path}: binary file`);
       let text: string;
       try {
-        text = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+        text = new TextDecoder("utf-8", {
+          fatal: true,
+          ignoreBOM: true,
+        }).decode(bytes);
       } catch {
         throw new Error(`${path}: not valid UTF-8`);
       }
+      if (text.startsWith("\uFEFF"))
+        throw new Error(`${path}: byte order mark`);
       if (text.includes("\r")) throw new Error(`${path}: CRLF line ending`);
       files.push({ path, text });
     }

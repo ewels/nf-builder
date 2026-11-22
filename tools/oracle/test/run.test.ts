@@ -123,6 +123,7 @@ describe("F-005 runner", () => {
         expect(options.pathPrefix.startsWith(`${join(runsDir, "c1")}/`)).toBe(
           false,
         );
+        expect(options.pathPrefix.startsWith(`${cwd}/`)).toBe(false);
       }
       return args[0] === "lint" ? res({ stdout: LINT_OK }) : res();
     };

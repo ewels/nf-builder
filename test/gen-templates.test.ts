@@ -95,7 +95,7 @@ describe("gen:templates", () => {
     expect(stale.message).toContain("gen:templates 26.10");
   });
 
-  it("F-203 IO-01 IO-12: gen:templates refuses binary or non-UTF-8 files, CRLF, symlinks, dotfiles and files over 1 MB", () => {
+  it("F-203 IO-01 IO-12: gen:templates refuses binary or non-UTF-8 files, a byte order mark, CRLF, symlinks, dotfiles and files over 1 MB", () => {
     const bad = (setup: (dir: string) => void): string => {
       const { dir } = tempRoot({ blank: { "main.nf": "ok\n" } });
       const tree = join(dir, "blank");
@@ -118,6 +118,11 @@ describe("gen:templates", () => {
     expect(bad((d) => writeFileSync(join(d, "x.txt"), "a\r\nb\n"))).toMatch(
       /x\.txt.*CRLF/,
     );
+    expect(
+      bad((d) =>
+        writeFileSync(join(d, "x.txt"), Buffer.from("\uFEFFa\n", "utf8")),
+      ),
+    ).toMatch(/x\.txt.*byte order mark/);
     expect(
       bad((d) => symlinkSync(join(d, "main.nf"), join(d, "link"))),
     ).toMatch(/link.*symlink/);
