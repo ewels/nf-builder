@@ -293,7 +293,7 @@ cases:
       expect: ok
       args: ["-stub", "--words", "data/words.txt"]
 
-  # F-203: the project templates of the 26.10 pack, run in place from packages/lang-2610/templates/<id>/.
+  # F-203: the project templates of the 26.10 pack, read from packages/lang-2610/templates/<id>/.
   - id: template-blank
     dir: ../../../packages/lang-2610/templates/blank
     about: The blank template, an entry workflow and a params block that are both empty, lints with no warning and stub-runs.

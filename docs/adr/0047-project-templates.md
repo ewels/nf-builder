@@ -23,8 +23,8 @@ UX-60 asks for a New project dialog with Start blank, templates and a Publish do
   - Start blank has an entry workflow, a `params` block, `nextflow.config`, a schema and a README, but no `output` block: `nextflow lint` rejects `output {}` without `publish:`. LA-40 reads as "an output block once something is published".
   - Tool versions use the LA-42 `eval` idiom. Hello world has no `topic:` section, because `echo` is not a tool.
   - Samplesheet to MultiQC carries tiny text test data and a relative samplesheet under `assets/`, with a `test` profile: no remote data and no plugins.
-- **Oracle:** each template is the case `template-<id>`, run in place. Three case keys are new:
-  - `dir` runs a directory in place;
+- **Oracle:** each template is the case `template-<id>`, read from the pack directory. Three case keys are new:
+  - `dir` names the case's tree, which the oracle copies into its run directory;
   - `lint.clean` requires no lint output;
   - `run.tools` puts shims on the `PATH` for the tools that `eval(...)` calls under `-stub`.
 - **Documentation check:** a unit test checks that every process and workflow has a doc comment and every parameter a schema description. The check moves into the engine with F-311 and F-312 (LA-54).
@@ -33,10 +33,10 @@ UX-60 asks for a New project dialog with Start blank, templates and a Publish do
   - Publish docs is shown, checked by default and sent as `NewProject.publishDocs`, but does nothing until F-606.
   - The Import route and the metro map checkbox stay with F-401, F-403 and F-607.
   - The header's Templates button opens the dialog on From a template, so the F-201 shell baseline is re-approved.
-  - Start blank doesn't wait for the template list: the worker resolves the pack's blank template itself, so it works while the list loads or after it failed to load.
+  - Start blank doesn't wait for the template list: the worker resolves the pack's blank template itself, so it works while the list loads or after the list failed to load. It still needs the worker to load the pack's templates chunk.
 - **Licence:** template content is dedicated under MIT-0, so users needn't keep a notice. It is written for this project. The facts it takes from elsewhere are cited in the oracle cases' `sources`: tool versions and the MultiQC version command from nf-core modules, and the shape of `SAY_HELLO` from the Nextflow docs' typed process example.
 - **Baselines:** each template's canvas is a visual baseline approved from CI (ADR 0021). They use F-205's interim layout, and F-207 re-approves them. Start blank's canvas is checked in the DOM only: it has no edges and nothing to lay out.
-- **Parameter comments:** parameters are described in `nextflow_schema.json` only, not in comments (LA-53).
+- **Parameter comments:** each parameter is described in `nextflow_schema.json` only, not in a comment (LA-53). A doc comment on the `params` block as a whole is allowed.
 - **Opening a project keeps the canvas.** The canvas store resets only when no project is current and none is opening. This amends ADR 0046's "It resets when no stored project is current": a status pushed before an open finished could blank the canvas.
 
 ## Consequences
