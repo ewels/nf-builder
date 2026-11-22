@@ -1,17 +1,10 @@
 import type { Locator, Page } from "@playwright/test";
+import type { EngineHook } from "./engine.ts";
 
 /** The subset of the workspace API the tests call, on `window.nfBuilderEngine` (F-202). */
-export interface WorkspaceHook {
-  writeFiles(
-    files: { path: string; text: string | null }[],
-  ): Promise<{ ok?: boolean; revision?: number }>;
-  apply(
-    command: unknown,
-    revision: number,
-  ): Promise<{ ok: boolean; revision: number | null }>;
+export type WorkspaceHook = Pick<EngineHook, "writeFiles" | "apply"> & {
   readFile(path: string): Promise<string | null>;
-  flush(): Promise<{ status: string; error: string | null }>;
-}
+};
 
 declare global {
   interface Window {
@@ -122,7 +115,7 @@ export async function stubStorage(
   }, options);
 }
 
-export interface StoredDatabase {
+interface StoredDatabase {
   version: number;
   stores: Record<string, { keyPath: unknown; records: unknown[] }>;
 }

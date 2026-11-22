@@ -6,7 +6,11 @@ import { useStore } from "zustand";
 import { createStore, type StoreApi } from "zustand/vanilla";
 import { getEngine } from "../engine/engine-client";
 import { requestPaletteView } from "../palette/use-palette-view";
-import type { WorkspaceApi, WorkspaceStatus } from "../workspace/types";
+import {
+  INITIAL_STATUS,
+  type WorkspaceApi,
+  type WorkspaceStatus,
+} from "../workspace/types";
 import {
   nearQuota,
   requestPersistence,
@@ -14,7 +18,7 @@ import {
   storageUsage,
 } from "./storage-health";
 
-export interface ProjectUiState {
+interface ProjectUiState {
   readonly status: WorkspaceStatus;
   /** Set while usage is at or above the warning fraction. */
   readonly storageWarning: StorageUsage | null;
@@ -22,7 +26,7 @@ export interface ProjectUiState {
   readonly persisted: boolean | null;
 }
 
-export interface ProjectActions {
+interface ProjectActions {
   start(): Promise<void>;
   create(name: string): Promise<void>;
   open(id: string): Promise<void>;
@@ -36,16 +40,6 @@ export interface ProjectStoreDeps {
   readonly storage: () => StorageManager | undefined;
   readonly languageVersion: string | undefined;
 }
-
-export const INITIAL_STATUS: WorkspaceStatus = {
-  storage: "starting",
-  storageError: null,
-  projects: [],
-  current: null,
-  opening: null,
-  openError: null,
-  save: { status: "saved", error: null },
-};
 
 export function createProjectStore(
   deps: ProjectStoreDeps,
@@ -87,9 +81,9 @@ export function createProjectStore(
 
       async start() {
         try {
-          // the palette goes first: the worker's queue is serial and a long open would delay it (ADR 0029)
+          // the palette request goes first: the worker's queue is serial and a long open would delay it (ADR 0029)
           if (deps.languageVersion !== undefined)
-            await deps.palette(deps.languageVersion).catch(() => undefined);
+            void deps.palette(deps.languageVersion).catch(() => undefined);
           const workspace = deps.workspace();
           const initial = await workspace.watch(onStatus);
           set({ status: initial });

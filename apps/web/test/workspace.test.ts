@@ -10,7 +10,7 @@ import { describe, expect, it } from "vitest";
 import type { Timer } from "../src/workspace/autosave";
 import { openProjectDb, type ProjectDb } from "../src/workspace/project-db";
 import type { WorkspaceStatus } from "../src/workspace/types";
-import { createWorkspace } from "../src/workspace/workspace";
+import { createWorkspace, randomId } from "../src/workspace/workspace";
 
 const version = installedPackVersions()[0] as string;
 const readme = (text: string): EditCommand => ({
@@ -398,5 +398,43 @@ describe("F-202 workspace", () => {
         files: [],
       }),
     ).rejects.toThrow(/Reload this page/);
+  });
+
+  it("F-202 IO-01: a save to a project deleted in another tab reports failed, not saved", async () => {
+    const a = setup();
+    await a.watching;
+    const meta = await a.workspace.createProject({
+      name: "Gone",
+      languageVersion: version,
+      files,
+    });
+    await a.workspace.openProject(meta.id);
+    const other = await a.reader();
+    await other.deleteProject(meta.id);
+    other.close();
+    ok(await a.workspace.writeFiles([{ path: "README.md", text: "edit\n" }]));
+    const state = await a.workspace.flush();
+    expect(state).toEqual({
+      status: "failed",
+      error: "This project was deleted in another tab.",
+    });
+  });
+
+  it("F-202 ADR-0044: project ids still work where crypto.randomUUID is missing (a frame in an insecure page)", () => {
+    const original = crypto.randomUUID;
+    Object.defineProperty(crypto, "randomUUID", {
+      value: undefined,
+      configurable: true,
+    });
+    try {
+      const a = randomId();
+      expect(a).toMatch(/^[0-9a-f]{32}$/);
+      expect(randomId()).not.toBe(a);
+    } finally {
+      Object.defineProperty(crypto, "randomUUID", {
+        value: original,
+        configurable: true,
+      });
+    }
   });
 });

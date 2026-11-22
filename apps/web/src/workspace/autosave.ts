@@ -11,8 +11,7 @@ export interface Timer {
   clear(handle: unknown): void;
 }
 
-export interface AutosaverOptions {
-  readonly delayMs?: number;
+interface AutosaverOptions {
   write(changes: readonly FileChange[]): Promise<void>;
   onState(state: SaveState): void;
   readonly timer?: Timer;
@@ -33,7 +32,6 @@ const keyOf = (c: { projectId: string; path: string }) =>
   JSON.stringify([c.projectId, c.path]);
 
 export function createAutosaver(options: AutosaverOptions): Autosaver {
-  const delay = options.delayMs ?? AUTOSAVE_DELAY_MS;
   const timer: Timer = options.timer ?? {
     set: (fn, ms) => setTimeout(fn, ms),
     clear: (h) => clearTimeout(h as ReturnType<typeof setTimeout>),
@@ -59,7 +57,7 @@ export function createAutosaver(options: AutosaverOptions): Autosaver {
     handle = timer.set(() => {
       armed = false;
       void drain();
-    }, delay);
+    }, AUTOSAVE_DELAY_MS);
   };
 
   /** Writes what is pending, one write at a time, until nothing is left or a write fails. */

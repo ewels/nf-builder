@@ -17,9 +17,7 @@ export function requestPaletteView(version: string): Promise<PaletteView> {
   if (!request) {
     request = getEngine().palette(version);
     requests.set(version, request);
-    request.catch(() => {
-      if (requests.get(version) === request) requests.delete(version);
-    });
+    request.catch(() => requests.delete(version));
   }
   return request;
 }

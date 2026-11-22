@@ -38,7 +38,10 @@ export interface ProjectDb {
 }
 
 /** `MIGRATIONS[v]` upgrades a database from version `v - 1` to `v`. A shipped step is never edited. */
-const MIGRATIONS: Record<number, (db: IDBDatabase) => void> = {
+export const MIGRATIONS: Record<
+  number,
+  (db: IDBDatabase, tx: IDBTransaction) => void
+> = {
   1: (db) => {
     db.createObjectStore("projects", { keyPath: "id" });
     db.createObjectStore("files", { keyPath: ["projectId", "path"] });
@@ -55,23 +58,28 @@ const req = <T>(request: IDBRequest<T>): Promise<T> =>
 const done = (tx: IDBTransaction): Promise<void> =>
   new Promise((resolve, reject) => {
     tx.oncomplete = () => resolve();
+    // a failed request aborts the transaction, which carries that request's error
     tx.onabort = () =>
       reject(tx.error ?? new DOMException("Transaction aborted", "AbortError"));
-    tx.onerror = () => reject(tx.error);
   });
 
 /** Every key of one project's files: `[id, path]` sorts below `[id, []]` because arrays sort after strings. */
 const filesOf = (id: string) => IDBKeyRange.bound([id], [id, []]);
 
 export async function openProjectDb(
-  factory: IDBFactory = indexedDB,
+  factory: IDBFactory,
   onClosed?: (reason: string) => void,
 ): Promise<ProjectDb> {
   const db = await new Promise<IDBDatabase>((resolve, reject) => {
     const request = factory.open(DB_NAME, DB_VERSION);
+    let blocked = false;
     request.onupgradeneeded = (event) => {
-      for (let v = event.oldVersion + 1; v <= DB_VERSION; v += 1)
-        MIGRATIONS[v]?.(request.result);
+      const tx = request.transaction;
+      for (let v = event.oldVersion + 1; v <= DB_VERSION; v += 1) {
+        const step = MIGRATIONS[v];
+        if (!step || !tx) throw new Error(`No migration to version ${v}.`);
+        step(request.result, tx);
+      }
     };
     request.onerror = () => {
       const error = request.error;
@@ -79,20 +87,47 @@ export async function openProjectDb(
         error?.name === "VersionError" ? new StorageVersionError() : error,
       );
     };
-    request.onblocked = () =>
+    request.onblocked = () => {
+      blocked = true;
       reject(new Error("The project database is blocked by another tab."));
-    request.onsuccess = () => resolve(request.result);
+    };
+    request.onsuccess = () => {
+      // the caller has already been told it failed: don't leave a connection open with no handlers
+      if (blocked) request.result.close();
+      else resolve(request.result);
+    };
   });
+  db.onclose = () =>
+    onClosed?.(
+      "The project database closed (site data cleared or storage evicted). Reload this page.",
+    );
   db.onversionchange = () => {
     db.close();
     onClosed?.("nf-builder was updated in another tab. Reload this page.");
   };
 
-  const readMeta = async (
-    tx: IDBTransaction,
-    id: string,
-  ): Promise<ProjectMeta | undefined> =>
+  const readMeta = (tx: IDBTransaction, id: string) =>
     req<ProjectMeta | undefined>(tx.objectStore("projects").get(id));
+
+  /** Runs `body` in one readwrite transaction over both stores; a throw aborts it, so nothing is written. */
+  const write = async (
+    body: (tx: IDBTransaction) => Promise<void> | void,
+  ): Promise<void> => {
+    const tx = db.transaction(["projects", "files"], "readwrite");
+    const committed = done(tx);
+    try {
+      await body(tx);
+    } catch (error) {
+      committed.catch(() => undefined);
+      try {
+        tx.abort();
+      } catch {
+        // already aborted by a failed request
+      }
+      throw error;
+    }
+    await committed;
+  };
 
   const update = async (
     id: string,
@@ -132,10 +167,8 @@ export async function openProjectDb(
       };
     },
 
-    async createProject(meta, files) {
-      const tx = db.transaction(["projects", "files"], "readwrite");
-      const committed = done(tx);
-      try {
+    createProject: (meta, files) =>
+      write((tx) => {
         tx.objectStore("projects").add(meta);
         for (const f of files)
           tx.objectStore("files").put({
@@ -143,51 +176,37 @@ export async function openProjectDb(
             path: f.path,
             text: f.text,
           });
-      } catch (error) {
-        tx.abort();
-        committed.catch(() => undefined);
-        throw error;
-      }
-      await committed;
-    },
+      }),
 
     renameProject: (id, name, now) =>
       update(id, (m) => ({ ...m, name, updatedAt: now })),
 
     touchProject: (id, now) => update(id, (m) => ({ ...m, openedAt: now })),
 
-    async deleteProject(id) {
-      const tx = db.transaction(["projects", "files"], "readwrite");
-      const committed = done(tx);
-      tx.objectStore("projects").delete(id);
-      tx.objectStore("files").delete(filesOf(id));
-      await committed;
-    },
+    deleteProject: (id) =>
+      write((tx) => {
+        tx.objectStore("projects").delete(id);
+        tx.objectStore("files").delete(filesOf(id));
+      }),
 
     async saveFiles(changes, now) {
       if (changes.length === 0) return;
-      const tx = db.transaction(["projects", "files"], "readwrite");
-      const committed = done(tx);
-      try {
-        const live = new Map<string, ProjectMeta | undefined>();
-        for (const c of changes)
-          if (!live.has(c.projectId))
-            live.set(c.projectId, await readMeta(tx, c.projectId));
+      await write(async (tx) => {
+        // every request is issued before anything is awaited, so a page that is closing gets them into the transaction
         const files = tx.objectStore("files");
         for (const c of changes) {
-          if (!live.get(c.projectId)) continue;
           if (c.text === null) files.delete([c.projectId, c.path]);
           else
             files.put({ projectId: c.projectId, path: c.path, text: c.text });
         }
-        for (const meta of live.values())
+        const ids = [...new Set(changes.map((c) => c.projectId))];
+        const metas = await Promise.all(ids.map((id) => readMeta(tx, id)));
+        if (metas.some((m) => !m))
+          throw new Error("This project was deleted in another tab.");
+        for (const meta of metas)
           if (meta) tx.objectStore("projects").put({ ...meta, updatedAt: now });
-      } catch (error) {
-        tx.abort();
-        committed.catch(() => undefined);
-        throw error;
-      }
-      await committed;
+        tx.commit?.();
+      });
     },
 
     close: () => db.close(),

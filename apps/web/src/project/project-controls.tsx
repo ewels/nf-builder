@@ -1,5 +1,5 @@
 // The connected project switcher and whichever dialog is open (F-202).
-import { type JSX, useState } from "react";
+import { type JSX, useEffect, useRef, useState } from "react";
 import { DEFAULT_PROJECT_NAME } from "../workspace/project-name";
 import { DeleteProjectDialog, ProjectNameDialog } from "./project-dialogs";
 import { useProjects } from "./project-store";
@@ -15,12 +15,20 @@ export function ProjectControls(): JSX.Element {
     null,
   );
   const close = () => setDialog(null);
+  // a dialog's own unmount can't restore focus, so put it back on the switcher once the dialog has gone (WCAG 2.4.3)
+  const button = useRef<HTMLButtonElement>(null);
+  const shown = useRef(false);
+  useEffect(() => {
+    if (dialog === null && shown.current) button.current?.focus();
+    shown.current = dialog !== null;
+  }, [dialog]);
   const { current } = status;
   return (
     <>
       <ProjectSwitcher
         projects={status.projects}
         current={current}
+        buttonRef={button}
         disabled={status.storage !== "ready"}
         onOpen={(id) => void open(id).catch(() => undefined)} // the status carries `openError`
         onNew={() => setDialog("create")}

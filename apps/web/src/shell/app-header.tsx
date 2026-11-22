@@ -1,5 +1,9 @@
 import type { JSX, ReactNode } from "react";
-import { PersistenceNote, StorageWarning } from "../project/project-status";
+import {
+  isFramed,
+  PersistenceNote,
+  StorageWarning,
+} from "../project/project-status";
 import type { StorageUsage } from "../project/storage-health";
 
 const APP_NAME = "nf-builder";
@@ -32,9 +36,12 @@ export function AppHeader({
         title={saveFailed ?? undefined}
       >
         {saveLabel}
+        {saveFailed ? (
+          <span className="visually-hidden">: {saveFailed}</span>
+        ) : null}
       </p>
       {storageWarning ? <StorageWarning usage={storageWarning} /> : null}
-      {storageNote ? <PersistenceNote /> : null}
+      {storageNote ? <PersistenceNote framed={isFramed()} /> : null}
       <div className="header-actions">
         <button type="button" className="header-button" disabled>
           Templates

@@ -32,16 +32,9 @@ export interface FileChange {
   readonly text: string | null;
 }
 
-export type SaveStatus = "saved" | "saving" | "failed";
-
 export interface SaveState {
-  readonly status: SaveStatus;
+  readonly status: "saved" | "saving" | "failed";
   readonly error: string | null;
-}
-
-export interface OpeningState {
-  readonly project: ProjectMeta;
-  readonly progress: LoadProgress | null;
 }
 
 export interface WorkspaceStatus {
@@ -49,13 +42,27 @@ export interface WorkspaceStatus {
   readonly storageError: string | null;
   readonly projects: readonly ProjectMeta[];
   readonly current: ProjectMeta | null;
-  readonly opening: OpeningState | null;
+  readonly opening: {
+    readonly project: ProjectMeta;
+    readonly progress: LoadProgress | null;
+  } | null;
   readonly openError: {
     readonly project: ProjectMeta;
     readonly message: string;
   } | null;
   readonly save: SaveState;
 }
+
+/** The status before the database has opened, on both sides of the bridge. */
+export const INITIAL_STATUS: WorkspaceStatus = {
+  storage: "starting",
+  storageError: null,
+  projects: [],
+  current: null,
+  opening: null,
+  openError: null,
+  save: { status: "saved", error: null },
+};
 
 export interface WorkspaceApi extends EngineApi {
   watch(listener: (status: WorkspaceStatus) => void): Promise<WorkspaceStatus>;

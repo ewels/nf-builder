@@ -1,14 +1,14 @@
 import { describe, expect, it, vi } from "vitest";
 import {
   createProjectStore,
-  INITIAL_STATUS,
   type ProjectStoreDeps,
 } from "../src/project/project-store";
 import { resetPersistenceRequest } from "../src/project/storage-health";
-import type {
-  ProjectMeta,
-  WorkspaceApi,
-  WorkspaceStatus,
+import {
+  INITIAL_STATUS,
+  type ProjectMeta,
+  type WorkspaceApi,
+  type WorkspaceStatus,
 } from "../src/workspace/types";
 
 const meta = (id: string, over: Partial<ProjectMeta> = {}): ProjectMeta => ({
@@ -74,6 +74,21 @@ describe("F-202 project store", () => {
     const f = fixture(ready({ projects: [meta("recent"), meta("older")] }));
     await f.store.getState().start();
     expect(f.calls).toEqual(["palette:26.10", "watch", "openProject:recent"]);
+  });
+
+  it("F-202 QA-03 ADR-0029: start does not wait for the palette before watching", async () => {
+    const f = fixture(ready());
+    const deps = f as unknown as { calls: string[] };
+    // a palette that never settles must not hold the workspace back
+    const never = createProjectStore({
+      workspace: () => f.workspace,
+      palette: () => new Promise(() => undefined),
+      storage: () => undefined,
+      languageVersion: "26.10",
+    });
+    await never.getState().start();
+    expect(f.workspace.watch).toHaveBeenCalledTimes(1);
+    expect(deps.calls).toContain("watch");
   });
 
   it("F-202 IO-01: start opens nothing when a project is already open or none exist", async () => {

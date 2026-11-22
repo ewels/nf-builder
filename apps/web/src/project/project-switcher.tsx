@@ -2,6 +2,7 @@
 import {
   type JSX,
   type KeyboardEvent,
+  type RefObject,
   useEffect,
   useId,
   useRef,
@@ -10,7 +11,7 @@ import {
 import { ChevronIcon } from "../shell/icons";
 import type { ProjectMeta } from "../workspace/types";
 
-export interface ProjectSwitcherProps {
+interface ProjectSwitcherProps {
   readonly projects: readonly ProjectMeta[];
   readonly current: ProjectMeta | null;
   readonly onOpen: (id: string) => void;
@@ -18,6 +19,8 @@ export interface ProjectSwitcherProps {
   readonly onRename: () => void;
   readonly onDelete: () => void;
   readonly disabled?: boolean;
+  /** Lets the owner of a dialog put focus back on the switcher button. */
+  readonly buttonRef?: RefObject<HTMLButtonElement | null>;
   readonly initiallyOpen?: boolean;
 }
 
@@ -32,10 +35,9 @@ export function ProjectSwitcher(p: ProjectSwitcherProps): JSX.Element {
   const [open, setOpen] = useState(p.initiallyOpen ?? false);
   const panelId = useId();
   const root = useRef<HTMLDivElement>(null);
-  const button = useRef<HTMLButtonElement>(null);
+  const ownButton = useRef<HTMLButtonElement>(null);
+  const button = p.buttonRef ?? ownButton;
   const panel = useRef<HTMLDivElement>(null);
-
-  const items = () => panelItems(panel.current);
 
   useEffect(() => {
     if (!open) return;
@@ -50,22 +52,21 @@ export function ProjectSwitcher(p: ProjectSwitcherProps): JSX.Element {
     return () => document.removeEventListener("mousedown", outside);
   }, [open]);
 
-  const close = (refocus: boolean) => {
-    setOpen(false);
-    if (refocus) button.current?.focus();
-  };
+  /** Closes the panel with focus back on the button first: a dialog records the focused element to return to. */
   const act = (fn: () => void) => () => {
-    close(false);
+    setOpen(false);
+    button.current?.focus();
     fn();
   };
   const onKeyDown = (event: KeyboardEvent) => {
     if (event.key === "Escape" && open) {
       event.stopPropagation();
-      close(true);
+      setOpen(false);
+      button.current?.focus();
       return;
     }
     if (!open || (event.key !== "ArrowDown" && event.key !== "ArrowUp")) return;
-    const list = items();
+    const list = panelItems(panel.current);
     if (list.length === 0) return;
     event.preventDefault();
     const at = list.indexOf(document.activeElement as HTMLButtonElement);

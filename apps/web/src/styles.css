@@ -297,10 +297,25 @@ html.is-resizing body * {
   border-radius: 6px;
 }
 
-.header-button:focus-visible,
+.header-button:focus-visible {
+  outline: 2px solid var(--color-header-text);
+  outline-offset: 1px;
+}
+
 .project-item:focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 1px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .project-switcher {
@@ -402,10 +417,9 @@ html.is-resizing body * {
 .storage-note {
   margin: 0;
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  max-width: 48ch;
   font-size: 12px;
+  line-height: 1.25;
   color: var(--color-header-disabled);
 }
 

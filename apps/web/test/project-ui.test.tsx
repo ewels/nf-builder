@@ -1,9 +1,10 @@
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { AppShell } from "../src/app-shell";
 import {
   DeleteProjectDialog,
   ProjectNameDialog,
+  showModalOnce,
 } from "../src/project/project-dialogs";
 import {
   CanvasPlaceholder,
@@ -12,9 +13,13 @@ import {
   StorageWarning,
   saveLabel,
 } from "../src/project/project-status";
-import { INITIAL_STATUS } from "../src/project/project-store";
 import { ProjectSwitcher } from "../src/project/project-switcher";
-import type { ProjectMeta, WorkspaceStatus } from "../src/workspace/types";
+import { AppHeader } from "../src/shell/app-header";
+import {
+  INITIAL_STATUS,
+  type ProjectMeta,
+  type WorkspaceStatus,
+} from "../src/workspace/types";
 
 const meta = (id: string, name: string): ProjectMeta => ({
   id,
@@ -94,7 +99,9 @@ describe("F-202 project UI", () => {
         onClose={noop}
       />,
     );
-    expect(html).toContain("Projects are stored in this browser only.");
+    expect(html).toContain(
+      "Projects are stored in this browser only. Clearing site data deletes them.",
+    );
     expect(html).toContain('value="Untitled project"');
     expect(html).toContain("New project");
     const del = renderToStaticMarkup(
@@ -108,7 +115,7 @@ describe("F-202 project UI", () => {
     expect(del).toContain("can&#x27;t be recovered");
   });
 
-  it('F-202 QA-03: the canvas area shows "Opening X: 3 of 17 files" with a progress bar', () => {
+  it('F-202 QA-03: the canvas area shows "Opening X: Parsing 3 of 17 files" with a progress bar', () => {
     const status: WorkspaceStatus = {
       ...INITIAL_STATUS,
       storage: "ready",
@@ -118,12 +125,31 @@ describe("F-202 project UI", () => {
       },
     };
     expect(formatOpening("Sarek", status.opening?.progress ?? null)).toBe(
-      "Opening Sarek: 3 of 17 files",
+      "Opening Sarek: Parsing 3 of 17 files",
     );
     const html = renderToStaticMarkup(<CanvasPlaceholder status={status} />);
-    expect(html).toContain("Opening Sarek: 3 of 17 files");
+    expect(html).toContain("Opening Sarek: Parsing 3 of 17 files");
     expect(html).toMatch(/<progress[^>]*max="17"[^>]*value="3"/);
     expect(html).toContain('role="status"');
+  });
+
+  it("F-202 QA-03: the opening text names the phase", () => {
+    const at = (phase: "loading" | "parsing" | "modelling", done = 12) => ({
+      phase,
+      done,
+      total: 300,
+      path: null,
+    });
+    expect(formatOpening("X", at("parsing"))).toBe(
+      "Opening X: Parsing 12 of 300 files",
+    );
+    expect(formatOpening("X", at("loading"))).toBe(
+      "Opening X: Loading 12 of 300 files",
+    );
+    expect(formatOpening("X", at("modelling", 300))).toBe(
+      "Opening X: Modelling…",
+    );
+    expect(formatOpening("X", null)).toBe("Opening X");
   });
 
   it("F-202 UX-01 IO-14: the canvas area explains unavailable storage, open errors, an open project and none", () => {
@@ -159,5 +185,39 @@ describe("F-202 project UI", () => {
       "This browser may clear these projects when it needs space.",
     );
     expect(html).not.toContain("role=");
+  });
+
+  it("F-202 ADR-0044: in a frame the persistence note adds that projects are separate from nf-builder in its own tab", () => {
+    const html = renderToStaticMarkup(<PersistenceNote framed />);
+    expect(html).toContain(
+      "kept separate from nf-builder opened in its own tab",
+    );
+    expect(renderToStaticMarkup(<PersistenceNote />)).not.toContain("separate");
+    expect(renderToStaticMarkup(<PersistenceNote />)).toMatch(/title="/);
+  });
+
+  it("F-202 QA-10: the header exposes the save error as visually hidden text", () => {
+    const html = renderToStaticMarkup(
+      <AppHeader
+        languageVersions={["26.10"]}
+        projectControls={null}
+        saveLabel="Save failed"
+        saveFailed="disk full"
+        storageWarning={null}
+        storageNote={false}
+      />,
+    );
+    expect(html).toMatch(/class="visually-hidden"[^>]*>[^<]*disk full/);
+  });
+
+  it("F-202 QA-10: a dialog that opens twice (StrictMode) is shown once and never closed by its own cleanup", () => {
+    const dialog = { open: false, showModal: vi.fn(), close: vi.fn() };
+    dialog.showModal.mockImplementation(() => {
+      dialog.open = true;
+    });
+    showModalOnce(dialog as unknown as HTMLDialogElement);
+    showModalOnce(dialog as unknown as HTMLDialogElement);
+    expect(dialog.showModal).toHaveBeenCalledTimes(1);
+    expect(dialog.close).not.toHaveBeenCalled();
   });
 });

@@ -11,6 +11,7 @@ import {
   switcher,
   type WorkspaceHook,
 } from "./projects.ts";
+import { PREVIEW_URL } from "./urls.ts";
 
 const readFile = (page: Page, path: string) =>
   page.evaluate(
@@ -215,4 +216,80 @@ test("F-202 ADR-0002 IO-01: the stored records match the recorded IndexedDB form
   expect(db.stores.files?.records).toEqual([
     { projectId: projects[0]?.id, path: "README.md", text: "y\n" },
   ]);
+});
+
+test("F-202 QA-10: focus returns to the switcher after Escape, Cancel, Create and choosing a project", async ({
+  page,
+}) => {
+  await page.goto("./");
+  await expect(switcher(page)).toBeEnabled();
+  await switcher(page).click();
+  await page.keyboard.press("Escape");
+  await expect(switcher(page)).toBeFocused();
+
+  await createProjectInUi(page, "Focus A");
+  await expect(switcher(page)).toBeFocused();
+
+  await switcher(page).click();
+  await page.getByRole("button", { name: "New project…" }).click();
+  const dialog = page.getByRole("dialog", { name: "New project" });
+  await dialog.getByRole("button", { name: "Cancel" }).click();
+  await expect(dialog).toBeHidden();
+  await expect(switcher(page)).toBeFocused();
+
+  await switcher(page).click();
+  await page.getByRole("button", { name: "New project…" }).click();
+  await page.keyboard.press("Escape");
+  await expect(dialog).toBeHidden();
+  await expect(switcher(page)).toBeFocused();
+
+  await createProjectInUi(page, "Focus B");
+  await switcher(page).click();
+  await page
+    .getByRole("button", { name: "Focus A", exact: true })
+    .last()
+    .click();
+  await expect(switcher(page)).toHaveText(/Focus A/);
+  await expect(switcher(page)).toBeFocused();
+});
+
+test("F-202 IO-03 ADR-0044: when persistent storage is refused a quiet note says the browser may clear projects", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    const refuse = { persisted: false, persist: false };
+    for (const [key, answer] of Object.entries(refuse))
+      Object.defineProperty(navigator.storage, key, {
+        value: () => Promise.resolve(answer),
+        configurable: true,
+      });
+  });
+  await page.goto("./");
+  await expect(switcher(page)).toBeEnabled();
+  await expect(page.locator(".storage-note")).toHaveCount(0);
+  await createProjectInUi(page, "Refused");
+  await expect(page.locator(".storage-note")).toContainText(
+    "This browser may clear these projects when it needs space.",
+  );
+});
+
+test("F-202 IO-01 ADR-0044: inside a cross-origin iframe a project can be created and is saved", async ({
+  page,
+}) => {
+  await page.setContent(
+    `<iframe id="app" src="${PREVIEW_URL}" width="1200" height="800"></iframe>`,
+  );
+  const frame = page.frameLocator("#app");
+  const button = frame.getByRole("banner").locator(".project-switcher-button");
+  await expect(button).toBeEnabled();
+  await button.click();
+  await frame.getByRole("button", { name: "New project…" }).click();
+  const dialog = frame.getByRole("dialog", { name: "New project" });
+  await dialog.getByLabel("Name").fill("Framed");
+  await dialog.getByRole("button", { name: "Create" }).click();
+  await expect(dialog).toBeHidden();
+  await expect(button).toHaveText(/Framed/);
+  await expect(frame.getByRole("banner").locator(".save-state")).toHaveText(
+    "Saved",
+  );
 });

@@ -13,10 +13,13 @@ Object.defineProperty(window, "nfBuilderEngine", { get: getEngine });
 
 startProjects();
 // Best effort: write pending changes when the page goes away (IO-01).
-window.addEventListener("pagehide", () => {
+const flushNow = () =>
   void getEngine()
     .flush()
     .catch(() => undefined);
+window.addEventListener("pagehide", flushNow);
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "hidden") flushNow();
 });
 
 createRoot(root).render(

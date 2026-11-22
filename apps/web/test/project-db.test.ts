@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import {
   DB_NAME,
   DB_VERSION,
+  MIGRATIONS,
   openProjectDb,
   StorageVersionError,
 } from "../src/workspace/project-db";
@@ -139,9 +140,18 @@ describe("F-202 project database", () => {
     const after = await db.readProject("a");
     expect(after?.files[0]).toEqual({ path: "one.nf", text: "1b" });
     expect(after?.project.updatedAt).toBe(5000);
-    // changes for a project that no longer exists are dropped, not stored as orphans
-    await db.saveFiles([{ projectId: "gone", path: "z.nf", text: "z" }], 6000);
+    // changes for a project that no longer exists are refused, not stored as orphans, and nothing else is written
+    await expect(
+      db.saveFiles(
+        [
+          { projectId: "a", path: "one.nf", text: "lost too" },
+          { projectId: "gone", path: "z.nf", text: "z" },
+        ],
+        6000,
+      ),
+    ).rejects.toThrow("This project was deleted in another tab.");
     expect(await db.readProject("gone")).toBeNull();
+    expect((await db.readProject("a"))?.files[0]?.text).toBe("1b");
     db.close();
   });
 
@@ -218,5 +228,38 @@ describe("F-202 project database", () => {
       "nf-builder was updated in another tab. Reload this page.",
     ]);
     await expect(db.listProjects()).rejects.toThrow();
+  });
+
+  it("F-202 IO-01: a failed request rejects with its own error, never null", async () => {
+    const db = await fresh().db;
+    await db.createProject(meta("a"), []);
+    const error: unknown = await db
+      .createProject(meta("a"), [])
+      .catch((e) => e);
+    expect(error).toBeInstanceOf(Error);
+    expect((error as Error).name).toBe("ConstraintError");
+    db.close();
+  });
+
+  it("F-202 ADR-0002: MIGRATIONS has a step for every version from 1 to DB_VERSION", () => {
+    for (let v = 1; v <= DB_VERSION; v += 1)
+      expect(typeof MIGRATIONS[v], `version ${v}`).toBe("function");
+  });
+
+  it("F-202 ADR-0002 ADR-0044: a connection that closes by itself (site data cleared, storage evicted) is reported", async () => {
+    const factory = new IDBFactory();
+    const opened: IDBDatabase[] = [];
+    const spy = {
+      open: (name: string, version?: number) => {
+        const request = factory.open(name, version);
+        request.addEventListener("success", () => opened.push(request.result));
+        return request;
+      },
+    } as unknown as IDBFactory;
+    const reasons: string[] = [];
+    await openProjectDb(spy, (reason) => reasons.push(reason));
+    opened[0]?.onclose?.(new Event("close"));
+    expect(reasons).toHaveLength(1);
+    expect(reasons[0]).toMatch(/closed/);
   });
 });

@@ -4,53 +4,50 @@
 // straight through. Nothing here assumes a top-level page (ADR 0044): an unavailable database becomes a status, not a crash.
 import {
   type EngineApi,
-  type FileText,
+  type EngineRefusal,
   installedPackVersions,
+  type ProjectChange,
   type ProjectSummary,
 } from "@nf-builder/engine";
 import { createAutosaver, type Timer } from "./autosave";
 import type { ProjectDb } from "./project-db";
 import { normaliseProjectName } from "./project-name";
-import type {
-  NewProject,
-  ProjectMeta,
-  WorkspaceApi,
-  WorkspaceStatus,
+import {
+  INITIAL_STATUS,
+  type NewProject,
+  type ProjectMeta,
+  type WorkspaceApi,
+  type WorkspaceStatus,
 } from "./types";
 
-export interface WorkspaceOptions {
+interface WorkspaceOptions {
   readonly engine: EngineApi;
   /** `onClosed` reports a connection that closed later (another tab upgraded the database). */
   readonly openDb: (onClosed: (reason: string) => void) => Promise<ProjectDb>;
   readonly now?: () => number;
   readonly newId?: () => string;
   readonly timer?: Timer;
-  readonly delayMs?: number;
+}
+
+/** `crypto.randomUUID` exists only in secure contexts, and a frame inside an insecure page isn't one (ADR 0044). */
+export function randomId(): string {
+  if (typeof crypto.randomUUID === "function") return crypto.randomUUID();
+  const bytes = crypto.getRandomValues(new Uint8Array(16));
+  return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
 }
 
 const message = (error: unknown) =>
   error instanceof Error ? error.message : String(error);
-/** The files a successful change wrote; a refusal has none. */
-const writtenFiles = (result: object): readonly FileText[] | null =>
-  "files" in result ? (result.files as readonly FileText[]) : null;
 
 export function createWorkspace(options: WorkspaceOptions): WorkspaceApi {
   const { engine } = options;
   const now = options.now ?? (() => Date.now());
-  const newId = options.newId ?? (() => crypto.randomUUID());
+  const newId = options.newId ?? randomId;
 
   let db: ProjectDb | null = null;
   let currentId: string | null = null;
   let listener: ((status: WorkspaceStatus) => void) | undefined;
-  let status: WorkspaceStatus = {
-    storage: "starting",
-    storageError: null,
-    projects: [],
-    current: null,
-    opening: null,
-    openError: null,
-    save: { status: "saved", error: null },
-  };
+  let status = INITIAL_STATUS;
 
   const push = (patch: Partial<WorkspaceStatus>) => {
     status = { ...status, ...patch };
@@ -71,7 +68,6 @@ export function createWorkspace(options: WorkspaceOptions): WorkspaceApi {
   };
 
   const autosaver = createAutosaver({
-    delayMs: options.delayMs,
     timer: options.timer,
     write: (changes) => needDb().saveFiles(changes, now()),
     onState: (save) => push({ save }),
@@ -99,12 +95,14 @@ export function createWorkspace(options: WorkspaceOptions): WorkspaceApi {
     return result;
   };
 
-  /** A change that is recorded for autosave when it succeeds. */
-  const change = <R extends object>(call: () => Promise<R>): Promise<R> =>
+  /** A change that is recorded for autosave when it succeeds; a refusal has no `files`. */
+  const change = <R extends ProjectChange | EngineRefusal>(
+    call: () => Promise<R>,
+  ): Promise<R> =>
     serial(async () => {
       const result = await call();
-      const written = writtenFiles(result);
-      if (currentId && written) autosaver.record(currentId, written);
+      if (currentId && "files" in result)
+        autosaver.record(currentId, result.files);
       return result;
     });
 
@@ -221,8 +219,8 @@ export function createWorkspace(options: WorkspaceOptions): WorkspaceApi {
     deleteProject: (id) =>
       serial(async () => {
         const store = needDb();
+        autosaver.discard(id);
         if (currentId === id) {
-          autosaver.discard(id);
           await engine.close();
           currentId = null;
           push({ current: null });

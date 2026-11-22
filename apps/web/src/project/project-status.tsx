@@ -12,9 +12,21 @@ export function saveLabel(hasProject: boolean, save: SaveState): string {
 }
 
 export function formatOpening(name: string, p: LoadProgress | null): string {
-  return p === null || p.total === 0
-    ? `Opening ${name}`
-    : `Opening ${name}: ${p.done} of ${p.total} files`;
+  if (p === null) return `Opening ${name}`;
+  if (p.phase === "modelling") return `Opening ${name}: Modelling…`;
+  const verb = p.phase === "parsing" ? "Parsing" : "Loading";
+  return p.total === 0
+    ? `Opening ${name}: ${verb}…`
+    : `Opening ${name}: ${verb} ${p.done} of ${p.total} files`;
+}
+
+/** Whether the app runs in a frame. Reading `window.top` can throw across origins, which also means framed. */
+export function isFramed(): boolean {
+  try {
+    return window.self !== window.top;
+  } catch {
+    return true;
+  }
 }
 
 export function StorageWarning({
@@ -29,11 +41,21 @@ export function StorageWarning({
   );
 }
 
+const PERSISTENCE_TEXT =
+  "This browser may clear these projects when it needs space.";
+
 /** Shown when the browser refused persistent storage, as in a cross-origin frame (ADR 0044). Never blocks anything. */
-export function PersistenceNote(): JSX.Element {
+export function PersistenceNote({
+  framed = false,
+}: {
+  readonly framed?: boolean;
+}): JSX.Element {
+  const text = framed
+    ? `${PERSISTENCE_TEXT} Projects here are kept separate from nf-builder opened in its own tab.`
+    : PERSISTENCE_TEXT;
   return (
-    <p className="storage-note">
-      This browser may clear these projects when it needs space.
+    <p className="storage-note" title={text}>
+      {text}
     </p>
   );
 }

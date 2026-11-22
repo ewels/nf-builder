@@ -18,11 +18,9 @@ export function exposeEngine(api: WorkspaceApi, endpoint: Endpoint): void {
     open: (request, onProgress) =>
       api.open(request, onProgress).finally(() => release(onProgress)),
     watch: (listener) => {
-      const previous = watcher;
+      release(watcher);
       watcher = listener;
-      const result = api.watch(listener);
-      release(previous);
-      return result;
+      return api.watch(listener);
     },
   };
   expose(exposed, endpoint);
