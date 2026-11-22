@@ -1,6 +1,7 @@
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { resolveConfig } from "vite";
 import { afterEach, describe, expect, it } from "vitest";
 import {
   readWorkerManifest,
@@ -92,5 +93,25 @@ describe("worker manifest", () => {
       ]),
     );
     expect(readWorkerManifest(dir)).toHaveLength(1);
+  });
+
+  it("F-113 ADR-0003: the web build bundles workers as ES modules with the manifest plugin", async () => {
+    const config = await resolveConfig(
+      {
+        root: join(import.meta.dirname, "../apps/web"),
+        configFile: join(import.meta.dirname, "../apps/web/vite.config.ts"),
+      },
+      "build",
+    );
+    expect(config.worker.format).toBe("es");
+    const names = (plugins: readonly { name: string }[]) =>
+      plugins.map((p) => p.name);
+    expect(names(config.plugins)).toContain("nf-builder:worker-manifest-emit");
+    const inner = (await config.worker.plugins?.([])) as unknown as
+      | { plugins: { name: string }[] }
+      | undefined;
+    expect(names(inner?.plugins ?? [])).toContain(
+      "nf-builder:worker-manifest-collect",
+    );
   });
 });
