@@ -16,6 +16,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-108 code nodes | not started | [plan](plan-F-108.md). After F-106; parallel with F-107. |
 | F-111 edit commands | not started | [plan](plan-F-111.md). Tasks 1–6 need only F-105; 7 onwards need F-106. |
 | F-112 diagnostics | not started | [plan](plan-F-112.md). After F-106 (and F-111 for fixes). |
+| F-113 engine worker | not started | [plan](plan-F-113.md). After F-111. |
 | F-501 registry snapshot | merged, PR #29, **not passing** | Blocked on #31 (Netlify can't read the snapshot branch of a private repository). F-502 to F-506, F-702, F-704 and F-705 depend on it. #27 (build hook). |
 
 Next free ADR number: 0036 (0034 is F-105's, 0035 F-501's).
@@ -65,6 +66,9 @@ Next free ADR number: 0036 (0034 is F-105's, 0035 F-501's).
   - no new feature for full nf-lang name-resolution and type-check parity: the spec doesn't require it for v0.1, so the deferred checks (point 4's list) are recorded in F-112's notes and ADR.
 - LA-33 amended: a missing argument is an error (nf-lang rejects it), an unused output a warning. LA-31 and a new LA-37 row as in point 7. `Port.argumentType` is added to F-106 (point 13).
 - Rules behind a lazy `LanguagePack.loadLints()`, one ADR at landing.
+
+### F-113 — [plan](plan-F-113.md)
+- Accept every recommendation in section 6: Comlink 4.4.2 as a runtime dependency of `@nf-builder/web` (ADR 0003 names it); pack versions from a pack-free `version` export, palette through the worker; Comlink only in apps/web; the page throttled 4× with worker timings reported unthrottled (Chromium can't throttle workers), clarified in `quality.md`; F-113 reports QA-03 and QA-04, F-702 gates QA-03; diagnostics from `ProjectModel.diagnostics()` until F-112 wires its diagnoser; `window.nfBuilderEngine` test hook; no double-parse optimisation yet; loading progress shown by F-202; the worker manifest and the `check:hosts` amendment; a `bench` job in `ci.yml` and `pnpm bench`. One ADR at landing.
 
 ### F-501 (merged with its PR)
 - Accept every recommendation in section 6: an orphan `registry-snapshot` branch fetched by each Netlify build; ship without the build-hook secret and open a `maintainer` issue for it; split `index.json` (QA-06) and `ports.json`, with IO-31 read as the pair; `tools/registry-snapshot` may import lang-core and pack entries (amends ADR 0003); make lang-2610 erasable for plain Node; ports from registry metadata in `meta.yml` order; parser wins on kind and component; every bundle file; pinned dependency closure; plugin release admitted by the pinned Nextflow; the failure policy; a path-filtered PR dry run outside "CI green"; daily at 03:23 UTC; the fixture snapshot for e2e. ADR 0035 (F-105 takes 0034).
