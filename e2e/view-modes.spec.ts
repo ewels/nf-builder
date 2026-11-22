@@ -222,7 +222,7 @@ test("F-208 IO-01: a Code view edit survives a reload", async ({ page }) => {
   await expect.poll(() => readFile(page, "main.nf")).toBe(fileText(F208_AFTER));
 });
 
-test("F-208 step 5 UX-27: Nextflow highlighting gives a keyword and an identifier different token classes", async ({
+test("F-208 UX-27 ADR-0003: Nextflow highlighting gives a keyword and an identifier different token classes", async ({
   page,
 }) => {
   await openSplit(page);

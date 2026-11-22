@@ -111,6 +111,7 @@ export const NON_FETCHED_URLS: readonly NonFetchedUrl[] = [
   {
     match: "exact",
     url: "https://github.com/microsoft/vscode/issues/103170",
-    reason: "A comment in Monaco's bundled CSS (F-208); never fetched",
+    reason:
+      "A comment in CSS inside a JavaScript string that Monaco injects for its menus (F-208); never fetched",
   },
 ];

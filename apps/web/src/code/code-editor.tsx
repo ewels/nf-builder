@@ -6,7 +6,7 @@ import { problemsToMarkers } from "./markers";
 import { modelFor } from "./models";
 import { monaco } from "./monaco";
 import { NEXTFLOW_THEME, registerNextflow } from "./nextflow-language";
-import { createTextSync, type SyncState } from "./text-sync";
+import { createTextSync, type PaneSyncState, withoutText } from "./text-sync";
 
 const MARKER_OWNER = "nf-builder-refusal";
 
@@ -56,7 +56,7 @@ export default function CodeEditor({
   onSync,
 }: {
   readonly path: string;
-  readonly onSync: (state: SyncState) => void;
+  readonly onSync: (state: PaneSyncState) => void;
 }): JSX.Element {
   const host = useRef<HTMLDivElement>(null);
   const [problem, setProblem] = useState<string | null>(null);
@@ -101,7 +101,7 @@ export default function CodeEditor({
               );
           } else if (state.status === "idle")
             monaco.editor.setModelMarkers(model, MARKER_OWNER, []);
-          report.current(state);
+          report.current(withoutText(state));
         },
       });
       const reduced = window.matchMedia(

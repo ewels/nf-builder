@@ -16,6 +16,17 @@ export type SyncState =
     }
   | { readonly status: "failed"; readonly message: string };
 
+/** A sync state as the pane shows it: the same, without the refused text. */
+export type PaneSyncState =
+  | Exclude<SyncState, { readonly status: "refused" }>
+  | Omit<Extract<SyncState, { readonly status: "refused" }>, "text">;
+
+export function withoutText(state: SyncState): PaneSyncState {
+  if (state.status !== "refused") return state;
+  const { text: _text, ...rest } = state;
+  return rest;
+}
+
 interface TextSyncOptions {
   send(text: string): Promise<ApplyOutcome>;
   onState(state: SyncState): void;

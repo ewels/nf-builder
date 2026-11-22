@@ -4,6 +4,7 @@ import {
   createTextSync,
   SYNC_DELAY_MS,
   type SyncState,
+  withoutText,
 } from "../src/code/text-sync";
 
 const ok = { ok: true } as unknown as ApplyOutcome;
@@ -173,5 +174,23 @@ describe("F-208 text sync", () => {
     sync.edit("d");
     await sync.flush();
     expect(g.sent).toEqual(["b"]);
+  });
+});
+
+describe("F-208 sync status", () => {
+  it("F-208 ADR-0004: the status shown in the pane carries no file text", () => {
+    const refused: SyncState = {
+      status: "refused",
+      message: "no",
+      problems: [],
+      text: "secret",
+    };
+    expect(withoutText(refused)).toEqual({
+      status: "refused",
+      message: "no",
+      problems: [],
+    });
+    expect(JSON.stringify(withoutText(refused))).not.toContain("secret");
+    expect(withoutText({ status: "idle" })).toEqual({ status: "idle" });
   });
 });
