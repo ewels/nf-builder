@@ -81,13 +81,18 @@ export const variableStatement = (
 /**
  * Upstream's `checkDirective`: a directive-like statement is a call of a bare name. A bare name `stdout` becomes
  * `stdout()`, and `cpus -1` becomes `cpus(-1)` with the unary minus ranging over `-1`. Anything else that is not such
- * a call is dropped (`null`).
+ * a call is reported with `message` at the statement and dropped (`null`).
  */
 export function directive(
   statement: Statement,
+  message: string,
   cx: BuildContext,
 ): ExpressionStatement | null {
-  if (statement.kind !== "ExpressionStatement") return null;
+  const invalid = () => {
+    cx.error(message, statement.range);
+    return null;
+  };
+  if (statement.kind !== "ExpressionStatement") return invalid();
   const e = unparen(statement.expression);
 
   if (e.kind === "Variable")
@@ -127,7 +132,7 @@ export function directive(
   }
 
   if (e.kind !== "MethodCall" || e.receiver !== null || e.navigation !== null)
-    return null;
+    return invalid();
   return statement;
 }
 

@@ -19,7 +19,7 @@ import type {
   ParamsBlock,
   RecordDef,
 } from "@nf-builder/lang-core";
-import type { TerminalNode } from "antlr4ng";
+import type { ParserRuleContext, TerminalNode } from "antlr4ng";
 import type {
   EnumDefContext,
   FeatureFlagDeclarationContext,
@@ -35,6 +35,7 @@ import type {
   ParamDeclarationV1Context,
   ParamsDefContext,
   RecordDefContext,
+  StatementContext,
 } from "../../generated/ScriptParser.ts";
 import {
   AgentDefAltContext,
@@ -57,8 +58,10 @@ import type { BuildContext } from "./context.ts";
 import { expression } from "./expressions.ts";
 import { stringLiteral } from "./literals.ts";
 import { agentDef, processDef } from "./process.ts";
-import { blockStatements } from "./statements.ts";
+import { unparen } from "./sections.ts";
+import { blockStatements, statement } from "./statements.ts";
 import {
+  checkVariableName,
   identifier,
   legacyType,
   parameter,
@@ -112,14 +115,31 @@ export function featureFlag(
 ): FeatureFlag {
   const name = featureFlagName(ctx.featureFlagName(), cx);
   const value = expression(ctx.expression(), cx);
+  const range = cx.range(ctx);
   // `nextflow.enable.types = true` turns typing on for everything after it, and nothing turns it off
   if (name.name === "nextflow.enable.types" && isTrue(value))
     cx.typesEnabled = true;
-  return { kind: "FeatureFlag", name, value, range: cx.range(ctx) };
+  // upstream: the value must be a constant (parentheses are looked through; `-1` and a gstring are not constants)
+  if (!isConstant(value))
+    cx.error(
+      "Feature flag value must be a literal value (number, string, true/false)",
+      range,
+    );
+  return { kind: "FeatureFlag", name, value, range };
 }
 
 const isTrue = (value: Expression) =>
   value.kind === "Boolean" && value.value === true;
+
+function isConstant(value: Expression): boolean {
+  const e = value.kind === "Parenthesized" ? unparen(value) : value;
+  return (
+    e.kind === "Number" ||
+    e.kind === "String" ||
+    e.kind === "Boolean" ||
+    e.kind === "Null"
+  );
+}
 
 export function include(
   ctx: IncludeDeclarationContext,
@@ -153,11 +173,12 @@ function importDeclaration(
   ctx: ImportDeclarationContext,
   cx: BuildContext,
 ): ImportDeclaration {
-  return {
-    kind: "Import",
-    name: ctx.qualifiedClassName().getText(),
-    range: cx.range(ctx),
-  };
+  const range = cx.range(ctx);
+  cx.error(
+    "Groovy `import` declarations are not supported -- use fully-qualified name inline instead",
+    range,
+  );
+  return { kind: "Import", name: ctx.qualifiedClassName().getText(), range };
 }
 
 export function paramsBlock(
@@ -178,16 +199,26 @@ export function param(
   cx: BuildContext,
 ): Param | null {
   const ident = ctx.identifier();
-  if (!ident) return null;
+  if (!ident) {
+    // upstream reports the statement without building it
+    const stmt = ctx.statement();
+    cx.error(
+      "Invalid parameter declaration",
+      cx.range(stmt as ParserRuleContext),
+    );
+    return null;
+  }
   const type = ctx.type();
   const value = ctx.expression();
-  return {
+  const node: Param = {
     kind: "Param",
     name: identifier(ident, cx),
     type: type ? typeRef(type, cx) : null,
     defaultValue: value ? expression(value, cx) : null,
     range: cx.range(ctx),
   };
+  checkVariableName(node.name.name, node.range, cx);
+  return node;
 }
 
 /** `params.a.b = value`; dropped when types are enabled (use the `params` block). */
@@ -195,7 +226,13 @@ export function legacyParam(
   ctx: ParamDeclarationV1Context,
   cx: BuildContext,
 ): LegacyParam | null {
-  if (cx.typesEnabled) return null;
+  if (cx.typesEnabled) {
+    cx.error(
+      "Legacy parameter is not allowed with `nextflow.enable.types = true` -- use the `params` block instead",
+      cx.range(ctx),
+    );
+    return null;
+  }
   let target: Expression = {
     kind: "Variable",
     name: "params",
@@ -220,13 +257,18 @@ export function legacyParam(
 }
 
 export function recordDef(ctx: RecordDefContext, cx: BuildContext): RecordDef {
+  const range = cx.range(ctx);
+  const body = ctx.recordBody();
+  if (!body) cx.error("Missing record body", range);
   return {
     kind: "Record",
     name: identifier(ctx.identifier(), cx),
-    fields: (ctx.recordBody()?.nameTypePair() ?? []).map((p) =>
-      typedName(p, cx),
-    ),
-    range: cx.range(ctx),
+    fields: (body?.nameTypePair() ?? []).map((p) => {
+      const field = typedName(p, cx);
+      if (!p.type()) cx.error("Missing field type", field.range);
+      return field;
+    }),
+    range,
   };
 }
 
@@ -260,15 +302,22 @@ export function outputDecl(
   cx: BuildContext,
 ): OutputDecl | null {
   const ident = ctx.identifier();
-  if (!ident) return null;
+  if (!ident) {
+    // built first, so that its own errors are reported too
+    const stmt = statement(ctx.statement() as StatementContext, cx);
+    cx.error("Invalid output declaration", stmt.range);
+    return null;
+  }
   const type = ctx.type();
-  return {
+  const node: OutputDecl = {
     kind: "Output",
     name: identifier(ident, cx),
     type: type ? typeRef(type, cx) : null,
     body: braces(ctx.blockStatements(), ctx, cx),
     range: cx.range(ctx),
   };
+  checkVariableName(node.name.name, node.range, cx);
+  return node;
 }
 
 /** The `{ ... }` of a declaration as a block that includes the braces. */
@@ -293,7 +342,7 @@ export function functionDef(
   const legacy = ctx.legacyType();
   const returnType = ctx.type();
   // Fields are created in source order: `def String name(params) -> Type { ... }`.
-  return {
+  const node: FunctionDef = {
     kind: "Function",
     def: ctx.DEF() !== null,
     legacyReturnType: legacy ? legacyType(legacy, cx) : null,
@@ -305,15 +354,15 @@ export function functionDef(
     body: braces(ctx.blockStatements(), ctx, cx),
     range: cx.range(ctx),
   };
+  checkVariableName(node.name.name, node.range, cx);
+  return node;
 }
 
 function incompleteDeclaration(
   ctx: IncompleteScriptDeclarationContext,
   cx: BuildContext,
 ): IncompleteDeclaration {
-  return {
-    kind: "IncompleteDeclaration",
-    text: ctx.getText(),
-    range: cx.range(ctx),
-  };
+  const range = cx.range(ctx);
+  cx.error("Incomplete declaration", range);
+  return { kind: "IncompleteDeclaration", text: ctx.getText(), range };
 }

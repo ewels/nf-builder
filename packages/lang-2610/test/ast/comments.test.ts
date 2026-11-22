@@ -5,6 +5,13 @@ import { type AstNode, type Comment, walk } from "@nf-builder/lang-core";
 import { describe, expect, it } from "vitest";
 import { parseScriptAst } from "../../src/ast/index.ts";
 import { checkRanges } from "./check-ranges.ts";
+import {
+  type Attachment,
+  anchors,
+  attachments,
+  type Row,
+  type Slot,
+} from "./comment-anchors.ts";
 
 const dir = dirname(fileURLToPath(import.meta.url));
 const read = (path: string) => readFileSync(join(dir, path), "utf8");
@@ -14,41 +21,6 @@ function build(text: string) {
   if (!result.ok) throw new Error(JSON.stringify(result.errors));
   return result.ast;
 }
-
-type Slot = "leading" | "trailing" | "dangling";
-type Attachment = {
-  slot: Slot;
-  node: AstNode & Record<string, unknown>;
-  comment: Comment;
-};
-
-/** Every attachment in the tree, by the comment's `line:column`. */
-function attachments(ast: ReturnType<typeof build>): Map<string, Attachment[]> {
-  const out = new Map<string, Attachment[]>();
-  walk(ast, (node) => {
-    for (const slot of ["leading", "trailing", "dangling"] as const) {
-      const list = (node as unknown as Record<string, Comment[] | undefined>)[
-        `${slot}Comments`
-      ];
-      for (const comment of list ?? []) {
-        const key = `${comment.range.line}:${comment.range.column}`;
-        const entry = { slot, node: node as Attachment["node"], comment };
-        out.set(key, [...(out.get(key) ?? []), entry]);
-      }
-    }
-  });
-  return out;
-}
-
-type Row = {
-  line: number;
-  column: number;
-  slot: Slot;
-  anchor: string;
-  from: [number, number];
-  to: [number, number];
-  text: string;
-};
 
 /** `fixtures-comments.upstream.txt`: nf-lang 26.10.7's attachments, from `DumpComments.java`. */
 function upstreamRows(): Map<string, Row[]> {
@@ -76,102 +48,6 @@ function upstreamRows(): Map<string, Row[]> {
     });
   }
   return files;
-}
-
-const STATEMENTS = new Set([
-  "ExpressionStatement",
-  "VariableDeclaration",
-  "Assignment",
-  "If",
-  "TryCatch",
-  "Return",
-  "Throw",
-  "Assert",
-  "EmptyStatement",
-  "NamedOutput",
-]);
-const EXPRESSIONS = new Set([
-  "Variable",
-  "Number",
-  "String",
-  "Boolean",
-  "Null",
-  "GString",
-  "List",
-  "Map",
-  "MapEntry",
-  "NamedArgument",
-  "Closure",
-  "Property",
-  "Index",
-  "MethodCall",
-  "Call",
-  "New",
-  "Unary",
-  "Binary",
-  "Cast",
-  "TypeTest",
-  "Ternary",
-  "Elvis",
-  "Parenthesized",
-]);
-const DECLARATIONS = new Set([
-  "FeatureFlag",
-  "Include",
-  "ParamsBlock",
-  "LegacyParam",
-  "Record",
-  "Enum",
-  "Process",
-  "Agent",
-  "Workflow",
-  "OutputBlock",
-  "Output",
-  "Function",
-]);
-const PARAMETERS = new Set([
-  "TypedName",
-  "Param",
-  "Parameter",
-  "RecordInput",
-  "TupleInput",
-]);
-
-/** Whether our node is nf-lang's anchor: the same kind family at the same start and end (a block, by its first item). */
-function anchors(row: Row, node: AstNode & Record<string, unknown>): boolean {
-  if (row.anchor === "ScriptNode") return node.kind === "Script";
-  const r = node.range;
-  if (row.anchor === "BlockStatement") {
-    // upstream's block starts at its first statement; ours includes the braces
-    const first =
-      node.kind === "Block"
-        ? (node.statements as AstNode[])[0]
-        : node.kind === "Section"
-          ? (node.items as AstNode[])[0]
-          : undefined;
-    return (
-      first !== undefined &&
-      first.range.line === row.from[0] &&
-      first.range.column === row.from[1]
-    );
-  }
-  const family =
-    row.anchor.endsWith("Statement") && row.anchor !== "BlockStatement"
-      ? STATEMENTS
-      : row.anchor.endsWith("Expression")
-        ? EXPRESSIONS
-        : row.anchor === "Parameter"
-          ? PARAMETERS
-          : row.anchor.endsWith("Node") || /^\w+Node(V\d)?$/.test(row.anchor)
-            ? DECLARATIONS
-            : new Set<string>();
-  return (
-    family.has(node.kind) &&
-    r.line === row.from[0] &&
-    r.column === row.from[1] &&
-    r.endLine === row.to[0] &&
-    r.endColumn === row.to[1]
-  );
 }
 
 /** Differences from nf-lang that are known and explained: `file:line:column` and the cause. */

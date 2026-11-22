@@ -8,6 +8,7 @@ import type {
   GStringText,
   Interpolation,
   NumberLiteral,
+  ParseProblem,
   PropertyExpr,
   StringLiteral,
   Variable,
@@ -73,17 +74,104 @@ export function stringValue(text: string): string {
   return replaceEscapes(body, quote === "/");
 }
 
+const ESCAPABLE = "btnfrs\"'\\$\r\n";
+const isHex = (c: string | undefined) =>
+  c !== undefined && /^[0-9a-fA-F]$/.test(c);
+
+/** Upstream's `isEscapable`: `i` is the index of the character after the backslash. */
+function escapable(text: string, i: number): boolean {
+  const c = text.charAt(i);
+  if (c === "u") return [1, 2, 3, 4].every((k) => isHex(text[i + k]));
+  return ESCAPABLE.includes(c) || (c >= "0" && c <= "7");
+}
+
+/**
+ * One error per invalid escape in a string's source `text`, which starts at `line` and `column` (nf-lang's `EscapeUtils`).
+ * The lexer accepts invalid escapes so that the error lands on the escape itself. Slashy strings have none. As nf-lang
+ * does, columns after the start count UTF-16 units, not code points. The config builder uses this too.
+ */
+export function checkEscapes(
+  text: string,
+  line: number,
+  column: number,
+  slashy: boolean,
+): ParseProblem[] {
+  if (slashy || !text.includes("\\")) return [];
+  const problems: ParseProblem[] = [];
+  for (let i = 0; i < text.length; i++) {
+    const c = text.charAt(i);
+    if (c === "\n") {
+      line++;
+      column = 1;
+    } else if (c === "\\" && i + 1 < text.length) {
+      const next = text.charAt(i + 1);
+      if (!escapable(text, i + 1))
+        problems.push({
+          source: "builder",
+          message: `Invalid escape sequence: '\\${next}'`,
+          line,
+          column,
+          endLine: line,
+          endColumn: column + 2,
+        });
+      i++;
+      if (next === "\n") {
+        line++;
+        column = 1;
+      } else {
+        column += 2;
+      }
+    } else {
+      column++;
+    }
+  }
+  return problems;
+}
+
+/**
+ * The message of the exception Groovy's `Numbers.parseInteger` or `parseDecimal` throws for a number literal, or `null`.
+ * Only decimal integers with an `i` or `l` suffix are range-checked (hex, octal and binary wrap), and `d` and `f`
+ * literals must not overflow to infinity. The config builder uses this too.
+ */
+export function numberError(text: string, integer: boolean): string | null {
+  const digits = text.replaceAll("_", "");
+  const suffix = digits.at(-1)?.toLowerCase();
+  if (integer) {
+    if ((suffix !== "i" && suffix !== "l") || !/^[1-9]\d*[iIlL]$/.test(digits))
+      return null;
+    const value = BigInt(digits.slice(0, -1));
+    const bits = value.toString(2).length;
+    if (suffix === "i" && bits > 31)
+      return `Number of value ${value} does not fit in the range of int, but int was enforced.`;
+    if (suffix === "l" && bits > 63)
+      return `Number of value ${value} does not fit in the range of long, but long was enforced.`;
+    return null;
+  }
+  if (suffix !== "d" && suffix !== "f") return null;
+  const value = Number(digits.slice(0, -1));
+  const limit = suffix === "f" ? Math.fround(value) : value;
+  return Number.isFinite(limit) ? null : "out of range";
+}
+
 export function stringLiteral(
   ctx: StringLiteralContext,
   cx: BuildContext,
 ): StringLiteral {
   const text = ctx.getText();
+  const at = cx.range(ctx);
+  for (const problem of checkEscapes(
+    text,
+    at.line,
+    at.column,
+    text.startsWith("/"),
+  ))
+    cx.report(problem);
   return {
     kind: "String",
     text,
     value: stringValue(text),
     quote: quoteOf(text),
-    range: cx.range(ctx),
+    range: at,
   };
 }
 
@@ -91,12 +179,13 @@ export function numberLiteral(
   ctx: IntegerLiteralAltContext | FloatingPointLiteralAltContext,
   cx: BuildContext,
 ): NumberLiteral {
-  return {
-    kind: "Number",
-    text: ctx.getText(),
-    integer: has<IntegerLiteralAltContext>(ctx, "IntegerLiteral"),
-    range: cx.range(ctx),
-  };
+  const text = ctx.getText();
+  const integer = has<IntegerLiteralAltContext>(ctx, "IntegerLiteral");
+  const range = cx.range(ctx);
+  const message = numberError(text, integer);
+  // upstream keeps the last one and fails the build after the whole script is built
+  if (message) cx.numberFormatError = { message, at: range };
+  return { kind: "Number", text, integer, range };
 }
 
 const codePoints = (text: string) => {
@@ -111,11 +200,14 @@ function gstringText(
   cx: BuildContext,
 ): GStringText {
   const text = ctx.getText();
+  const range = cx.range(ctx);
+  for (const problem of checkEscapes(text, range.line, range.column, false))
+    cx.report(problem);
   return {
     kind: "GStringText",
     text,
     value: replaceEscapes(triple ? text.replaceAll("\r\n", "\n") : text, false),
-    range: cx.range(ctx),
+    range,
   };
 }
 

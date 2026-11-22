@@ -59,7 +59,13 @@ import { has } from "./alt.ts";
 import type { BuildContext } from "./context.ts";
 import { gstring, numberLiteral, stringLiteral } from "./literals.ts";
 import { blockStatements, statementOrLabeled } from "./statements.ts";
-import { createdName, identifier, parameter, typeRef } from "./types.ts";
+import {
+  checkVariableName,
+  createdName,
+  identifier,
+  parameter,
+  typeRef,
+} from "./types.ts";
 
 // The labelled fields of the expression alternatives (`left=expression`, `op=...`), set only on the alternative that has them.
 type Labels = {
@@ -163,9 +169,11 @@ export function expression(
     };
 
   const alt = ctx as IncompleteExprAltContext;
+  const object = expression(alt.expression(), cx);
+  cx.error("Incomplete expression", range);
   return {
     kind: "IncompleteExpression",
-    object: expression(alt.expression(), cx),
+    object,
     navigation: alt.SPREAD_DOT() ? "*." : alt.SAFE_DOT() ? "?." : ".",
     range,
   };
@@ -307,11 +315,21 @@ export function argumentList(
   cx: BuildContext,
 ): Argument[] {
   if (!ctx) return [];
+  const names = new Set<string>();
   return ctx.argumentListElement().map((element) => {
     const named = element.namedArg();
-    return named
-      ? namedArgument(named, cx)
-      : expression(element.expression() as ExpressionContext, cx);
+    if (!named)
+      return expression(element.expression() as ExpressionContext, cx);
+    const argument = namedArgument(named, cx);
+    // the key's text: an identifier's name, or a string's value
+    const name =
+      argument.name.kind === "String"
+        ? argument.name.value
+        : argument.name.name;
+    if (names.has(name))
+      cx.fatal(`Duplicated named argument '${name}' found`, argument.range);
+    names.add(name);
+    return argument;
   });
 }
 
@@ -343,8 +361,10 @@ function namedProperty(
 export function primary(ctx: PrimaryContext, cx: BuildContext): Expression {
   const range = cx.range(ctx);
 
-  if (has<{ identifier(): never } & PrimaryContext>(ctx, "identifier"))
+  if (has<{ identifier(): never } & PrimaryContext>(ctx, "identifier")) {
+    checkVariableName(ctx.getText(), range, cx);
     return { kind: "Variable", name: ctx.getText(), range };
+  }
   if (has<{ literal(): LiteralContext } & PrimaryContext>(ctx, "literal"))
     return literal(ctx.literal(), cx);
   if (has<{ gstring(): never } & PrimaryContext>(ctx, "gstring"))

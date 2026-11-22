@@ -57,6 +57,25 @@ describe("F-102 step 2: every node's range slices back to its exact source text"
     expect(checkRanges(ast, text)).toEqual([]);
   });
 
+  it("F-102 step 2 AR-02: a typed input section ending in a plain type re-parses on its own although it follows a generic type", () => {
+    // alone, `Bag<Path>` followed by `config: Path` is ambiguous (the rule has no outer context); the checker gives the
+    // slice the text that follows it in the file
+    const text = [
+      "nextflow.enable.types = true",
+      "",
+      "process P {",
+      "    input:",
+      "    logs: Bag<Path>",
+      "    config: Path",
+      "",
+      "    script:",
+      '    "echo"',
+      "}",
+      "",
+    ].join("\n");
+    expect(checkRanges(build(text), text, { reparse: "all" })).toEqual([]);
+  });
+
   it("F-102 step 2: CRLF files keep exact slices and count one line per CRLF", () => {
     const layout = (ast: ScriptAst) =>
       find(ast, () => true).map((n) => [

@@ -25,21 +25,33 @@ import { expression } from "./expressions.ts";
 import { namedOutput } from "./process.ts";
 import { labelled, statementsRange, unlabelled } from "./sections.ts";
 import { blockStatements } from "./statements.ts";
-import { identifier, typeRef } from "./types.ts";
+import { checkVariableName, identifier, typeRef } from "./types.ts";
 
 const last = <T>(items: readonly T[]): T => items[items.length - 1] as T;
 
 function take(ctx: WorkflowTakeContext, cx: BuildContext): TypedName | null {
   const ident = ctx.identifier();
-  if (!ident) return null;
+  if (!ident) {
+    // upstream reports the statement without building it
+    cx.error("Invalid workflow take", cx.range(ctx.statement() as never));
+    return null;
+  }
   const type = ctx.type();
-  if (!cx.typesEnabled && type) return null;
-  return {
+  if (!cx.typesEnabled && type) {
+    cx.error(
+      "Typed input is not allowed in legacy workflow -- set `nextflow.enable.types = true` to use typed workflows in this script",
+      cx.range(ctx),
+    );
+    return null;
+  }
+  const node: TypedName = {
     kind: "TypedName",
     name: identifier(ident, cx),
     type: type ? typeRef(type, cx) : null,
     range: cx.range(ctx),
   };
+  checkVariableName(node.name.name, node.range, cx);
+  return node;
 }
 
 export function workflowTakes(
@@ -60,7 +72,13 @@ function emit(
   cx: BuildContext,
 ): NamedOutput | ExpressionStatement | null {
   const item = namedOutput(ctx, cx);
-  if (!cx.typesEnabled && ctx.nameTypePair()?.type()) return null;
+  if (item && !cx.typesEnabled && ctx.nameTypePair()?.type()) {
+    cx.error(
+      "Typed output is not allowed in legacy workflow -- set `nextflow.enable.types = true` to use typed workflows in this script",
+      cx.range(ctx),
+    );
+    return null;
+  }
   return item;
 }
 
@@ -74,6 +92,14 @@ export function workflowEmits(
     const item = emit(e, cx);
     if (item) items.push(item);
   }
+  if (
+    items.length > 1 &&
+    items.some((item) => item.kind === "ExpressionStatement")
+  )
+    cx.error(
+      "Every emit must be assigned to a name when there are multiple emits",
+      cx.range(ctx),
+    );
   return labelled(cx, label, cx.range(last(ctx.workflowEmit())), items);
 }
 
@@ -81,9 +107,20 @@ function publisher(
   ctx: WorkflowEmitContext,
   cx: BuildContext,
 ): NamedOutput | null {
+  const message = "Invalid workflow publish statement -- must be an assignment";
   const pair = ctx.nameTypePair();
+  if (!pair) {
+    // upstream reports the statement without building it
+    cx.error(message, cx.range(ctx.statement() as never));
+    return null;
+  }
+  const pairRange = cx.range(pair);
+  checkVariableName(pair.identifier().getText(), pairRange, cx);
   const value = ctx.expression();
-  if (!pair || !value) return null;
+  if (!value) {
+    cx.error(message, pairRange);
+    return null;
+  }
   const type = pair.type();
   return {
     kind: "NamedOutput",
@@ -127,7 +164,7 @@ export function workflowDef(
   const takes = body?._take;
   const emits = body?._emit;
   const publishers = body?._publish;
-  return {
+  const node: WorkflowDef = {
     kind: "Workflow",
     name: name ? identifier(name, cx) : null,
     typed: cx.typesEnabled,
@@ -153,4 +190,36 @@ export function workflowDef(
     onError: blockSection(body?._onError, body?.ONERROR()?.symbol, cx),
     range: cx.range(ctx),
   };
+  if (body && !name) {
+    if (takes)
+      cx.error(
+        "Entry workflow cannot have a take section",
+        cx.tokenRange((body.TAKE() as { symbol: Token }).symbol),
+      );
+    if (emits)
+      cx.error(
+        "Entry workflow cannot have an emit section",
+        cx.tokenRange((body.EMIT() as { symbol: Token }).symbol),
+      );
+  }
+  if (body && name) {
+    // upstream reports the section's block; for onError it passes onComplete's by mistake (lint prints -1:-1), so every
+    // section is reported at its first item
+    if (publishers)
+      cx.error(
+        "Named workflow cannot have a publish section",
+        cx.range(publishers),
+      );
+    if (body._onComplete)
+      cx.error(
+        "Named workflow cannot have an onComplete section",
+        statementsRange(body._onComplete, cx),
+      );
+    if (body._onError)
+      cx.error(
+        "Named workflow cannot have an onError section",
+        statementsRange(body._onError, cx),
+      );
+  }
+  return node;
 }

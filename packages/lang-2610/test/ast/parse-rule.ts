@@ -202,7 +202,7 @@ function rulesFor(node: AstNode, parents: Parents): Rule[] | null {
       return [
         rule(
           (p) => p.statement(),
-          (ctx, cx) => directive(statement(ctx, cx), cx),
+          (ctx, cx) => directive(statement(ctx, cx), "", cx),
         ),
       ];
     return [rule((p) => p.statement(), statement)];
@@ -218,7 +218,7 @@ function rulesFor(node: AstNode, parents: Parents): Rule[] | null {
         rule(
           (p) => p.statement(),
           (ctx, cx) =>
-            (directive(statement(ctx, cx), cx) as ExpressionStatement)
+            (directive(statement(ctx, cx), "", cx) as ExpressionStatement)
               .expression,
         ),
       ];
@@ -305,6 +305,43 @@ function parseSlice(slice: string, parse: Rule["parse"]) {
   return { ctx, tokens };
 }
 
+/**
+ * A rule parsed alone has no outer context, so ANTLR lets the rule end anywhere. That can cost an ambiguous slice its
+ * type arguments: `logs: Bag<Path>` followed by `config: Path` stops before the `<`. Parsing the slice together with
+ * the text that follows it in the file gives the parser what it has in the file; the rule must end where the slice does.
+ */
+function parseSliceWithFollow(
+  slice: string,
+  follow: () => string,
+  parse: Rule["parse"],
+) {
+  const lexer = new ScriptLexer(CharStream.fromString(slice + follow()));
+  lexer.removeErrorListeners();
+  const tokens = new CommonTokenStream(lexer);
+  const parser = new ScriptParser(tokens);
+  parser.removeErrorListeners();
+  parser.errorHandler = new BailErrorStrategy();
+  (parser.interpreter as ParserATNSimulator).predictionMode = PredictionMode.LL;
+  const ctx = parse(parser);
+  if ((ctx.stop?.stop ?? -1) + 1 > [...slice].length)
+    throw new Error(`unconsumed input from token ${tokens.LT(1)?.text}`);
+  return { ctx, tokens };
+}
+
+function parseSliceWithFallback(
+  slice: string,
+  follow: () => string,
+  parse: Rule["parse"],
+) {
+  try {
+    return parseSlice(slice, parse);
+  } catch (error) {
+    if (!String((error as Error).message).startsWith("unconsumed input"))
+      throw error;
+    return parseSliceWithFollow(slice, follow, parse);
+  }
+}
+
 /** The node built from the slice alone (offsets relative to the slice), or the reason it could not be. */
 export function reparse(
   node: AstNode,
@@ -325,10 +362,11 @@ export function reparse(
         ? owner.typed === true
         : scriptTypesEnabled;
   const slice = text.slice(node.range.start, node.range.end);
+  const follow = () => text.slice(node.range.end);
   const errors: string[] = [];
   for (const r of rules) {
     try {
-      const { ctx, tokens } = parseSlice(slice, r.parse);
+      const { ctx, tokens } = parseSliceWithFallback(slice, follow, r.parse);
       const cx = new BuildContext(slice, tokens);
       cx.typesEnabled = typesEnabled;
       return { node: r.build(ctx as never, cx) };
