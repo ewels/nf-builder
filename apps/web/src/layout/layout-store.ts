@@ -5,6 +5,7 @@ import {
   type StateStorage,
 } from "zustand/middleware";
 import { createStore, type StoreApi } from "zustand/vanilla";
+import { safeStorage } from "./safe-storage";
 
 export type Side = "left" | "right";
 interface ColumnLayout {
@@ -67,22 +68,6 @@ function sanitiseLayout(value: unknown): LayoutState {
   return {
     left: sanitiseColumn("left", value.left),
     right: sanitiseColumn("right", value.right),
-  };
-}
-
-/** Wraps a storage getter so that blocked, missing or full storage never throws. */
-function safeStorage(getStorage: () => StateStorage): StateStorage {
-  const attempt = <T>(fn: (storage: StateStorage) => T, fallback: T): T => {
-    try {
-      return fn(getStorage());
-    } catch {
-      return fallback;
-    }
-  };
-  return {
-    getItem: (name) => attempt((s) => s.getItem(name), null),
-    setItem: (name, value) => attempt((s) => s.setItem(name, value), undefined),
-    removeItem: (name) => attempt((s) => s.removeItem(name), undefined),
   };
 }
 

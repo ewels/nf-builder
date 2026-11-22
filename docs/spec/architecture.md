@@ -53,8 +53,8 @@ interface LanguagePack {
   version: string;                      // "26.10"
   parseScript(text: string): ParseResult;
   parseConfig(text: string): ParseResult;
-  catalogue: Catalogue;                 // generated, ADR 0005
-  palette: PaletteDefinition;           // catalogue + palette.yaml overlay
+  palette: PaletteDefinition;           // palette.json, ADR 0025
+  loadCatalogue(): Promise<Catalogue>;  // generated, lazily loaded (ADR 0005, ADR 0028)
   printer: Printer;                     // declarations → text, ADR 0005
   lints: LintRule[];
   templates: Template[];

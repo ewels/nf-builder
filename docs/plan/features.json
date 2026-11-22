@@ -541,8 +541,8 @@
         "Searching `group` finds `groupTuple`",
         "No legacy-only construct appears"
       ],
-      "passes": false,
-      "notes": "From F-109: groupTuple is legacy-only (every catalogue entry deprecated), so UX-13 keeps it out of the palette; step 2's search example needs a modern operator (for example groupBy)."
+      "passes": true,
+      "notes": "From F-109: groupTuple is legacy-only (every catalogue entry deprecated), so UX-13 keeps it out of the palette; step 2's search example needs a modern operator (for example groupBy). Verified 2026-11-22 on PR #20: e2e/palette.spec.ts (Chromium) covers step 1 (categories toggle by mouse and keyboard and the open set persists across reload, ADR 0028), step 2 (searching group finds groupBy; groupTuple is legacy-only and never shown, Q15) and step 3 (every modern factory and operator shown, legacy-only absent; agent carries the preview badge); the catalogue loads as a lazy JSON chunk. App shell baseline re-approved from the CI artefact (ADR 0021)."
     },
     {
       "id": "F-205",
@@ -645,6 +645,26 @@
       "notes": ""
     },
     {
+      "id": "F-210",
+      "milestone": "M2",
+      "description": "Files view: the project tree in the left column's Files tab, with new file, new folder and upload actions; registry module folders tagged `registry`; files that failed to parse badged; dropping files or a zip adds them.",
+      "spec": [
+        "UX-10",
+        "UX-16"
+      ],
+      "depends_on": [
+        "F-202",
+        "F-204",
+        "F-403"
+      ],
+      "steps": [
+        "Create a file and a folder from the Files view, upload a file, and drop a zip: all appear in the tree and persist after reload",
+        "A registry module folder shows the `registry` tag and a file with a syntax error shows an error badge"
+      ],
+      "passes": false,
+      "notes": "Added 2026-11-22 (F-204 PR, scope-change; Q16): UX-16 had no owning feature; F-301 step 1 relies on the Files view. Dropping a zip reuses F-403's zip import."
+    },
+    {
       "id": "F-301",
       "milestone": "M3",
       "description": "Add from palette by drag and drop or keyboard; a new process goes in its own module file with the flag and an include, plus a call in the current workflow.",
@@ -655,7 +675,8 @@
       ],
       "depends_on": [
         "F-204",
-        "F-209"
+        "F-209",
+        "F-210"
       ],
       "steps": [
         "Drag Process onto the canvas: node appears; Files shows `modules/local/<name>/main.nf`; main.nf has the include and call",
@@ -663,7 +684,7 @@
         "Exported result passes `nextflow lint`"
       ],
       "passes": false,
-      "notes": ""
+      "notes": "From F-204: palette item descriptions are only a title tooltip on non-focusable rows; making items focusable here must also expose descriptions to keyboard users (QA-11)."
     },
     {
       "id": "F-302",
