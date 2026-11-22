@@ -3,11 +3,6 @@
 
 import type { Callee, Diagnostic, GraphNodeKind } from "@nf-builder/lang-core";
 
-/** The most lines a script preview shows. */
-export const PREVIEW_LINES = 8;
-/** The most characters a directive or topic value shows. */
-export const VALUE_CHARS = 60;
-
 export interface PortConnection {
   readonly direction: "from" | "to";
   /** The node at the other end. */

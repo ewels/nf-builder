@@ -57,9 +57,4 @@ export interface EngineHook {
     revision: number,
   ): Promise<{ ok: boolean; revision: number | null }>;
   project(path: string, workflow: string | null): Promise<unknown>;
-  details(
-    path: string,
-    workflow: string | null,
-    node: string,
-  ): Promise<unknown>;
 }

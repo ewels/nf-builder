@@ -78,7 +78,8 @@ function look(node: GraphNode): Look {
 /** The title the canvas draws for a node; the details pane uses it to name connections (F-206). */
 export const nodeTitle = (node: GraphNode): string => look(node).title;
 
-const typeText = (type: FlowType | null): string | null =>
+/** A type as the canvas and the details pane show it; null when nothing is known. */
+export const typeText = (type: FlowType | null): string | null =>
   type === null || (type.dataflow === null && type.element === null)
     ? null
     : formatFlowType(type);

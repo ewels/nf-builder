@@ -8,6 +8,7 @@ import type {
   GraphNode,
   IncludableDeclaration,
   Include,
+  NamedArgument,
   Projection,
   Range,
   ScriptCatalogue,
@@ -21,14 +22,17 @@ import {
   operatorDescription,
   plainText,
 } from "../palette-view";
-import {
-  type DeclarationDetails,
-  type DetailRow,
-  type OperatorDetail,
-  PREVIEW_LINES,
-  type Preview,
-  VALUE_CHARS,
+import type {
+  DeclarationDetails,
+  DetailRow,
+  OperatorDetail,
+  Preview,
 } from "./types";
+
+/** The most lines a script preview shows. */
+const PREVIEW_LINES = 8;
+/** The most characters a directive or topic value shows. */
+const VALUE_CHARS = 60;
 
 export interface CalleeDeclaration {
   /** The declaration; for a pipeline the entry workflow, never the whole-file `ScriptAst`. */
@@ -121,6 +125,12 @@ export function previewText(
   };
 }
 
+/** A params or output node without its block takes the whole workflow's range, which is not its own. */
+export const spansWorkflow = (projection: Projection, node: GraphNode) =>
+  (node.kind === "params" || node.kind === "output") &&
+  node.range.start === projection.workflow.range.start &&
+  node.range.end === projection.workflow.range.end;
+
 export interface DetailsInput {
   readonly model: ProjectModel;
   readonly catalogue: ScriptCatalogue;
@@ -132,6 +142,16 @@ const textOf = (model: ProjectModel, path: string | null): string =>
 
 const slice = (text: string, node: AstNode) =>
   text.slice(node.range.start, node.range.end);
+
+/** A preview of `range` in `text`; null when there is nothing to show. */
+function preview(
+  title: Preview["title"],
+  text: string,
+  range: Range,
+): Preview | null {
+  const p = previewText(text, range);
+  return p.text === "" ? null : { title, ...p };
+}
 
 /** The statements of a section as a preview; a lone triple-quoted string shows what is inside the quotes. */
 function sectionPreview(
@@ -159,8 +179,7 @@ function sectionPreview(
         column: 1,
       };
   }
-  const { text: body, truncated } = previewText(text, range);
-  return body === "" ? null : { title, text: body, truncated };
+  return preview(title, text, range);
 }
 
 const SECTION_TITLE = {
@@ -189,9 +208,8 @@ function directiveRows(
   });
 }
 
-const isTopicKey = (key: AstNode): boolean =>
-  (key.kind === "Identifier" && (key as { name?: string }).name === "topic") ||
-  (key.kind === "String" && (key as { value?: string }).value === "topic");
+const isTopicKey = (key: NamedArgument["name"]): boolean =>
+  (key.kind === "Identifier" ? key.name : key.value) === "topic";
 
 function typedTopics(
   text: string,
@@ -214,12 +232,11 @@ function typedTopics(
 
 function legacyTopics(
   text: string,
-  section: Section<ExpressionStatement | AstNode> | null,
+  section: Section<ExpressionStatement> | null,
 ): DetailRow[] {
   const rows: DetailRow[] = [];
   for (const item of section?.items ?? []) {
-    if (item.kind !== "ExpressionStatement") continue;
-    const e = (item as ExpressionStatement).expression;
+    const e = item.expression;
     if (e.kind !== "MethodCall") continue;
     for (const arg of e.args)
       if (arg.kind === "NamedArgument" && isTopicKey(arg.name))
@@ -241,21 +258,26 @@ const EMPTY: DeclarationDetails = {
   preview: null,
 };
 
+/** The first paragraph of a catalogue description, as plain text; null when there is none. */
+function catalogueSummary(markdown: string | undefined): string | null {
+  const text =
+    markdown === undefined ? "" : firstParagraph(plainText(markdown));
+  return text === "" ? null : text;
+}
+
 function operatorsOf(
   script: ScriptCatalogue,
   steps: readonly { operator: string; known: boolean }[],
 ): OperatorDetail[] {
-  return steps.map((step) => {
-    const entries = script.operators.filter((o) => o.name === step.operator);
-    const markdown = operatorDescription(script, step.operator);
-    const text =
-      markdown === undefined ? "" : firstParagraph(plainText(markdown));
-    return {
-      name: step.operator,
-      description: text === "" ? null : text,
-      legacy: !step.known || entries.every((o) => o.deprecated),
-    };
-  });
+  return steps.map((step) => ({
+    name: step.operator,
+    description: catalogueSummary(operatorDescription(script, step.operator)),
+    legacy:
+      !step.known ||
+      script.operators
+        .filter((o) => o.name === step.operator)
+        .every((o) => o.deprecated),
+  }));
 }
 
 function calleeDetails(
@@ -295,14 +317,8 @@ function calleeDetails(
         directives: directiveRows(text, declaration.directives),
         preview: sectionPreview(text, "Prompt", declaration.prompt),
       };
-    case "Unparsed": {
-      const { text: body, truncated } = previewText(text, declaration.range);
-      return {
-        ...base,
-        preview:
-          body === "" ? null : { title: "Source", text: body, truncated },
-      };
-    }
+    case "Unparsed":
+      return { ...base, preview: preview("Source", text, declaration.range) };
     default:
       return base;
   }
@@ -320,10 +336,10 @@ export function declarationDetails(
   const path = projection.workflow.path;
   const text = textOf(model, path);
   const here = { ...EMPTY, path, line: node.range.line };
-  const source = (t: string, range: Range): Preview => {
-    const p = previewText(t, range);
-    return { title: "Source", text: p.text, truncated: p.truncated };
-  };
+  const source = (t: string, range: Range): Preview => ({
+    title: "Source",
+    ...previewText(t, range),
+  });
   switch (node.kind) {
     case "chain":
       return {
@@ -331,16 +347,14 @@ export function declarationDetails(
         operators: operatorsOf(catalogue, node.steps),
         preview: source(text, node.range),
       };
-    case "factory": {
-      const markdown = factoryDescription(catalogue, node.factory);
-      const description =
-        markdown === undefined ? "" : firstParagraph(plainText(markdown));
+    case "factory":
       return {
         ...here,
-        description: description === "" ? null : description,
+        description: catalogueSummary(
+          factoryDescription(catalogue, node.factory),
+        ),
         preview: source(text, node.range),
       };
-    }
     case "code":
       return {
         ...here,
@@ -351,15 +365,13 @@ export function declarationDetails(
         }),
       };
     case "params":
-    case "output": {
-      const whole = projection.workflow.range;
-      const spansWorkflow =
-        node.range.start === whole.start && node.range.end === whole.end;
+    case "output":
       return {
         ...here,
-        preview: spansWorkflow ? null : source(text, node.range),
+        preview: spansWorkflow(projection, node)
+          ? null
+          : source(text, node.range),
       };
-    }
     default:
       return here;
   }

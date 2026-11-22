@@ -64,13 +64,12 @@ export type {
   CanvasViewOptions,
   EdgeDataflow,
 } from "./canvas";
-export { CANVAS_METRICS, canvasView, nodeTitle } from "./canvas";
+export { CANVAS_METRICS, canvasView } from "./canvas";
+export { nodeView } from "./details/node-view";
+export { workflowSummary } from "./details/summary";
 export type {
-  CalleeDeclaration,
   DeclarationDetails,
   DetailRow,
-  DetailsInput,
-  DiagnosticScope,
   NodeDetails,
   NodeView,
   OperatorDetail,
@@ -81,23 +80,7 @@ export type {
   SummaryModule,
   SummaryPort,
   WorkflowSummary,
-} from "./details";
-export {
-  declarationDetails,
-  diagnosticsWithin,
-  docSummary,
-  kindLabel,
-  nodeDetails,
-  nodeDiagnosticScopes,
-  nodeView,
-  oneLine,
-  PREVIEW_LINES,
-  portTypeText,
-  previewText,
-  resolveCallee,
-  VALUE_CHARS,
-  workflowSummary,
-} from "./details";
+} from "./details/types";
 export {
   compareDiagnostics,
   countDiagnostics,

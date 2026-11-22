@@ -8,7 +8,7 @@ import type {
   Range,
 } from "@nf-builder/lang-core";
 import { compareDiagnostics } from "../diagnostics/diagnose";
-import type { CalleeDeclaration } from "./declaration";
+import { type CalleeDeclaration, spansWorkflow } from "./declaration";
 
 export interface DiagnosticScope {
   readonly path: string;
@@ -20,15 +20,8 @@ export function nodeDiagnosticScopes(
   node: GraphNode,
   callee: CalleeDeclaration | null,
 ): DiagnosticScope[] {
+  if (spansWorkflow(projection, node)) return [];
   const path = projection.workflow.path;
-  const whole = projection.workflow.range;
-  // without a block, a params or output node takes the whole workflow's range: that is not its own
-  if (
-    (node.kind === "params" || node.kind === "output") &&
-    node.range.start === whole.start &&
-    node.range.end === whole.end
-  )
-    return [];
   const scopes: DiagnosticScope[] = [{ path, range: node.range }];
   if (node.kind !== "call" || callee === null) return scopes;
   const declaration = callee.declaration;

@@ -165,16 +165,16 @@ export function createCanvasStore(
       if (tab === undefined || content.status !== "ready") return;
       const mine = ++selection;
       set({ selected: id, details: { status: "loading", node: id } });
+      const unavailable = (message: string): DetailsContent => ({
+        status: "unavailable",
+        node: id,
+        message,
+      });
       let details: DetailsContent;
       try {
         const result = await engine().details(tab.path, tab.workflow, id);
         if (mine !== selection) return;
-        if ("ok" in result)
-          details = {
-            status: "unavailable",
-            node: id,
-            message: result.message,
-          };
+        if ("ok" in result) details = unavailable(result.message);
         else if (result.details === null) {
           clearSelection();
           return;
@@ -188,19 +188,11 @@ export function createCanvasStore(
                   revision: result.revision,
                   details: result.details,
                 }
-              : {
-                  status: "unavailable",
-                  node: id,
-                  message: "The project changed. Select the node again.",
-                };
+              : unavailable("The project changed. Select the node again.");
         }
       } catch (error) {
         if (mine !== selection) return;
-        details = {
-          status: "unavailable",
-          node: id,
-          message: messageOf(error),
-        };
+        details = unavailable(messageOf(error));
       }
       set({ details });
     }

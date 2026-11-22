@@ -3,20 +3,12 @@
 
 import type {
   Callee,
-  FlowType,
   GraphNode,
   Port,
   Projection,
 } from "@nf-builder/lang-core";
-import { nodeTitle } from "../canvas/view";
-import { formatFlowType } from "../projection/types";
+import { nodeTitle, typeText } from "../canvas/view";
 import type { NodeView, PortConnection, PortDetail } from "./types";
-
-/** The formatted type, or null when it is unknown (no type, or neither dataflow nor element). */
-export const portTypeText = (type: FlowType | null): string | null =>
-  type === null || (type.dataflow === null && type.element === null)
-    ? null
-    : formatFlowType(type);
 
 const capitalise = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
@@ -100,10 +92,10 @@ function portDetails(
     return {
       id: p.id,
       label: p.label,
-      type: portTypeText(p.type),
+      type: typeText(p.type),
       connections,
       unconnected,
-      argumentType: portTypeText(p.argumentType),
+      argumentType: typeText(p.argumentType),
     };
   });
 }

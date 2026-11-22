@@ -2,7 +2,8 @@
 // parameters and published outputs. Pure.
 
 import type { GraphNode, Port, Projection } from "@nf-builder/lang-core";
-import { kindLabel, portTypeText } from "./node-view";
+import { typeText } from "../canvas/view";
+import { kindLabel } from "./node-view";
 import type {
   SummaryCall,
   SummaryModule,
@@ -14,7 +15,7 @@ const portsOf = (node: GraphNode, ports: readonly Port[]): SummaryPort[] =>
   ports.map((p) => ({
     node: node.id,
     name: p.label,
-    type: portTypeText(p.type),
+    type: typeText(p.type),
   }));
 
 export function workflowSummary(projection: Projection): WorkflowSummary {
@@ -31,14 +32,14 @@ export function workflowSummary(projection: Projection): WorkflowSummary {
         takes.push({
           node: node.id,
           name: node.name,
-          type: portTypeText(node.outputs[0]?.type ?? null),
+          type: typeText(node.outputs[0]?.type ?? null),
         });
         break;
       case "emit":
         emits.push({
           node: node.id,
           name: node.name,
-          type: portTypeText(node.inputs[0]?.type ?? null),
+          type: typeText(node.inputs[0]?.type ?? null),
         });
         break;
       case "params":

@@ -3,9 +3,9 @@ import { join } from "node:path";
 import type { Locator, Page } from "@playwright/test";
 import { REPO_ROOT } from "../scripts/check-common.ts";
 import { NODE, openProject } from "./canvas.ts";
-import { readProject } from "./engine.ts";
+import { type EngineHook, readProject } from "./engine.ts";
 
-export const F206_FIXTURE = join(REPO_ROOT, "tools/oracle/cases/f206-details");
+const F206_FIXTURE = join(REPO_ROOT, "tools/oracle/cases/f206-details");
 
 export const openDetailsFixture = (page: Page) =>
   openProject(page, readProject(F206_FIXTURE));
@@ -32,7 +32,7 @@ const port = (
   ...connections: string[]
 ): ExpectedPort => ({ label, type, connections });
 
-/** One entry per node of `f205-canvas`'s entry workflow and `SHOUT`, and the unparsed `SECOND` of `bad-declaration`. */
+/** One entry per node of `f205-canvas`'s entry workflow. */
 export const DETAILS_EXPECTED: Record<string, ExpectedDetails> = {
   [NODE.params]: {
     name: "params",
@@ -195,31 +195,55 @@ export const SECOND_EXPECTED: ExpectedDetails = {
 
 export const TRIM_ID = "main.nf#/trimmed";
 
-/** The id of the call to `callee` in the entry workflow of `main.nf` (an unassigned call has no variable to key it). */
-export function calleeNodeId(page: Page, callee: string): Promise<string> {
-  return page.evaluate(async (name) => {
-    const engine = (
-      window as unknown as {
-        nfBuilderEngine: {
-          project(path: string, workflow: string | null): Promise<unknown>;
-        };
-      }
-    ).nfBuilderEngine;
-    const result = (await engine.project("main.nf", null)) as {
-      projection: {
-        nodes: { id: string; kind: string; callee?: { name: string } }[];
+interface Projected {
+  nodes: {
+    id: string;
+    kind: string;
+    callee?: { name: string };
+    inputs: unknown[];
+    outputs: unknown[];
+  }[];
+  edges: { from: { node: string }; to: { node: string } }[];
+}
+
+/** The nodes and edges of a workflow's projection, from the engine hook. */
+export function projectionOf(
+  page: Page,
+  path: string,
+  workflow: string | null,
+): Promise<Projected> {
+  return page.evaluate(
+    async ({ path, workflow }) => {
+      const engine = (window as unknown as { nfBuilderEngine: EngineHook })
+        .nfBuilderEngine;
+      const { projection } = (await engine.project(path, workflow)) as {
+        projection: Projected;
       };
-    };
-    const found = result.projection.nodes.find(
-      (n) => n.kind === "call" && n.callee?.name === name,
-    );
-    if (found === undefined) throw new Error(`no call to ${name}`);
-    return found.id;
-  }, callee);
+      return { nodes: projection.nodes, edges: projection.edges };
+    },
+    { path, workflow },
+  );
+}
+
+/** The id of the call to `callee` in the entry workflow of `main.nf` (an unassigned call has no variable to key it). */
+export async function calleeNodeId(
+  page: Page,
+  callee: string,
+): Promise<string> {
+  const { nodes } = await projectionOf(page, "main.nf", null);
+  const found = nodes.find(
+    (n) => n.kind === "call" && n.callee?.name === callee,
+  );
+  if (found === undefined) throw new Error(`no call to ${callee}`);
+  return found.id;
 }
 
 export const detailsPane = (page: Page): Locator =>
   page.locator(".details-pane");
+
+/** The pane's section headed `title`. */
+export const detailsSection = (page: Page, title: string): Locator =>
+  detailsPane(page).locator(`section:has(> h4:text-is("${title}"))`);
 
 /** Waits until the worker's part of the details has arrived. */
 export async function detailsReady(page: Page): Promise<void> {
@@ -229,14 +253,8 @@ export async function detailsReady(page: Page): Promise<void> {
 }
 
 /** The pane's port rows under `title` ("Inputs" or "Outputs"). */
-export function readPorts(
-  pane: Locator,
-  title: string,
-): Promise<ExpectedPort[]> {
-  return pane
-    .locator("section.details-section", {
-      has: pane.page().locator(`h4:text-is("${title}")`),
-    })
+export function readPorts(page: Page, title: string): Promise<ExpectedPort[]> {
+  return detailsSection(page, title)
     .first()
     .evaluate((section) =>
       [...section.querySelectorAll(":scope > ul > li")].map((li) => {

@@ -12,22 +12,17 @@ export function DetailsHeaderView({
   return (
     <div className="details-header">
       {title}
-      <button
-        type="button"
-        className="details-action"
-        disabled
-        title="Opens the edit popup (not available yet)"
-      >
-        Edit
-      </button>
-      <button
-        type="button"
-        className="details-action"
-        disabled
-        title="Opens the code popup (not available yet)"
-      >
-        Code
-      </button>
+      {["Edit", "Code"].map((name) => (
+        <button
+          key={name}
+          type="button"
+          className="details-action"
+          disabled
+          title={`Opens the ${name.toLowerCase()} popup (not available yet)`}
+        >
+          {name}
+        </button>
+      ))}
     </div>
   );
 }

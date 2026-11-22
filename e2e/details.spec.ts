@@ -18,15 +18,16 @@ import {
   DETAILS_EXPECTED,
   detailsPane,
   detailsReady,
+  detailsSection,
   type ExpectedDetails,
   openDetailsFixture,
+  projectionOf,
   readPorts,
   SECOND_EXPECTED,
   SECOND_ID,
   SHOUT_EXPECTED,
   TRIM_ID,
 } from "./details.ts";
-import type { EngineHook } from "./engine.ts";
 
 const escapeRegExp = (text: string): string =>
   text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -45,36 +46,16 @@ async function expectDetails(
   await expect(pane.locator(".details-file"), id).toHaveText(
     new RegExp(`^${escapeRegExp(expected.file)}(:\\d+)?$`),
   );
-  expect(await readPorts(pane, "Inputs"), `${id} inputs`).toEqual(
+  expect(await readPorts(page, "Inputs"), `${id} inputs`).toEqual(
     expected.inputs,
   );
-  expect(await readPorts(pane, "Outputs"), `${id} outputs`).toEqual(
+  expect(await readPorts(page, "Outputs"), `${id} outputs`).toEqual(
     expected.outputs,
   );
 }
 
-const projectionNodes = (
-  page: Page,
-  path: string,
-  workflow: string | null,
-): Promise<{ id: string; inputs: unknown[]; outputs: unknown[] }[]> =>
-  page.evaluate(
-    async ({ path, workflow }) => {
-      const engine = (window as unknown as { nfBuilderEngine: EngineHook })
-        .nfBuilderEngine;
-      const result = (await engine.project(path, workflow)) as {
-        projection: {
-          nodes: { id: string; inputs: unknown[]; outputs: unknown[] }[];
-        };
-      };
-      return result.projection.nodes.map((n) => ({
-        id: n.id,
-        inputs: n.inputs,
-        outputs: n.outputs,
-      }));
-    },
-    { path, workflow },
-  );
+const detailsColumn = (page: Page) =>
+  page.getByRole("complementary", { name: "Details" });
 
 test("F-206 UX-24: edges touching the selected node are highlighted until the selection clears", async ({
   page,
@@ -82,18 +63,10 @@ test("F-206 UX-24: edges touching the selected node are highlighted until the se
   await page.goto("./");
   await openFixture(page);
   await canvasReady(page);
-  const touching = await page.evaluate(async (id) => {
-    const engine = (window as unknown as { nfBuilderEngine: EngineHook })
-      .nfBuilderEngine;
-    const result = (await engine.project("main.nf", null)) as {
-      projection: {
-        edges: { id: string; from: { node: string }; to: { node: string } }[];
-      };
-    };
-    return result.projection.edges.filter(
-      (e) => e.from.node === id || e.to.node === id,
-    ).length;
-  }, NODE.greeted);
+  const { edges } = await projectionOf(page, "main.nf", null);
+  const touching = edges.filter(
+    (e) => e.from.node === NODE.greeted || e.to.node === NODE.greeted,
+  ).length;
   expect(touching).toBeGreaterThan(0);
   const highlighted = page.locator(".react-flow__edge-path.is-highlighted");
   await expect(highlighted).toHaveCount(0);
@@ -152,15 +125,14 @@ test("F-206 step 1 UX-30: every node's details list one row per projected port",
       await openWorkflow(page, path, workflow);
       await canvasReady(page);
     }
-    for (const n of await projectionNodes(page, path, workflow)) {
+    for (const n of (await projectionOf(page, path, workflow)).nodes) {
       await selectNode(page, n.id);
-      const pane = detailsPane(page);
       await expect(
-        pane.locator('section:has(> h4:text-is("Inputs")) > ul > li'),
+        detailsSection(page, "Inputs").locator(":scope > ul > li"),
         n.id,
       ).toHaveCount(n.inputs.length);
       await expect(
-        pane.locator('section:has(> h4:text-is("Outputs")) > ul > li'),
+        detailsSection(page, "Outputs").locator(":scope > ul > li"),
         n.id,
       ).toHaveCount(n.outputs.length);
       seen++;
@@ -184,8 +156,7 @@ test("F-206 UX-30 LA-20: a typed process shows its description, directives, topi
   await expect(pane.locator(".details-description")).not.toContainText(
     "@param",
   );
-  const section = (title: string) =>
-    pane.locator(`section:has(> h4:text-is("${title}"))`);
+  const section = (title: string) => detailsSection(page, title);
   await expect(section("Directives").locator("li")).toHaveCount(4);
   for (const name of ["tag", "label", "cpus", "container"])
     await expect(section("Directives")).toContainText(name);
@@ -204,9 +175,7 @@ test("F-206 UX-30 AR-05: a node's problems show in its details", async ({
   await page.goto("./");
   await openDetailsFixture(page);
   await canvasReady(page);
-  const problems = detailsPane(page).locator(
-    'section:has(> h4:text-is("Problems"))',
-  );
+  const problems = detailsSection(page, "Problems");
   await selectNode(page, await calleeNodeId(page, "LEGACY_VERSIONS"));
   await detailsReady(page);
   await expect(problems).toContainText("Suggestion");
@@ -235,8 +204,7 @@ test("F-206 step 2 UX-31: clicking empty canvas shows the workflow summary with 
   await expect(pane).toHaveAttribute("data-details-state", /ready|loading/);
   await clickEmptyCanvas(page);
   await expect(pane).toHaveAttribute("data-details-state", "summary");
-  const section = (title: string) =>
-    pane.locator(`section:has(> h4:text-is("${title}"))`);
+  const section = (title: string) => detailsSection(page, title);
   await expect(section("Calls")).toContainText("GREET");
   await expect(section("Calls")).toContainText("WORDCOUNT");
   await expect(section("Registry modules")).toContainText("nf-core/wordcount");
@@ -256,7 +224,7 @@ test("F-206 UX-32: Edit and Code show, disabled, only while a node is selected",
   await page.goto("./");
   await openFixture(page);
   await canvasReady(page);
-  const column = page.getByRole("complementary", { name: "Details" });
+  const column = detailsColumn(page);
   await expect(column.getByRole("button", { name: "Edit" })).toHaveCount(0);
   await selectNode(page, NODE.greeted);
   for (const name of ["Edit", "Code"])
@@ -265,9 +233,6 @@ test("F-206 UX-32: Edit and Code show, disabled, only while a node is selected",
   await expect(column.getByRole("button", { name: "Edit" })).toHaveCount(0);
   await expect(column.getByRole("button", { name: "Code" })).toHaveCount(0);
 });
-
-const detailsColumn = (page: Page) =>
-  page.getByRole("complementary", { name: "Details" });
 
 test(
   "F-206 UX-30 UX-32: a typed process's details match the approved baseline @visual",
