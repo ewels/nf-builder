@@ -5,7 +5,7 @@ import type {
   ApiServiceInfo,
 } from "./api-types.ts";
 
-const DEFAULT_BASE = "https://registry.nextflow.io";
+export const REGISTRY_URL = "https://registry.nextflow.io";
 
 export class RegistryHttpError extends Error {
   readonly url: string;
@@ -43,7 +43,7 @@ const PAGE_SIZE = 100;
 export function createRegistryApi(
   options: RegistryApiOptions = {},
 ): RegistryApi {
-  const base = `${options.baseUrl ?? DEFAULT_BASE}/api/v1`;
+  const base = `${options.baseUrl ?? REGISTRY_URL}/api/v1`;
   const doFetch = options.fetch ?? globalThis.fetch;
   const sleep =
     options.sleep ??

@@ -15,8 +15,9 @@ beforeAll(async () => {
 describe("F-501 classification", () => {
   it("F-501 step 3 IO-31: nf-core/fastqc is a legacy process named FASTQC", async () => {
     const mainNf =
-      recordedBundleText("nf-core/fastqc", "0.0.0-6d1763b").get("main.nf") ??
-      null;
+      (await recordedBundleText("nf-core/fastqc", "0.0.0-6d1763b")).get(
+        "main.nf",
+      ) ?? null;
     const metadata = (await recordedModule("nf-core/fastqc")).latest?.metadata;
     expect(
       classifyModule(parser, mainNf, {
@@ -32,7 +33,8 @@ describe("F-501 classification", () => {
 
   it("F-501 IO-31: nextflow-io/hello is a typed process HELLO although the registry gives no componentName", async () => {
     const mainNf =
-      recordedBundleText("nextflow-io/hello", "1.0.0").get("main.nf") ?? null;
+      (await recordedBundleText("nextflow-io/hello", "1.0.0")).get("main.nf") ??
+      null;
     const metadata = (await recordedModule("nextflow-io/hello")).latest
       ?.metadata;
     expect(metadata?.componentName).toBeUndefined();

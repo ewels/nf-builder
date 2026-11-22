@@ -22,8 +22,9 @@ describe("F-501 ports", () => {
   it("F-501 step 3 LA-23: nf-core/fastqc ports match its meta.yml", async () => {
     const module = await recordedModule("nf-core/fastqc");
     const metaYml =
-      recordedBundleText("nf-core/fastqc", "0.0.0-6d1763b").get("meta.yml") ??
-      "";
+      (await recordedBundleText("nf-core/fastqc", "0.0.0-6d1763b")).get(
+        "meta.yml",
+      ) ?? "";
     const ports = modulePorts(module.latest?.metadata, metaYml);
     expect(ports).toEqual({
       inputs: [["meta:map", "reads:file"]],
@@ -74,7 +75,9 @@ describe("F-501 ports", () => {
   it("F-501: list-form meta.yml outputs keep position; synthetic output_<n> names become null", async () => {
     const module = await recordedModule("nextflow-io/hello");
     const metaYml =
-      recordedBundleText("nextflow-io/hello", "1.0.0").get("meta.yml") ?? "";
+      (await recordedBundleText("nextflow-io/hello", "1.0.0")).get(
+        "meta.yml",
+      ) ?? "";
     expect(metaYmlOutputNames(metaYml)).toEqual(["output_1"]);
     expect(modulePorts(module.latest?.metadata, metaYml)).toEqual({
       inputs: ["greeting:string"],

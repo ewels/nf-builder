@@ -1,15 +1,7 @@
-import { readFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
 import { gzipSync } from "node:zlib";
 import { describe, expect, it } from "vitest";
 import { readModuleTarGz } from "../src/tar.ts";
-
-const fixture = (name: string) =>
-  new Uint8Array(
-    readFileSync(
-      fileURLToPath(new URL(`./fixtures/recorded/${name}`, import.meta.url)),
-    ),
-  );
+import { recordedTarGz } from "./support/recorded.ts";
 
 /** One ustar entry (header plus padded data). */
 function entry(
@@ -45,9 +37,9 @@ const tarGz = (...entries: Uint8Array[]) =>
   new Uint8Array(gzipSync(Buffer.concat([...entries, new Uint8Array(1024)])));
 
 describe("F-501 module tar reader", () => {
-  it("F-501 IO-31: reads every regular file of the recorded fastqc bundle, honouring pax headers", () => {
+  it("F-501 IO-31: reads every regular file of the recorded fastqc bundle, honouring pax headers", async () => {
     const files = readModuleTarGz(
-      fixture("nf-core-fastqc-0.0.0-6d1763b.tar.gz"),
+      await recordedTarGz("nf-core/fastqc", "0.0.0-6d1763b"),
     );
     expect(files.map((f) => f.path)).toEqual([
       ".conda-lock/linux_amd64-bd-b342db7b694c9af4_1.txt",
