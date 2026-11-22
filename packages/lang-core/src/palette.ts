@@ -79,3 +79,46 @@ export type PaletteCategory = {
   groups?: PaletteGroup[];
 };
 export type PaletteDefinition = { categories: PaletteCategory[] };
+
+// The resolved palette the web app renders (ADR 0028): plain, serialisable data, so it can cross a worker boundary.
+
+export type PaletteViewItem = {
+  /** Construct id, or `${kind}:${name}`; unique in the palette. */
+  readonly key: string;
+  readonly kind: PaletteItem["kind"];
+  /** Catalogue name (operator, factory, config scope) or construct id. Searched. */
+  readonly name: string;
+  /** Display text: construct label, else the catalogue name. Searched. */
+  readonly label: string;
+  /** First paragraph of `description`. Shown as the item's tooltip. */
+  readonly summary: string;
+  /** Whole description as plain text. Searched (UX-11). */
+  readonly description: string;
+  /** Searched (UX-11); empty when palette.yaml gives none. */
+  readonly keywords: readonly string[];
+  /** Item icon, else its category's icon. */
+  readonly icon: PaletteIcon;
+  /** UX-13 badge. */
+  readonly preview: boolean;
+  readonly docs?: string;
+};
+
+export type PaletteViewGroup = {
+  readonly id: OperatorGroupId;
+  readonly label: string;
+  readonly items: readonly PaletteViewItem[];
+};
+
+/** Exactly one of `items` and `groups` is non-empty. */
+export type PaletteViewCategory = {
+  readonly id: PaletteCategoryId;
+  readonly label: string;
+  readonly icon: PaletteIcon;
+  readonly items: readonly PaletteViewItem[];
+  readonly groups: readonly PaletteViewGroup[];
+};
+
+export type PaletteView = {
+  readonly version: string;
+  readonly categories: readonly PaletteViewCategory[];
+};

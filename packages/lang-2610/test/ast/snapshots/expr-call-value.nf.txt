@@ -1,0 +1,32 @@
+Script typesEnabled=false 1:1-9:1
+  body[0] Function def=true 1:1-3:2
+    name Identifier 1:5-1:10 "adder"
+    params[0] Parameter def=false 1:11-1:12
+      name Identifier 1:11-1:12 "x"
+    body Block 1:14-3:2
+      statements[0] Return 2:5-2:26
+        value Closure 2:12-2:26
+          params[0] Parameter def=false 2:14-2:15
+            name Identifier 2:14-2:15 "y"
+          body[0] ExpressionStatement 2:19-2:24
+            expression Binary operator="+" 2:19-2:24
+              left Variable 2:19-2:20 "x"
+              right Variable 2:23-2:24 "y"
+  body[1] Workflow typed=false 5:1-8:2
+    main Section 6:5-7:26
+      items[0] ExpressionStatement 6:5-6:24
+        expression MethodCall trailingComma=false parens=false 6:5-6:24
+          method Identifier 6:5-6:12 "println"
+          args[0] Call trailingComma=false parens=true 6:13-6:24
+            callee MethodCall trailingComma=false parens=true 6:13-6:21
+              method Identifier 6:13-6:18 "adder"
+              args[0] Number integer=true 6:19-6:20 "1"
+            args[0] Number integer=true 6:22-6:23 "2"
+      items[1] ExpressionStatement 7:5-7:26
+        expression Call trailingComma=false parens=true 7:5-7:26
+          callee MethodCall trailingComma=false parens=true 7:5-7:23
+            method Identifier 7:5-7:12 "println"
+            args[0] MethodCall trailingComma=false parens=true 7:14-7:22
+              method Identifier 7:14-7:19 "adder"
+              args[0] Number integer=true 7:20-7:21 "3"
+          args[0] Number integer=true 7:24-7:25 "4"

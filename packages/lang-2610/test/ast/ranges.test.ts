@@ -57,6 +57,25 @@ describe("F-102 step 2: every node's range slices back to its exact source text"
     expect(checkRanges(ast, text)).toEqual([]);
   });
 
+  it("F-102 step 2 AR-02: a typed input section ending in a plain type re-parses on its own although it follows a generic type", () => {
+    // alone, `Bag<Path>` followed by `config: Path` is ambiguous (the rule has no outer context); the checker gives the
+    // slice the text that follows it in the file
+    const text = [
+      "nextflow.enable.types = true",
+      "",
+      "process P {",
+      "    input:",
+      "    logs: Bag<Path>",
+      "    config: Path",
+      "",
+      "    script:",
+      '    "echo"',
+      "}",
+      "",
+    ].join("\n");
+    expect(checkRanges(build(text), text, { reparse: "all" })).toEqual([]);
+  });
+
   it("F-102 step 2: CRLF files keep exact slices and count one line per CRLF", () => {
     const layout = (ast: ScriptAst) =>
       find(ast, () => true).map((n) => [
@@ -141,5 +160,23 @@ describe("F-102 step 2: every node's range slices back to its exact source text"
     expect(widen(shrink, (n) => n.kind === "Identifier")).not.toEqual([]);
     // the unchanged tree passes
     expect(checkRanges(build(text), text)).toEqual([]);
+  });
+
+  it("F-102 step 2 ADR-0005: every ported nf-lang case that builds has exact ranges", () => {
+    const cases = JSON.parse(
+      readFileSync(join(dir, "../ported/cases.json"), "utf8"),
+    ) as { cases: { id: string; file: string }[] };
+    let built = 0;
+    for (const c of cases.cases) {
+      if (!c.file.endsWith(".nf")) continue;
+      const text = readFileSync(join(dir, "../ported", c.file), "utf8");
+      const result = parseScriptAst(text);
+      if (!result.ok) continue;
+      built++;
+      expect(checkRanges(result.ast, text, { reparse: "all" }), c.id).toEqual(
+        [],
+      );
+    }
+    expect(built).toBeGreaterThan(20);
   });
 });

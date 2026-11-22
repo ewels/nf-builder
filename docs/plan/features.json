@@ -226,8 +226,8 @@
         "Snapshot tests cover each construct in the syntax reference",
         "Every AST node's range slices back to its exact source text"
       ],
-      "passes": false,
-      "notes": "From F-101: 31 ported inputs parse at grammar level and must be rejected by the AST builder here (packages/lang-2610/test/ported/cases.json, owner F-102): 4 reparse cases (ScriptAstBuilderTest L194, L209, L224, AgentParserTest L168; ScriptAstBuilder.java#L251-L320, also needed by F-104's section-order fixture) and 27 AST-builder errors (ScriptAstBuilderTest L245-L700 and the escape cases L744-L852, AgentParserTest L403). Also from F-101: the ported valid-escape and GString cases (cases.json, layer lexer) must stay error-free once the AST builder adds upstream's EscapeUtils check; ParseError.endColumn follows upstream (start in code points, end from the UTF-16 length), so convert when slicing ranges."
+      "passes": true,
+      "notes": "From F-101: 31 ported inputs parse at grammar level and must be rejected by the AST builder here (packages/lang-2610/test/ported/cases.json, owner F-102): 4 reparse cases (ScriptAstBuilderTest L194, L209, L224, AgentParserTest L168; ScriptAstBuilder.java#L251-L320, also needed by F-104's section-order fixture) and 27 AST-builder errors (ScriptAstBuilderTest L245-L700 and the escape cases L744-L852, AgentParserTest L403). Also from F-101: the ported valid-escape and GString cases (cases.json, layer lexer) must stay error-free once the AST builder adds upstream's EscapeUtils check; ParseError.endColumn follows upstream (start in code points, end from the UTF-16 length), so convert when slicing ranges. Verified 2026-11-22: step 1 by packages/lang-2610/test/ast/snapshot.test.ts (56 lint-clean fixtures; coverage.test.ts proves all 43 syntax.mdx sections at the pinned commit, every node kind and operator); step 2 by test/ast/ranges.test.ts on every fixture and ported case and test/corpus/ast.corpus.ts on the corpus (CI corpus-parse). Builder errors: the 31 F-101 ported cases plus 46 inputs in test/ast/errors (the oracle re-checks lint). Comments: a port of CommentAttacher, checked against nf-lang on the fixtures and on 3,923 corpus comments. No Playwright test (no UI)."
     },
     {
       "id": "F-103",
@@ -267,7 +267,7 @@
         "Malformed fixtures: the bad declaration is isolated, the rest of the file is modelled"
       ],
       "passes": false,
-      "notes": ""
+      "notes": "From F-102: parseScriptAst (lang-2610, internal) returns ScriptParseResult; declarations with builder errors are listed in errors by range; section-order.nf gives an InvalidDeclaration. Add LanguagePack.loadParser and SourceFile (AR-01) here."
     },
     {
       "id": "F-105",
@@ -386,7 +386,7 @@
         "Printed fixtures pass `nextflow lint` with no errors"
       ],
       "passes": false,
-      "notes": "From F-005 (S1): in typed code the printer emits a legacy tuple input as tuple(a, b, ...), one argument per declared component; a mixed list literal fails nextflow lint (LA-14)."
+      "notes": "From F-005 (S1): in typed code the printer emits a legacy tuple input as tuple(a, b, ...), one argument per declared component; a mixed list literal fails nextflow lint (LA-14). From F-102: comments are attached by a port of nf-lang 26.10.7's CommentAttacher, checked against it on the fixtures and the corpus. The AST keeps quote style, verbatim numbers, trailing commas, Parenthesized, labels and elseRange for the formatter."
     },
     {
       "id": "F-111",
@@ -437,7 +437,7 @@
         "Every message states what to do; mechanical cases carry a quick-fix command"
       ],
       "passes": false,
-      "notes": "From F-101: 8 ported AgentParserTest inputs (L485-L491, L518: agent output types, eval not defined) parse and are rejected only by name and type resolution (owner F-112 in packages/lang-2610/test/ported/cases.json)."
+      "notes": "From F-101: 8 ported AgentParserTest inputs (L485-L491, L518: agent output types, eval not defined) parse and are rejected only by name and type resolution (owner F-112 in packages/lang-2610/test/ported/cases.json). From F-102: AST-builder errors come with nf-lang wording in ScriptParseResult.errors (source builder or parser); warnings (ScriptAstBuilder.java #L597, #L619, #L634, #L695, #L824, #L836, #L977, #L1059) and resolver errors are F-112's."
     },
     {
       "id": "F-113",
@@ -456,7 +456,7 @@
         "The main thread does no parsing (asserted in a Playwright performance trace)"
       ],
       "passes": false,
-      "notes": "From F-201's plan: the shell reads installed pack versions through engine on the main thread; once a pack's entry holds the parser, move that list behind the worker so the parser stays out of the initial bundle (QA-01 check will catch it). From F-006: QA-03 risk. Sarek parses in 1.1 s warm but 15.9 s cold in Node (first-use DFA construction for real grammar ambiguities; upstream Java pays it too). Measure in the worker, then consider parsing open or changed files first, warming the parser at worker start, or caching parse results."
+      "notes": "From F-201's plan: the shell reads installed pack versions through engine on the main thread; once a pack's entry holds the parser, move that list behind the worker so the parser stays out of the initial bundle (QA-01 check will catch it). From F-006: QA-03 risk. Sarek parses in 1.1 s warm but 15.9 s cold in Node (first-use DFA construction for real grammar ambiguities; upstream Java pays it too). Measure in the worker, then consider parsing open or changed files first, warming the parser at worker start, or caching parse results. 2026-11-22, maintainer (ADR 0029): QA-03 no longer asks for 3 s. The worker must keep the UI responsive and report loading progress; sarek must finish within 30 s on the CI reference profile. The earlier cold-start note no longer needs lazy parsing or caching."
     },
     {
       "id": "F-201",
@@ -541,8 +541,8 @@
         "Searching `group` finds `groupTuple`",
         "No legacy-only construct appears"
       ],
-      "passes": false,
-      "notes": "From F-109: groupTuple is legacy-only (every catalogue entry deprecated), so UX-13 keeps it out of the palette; step 2's search example needs a modern operator (for example groupBy)."
+      "passes": true,
+      "notes": "From F-109: groupTuple is legacy-only (every catalogue entry deprecated), so UX-13 keeps it out of the palette; step 2's search example needs a modern operator (for example groupBy). Verified 2026-11-22 on PR #20: e2e/palette.spec.ts (Chromium) covers step 1 (categories toggle by mouse and keyboard and the open set persists across reload, ADR 0028), step 2 (searching group finds groupBy; groupTuple is legacy-only and never shown, Q15) and step 3 (every modern factory and operator shown, legacy-only absent; agent carries the preview badge); the catalogue loads as a lazy JSON chunk. App shell baseline re-approved from the CI artefact (ADR 0021)."
     },
     {
       "id": "F-205",
@@ -645,6 +645,26 @@
       "notes": ""
     },
     {
+      "id": "F-210",
+      "milestone": "M2",
+      "description": "Files view: the project tree in the left column's Files tab, with new file, new folder and upload actions; registry module folders tagged `registry`; files that failed to parse badged; dropping files or a zip adds them.",
+      "spec": [
+        "UX-10",
+        "UX-16"
+      ],
+      "depends_on": [
+        "F-202",
+        "F-204",
+        "F-403"
+      ],
+      "steps": [
+        "Create a file and a folder from the Files view, upload a file, and drop a zip: all appear in the tree and persist after reload",
+        "A registry module folder shows the `registry` tag and a file with a syntax error shows an error badge"
+      ],
+      "passes": false,
+      "notes": "Added 2026-11-22 (F-204 PR, scope-change; Q16): UX-16 had no owning feature; F-301 step 1 relies on the Files view. Dropping a zip reuses F-403's zip import."
+    },
+    {
       "id": "F-301",
       "milestone": "M3",
       "description": "Add from palette by drag and drop or keyboard; a new process goes in its own module file with the flag and an include, plus a call in the current workflow.",
@@ -655,7 +675,8 @@
       ],
       "depends_on": [
         "F-204",
-        "F-209"
+        "F-209",
+        "F-210"
       ],
       "steps": [
         "Drag Process onto the canvas: node appears; Files shows `modules/local/<name>/main.nf`; main.nf has the include and call",
@@ -663,7 +684,7 @@
         "Exported result passes `nextflow lint`"
       ],
       "passes": false,
-      "notes": ""
+      "notes": "From F-204: palette item descriptions are only a title tooltip on non-focusable rows; making items focusable here must also expose descriptions to keyboard users (QA-11)."
     },
     {
       "id": "F-302",
@@ -912,7 +933,7 @@
     },
     {
       "id": "F-402",
-      "milestone": "M4",
+      "milestone": "M8",
       "description": "Import a private GitHub repo with a token held in memory by default; optional remember-on-device.",
       "spec": [
         "IO-10",
@@ -928,7 +949,7 @@
         "The token never appears in exports or console output"
       ],
       "passes": false,
-      "notes": ""
+      "notes": "Deferred past v0.1 by the maintainer on 2026-11-22 (ADR 0030); milestone M8 holds deferred features."
     },
     {
       "id": "F-403",
@@ -1290,7 +1311,7 @@
     {
       "id": "F-702",
       "milestone": "M7",
-      "description": "All performance budgets green in CI.",
+      "description": "Performance budgets in CI: bundle size (QA-01), the QA-03 ceiling and the registry snapshot size (QA-06) fail CI when exceeded; QA-02, QA-04 and QA-05 are measured and reported.",
       "spec": [
         "QA-01",
         "QA-02",
@@ -1303,10 +1324,10 @@
         "F-503"
       ],
       "steps": [
-        "CI budget report shows every budget met on `main`"
+        "On `main`, CI fails when QA-01, QA-03 or QA-06 is exceeded, and its budget report shows the QA-02, QA-04 and QA-05 measurements"
       ],
       "passes": false,
-      "notes": "ADR 0015 excludes worker bundles from the QA-01 measurement until this feature; revisit that here."
+      "notes": "ADR 0015 excludes worker bundles from the QA-01 measurement until this feature; revisit that here. 2026-11-22, maintainer (ADR 0030): QA-02, QA-04 and QA-05 are reported, not gates."
     },
     {
       "id": "F-703",

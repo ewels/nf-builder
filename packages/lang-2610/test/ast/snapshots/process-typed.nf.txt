@@ -1,0 +1,37 @@
+Script typesEnabled=true 1:1-22:1
+  body[0] FeatureFlag 1:1-1:29
+    name Identifier 1:1-1:22 "nextflow.enable.types"
+    value Boolean 1:25-1:29 "true"
+  body[1] Process typed=true 3:1-21:2
+    name Identifier 3:9-3:14 "greet"
+    inputs Section label="input" labelRange=4:5-4:11 4:5-6:17
+      items[0] TypedName 5:5-5:21
+        name Identifier 5:5-5:13 "greeting"
+        type TypeRef nullable=false 5:15-5:21 "String"
+      items[1] TypedName 6:5-6:17
+        name Identifier 6:5-6:9 "name"
+        type TypeRef nullable=false 6:11-6:17 "String"
+    stage Section label="stage" labelRange=8:5-8:11 8:5-9:21
+      items[0] ExpressionStatement 9:5-9:21
+        expression MethodCall trailingComma=false parens=false 9:5-9:21
+          method Identifier 9:5-9:8 "env"
+          args[0] String value="NAME" quote="'" 9:9-9:15 "'NAME'"
+          args[1] Variable 9:17-9:21 "name"
+    outputs Section label="output" labelRange=11:5-11:12 11:5-12:13
+      items[0] ExpressionStatement 12:5-12:13
+        expression MethodCall trailingComma=false parens=true 12:5-12:13
+          method Identifier 12:5-12:11 "stdout"
+    topics Section label="topic" labelRange=14:5-14:11 14:5-15:41
+      items[0] ExpressionStatement 15:5-15:41
+        expression Binary operator=">>" 15:5-15:41
+          left MethodCall trailingComma=false parens=true 15:5-15:27
+            method Identifier 15:5-15:9 "eval"
+            args[0] String value="bash --version" quote="'" 15:10-15:26 "'bash --version'"
+          right String value="versions" quote="'" 15:31-15:41 "'versions'"
+    exec Section label="script" labelRange=17:5-17:12 17:5-20:8
+      items[0] ExpressionStatement 18:5-20:8
+        expression GString quote="\"\"\"" 18:5-20:8
+          parts[0] GStringText 18:8-19:11 "\n    echo \""
+          parts[1] Interpolation braced=true 19:11-19:22
+            expression Variable 19:13-19:21 "greeting"
+          parts[2] GStringText value=", ${NAME}!\"\n    " 19:22-20:5 ", \\${NAME}!\"\n    "

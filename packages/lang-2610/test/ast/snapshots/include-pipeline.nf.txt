@@ -1,0 +1,12 @@
+Script typesEnabled=true 1:1-7:1
+  body[0] FeatureFlag 1:1-1:29
+    name Identifier 1:1-1:22 "nextflow.enable.types"
+    value Boolean 1:25-1:29 "true"
+  body[1] Include 3:1-6:31
+    entries[0] IncludeEntry 4:5-4:27
+      name Identifier 4:5-4:11 "params"
+      alias Identifier 4:15-4:27 "RnaseqParams"
+    entries[1] IncludeEntry 5:5-5:23
+      name Identifier 5:5-5:13 "workflow"
+      alias Identifier 5:17-5:23 "RNASEQ"
+    source String value="./pipelines/rnaseq.nf" quote="'" 6:8-6:31 "'./pipelines/rnaseq.nf'"

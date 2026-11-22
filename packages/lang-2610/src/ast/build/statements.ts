@@ -38,7 +38,13 @@ import { spanRanges } from "../positions.ts";
 import { has } from "./alt.ts";
 import type { BuildContext } from "./context.ts";
 import { argumentList, expression, methodCall } from "./expressions.ts";
-import { identifier, legacyType, qualifiedType, typedName } from "./types.ts";
+import {
+  checkVariableName,
+  identifier,
+  legacyType,
+  qualifiedType,
+  typedName,
+} from "./types.ts";
 
 export function statement(ctx: StatementContext, cx: BuildContext): Statement {
   const range = cx.range(ctx);
@@ -169,14 +175,16 @@ function variableDeclaration(
     return {
       ...common,
       legacyType: null,
-      targets: names.identifier().map(
-        (i): TypedName => ({
+      targets: names.identifier().map((i): TypedName => {
+        const range = cx.range(i);
+        checkVariableName(i.getText(), range, cx);
+        return {
           kind: "TypedName",
           name: identifier(i, cx),
           type: null,
-          range: cx.range(i),
-        }),
-      ),
+          range,
+        };
+      }),
       multiple: true,
       initializer,
       range,
@@ -195,6 +203,7 @@ function variableDeclaration(
     };
   const legacy = s.legacyType();
   const name = s.identifier() as NonNullable<ReturnType<typeof s.identifier>>;
+  checkVariableName(name.getText(), cx.range(name), cx);
   return {
     ...common,
     legacyType: legacy ? legacyType(legacy, cx) : null,
@@ -213,7 +222,9 @@ function variableDeclaration(
 }
 
 function variableName(ctx: ParserRuleContext, cx: BuildContext): Variable {
-  return { kind: "Variable", name: ctx.getText(), range: cx.range(ctx) };
+  const range = cx.range(ctx);
+  checkVariableName(ctx.getText(), range, cx);
+  return { kind: "Variable", name: ctx.getText(), range };
 }
 
 export function variableNames(
@@ -237,29 +248,25 @@ function assignment(
   const operator = (s._op?.text ?? "=") as AssignmentOperator;
   const value = expression(s._source as never, cx);
 
+  // Upstream looks through parentheses: `(a.b) = c` is valid, `(a) = c` is a one-name tuple, `((a)) = c` fails.
+  let inner = target;
+  let depth = 0;
+  while (inner.kind === "Parenthesized") {
+    inner = inner.expression;
+    depth++;
+  }
   let result: Expression | TupleTarget = target;
-  if (
-    target.kind === "Parenthesized" &&
-    target.expression.kind === "Variable"
-  ) {
-    // `(a) = b`
-    result = {
-      kind: "TupleTarget",
-      names: [target.expression],
-      range: target.range,
-    };
+  if (inner.kind === "Variable" && depth > 0) {
+    if (depth > 1)
+      cx.fatal(
+        "Nested parenthesis is not allowed in multiple assignment, e.g. ((a)) = b",
+        range,
+      );
+    result = { kind: "TupleTarget", names: [inner], range: target.range };
   } else if (
-    target.kind === "Parenthesized" &&
-    target.expression.kind === "Parenthesized"
-  ) {
-    cx.fatal(
-      "Nested parenthesis is not allowed in multiple assignment, e.g. ((a)) = b",
-      range,
-    );
-  } else if (
-    target.kind !== "Variable" &&
-    target.kind !== "Property" &&
-    target.kind !== "Index"
+    inner.kind !== "Variable" &&
+    inner.kind !== "Property" &&
+    inner.kind !== "Index"
   ) {
     cx.fatal(
       "Invalid assignment target -- must be a variable, index, or property expression",
@@ -282,6 +289,9 @@ export function catchClause(
   const types: ReturnType<typeof qualifiedType>[] =
     typeList?.qualifiedClassName().map((t) => qualifiedType(t, cx)) ?? [];
   const variable = identifier(name, cx);
+  // upstream builds one variable per caught type, and checks the name for each
+  for (let i = 0; i < Math.max(types.length, 1); i++)
+    checkVariableName(variable.name, variable.range, cx);
   const legacy =
     typeList !== null &&
     (typeList.start?.tokenIndex ?? 0) < (name.start?.tokenIndex ?? 0);

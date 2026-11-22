@@ -13,3 +13,7 @@ export const ORACLE_CACHE = `${CACHE_DIR}/oracle`;
 export const DEFAULT_MANIFEST = `${TOOL_DIR}/cases/cases.yaml`;
 /** Read by path, never imported: tools stay standalone. */
 export const FIXTURES_FILE = `${REPO_ROOT}/tools/corpus/fixtures/fixtures.yaml`;
+/** Read by path, never imported: the F-102 AST fixtures and their recorded lint results (all `[]`). */
+export const AST_FIXTURES_FILE = `${REPO_ROOT}/packages/lang-2610/test/ast/fixtures.json`;
+/** Read by path, never imported: the F-102 builder-error inputs and the lint errors recorded for each. */
+export const AST_ERRORS_FILE = `${REPO_ROOT}/packages/lang-2610/test/ast/errors.json`;

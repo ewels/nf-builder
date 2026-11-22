@@ -15,6 +15,7 @@ import {
   type LintResult,
   lintDir,
   nextflowVersion,
+  parseCommentDump,
   parseLintJson,
   resolveLauncher,
 } from "../src/lint.ts";
@@ -33,6 +34,49 @@ function fakeLauncher(dir: string, script: string): string {
   chmodSync(file, 0o755);
   return file;
 }
+
+describe("corpus comment dump", () => {
+  it("F-102 AR-02: parseCommentDump reads CommentDump.java output, with JVM notices before it and rejected files as errors", () => {
+    const row = {
+      line: 2,
+      column: 5,
+      text: "// c",
+      slot: "leading",
+      node: {
+        class: "ExpressionStatement",
+        line: 3,
+        column: 5,
+        endLine: 3,
+        endColumn: 9,
+      },
+    };
+    const json = JSON.stringify({
+      files: [
+        { file: "main.nf", comments: [row] },
+        { file: "bad.nf", error: "Unexpected input" },
+      ],
+    });
+    const parsed = parseCommentDump(
+      `Picked up JAVA_TOOL_OPTIONS: -Dx\n${json}\n`,
+    );
+    expect(parsed.files).toEqual([
+      { file: "main.nf", comments: [row] },
+      { file: "bad.nf", error: "Unexpected input" },
+    ]);
+    expect(() => parseCommentDump("boom")).toThrow(/not JSON/);
+    expect(() => parseCommentDump('{"files": 1}')).toThrow(/no files list/);
+    expect(() =>
+      parseCommentDump(
+        JSON.stringify({
+          files: [{ file: "a.nf", comments: [{ ...row, slot: "sideways" }] }],
+        }),
+      ),
+    ).toThrow(/unexpected comment entry/);
+    expect(() =>
+      parseCommentDump(JSON.stringify({ files: [{ file: "a.nf" }] })),
+    ).toThrow(/no comments or error/);
+  });
+});
 
 describe("corpus lint", () => {
   it("F-006 step 2: parseLintJson reads nextflow lint -o json output", () => {

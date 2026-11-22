@@ -5,6 +5,7 @@ import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { basename, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import type { Manifest } from "./manifest.ts";
 import { REPO_ROOT } from "./manifest.ts";
 
@@ -24,6 +25,10 @@ export type LintResult = {
 
 const LINT_CACHE_DIR = `${REPO_ROOT}.cache/corpus-lint`;
 const UPSTREAM_FILE = `${REPO_ROOT}packages/lang-2610/upstream.json`;
+
+const COMMENT_DUMP_JAVA = fileURLToPath(
+  new URL("CommentDump.java", import.meta.url),
+);
 
 const isRecord = (v: unknown): v is Record<string, unknown> =>
   typeof v === "object" && v !== null && !Array.isArray(v);
@@ -66,6 +71,96 @@ export function parseLintJson(stdout: string): {
     };
   });
   return { filesChecked: filesWithErrors + filesWithoutErrors, errors };
+}
+
+export type CommentRow = {
+  line: number;
+  column: number;
+  text: string;
+  slot: "leading" | "trailing" | "dangling";
+  node: {
+    class: string;
+    line: number;
+    column: number;
+    endLine: number;
+    endColumn: number;
+  };
+};
+/** `comments` is what nf-lang's CommentAttacher attached; `error` is why the builder rejected the file. */
+export type CommentDumpFile =
+  | { file: string; comments: CommentRow[] }
+  | { file: string; error: string };
+export type CommentDump = { files: CommentDumpFile[] };
+/** The file written to `.cache/corpus-lint/<id>.comments.json`. */
+export type CommentDumpResult = CommentDump & {
+  id: string;
+  sha: string;
+  nextflowVersion: string;
+};
+
+const SLOTS = ["leading", "trailing", "dangling"];
+const isNumber = (v: unknown): v is number => typeof v === "number";
+
+function parseCommentRow(value: unknown): CommentRow {
+  if (
+    !isRecord(value) ||
+    !isNumber(value.line) ||
+    !isNumber(value.column) ||
+    typeof value.text !== "string" ||
+    typeof value.slot !== "string" ||
+    !SLOTS.includes(value.slot) ||
+    !isRecord(value.node) ||
+    typeof value.node.class !== "string" ||
+    !isNumber(value.node.line) ||
+    !isNumber(value.node.column) ||
+    !isNumber(value.node.endLine) ||
+    !isNumber(value.node.endColumn)
+  )
+    throw new Error(`unexpected comment entry: ${JSON.stringify(value)}`);
+  return value as CommentRow;
+}
+
+/** Reads what CommentDump.java prints: one JSON document, possibly after JVM notices on earlier lines. */
+export function parseCommentDump(stdout: string): CommentDump {
+  const start = stdout.indexOf('{"files":');
+  let json: unknown;
+  try {
+    json = JSON.parse(start < 0 ? stdout : stdout.slice(start));
+  } catch {
+    throw new Error(`CommentDump output is not JSON: ${stdout.slice(0, 200)}`);
+  }
+  if (!isRecord(json) || !Array.isArray(json.files))
+    throw new Error("CommentDump output has no files list");
+  const files = json.files.map((f: unknown): CommentDumpFile => {
+    if (!isRecord(f) || typeof f.file !== "string")
+      throw new Error(
+        `unexpected CommentDump file entry: ${JSON.stringify(f)}`,
+      );
+    if (typeof f.error === "string") return { file: f.file, error: f.error };
+    if (!Array.isArray(f.comments))
+      throw new Error(`${f.file}: CommentDump entry has no comments or error`);
+    return { file: f.file, comments: f.comments.map(parseCommentRow) };
+  });
+  return { files };
+}
+
+/** Runs CommentDump.java against the dist's classes: the comments nf-lang attaches in every `.nf` file under `dir`. */
+export function dumpComments(launcher: string, dir: string): CommentDump {
+  const run = spawnSync("java", ["-cp", launcher, COMMENT_DUMP_JAVA, dir], {
+    encoding: "utf8",
+    maxBuffer: 1024 * 1024 * 1024,
+  });
+  if (run.error)
+    throw new Error(
+      (run.error as NodeJS.ErrnoException).code === "ENOENT"
+        ? "java not found: install a JDK 17+ (java on PATH)"
+        : `could not run java: ${run.error.message}`,
+    );
+  if (run.status !== 0)
+    throw new Error(
+      `CommentDump.java failed (exit ${run.status}) in ${dir}\nstderr tail:\n${tail(run.stderr)}`,
+    );
+  return parseCommentDump(run.stdout);
 }
 
 /** Same environment as the CI oracle; an inherited NXF_VER would make Nextflow download another version. */
@@ -198,12 +293,19 @@ export function lintCorpus(o: {
     { id: "fixtures", sha: fixturesSha(o.fixturesDir), dir: o.fixturesDir },
   ];
   mkdirSync(LINT_CACHE_DIR, { recursive: true });
+  // CommentDump.java needs the classes of the dist; any other launcher is not a jar it can use
+  const commentsFor = /^nextflow-.+-dist$/.test(basename(o.launcher));
   const results: LintResult[] = [];
   for (const t of targets) {
     const file = join(LINT_CACHE_DIR, `${t.id}.json`);
+    const commentsFile = join(LINT_CACHE_DIR, `${t.id}.comments.json`);
+    const commentsCached =
+      !commentsFor || (!o.force && isCached(commentsFile, t.sha, version));
     if (!o.force && isCached(file, t.sha, version)) {
       results.push(JSON.parse(readFileSync(file, "utf8")) as LintResult);
       o.log(`corpus-lint: ${t.id} up to date`);
+      if (!commentsCached)
+        writeComments(o.launcher, t, version, commentsFile, o.log);
       continue;
     }
     const started = Date.now();
@@ -219,6 +321,33 @@ export function lintCorpus(o: {
     o.log(
       `corpus-lint: ${t.id}: ${lint.filesChecked} files, ${lint.errors.length} errors (${((Date.now() - started) / 1000).toFixed(1)} s)`,
     );
+    if (commentsFor) writeComments(o.launcher, t, version, commentsFile, o.log);
   }
   return results;
+}
+
+/** Writes `<id>.comments.json`: where nf-lang's CommentAttacher put each comment of the target's scripts. */
+function writeComments(
+  launcher: string,
+  target: { id: string; sha: string; dir: string },
+  version: string,
+  file: string,
+  log: (line: string) => void,
+): void {
+  const started = Date.now();
+  const dump = dumpComments(launcher, target.dir);
+  const result: CommentDumpResult = {
+    id: target.id,
+    sha: target.sha,
+    nextflowVersion: version,
+    ...dump,
+  };
+  writeFileSync(file, `${JSON.stringify(result)}\n`);
+  const comments = dump.files.reduce(
+    (n, f) => n + ("comments" in f ? f.comments.length : 0),
+    0,
+  );
+  log(
+    `corpus-lint: ${target.id}: ${dump.files.length} scripts, ${comments} comments (${((Date.now() - started) / 1000).toFixed(1)} s)`,
+  );
 }

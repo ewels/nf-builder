@@ -1,0 +1,83 @@
+Script typesEnabled=false 1:1-22:1
+  body[0] Process typed=false 1:1-12:2
+    name Identifier 1:9-1:14 "SPLIT"
+    inputs Section label="input" labelRange=2:5-2:11 2:5-3:10
+      items[0] ExpressionStatement 3:5-3:10
+        expression MethodCall trailingComma=false parens=false 3:5-3:10
+          method Identifier 3:5-3:8 "val"
+          args[0] Variable 3:9-3:10 "x"
+    outputs Section label="output" labelRange=5:5-5:12 5:5-6:22
+      items[0] ExpressionStatement 6:5-6:22
+        expression MethodCall trailingComma=false parens=false 6:5-6:22
+          method Identifier 6:5-6:8 "val"
+          args[0] Variable 6:9-6:10 "x"
+          args[1] NamedArgument 6:12-6:22
+            name Identifier 6:12-6:16 "emit"
+            value Variable 6:18-6:22 "item"
+    exec Section label="script" labelRange=8:5-8:12 8:5-11:8
+      items[0] ExpressionStatement 9:5-11:8
+        expression GString quote="\"\"\"" 9:5-11:8
+          parts[0] GStringText 9:8-10:10 "\n    echo "
+          parts[1] Interpolation braced=true 10:10-10:14
+            expression Variable 10:12-10:13 "x"
+          parts[2] GStringText 10:14-11:5 "\n    "
+  body[1] Workflow typed=false 14:1-21:2
+    main Section 15:5-20:20
+      items[0] ExpressionStatement 15:5-15:52
+        expression Binary operator="|" 15:5-15:52
+          left Binary operator="|" 15:5-15:45
+            left MethodCall navigation="." trailingComma=false parens=true 15:5-15:24
+              receiver Variable 15:5-15:12 "channel"
+              method Identifier 15:13-15:15 "of"
+              args[0] Number integer=true 15:16-15:17 "1"
+              args[1] Number integer=true 15:19-15:20 "2"
+              args[2] Number integer=true 15:22-15:23 "3"
+            right MethodCall trailingComma=false parens=false 15:27-15:45
+              method Identifier 15:27-15:30 "map"
+              closures[0] Closure 15:31-15:45
+                params[0] Parameter def=false 15:33-15:34
+                  name Identifier 15:33-15:34 "v"
+                body[0] ExpressionStatement 15:38-15:43
+                  expression Binary operator="*" 15:38-15:43
+                    left Variable 15:38-15:39 "v"
+                    right Number integer=true 15:42-15:43 "2"
+          right Variable 15:48-15:52 "view"
+      items[1] ExpressionStatement 16:5-16:32
+        expression MethodCall trailingComma=false parens=true 16:5-16:32
+          method Identifier 16:5-16:10 "SPLIT"
+          args[0] MethodCall navigation="." trailingComma=false parens=true 16:11-16:31
+            receiver Variable 16:11-16:18 "channel"
+            method Identifier 16:19-16:21 "of"
+            args[0] String value="a" quote="'" 16:22-16:25 "'a'"
+            args[1] String value="b" quote="'" 16:27-16:30 "'b'"
+      items[2] ExpressionStatement 17:5-17:26
+        expression MethodCall navigation="." trailingComma=false parens=true 17:5-17:26
+          receiver Property navigation="." 17:5-17:19
+            object Property navigation="." 17:5-17:14
+              object Variable 17:5-17:10 "SPLIT"
+              property Identifier 17:11-17:14 "out"
+            property Identifier 17:15-17:19 "item"
+          method Identifier 17:20-17:24 "view"
+      items[3] ExpressionStatement 18:5-18:50
+        expression MethodCall navigation="." trailingComma=false parens=false 18:5-18:50
+          receiver MethodCall navigation="." trailingComma=false parens=false 18:5-18:33
+            receiver MethodCall navigation="." trailingComma=false parens=true 18:5-18:20
+              receiver Variable 18:5-18:12 "channel"
+              method Identifier 18:13-18:15 "of"
+              args[0] String value="x" quote="'" 18:16-18:19 "'x'"
+            method Identifier 18:21-18:24 "tap"
+            closures[0] Closure 18:25-18:33
+              body[0] ExpressionStatement 18:27-18:31
+                expression Variable 18:27-18:31 "copy"
+          method Identifier 18:34-18:37 "set"
+          closures[0] Closure 18:38-18:50
+            body[0] ExpressionStatement 18:40-18:48
+              expression Variable 18:40-18:48 "original"
+      items[4] ExpressionStatement 19:5-19:16
+        expression MethodCall navigation="." trailingComma=false parens=true 19:5-19:16
+          receiver Variable 19:5-19:9 "copy"
+          method Identifier 19:10-19:14 "view"
+      items[5] ExpressionStatement 20:5-20:20
+        expression MethodCall navigation="." trailingComma=false parens=true 20:5-20:20
+          receiver Variable 20:5-20:13 "original"
+          method Identifier 20:14-20:18 "view"

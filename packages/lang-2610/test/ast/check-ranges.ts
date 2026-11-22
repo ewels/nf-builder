@@ -8,7 +8,7 @@ import {
 } from "@nf-builder/lang-core";
 import { CharStream } from "antlr4ng";
 import { ScriptLexer } from "../../src/generated/ScriptLexer.ts";
-import { hasRule, NOT_REPARSED, reparse } from "./parse-rule.ts";
+import { hasRule, notReparsed, reparse } from "./parse-rule.ts";
 import { shape } from "./shape.ts";
 
 // F-102 step 2: every AST node's range slices back to its exact source text. `checkRanges` returns the problems found;
@@ -126,6 +126,16 @@ export function checkRanges(
       );
   };
 
+  const ancestors = (node: AstNode): AstNode[] => {
+    const out: AstNode[] = [];
+    for (let p = parentOf.get(node); p; p = parentOf.get(p)) out.push(p);
+    return out;
+  };
+  const parentOf = new Map<AstNode, AstNode>();
+  walk(ast, (node, parent) => {
+    if (parent) parentOf.set(node, parent);
+  });
+
   walk(ast, (node, parent) => {
     const where = describe(node);
     const r = node.range;
@@ -225,10 +235,11 @@ export function checkRanges(
       mode === "all" ||
       (mode === "declarations" && DECLARATION_KINDS.has(node.kind))
     ) {
-      if (!hasRule(node) && !NOT_REPARSED.has(node.kind)) {
+      const parents = ancestors(node);
+      if (!hasRule(node, parents) && !notReparsed(node, parents)) {
         problems.push(`${where}: no re-parse rule for ${node.kind}`);
       } else {
-        const result = reparse(node, text, ast.typesEnabled);
+        const result = reparse(node, text, ast.typesEnabled, parents);
         if ("error" in result) problems.push(`${where}: ${result.error}`);
         else if ("node" in result) {
           const before = JSON.stringify(shape(node));

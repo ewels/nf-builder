@@ -22,6 +22,11 @@ export class BuildContext {
   /** `nextflow.enable.types = true` has been seen: processes and workflows built from here on are typed. */
   typesEnabled = false;
   readonly errors: ParseProblem[] = [];
+  /**
+   * The last number literal that Groovy's `Numbers` rejects (upstream `numberFormatError`). The build fails with it once
+   * the whole script is built (`failOnNumberFormat`), so every other error is collected first.
+   */
+  numberFormatError: { message: string; at: Range } | null = null;
 
   constructor(text: string, tokens: CommonTokenStream) {
     this.index = new PositionIndex(text);
@@ -39,6 +44,17 @@ export class BuildContext {
   /** Collect an error and carry on (upstream `collectSyntaxError`). */
   error(message: string, at: Range): void {
     this.errors.push(problem(message, at));
+  }
+
+  /** Collect an error that already has its position (`checkEscapes`). */
+  report(problem: ParseProblem): void {
+    this.errors.push(problem);
+  }
+
+  /** Fail the build with the pending number-format error, if there is one. */
+  failOnNumberFormat(): void {
+    if (this.numberFormatError)
+      this.fatal(this.numberFormatError.message, this.numberFormatError.at);
   }
 
   /** Stop the build (upstream `createParsingFailedException`). */

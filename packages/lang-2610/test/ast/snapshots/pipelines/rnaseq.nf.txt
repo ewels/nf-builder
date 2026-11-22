@@ -1,0 +1,16 @@
+Script typesEnabled=true 1:1-11:1
+  body[0] FeatureFlag 1:1-1:29
+    name Identifier 1:1-1:22 "nextflow.enable.types"
+    value Boolean 1:25-1:29 "true"
+  body[1] ParamsBlock 3:1-5:2
+    params[0] Param 4:5-4:18
+      name Identifier 4:5-4:10 "input"
+      type TypeRef nullable=false 4:12-4:18 "String"
+  body[2] Workflow typed=true 7:1-10:2
+    main Section label="main" labelRange=8:5-8:10 8:5-9:25
+      items[0] ExpressionStatement 9:5-9:25
+        expression MethodCall trailingComma=false parens=false 9:5-9:25
+          method Identifier 9:5-9:12 "println"
+          args[0] Property navigation="." 9:13-9:25
+            object Variable 9:13-9:19 "params"
+            property Identifier 9:20-9:25 "input"

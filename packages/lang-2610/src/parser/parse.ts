@@ -42,7 +42,7 @@ export type ParseOutcome<T> =
   | { ok: true; tree: T; mode: "SLL" | "LL"; tokens: CommonTokenStream }
   | { ok: false; error: ParseError; mode: "SLL" | "LL" };
 
-class FirstErrorListener extends BaseErrorListener {
+export class FirstErrorListener extends BaseErrorListener {
   first: ParseError | undefined;
 
   override syntaxError(

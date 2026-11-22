@@ -1,0 +1,9 @@
+Script typesEnabled=false 1:1-8:1
+  body[0] Workflow typed=false 1:1-7:2
+    name Identifier 1:10-1:15 "greet"
+    takes Section label="take" labelRange=2:5-2:10 2:5-3:14
+      items[0] TypedName 3:5-3:14
+        name Identifier 3:5-3:14 "greetings"
+    emits Section label="emit" labelRange=5:5-5:10 5:5-6:14
+      items[0] NamedOutput 6:5-6:14
+        name Identifier 6:5-6:14 "greetings"

@@ -1,8 +1,14 @@
 import type { LintSpec, Outcome, RunSpec } from "./cases.ts";
 import type { ExecResult } from "./nextflow.ts";
 
-type LintMessage = { message: string };
-type LintReport = { errors: LintMessage[]; warnings: LintMessage[] };
+/** One entry of `errors` or `warnings`; the position keys are there when Nextflow printed them. */
+export type LintMessage = {
+  message: string;
+  filename?: string;
+  startLine?: number;
+  startColumn?: number;
+};
+export type LintReport = { errors: LintMessage[]; warnings: LintMessage[] };
 
 /** Finds the JSON object `nextflow lint -o json` prints (from the first line that is exactly "{"); null if there is none or it doesn't parse. */
 export function parseLintJson(stdout: string): LintReport | null {

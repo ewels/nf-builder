@@ -1,0 +1,954 @@
+{
+  "about": "F-102 inputs for errors nf-lang's ScriptAstBuilder reports that nf-lang's own tests don't cover (those are in test/ported/cases.json). Malformed on purpose. lint is what nextflow lint 26.10.7 printed for the file alone; expect is what the AST builder must report (lint minus resolver errors, which end in 'is not defined'); fatal means the builder throws, so there is no AST.",
+  "upstream": {
+    "repo": "nextflow-io/nextflow",
+    "tag": "v26.10.7",
+    "commit": "0ad848ef3c3a22824cd9eb2ca14568385867702d"
+  },
+  "lintCheckedWith": "nextflow 26.10.7 lint -o json, one directory per file (NXF_SYNTAX_PARSER=v2, NXF_OFFLINE=true, no network), 2026-11-22",
+  "cases": [
+    {
+      "id": "agent-empty",
+      "file": "errors/agent-empty.nf",
+      "upstream": "modules/nf-lang/src/main/java/nextflow/script/parser/ScriptAstBuilder.java#L851,L868",
+      "fatal": false,
+      "lint": [
+        {
+          "line": 1,
+          "column": 1,
+          "message": "Missing agent body"
+        }
+      ],
+      "expect": [
+        {
+          "line": 1,
+          "column": 1,
+          "message": "Missing agent body"
+        }
+      ]
+    },
+    {
+      "id": "agent-invalid-directive",
+      "file": "errors/agent-invalid-directive.nf",
+      "upstream": "modules/nf-lang/src/main/java/nextflow/script/parser/ScriptAstBuilder.java#L877,L774-L803",
+      "fatal": false,
+      "lint": [
+        {
+          "line": 2,
+          "column": 5,
+          "message": "Invalid agent directive"
+        }
+      ],
+      "expect": [
+        {
+          "line": 2,
+          "column": 5,
+          "message": "Invalid agent directive"
+        }
+      ]
+    },
+    {
+      "id": "directive-not-call",
+      "file": "errors/directive-not-call.nf",
+      "upstream": "modules/nf-lang/src/main/java/nextflow/script/parser/ScriptAstBuilder.java#L567,L795-L798",
+      "fatal": false,
+      "lint": [
+        {
+          "line": 2,
+          "column": 5,
+          "message": "Invalid process directive"
+        }
+      ],
+      "expect": [
+        {
+          "line": 2,
+          "column": 5,
+          "message": "Invalid process directive"
+        }
+      ]
+    },
+    {
+      "id": "directive-with-receiver",
+      "file": "errors/directive-with-receiver.nf",
+      "upstream": "modules/nf-lang/src/main/java/nextflow/script/parser/ScriptAstBuilder.java#L567,L800-L804",
+      "fatal": false,
+      "lint": [
+        {
+          "line": 2,
+          "column": 5,
+          "message": "Invalid process directive"
+        }
+      ],
+      "expect": [
+        {
+          "line": 2,
+          "column": 5,
+          "message": "Invalid process directive"
+        }
+      ]
+    },
+    {
+      "id": "duplicate-named-arg",
+      "file": "errors/duplicate-named-arg.nf",
+      "upstream": "modules/nf-lang/src/main/java/nextflow/script/parser/ScriptAstBuilder.java#L2022",
+      "fatal": true,
+      "lint": [
+        {
+          "line": 1,
+          "column": 44,
+          "message": "Duplicated named argument 'checkIfExists' found"
+        }
+      ],
+      "expect": [
+        {
+          "line": 1,
+          "column": 44,
+          "message": "Duplicated named argument 'checkIfExists' found"
+        }
+      ]
+    },
+    {
+      "id": "empty-list-comma",
+      "file": "errors/empty-list-comma.nf",
+      "upstream": "modules/nf-lang/src/main/java/nextflow/script/parser/ScriptAstBuilder.java#L1881",
+      "fatal": true,
+      "lint": [
+        {
+          "line": 1,
+          "column": 10,
+          "message": "Empty list literal should not contain any comma(,)"
+        }
+      ],
+      "expect": [
+        {
+          "line": 1,
+          "column": 10,
+          "message": "Empty list literal should not contain any comma(,)"
+        }
+      ]
+    },
+    {
+      "id": "entry-twice",
+      "file": "errors/entry-twice.nf",
+      "upstream": "modules/nf-lang/src/main/java/nextflow/script/parser/ScriptAstBuilder.java#L390",
+      "fatal": false,
+      "lint": [
+        {
+          "line": 5,
+          "column": 1,
+          "message": "Entry workflow defined more than once"
+        }
+      ],
+      "expect": [
+        {
+          "line": 5,
+          "column": 1,
+          "message": "Entry workflow defined more than once"
+        }
+      ]
+    },
+    {
+      "id": "feature-flag-not-literal",
+      "file": "errors/feature-flag-not-literal.nf",
+      "upstream": "modules/nf-lang/src/main/java/nextflow/script/parser/ScriptAstBuilder.java#L412",
+      "fatal": false,
+      "lint": [
+        {
+          "line": 1,
+          "column": 1,
+          "message": "Feature flag value must be a literal value (number, string, true/false)"
+        }
+      ],
+      "expect": [
+        {
+          "line": 1,
+          "column": 1,
+          "message": "Feature flag value must be a literal value (number, string, true/false)"
+        }
+      ]
+    },
+    {
+      "id": "for-loop",
+      "file": "errors/for-loop.nf",
+      "upstream": "modules/nf-lang/src/main/java/nextflow/script/parser/ScriptAstBuilder.java#L1303",
+      "fatal": false,
+      "lint": [
+        {
+          "line": 1,
+          "column": 1,
+          "message": "`for` loops are no longer supported"
+        },
+        {
+          "line": 1,
+          "column": 6,
+          "message": "`x` is not defined"
+        },
+        {
+          "line": 2,
+          "column": 13,
+          "message": "`x` is not defined"
+        }
+      ],
+      "expect": [
+        {
+          "line": 1,
+          "column": 1,
+          "message": "`for` loops are no longer supported"
+        }
+      ]
+    },
+    {
+      "id": "groovy-keyword",
+      "file": "errors/groovy-keyword.nf",
+      "upstream": "modules/nf-lang/src/main/java/nextflow/script/parser/ScriptAstBuilder.java#L1307",
+      "fatal": false,
+      "lint": [
+        {
+          "line": 1,
+          "column": 5,
+          "message": "`static` is not allowed as an identifier because it is a Groovy keyword"
+        }
+      ],
+      "expect": [
+        {
+          "line": 1,
+          "column": 5,
+          "message": "`static` is not allowed as an identifier because it is a Groovy keyword"
+        }
+      ]
+    },
+    {
+      "id": "import",
+      "file": "errors/import.nf",
+      "upstream": "modules/nf-lang/src/main/java/nextflow/script/parser/ScriptAstBuilder.java#L339",
+      "fatal": false,
+      "lint": [
+        {
+          "line": 1,
+          "column": 1,
+          "message": "Groovy `import` declarations are not supported -- use fully-qualified name inline instead"
+        }
+      ],
+      "expect": [
+        {
+          "line": 1,
+          "column": 1,
+          "message": "Groovy `import` declarations are not supported -- use fully-qualified name inline instead"
+        }
+      ]
+    },
+    {
+      "id": "incomplete-declaration",
+      "file": "errors/incomplete-declaration.nf",
+      "upstream": "modules/nf-lang/src/main/java/nextflow/script/parser/ScriptAstBuilder.java#L1108",
+      "fatal": false,
+      "lint": [
+        {
+          "line": 1,
+          "column": 1,
+          "message": "Incomplete declaration"
+        }
+      ],
+      "expect": [
+        {
+          "line": 1,
+          "column": 1,
+          "message": "Incomplete declaration"
+        }
+      ]
+    },
+    {
+      "id": "incomplete-expression",
+      "file": "errors/incomplete-expression.nf",
+      "upstream": "modules/nf-lang/src/main/java/nextflow/script/parser/ScriptAstBuilder.java#L1425",
+      "fatal": false,
+      "lint": [
+        {
+          "line": 3,
+          "column": 5,
+          "message": "Incomplete expression"
+        }
+      ],
+      "expect": [
+        {
+          "line": 3,
+          "column": 5,
+          "message": "Incomplete expression"
+        }
+      ]
+    },
+    {
+      "id": "invalid-assignment-target",
+      "file": "errors/invalid-assignment-target.nf",
+      "upstream": "modules/nf-lang/src/main/java/nextflow/script/parser/ScriptAstBuilder.java#L1336",
+      "fatal": true,
+      "lint": [
+        {
+          "line": 2,
+          "column": 1,
+          "message": "Invalid assignment target -- must be a variable, index, or property expression"
+        }
+      ],
+      "expect": [
+        {
+          "line": 2,
+          "column": 1,
+          "message": "Invalid assignment target -- must be a variable, index, or property expression"
+        }
+      ]
+    },
+    {
+      "id": "invalid-definition",
+      "file": "errors/invalid-definition.nf",
+      "upstream": "modules/nf-lang/src/main/java/nextflow/script/parser/ScriptAstBuilder.java#L251-L260,L304-L320",
+      "fatal": false,
+      "lint": [
+        {
+          "line": 1,
+          "column": 1,
+          "message": "Invalid workflow definition -- check for missing or out-of-order section labels"
+        }
+      ],
+      "note": "the top-level statement is a call named workflow; re-parsing it as a declaration succeeds on a prefix, so no syntax error is found and the generic message is reported",
+      "expect": [
+        {
+          "line": 1,
+          "column": 1,
+          "message": "Invalid workflow definition -- check for missing or out-of-order section labels"
+        }
+      ]
+    },
+    {
+      "id": "nested-paren-assignment",
+      "file": "errors/nested-paren-assignment.nf",
+      "upstream": "modules/nf-lang/src/main/java/nextflow/script/parser/ScriptAstBuilder.java#L1327",
+      "fatal": true,
+      "lint": [
+        {
+          "line": 2,
+          "column": 1,
+          "message": "Nested parenthesis is not allowed in multiple assignment, e.g. ((a)) = b"
+        }
+      ],
+      "expect": [
+        {
+          "line": 2,
+          "column": 1,
+          "message": "Nested parenthesis is not allowed in multiple assignment, e.g. ((a)) = b"
+        }
+      ]
+    },
+    {
+      "id": "number-double-out-of-range",
+      "file": "errors/number-double-out-of-range.nf",
+      "upstream": "modules/nf-lang/src/main/java/nextflow/script/parser/ScriptAstBuilder.java#L1683,L289-L290",
+      "fatal": true,
+      "lint": [
+        {
+          "line": 1,
+          "column": 9,
+          "message": "out of range"
+        }
+      ],
+      "expect": [
+        {
+          "line": 1,
+          "column": 9,
+          "message": "out of range"
+        }
+      ]
+    },
+    {
+      "id": "number-float-out-of-range",
+      "file": "errors/number-float-out-of-range.nf",
+      "upstream": "modules/nf-lang/src/main/java/nextflow/script/parser/ScriptAstBuilder.java#L1683,L289-L290",
+      "fatal": true,
+      "lint": [
+        {
+          "line": 1,
+          "column": 9,
+          "message": "out of range"
+        }
+      ],
+      "expect": [
+        {
+          "line": 1,
+          "column": 9,
+          "message": "out of range"
+        }
+      ]
+    },
+    {
+      "id": "number-long-too-large",
+      "file": "errors/number-long-too-large.nf",
+      "upstream": "modules/nf-lang/src/main/java/nextflow/script/parser/ScriptAstBuilder.java#L1668,L289-L290",
+      "fatal": true,
+      "lint": [
+        {
+          "line": 1,
+          "column": 9,
+          "message": "Number of value 99999999999999999999 does not fit in the range of long, but long was enforced."
+        }
+      ],
+      "expect": [
+        {
+          "line": 1,
+          "column": 9,
+          "message": "Number of value 99999999999999999999 does not fit in the range of long, but long was enforced."
+        }
+      ]
+    },
+    {
+      "id": "number-too-large",
+      "file": "errors/number-too-large.nf",
+      "upstream": "modules/nf-lang/src/main/java/nextflow/script/parser/ScriptAstBuilder.java#L1668,L289-L290",
+      "fatal": true,
+      "lint": [
+        {
+          "line": 1,
+          "column": 9,
+          "message": "Number of value 99999999999999999999999999999 does not fit in the range of int, but int was enforced."
+        }
+      ],
+      "expect": [
+        {
+          "line": 1,
+          "column": 9,
+          "message": "Number of value 99999999999999999999999999999 does not fit in the range of int, but int was enforced."
+        }
+      ]
+    },
+    {
+      "id": "output-invalid-declaration",
+      "file": "errors/output-invalid-declaration.nf",
+      "upstream": "modules/nf-lang/src/main/java/nextflow/script/parser/ScriptAstBuilder.java#L1081",
+      "fatal": false,
+      "lint": [
+        {
+          "line": 13,
+          "column": 5,
+          "message": "Invalid output declaration"
+        }
+      ],
+      "expect": [
+        {
+          "line": 13,
+          "column": 5,
+          "message": "Invalid output declaration"
+        }
+      ]
+    },
+    {
+      "id": "output-twice",
+      "file": "errors/output-twice.nf",
+      "upstream": "modules/nf-lang/src/main/java/nextflow/script/parser/ScriptAstBuilder.java#L351",
+      "fatal": false,
+      "lint": [
+        {
+          "line": 15,
+          "column": 1,
+          "message": "Output block defined more than once"
+        }
+      ],
+      "expect": [
+        {
+          "line": 15,
+          "column": 1,
+          "message": "Output block defined more than once"
+        }
+      ]
+    },
+    {
+      "id": "params-block-after-legacy",
+      "file": "errors/params-block-after-legacy.nf",
+      "upstream": "modules/nf-lang/src/main/java/nextflow/script/parser/ScriptAstBuilder.java#L360",
+      "fatal": false,
+      "lint": [
+        {
+          "line": 3,
+          "column": 1,
+          "message": "Params block cannot be mixed with legacy parameter declarations"
+        }
+      ],
+      "expect": [
+        {
+          "line": 3,
+          "column": 1,
+          "message": "Params block cannot be mixed with legacy parameter declarations"
+        }
+      ]
+    },
+    {
+      "id": "params-invalid-declaration",
+      "file": "errors/params-invalid-declaration.nf",
+      "upstream": "modules/nf-lang/src/main/java/nextflow/script/parser/ScriptAstBuilder.java#L432",
+      "fatal": false,
+      "lint": [
+        {
+          "line": 3,
+          "column": 5,
+          "message": "Invalid parameter declaration"
+        }
+      ],
+      "expect": [
+        {
+          "line": 3,
+          "column": 5,
+          "message": "Invalid parameter declaration"
+        }
+      ]
+    },
+    {
+      "id": "params-legacy-after-block",
+      "file": "errors/params-legacy-after-block.nf",
+      "upstream": "modules/nf-lang/src/main/java/nextflow/script/parser/ScriptAstBuilder.java#L367",
+      "fatal": false,
+      "lint": [
+        {
+          "line": 5,
+          "column": 1,
+          "message": "Legacy parameter declarations cannot be mixed with the params block"
+        }
+      ],
+      "expect": [
+        {
+          "line": 5,
+          "column": 1,
+          "message": "Legacy parameter declarations cannot be mixed with the params block"
+        }
+      ]
+    },
+    {
+      "id": "params-twice",
+      "file": "errors/params-twice.nf",
+      "upstream": "modules/nf-lang/src/main/java/nextflow/script/parser/ScriptAstBuilder.java#L358",
+      "fatal": false,
+      "lint": [
+        {
+          "line": 5,
+          "column": 1,
+          "message": "Params block defined more than once"
+        }
+      ],
+      "expect": [
+        {
+          "line": 5,
+          "column": 1,
+          "message": "Params block defined more than once"
+        }
+      ]
+    },
+    {
+      "id": "process-empty",
+      "file": "errors/process-empty.nf",
+      "upstream": "modules/nf-lang/src/main/java/nextflow/script/parser/ScriptAstBuilder.java#L518,L558",
+      "fatal": false,
+      "lint": [
+        {
+          "line": 1,
+          "column": 1,
+          "message": "Missing process script body"
+        }
+      ],
+      "expect": [
+        {
+          "line": 1,
+          "column": 1,
+          "message": "Missing process script body"
+        }
+      ]
+    },
+    {
+      "id": "process-invalid-input",
+      "file": "errors/process-invalid-input.nf",
+      "upstream": "modules/nf-lang/src/main/java/nextflow/script/parser/ScriptAstBuilder.java#L667,L774-L803",
+      "fatal": false,
+      "lint": [
+        {
+          "line": 3,
+          "column": 5,
+          "message": "Invalid process input"
+        }
+      ],
+      "expect": [
+        {
+          "line": 3,
+          "column": 5,
+          "message": "Invalid process input"
+        }
+      ]
+    },
+    {
+      "id": "process-invalid-output",
+      "file": "errors/process-invalid-output.nf",
+      "upstream": "modules/nf-lang/src/main/java/nextflow/script/parser/ScriptAstBuilder.java#L741",
+      "fatal": false,
+      "lint": [
+        {
+          "line": 3,
+          "column": 5,
+          "message": "Typed output declaration is not allowed in legacy process -- set `nextflow.enable.types = true` to use typed processes in this script"
+        }
+      ],
+      "expect": [
+        {
+          "line": 3,
+          "column": 5,
+          "message": "Typed output declaration is not allowed in legacy process -- set `nextflow.enable.types = true` to use typed processes in this script"
+        }
+      ]
+    },
+    {
+      "id": "process-invalid-stage",
+      "file": "errors/process-invalid-stage.nf",
+      "upstream": "modules/nf-lang/src/main/java/nextflow/script/parser/ScriptAstBuilder.java#L675,L774-L803",
+      "fatal": false,
+      "lint": [
+        {
+          "line": 8,
+          "column": 5,
+          "message": "Invalid stage directive"
+        }
+      ],
+      "expect": [
+        {
+          "line": 8,
+          "column": 5,
+          "message": "Invalid stage directive"
+        }
+      ]
+    },
+    {
+      "id": "process-stage-legacy",
+      "file": "errors/process-stage-legacy.nf",
+      "upstream": "modules/nf-lang/src/main/java/nextflow/script/parser/ScriptAstBuilder.java#L537",
+      "fatal": false,
+      "lint": [
+        {
+          "line": 5,
+          "column": 5,
+          "message": "The `stage:` section is not supported in a legacy process"
+        }
+      ],
+      "expect": [
+        {
+          "line": 5,
+          "column": 5,
+          "message": "The `stage:` section is not supported in a legacy process"
+        }
+      ]
+    },
+    {
+      "id": "process-topic-legacy",
+      "file": "errors/process-topic-legacy.nf",
+      "upstream": "modules/nf-lang/src/main/java/nextflow/script/parser/ScriptAstBuilder.java#L540",
+      "fatal": false,
+      "lint": [
+        {
+          "line": 8,
+          "column": 5,
+          "message": "The `topic:` section is not supported in a legacy process"
+        }
+      ],
+      "expect": [
+        {
+          "line": 8,
+          "column": 5,
+          "message": "The `topic:` section is not supported in a legacy process"
+        }
+      ]
+    },
+    {
+      "id": "process-typed-multiple-unnamed-outputs",
+      "file": "errors/process-typed-multiple-unnamed-outputs.nf",
+      "upstream": "modules/nf-lang/src/main/java/nextflow/script/parser/ScriptAstBuilder.java#L691",
+      "fatal": false,
+      "lint": [
+        {
+          "line": 7,
+          "column": 5,
+          "message": "Every output must be assigned to a name when there are multiple outputs"
+        }
+      ],
+      "expect": [
+        {
+          "line": 7,
+          "column": 5,
+          "message": "Every output must be assigned to a name when there are multiple outputs"
+        }
+      ]
+    },
+    {
+      "id": "switch",
+      "file": "errors/switch.nf",
+      "upstream": "modules/nf-lang/src/main/java/nextflow/script/parser/ScriptAstBuilder.java#L1305",
+      "fatal": false,
+      "lint": [
+        {
+          "line": 2,
+          "column": 1,
+          "message": "`switch` statements are no longer supported"
+        }
+      ],
+      "expect": [
+        {
+          "line": 2,
+          "column": 1,
+          "message": "`switch` statements are no longer supported"
+        }
+      ]
+    },
+    {
+      "id": "underscore-name",
+      "file": "errors/underscore-name.nf",
+      "upstream": "modules/nf-lang/src/main/java/nextflow/script/parser/ScriptAstBuilder.java#L1299",
+      "fatal": false,
+      "lint": [
+        {
+          "line": 1,
+          "column": 5,
+          "message": "`_` is not allowed as an identifier because it is reserved for future use"
+        }
+      ],
+      "expect": [
+        {
+          "line": 1,
+          "column": 5,
+          "message": "`_` is not allowed as an identifier because it is reserved for future use"
+        }
+      ]
+    },
+    {
+      "id": "while-loop",
+      "file": "errors/while-loop.nf",
+      "upstream": "modules/nf-lang/src/main/java/nextflow/script/parser/ScriptAstBuilder.java#L1303",
+      "fatal": false,
+      "lint": [
+        {
+          "line": 2,
+          "column": 1,
+          "message": "`while` loops are no longer supported"
+        }
+      ],
+      "expect": [
+        {
+          "line": 2,
+          "column": 1,
+          "message": "`while` loops are no longer supported"
+        }
+      ]
+    },
+    {
+      "id": "workflow-emit-only-entry",
+      "file": "errors/workflow-emit-only-entry.nf",
+      "upstream": "modules/nf-lang/src/main/java/nextflow/script/parser/ScriptAstBuilder.java#L934",
+      "fatal": false,
+      "lint": [
+        {
+          "line": 2,
+          "column": 5,
+          "message": "Entry workflow cannot have an emit section"
+        }
+      ],
+      "expect": [
+        {
+          "line": 2,
+          "column": 5,
+          "message": "Entry workflow cannot have an emit section"
+        }
+      ]
+    },
+    {
+      "id": "workflow-entry-emit",
+      "file": "errors/workflow-entry-emit.nf",
+      "upstream": "modules/nf-lang/src/main/java/nextflow/script/parser/ScriptAstBuilder.java#L934",
+      "fatal": false,
+      "lint": [
+        {
+          "line": 5,
+          "column": 5,
+          "message": "Entry workflow cannot have an emit section"
+        }
+      ],
+      "expect": [
+        {
+          "line": 5,
+          "column": 5,
+          "message": "Entry workflow cannot have an emit section"
+        }
+      ]
+    },
+    {
+      "id": "workflow-entry-take",
+      "file": "errors/workflow-entry-take.nf",
+      "upstream": "modules/nf-lang/src/main/java/nextflow/script/parser/ScriptAstBuilder.java#L932",
+      "fatal": false,
+      "lint": [
+        {
+          "line": 2,
+          "column": 5,
+          "message": "Entry workflow cannot have a take section"
+        }
+      ],
+      "expect": [
+        {
+          "line": 2,
+          "column": 5,
+          "message": "Entry workflow cannot have a take section"
+        }
+      ]
+    },
+    {
+      "id": "workflow-invalid-take",
+      "file": "errors/workflow-invalid-take.nf",
+      "upstream": "modules/nf-lang/src/main/java/nextflow/script/parser/ScriptAstBuilder.java#L966",
+      "fatal": false,
+      "lint": [
+        {
+          "line": 3,
+          "column": 5,
+          "message": "Invalid workflow take"
+        },
+        {
+          "line": 6,
+          "column": 13,
+          "message": "`x` is not defined"
+        }
+      ],
+      "expect": [
+        {
+          "line": 3,
+          "column": 5,
+          "message": "Invalid workflow take"
+        }
+      ]
+    },
+    {
+      "id": "workflow-legacy-typed-emit",
+      "file": "errors/workflow-legacy-typed-emit.nf",
+      "upstream": "modules/nf-lang/src/main/java/nextflow/script/parser/ScriptAstBuilder.java#L1022",
+      "fatal": false,
+      "lint": [
+        {
+          "line": -1,
+          "column": -1,
+          "message": "Typed output is not allowed in legacy workflow -- set `nextflow.enable.types = true` to use typed workflows in this script"
+        }
+      ],
+      "note": "upstream passes the emit before giving it a position (ScriptAstBuilder.java#L1015-L1022), so lint prints -1:-1; report at the emit",
+      "expect": [
+        {
+          "line": 6,
+          "column": 5,
+          "message": "Typed output is not allowed in legacy workflow -- set `nextflow.enable.types = true` to use typed workflows in this script"
+        }
+      ]
+    },
+    {
+      "id": "workflow-legacy-typed-take",
+      "file": "errors/workflow-legacy-typed-take.nf",
+      "upstream": "modules/nf-lang/src/main/java/nextflow/script/parser/ScriptAstBuilder.java#L970",
+      "fatal": false,
+      "lint": [
+        {
+          "line": 3,
+          "column": 5,
+          "message": "Typed input is not allowed in legacy workflow -- set `nextflow.enable.types = true` to use typed workflows in this script"
+        },
+        {
+          "line": 6,
+          "column": 5,
+          "message": "`x` is not defined"
+        }
+      ],
+      "expect": [
+        {
+          "line": 3,
+          "column": 5,
+          "message": "Typed input is not allowed in legacy workflow -- set `nextflow.enable.types = true` to use typed workflows in this script"
+        }
+      ]
+    },
+    {
+      "id": "workflow-named-oncomplete",
+      "file": "errors/workflow-named-oncomplete.nf",
+      "upstream": "modules/nf-lang/src/main/java/nextflow/script/parser/ScriptAstBuilder.java#L940",
+      "fatal": false,
+      "lint": [
+        {
+          "line": 6,
+          "column": 5,
+          "message": "Named workflow cannot have an onComplete section"
+        }
+      ],
+      "expect": [
+        {
+          "line": 6,
+          "column": 5,
+          "message": "Named workflow cannot have an onComplete section"
+        }
+      ]
+    },
+    {
+      "id": "workflow-named-onerror",
+      "file": "errors/workflow-named-onerror.nf",
+      "upstream": "modules/nf-lang/src/main/java/nextflow/script/parser/ScriptAstBuilder.java#L942",
+      "fatal": false,
+      "lint": [
+        {
+          "line": -1,
+          "column": -1,
+          "message": "Named workflow cannot have an onError section"
+        }
+      ],
+      "note": "upstream passes the onComplete block instead of onError (ScriptAstBuilder.java#L942), so lint prints -1:-1; report at the first onError statement, as for publish and onComplete",
+      "expect": [
+        {
+          "line": 6,
+          "column": 5,
+          "message": "Named workflow cannot have an onError section"
+        }
+      ]
+    },
+    {
+      "id": "workflow-named-publish",
+      "file": "errors/workflow-named-publish.nf",
+      "upstream": "modules/nf-lang/src/main/java/nextflow/script/parser/ScriptAstBuilder.java#L938",
+      "fatal": false,
+      "lint": [
+        {
+          "line": 6,
+          "column": 5,
+          "message": "Named workflow cannot have a publish section"
+        }
+      ],
+      "expect": [
+        {
+          "line": 6,
+          "column": 5,
+          "message": "Named workflow cannot have a publish section"
+        }
+      ]
+    },
+    {
+      "id": "workflow-publish-statement",
+      "file": "errors/workflow-publish-statement.nf",
+      "upstream": "modules/nf-lang/src/main/java/nextflow/script/parser/ScriptAstBuilder.java#L1050",
+      "fatal": false,
+      "lint": [
+        {
+          "line": 6,
+          "column": 5,
+          "message": "Invalid workflow publish statement -- must be an assignment"
+        }
+      ],
+      "expect": [
+        {
+          "line": 6,
+          "column": 5,
+          "message": "Invalid workflow publish statement -- must be an assignment"
+        }
+      ]
+    }
+  ]
+}

@@ -60,13 +60,13 @@ Run `pnpm test:corpus` when touching the parser, model, projection or printer. T
 - changes to `features.json` beyond setting `passes` and appending to `notes` (the Scope guard fails without the `scope-change` label; adding or splitting features is fine; never drop scope or weaken a step without an ADR);
 - anything that contradicts an accepted ADR (supersede it) or depends on an open question in `docs/plan/open-questions.md` (answer it).
 
-**Blocked.** If a feature needs something only the maintainer can provide (a secret, a GitHub or Netlify setting, an account), note it under Blockers in `progress.md`, open a GitHub issue labelled `maintainer`, and move to the next feature. Stop only when every feature passes or everything left is blocked.
+**Blocked.** If a feature needs something only the maintainer can provide (a secret, a GitHub or Netlify setting, an account), note it under Blockers in `progress.md`, open a GitHub issue labelled `maintainer`, and move to the next feature. Stop only when every feature passes or everything left is blocked. Features in milestone M8 are deferred past v0.1 (ADR 0030) and don't count.
 
 **Never:**
 - edit generated files (below);
 - edit the body of an `Accepted` ADR, except to append a spike result (ADR 0001);
 - delete, skip or weaken a test or approved visual baseline;
-- push to `main` directly, or merge a PR before CI is green and the reviewer has nothing blocking;
+- push code, tests, workflows, configuration, dependencies, generated files or `features.json` to `main` directly, or merge a PR before CI is green and the reviewer has nothing blocking (docs-only changes may go straight to `main` after `pnpm check`, ADR 0031);
 - force-push or rewrite history on `main`;
 - commit tokens or secrets;
 - call a network host not on the ADR 0002 allow-list from app code (build-time tools may use the hosts their ADR records, ADR 0017);
@@ -95,7 +95,7 @@ If your change adds a dependency, moves a package boundary, changes a stored or 
 - Use the Nextflow agent skills:
   - Claude Code: eight skills from `seqeralabs/nextflow-plugin` are vendored in `.claude/skills/` (see its README), so cloud sessions get them too;
   - other agents: `npx skills add seqeralabs/nextflow-plugin`.
-- Nextflow code in templates and fixtures must pass the oracle (`pnpm oracle`, CI job `oracle`: `nextflow lint` and `nextflow run -stub` on 26.10). In typed code, build a legacy `tuple` input with `tuple(...)`, never a mixed list literal (spike S1). The exceptions are malformed on purpose: in `tools/corpus/fixtures/` the oracle must reproduce the `lint` result recorded in `fixtures.yaml` (ADR 0017), and an oracle case marked `expect: error` in `tools/oracle/cases/cases.yaml` must fail as recorded (ADR 0019). The upstream test inputs in `packages/lang-*/test/ported/` are kept as nf-lang wrote them; their recorded `lint` results are checked for consistency, not re-run (F-101).
+- Nextflow code in templates and fixtures must pass the oracle (`pnpm oracle`, CI job `oracle`: `nextflow lint` and `nextflow run -stub` on 26.10). In typed code, build a legacy `tuple` input with `tuple(...)`, never a mixed list literal (spike S1). The exceptions are malformed on purpose: in `tools/corpus/fixtures/` the oracle must reproduce the `lint` result recorded in `fixtures.yaml` (ADR 0017), and an oracle case marked `expect: error` in `tools/oracle/cases/cases.yaml` must fail as recorded (ADR 0019). The upstream test inputs in `packages/lang-*/test/ported/` are kept as nf-lang wrote them; their recorded `lint` results are checked for consistency, not re-run (F-101). The AST fixtures and error inputs in `packages/lang-*/test/ast/` are linted by the oracle, which must reproduce the `lint` lists recorded in `fixtures.json` (empty) and `errors.json` (F-102).
 
 ## Conventions that tools don't enforce
 

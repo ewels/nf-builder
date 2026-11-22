@@ -30,20 +30,25 @@ Script typesEnabled=false 1:1-24:1
     expression MethodCall navigation="." trailingComma=false parens=true 4:1-4:17
       receiver Variable 4:1-4:7 "myFile"
       method Identifier 4:8-4:15 "getText"
+    trailingComments[0] line 4:21-4:27 "// dot"
   body[4] ExpressionStatement 5:1-5:19
     expression MethodCall navigation="*." trailingComma=false parens=true 5:1-5:19
       receiver Variable 5:1-5:8 "myFiles"
       method Identifier 5:10-5:17 "getText"
+    trailingComments[0] line 5:21-5:83 "// spread dot:  myFiles.collect { myFile -> myFile.getText() }"
   body[5] ExpressionStatement 6:1-6:18
     expression MethodCall navigation="?." trailingComma=false parens=true 6:1-6:18
       receiver Variable 6:1-6:7 "myFile"
       method Identifier 6:9-6:16 "getText"
+    trailingComments[0] line 6:21-6:77 "// safe dot:    myFile != null ? myFile.getText() : null"
   body[6] ExpressionStatement 9:1-9:30
+    leadingComments[0] line 8:1-8:19 "// positional args"
     expression MethodCall trailingComma=false parens=false 9:1-9:30
       method Identifier 9:1-9:7 "printf"
       args[0] String value="Hello %s!\n" quote="'" 9:8-9:21 "'Hello %s!\\n'"
       args[1] String value="World" quote="'" 9:23-9:30 "'World'"
   body[7] ExpressionStatement 12:1-12:38
+    leadingComments[0] line 11:1-11:29 "// positional and named args"
     expression MethodCall trailingComma=false parens=false 12:1-12:38
       method Identifier 12:1-12:5 "file"
       args[0] String value="hello.txt" quote="'" 12:6-12:17 "'hello.txt'"
@@ -51,6 +56,7 @@ Script typesEnabled=false 1:1-24:1
         name Identifier 12:19-12:32 "checkIfExists"
         value Boolean 12:34-12:38 "true"
   body[8] ExpressionStatement 15:1-15:56
+    leadingComments[0] line 14:1-14:36 "// closure arg with additional args"
     expression MethodCall navigation="." trailingComma=false parens=true 15:1-15:56
       receiver List trailingComma=false 15:1-15:10
         elements[0] Number integer=true 15:2-15:3 "1"
@@ -70,6 +76,7 @@ Script typesEnabled=false 1:1-24:1
               right String value=" " quote="'" 15:47-15:50 "' '"
             right Variable 15:53-15:54 "v"
   body[9] ExpressionStatement 18:1-18:36
+    leadingComments[0] line 17:1-17:22 "// single closure arg"
     expression MethodCall navigation="." trailingComma=false parens=true 18:1-18:36
       receiver List trailingComma=false 18:1-18:10
         elements[0] Number integer=true 18:2-18:3 "1"
@@ -84,6 +91,7 @@ Script typesEnabled=false 1:1-24:1
             method Identifier 18:25-18:32 "println"
             args[0] Variable 18:33-18:34 "v"
   body[10] ExpressionStatement 21:1-21:34
+    leadingComments[0] line 20:1-20:42 "// single closure arg without parentheses"
     expression MethodCall navigation="." trailingComma=false parens=false 21:1-21:34
       receiver List trailingComma=false 21:1-21:10
         elements[0] Number integer=true 21:2-21:3 "1"

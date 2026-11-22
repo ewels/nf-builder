@@ -1,0 +1,10 @@
+Script typesEnabled=false 1:1-10:1
+  body[0] Enum trailingComma=false 1:1-9:2
+    name Identifier 1:6-1:9 "Day"
+    constants[0] Identifier 2:5-2:11 "MONDAY"
+    constants[1] Identifier 3:5-3:12 "TUESDAY"
+    constants[2] Identifier 4:5-4:14 "WEDNESDAY"
+    constants[3] Identifier 5:5-5:13 "THURSDAY"
+    constants[4] Identifier 6:5-6:11 "FRIDAY"
+    constants[5] Identifier 7:5-7:13 "SATURDAY"
+    constants[6] Identifier 8:5-8:11 "SUNDAY"

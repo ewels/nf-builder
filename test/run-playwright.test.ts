@@ -15,7 +15,8 @@ function listTests(grep: string) {
   return { status: result.status, output: `${result.stdout}${result.stderr}` };
 }
 
-describe("pnpm test:e2e", () => {
+// Each spawned `playwright --list` takes 1 to 2 s, and longer on a busy machine; the 5 s default timed out under load.
+describe("pnpm test:e2e", { timeout: 30_000 }, () => {
   it("F-002: pnpm test:e2e -- --grep F-002 --list lists only F-002 tests", () => {
     const { status, output } = listTests("F-002");
     expect(status, output).toBe(0);

@@ -1,0 +1,61 @@
+Script typesEnabled=false 1:1-22:1
+  body[0] Workflow typed=false 1:1-15:2
+    main Section label="main" labelRange=2:5-2:10 2:5-5:40
+      items[0] Assignment operator="=" 3:5-3:63
+        target Variable 3:5-3:14 "greetings"
+        value MethodCall navigation="." trailingComma=false parens=true 3:17-3:63
+          receiver Variable 3:17-3:24 "channel"
+          method Identifier 3:25-3:27 "of"
+          args[0] String value="Bonjour" quote="'" 3:28-3:37 "'Bonjour'"
+          args[1] String value="Ciao" quote="'" 3:39-3:45 "'Ciao'"
+          args[2] String value="Hello" quote="'" 3:47-3:54 "'Hello'"
+          args[3] String value="Hola" quote="'" 3:56-3:62 "'Hola'"
+      items[1] Assignment operator="=" 4:5-4:50
+        target Variable 4:5-4:13 "messages"
+        value MethodCall navigation="." trailingComma=false parens=false 4:16-4:50
+          receiver Variable 4:16-4:25 "greetings"
+          method Identifier 4:26-4:29 "map"
+          closures[0] Closure 4:30-4:50
+            params[0] Parameter def=false 4:32-4:33
+              name Identifier 4:32-4:33 "v"
+            body[0] ExpressionStatement 4:37-4:48
+              expression GString quote="\"" 4:37-4:48
+                parts[0] Interpolation braced=false 4:38-4:40
+                  expression Variable 4:39-4:40 "v"
+                parts[1] GStringText 4:40-4:47 " world!"
+      items[2] ExpressionStatement 5:5-5:40
+        expression MethodCall navigation="." trailingComma=false parens=false 5:5-5:40
+          receiver Variable 5:5-5:14 "greetings"
+          method Identifier 5:15-5:19 "view"
+          closures[0] Closure 5:20-5:40
+            params[0] Parameter def=false 5:22-5:23
+              name Identifier 5:22-5:23 "v"
+            body[0] ExpressionStatement 5:27-5:38
+              expression GString quote="\"" 5:27-5:38
+                parts[0] Interpolation braced=false 5:28-5:30
+                  expression Variable 5:29-5:30 "v"
+                parts[1] GStringText 5:30-5:37 " world!"
+    publishers Section label="publish" labelRange=7:5-7:13 7:5-8:24
+      items[0] NamedOutput 8:5-8:24
+        name Identifier 8:5-8:13 "messages"
+        value Variable 8:16-8:24 "messages"
+    onComplete Section label="onComplete" labelRange=10:5-10:16 10:5-11:48
+      items[0] ExpressionStatement 11:5-11:48
+        expression MethodCall navigation="." trailingComma=false parens=false 11:5-11:48
+          receiver Variable 11:5-11:8 "log"
+          method Identifier 11:9-11:13 "info"
+          args[0] String value="Workflow completed successfully!" quote="'" 11:14-11:48 "'Workflow completed successfully!'"
+    onError Section label="onError" labelRange=13:5-13:13 13:5-14:33
+      items[0] ExpressionStatement 14:5-14:33
+        expression MethodCall navigation="." trailingComma=false parens=false 14:5-14:33
+          receiver Variable 14:5-14:8 "log"
+          method Identifier 14:9-14:14 "error"
+          args[0] String value="Workflow failed." quote="'" 14:15-14:33 "'Workflow failed.'"
+  body[1] OutputBlock 17:1-21:2
+    outputs[0] Output 18:5-20:6
+      name Identifier 18:5-18:13 "messages"
+      body Block 18:14-20:6
+        statements[0] ExpressionStatement 19:9-19:17
+          expression MethodCall trailingComma=false parens=false 19:9-19:17
+            method Identifier 19:9-19:13 "path"
+            args[0] String value="." quote="'" 19:14-19:17 "'.'"

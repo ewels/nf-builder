@@ -5,6 +5,7 @@ import type {
   FormalParameter,
   Identifier,
   LegacyType,
+  Range,
   TypedName,
   TypeRef,
   Wildcard,
@@ -23,6 +24,66 @@ import type {
 import { has } from "./alt.ts";
 import type { BuildContext } from "./context.ts";
 import { expression } from "./expressions.ts";
+
+const GROOVY_KEYWORDS = new Set([
+  "abstract",
+  "assert",
+  "break",
+  "case",
+  "class",
+  "const",
+  "continue",
+  "default",
+  "do",
+  "extends",
+  "final",
+  "finally",
+  "for",
+  "goto",
+  "implements",
+  "interface",
+  "native",
+  "package",
+  "private",
+  "protected",
+  "public",
+  "static",
+  "super",
+  "switch",
+  "synchronized",
+  "this",
+  "throws",
+  "transient",
+  "void",
+  "volatile",
+  "while",
+]);
+
+/**
+ * Upstream's `checkInvalidVarName`, called wherever a name is declared and on every identifier used as a value. It also
+ * explains the removed Groovy statements: a `for` or `switch` statement parses as a call of a name that is a keyword.
+ */
+export function checkVariableName(
+  name: string,
+  at: Range,
+  cx: BuildContext,
+): void {
+  if (name === "_")
+    cx.error(
+      "`_` is not allowed as an identifier because it is reserved for future use",
+      at,
+    );
+  if (!GROOVY_KEYWORDS.has(name)) return;
+  if (name === "for" || name === "while")
+    cx.error(`\`${name}\` loops are no longer supported`, at);
+  else if (name === "switch")
+    cx.error("`switch` statements are no longer supported", at);
+  else
+    cx.error(
+      `\`${name}\` is not allowed as an identifier because it is a Groovy keyword`,
+      at,
+    );
+}
 
 export function identifier(
   ctx: IdentifierContext | KeywordsContext,
@@ -110,11 +171,14 @@ export function typedName(
   cx: BuildContext,
 ): TypedName {
   const type = ctx.type();
+  const name = identifier(ctx.identifier(), cx);
+  const range = cx.range(ctx);
+  checkVariableName(name.name, range, cx);
   return {
     kind: "TypedName",
-    name: identifier(ctx.identifier(), cx),
+    name,
     type: type ? typeRef(type, cx) : null,
-    range: cx.range(ctx),
+    range,
   };
 }
 
@@ -127,8 +191,8 @@ export function parameter(
   const type = has<FormalParameterContext>(ctx, "type") ? ctx.type() : null;
   const defaultValue = ctx.expression();
   // Fields are created in source order: `def String name: Type = value`.
-  return {
-    kind: "Parameter",
+  const node = {
+    kind: "Parameter" as const,
     def: ctx.DEF() !== null,
     legacyType: legacy ? legacyType(legacy, cx) : null,
     name: identifier(ctx.identifier(), cx),
@@ -136,4 +200,6 @@ export function parameter(
     defaultValue: defaultValue ? expression(defaultValue, cx) : null,
     range: cx.range(ctx),
   };
+  checkVariableName(node.name.name, node.range, cx);
+  return node;
 }
