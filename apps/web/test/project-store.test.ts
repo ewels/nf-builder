@@ -93,14 +93,12 @@ describe("F-202 F-205 project store and canvas", () => {
   it("F-202 F-205 UX-20: every successful openProject (auto-reopen, create, open) shows the summary on the canvas", async () => {
     const f = fixture(ready({ projects: [meta("recent")] }));
     await f.store.getState().start();
-    await f.store
-      .getState()
-      .create({
-        name: "New",
-        languageVersion: "26.10",
-        template: "blank",
-        publishDocs: true,
-      });
+    await f.store.getState().create({
+      name: "New",
+      languageVersion: "26.10",
+      template: "blank",
+      publishDocs: true,
+    });
     await f.store.getState().open("recent");
     await settle();
     expect(f.shown).toEqual([
