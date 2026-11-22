@@ -11,6 +11,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-104 round trip | `feat/F-104` | Tasks 1–2 building. [plan](plan-F-104.md). |
 | F-110 printer | `feat/F-110`, in PR | Plan deleted in its PR. |
 | F-105 semantic model | not started | [plan](plan-F-105.md). Branch from `main` after F-104 merges. |
+| F-106 typed projection | not started | [plan](plan-F-106.md). Branch from `main` after F-105 merges. |
 
 Next free ADR number: 0033.
 
@@ -37,6 +38,10 @@ Next free ADR number: 0033.
 ### F-105 — [plan](plan-F-105.md)
 - Accept every recommendation in section 6: rules in the pack (`LanguagePack.includes`, new ADR); minimal `Diagnostic` in lang-core; nf-lang wording, our own for registry cases lint can't report; upstream registry fidelity (nested vendoring, `meta.yml`) with the AR-03 clarification; dynamic `includeConfig` counted as external; partial targets bind what they can; direct dependants only; F-112 keeps the typing, alias and duplicate checks; two lint-only oracle cases; `yaml` as an engine dev dependency.
 - Rebase the plan on F-104's names as built before task 2 (section 1.4 lists them).
+
+### F-106 — [plan](plan-F-106.md)
+- Accept every recommendation in section 6: types in lang-core, logic in the engine with catalogue data; the 2.5 node-key grammar in a new ADR (a stored format once F-207 writes `layout.json`); the 2.4 type subset with `plain` values; code-node shells until F-108; calls are processes, workflows, agents and pipelines (unparsed and unresolved marked by status); the plan's port names; a type-probe oracle tree; whitespace-only per F-104's `equivalent`; projector as a snapshot, F-113 owns invalidation; no Playwright test.
+- Rebase sections 3 and 4 on F-104's and F-105's names as built (section 1.4 lists them).
 
 ## Process notes for the next session
 
