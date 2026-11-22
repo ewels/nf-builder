@@ -40,7 +40,7 @@ describe("F-208 view modes", () => {
     expect(viewModeForKey(press({ key: "Enter" }))).toBeNull();
   });
 
-  it("F-208 UX-70: modifier keys, repeats, composition, prevented events and editable targets (input, textarea, contenteditable, .monaco-editor) give no mode", () => {
+  it("F-208 UX-70: modifier keys, repeats, composition, prevented events and editable targets (input, textarea, contenteditable, .code-editor-host) give no mode", () => {
     for (const over of [
       { ctrlKey: true },
       { metaKey: true },
@@ -51,7 +51,7 @@ describe("F-208 view modes", () => {
       { target: target("input") },
       { target: target("textarea") },
       { target: target("[contenteditable]") },
-      { target: target(".monaco-editor") },
+      { target: target(".code-editor-host") },
     ])
       expect(viewModeForKey(press(over))).toBeNull();
     // a target that is not an element (the document) is not text entry

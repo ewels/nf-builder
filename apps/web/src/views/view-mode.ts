@@ -12,7 +12,7 @@ export const VIEW_MODES: readonly {
 ];
 
 const EDITABLE =
-  'input, textarea, select, [contenteditable]:not([contenteditable="false"]), .monaco-editor';
+  'input, textarea, select, [contenteditable]:not([contenteditable="false"]), .code-editor-host';
 
 /** Whether typing into `target` is text entry, so a letter there is never a shortcut. */
 export function isEditableTarget(target: EventTarget | null): boolean {

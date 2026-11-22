@@ -110,6 +110,27 @@ async function openSplit(page: Page): Promise<void> {
   await expect(editor(page)).toBeVisible();
 }
 
+test("F-208 UX-70 QA-11: G, S and C typed into the code editor are text, not shortcuts", async ({
+  page,
+}) => {
+  await openSplit(page);
+  await page.locator(".monaco-editor .view-lines").click();
+  await page.keyboard.press("ControlOrMeta+End");
+  await page.keyboard.type("gsc");
+  await expect(editor(page)).toContainText("gsc");
+  await expect(mode(page)).toHaveAttribute("data-view-mode", "split");
+});
+
+test("F-208 UX-70 QA-11: a letter pressed with the editor's context menu open does not switch the mode", async ({
+  page,
+}) => {
+  await openSplit(page);
+  await page.locator(".monaco-editor .view-lines").click({ button: "right" });
+  await expect(page.locator(".context-view")).toBeVisible();
+  await page.keyboard.press("g");
+  await expect(mode(page)).toHaveAttribute("data-view-mode", "split");
+});
+
 test("F-208 step 2 UX-27: in Split mode a valid edit updates the graph", async ({
   page,
 }) => {
