@@ -9,7 +9,7 @@
   },
   "scripts": {
     "check": "pnpm run typecheck && pnpm run lint && pnpm run test && pnpm run arch && pnpm run check:adr && pnpm run check:features",
-    "typecheck": "tsc && tsc -p e2e && pnpm -r run typecheck",
+    "typecheck": "tsc && tsc -p e2e && tsc -p spikes/s5-nf-metro && pnpm -r run typecheck",
     "lint": "biome check .",
     "format": "biome check --write .",
     "test": "vitest run",
@@ -19,6 +19,7 @@
     "preview": "pnpm --filter @nf-builder/web preview",
     "test:e2e": "node scripts/run-playwright.ts",
     "smoke": "node scripts/smoke.ts",
+    "spike:s5": "node spikes/s5-nf-metro/serve.ts",
     "check:adr": "node scripts/check-adrs.ts",
     "check:features": "node scripts/check-features.ts",
     "check:budget": "node scripts/check-bundle-budget.ts",

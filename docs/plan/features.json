@@ -188,8 +188,8 @@
         "The SVG matches the CLI output for the same input (visual diff within tolerance)",
         "Report records download size, first-render time and any nf-metro patches needed; ADR 0013 updated with the outcome"
       ],
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Verified 2026-11-22 on PR #15: pnpm test:e2e -- --grep F-010 (Chromium, chromium-spikes project) passes locally and in CI: step 1 renders rnaseq_metro and sarek_metro to SVG in a worker under self-hosted Pyodide 314.0.8 with nf-metro 2.1.0; step 2 finds 0 differing pixels against the nf-metro CLI (Python 3.12 in CI, 3.13 locally); step 3 records 16.52 MB served (10.46 MB gzip) and first render 8.6 s median locally, 8.7 s in CI. Report: docs/research/2026-11-22-spike-s5-nf-metro.md; ADR 0013 spike result. Spike kept until FI-54 (F-607) replaces it."
     },
     {
       "id": "F-101",
@@ -1262,7 +1262,7 @@
         "Docs oracle: `nf-metro validate` passes on every template's generated map"
       ],
       "passes": false,
-      "notes": ""
+      "notes": "From F-010 (S5): nf-metro renders in the browser with no patches (ADR 0013 spike result): self-host Pyodide and five wheels (nf-metro, lark, drawsvg, networkx by URL, Pillow), lazy-load the worker with a boot timeout, add 'wasm-unsafe-eval' to netlify.toml, set Pyodide's package base URL (its default CDN string would trip IO-41), add licences.md entries, and delete spikes/s5-nf-metro/."
     },
     {
       "id": "F-701",

@@ -15,6 +15,7 @@ const executablePath = process.env.PW_CHROMIUM_EXECUTABLE || undefined;
 const viewport = { width: 1440, height: 900 };
 
 // QA-20: Chromium runs every end-to-end test; Firefox and WebKit run the @smoke tests.
+const SPIKE_SPECS = /spike-[^/]*\.spec\.ts$/;
 const grep = new RegExp(`${SMOKE_TAG}\\b`);
 
 function project(name: BrowserName) {
@@ -26,6 +27,7 @@ function project(name: BrowserName) {
           viewport,
           launchOptions: { executablePath },
         },
+        testIgnore: SPIKE_SPECS,
         grepInvert: visualEnabled(process.env)
           ? undefined
           : new RegExp(`${VISUAL_TAG}\\b`),
@@ -49,10 +51,21 @@ export default defineConfig({
     ? [["list"], ["github"], ["html", { open: "never" }]]
     : "list",
   use: { baseURL: PREVIEW_URL, trace: "retain-on-failure" },
-  projects: selectedBrowsers(process.env.PW_BROWSERS).map((name) => ({
-    name,
-    ...project(name),
-  })),
+  projects: selectedBrowsers(process.env.PW_BROWSERS).flatMap((name) => [
+    { name, ...project(name) },
+    // Spike pages start their own server in beforeAll (ADR 0024): one worker, so --repeat-each cannot start two.
+    ...(name === "chromium"
+      ? [
+          {
+            ...project(name),
+            name: "chromium-spikes",
+            testIgnore: undefined,
+            testMatch: SPIKE_SPECS,
+            workers: 1,
+          },
+        ]
+      : []),
+  ]),
   webServer: [
     // Always a fresh production build, served with the netlify.toml headers.
     {
