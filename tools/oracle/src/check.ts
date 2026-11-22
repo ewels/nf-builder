@@ -1,13 +1,8 @@
 import type { LintSpec, Outcome, RunSpec } from "./cases.ts";
 import type { ExecResult } from "./nextflow.ts";
 
-export type LintMessage = {
-  filename: string;
-  startLine: number;
-  startColumn: number;
-  message: string;
-};
-export type LintReport = { errors: LintMessage[]; warnings: LintMessage[] };
+type LintMessage = { message: string };
+type LintReport = { errors: LintMessage[]; warnings: LintMessage[] };
 
 /** Finds the JSON object `nextflow lint -o json` prints (from the first line that is exactly "{"); null if there is none or it doesn't parse. */
 export function parseLintJson(stdout: string): LintReport | null {
@@ -41,6 +36,14 @@ export type Evaluation = {
   warnings: string[];
 };
 
+const mismatch = (
+  expected: Outcome,
+  actual: Outcome,
+  result: ExecResult,
+  detail?: string,
+): string =>
+  `expected ${expected}, got ${actual} (exit ${result.status ?? result.signal})${detail ? `; ${detail}` : ""}`;
+
 const actualOf = (result: ExecResult): Outcome =>
   result.status === 0 ? "ok" : "error";
 
@@ -57,8 +60,7 @@ export function evaluateLint(spec: LintSpec, result: ExecResult): Evaluation {
     .join(", ");
   if (actual !== spec.expect) {
     problems.push(
-      `expected ${spec.expect}, got ${actual} (exit ${result.status ?? result.signal})` +
-        (quote ? `; first errors: ${quote}` : ""),
+      mismatch(spec.expect, actual, result, quote && `first errors: ${quote}`),
     );
   } else if (spec.expect === "error") {
     if (report === null) problems.push("no JSON report in the lint output");
@@ -81,8 +83,12 @@ export function evaluateRun(spec: RunSpec, result: ExecResult): Evaluation {
   if (actual !== spec.expect) {
     const first = text.split("\n").find((l) => /error/i.test(l));
     problems.push(
-      `expected ${spec.expect}, got ${actual} (exit ${result.status ?? result.signal})` +
-        (first ? `; first error line: ${first.trim()}` : ""),
+      mismatch(
+        spec.expect,
+        actual,
+        result,
+        first && `first error line: ${first.trim()}`,
+      ),
     );
   } else {
     for (const needle of spec.output) {

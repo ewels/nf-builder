@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { relative } from "node:path";
 import { stripAnsi } from "./check.ts";
+import { FIXTURES_FILE } from "./paths.ts";
 import type { OracleRun } from "./run.ts";
 
 const escapeData = (value: string): string =>
@@ -39,13 +40,13 @@ export function formatReport(run: OracleRun): string {
       "",
       `Command: \`nextflow ${r.command.join(" ")}\``,
     );
-    if (r.problems.length > 0) {
-      out.push("", ...r.problems.map((p) => `- Problem: ${p}`));
-    }
-    if (r.errors.length > 0)
-      out.push("", ...r.errors.map((e) => `- Error: ${e}`));
-    if (r.warnings.length > 0) {
-      out.push("", ...r.warnings.map((w) => `- Warning: ${w}`));
+    for (const [label, items] of [
+      ["Problem", r.problems],
+      ["Error", r.errors],
+      ["Warning", r.warnings],
+    ] as const) {
+      if (items.length > 0)
+        out.push("", ...items.map((i) => `- ${label}: ${i}`));
     }
     out.push("", "```", excerpt, "```");
   }
@@ -53,13 +54,16 @@ export function formatReport(run: OracleRun): string {
   return out.join("\n");
 }
 
-/** One `::error` annotation per mismatched check. */
+/** One `::error` annotation per mismatched check; fixture rows point at fixtures.yaml, case rows at the manifest. */
 export function annotations(run: OracleRun, repoRoot: string): string[] {
-  const file = relative(repoRoot, run.manifest).split("\\").join("/");
+  const rel = (file: string): string =>
+    relative(repoRoot, file).split("\\").join("/");
   return run.results
     .filter((r) => !r.matched)
-    .map(
-      (r) =>
-        `::error file=${escapeProperty(file)},title=Nextflow oracle::${escapeData(`${r.caseId} ${r.kind}: ${r.problems.join("; ")}`)}`,
-    );
+    .map((r) => {
+      const file = rel(
+        r.caseId.startsWith("fixture:") ? FIXTURES_FILE : run.manifest,
+      );
+      return `::error file=${escapeProperty(file)},title=Nextflow oracle::${escapeData(`${r.caseId} ${r.kind}: ${r.problems.join("; ")}`)}`;
+    });
 }

@@ -10,6 +10,7 @@ const ids = {
     "s1-typed-calls-legacy",
     "s1-typed-calls-legacy-module",
     "s1-typed-list-literal-tuple",
+    "s1-typed-legacy-tuple-arity",
     "s1-legacy-calls-typed",
     "s1-legacy-calls-typed-module",
   ],
@@ -60,9 +61,25 @@ describe("F-005 S1 cases", () => {
     expect(pitfall?.run?.expect).toBe("ok");
   });
 
+  it("F-005 LA-14: lint does not check a legacy tuple input's arity; the mismatch fails only at run time", () => {
+    const c = byId.get("s1-typed-legacy-tuple-arity");
+    expect(read(join(c?.dir ?? "", "main.nf"))).toContain(
+      "tuple([id: reads.baseName])",
+    );
+    expect(c?.lint?.expect).toBe("ok");
+    expect(c?.run?.expect).toBe("error");
+    expect(c?.run?.output).toContain(
+      "Input tuple does not match tuple declaration",
+    );
+  });
+
   it("F-005 LA-14 ADR-0007: typed and legacy code across files is expected to pass lint and run -stub", () => {
     for (const id of ids.interop.filter(
-      (i) => i !== "s1-typed-list-literal-tuple",
+      (i) =>
+        ![
+          "s1-typed-list-literal-tuple",
+          "s1-typed-legacy-tuple-arity",
+        ].includes(i),
     )) {
       expect(byId.get(id)?.lint?.expect, id).toBe("ok");
       expect(byId.get(id)?.run?.expect, id).toBe("ok");

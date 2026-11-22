@@ -1,23 +1,16 @@
 import { readFileSync } from "node:fs";
-import { NEXTFLOW_CACHE, PIN_FILE } from "./paths.ts";
+import { isRecord } from "./cases.ts";
+import { PIN_FILE } from "./paths.ts";
 
 export type NextflowPin = { version: string; sha256: string };
 
-/** https://github.com/nextflow-io/nextflow/releases/download/v<v>/nextflow-<v>-dist */
 export function distUrl(version: string): string {
   return `https://github.com/nextflow-io/nextflow/releases/download/v${version}/nextflow-${version}-dist`;
 }
 
-/** <nextflowCache>/<v>/nextflow-<v>-dist */
-export function distPath(
-  version: string,
-  nextflowCache: string = NEXTFLOW_CACHE,
-): string {
+export function distPath(version: string, nextflowCache: string): string {
   return `${nextflowCache}/${version}/nextflow-${version}-dist`;
 }
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
 
 /** Reads and validates upstream.json. Throws Error("<file>: <field> ...") for a bad version, url or sha256. */
 export function loadPin(file: string = PIN_FILE): NextflowPin {
@@ -27,7 +20,7 @@ export function loadPin(file: string = PIN_FILE): NextflowPin {
   const version = isRecord(nextflow) ? nextflow.version : undefined;
   if (typeof version !== "string" || !/^\d+\.\d+\.\d+$/.test(version)) {
     throw new Error(
-      `${file}: nextflow.version must be a string like 26.10.7, got ${JSON.stringify(version)}`,
+      `${file}: nextflow.version must be a string like x.y.z, got ${JSON.stringify(version)}`,
     );
   }
   const url = isRecord(dist) ? dist.url : undefined;

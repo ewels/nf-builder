@@ -11,10 +11,9 @@ import { dirname } from "node:path";
 import { NEXTFLOW_CACHE } from "./paths.ts";
 import { distPath, distUrl, type NextflowPin } from "./pin.ts";
 
-/** Throws on failure. */
-export type Download = (url: string, dest: string) => void;
+type Download = (url: string, dest: string) => void;
 
-export const curlDownload: Download = (url, dest) => {
+const curlDownload: Download = (url, dest) => {
   const result = spawnSync("curl", ["-fsSL", "--retry", "3", "-o", dest, url], {
     stdio: ["ignore", "inherit", "inherit"],
   });
@@ -32,7 +31,7 @@ export function sha256File(file: string): string {
   return createHash("sha256").update(readFileSync(file)).digest("hex");
 }
 
-export type EnsureOptions = {
+type EnsureOptions = {
   nextflowCache?: string;
   download?: Download;
   log?: (line: string) => void;
@@ -122,18 +121,14 @@ export type ExecResult = {
 };
 export type Exec = (args: readonly string[], cwd: string) => ExecResult;
 
-export function nextflowExec(
-  dist: string,
-  env: NodeJS.ProcessEnv,
-  timeoutMs?: number,
-): Exec {
+export function nextflowExec(dist: string, env: NodeJS.ProcessEnv): Exec {
   return (args, cwd) => {
     const started = Date.now();
     const result = spawnSync(dist, [...args], {
       cwd,
       env,
       encoding: "utf8",
-      timeout: timeoutMs ?? 600_000,
+      timeout: 600_000,
       maxBuffer: 64 * 1024 * 1024,
     });
     return {

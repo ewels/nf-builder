@@ -99,7 +99,6 @@ describe("F-005 runner", () => {
     const seen: string[] = [];
     const code = main(["--manifest", manifest], {
       pin,
-      ensure: () => "/dist",
       exec: (args) => {
         seen.push(args[0] ?? "");
         return res({ stdout: "      version 9.9.9 build 1\n" });
@@ -123,7 +122,6 @@ describe("F-005 runner", () => {
     });
     const code = main(["--", "--manifest", manifest], {
       pin,
-      ensure: () => "/dist",
       exec,
       env: { GITHUB_ACTIONS: "true", GITHUB_STEP_SUMMARY: summary },
       oracleCache: cache,
@@ -152,7 +150,6 @@ describe("F-005 runner", () => {
     const ran: string[] = [];
     const deps = {
       pin,
-      ensure: () => "/dist",
       exec: versionOr((args, cwd) => {
         if (args[0] === "run") ran.push(cwd);
         return args[0] === "lint"

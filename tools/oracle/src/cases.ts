@@ -23,7 +23,7 @@ export type OracleCase = {
 export type Manifest = { file: string; cases: OracleCase[] };
 
 type Raw = Record<string, unknown>;
-const isRecord = (value: unknown): value is Raw =>
+export const isRecord = (value: unknown): value is Raw =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 const isStrings = (value: unknown): value is string[] =>
   Array.isArray(value) && value.every((v) => typeof v === "string");
@@ -50,14 +50,17 @@ export function loadManifest(file: string = DEFAULT_MANIFEST): Manifest {
     const problem = (text: string): void => {
       problems.push(`${file}: case ${id}: ${text}`);
     };
-    if (typeof entry.id !== "string" || !/^[a-z0-9]+(-[a-z0-9]+)*$/.test(id)) {
+    if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(id)) {
       problem("id must be kebab-case");
     }
     if (seen.has(id)) problem("duplicate id");
     seen.add(id);
-    for (const key of Object.keys(entry)) {
-      if (!CASE_KEYS.includes(key)) problem(`unknown key "${key}"`);
-    }
+    const unknownKeys = (obj: Raw, allowed: string[], prefix: string): void => {
+      for (const key of Object.keys(obj)) {
+        if (!allowed.includes(key)) problem(`unknown key "${prefix}${key}"`);
+      }
+    };
+    unknownKeys(entry, CASE_KEYS, "");
     if (typeof entry.about !== "string" || entry.about === "") {
       problem("about must not be empty");
     }
@@ -89,10 +92,7 @@ export function loadManifest(file: string = DEFAULT_MANIFEST): Manifest {
     let lint: LintSpec | undefined;
     if (entry.lint !== undefined) {
       const l = isRecord(entry.lint) ? entry.lint : {};
-      for (const key of Object.keys(l)) {
-        if (!["expect", "errors"].includes(key))
-          problem(`unknown key "lint.${key}"`);
-      }
+      unknownKeys(l, ["expect", "errors"], "lint.");
       lint = {
         expect: outcome("lint", l.expect),
         errors: strings("lint.errors", l.errors),
@@ -101,11 +101,7 @@ export function loadManifest(file: string = DEFAULT_MANIFEST): Manifest {
     let run: RunSpec | undefined;
     if (entry.run !== undefined) {
       const r = isRecord(entry.run) ? entry.run : {};
-      for (const key of Object.keys(r)) {
-        if (!["expect", "output", "script", "args"].includes(key)) {
-          problem(`unknown key "run.${key}"`);
-        }
-      }
+      unknownKeys(r, ["expect", "output", "script", "args"], "run.");
       const script = typeof r.script === "string" ? r.script : "main.nf";
       if (existsSync(dir) && !existsSync(join(dir, script))) {
         problem(`run script ${script} is missing from ${dir}`);
@@ -117,7 +113,7 @@ export function loadManifest(file: string = DEFAULT_MANIFEST): Manifest {
         args: r.args === undefined ? ["-stub"] : strings("run.args", r.args),
       };
     }
-    if (lint === undefined && run === undefined) {
+    if (!lint && !run) {
       problem("needs a lint or a run check");
     }
     cases.push({
@@ -126,8 +122,8 @@ export function loadManifest(file: string = DEFAULT_MANIFEST): Manifest {
       about: typeof entry.about === "string" ? entry.about : "",
       spec: isStrings(entry.spec) ? entry.spec : [],
       sources: isStrings(entry.sources) ? entry.sources : [],
-      ...(lint ? { lint } : {}),
-      ...(run ? { run } : {}),
+      ...(lint && { lint }),
+      ...(run && { run }),
     });
   });
   if (problems.length > 0) throw new Error(problems.join("\n"));

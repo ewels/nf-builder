@@ -8,8 +8,9 @@ import {
   evaluateRun,
 } from "./check.ts";
 import { type Exec, type ExecResult, parseVersion } from "./nextflow.ts";
-import { ORACLE_CACHE } from "./paths.ts";
 import type { NextflowPin } from "./pin.ts";
+
+export const LINT_COMMAND = ["lint", "-o", "json", "."];
 
 export type CheckResult = Evaluation & {
   caseId: string;
@@ -22,26 +23,24 @@ export type CheckResult = Evaluation & {
 };
 export type RunOptions = {
   exec: Exec;
-  runsDir?: string;
+  runsDir: string;
   log?: (line: string) => void;
 };
 
-/** rm -rf <runsDir>/<id>, then copies the case directory there. Returns the run directory. */
-export function prepareRunDir(c: OracleCase, runsDir: string): string {
-  const dir = join(runsDir, c.id);
-  rmSync(dir, { recursive: true, force: true });
-  mkdirSync(runsDir, { recursive: true });
-  cpSync(c.dir, dir, { recursive: true });
-  return dir;
-}
-
-const writeLog = (
-  file: string,
+/** Runs one nextflow command in dir, writes <kind>.log there and evaluates the result. */
+export function runCheck(
+  exec: Exec,
+  dir: string,
+  caseId: string,
+  kind: CheckKind,
   command: string[],
-  result: ExecResult,
-): void => {
+  expected: Outcome,
+  evaluate: (result: ExecResult) => Evaluation,
+): CheckResult {
+  const result = exec(command, dir);
+  const logFile = join(dir, `${kind}.log`);
   writeFileSync(
-    file,
+    logFile,
     [
       `$ nextflow ${command.join(" ")}`,
       `exit: ${result.status ?? `signal ${result.signal}`}`,
@@ -53,47 +52,42 @@ const writeLog = (
       "",
     ].join("\n"),
   );
-};
-
-/** In the run directory: lint as ["lint", "-o", "json", "."], then run as ["run", script, ...args]. Writes lint.log and run.log. */
-export function runCase(c: OracleCase, options: RunOptions): CheckResult[] {
-  const {
-    exec,
-    runsDir = join(ORACLE_CACHE, "runs"),
-    log = () => {},
-  } = options;
-  const dir = prepareRunDir(c, runsDir);
-  const results: CheckResult[] = [];
-  const record = (
-    kind: CheckKind,
-    command: string[],
-    expected: Outcome,
-    evaluate: (result: ExecResult) => Evaluation,
-  ): void => {
-    log(`${c.id}: nextflow ${command.join(" ")}`);
-    const result = exec(command, dir);
-    const logFile = join(dir, `${kind}.log`);
-    writeLog(logFile, command, result);
-    results.push({
-      ...evaluate(result),
-      caseId: c.id,
-      kind,
-      command,
-      expected,
-      exitCode: result.status,
-      durationMs: result.durationMs,
-      logFile,
-    });
+  return {
+    ...evaluate(result),
+    caseId,
+    kind,
+    command,
+    expected,
+    exitCode: result.status,
+    durationMs: result.durationMs,
+    logFile,
   };
+}
+
+/** In a fresh copy of the case: lint, then run. Writes lint.log and run.log. */
+export function runCase(c: OracleCase, options: RunOptions): CheckResult[] {
+  const { exec, runsDir, log = () => {} } = options;
+  const dir = join(runsDir, c.id);
+  rmSync(dir, { recursive: true, force: true });
+  mkdirSync(runsDir, { recursive: true });
+  cpSync(c.dir, dir, { recursive: true });
   const { lint, run } = c;
+  const results: CheckResult[] = [];
   if (lint) {
-    record("lint", ["lint", "-o", "json", "."], lint.expect, (r) =>
-      evaluateLint(lint, r),
+    log(`${c.id}: nextflow ${LINT_COMMAND.join(" ")}`);
+    results.push(
+      runCheck(exec, dir, c.id, "lint", LINT_COMMAND, lint.expect, (r) =>
+        evaluateLint(lint, r),
+      ),
     );
   }
   if (run) {
-    record("run", ["run", run.script, ...run.args], run.expect, (r) =>
-      evaluateRun(run, r),
+    const command = ["run", run.script, ...run.args];
+    log(`${c.id}: nextflow ${command.join(" ")}`);
+    results.push(
+      runCheck(exec, dir, c.id, "run", command, run.expect, (r) =>
+        evaluateRun(run, r),
+      ),
     );
   }
   return results;

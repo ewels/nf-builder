@@ -8,10 +8,12 @@ import {
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { evaluateLint } from "../src/check.ts";
 import { main } from "../src/cli.ts";
 import { loadFixtures, runFixtures } from "../src/fixtures.ts";
 import type { Exec, ExecResult } from "../src/nextflow.ts";
-import { FIXTURES_FILE } from "../src/paths.ts";
+import { FIXTURES_FILE, REPO_ROOT } from "../src/paths.ts";
+import { annotations } from "../src/report.ts";
 
 const tmp = (): string => mkdtempSync(join(tmpdir(), "oracle-fix-"));
 const res = (over: Partial<ExecResult> = {}): ExecResult => ({
@@ -106,7 +108,6 @@ describe("F-005 corpus fixtures", () => {
       args[0] === "-version" ? res({ stdout: "version 1.2.3 build 1" }) : res(); // bad.nf wrongly lints clean
     const deps = {
       pin: { version: "1.2.3", sha256: "a".repeat(64) },
-      ensure: () => "/dist",
       exec,
       env: {},
       write: () => {},
@@ -133,5 +134,52 @@ describe("F-005 corpus fixtures", () => {
         oracleCache: cache2,
       }),
     ).toBe(0);
+  });
+});
+
+describe("F-005 default run and annotations", () => {
+  it("F-005 ADR-0017: a plain pnpm oracle (no --case, no --manifest) includes the corpus fixtures", () => {
+    const cache = tmp();
+    main([], {
+      pin: { version: "1.2.3", sha256: "a".repeat(64) },
+      exec: (args) =>
+        args[0] === "-version"
+          ? res({ stdout: "version 1.2.3 build 1" })
+          : res(),
+      env: {},
+      oracleCache: cache,
+      write: () => {},
+    });
+    const rows = (
+      JSON.parse(readFileSync(join(cache, "results.json"), "utf8")) as {
+        results: { caseId: string }[];
+      }
+    ).results.map((r) => r.caseId);
+    expect(rows.some((id) => id.startsWith("fixture:"))).toBe(true);
+    expect(rows.some((id) => id.startsWith("s1-"))).toBe(true);
+  });
+
+  it("F-005 ADR-0017: annotations point fixture rows at fixtures.yaml and case rows at the cases manifest", () => {
+    const row = (caseId: string) => ({
+      ...evaluateLint({ expect: "ok", errors: [] }, res({ status: 1 })),
+      caseId,
+      kind: "lint" as const,
+      command: [],
+      expected: "ok" as const,
+      exitCode: 1,
+      durationMs: 1,
+      logFile: "/nowhere",
+    });
+    const lines = annotations(
+      {
+        nextflowVersion: "1.2.3",
+        manifest: `${REPO_ROOT}/tools/oracle/cases/cases.yaml`,
+        startedAt: "now",
+        results: [row("c1"), row("fixture:x.nf")],
+      },
+      REPO_ROOT,
+    );
+    expect(lines[0]).toContain("file=tools/oracle/cases/cases.yaml,");
+    expect(lines[1]).toContain("file=tools/corpus/fixtures/fixtures.yaml,");
   });
 });

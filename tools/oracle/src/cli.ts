@@ -7,8 +7,8 @@ import {
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
-import { loadManifest } from "./cases.ts";
-import { loadFixtures, runFixtures } from "./fixtures.ts";
+import { loadManifest, type Manifest } from "./cases.ts";
+import { type FixtureManifest, loadFixtures, runFixtures } from "./fixtures.ts";
 import {
   type Exec,
   ensureNextflow,
@@ -29,7 +29,6 @@ export const USAGE = "Usage: pnpm oracle [--case <id>]... [--manifest <file>]";
 
 export type OracleDeps = {
   pin?: NextflowPin;
-  ensure?: (pin: NextflowPin) => string;
   exec?: Exec;
   env?: NodeJS.ProcessEnv;
   oracleCache?: string;
@@ -43,7 +42,7 @@ export function main(argv: readonly string[], deps: OracleDeps = {}): number {
   const write = deps.write ?? ((line: string) => console.log(line));
   const env = deps.env ?? process.env;
   const oracleCache = deps.oracleCache ?? ORACLE_CACHE;
-  const args = argv[0] === "--" ? argv.slice(1) : [...argv];
+  const args = argv[0] === "--" ? argv.slice(1) : argv;
 
   let values: { case?: string[]; manifest?: string };
   try {
@@ -68,8 +67,8 @@ export function main(argv: readonly string[], deps: OracleDeps = {}): number {
         (values.manifest === undefined ? FIXTURES_FILE : undefined));
 
   let pin: NextflowPin;
-  let manifest: ReturnType<typeof loadManifest>;
-  let fixtures: ReturnType<typeof loadFixtures> | undefined;
+  let manifest: Manifest;
+  let fixtures: FixtureManifest | undefined;
   try {
     pin = deps.pin ?? loadPin();
     manifest = loadManifest(resolve(values.manifest ?? DEFAULT_MANIFEST));
@@ -99,10 +98,7 @@ export function main(argv: readonly string[], deps: OracleDeps = {}): number {
   try {
     exec =
       deps.exec ??
-      nextflowExec(
-        deps.ensure?.(pin) ?? ensureNextflow(pin, { log: write }),
-        nextflowEnv(env),
-      );
+      nextflowExec(ensureNextflow(pin, { log: write }), nextflowEnv(env));
   } catch (error) {
     write(`oracle: ${(error as Error).message}`);
     return 3;
@@ -139,11 +135,10 @@ export function main(argv: readonly string[], deps: OracleDeps = {}): number {
   if (env.GITHUB_ACTIONS === "true") {
     for (const line of annotations(run, REPO_ROOT)) write(line);
   }
-  const bad = run.results.filter((r) => !r.matched);
   for (const r of run.results) {
     write(`${r.matched ? "ok      " : "MISMATCH"} ${r.caseId} ${r.kind}`);
   }
-  return bad.length === 0 ? 0 : 1;
+  return run.results.every((r) => r.matched) ? 0 : 1;
 }
 
 const isMain =
