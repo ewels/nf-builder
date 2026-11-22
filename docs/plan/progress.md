@@ -318,6 +318,21 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - Registry problems found while measuring are in `docs/research/upstream-bugs.md` (17 to 19).
 - Blockers: #31, give Netlify builds read access to the `registry-snapshot` branch (make the repository public, or set `REGISTRY_SNAPSHOT_TOKEN`); #27, the `NETLIFY_BUILD_HOOK` secret for daily deploys.
 
+## 2026-11-22 · F-501 follow-up · Claude (autonomous)
+- Did: dispatched the `Registry snapshot` workflow on `main` after the merge (run 45024203775): the build and check passed and the publish job pushed the first snapshot to branch `registry-snapshot`; the verify job skipped the deployed check because `NETLIFY_BUILD_HOOK` isn't set.
+- State: F-501 still not passing: Netlify builds can't read the branch while the repository is private (#31).
+- Next: once #31 is resolved, a production deploy should serve `/registry/`; then `pnpm check:registry --url https://nf-builder.netlify.app --generated-at <ts>` and set F-501 to passing in a PR.
+- Decisions: none.
+- Blockers: #31, #27.
+
+## 2026-11-22 · process · Claude (autonomous)
+- Did: GitHub Actions stopped starting jobs at 13:17 UTC ("recent account payments have failed or your spending limit needs to be increased"); opened maintainer issue #33.
+- State: no PR can get a green CI, so nothing merges until #33 is resolved. F-106 (PR #32) is built and in review.
+- Next: keep building in order on branches with the CI checks run locally (`pnpm check`, `pnpm oracle`, `pnpm test:corpus`, Chromium end-to-end tests, `pnpm build` with `check:budget` and `check:hosts`); merge each PR in order once CI is green again.
+- Decisions:
+  - While #33 blocks CI, a feature may branch from an unmerged dependency's branch (stacked), as an exception to ADR 0018's "independent features only". Every PR still needs a green CI before it merges, and the stack merges bottom up. The exception ends when CI runs again.
+- Blockers: #33 (Actions billing), #31 (snapshot branch read access), #27 (build hook).
+
 ## 2026-11-22 · F-106 · Claude (autonomous)
 - Did: the projection for typed workflows (`packages/engine/src/projection/`, types in lang-core): calls, chains, factories, takes, emits, `:params` and `:output` nodes with ports per LA-20 to LA-26, def-use edges with Channel/Value types (LA-28) from the catalogue and nf-lang's call rules, pipeline calls, inferred workflow emit types, code-node shells, and a shared scope API for F-107 and F-108. Probed types match `nextflow lint` in a new oracle tree; node ids survive whitespace-only re-parses.
 - State: passing.
