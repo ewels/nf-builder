@@ -309,8 +309,8 @@
         "Snapshot tests on typed fixtures and the typed rnaseq-nf branch",
         "Node identities are stable across a re-parse with whitespace-only changes"
       ],
-      "passes": false,
-      "notes": "From F-105: ProjectModel.lookup(path, name) gives a call's binding (a local declaration, or an include entry with its resolved target and declaration); plugin entries have none; entries bound to Unparsed draw as unparsed nodes; ResolvedEntry.pipeline marks pipeline includes."
+      "passes": true,
+      "notes": "From F-105: ProjectModel.lookup(path, name) gives a call's binding (a local declaration, or an include entry with its resolved target and declaration); plugin entries have none; entries bound to Unparsed draw as unparsed nodes; ResolvedEntry.pipeline marks pipeline includes. Verified 2026-11-22: step 1 by packages/engine/test/projection/snapshot.test.ts (every typed workflow in the F-102 typed fixtures, the s1-typed-calls-legacy oracle cases and the F-106 fixture tree) and test/corpus/projection.corpus.ts (the rnaseq-nf-typed pin's two workflows; CI corpus-parse); the Channel/Value kind of every probed value matches nextflow lint 26.10.7 (types-oracle.test.ts against the projection-fixtures oracle tree). Step 2 by identity.test.ts (5 whitespace kinds x 3 seeds on 4 sets, guarded by F-104's equivalent) and the corpus identity test. Every workflow of every pin projects with unique ids (projection-corpus.md is F-107's baseline: rnaseq 173 code nodes of 398 main statements, sarek 354 of 843, fetchngs 27 of 41). ADR 0036. No Playwright test (no UI, Q13)."
     },
     {
       "id": "F-107",
@@ -328,7 +328,7 @@
         "Report the share of statements modelled per corpus workflow; target at least 90% overall"
       ],
       "passes": false,
-      "notes": ""
+      "notes": "From F-106: legacy callees project with $n inputs and one out port of unknown type through fallbackSignature in packages/engine/src/projection/signature.ts; add legacyProcessSignature there. Reads of legacy outputs are indirect edges from the call variable until .out is modelled; LegacyParam isn't on :params yet. The shared scope API is projection/scope.ts. Baseline counts per pin are in .cache/reports/projection-corpus.md."
     },
     {
       "id": "F-108",
@@ -347,7 +347,7 @@
         "Round trip remains equivalent"
       ],
       "passes": false,
-      "notes": ""
+      "notes": "From F-106: code nodes are shells with no inputs and one output for a single-variable assignment (codeNode in packages/engine/src/projection/project.ts); variablesRead (projection/reads.ts) and scope.ts are the start of free-variable analysis."
     },
     {
       "id": "F-109",
@@ -411,7 +411,7 @@
         "An edit that would mix typed and legacy definitions in one script is refused with a message"
       ],
       "passes": false,
-      "notes": "From F-110: nodes an edit creates carry NO_RANGE and get the fresh layout (ADR 0032); synthesised triple-quoted strings carry their final indentation and StringLiteral.text must be set. Never write a print whose missingComments is non-empty. printDeclaration reprints and normalises the whole declaration (println 'x' becomes println('x')); decide whether AddCall needs statement-level printing (AR-22). From F-104: printSourceFile and equivalent (engine/src/source/) are the base for AR-22: replace an item's slice with printer output (SourceParser.printer) and check every other item stays equivalent."
+      "notes": "From F-110: nodes an edit creates carry NO_RANGE and get the fresh layout (ADR 0032); synthesised triple-quoted strings carry their final indentation and StringLiteral.text must be set. Never write a print whose missingComments is non-empty. printDeclaration reprints and normalises the whole declaration (println 'x' becomes println('x')); decide whether AddCall needs statement-level printing (AR-22). From F-104: printSourceFile and equivalent (engine/src/source/) are the base for AR-22: replace an item's slice with printer output (SourceParser.printer) and check every other item stays equivalent. From F-106: Port.argument, ChainStep ranges, node range and GraphEdge.direct locate text to patch; node keys parse with parseNodeKey; only the entry workflow has an :output node."
     },
     {
       "id": "F-112",
@@ -437,7 +437,7 @@
         "Every message states what to do; mechanical cases carry a quick-fix command"
       ],
       "passes": false,
-      "notes": "From F-101: 8 ported AgentParserTest inputs (L485-L491, L518: agent output types, eval not defined) parse and are rejected only by name and type resolution (owner F-112 in packages/lang-2610/test/ported/cases.json). From F-102: AST-builder errors come with nf-lang wording in ScriptParseResult.errors (source builder or parser); warnings (ScriptAstBuilder.java #L597, #L619, #L634, #L695, #L824, #L836, #L977, #L1059) and resolver errors are F-112's. From F-103: selector placement, includeConfig placement and include resolution are resolver checks, not AST-builder errors (lint 26.10.7: a selector inside docker passes lint; includeConfig inside process gives 'Config includes are only allowed at the top-level or in a profile'); decimal number-format errors are not ported. From F-104: whole-script checks carry scope 'file' and never isolate a declaration; Unparsed.problems hold the chunk's own errors; source 'internal' marks caught exceptions and model-check failures. From F-105: Diagnostic (lang-core) with codes include-target, include-not-parsed and include-name at the include node; left to F-112: pipeline-include typing errors (ResolveIncludeVisitor L134-L137), alias rules (records and enums can't be aliased; workflow and params must be), duplicate names (scope keeps the first) and config include placement."
+      "notes": "From F-101: 8 ported AgentParserTest inputs (L485-L491, L518: agent output types, eval not defined) parse and are rejected only by name and type resolution (owner F-112 in packages/lang-2610/test/ported/cases.json). From F-102: AST-builder errors come with nf-lang wording in ScriptParseResult.errors (source builder or parser); warnings (ScriptAstBuilder.java #L597, #L619, #L634, #L695, #L824, #L836, #L977, #L1059) and resolver errors are F-112's. From F-103: selector placement, includeConfig placement and include resolution are resolver checks, not AST-builder errors (lint 26.10.7: a selector inside docker passes lint; includeConfig inside process gives 'Config includes are only allowed at the top-level or in a profile'); decimal number-format errors are not ported. From F-104: whole-script checks carry scope 'file' and never isolate a declaration; Unparsed.problems hold the chunk's own errors; source 'internal' marks caught exceptions and model-check failures. From F-105: Diagnostic (lang-core) with codes include-target, include-not-parsed and include-name at the include node; left to F-112: pipeline-include typing errors (ResolveIncludeVisitor L134-L137), alias rules (records and enums can't be aliased; workflow and params must be), duplicate names (scope keeps the first) and config include placement. From F-106: FlowType/TypeExpr on ports (declared) and edges (source type), and Port.argumentType for inline arguments (LA-29, LA-32)."
     },
     {
       "id": "F-113",
@@ -456,7 +456,7 @@
         "The main thread does no parsing (asserted in a Playwright performance trace)"
       ],
       "passes": false,
-      "notes": "From F-201's plan: the shell reads installed pack versions through engine on the main thread; once a pack's entry holds the parser, move that list behind the worker so the parser stays out of the initial bundle (QA-01 check will catch it). From F-006: QA-03 risk. Sarek parses in 1.1 s warm but 15.9 s cold in Node (first-use DFA construction for real grammar ambiguities; upstream Java pays it too). Measure in the worker, then consider parsing open or changed files first, warming the parser at worker start, or caching parse results. 2026-11-22, maintainer (ADR 0029): QA-03 no longer asks for 3 s. The worker must keep the UI responsive and report loading progress; sarek must finish within 30 s on the CI reference profile. The earlier cold-start note no longer needs lazy parsing or caching. From F-104: LanguagePack.loadParser() is a dynamic import (parser and printer in one chunk); call it in the worker. A failing file is parsed at most twice (whole, then per chunk); the whole-corpus round trip takes about 31 s in Node. From F-105: ProjectModel is synchronous; setFile/deleteFile return the re-modelled paths; the trace hook counts parse and model work; openProject(version, files) loads the pack's parser."
+      "notes": "From F-201's plan: the shell reads installed pack versions through engine on the main thread; once a pack's entry holds the parser, move that list behind the worker so the parser stays out of the initial bundle (QA-01 check will catch it). From F-006: QA-03 risk. Sarek parses in 1.1 s warm but 15.9 s cold in Node (first-use DFA construction for real grammar ambiguities; upstream Java pays it too). Measure in the worker, then consider parsing open or changed files first, warming the parser at worker start, or caching parse results. 2026-11-22, maintainer (ADR 0029): QA-03 no longer asks for 3 s. The worker must keep the UI responsive and report loading progress; sarek must finish within 30 s on the CI reference profile. The earlier cold-start note no longer needs lazy parsing or caching. From F-104: LanguagePack.loadParser() is a dynamic import (parser and printer in one chunk); call it in the worker. A failing file is parsed at most twice (whole, then per chunk); the whole-corpus round trip takes about 31 s in Node. From F-105: ProjectModel is synchronous; setFile/deleteFile return the re-modelled paths; the trace hook counts parse and model work; openProject(version, files) loads the pack's parser. From F-106: createProjector(model, catalogue) is a snapshot of the model with its own memo; re-project the re-modelled files' workflows and their dependants' after a change; projections are plain data."
     },
     {
       "id": "F-201",
@@ -566,7 +566,7 @@
         "Hovering an edge shows its type"
       ],
       "passes": false,
-      "notes": ""
+      "notes": "From F-106: node kinds call, chain, factory, take, emit, params, output, code; callee.status modelled/unparsed/unresolved and callee.typed for badges; FlowType.dataflow channel/value/plain on edges; node ids are the layout keys (ADR 0036)."
     },
     {
       "id": "F-206",

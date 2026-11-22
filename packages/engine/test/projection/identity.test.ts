@@ -1,53 +1,10 @@
-import type { Projection } from "@nf-builder/lang-core";
 import { describe, expect, it } from "vitest";
 import type { ProjectFile } from "../../src/model/project";
-import type { Projector } from "../../src/projection/project";
 import { equivalent } from "../../src/source/equivalent";
 import { openFiles, projectorFor } from "./open";
 import { fixtureSets } from "./sets";
+import { shapes } from "./shape";
 import { type PerturbKind, perturbWhitespace } from "./whitespace";
-
-/** What must survive a whitespace-only change: ids, kinds, labels, ports, edges. Ranges are left out. */
-function shape(projection: Projection) {
-  const { workflow } = projection;
-  return {
-    workflow: { ...workflow, range: undefined },
-    nodes: projection.nodes.map((n) => ({
-      id: n.id,
-      kind: n.kind,
-      label: n.label,
-      extra:
-        n.kind === "call"
-          ? n.callee
-          : n.kind === "chain"
-            ? n.steps.map((s) => [s.operator, s.known])
-            : n.kind === "factory"
-              ? [n.namespace, n.factory]
-              : n.kind === "take" || n.kind === "emit"
-                ? n.name
-                : null,
-      inputs: n.inputs.map((p) => [p.id, p.label, p.type, p.argumentType]),
-      outputs: n.outputs.map((p) => [p.id, p.label, p.type, p.argumentType]),
-    })),
-    edges: projection.edges.map((e) => [
-      e.from,
-      e.to,
-      e.type,
-      e.variable,
-      e.direct,
-    ]),
-  };
-}
-
-function shapes(projector: Projector) {
-  return projector.workflows().map((ref) => {
-    const p = projector.project(ref.path, ref.name);
-    return {
-      ref: { ...ref, range: undefined },
-      shape: p === null ? null : shape(p),
-    };
-  });
-}
 
 const KINDS: PerturbKind[] = ["indent", "blank", "trailing", "crlf", "all"];
 const SEEDS = [1, 2, 3];
