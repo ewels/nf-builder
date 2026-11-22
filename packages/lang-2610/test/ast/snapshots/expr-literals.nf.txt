@@ -1,0 +1,47 @@
+Script typesEnabled=false 1:1-8:1
+  body[0] VariableDeclaration def=true multiple=false 1:1-1:65
+    targets[0] TypedName 1:5-1:13
+      name Identifier 1:5-1:13 "integers"
+    initializer List trailingComma=false 1:16-1:65
+      elements[0] Number integer=true 1:17-1:19 "42"
+      elements[1] Unary operator="-" 1:21-1:23
+        operand Number integer=true 1:22-1:23 "1"
+      elements[2] Number integer=true 1:25-1:31 "0b1001"
+      elements[3] Number integer=true 1:33-1:36 "031"
+      elements[4] Number integer=true 1:38-1:44 "0xabcd"
+      elements[5] Number integer=true 1:46-1:55 "1_000_000"
+      elements[6] Number integer=true 1:57-1:60 "42L"
+      elements[7] Number integer=true 1:62-1:64 "2G"
+  body[1] VariableDeclaration def=true multiple=false 2:1-2:60
+    targets[0] TypedName 2:5-2:10
+      name Identifier 2:5-2:10 "reals"
+    initializer List trailingComma=false 2:13-2:60
+      elements[0] Number integer=false 2:14-2:18 "3.14"
+      elements[1] Unary operator="-" 2:20-2:24
+        operand Number integer=false 2:21-2:24 "0.1"
+      elements[2] Number integer=false 2:26-2:32 "1.59e7"
+      elements[3] Number integer=false 2:34-2:41 "1.59e-7"
+      elements[4] Number integer=false 2:43-2:47 "1.5f"
+      elements[5] Number integer=false 2:49-2:53 "2.0d"
+      elements[6] Number integer=false 2:55-2:59 "3.0G"
+  body[2] Assert 3:1-3:21
+    condition Binary operator="!=" 3:8-3:21
+      left Boolean 3:8-3:12 "true"
+      right Boolean 3:16-3:21 "false"
+  body[3] Assert 4:1-4:22
+    condition Binary operator="==" 4:8-4:22
+      left Unary operator="!" 4:8-4:13
+        operand Boolean 4:9-4:13 "true"
+      right Boolean 4:17-4:22 "false"
+  body[4] Assert 5:1-5:22
+    condition Binary operator="==" 5:8-5:22
+      left Boolean 5:8-5:12 "true"
+      right Unary operator="!" 5:16-5:22
+        operand Boolean 5:17-5:22 "false"
+  body[5] VariableDeclaration def=true multiple=false 6:1-6:13
+    targets[0] TypedName 6:5-6:6
+      name Identifier 6:5-6:6 "x"
+    initializer Null 6:9-6:13 "null"
+  body[6] Assignment operator="=" 7:1-7:7
+    target Variable 7:1-7:2 "x"
+    value Number integer=true 7:5-7:7 "42"

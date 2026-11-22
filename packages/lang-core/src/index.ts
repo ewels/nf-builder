@@ -2,6 +2,8 @@
 export interface LanguagePack {
   readonly version: string;
 }
+
+export * from "./ast/index.ts";
 export type {
   CatalogueEntry,
   CatalogueSource,

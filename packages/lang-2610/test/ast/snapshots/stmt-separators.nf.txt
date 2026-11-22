@@ -1,0 +1,19 @@
+Script typesEnabled=false 1:1-7:1
+  comments[0] line 1:1-1:11 "// newline"
+  comments[1] line 5:1-5:14 "// semi-colon"
+  body[0] ExpressionStatement 2:1-2:17
+    expression MethodCall trailingComma=false parens=false 2:1-2:17
+      method Identifier 2:1-2:8 "println"
+      args[0] String value="Hello!" quote="'" 2:9-2:17 "'Hello!'"
+  body[1] ExpressionStatement 3:1-3:23
+    expression MethodCall trailingComma=false parens=false 3:1-3:23
+      method Identifier 3:1-3:8 "println"
+      args[0] String value="Hello again!" quote="'" 3:9-3:23 "'Hello again!'"
+  body[2] ExpressionStatement 6:1-6:17
+    expression MethodCall trailingComma=false parens=false 6:1-6:17
+      method Identifier 6:1-6:8 "println"
+      args[0] String value="Hello!" quote="'" 6:9-6:17 "'Hello!'"
+  body[3] ExpressionStatement 6:20-6:42
+    expression MethodCall trailingComma=false parens=false 6:20-6:42
+      method Identifier 6:20-6:27 "println"
+      args[0] String value="Hello again!" quote="'" 6:28-6:42 "'Hello again!'"

@@ -1,0 +1,268 @@
+{
+  "about": "F-102 AST snapshot fixtures. Each passes nextflow lint 26.10.7 with no errors (warnings allowed); the CI oracle re-checks them. source cites nextflow-io/nextflow docs at the pinned commit; adjusted says what was changed to make a reference snippet a lint-clean script.",
+  "upstream": {
+    "repo": "nextflow-io/nextflow",
+    "tag": "v26.10.7",
+    "commit": "0ad848ef3c3a22824cd9eb2ca14568385867702d"
+  },
+  "lintCheckedWith": "nextflow 26.10.7 lint -o json (NXF_SYNTAX_PARSER=v2, NXF_OFFLINE=true, no network), 2026-11-22",
+  "fixtures": [
+    {
+      "file": "comments.nf",
+      "sections": [
+        "Comments"
+      ],
+      "source": [
+        "docs/reference/syntax.mdx#L14-L25"
+      ],
+      "lint": []
+    },
+    {
+      "file": "shebang.nf",
+      "sections": [
+        "Shebang"
+      ],
+      "source": [
+        "docs/reference/syntax.mdx#L68-L70",
+        "docs/reference/syntax.mdx#L49"
+      ],
+      "lint": []
+    },
+    {
+      "file": "stmt-separators.nf",
+      "sections": [
+        "Statements"
+      ],
+      "source": [
+        "docs/reference/syntax.mdx#L486-L491"
+      ],
+      "lint": []
+    },
+    {
+      "file": "stmt-variable-declaration.nf",
+      "sections": [
+        "Variable declaration"
+      ],
+      "source": [
+        "docs/reference/syntax.mdx#L499",
+        "docs/reference/syntax.mdx#L505",
+        "docs/reference/syntax.mdx#L511-L512"
+      ],
+      "adjusted": "variables renamed so each is declared once; adds a Groovy-typed and an uninitialised declaration",
+      "lint": []
+    },
+    {
+      "file": "stmt-assignment.nf",
+      "sections": [
+        "Assignment"
+      ],
+      "source": [
+        "docs/reference/syntax.mdx#L520-L522",
+        "docs/reference/syntax.mdx#L530",
+        "docs/reference/syntax.mdx#L533-L536"
+      ],
+      "adjusted": "declares the variables first; one statement per compound operator listed at L533",
+      "lint": []
+    },
+    {
+      "file": "stmt-expression.nf",
+      "sections": [
+        "Expression statement"
+      ],
+      "source": [
+        "docs/reference/syntax.mdx#L49"
+      ],
+      "lint": []
+    },
+    {
+      "file": "stmt-assert.nf",
+      "sections": [
+        "assert",
+        "Boolean"
+      ],
+      "source": [
+        "docs/reference/syntax.mdx#L550",
+        "docs/reference/syntax.mdx#L672"
+      ],
+      "lint": []
+    },
+    {
+      "file": "stmt-if-else.nf",
+      "sections": [
+        "if/else"
+      ],
+      "source": [
+        "docs/reference/syntax.mdx#L558-L564",
+        "docs/reference/syntax.mdx#L570-L580"
+      ],
+      "lint": []
+    },
+    {
+      "file": "stmt-throw.nf",
+      "sections": [
+        "throw"
+      ],
+      "source": [
+        "docs/reference/syntax.mdx#L606"
+      ],
+      "lint": []
+    },
+    {
+      "file": "stmt-try-catch.nf",
+      "sections": [
+        "try/catch"
+      ],
+      "source": [
+        "docs/reference/syntax.mdx#L614-L626"
+      ],
+      "adjusted": "AccessDeniedException qualified as java.nio.file.AccessDeniedException: the reference's unqualified name fails lint ('`AccessDeniedException` is not defined')",
+      "lint": []
+    },
+    {
+      "file": "stmt-try-catch-legacy.nf",
+      "sections": [
+        "try/catch"
+      ],
+      "source": [],
+      "note": "lint-validated: Groovy-style catch( IOException e )",
+      "lint": []
+    },
+    {
+      "file": "stmt-empty.nf",
+      "sections": [
+        "Statements"
+      ],
+      "source": [],
+      "note": "lint-validated: empty statements",
+      "lint": []
+    },
+    {
+      "file": "expr-literals.nf",
+      "sections": [
+        "Number",
+        "Boolean",
+        "Null"
+      ],
+      "source": [
+        "docs/reference/syntax.mdx#L654-L664",
+        "docs/reference/syntax.mdx#L672-L674",
+        "docs/reference/syntax.mdx#L682-L683"
+      ],
+      "adjusted": "numbers as list elements, plus suffixed forms (lint-validated)",
+      "lint": []
+    },
+    {
+      "file": "expr-strings.nf",
+      "sections": [
+        "String"
+      ],
+      "source": [
+        "docs/reference/syntax.mdx#L691-L692",
+        "docs/reference/syntax.mdx#L698-L706",
+        "docs/reference/syntax.mdx#L712",
+        "docs/reference/syntax.mdx#L721-L739"
+      ],
+      "adjusted": "one string using every escape in the table, a slashy string with \\/ and a line continuation",
+      "lint": []
+    },
+    {
+      "file": "expr-gstrings.nf",
+      "sections": [
+        "Dynamic string"
+      ],
+      "source": [
+        "docs/reference/syntax.mdx#L746-L747",
+        "docs/reference/syntax.mdx#L754-L755",
+        "docs/reference/syntax.mdx#L762-L768"
+      ],
+      "adjusted": "defines the variables the multi-line string reads",
+      "lint": []
+    },
+    {
+      "file": "expr-collections.nf",
+      "sections": [
+        "List",
+        "Map"
+      ],
+      "source": [
+        "docs/reference/syntax.mdx#L776",
+        "docs/reference/syntax.mdx#L784",
+        "docs/reference/syntax.mdx#L790",
+        "docs/reference/syntax.mdx#L796-L797"
+      ],
+      "adjusted": "adds a trailing comma, an empty list, quoted and keyword keys",
+      "lint": []
+    },
+    {
+      "file": "expr-closures.nf",
+      "sections": [
+        "Closure"
+      ],
+      "source": [
+        "docs/reference/syntax.mdx#L806",
+        "docs/reference/syntax.mdx#L814-L819"
+      ],
+      "adjusted": "closures assigned to variables; adds typed parameters with a default, `->` only, implicit it, a Groovy-typed parameter",
+      "lint": []
+    },
+    {
+      "file": "expr-index-property.nf",
+      "sections": [
+        "Variable",
+        "Index expression",
+        "Property expression"
+      ],
+      "source": [
+        "docs/reference/syntax.mdx#L829",
+        "docs/reference/syntax.mdx#L837-L839"
+      ],
+      "adjusted": "defines the variables; adds a two-element index and a string property",
+      "lint": []
+    },
+    {
+      "file": "expr-calls.nf",
+      "sections": [
+        "Function call"
+      ],
+      "source": [
+        "docs/reference/syntax.mdx#L849",
+        "docs/reference/syntax.mdx#L855-L857",
+        "docs/reference/syntax.mdx#L863",
+        "docs/reference/syntax.mdx#L871-L875",
+        "docs/reference/syntax.mdx#L884-L891"
+      ],
+      "adjusted": "defines the variables; omits resourceLabels (a process directive, not a function); adds a trailing comma in arguments",
+      "lint": []
+    },
+    {
+      "file": "expr-constructor.nf",
+      "sections": [
+        "Constructor call"
+      ],
+      "source": [
+        "docs/reference/syntax.mdx#L899",
+        "docs/reference/syntax.mdx#L905"
+      ],
+      "adjusted": "adds a generic constructor",
+      "lint": []
+    },
+    {
+      "file": "expr-operators.nf",
+      "sections": [
+        "Unary expressions",
+        "Binary expressions",
+        "Ternary expression",
+        "Parentheses",
+        "Precedence"
+      ],
+      "source": [
+        "docs/reference/syntax.mdx#L913",
+        "docs/reference/syntax.mdx#L918-L963",
+        "docs/reference/syntax.mdx#L970",
+        "docs/reference/syntax.mdx#L978-L982"
+      ],
+      "adjusted": "one println per operator; unary operands in parentheses (`println ~a` is a command call lint rejects)",
+      "lint": []
+    }
+  ]
+}

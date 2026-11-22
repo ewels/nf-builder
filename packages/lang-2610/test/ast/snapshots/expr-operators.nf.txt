@@ -1,0 +1,260 @@
+Script typesEnabled=false 1:1-41:1
+  body[0] VariableDeclaration def=true multiple=false 1:1-1:10
+    targets[0] TypedName 1:5-1:6
+      name Identifier 1:5-1:6 "a"
+    initializer Number integer=true 1:9-1:10 "7"
+  body[1] VariableDeclaration def=true multiple=false 2:1-2:10
+    targets[0] TypedName 2:5-2:6
+      name Identifier 2:5-2:6 "b"
+    initializer Number integer=true 2:9-2:10 "2"
+  body[2] ExpressionStatement 3:1-3:22
+    expression MethodCall trailingComma=false parens=false 3:1-3:22
+      method Identifier 3:1-3:8 "println"
+      args[0] Unary operator="!" 3:9-3:22
+        operand Parenthesized 3:10-3:22
+          expression Binary operator="==" 3:11-3:21
+            left Binary operator="+" 3:11-3:16
+              left Number integer=true 3:11-3:12 "2"
+              right Number integer=true 3:15-3:16 "2"
+            right Number integer=true 3:20-3:21 "4"
+  body[3] ExpressionStatement 4:1-4:12
+    expression MethodCall trailingComma=false parens=true 4:1-4:12
+      method Identifier 4:1-4:8 "println"
+      args[0] Unary operator="~" 4:9-4:11
+        operand Variable 4:10-4:11 "a"
+  body[4] ExpressionStatement 5:1-5:12
+    expression MethodCall trailingComma=false parens=true 5:1-5:12
+      method Identifier 5:1-5:8 "println"
+      args[0] Unary operator="+" 5:9-5:11
+        operand Variable 5:10-5:11 "a"
+  body[5] ExpressionStatement 6:1-6:12
+    expression MethodCall trailingComma=false parens=true 6:1-6:12
+      method Identifier 6:1-6:8 "println"
+      args[0] Unary operator="-" 6:9-6:11
+        operand Variable 6:10-6:11 "a"
+  body[6] ExpressionStatement 7:1-7:15
+    expression MethodCall trailingComma=false parens=false 7:1-7:15
+      method Identifier 7:1-7:8 "println"
+      args[0] Binary operator="**" 7:9-7:15
+        left Variable 7:9-7:10 "a"
+        right Variable 7:14-7:15 "b"
+  body[7] ExpressionStatement 8:1-8:14
+    expression MethodCall trailingComma=false parens=false 8:1-8:14
+      method Identifier 8:1-8:8 "println"
+      args[0] Binary operator="*" 8:9-8:14
+        left Variable 8:9-8:10 "a"
+        right Variable 8:13-8:14 "b"
+  body[8] ExpressionStatement 9:1-9:14
+    expression MethodCall trailingComma=false parens=false 9:1-9:14
+      method Identifier 9:1-9:8 "println"
+      args[0] Binary operator="/" 9:9-9:14
+        left Variable 9:9-9:10 "a"
+        right Variable 9:13-9:14 "b"
+  body[9] ExpressionStatement 10:1-10:14
+    expression MethodCall trailingComma=false parens=false 10:1-10:14
+      method Identifier 10:1-10:8 "println"
+      args[0] Binary operator="%" 10:9-10:14
+        left Variable 10:9-10:10 "a"
+        right Variable 10:13-10:14 "b"
+  body[10] ExpressionStatement 11:1-11:14
+    expression MethodCall trailingComma=false parens=false 11:1-11:14
+      method Identifier 11:1-11:8 "println"
+      args[0] Binary operator="+" 11:9-11:14
+        left Variable 11:9-11:10 "a"
+        right Variable 11:13-11:14 "b"
+  body[11] ExpressionStatement 12:1-12:14
+    expression MethodCall trailingComma=false parens=false 12:1-12:14
+      method Identifier 12:1-12:8 "println"
+      args[0] Binary operator="-" 12:9-12:14
+        left Variable 12:9-12:10 "a"
+        right Variable 12:13-12:14 "b"
+  body[12] ExpressionStatement 13:1-13:15
+    expression MethodCall trailingComma=false parens=false 13:1-13:15
+      method Identifier 13:1-13:8 "println"
+      args[0] Binary operator="<<" 13:9-13:15
+        left Variable 13:9-13:10 "a"
+        right Variable 13:14-13:15 "b"
+  body[13] ExpressionStatement 14:1-14:15
+    expression MethodCall trailingComma=false parens=false 14:1-14:15
+      method Identifier 14:1-14:8 "println"
+      args[0] Binary operator=">>" 14:9-14:15
+        left Variable 14:9-14:10 "a"
+        right Variable 14:14-14:15 "b"
+  body[14] ExpressionStatement 15:1-15:16
+    expression MethodCall trailingComma=false parens=false 15:1-15:16
+      method Identifier 15:1-15:8 "println"
+      args[0] Binary operator=">>>" 15:9-15:16
+        left Variable 15:9-15:10 "a"
+        right Variable 15:15-15:16 "b"
+  body[15] ExpressionStatement 16:1-16:13
+    expression MethodCall trailingComma=false parens=false 16:1-16:13
+      method Identifier 16:1-16:8 "println"
+      args[0] Binary operator=".." 16:9-16:13
+        left Variable 16:9-16:10 "a"
+        right Variable 16:12-16:13 "b"
+  body[16] ExpressionStatement 17:1-17:14
+    expression MethodCall trailingComma=false parens=false 17:1-17:14
+      method Identifier 17:1-17:8 "println"
+      args[0] Binary operator="..<" 17:9-17:14
+        left Variable 17:9-17:10 "a"
+        right Variable 17:13-17:14 "b"
+  body[17] ExpressionStatement 18:1-18:20
+    expression MethodCall trailingComma=false parens=false 18:1-18:20
+      method Identifier 18:1-18:8 "println"
+      args[0] Cast 18:9-18:20
+        operand Variable 18:9-18:10 "a"
+        type TypeRef nullable=false 18:14-18:20 "String"
+  body[18] ExpressionStatement 19:1-19:29
+    expression MethodCall trailingComma=false parens=false 19:1-19:29
+      method Identifier 19:1-19:8 "println"
+      args[0] TypeTest operator="instanceof" 19:9-19:29
+        operand Variable 19:9-19:10 "a"
+        type TypeRef nullable=false 19:22-19:29 "Integer"
+  body[19] ExpressionStatement 20:1-20:29
+    expression MethodCall trailingComma=false parens=false 20:1-20:29
+      method Identifier 20:1-20:8 "println"
+      args[0] TypeTest operator="!instanceof" 20:9-20:29
+        operand Variable 20:9-20:10 "a"
+        type TypeRef nullable=false 20:23-20:29 "String"
+  body[20] ExpressionStatement 21:1-21:14
+    expression MethodCall trailingComma=false parens=false 21:1-21:14
+      method Identifier 21:1-21:8 "println"
+      args[0] Binary operator="<" 21:9-21:14
+        left Variable 21:9-21:10 "a"
+        right Variable 21:13-21:14 "b"
+  body[21] ExpressionStatement 22:1-22:14
+    expression MethodCall trailingComma=false parens=false 22:1-22:14
+      method Identifier 22:1-22:8 "println"
+      args[0] Binary operator=">" 22:9-22:14
+        left Variable 22:9-22:10 "a"
+        right Variable 22:13-22:14 "b"
+  body[22] ExpressionStatement 23:1-23:15
+    expression MethodCall trailingComma=false parens=false 23:1-23:15
+      method Identifier 23:1-23:8 "println"
+      args[0] Binary operator="<=" 23:9-23:15
+        left Variable 23:9-23:10 "a"
+        right Variable 23:14-23:15 "b"
+  body[23] ExpressionStatement 24:1-24:15
+    expression MethodCall trailingComma=false parens=false 24:1-24:15
+      method Identifier 24:1-24:8 "println"
+      args[0] Binary operator=">=" 24:9-24:15
+        left Variable 24:9-24:10 "a"
+        right Variable 24:14-24:15 "b"
+  body[24] ExpressionStatement 25:1-25:20
+    expression MethodCall trailingComma=false parens=false 25:1-25:20
+      method Identifier 25:1-25:8 "println"
+      args[0] Binary operator="in" 25:9-25:20
+        left Variable 25:9-25:10 "a"
+        right List trailingComma=false 25:14-25:20
+          elements[0] Number integer=true 25:15-25:16 "1"
+          elements[1] Number integer=true 25:18-25:19 "7"
+  body[25] ExpressionStatement 26:1-26:21
+    expression MethodCall trailingComma=false parens=false 26:1-26:21
+      method Identifier 26:1-26:8 "println"
+      args[0] Binary operator="!in" 26:9-26:21
+        left Variable 26:9-26:10 "a"
+        right List trailingComma=false 26:15-26:21
+          elements[0] Number integer=true 26:16-26:17 "1"
+          elements[1] Number integer=true 26:19-26:20 "7"
+  body[26] ExpressionStatement 27:1-27:15
+    expression MethodCall trailingComma=false parens=false 27:1-27:15
+      method Identifier 27:1-27:8 "println"
+      args[0] Binary operator="==" 27:9-27:15
+        left Variable 27:9-27:10 "a"
+        right Variable 27:14-27:15 "b"
+  body[27] ExpressionStatement 28:1-28:15
+    expression MethodCall trailingComma=false parens=false 28:1-28:15
+      method Identifier 28:1-28:8 "println"
+      args[0] Binary operator="!=" 28:9-28:15
+        left Variable 28:9-28:10 "a"
+        right Variable 28:14-28:15 "b"
+  body[28] ExpressionStatement 29:1-29:16
+    expression MethodCall trailingComma=false parens=false 29:1-29:16
+      method Identifier 29:1-29:8 "println"
+      args[0] Binary operator="<=>" 29:9-29:16
+        left Variable 29:9-29:10 "a"
+        right Variable 29:15-29:16 "b"
+  body[29] ExpressionStatement 30:1-30:21
+    expression MethodCall trailingComma=false parens=false 30:1-30:21
+      method Identifier 30:1-30:8 "println"
+      args[0] Binary operator="=~" 30:9-30:21
+        left String value="abc" quote="'" 30:9-30:14 "'abc'"
+        right String value="b" quote="/" 30:18-30:21 "/b/"
+  body[30] ExpressionStatement 31:1-31:24
+    expression MethodCall trailingComma=false parens=false 31:1-31:24
+      method Identifier 31:1-31:8 "println"
+      args[0] Binary operator="==~" 31:9-31:24
+        left String value="abc" quote="'" 31:9-31:14 "'abc'"
+        right String value="a.c" quote="/" 31:19-31:24 "/a.c/"
+  body[31] ExpressionStatement 32:1-32:14
+    expression MethodCall trailingComma=false parens=false 32:1-32:14
+      method Identifier 32:1-32:8 "println"
+      args[0] Binary operator="&" 32:9-32:14
+        left Variable 32:9-32:10 "a"
+        right Variable 32:13-32:14 "b"
+  body[32] ExpressionStatement 33:1-33:14
+    expression MethodCall trailingComma=false parens=false 33:1-33:14
+      method Identifier 33:1-33:8 "println"
+      args[0] Binary operator="^" 33:9-33:14
+        left Variable 33:9-33:10 "a"
+        right Variable 33:13-33:14 "b"
+  body[33] ExpressionStatement 34:1-34:14
+    expression MethodCall trailingComma=false parens=false 34:1-34:14
+      method Identifier 34:1-34:8 "println"
+      args[0] Binary operator="|" 34:9-34:14
+        left Variable 34:9-34:10 "a"
+        right Variable 34:13-34:14 "b"
+  body[34] ExpressionStatement 35:1-35:23
+    expression MethodCall trailingComma=false parens=false 35:1-35:23
+      method Identifier 35:1-35:8 "println"
+      args[0] Binary operator="&&" 35:9-35:23
+        left Binary operator=">" 35:9-35:14
+          left Variable 35:9-35:10 "a"
+          right Number integer=true 35:13-35:14 "1"
+        right Binary operator=">" 35:18-35:23
+          left Variable 35:18-35:19 "b"
+          right Number integer=true 35:22-35:23 "1"
+  body[35] ExpressionStatement 36:1-36:23
+    expression MethodCall trailingComma=false parens=false 36:1-36:23
+      method Identifier 36:1-36:8 "println"
+      args[0] Binary operator="||" 36:9-36:23
+        left Binary operator=">" 36:9-36:14
+          left Variable 36:9-36:10 "a"
+          right Number integer=true 36:13-36:14 "1"
+        right Binary operator=">" 36:18-36:23
+          left Variable 36:18-36:19 "b"
+          right Number integer=true 36:22-36:23 "1"
+  body[36] ExpressionStatement 37:1-37:15
+    expression MethodCall trailingComma=false parens=false 37:1-37:15
+      method Identifier 37:1-37:8 "println"
+      args[0] Elvis 37:9-37:15
+        condition Variable 37:9-37:10 "a"
+        alternate Variable 37:14-37:15 "b"
+  body[37] ExpressionStatement 38:1-38:48
+    expression MethodCall trailingComma=false parens=false 38:1-38:48
+      method Identifier 38:1-38:8 "println"
+      args[0] Ternary 38:9-38:48
+        condition Binary operator="==" 38:9-38:19
+          left Binary operator="%" 38:9-38:14
+            left Variable 38:9-38:10 "a"
+            right Number integer=true 38:13-38:14 "2"
+          right Number integer=true 38:18-38:19 "0"
+        consequent String value="a is even!" quote="'" 38:22-38:34 "'a is even!'"
+        alternate String value="a is odd!" quote="'" 38:37-38:48 "'a is odd!'"
+  body[38] ExpressionStatement 39:1-39:18
+    expression MethodCall trailingComma=false parens=false 39:1-39:18
+      method Identifier 39:1-39:8 "println"
+      args[0] Binary operator="+" 39:9-39:18
+        left Number integer=true 39:9-39:10 "1"
+        right Binary operator="*" 39:13-39:18
+          left Number integer=true 39:13-39:14 "2"
+          right Number integer=true 39:17-39:18 "3"
+  body[39] ExpressionStatement 40:1-40:21
+    expression MethodCall trailingComma=false parens=true 40:1-40:21
+      method Identifier 40:1-40:8 "println"
+      args[0] Binary operator="*" 40:9-40:20
+        left Parenthesized 40:9-40:16
+          expression Binary operator="+" 40:10-40:15
+            left Number integer=true 40:10-40:11 "1"
+            right Number integer=true 40:14-40:15 "2"
+        right Number integer=true 40:19-40:20 "3"

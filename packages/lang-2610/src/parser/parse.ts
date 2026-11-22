@@ -39,7 +39,7 @@ export type ParseError = {
   endColumn: number;
 };
 export type ParseOutcome<T> =
-  | { ok: true; tree: T; mode: "SLL" | "LL" }
+  | { ok: true; tree: T; mode: "SLL" | "LL"; tokens: CommonTokenStream }
   | { ok: false; error: ParseError; mode: "SLL" | "LL" };
 
 class FirstErrorListener extends BaseErrorListener {
@@ -155,7 +155,7 @@ function run<P extends ScriptParser | ConfigParser, T>(
     }) as const;
 
   try {
-    return { ok: true, tree: start(parser), mode: "SLL" };
+    return { ok: true, tree: start(parser), mode: "SLL", tokens };
   } catch (error) {
     if (error instanceof LexerSyntaxError) return lexerError(error, "SLL");
     if (!(error instanceof ParseCancellationException)) throw error;
@@ -168,7 +168,7 @@ function run<P extends ScriptParser | ConfigParser, T>(
   parser.interpreter = base;
   base.predictionMode = PredictionMode.LL;
   try {
-    return { ok: true, tree: start(parser), mode: "LL" };
+    return { ok: true, tree: start(parser), mode: "LL", tokens };
   } catch (error) {
     if (error instanceof LexerSyntaxError) return lexerError(error, "LL");
     if (!(error instanceof ParseCancellationException)) throw error;

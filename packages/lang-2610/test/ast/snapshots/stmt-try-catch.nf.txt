@@ -1,0 +1,44 @@
+Script typesEnabled=false 1:1-14:1
+  body[0] VariableDeclaration def=true multiple=false 1:1-1:16
+    targets[0] TypedName 1:5-1:9
+      name Identifier 1:5-1:9 "text"
+    initializer Null 1:12-1:16 "null"
+  body[1] TryCatch 2:1-13:2
+    body Block 2:5-4:2
+      statements[0] Assignment operator="=" 3:5-3:34
+        target Variable 3:5-3:9 "text"
+        value Property navigation="." 3:12-3:34
+          object MethodCall trailingComma=false parens=true 3:12-3:29
+            method Identifier 3:12-3:16 "file"
+            args[0] String value="hello.txt" quote="'" 3:17-3:28 "'hello.txt'"
+          property Identifier 3:30-3:34 "text"
+    catches[0] Catch legacy=false 5:1-7:2
+      variable Identifier 5:8-5:9 "e"
+      types[0] TypeRef nullable=false 5:11-5:22 "IOException"
+      body Block 5:25-7:2
+        statements[0] ExpressionStatement 6:5-6:40
+          expression MethodCall navigation="." trailingComma=false parens=false 6:5-6:40
+            receiver Variable 6:5-6:8 "log"
+            method Identifier 6:9-6:13 "warn"
+            args[0] String value="Could not load hello.txt" quote="\"" 6:14-6:40 "\"Could not load hello.txt\""
+    catches[1] Catch legacy=false 8:1-10:2
+      variable Identifier 8:8-8:9 "e"
+      types[0] TypeRef nullable=false 8:11-8:32 "FileNotFoundException"
+      types[1] TypeRef nullable=false 8:35-8:70 "java.nio.file.AccessDeniedException"
+      body Block 8:73-10:2
+        statements[0] ExpressionStatement 9:5-9:40
+          expression MethodCall navigation="." trailingComma=false parens=false 9:5-9:40
+            receiver Variable 9:5-9:8 "log"
+            method Identifier 9:9-9:13 "warn"
+            args[0] String value="Could not load hello.txt" quote="\"" 9:14-9:40 "\"Could not load hello.txt\""
+    catches[2] Catch legacy=false 11:1-13:2
+      variable Identifier 11:8-11:9 "e"
+      body Block 11:12-13:2
+        statements[0] ExpressionStatement 12:5-12:38
+          expression MethodCall navigation="." trailingComma=false parens=false 12:5-12:38
+            receiver Variable 12:5-12:8 "log"
+            method Identifier 12:9-12:13 "warn"
+            args[0] GString quote="\"" 12:14-12:38
+              parts[0] GStringText 12:15-12:33 "Unexpected error: "
+              parts[1] Interpolation braced=true 12:33-12:37
+                expression Variable 12:35-12:36 "e"

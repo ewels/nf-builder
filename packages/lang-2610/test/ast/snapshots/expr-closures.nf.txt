@@ -1,0 +1,76 @@
+Script typesEnabled=false 1:1-12:1
+  body[0] VariableDeclaration def=true multiple=false 1:1-1:28
+    targets[0] TypedName 1:5-1:8
+      name Identifier 1:5-1:8 "add"
+    initializer Closure 1:11-1:28
+      params[0] Parameter def=false 1:13-1:14
+        name Identifier 1:13-1:14 "a"
+      params[1] Parameter def=false 1:16-1:17
+        name Identifier 1:16-1:17 "b"
+      body[0] ExpressionStatement 1:21-1:26
+        expression Binary operator="+" 1:21-1:26
+          left Variable 1:21-1:22 "a"
+          right Variable 1:25-1:26 "b"
+  body[1] VariableDeclaration def=true multiple=false 2:1-7:2
+    targets[0] TypedName 2:5-2:11
+      name Identifier 2:5-2:11 "square"
+    initializer Closure 2:14-7:2
+      params[0] Parameter def=false 2:16-2:17
+        name Identifier 2:16-2:17 "v"
+      body[0] ExpressionStatement 3:5-3:21
+        expression MethodCall trailingComma=false parens=false 3:5-3:21
+          method Identifier 3:5-3:12 "println"
+          args[0] String value="Hello!" quote="'" 3:13-3:21 "'Hello!'"
+      body[1] ExpressionStatement 4:5-4:34
+        expression MethodCall trailingComma=false parens=false 4:5-4:34
+          method Identifier 4:5-4:12 "println"
+          args[0] String value="We're in a closure!" quote="\"" 4:13-4:34 "\"We're in a closure!\""
+      body[2] ExpressionStatement 5:5-5:25
+        expression MethodCall trailingComma=false parens=false 5:5-5:25
+          method Identifier 5:5-5:12 "println"
+          args[0] String value="Goodbye..." quote="'" 5:13-5:25 "'Goodbye...'"
+      body[3] ExpressionStatement 6:5-6:10
+        expression Binary operator="*" 6:5-6:10
+          left Variable 6:5-6:6 "v"
+          right Variable 6:9-6:10 "v"
+  body[2] VariableDeclaration def=true multiple=false 8:1-8:52
+    targets[0] TypedName 8:5-8:10
+      name Identifier 8:5-8:10 "typed"
+    initializer Closure 8:13-8:52
+      params[0] Parameter def=false 8:15-8:25
+        name Identifier 8:15-8:16 "a"
+        type TypeRef nullable=false 8:18-8:25 "Integer"
+      params[1] Parameter def=false 8:27-8:41
+        name Identifier 8:27-8:28 "b"
+        type TypeRef nullable=false 8:30-8:37 "Integer"
+        defaultValue Number integer=true 8:40-8:41 "1"
+      body[0] ExpressionStatement 8:45-8:50
+        expression Binary operator="+" 8:45-8:50
+          left Variable 8:45-8:46 "a"
+          right Variable 8:49-8:50 "b"
+  body[3] VariableDeclaration def=true multiple=false 9:1-9:25
+    targets[0] TypedName 9:5-9:13
+      name Identifier 9:5-9:13 "noParams"
+    initializer Closure 9:16-9:25
+      body[0] ExpressionStatement 9:21-9:23
+        expression Number integer=true 9:21-9:23 "42"
+  body[4] VariableDeclaration def=true multiple=false 10:1-10:26
+    targets[0] TypedName 10:5-10:13
+      name Identifier 10:5-10:13 "implicit"
+    initializer Closure 10:16-10:26
+      body[0] ExpressionStatement 10:18-10:24
+        expression Binary operator="*" 10:18-10:24
+          left Variable 10:18-10:20 "it"
+          right Number integer=true 10:23-10:24 "2"
+  body[5] VariableDeclaration def=true multiple=false 11:1-11:43
+    targets[0] TypedName 11:5-11:16
+      name Identifier 11:5-11:16 "legacyTyped"
+    initializer Closure 11:19-11:43
+      params[0] Parameter def=false 11:21-11:29
+        legacyType LegacyType dimensions=0 11:21-11:27
+          type TypeRef nullable=false 11:21-11:27 "String"
+        name Identifier 11:28-11:29 "s"
+      body[0] ExpressionStatement 11:33-11:41
+        expression MethodCall navigation="." trailingComma=false parens=true 11:33-11:41
+          receiver Variable 11:33-11:34 "s"
+          method Identifier 11:35-11:39 "size"
