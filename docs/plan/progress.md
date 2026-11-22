@@ -395,7 +395,7 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - the app shows an "Open in a new tab" notice instead of starting inside a frame;
   - the snapshot plugin is host-neutral and `check:registry --url` samples with cache-busting;
   - Deploy check, the netlify.toml headers and the Netlify verify job are gone, and `netlify.toml` keeps only build settings.
-- State: built; merges once the maintainer enables Pages (#35). Steps 1 and 5 are confirmed by the first `verify` runs after merge (Q11).
+- State: passing (steps 1 and 5 confirmed by the first `verify` runs after merge, Q11); merges once the maintainer enables Pages (#35).
 - Next: F-111, then F-112 and F-113.
 - Decisions:
   - [ADR 0040](../adr/0040-github-pages-hosting.md) and [ADR 0041](../adr/0041-registry-snapshot-deploy.md) (on `main` since fcc9483).
@@ -405,4 +405,11 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - `smol-toml` stays, for `test/netlify-toml.test.ts`.
   - `SITE_CONTEXT` and `SITE_COMMIT` stamp `version.json`.
   - The registry check samples 20 bundles and 5 plugins after deploys; the full check runs before upload.
+  - Tests removed with their behaviour, each replaced under ADR 0040 or 0041:
+    - `netlify-config.test.ts` moved to `netlify-toml.test.ts` and `security-policy.test.ts`;
+    - `check-deploy-headers.test.ts` moved to `check-site.test.ts` (`--allow-newer` dropped: Pages deploys are serialised);
+    - the SPA-fallback and header e2e assertions now assert their absence;
+    - the S4 pull-request trigger became dispatch-only;
+    - the registry `verify` job and hook moved to the `pages.yml` tests.
+  - A present but broken registry snapshot fails the deploy (the full `check:registry` before upload) until the next good snapshot; only a missing branch is skipped.
 - Blockers: #35.

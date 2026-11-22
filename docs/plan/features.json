@@ -213,8 +213,8 @@
         "Inside a frame the app does not mount and shows a short message with an \"Open in a new tab\" link",
         "A successful `Registry snapshot` run on `main` triggers a Pages deploy that serves the snapshot at `/registry/` without any secret, and `verify` passes `pnpm check:registry --url` against the deployed site"
       ],
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Verified 2026-11-22: step 2 by the CI `site` job (`pnpm check:site` on a `/nf-builder/` build), test/check-site.test.ts, test/security-policy*.test.ts and e2e/pages-hosting.spec.ts; step 3 by `pnpm test:e2e` under `/nf-builder/` (pages-hosting.spec.ts and the F-002/F-011 preview test in app-shell.spec.ts); step 4 by apps/web/test/frame-guard.test.tsx and the cross-origin frame e2e test. Steps 1 and 5 are confirmed after merge by `pages.yml`'s `verify` job: the push run, then the first `workflow_run` after a Registry snapshot run (Q11). Merge only once Pages' source is \"GitHub Actions\" (#35)."
     },
     {
       "id": "F-101",

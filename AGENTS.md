@@ -32,7 +32,7 @@ This table lists every root `package.json` script that `pnpm check` doesn't alre
 | `pnpm --filter <package> test` | While iterating on one package |
 | `pnpm format` | Before `pnpm check`: apply Biome's formatting and safe fixes |
 | `pnpm check` | Before every commit: typecheck, Biome, unit tests, dependency-cruiser, ADR lint, `features.json` validation |
-| `pnpm check:budget` and `pnpm check:hosts` | After `pnpm build`: QA-01 bundle budget and IO-41 host allow-list (ADR 0015) |
+| `pnpm check:budget` and `pnpm check:hosts` | After `pnpm build`, with the same `BASE_PATH`: QA-01 bundle budget and IO-41 host allow-list (ADR 0015) |
 | `pnpm check:site [<dir>]` | After `pnpm build` with `BASE_PATH=/nf-builder/` (as the CI `site` job does): every page starts `<head>` with the QA-30 policy meta, asset URLs sit under the base, `version.json` is valid; `--url <site> --commit <sha>` polls a deployed site (ADR 0040) |
 | `pnpm test:e2e -- --grep F-123` | The feature's end-to-end test |
 | `pnpm corpus:fetch` | Fetch the pinned pipeline corpus into `.cache/corpus/` (git over github.com; second run is a no-op) |
