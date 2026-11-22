@@ -474,3 +474,15 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - A present but broken registry snapshot fails the deploy (the full `check:registry` before upload) until the next good snapshot; only a missing branch is skipped.
   - [ADR 0044](../adr/0044-embeddable-in-frames.md) (maintainer's decision): no frame guard. An embedded copy has partitioned storage, so its own projects. Embedders grant clipboard and other permissions. Notes for F-202 and F-310.
 - Blockers: #35.
+
+## 2026-11-22 · deploy · Claude (autonomous)
+- Did:
+  - The maintainer enabled GitHub Pages and deleted the Netlify site. F-011 merged (PR #37), and the first `Pages` run deployed https://ewels.github.io/nf-builder/.
+    - `verify` confirmed the commit and the meta policy.
+    - A sampled `check:registry --url` against the live site passed.
+    - A `Registry snapshot` run was dispatched to exercise the snapshot-triggered deploy.
+  - F-112 merged (PR #40). M0 and M1 are complete, and 26 of 69 v0.1 features pass.
+- Decisions:
+  - The maintainer asked for the app to work inside iframes, so F-011 dropped its frame guard before merging ([ADR 0044](../adr/0044-embeddable-in-frames.md)).
+- Next: F-202 and F-205 are building; F-203 and F-209 are being planned; F-501 flips after the snapshot-triggered `verify`.
+- Blockers: none. #35 asks whether to use a custom domain (before F-202 ships) and to update the repository homepage.

@@ -15,15 +15,15 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-107 legacy projection | merged, PR #36 | |
 | F-108 code nodes | merged, PR #34 | |
 | F-111 edit commands | merged, PR #38 | |
-| F-112 diagnostics | `feat/F-112`, in PR | Plan deleted in its PR. |
-| F-113 engine worker | `feat/F-113`, in PR | Plan deleted in its PR. |
-| F-202 projects in IndexedDB | not started | [plan](plan-F-202.md). After F-113. |
-| F-205 canvas | not started | [plan](plan-F-205.md). After F-113 (and F-106); parallel with F-202. |
+| F-112 diagnostics | merged, PR #40 | |
+| F-113 engine worker | merged, PR #39 | |
+| F-202 projects in IndexedDB | `feat/F-202` | Tasks 1–5 committed; task 6 building. [plan](plan-F-202.md). |
+| F-205 canvas | `feat/F-205` | Tasks 1–3 committed; task 4 building. [plan](plan-F-205.md). |
 | F-206 details pane | not started | [plan](plan-F-206.md). After F-205. |
 | F-207 layout sidecar | not started | [plan](plan-F-207.md). After F-205 and F-202. |
 | F-208 view modes and Code | not started | [plan](plan-F-208.md). After F-205. |
-| F-501 registry snapshot | merged, PR #29, **not passing** | Passes once the Pages deploy serves `/registry/` and `verify` passes (ADR 0041, F-011). F-502 to F-506, F-702, F-704 and F-705 depend on it. |
-| F-011 GitHub Pages hosting | `feat/F-011`, in PR #37 | Pages enabled by the maintainer; the plan stays (ADR 0040 links it). |
+| F-501 registry snapshot | merged, PR #29, **not passing** | Live `/registry/` passes a sampled check; waiting for the dispatched snapshot run's `workflow_run` deploy and `verify`, then flip in a PR. |
+| F-011 GitHub Pages hosting | merged, PR #37 | Live at https://ewels.github.io/nf-builder/; first `verify` passed. |
 
 ## Merge order
 
