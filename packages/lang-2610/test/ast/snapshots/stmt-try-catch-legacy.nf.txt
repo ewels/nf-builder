@@ -8,9 +8,12 @@ Script typesEnabled=false 1:1-7:1
             object MethodCall trailingComma=false parens=true 2:13-2:30
               method Identifier 2:13-2:17 "file"
               args[0] String value="hello.txt" quote="'" 2:18-2:29 "'hello.txt'"
+              closures=[]
             property Identifier 2:31-2:35 "text"
+          closures=[]
     catches[0] Catch legacy=true 4:1-6:2
       types[0] TypeRef nullable=false 4:8-4:19 "IOException"
+        typeArguments=[]
       variable Identifier 4:20-4:21 "e"
       body Block 4:24-6:2
         statements[0] ExpressionStatement 5:5-5:40
@@ -18,3 +21,4 @@ Script typesEnabled=false 1:1-7:1
             receiver Variable 5:5-5:8 "log"
             method Identifier 5:9-5:13 "warn"
             args[0] String value="Could not load hello.txt" quote="\"" 5:14-5:40 "\"Could not load hello.txt\""
+            closures=[]

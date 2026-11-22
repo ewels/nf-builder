@@ -16,7 +16,6 @@ import type {
   Statement,
   TupleInput,
 } from "@nf-builder/lang-core";
-import type { ParserRuleContext } from "antlr4ng";
 import {
   type AgentDefContext,
   AgentDirectivesContext,
@@ -55,28 +54,16 @@ import { checkVariableName, identifier, typedName, typeRef } from "./types.ts";
 
 const last = <T>(items: readonly T[]): T => items[items.length - 1] as T;
 
-/** Upstream's `checkDirective` over each statement; the invalid ones are dropped. */
-function directives(
-  contexts: ParserRuleContext[],
-  build: (ctx: never, cx: BuildContext) => Statement,
-  message: string,
-  cx: BuildContext,
-): ExpressionStatement[] {
-  const out: ExpressionStatement[] = [];
-  for (const ctx of contexts) {
-    const item = directive(build(ctx as never, cx), message, cx);
-    if (item) out.push(item);
-  }
-  return out;
-}
-
-/** A section of statements that are directive-like: directives, stage directives. */
+/** Upstream's `checkDirective` over each statement of a directive-like section (directives, stage); invalid ones are dropped. */
 function directiveSection(
   ctx: ProcessDirectivesContext | AgentDirectivesContext | ProcessStageContext,
   message: string,
   cx: BuildContext,
 ): ExpressionStatement[] {
-  return directives(ctx.statement(), statement as never, message, cx);
+  return ctx
+    .statement()
+    .map((s) => directive(statement(s, cx), message, cx))
+    .filter((s) => s !== null);
 }
 
 export function processDirectives(
@@ -133,19 +120,6 @@ export function processWhen(
   return labelled(cx, ctx.start as never, condition.range, [condition]);
 }
 
-export function processExec(
-  ctx: ProcessExecContext,
-  cx: BuildContext,
-): Section<Statement> {
-  const body = ctx.blockStatements();
-  return labelled(
-    cx,
-    ctx.start as never,
-    statementsRange(body, cx),
-    blockStatements(body, cx),
-  );
-}
-
 /** The script body of a process without a `script:` label. */
 export function implicitExec(
   ctx: BlockStatementsContext,
@@ -154,8 +128,9 @@ export function implicitExec(
   return unlabelled(statementsRange(ctx, cx), blockStatements(ctx, cx));
 }
 
+/** A labelled section of statements: `script:`/`exec:`/`shell:`, `stub:`, `prompt:`. */
 export function processStub(
-  ctx: ProcessStubContext | AgentPromptContext,
+  ctx: ProcessExecContext | ProcessStubContext | AgentPromptContext,
   cx: BuildContext,
 ): Section<Statement> {
   const body = ctx.blockStatements();
@@ -478,7 +453,7 @@ export function processDef(
     if (when) sections.when = processWhen(when, cx);
     const exec = body.processExec();
     const implicit = body.blockStatements();
-    if (exec) sections.exec = processExec(exec, cx);
+    if (exec) sections.exec = processStub(exec, cx);
     else if (implicit) sections.exec = implicitExec(implicit, cx);
     const stub = body.processStub();
     if (stub) sections.stub = processStub(stub, cx);

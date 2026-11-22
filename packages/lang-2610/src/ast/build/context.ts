@@ -46,11 +46,6 @@ export class BuildContext {
     this.errors.push(problem(message, at));
   }
 
-  /** Collect an error that already has its position (`checkEscapes`). */
-  report(problem: ParseProblem): void {
-    this.errors.push(problem);
-  }
-
   /** Fail the build with the pending number-format error, if there is one. */
   failOnNumberFormat(): void {
     if (this.numberFormatError)

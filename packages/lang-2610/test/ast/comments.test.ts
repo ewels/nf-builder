@@ -1,7 +1,6 @@
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { type AstNode, type Comment, walk } from "@nf-builder/lang-core";
 import { describe, expect, it } from "vitest";
 import { parseScriptAst } from "../../src/ast/index.ts";
 import { checkRanges } from "./check-ranges.ts";

@@ -5,6 +5,8 @@ Script typesEnabled=false 1:1-20:1
     initializer MethodCall navigation="." trailingComma=false parens=true 1:9-1:22
       receiver Variable 1:9-1:13 "Math"
       method Identifier 1:14-1:20 "random"
+      args=[]
+      closures=[]
   body[1] If elseRange=5:1-5:5 2:1-7:2
     condition Binary operator="<" 2:5-2:12
       left Variable 2:5-2:6 "x"
@@ -14,11 +16,13 @@ Script typesEnabled=false 1:1-20:1
         expression MethodCall trailingComma=false parens=false 3:5-3:24
           method Identifier 3:5-3:12 "println"
           args[0] String value="You lost." quote="'" 3:13-3:24 "'You lost.'"
+          closures=[]
     alternate Block 5:6-7:2
       statements[0] ExpressionStatement 6:5-6:23
         expression MethodCall trailingComma=false parens=false 6:5-6:23
           method Identifier 6:5-6:12 "println"
           args[0] String value="You won!" quote="'" 6:13-6:23 "'You won!'"
+          closures=[]
   body[2] VariableDeclaration def=true multiple=false 9:1-9:15
     targets[0] TypedName 9:5-9:10
       name Identifier 9:5-9:10 "grade"
@@ -31,6 +35,7 @@ Script typesEnabled=false 1:1-20:1
       expression MethodCall trailingComma=false parens=false 11:5-11:28
         method Identifier 11:5-11:12 "println"
         args[0] String value="You get an A!" quote="'" 11:13-11:28 "'You get an A!'"
+        closures=[]
     alternate If elseRange=14:1-14:5 12:6-19:26
       condition Binary operator=">=" 12:10-12:21
         left Variable 12:10-12:15 "grade"
@@ -39,6 +44,7 @@ Script typesEnabled=false 1:1-20:1
         expression MethodCall trailingComma=false parens=false 13:5-13:27
           method Identifier 13:5-13:12 "println"
           args[0] String value="You get a B!" quote="'" 13:13-13:27 "'You get a B!'"
+          closures=[]
       alternate If elseRange=16:1-16:5 14:6-19:26
         condition Binary operator=">=" 14:10-14:21
           left Variable 14:10-14:15 "grade"
@@ -47,6 +53,7 @@ Script typesEnabled=false 1:1-20:1
           expression MethodCall trailingComma=false parens=false 15:5-15:27
             method Identifier 15:5-15:12 "println"
             args[0] String value="You get a C!" quote="'" 15:13-15:27 "'You get a C!'"
+            closures=[]
         alternate If elseRange=18:1-18:5 16:6-19:26
           condition Binary operator=">=" 16:10-16:21
             left Variable 16:10-16:15 "grade"
@@ -55,7 +62,9 @@ Script typesEnabled=false 1:1-20:1
             expression MethodCall trailingComma=false parens=false 17:5-17:27
               method Identifier 17:5-17:12 "println"
               args[0] String value="You get a D!" quote="'" 17:13-17:27 "'You get a D!'"
+              closures=[]
           alternate ExpressionStatement 19:5-19:26
             expression MethodCall trailingComma=false parens=false 19:5-19:26
               method Identifier 19:5-19:12 "println"
               args[0] String value="You failed." quote="'" 19:13-19:26 "'You failed.'"
+              closures=[]

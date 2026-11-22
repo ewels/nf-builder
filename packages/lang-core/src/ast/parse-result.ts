@@ -5,7 +5,7 @@ export interface ParseProblem {
   readonly source: "lexer" | "parser" | "builder";
   /** nf-lang wording, as `nextflow lint` prints it. */
   readonly message: string;
-  /** 1-based, code points, end exclusive. */
+  /** 1-based, code points, end exclusive (except escape errors, whose columns are UTF-16 units as nf-lang reports them). */
   readonly line: number;
   readonly column: number;
   readonly endLine: number;

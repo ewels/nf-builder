@@ -2,4 +2,5 @@ Script typesEnabled=false 1:1-2:1
   body[0] Throw 1:1-1:41
     value New trailingComma=false 1:7-1:41
       type TypeRef nullable=false 1:11-1:20 "Exception"
+        typeArguments=[]
       args[0] String value="something failed!" quote="'" 1:21-1:40 "'something failed!'"

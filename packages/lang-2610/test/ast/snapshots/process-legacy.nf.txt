@@ -9,9 +9,11 @@ Script typesEnabled=false 1:1-23:1
         expression MethodCall trailingComma=false parens=false 3:5-3:26
           method Identifier 3:5-3:18 "errorStrategy"
           args[0] String value="retry" quote="'" 3:19-3:26 "'retry'"
+          closures=[]
       items[1] ExpressionStatement 4:5-4:34
         expression MethodCall trailingComma=false parens=false 4:5-4:34
           method Identifier 4:5-4:8 "tag"
+          args=[]
           closures[0] Closure 4:9-4:34
             body[0] ExpressionStatement 4:11-4:32
               expression GString quote="\"" 4:11-4:32
@@ -25,14 +27,18 @@ Script typesEnabled=false 1:1-23:1
         expression MethodCall trailingComma=false parens=false 7:5-7:17
           method Identifier 7:5-7:8 "val"
           args[0] Variable 7:9-7:17 "greeting"
+          closures=[]
       items[1] ExpressionStatement 8:5-8:13
         expression MethodCall trailingComma=false parens=false 8:5-8:13
           method Identifier 8:5-8:8 "val"
           args[0] Variable 8:9-8:13 "name"
+          closures=[]
     outputs Section label="output" labelRange=10:5-10:12 10:5-11:11
       items[0] ExpressionStatement 11:5-11:11
         expression MethodCall trailingComma=false parens=false 11:5-11:11
           method Identifier 11:5-11:11 "stdout"
+          args=[]
+          closures=[]
     exec Section label="script" labelRange=13:5-13:12 13:5-16:8
       items[0] ExpressionStatement 14:5-16:8
         leadingComments[0] line 13:13-13:24 "// or exec:"

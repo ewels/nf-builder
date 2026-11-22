@@ -58,14 +58,9 @@ import { spanRanges } from "../positions.ts";
 import { has } from "./alt.ts";
 import type { BuildContext } from "./context.ts";
 import { gstring, numberLiteral, stringLiteral } from "./literals.ts";
+import { unparen } from "./sections.ts";
 import { blockStatements, statementOrLabeled } from "./statements.ts";
-import {
-  checkVariableName,
-  createdName,
-  identifier,
-  parameter,
-  typeRef,
-} from "./types.ts";
+import { checkVariableName, identifier, parameter, typeRef } from "./types.ts";
 
 // The labelled fields of the expression alternatives (`left=expression`, `op=...`), set only on the alternative that has them.
 type Labels = {
@@ -250,8 +245,7 @@ function pathElement(
   const trailing = closure(closureCtx, cx);
   // Upstream adds the closure to the call's arguments even when the call is in parentheses (`(foo(1)) { }`,
   // ScriptAstBuilder.java#L1547-L1553), so the parentheses are dropped there.
-  let target = object;
-  while (target.kind === "Parenthesized") target = target.expression;
+  const target = unparen(object);
   if (target.kind === "MethodCall" || target.kind === "Call")
     return { ...target, closures: [...target.closures, trailing], range };
   return methodCall(
@@ -374,7 +368,7 @@ export function primary(ctx: PrimaryContext, cx: BuildContext): Expression {
     const args = creator.arguments();
     return {
       kind: "New",
-      type: createdName(creator.createdName(), cx),
+      type: typeRef(creator.createdName(), cx),
       args: argumentList(args.argumentList(), cx),
       trailingComma: args.COMMA() !== null,
       range,

@@ -3,18 +3,22 @@ Script typesEnabled=false 1:1-19:1
     expression MethodCall trailingComma=false parens=false 1:1-1:25
       method Identifier 1:1-1:8 "println"
       args[0] String value="I said 'hello'" quote="\"" 1:9-1:25 "\"I said 'hello'\""
+      closures=[]
   body[1] ExpressionStatement 2:1-2:32
     expression MethodCall trailingComma=false parens=false 2:1-2:32
       method Identifier 2:1-2:8 "println"
       args[0] String value="I said \"hello\" again!" quote="'" 2:9-2:32 "'I said \"hello\" again!'"
+      closures=[]
   body[2] ExpressionStatement 4:1-7:8
     expression MethodCall trailingComma=false parens=false 4:1-7:8
       method Identifier 4:1-4:8 "println"
       args[0] String value="\n    Hello,\n    How are you today?\n    " quote="'''" 4:9-7:8 "'''\n    Hello,\n    How are you today?\n    '''"
+      closures=[]
   body[3] ExpressionStatement 9:1-12:8
     expression MethodCall trailingComma=false parens=false 9:1-12:8
       method Identifier 9:1-9:8 "println"
       args[0] String value="\n    We don't have to escape quotes anymore!\n    Even \"double\" quotes!\n    " quote="\"\"\"" 9:9-12:8 "\"\"\"\n    We don't have to escape quotes anymore!\n    Even \"double\" quotes!\n    \"\"\""
+      closures=[]
   body[4] VariableDeclaration def=true multiple=false 14:1-14:26
     targets[0] TypedName 14:5-14:11
       name Identifier 14:5-14:11 "slashy"

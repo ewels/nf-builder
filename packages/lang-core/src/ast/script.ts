@@ -217,21 +217,7 @@ export interface VariableDeclaration
   readonly multiple: boolean;
   readonly initializer: Expression | null;
 }
-export type AssignmentOperator =
-  | "="
-  | "+="
-  | "-="
-  | "*="
-  | "/="
-  | "%="
-  | "**="
-  | "&="
-  | "|="
-  | "^="
-  | "<<="
-  | ">>="
-  | ">>>="
-  | "?=";
+export type AssignmentOperator = (typeof ASSIGNMENT_OPERATORS)[number];
 export interface Assignment extends StatementBase<"Assignment"> {
   readonly target: Expression | TupleTarget;
   readonly operator: AssignmentOperator;
@@ -390,34 +376,7 @@ export interface UnaryExpr extends NodeBase<"Unary"> {
   readonly operator: UnaryOperator;
   readonly operand: Expression;
 }
-export type BinaryOperator =
-  | "**"
-  | "*"
-  | "/"
-  | "%"
-  | "+"
-  | "-"
-  | "<<"
-  | ">>"
-  | ">>>"
-  | ".."
-  | "..<"
-  | "<"
-  | ">"
-  | "<="
-  | ">="
-  | "in"
-  | "!in"
-  | "=="
-  | "!="
-  | "<=>"
-  | "=~"
-  | "==~"
-  | "&"
-  | "^"
-  | "|"
-  | "&&"
-  | "||";
+export type BinaryOperator = (typeof BINARY_OPERATORS)[number];
 export interface BinaryExpr extends NodeBase<"Binary"> {
   readonly operator: BinaryOperator;
   readonly left: Expression;
@@ -598,7 +557,7 @@ export const BINARY_OPERATORS = [
   "|",
   "&&",
   "||",
-] as const satisfies readonly BinaryOperator[];
+] as const;
 
 export const ASSIGNMENT_OPERATORS = [
   "=",
@@ -615,4 +574,4 @@ export const ASSIGNMENT_OPERATORS = [
   ">>=",
   ">>>=",
   "?=",
-] as const satisfies readonly AssignmentOperator[];
+] as const;

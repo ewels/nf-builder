@@ -5,7 +5,7 @@
 
 ## Context
 
-F-102 (script AST) and F-103 (config AST) build our own typed trees from the generated parse trees (AR-02). Both need source ranges that slice back to exact text, comments that the printer can put back (F-110), and the same error positions as `nextflow lint`. nf-lang counts columns in code points (it reads input with `CharStreams.fromReader`), while JavaScript strings slice in UTF-16 units. AR-02 says comments attach to the following node, but nf-lang's `CommentAttacher`, which `nextflow lint -format` prints from, attaches leading, trailing and dangling comments. The two grammars share their expression rules. Research: the F-102 and F-103 plans and [spike S2 report](../research/2026-11-22-spike-s2-parser.md).
+F-102 (script AST) and F-103 (config AST) build our own typed trees from the generated parse trees (AR-02). Both need source ranges that slice back to exact text, comments that the printer can put back (F-110), and the same error positions as `nextflow lint`. nf-lang counts columns in code points (it reads input with `CharStreams.fromReader`), while JavaScript strings slice in UTF-16 units. AR-02 says comments attach to the following node, but nf-lang's `CommentAttacher`, which `nextflow lint -format` prints from, attaches leading, trailing and dangling comments. The two grammars share their expression rules. Research: the [F-102 plan](https://github.com/ewels/nf-builder/blob/a58f44b/docs/plan/handoff/plan-F-102.md), the [F-103 plan](https://github.com/ewels/nf-builder/blob/a58f44b/docs/plan/handoff/plan-F-103.md) and [spike S2 report](../research/2026-11-22-spike-s2-parser.md).
 
 ## Decision
 

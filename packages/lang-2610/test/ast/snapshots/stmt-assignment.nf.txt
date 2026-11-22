@@ -11,6 +11,7 @@ Script typesEnabled=false 1:1-23:1
     targets[0] TypedName 3:5-3:8
       name Identifier 3:5-3:8 "map"
     initializer Map trailingComma=false 3:11-3:14 "[:]"
+      entries=[]
   body[3] VariableDeclaration def=true multiple=false 4:1-4:10
     targets[0] TypedName 4:5-4:6
       name Identifier 4:5-4:6 "x"
@@ -40,6 +41,7 @@ Script typesEnabled=false 1:1-23:1
       method Identifier 9:10-9:15 "tuple"
       args[0] Number integer=true 9:16-9:17 "1"
       args[1] Number integer=true 9:19-9:20 "2"
+      closures=[]
   body[9] Assignment operator="+=" 10:1-10:7
     target Variable 10:1-10:2 "x"
     value Number integer=true 10:6-10:7 "1"

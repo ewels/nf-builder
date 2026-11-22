@@ -28,7 +28,6 @@ import {
   legacyOutputs,
   namedOutput,
   processDirectives,
-  processExec,
   processStage,
   processStub,
   processTopics,
@@ -112,7 +111,7 @@ export const NOT_REPARSED = new Set([
   "InvalidDeclaration",
 ]);
 
-const DECLARATION_KINDS = new Set([
+export const DECLARATION_KINDS = new Set([
   "FeatureFlag",
   "Include",
   "Import",
@@ -173,7 +172,7 @@ function sectionRules(section: Fields, parents: Parents): Rule[] | null {
     return [rule((p) => p.processStub(), processStub)];
   if (owner.exec === section)
     return section.label
-      ? [rule((p) => p.processExec(), processExec)]
+      ? [rule((p) => p.processExec(), processStub)]
       : [rule((p) => p.blockStatements(), implicitExec)];
   return null;
 }

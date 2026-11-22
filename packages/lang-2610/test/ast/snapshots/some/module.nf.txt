@@ -1,11 +1,13 @@
 Script typesEnabled=false 1:1-8:1
   body[0] Function def=true 1:1-3:2
     name Identifier 1:5-1:10 "hello"
+    params=[]
     body Block 1:13-3:2
       statements[0] ExpressionStatement 2:5-2:12
         expression String value="hello" quote="'" 2:5-2:12 "'hello'"
   body[1] Function def=true 5:1-7:2
     name Identifier 5:5-5:8 "bye"
+    params=[]
     body Block 5:11-7:2
       statements[0] ExpressionStatement 6:5-6:10
         expression String value="bye" quote="'" 6:5-6:10 "'bye'"

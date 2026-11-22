@@ -10,11 +10,13 @@ Script typesEnabled=false 1:1-22:1
           args[1] String value="Ciao" quote="'" 3:39-3:45 "'Ciao'"
           args[2] String value="Hello" quote="'" 3:47-3:54 "'Hello'"
           args[3] String value="Hola" quote="'" 3:56-3:62 "'Hola'"
+          closures=[]
       items[1] Assignment operator="=" 4:5-4:50
         target Variable 4:5-4:13 "messages"
         value MethodCall navigation="." trailingComma=false parens=false 4:16-4:50
           receiver Variable 4:16-4:25 "greetings"
           method Identifier 4:26-4:29 "map"
+          args=[]
           closures[0] Closure 4:30-4:50
             params[0] Parameter def=false 4:32-4:33
               name Identifier 4:32-4:33 "v"
@@ -27,6 +29,7 @@ Script typesEnabled=false 1:1-22:1
         expression MethodCall navigation="." trailingComma=false parens=false 5:5-5:40
           receiver Variable 5:5-5:14 "greetings"
           method Identifier 5:15-5:19 "view"
+          args=[]
           closures[0] Closure 5:20-5:40
             params[0] Parameter def=false 5:22-5:23
               name Identifier 5:22-5:23 "v"
@@ -45,12 +48,14 @@ Script typesEnabled=false 1:1-22:1
           receiver Variable 11:5-11:8 "log"
           method Identifier 11:9-11:13 "info"
           args[0] String value="Workflow completed successfully!" quote="'" 11:14-11:48 "'Workflow completed successfully!'"
+          closures=[]
     onError Section label="onError" labelRange=13:5-13:13 13:5-14:33
       items[0] ExpressionStatement 14:5-14:33
         expression MethodCall navigation="." trailingComma=false parens=false 14:5-14:33
           receiver Variable 14:5-14:8 "log"
           method Identifier 14:9-14:14 "error"
           args[0] String value="Workflow failed." quote="'" 14:15-14:33 "'Workflow failed.'"
+          closures=[]
   body[1] OutputBlock 17:1-21:2
     outputs[0] Output 18:5-20:6
       name Identifier 18:5-18:13 "messages"
@@ -59,3 +64,4 @@ Script typesEnabled=false 1:1-22:1
           expression MethodCall trailingComma=false parens=false 19:9-19:17
             method Identifier 19:9-19:13 "path"
             args[0] String value="." quote="'" 19:14-19:17 "'.'"
+            closures=[]

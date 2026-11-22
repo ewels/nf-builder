@@ -80,6 +80,13 @@ export class PositionIndex {
   }
 }
 
+/** The number of code points in `text`. */
+export const codePoints = (text: string) => {
+  let n = 0;
+  for (const _ of text) n++;
+  return n;
+};
+
 export function tokenRange(
   first: Token,
   last: Token,

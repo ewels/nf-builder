@@ -132,7 +132,7 @@ const isTrue = (value: Expression) =>
   value.kind === "Boolean" && value.value === true;
 
 function isConstant(value: Expression): boolean {
-  const e = value.kind === "Parenthesized" ? unparen(value) : value;
+  const e = unparen(value);
   return (
     e.kind === "Number" ||
     e.kind === "String" ||
