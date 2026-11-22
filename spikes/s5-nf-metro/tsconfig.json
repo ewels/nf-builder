@@ -7,10 +7,16 @@
       "DOM.Iterable"
     ],
     "types": [
-      "vite/client"
-    ]
+      "vite/client",
+      "node"
+    ],
+    "erasableSyntaxOnly": true
   },
   "include": [
-    "src"
+    "src",
+    "prepare.ts",
+    "headers.ts",
+    "serve.ts",
+    "vite.config.ts"
   ]
 }

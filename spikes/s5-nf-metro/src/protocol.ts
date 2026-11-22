@@ -28,8 +28,6 @@ export const MAPS: readonly {
   },
 ];
 
-export type RenderRequest = { type: "render"; maps: readonly MapName[] };
-
 export type ResourceSize = {
   path: string;
   transferSize: number;
@@ -40,11 +38,7 @@ export type ResourceSize = {
 export type Phases = { runtimeMs: number; installMs: number; importMs: number };
 
 export type WorkerMessage =
-  | {
-      type: "progress";
-      stage: "runtime" | "install" | "import" | "render";
-      detail: string;
-    }
+  | { type: "progress"; detail: string }
   | { type: "svg"; name: MapName; svg: string; renderMs: number }
   | {
       type: "done";
@@ -53,8 +47,9 @@ export type WorkerMessage =
       loadedModules: string[];
       phases: Phases;
       resources: ResourceSize[];
+      cspViolations: string[];
     }
-  | { type: "error"; message: string };
+  | { type: "error"; message: string; cspViolations: string[] };
 
 export type MapMetrics = {
   name: MapName;
@@ -77,4 +72,6 @@ export type SpikeMetrics = {
   maps: MapMetrics[];
   loadedModules: string[];
   workerResources: ResourceSize[];
+  /** securitypolicyviolation events seen inside the worker. */
+  workerCspViolations: string[];
 };

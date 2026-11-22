@@ -2,23 +2,16 @@
 // the CLI reference SVGs with a pinned nf-metro in a Python venv. Both parts are idempotent. Build-time only.
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import {
-  existsSync,
-  mkdirSync,
-  readFileSync,
-  renameSync,
-  rmSync,
-  statSync,
-  writeFileSync,
-} from "node:fs";
+import { mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { dirname, isAbsolute, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { isMain, REPO_ROOT } from "../../scripts/check-common.ts";
+import { REPO_ROOT } from "../../scripts/check-common.ts";
 import { MAPS } from "./src/protocol.ts";
 
 export const SPIKE_S5_DIR: string = dirname(fileURLToPath(import.meta.url));
 export const SPIKE_S5_CACHE: string = join(REPO_ROOT, ".cache/spikes/s5");
 export const PUBLIC_DIR: string = join(SPIKE_S5_CACHE, "public");
+export const SPIKE_S5_PORT = 4175;
 /** Hosts this build-time tool may call (ADR 0017, ADR 0024). pypi.org is reached by pip, not by this code. */
 export const BUILD_HOSTS: readonly string[] = [
   "cdn.jsdelivr.net",
@@ -52,15 +45,10 @@ function checkAsset(asset: SpikeAsset, seen: Set<string>): void {
     !ROOTS.some((root) => asset.path.startsWith(root))
   )
     bad("the path must be relative and under pyodide/, wheels/ or examples/");
-  let url: URL | undefined;
-  try {
-    url = new URL(asset.url);
-  } catch {
-    bad("the URL is not valid");
-  }
-  if (url?.protocol !== "https:") bad("the URL must be https");
-  if (!BUILD_HOSTS.includes(url?.hostname ?? ""))
-    bad(`the host ${url?.hostname} is not in the build-time host list`);
+  const url = URL.parse(asset.url) ?? bad("the URL is not valid");
+  if (url.protocol !== "https:") bad("the URL must be https");
+  if (!BUILD_HOSTS.includes(url.hostname))
+    bad(`the host ${url.hostname} is not in the build-time host list`);
   if (!/^[0-9a-f]{64}$/.test(asset.sha256))
     bad("sha256 must be 64 lowercase hex characters");
   if (!Number.isInteger(asset.bytes) || asset.bytes <= 0)
@@ -111,36 +99,30 @@ export async function fetchAssets(
         `${asset.path}: ${asset.url} answered ${response.status}`,
       );
     const data = new Uint8Array(await response.arrayBuffer());
-    mkdirSync(dirname(file), { recursive: true });
-    const part = `${file}.part`;
-    writeFileSync(part, data);
     const got = sha256(data);
-    if (got !== asset.sha256 || data.length !== asset.bytes) {
-      rmSync(part, { force: true });
-      rmSync(file, { force: true });
+    if (got !== asset.sha256 || data.length !== asset.bytes)
       throw new Error(
         `${asset.path}: sha256 ${got} does not match the pin ${asset.sha256} (${asset.url}). If upstream changed, re-pin it in spikes/s5-nf-metro/assets.json in its own PR (ADR 0024).`,
       );
-    }
-    renameSync(part, file);
+    mkdirSync(dirname(file), { recursive: true });
+    writeFileSync(file, data);
     fetched++;
   }
   return { fetched, upToDate };
 }
 
-export type Command = { file: string; args: string[]; cwd?: string };
+type Command = { file: string; args: string[] };
 
 export function referenceCommands(opts: {
   cacheDir: string;
   spikeDir: string;
   publicDir: string;
   maps: readonly string[];
-  python?: string;
 }): Command[] {
   const venv = join(opts.cacheDir, "venv");
   const python = join(venv, "bin/python");
   return [
-    { file: opts.python ?? "python3", args: ["-m", "venv", venv] },
+    { file: "python3", args: ["-m", "venv", venv] },
     {
       file: python,
       args: [
@@ -178,11 +160,10 @@ export type ReferenceManifest = {
   files: Record<string, string>;
 };
 
-const MANIFEST = join(PUBLIC_DIR, "reference/manifest.json");
-
-function referenceInputs(): string {
-  const examples = readAssets()
-    .assets.filter((a) => a.path.startsWith("examples/"))
+/** sha256 of requirements-cli.txt plus the pinned example hashes: the references depend on nothing else. */
+function referenceInputs(assets: readonly SpikeAsset[]): string {
+  const examples = assets
+    .filter((a) => a.path.startsWith("examples/"))
     .map((a) => `${a.path} ${a.sha256}`)
     .sort();
   return sha256(
@@ -193,25 +174,28 @@ function referenceInputs(): string {
   );
 }
 
-function freshManifest(inputs: string): ReferenceManifest | undefined {
+/** The manifest when it was made from the same inputs and every reference SVG still has its recorded hash. */
+export function freshManifest(
+  publicDir: string,
+  inputs: string,
+): ReferenceManifest | undefined {
   try {
     const manifest = JSON.parse(
-      readFileSync(MANIFEST, "utf8"),
+      readFileSync(join(publicDir, "reference/manifest.json"), "utf8"),
     ) as ReferenceManifest;
-    const filesExist = Object.keys(manifest.files).every((name) =>
-      existsSync(join(PUBLIC_DIR, "reference", `${name}.svg`)),
+    const intact = Object.entries(manifest.files).every(
+      ([name, hash]) =>
+        sha256(readFileSync(join(publicDir, "reference", `${name}.svg`))) ===
+        hash,
     );
-    return manifest.inputs === inputs && filesExist ? manifest : undefined;
+    return manifest.inputs === inputs && intact ? manifest : undefined;
   } catch {
     return undefined;
   }
 }
 
 function run(command: Command): string {
-  const result = spawnSync(command.file, command.args, {
-    cwd: command.cwd,
-    encoding: "utf8",
-  });
+  const result = spawnSync(command.file, command.args, { encoding: "utf8" });
   if (result.error || result.status !== 0)
     throw new Error(
       `${[command.file, ...command.args].join(" ")} failed (${result.error?.message ?? `exit ${result.status}`}):\n${result.stderr}`,
@@ -219,16 +203,12 @@ function run(command: Command): string {
   return result.stdout;
 }
 
-export function renderReferences(
-  opts: { python?: string } = {},
+function renderReferences(
+  inputs: string,
+  pinnedNfMetro: string,
 ): ReferenceManifest {
-  const inputs = referenceInputs();
-  const fresh = freshManifest(inputs);
-  if (fresh) return fresh;
-
-  const python = opts.python ?? "python3";
   const probe = spawnSync(
-    python,
+    "python3",
     ["-c", "import sys; print('%d.%d' % sys.version_info[:2])"],
     { encoding: "utf8" },
   );
@@ -251,7 +231,6 @@ export function renderReferences(
     spikeDir: SPIKE_S5_DIR,
     publicDir: PUBLIC_DIR,
     maps,
-    python,
   });
   let probeOutput = "";
   for (const [index, command] of commands.entries()) {
@@ -259,10 +238,9 @@ export function renderReferences(
     if (index === 2) probeOutput = out.trim();
   }
   const [nfMetro = "", pythonVersion = ""] = probeOutput.split(" ");
-  const pinned = readAssets().nfMetro.version;
-  if (nfMetro !== pinned)
+  if (nfMetro !== pinnedNfMetro)
     throw new Error(
-      `the CLI venv has nf-metro ${nfMetro} but assets.json pins ${pinned}`,
+      `the CLI venv has nf-metro ${nfMetro} but assets.json pins ${pinnedNfMetro}`,
     );
   const files: Record<string, string> = {};
   for (const name of maps)
@@ -275,25 +253,21 @@ export function renderReferences(
     inputs,
     files,
   };
-  writeFileSync(MANIFEST, `${JSON.stringify(manifest, null, 2)}\n`);
+  writeFileSync(
+    join(PUBLIC_DIR, "reference/manifest.json"),
+    `${JSON.stringify(manifest, null, 2)}\n`,
+  );
   return manifest;
 }
 
+/** Fetches the pinned files, then renders the CLI references unless they are already up to date. */
 export async function prepareSpikeS5(): Promise<void> {
-  const { fetched, upToDate } = await fetchAssets(
-    readAssets().assets,
-    PUBLIC_DIR,
-  );
-  const wasFresh = freshManifest(referenceInputs()) !== undefined;
-  const manifest = renderReferences();
+  const pins = readAssets();
+  const { fetched, upToDate } = await fetchAssets(pins.assets, PUBLIC_DIR);
+  const inputs = referenceInputs(pins.assets);
+  const existing = freshManifest(PUBLIC_DIR, inputs);
+  const manifest = existing ?? renderReferences(inputs, pins.nfMetro.version);
   console.log(
-    `spike S5: ${fetched} fetched, ${upToDate} up to date; references ${wasFresh ? "up to date" : "rendered"} (nf-metro ${manifest.nfMetro}, Python ${manifest.python})`,
+    `spike S5: ${fetched} fetched, ${upToDate} up to date; references ${existing ? "up to date" : "rendered"} (nf-metro ${manifest.nfMetro}, Python ${manifest.python})`,
   );
-}
-
-if (isMain(import.meta)) {
-  prepareSpikeS5().catch((error: unknown) => {
-    console.error(error instanceof Error ? error.message : error);
-    process.exitCode = 1;
-  });
 }

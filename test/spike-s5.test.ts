@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import {
   existsSync,
+  mkdirSync,
   mkdtempSync,
   readFileSync,
   rmSync,
@@ -22,6 +23,7 @@ import {
 import {
   BUILD_HOSTS,
   fetchAssets,
+  freshManifest,
   readAssets,
   referenceCommands,
   SPIKE_S5_DIR,
@@ -280,5 +282,29 @@ describe("F-010 spike S5 comparison", () => {
     expect(normaliseSvg("<svg a=1  b=2/>")).not.toBe(
       normaliseSvg("<svg a=1 b=2/>"),
     );
+  });
+});
+
+describe("F-010 spike S5 reference cache", () => {
+  it("F-010 step 2: freshManifest accepts the references only while their files still have the recorded hashes", () => {
+    const dir = temp();
+    mkdirSync(join(dir, "reference"));
+    writeFileSync(join(dir, "reference/a.svg"), "<svg/>");
+    const manifest = {
+      nfMetro: "2.1.0",
+      python: "3.13.0",
+      inputs: "in",
+      files: { a: sha("<svg/>") },
+    };
+    writeFileSync(
+      join(dir, "reference/manifest.json"),
+      JSON.stringify(manifest),
+    );
+    expect(freshManifest(dir, "in")).toEqual(manifest);
+    expect(freshManifest(dir, "other")).toBeUndefined();
+    writeFileSync(join(dir, "reference/a.svg"), "<svg>changed</svg>");
+    expect(freshManifest(dir, "in")).toBeUndefined();
+    rmSync(join(dir, "reference/a.svg"));
+    expect(freshManifest(dir, "in")).toBeUndefined();
   });
 });

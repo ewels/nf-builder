@@ -1,7 +1,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { gzipSync } from "node:zlib";
-import { expect, test } from "@playwright/test";
+import { expect, type Page, test } from "@playwright/test";
 import {
   cspProblems,
   readNetlifyConfig,
@@ -20,6 +20,16 @@ import { watchForCspViolations } from "./csp.ts";
 
 // Spike S5 (F-010, ADR 0024). Chromium only and not @smoke: the beforeAll never runs in the smoke, Firefox or WebKit runs.
 const CSP = "Content-Security-Policy";
+
+async function loadMetrics(page: Page): Promise<SpikeMetrics> {
+  await page.goto(SPIKE_S5_URL);
+  await expect(page.locator("#status")).toHaveText("Done", {
+    timeout: 120_000,
+  });
+  return JSON.parse(
+    (await page.locator("#metrics").textContent()) ?? "",
+  ) as SpikeMetrics;
+}
 
 let server: Awaited<ReturnType<typeof startSpikeS5>> | undefined;
 
@@ -40,10 +50,7 @@ test.describe("F-010 spike S5: nf-metro under Pyodide", () => {
     const watch = await watchForCspViolations(page);
     const urls: string[] = [];
     context.on("request", (request) => urls.push(request.url()));
-    await page.goto(SPIKE_S5_URL);
-    await expect(page.locator("#status")).toHaveText("Done", {
-      timeout: 120_000,
-    });
+    const metrics = await loadMetrics(page);
 
     for (const map of MAPS) {
       const image = page.getByRole("img", {
@@ -55,9 +62,6 @@ test.describe("F-010 spike S5: nf-metro under Pyodide", () => {
       ).toBeGreaterThan(0);
     }
 
-    const metrics = JSON.parse(
-      (await page.locator("#metrics").textContent()) ?? "",
-    ) as SpikeMetrics;
     expect(metrics.pyodideVersion).toBe("314.0.8");
     expect(metrics.nfMetroVersion).toBe("2.1.0");
     expect(metrics.maps.map((m) => m.name)).toEqual(MAPS.map((m) => m.name));
@@ -73,6 +77,7 @@ test.describe("F-010 spike S5: nf-metro under Pyodide", () => {
       expect(metrics.loadedModules).not.toContain(name);
 
     expect(urls.filter((url) => /av-|resvg/.test(url))).toEqual([]);
+    expect(metrics.workerCspViolations).toEqual([]);
     expect(await watch.violations()).toEqual([]);
     expect(watch.consoleErrors).toEqual([]);
   });
@@ -81,13 +86,7 @@ test.describe("F-010 spike S5: nf-metro under Pyodide", () => {
     page,
   }) => {
     test.setTimeout(180_000);
-    await page.goto(SPIKE_S5_URL);
-    await expect(page.locator("#status")).toHaveText("Done", {
-      timeout: 120_000,
-    });
-    const metrics = JSON.parse(
-      (await page.locator("#metrics").textContent()) ?? "",
-    ) as SpikeMetrics;
+    const metrics = await loadMetrics(page);
     expect(metrics.referenceNfMetro).toBe("2.1.0");
     expect(metrics.nfMetroVersion).toBe("2.1.0");
     expect(metrics.maps).toHaveLength(MAPS.length);
@@ -118,8 +117,9 @@ test.describe("F-010 spike S5: nf-metro under Pyodide", () => {
     const requests: { path: string; bodyBytes: number }[] = [];
     const urls: string[] = [];
     const sizes: Promise<void>[] = [];
+    // Every request, finished or not, so a blocked or failed off-origin request is caught too.
+    context.on("request", (request) => urls.push(request.url()));
     context.on("requestfinished", (request) => {
-      urls.push(request.url());
       sizes.push(
         request.sizes().then((size) => {
           requests.push({
@@ -129,14 +129,8 @@ test.describe("F-010 spike S5: nf-metro under Pyodide", () => {
         }),
       );
     });
-    await page.goto(SPIKE_S5_URL);
-    await expect(page.locator("#status")).toHaveText("Done", {
-      timeout: 120_000,
-    });
+    const metrics = await loadMetrics(page);
     await Promise.all(sizes);
-    const metrics = JSON.parse(
-      (await page.locator("#metrics").textContent()) ?? "",
-    ) as SpikeMetrics;
     await context.close();
 
     for (const url of urls)
@@ -201,10 +195,7 @@ test.describe("F-010 spike S5: nf-metro under Pyodide", () => {
   }) => {
     test.setTimeout(180_000);
     const watch = await watchForCspViolations(page);
-    await page.goto(SPIKE_S5_URL);
-    await expect(page.locator("#status")).toHaveText("Done", {
-      timeout: 120_000,
-    });
+    const metrics = await loadMetrics(page);
     const expected = spikeS5Headers()[CSP] ?? "";
     const netlify = siteHeaders(readNetlifyConfig())[CSP] ?? "";
     expect(expected).toBe(
@@ -222,6 +213,7 @@ test.describe("F-010 spike S5: nf-metro under Pyodide", () => {
       const response = await request.get(url);
       expect(response.headers()["content-security-policy"], url).toBe(expected);
     }
+    expect(metrics.workerCspViolations).toEqual([]);
     expect(await watch.violations()).toEqual([]);
     expect(watch.consoleErrors).toEqual([]);
   });

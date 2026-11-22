@@ -9,7 +9,7 @@
   },
   "scripts": {
     "check": "pnpm run typecheck && pnpm run lint && pnpm run test && pnpm run arch && pnpm run check:adr && pnpm run check:features",
-    "typecheck": "tsc && tsc -p e2e && tsc -p spikes/s5-nf-metro && tsc -p spikes/s5-nf-metro/tsconfig.node.json && pnpm -r run typecheck",
+    "typecheck": "tsc && tsc -p e2e && tsc -p spikes/s5-nf-metro && pnpm -r run typecheck",
     "lint": "biome check .",
     "format": "biome check --write .",
     "test": "vitest run",

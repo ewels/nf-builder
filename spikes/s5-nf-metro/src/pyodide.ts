@@ -1,15 +1,8 @@
 // The only Pyodide surface the spike uses, typed by hand so that there is no npm dependency (ADR 0024).
-export interface PyodideApi {
+interface PyodideApi {
   version: string;
-  loadPackage(
-    names: string[],
-    options?: { messageCallback?: (message: string) => void },
-  ): Promise<unknown>;
+  loadPackage(names: string[]): Promise<unknown>;
   runPython(code: string): unknown;
-  globals: {
-    get(name: string): unknown;
-    set(name: string, value: unknown): void;
-  };
   FS: {
     mkdirTree(path: string): void;
     writeFile(path: string, data: string | Uint8Array): void;
