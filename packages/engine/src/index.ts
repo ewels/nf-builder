@@ -55,6 +55,7 @@ export {
 export { installedPackVersions } from "./packs";
 export { loadPalette } from "./palette";
 export { paletteItemCount, searchPalette } from "./palette-search";
+export { projectionCoverage } from "./projection/coverage";
 export { formatNodeKey, parseNodeKey } from "./projection/keys";
 export {
   createProjector,
