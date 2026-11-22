@@ -153,19 +153,22 @@ export function numberError(text: string, integer: boolean): string | null {
   return Number.isFinite(limit) ? null : "out of range";
 }
 
+/** `checkEscapesToo: false` for the names of config paths, blocks and selectors, which upstream does not check. */
 export function stringLiteral(
   ctx: StringLiteralContext,
   cx: BuildContext,
+  checkEscapesToo = true,
 ): StringLiteral {
   const text = ctx.getText();
   const at = cx.range(ctx);
-  for (const problem of checkEscapes(
-    text,
-    at.line,
-    at.column,
-    text.startsWith("/"),
-  ))
-    cx.report(problem);
+  if (checkEscapesToo)
+    for (const problem of checkEscapes(
+      text,
+      at.line,
+      at.column,
+      text.startsWith("/"),
+    ))
+      cx.report(problem);
   return {
     kind: "String",
     text,

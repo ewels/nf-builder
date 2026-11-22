@@ -65,7 +65,9 @@ function configName(ctx: ConfigPrimaryContext, cx: BuildContext): ConfigName {
   if (string)
     return {
       kind: "ConfigName",
-      name: stringLiteral(string as unknown as StringLiteralContext, cx).value,
+      // upstream's `configPrimary` decodes the name without checking its escapes
+      name: stringLiteral(string as unknown as StringLiteralContext, cx, false)
+        .value,
       form: "string",
       range,
     };

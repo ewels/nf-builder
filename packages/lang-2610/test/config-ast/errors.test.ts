@@ -66,6 +66,8 @@ const lint: Record<string, [number, number, string][]> = {
     ],
     [2, 14, "Invalid escape sequence: '\\q'"],
   ],
+  // names in paths, blocks and selectors are not checked for escapes; only the value on line 5 is
+  "q03-escapes-in-names.config": [[5, 7, "Invalid escape sequence: '\\q'"]],
   // an escape before a fatal error is reported, one after it is not
   "q02-escape-fatal-escape.config": [
     [1, 14, "Invalid escape sequence: '\\q'"],
