@@ -1,18 +1,40 @@
 export type {
+  Callee,
+  CallNode,
+  ChainNode,
+  ChainStep,
+  CodeNode,
   ConfigSourceFile,
+  Dataflow,
   Diagnostic,
+  EmitNode,
+  FactoryNode,
+  FlowType,
+  GraphEdge,
+  GraphNode,
+  GraphNodeKind,
   IncludeTarget,
+  NodeKey,
+  NodeKeyLocal,
+  OutputNode,
   PaletteCategoryId,
   PaletteIcon,
   PaletteView,
   PaletteViewCategory,
   PaletteViewItem,
+  ParamsNode,
   ParseStatus,
   PlainSourceFile,
+  Port,
+  PortRef,
+  Projection,
   ScriptSourceFile,
   SourceFile,
   SourceLanguage,
   SourceParser,
+  TakeNode,
+  TypeExpr,
+  WorkflowRef,
 } from "@nf-builder/lang-core";
 export type {
   Binding,
@@ -33,6 +55,9 @@ export {
 export { installedPackVersions } from "./packs";
 export { loadPalette } from "./palette";
 export { paletteItemCount, searchPalette } from "./palette-search";
+export { formatNodeKey, parseNodeKey } from "./projection/keys";
+export { createProjector, type Projector } from "./projection/project";
+export { formatFlowType, formatType } from "./projection/types";
 export {
   type Equivalence,
   equivalent,

@@ -14,3 +14,13 @@ describe("palette exports", () => {
     expect(entry.paletteItemCount).toBeTypeOf("function");
   });
 });
+
+describe("projection exports", () => {
+  it("F-106 AR-10 AR-11: the entry exports the projector, the node-key functions and the type formatters", () => {
+    expect(entry.createProjector).toBeTypeOf("function");
+    expect(entry.formatNodeKey).toBeTypeOf("function");
+    expect(entry.parseNodeKey).toBeTypeOf("function");
+    expect(entry.formatFlowType).toBeTypeOf("function");
+    expect(entry.formatType).toBeTypeOf("function");
+  });
+});

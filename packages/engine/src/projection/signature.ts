@@ -7,8 +7,11 @@ import type {
   AgentDef,
   Callee,
   Expression,
+  ExpressionStatement,
   FlowType,
+  NamedOutput,
   ProcessInput,
+  ScriptAst,
   TypedProcess,
   WorkflowDef,
 } from "@nf-builder/lang-core";
@@ -105,6 +108,17 @@ export function processSignature(
   };
 }
 
+/** The port name of an emit item: its name, the variable it names, `out` for a lone expression, else `$n`. */
+export function emitName(
+  item: NamedOutput | ExpressionStatement,
+  index: number,
+  count: number,
+): string {
+  if (item.kind === "NamedOutput") return item.name.name;
+  if (item.expression.kind === "Variable") return item.expression.name;
+  return count === 1 ? "out" : `$${index + 1}`;
+}
+
 /** A workflow's ports: one input per take, one output per emit, with a plain emit type exposed as `Value<T>`. */
 export function workflowSignature(
   def: WorkflowDef,
@@ -119,13 +133,9 @@ export function workflowSignature(
   );
   const emitItems = def.emits?.items ?? [];
   const outputs = emitItems.map((item, index): PortSpec => {
-    let id: string;
-    let declared: FlowType | null = null;
-    if (item.kind === "NamedOutput") {
-      id = item.name.name;
-      declared = flowFromDeclared(item.type);
-    } else if (item.expression.kind === "Variable") id = item.expression.name;
-    else id = emitItems.length === 1 ? "out" : `$${index + 1}`;
+    const id = emitName(item, index, emitItems.length);
+    const declared =
+      item.kind === "NamedOutput" ? flowFromDeclared(item.type) : null;
     return {
       id,
       label: id,
@@ -133,6 +143,29 @@ export function workflowSignature(
     };
   });
   return { kind: "workflow", typed: def.typed, inputs, outputs };
+}
+
+/**
+ * An included pipeline (26.10): the params block's parameters are the inputs, the output block's declarations the
+ * outputs, each wrapped as `workflowEmitType` does (`pipelineOutputType`, L890-L970).
+ */
+export function pipelineSignature(ast: ScriptAst): Signature {
+  const params = ast.body.find((i) => i.kind === "ParamsBlock");
+  const output = ast.body.find((i) => i.kind === "OutputBlock");
+  return {
+    kind: "pipeline",
+    typed: ast.typesEnabled,
+    inputs: (params?.params ?? []).map((p) => ({
+      id: p.name.name,
+      label: p.name.name,
+      type: flowFromDeclared(p.type),
+    })),
+    outputs: (output?.outputs ?? []).map((o) => ({
+      id: o.name.name,
+      label: o.name.name,
+      type: asEmitType(flowFromDeclared(o.type) ?? UNKNOWN),
+    })),
+  };
 }
 
 /** For a callee with no usable declaration: `$1..$n` inputs and one output of unknown type. */

@@ -35,8 +35,10 @@ import { variablesRead } from "./reads";
 import { type Value, WorkflowScope } from "./scope";
 import {
   callDataflow,
+  emitName,
   fallbackSignature,
   type PortSpec,
+  pipelineSignature,
   processSignature,
   type Signature,
   workflowSignature,
@@ -118,6 +120,12 @@ function listWorkflows(source: SourceFile): Listed[] {
   return out;
 }
 
+/** The inferred types of a callee workflow's emits, by port name (unknown ones left out). */
+type EmitTypes = (
+  path: string,
+  workflow: string | null,
+) => ReadonlyMap<string, FlowType>;
+
 interface Callable {
   readonly callee: Callee;
   readonly signature: (argumentCount: number) => Signature;
@@ -173,6 +181,7 @@ class Projecting {
     private readonly text: string,
     private readonly ref: WorkflowRef,
     private readonly node: WorkflowNode,
+    private readonly emitTypes: EmitTypes,
   ) {
     this.#keys = new KeyAllocator(path, ref.name);
   }
@@ -202,6 +211,8 @@ class Projecting {
       ]);
     }
     for (const statement of statements) this.#statement(statement);
+    this.#addEmits(node);
+    this.#addOutput(node);
     return {
       workflow: this.ref,
       nodes: this.#nodes,
@@ -215,9 +226,13 @@ class Projecting {
 
   // ---- params ----
 
-  #addParams(node: WorkflowNode): void {
+  #fileAst(): ScriptAst | null {
     const source = this.model.file(this.path)?.source;
-    const ast = source?.language === "nextflow" ? source.ast : null;
+    return source?.language === "nextflow" ? source.ast : null;
+  }
+
+  #addParams(node: WorkflowNode): void {
+    const ast = this.#fileAst();
     const block = ast?.body.find((i) => i.kind === "ParamsBlock") ?? null;
     const read = new Set<string>();
     const sections =
@@ -244,6 +259,66 @@ class Projecting {
       range: block?.range ?? node.range,
     });
     this.#scope.bind("params", [{ node: id, ports: specs }]);
+  }
+
+  // ---- emits, publish and output ----
+
+  #addEmits(node: WorkflowNode): void {
+    const items = node.kind === "Workflow" ? (node.emits?.items ?? []) : [];
+    items.forEach((item, index) => {
+      const name = emitName(item, index, items.length);
+      const value = item.kind === "NamedOutput" ? item.value : item.expression;
+      const declared =
+        item.kind === "NamedOutput" ? flowFromDeclared(item.type) : null;
+      const feed =
+        value === null ? this.#feedName(name, item.range) : this.#feed(value);
+      const id = this.#keys.emit(name);
+      this.#push({
+        id,
+        kind: "emit",
+        label: name,
+        inputs: [port(spec("in", declared), feed.range, feed.argumentType)],
+        outputs: [],
+        range: item.range,
+        name,
+      });
+      this.#connect(feed, { node: id, port: "in" });
+    });
+  }
+
+  #addOutput(node: WorkflowNode): void {
+    const publishers = node.kind === "Workflow" ? node.publishers : null;
+    const block = this.#fileAst()?.body.find((i) => i.kind === "OutputBlock");
+    if (block === undefined && publishers === null) return;
+    const specs: PortSpec[] = [];
+    for (const o of block?.outputs ?? [])
+      specs.push(spec(o.name.name, flowFromDeclared(o.type)));
+    const feeds: { name: string; feed: Feed }[] = [];
+    for (const item of publishers?.items ?? []) {
+      const name = item.name.name;
+      feeds.push({
+        name,
+        feed:
+          item.value === null
+            ? this.#feedName(name, item.range)
+            : this.#feed(item.value),
+      });
+      if (!specs.some((s) => s.id === name)) specs.push(spec(name, null));
+    }
+    const id = this.#keys.output();
+    this.#push({
+      id,
+      kind: "output",
+      label: "output",
+      inputs: specs.map((s) => {
+        const feed = feeds.find((f) => f.name === s.id)?.feed;
+        return port(s, feed?.range ?? null, feed?.argumentType ?? null);
+      }),
+      outputs: [],
+      range: block?.range ?? publishers?.range ?? node.range,
+    });
+    for (const { name, feed } of feeds)
+      this.#connect(feed, { node: id, port: name });
   }
 
   // ---- statements ----
@@ -417,7 +492,13 @@ class Projecting {
           typed: declaration.kind === "Workflow" ? declaration.typed : null,
           ...base,
         },
-        signature: (n) => fallbackSignature("pipeline", n),
+        signature: (n) => {
+          const source =
+            path === null ? undefined : this.model.file(path)?.source;
+          return source?.language === "nextflow" && source.ast !== null
+            ? pipelineSignature(source.ast)
+            : fallbackSignature("pipeline", n);
+        },
       };
     switch (declaration.kind) {
       case "Process":
@@ -446,12 +527,31 @@ class Projecting {
           base,
           processSignature(declaration, this.library),
         );
-      case "Workflow":
-        return this.#modelled(
-          name,
-          base,
-          workflowSignature(declaration, () => null),
-        );
+      case "Workflow": {
+        // the emit types come from the callee's own projection, so the signature is built when a call needs it
+        const workflow = declaration.name?.name ?? null;
+        const callee = base.path;
+        let signature: Signature | undefined;
+        return {
+          callee: {
+            name,
+            kind: "workflow",
+            status: "modelled",
+            typed: declaration.typed,
+            ...base,
+          },
+          signature: () => {
+            signature ??= workflowSignature(
+              declaration,
+              (id) =>
+                (callee === null
+                  ? undefined
+                  : this.emitTypes(callee, workflow).get(id)) ?? null,
+            );
+            return signature;
+          },
+        };
+      }
       default:
         return null;
     }
@@ -551,6 +651,25 @@ class Projecting {
     };
   }
 
+  /** A feed that reads the variable `name` whole (a bare `emit: x` or `publish: x`). */
+  #feedName(name: string, range: Range): Feed {
+    const resolved = this.#scope.resolveRead({ name, properties: [] });
+    if (resolved === null)
+      return { range, edges: [], type: null, argumentType: null };
+    const direct = resolved.sources.length === 1;
+    return {
+      range,
+      edges: resolved.sources.map((s) => ({
+        from: s.port,
+        type: s.type ?? UNKNOWN,
+        variable: resolved.variable,
+        direct,
+      })),
+      type: direct ? (resolved.sources[0]?.type ?? null) : null,
+      argumentType: null,
+    };
+  }
+
   #connect(feed: Feed, to: PortRef): void {
     for (const edge of feed.edges) {
       const id = `${edge.from.node}[${edge.from.port}] -> ${to.node}[${to.port}]`;
@@ -570,14 +689,38 @@ class Projecting {
 
   #call(call: MethodCall, assigned: string | null): Value {
     const callable = this.#callable(call) as Callable;
-    const args = call.args.map(argumentValue);
+    const pipeline =
+      callable.callee.kind === "pipeline" &&
+      callable.callee.status === "modelled";
+    const record = pipeline ? recordArguments(call) : null;
+    const args =
+      record === null
+        ? call.args.map(argumentValue)
+        : record.map((r) => r.value);
     const feeds = args.map((a) => this.#feed(a));
     const signature = callable.signature(args.length);
-    const count = Math.max(signature.inputs.length, args.length);
-    const inputSpecs = Array.from(
-      { length: count },
-      (_, i) => signature.inputs[i] ?? spec(`$${i + 1}`, null),
-    );
+    // each feed goes to the input port with the same position, or, for a pipeline's record(...), the same name
+    const inputSpecs: PortSpec[] = [];
+    const fed = new Map<string, Feed>();
+    if (record !== null) {
+      inputSpecs.push(...signature.inputs);
+      record.forEach((r, i) => {
+        if (!inputSpecs.some((s) => s.id === r.key))
+          inputSpecs.push(spec(r.key, null));
+        fed.set(r.key, feeds[i] as Feed);
+      });
+    } else {
+      const count = pipeline
+        ? args.length
+        : Math.max(signature.inputs.length, args.length);
+      for (let i = 0; i < count; i++) {
+        const input =
+          (pipeline ? undefined : signature.inputs[i]) ??
+          spec(`$${i + 1}`, null);
+        inputSpecs.push(input);
+        if (feeds[i]) fed.set(input.id, feeds[i] as Feed);
+      }
+    }
     const kind = callDataflow(feeds.map((f) => f.type));
     const processLike =
       signature.kind === "process" || signature.kind === "agent";
@@ -602,21 +745,19 @@ class Projecting {
       id,
       kind: "call",
       label: name,
-      inputs: inputSpecs.map((s, i) =>
+      inputs: inputSpecs.map((s) =>
         port(
           s,
-          feeds[i] ? feeds[i].range : null,
-          feeds[i]?.argumentType ?? null,
+          fed.get(s.id)?.range ?? null,
+          fed.get(s.id)?.argumentType ?? null,
         ),
       ),
       outputs: outputs.map((s) => port(s)),
       range: call.range,
       callee: callable.callee,
     });
-    feeds.forEach((feed, i) => {
-      const input = inputSpecs[i];
-      if (input) this.#connect(feed, { node: id, port: input.id });
-    });
+    for (const [input, feed] of fed)
+      this.#connect(feed, { node: id, port: input });
     return { node: id, ports: outputs };
   }
 
@@ -778,40 +919,118 @@ function unresolved(
   return { name, kind, status, typed: null, path, module };
 }
 
+/** `record(k: v, …)` as a call's only argument: its entries; null for any other shape. */
+function recordArguments(
+  call: MethodCall,
+): { key: string; value: Expression }[] | null {
+  const only = call.args.length === 1 ? call.args[0] : undefined;
+  const inner = only === undefined ? undefined : unwrap(only as Expression);
+  if (
+    inner?.kind !== "MethodCall" ||
+    inner.receiver !== null ||
+    methodName(inner) !== "record" ||
+    inner.args.length === 0
+  )
+    return null;
+  const entries: { key: string; value: Expression }[] = [];
+  for (const a of inner.args) {
+    if (a.kind !== "NamedArgument") return null;
+    entries.push({
+      key: a.name.kind === "Identifier" ? a.name.name : a.name.value,
+      value: a.value,
+    });
+  }
+  return entries;
+}
+
 const isChain = (e: Expression): boolean =>
   e.kind === "Variable" ||
   (e.kind === "Property" &&
     e.property.kind === "Identifier" &&
     isChain(e.object));
 
+/** The types of a projection's emits that come straight from one value: its emit nodes' single direct feed. */
+function inferredEmits(projection: Projection): ReadonlyMap<string, FlowType> {
+  const types = new Map<string, FlowType>();
+  for (const node of projection.nodes) {
+    if (node.kind !== "emit") continue;
+    const feeds = projection.edges.filter(
+      (e) => e.to.node === node.id && e.to.port === "in",
+    );
+    const only = feeds.length === 1 ? feeds[0] : undefined;
+    if (only?.direct) types.set(node.name, only.type);
+  }
+  return types;
+}
+
 export function createProjector(
   model: ProjectModel,
   catalogue: ScriptCatalogue,
 ): Projector {
   const library = dataflowLibrary(catalogue);
+  // a projector is a snapshot of the model (F-113 replaces it after a change)
+  let all: Listed[] | undefined;
   const listed = (): Listed[] =>
-    model.paths().flatMap((path) => {
+    (all ??= model.paths().flatMap((path) => {
       const file = model.file(path);
       return file ? listWorkflows(file.source) : [];
-    });
+    }));
+
+  const memo = new Map<string, ReadonlyMap<string, FlowType>>();
+  const active = new Set<string>();
+  let cycles = 0;
+
+  /** Projects one workflow; a workflow met again while it is being projected is a cycle (`emitTypes` gives unknown). */
+  function build(path: string, workflow: string | null): Projection | null {
+    const found = listed().find(
+      (l) => l.ref.path === path && l.ref.name === workflow,
+    );
+    const file = model.file(path);
+    if (found === undefined || found.node === null || file === undefined)
+      return null;
+    const key = `${path}#${workflow ?? ""}`;
+    active.add(key);
+    try {
+      return new Projecting(
+        model,
+        library,
+        path,
+        file.source.text,
+        found.ref,
+        found.node,
+        emitTypes,
+      ).run();
+    } finally {
+      active.delete(key);
+    }
+  }
+
+  const none: ReadonlyMap<string, FlowType> = new Map();
+  const emitTypes: EmitTypes = (path, workflow) => {
+    const key = `${path}#${workflow ?? ""}`;
+    const known = memo.get(key);
+    if (known !== undefined) return known;
+    if (active.has(key)) {
+      cycles += 1;
+      return none;
+    }
+    const before = cycles;
+    try {
+      const projection = build(path, workflow);
+      const types = projection === null ? none : inferredEmits(projection);
+      // a result that met a cycle depends on where the walk started, so only cycle-free ones are kept
+      if (cycles === before) memo.set(key, types);
+      return types;
+    } catch {
+      return none;
+    }
+  };
+
   return {
     workflows: () => listed().map((l) => l.ref),
     project(path, workflow) {
       try {
-        const found = listed().find(
-          (l) => l.ref.path === path && l.ref.name === workflow,
-        );
-        const file = model.file(path);
-        if (found === undefined || found.node === null || file === undefined)
-          return null;
-        return new Projecting(
-          model,
-          library,
-          path,
-          file.source.text,
-          found.ref,
-          found.node,
-        ).run();
+        return build(path, workflow);
       } catch {
         return null;
       }

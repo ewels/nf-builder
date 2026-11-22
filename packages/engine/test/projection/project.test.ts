@@ -104,6 +104,9 @@ describe("F-106 AR-10 LA-20 projector", () => {
     expect(ports(prepared, "inputs")).toEqual(["samples", "fasta"]);
     expect(ports(prepared, "outputs")).toEqual(["bams", "logs", "index"]);
     expect(type(prepared, "bams")).toBe("Channel<Path>");
+    // inferred from the callee's own projection: the emit's source, wrapped by workflowEmitType
+    expect(type(prepared, "logs")).toBe("Channel<String>");
+    expect(type(prepared, "index")).toBe("Value<Path>");
     const samples = into(main, prepared.id, "samples");
     expect(samples).toMatchObject([
       {
@@ -118,6 +121,38 @@ describe("F-106 AR-10 LA-20 projector", () => {
     expect(take.inputs).toEqual([]);
     expect(type(take, "out")).toBe("Channel<Sample>");
     expect(p.nodes.slice(0, 2).map((n) => n.kind)).toEqual(["take", "take"]);
+    const base = `${PREPARE_FILE}#PREPARE`;
+    expect(p.nodes.slice(-3).map((n) => n.id)).toEqual([
+      `${base}/:emit:bams`,
+      `${base}/:emit:logs`,
+      `${base}/:emit:index`,
+    ]);
+    const bams = node(p, `${base}/:emit:bams`);
+    expect(bams.kind).toBe("emit");
+    expect(bams).toMatchObject({ name: "bams", outputs: [] });
+    expect(bams.inputs).toMatchObject([
+      {
+        id: "in",
+        type: {
+          dataflow: "channel",
+          element: { name: "Path", args: [], nullable: false },
+        },
+      },
+    ]);
+    expect(into(p, bams.id, "in")).toMatchObject([
+      { from: { node: `${base}/bams`, port: "out" }, variable: "bams" },
+    ]);
+    expect(into(p, `${base}/:emit:logs`, "in")).toMatchObject([
+      {
+        from: { node: `${base}/aligned`, port: "log" },
+        variable: "aligned.log",
+        direct: true,
+      },
+    ]);
+    expect(node(p, `${base}/:emit:logs`).inputs[0]?.type).toBeNull();
+    expect(into(p, `${base}/:emit:index`, "in")).toMatchObject([
+      { from: { node: `${base}/index`, port: "out" }, variable: "index" },
+    ]);
   });
 
   it("F-106 AR-12 LA-24: a chain is the maximal run of operator calls with no assignment between; receiver and graph-fed arguments are ports, closures are not; one output", () => {
@@ -214,6 +249,46 @@ describe("F-106 AR-10 LA-20 projector", () => {
     expect(main.nodes[0]?.id).toBe("main.nf#/:params");
   });
 
+  it("F-106 LA-26: the output node has one input per declared output, fed by publish; undeclared targets add ports", async () => {
+    const main = must(projector, "main.nf", null);
+    const out = node(main, "main.nf#/:output");
+    expect(out.kind).toBe("output");
+    expect(out.outputs).toEqual([]);
+    expect(main.nodes.at(-1)?.id).toBe("main.nf#/:output");
+    expect(ports(out, "inputs")).toEqual(["bams", "report", "upper"]);
+    expect(out.inputs[0]?.type).toMatchObject({ dataflow: "channel" });
+    expect(out.inputs[1]?.type).toMatchObject({ dataflow: "plain" });
+    expect(into(main, out.id, "bams")).toMatchObject([
+      {
+        from: { node: "main.nf#/prepared", port: "bams" },
+        variable: "prepared.bams",
+        direct: true,
+      },
+    ]);
+    expect(into(main, out.id, "report")).toMatchObject([
+      { from: { node: "main.nf#/report", port: "report" }, variable: "report" },
+    ]);
+    expect(into(main, out.id, "upper")).toMatchObject([
+      { from: { node: "main.nf#/sub", port: "upper" } },
+    ]);
+    const p = must(
+      await projectorForFiles({
+        "main.nf":
+          "nextflow.enable.types = true\n\nworkflow {\n    main:\n    x = channel.of(1)\n\n    publish:\n    extra = x\n    inline = 'a'\n}\n\noutput {\n    declared: Channel<Integer> {\n        path 'd'\n    }\n}\n",
+      }),
+      "main.nf",
+      null,
+    );
+    const o = node(p, "main.nf#/:output");
+    expect(ports(o, "inputs")).toEqual(["declared", "extra", "inline"]);
+    expect(o.inputs[0]?.argument).toBeNull();
+    expect(into(p, o.id, "extra")).toMatchObject([
+      { from: { node: "main.nf#/x", port: "out" } },
+    ]);
+    expect(o.inputs[2]?.argumentType).toMatchObject({ dataflow: "plain" });
+    expect(into(p, o.id, "inline")).toEqual([]);
+  });
+
   it("F-106 LA-28: a process or agent call returns Channel when any argument is a channel or unknown, else Value", async () => {
     const main = must(projector, "main.nf", null);
     expect(type(node(main, "main.nf#/answers"), "out")).toBe("Channel<String>");
@@ -305,20 +380,51 @@ describe("F-106 AR-10 LA-20 projector", () => {
     );
   });
 
-  it("F-106 AR-10: an argument that only reads a graph value inside an expression is an indirect edge", () => {
+  it("F-106 AR-10: a pipeline call takes the included pipeline's params and gives its outputs; record() arguments map to params", async () => {
     const main = must(projector, "main.nf", null);
     const sub = node(main, "main.nf#/sub") as CallNode;
     expect(sub.callee).toMatchObject({
       name: "SUB",
       kind: "pipeline",
       status: "modelled",
+      path: "pipelines/sub.nf",
     });
-    expect(into(main, sub.id, "$1")).toMatchObject([
+    expect(ports(sub, "inputs")).toEqual(["input"]);
+    expect(sub.inputs[0]?.type).toMatchObject({ dataflow: "channel" });
+    expect(ports(sub, "outputs")).toEqual(["upper"]);
+    expect(type(sub, "upper")).toBe("Channel<String>");
+    expect(into(main, sub.id, "input")).toMatchObject([
       {
         from: { node: "main.nf#/ch_names~2", port: "out" },
         variable: "ch_names",
-        direct: false,
+        direct: true,
       },
+    ]);
+    const p = must(
+      await projectorForFiles({
+        "sub.nf":
+          "nextflow.enable.types = true\n\nparams {\n    a: String\n    b: Integer\n}\n\nworkflow {\n    main:\n    x = channel.of(params.a)\n\n    publish:\n    x = x\n}\n\noutput {\n    x: Channel<String> {\n        path 'x'\n    }\n}\n",
+        "main.nf":
+          "nextflow.enable.types = true\n\ninclude { workflow as SUB } from './sub'\n\nworkflow {\n    main:\n    s = channel.of('q')\n    r = SUB(record(a: s.map { v -> v }, b: 3, c: s))\n    t = SUB(s)\n}\n",
+      }),
+      "main.nf",
+      null,
+    );
+    const r = node(p, "main.nf#/r");
+    expect(ports(r, "inputs")).toEqual(["a", "b", "c"]);
+    expect(into(p, r.id, "a")).toMatchObject([
+      { from: { node: "main.nf#/.map@1", port: "out" }, direct: true },
+    ]);
+    expect(r.inputs[1]?.argumentType).toMatchObject({ dataflow: "plain" });
+    expect(into(p, r.id, "c")).toMatchObject([
+      { from: { node: "main.nf#/s", port: "out" }, variable: "s" },
+    ]);
+    // any other argument shape feeds one $1 port
+    const t = node(p, "main.nf#/t");
+    expect(ports(t, "inputs")).toEqual(["$1"]);
+    expect(ports(t, "outputs")).toEqual(["x"]);
+    expect(into(p, t.id, "$1")).toMatchObject([
+      { from: { node: "main.nf#/s", port: "out" } },
     ]);
   });
 
@@ -379,6 +485,64 @@ describe("F-106 AR-10 LA-20 projector", () => {
       status: "unresolved",
     });
     expect(ports(node(p, "main.nf#/a"), "inputs")).toEqual(["$1", "$2"]);
+  });
+
+  it("F-106 AR-10 ADR-0004: every main statement is one top node or one code node, every emit an emit node, every publish item an edge or port of the output node", () => {
+    for (const ref of projector.workflows()) {
+      const p = projector.project(ref.path, ref.name);
+      if (p === null) continue;
+      const file = model.file(ref.path)?.source;
+      const ast = file?.language === "nextflow" ? file.ast : null;
+      const def = ast?.body.find(
+        (i) => i.kind === "Workflow" && (i.name?.name ?? null) === ref.name,
+      );
+      if (def?.kind !== "Workflow") continue;
+      const body = def.main?.items.filter((s) => s.kind !== "EmptyStatement");
+      // each statement's top node starts inside the statement's range; nested nodes are created before it
+      for (const statement of body ?? []) {
+        const tops = p.nodes.filter(
+          (n) =>
+            n.kind !== "take" &&
+            n.kind !== "emit" &&
+            n.kind !== "params" &&
+            n.kind !== "output" &&
+            n.range.start >= statement.range.start &&
+            n.range.end <= statement.range.end,
+        );
+        expect(
+          tops.length,
+          `${ref.path}:${statement.range.line}`,
+        ).toBeGreaterThan(0);
+      }
+      const emits = def.emits?.items.length ?? 0;
+      expect(p.nodes.filter((n) => n.kind === "emit")).toHaveLength(emits);
+      for (const item of def.publishers?.items ?? []) {
+        const output = p.nodes.find((n) => n.kind === "output");
+        expect(
+          output?.inputs.some((i) => i.id === item.name.name),
+          item.name.name,
+        ).toBe(true);
+      }
+    }
+  });
+
+  it("F-106 LA-22 IO-14: a workflow whose emit types depend on each other in a cycle gives unknown types, whichever is projected first", async () => {
+    const files = {
+      "a.nf":
+        "include { B } from './b'\n\nworkflow A {\n    take:\n    x\n\n    main:\n    r = B(x)\n\n    emit:\n    r\n}\n",
+      "b.nf":
+        "include { A } from './a'\n\nworkflow B {\n    take:\n    x\n\n    main:\n    r = A(x)\n\n    emit:\n    r\n}\n",
+    };
+    const first = await projectorForFiles(files);
+    const second = await projectorForFiles(files);
+    const a1 = must(first, "a.nf", "A");
+    const b1 = must(first, "b.nf", "B");
+    const b2 = must(second, "b.nf", "B");
+    const a2 = must(second, "a.nf", "A");
+    expect(b1).toEqual(b2);
+    expect(a1).toEqual(a2);
+    const call = node(a1, "a.nf#A/r");
+    expect(call.outputs[0]?.type).toEqual({ dataflow: null, element: null });
   });
 
   it("F-106 AR-31: projections are plain data and deterministic", async () => {
