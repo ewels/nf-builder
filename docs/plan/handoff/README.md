@@ -22,7 +22,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-203 new project dialog | `feat/F-203` (`/home/user/wt-F-203`) | Tasks 1–5 committed (oracle keys, three templates, engine `templates`); tasks 6–7 building; merge `main` (F-205) before task 8. [plan](plan-F-203.md). |
 | F-206 details pane | `feat/F-206` (`/home/user/wt-F-206`) | Tasks 1–2 building; task 0 done by F-112. [plan](plan-F-206.md). |
 | F-207 layout sidecar | not started | [plan](plan-F-207.md). After F-205 and F-202. |
-| F-208 view modes and Code | `feat/F-208` (`/home/user/wt-F-208`) | Tasks 1–2 building. [plan](plan-F-208.md). |
+| F-208 view modes and Code | merged, PR #46 | |
 | F-209 undo and redo | not started | [plan](plan-F-209.md). After F-202, F-205 and F-208. |
 | F-501 registry snapshot | merged, PR #29, **not passing** | Live `/registry/` passes a sampled check; waiting for the dispatched snapshot run's `workflow_run` deploy and `verify`, then flip in a PR. |
 | F-011 GitHub Pages hosting | merged, PR #37 | Live at https://ewels.github.io/nf-builder/; first `verify` passed. |
@@ -31,7 +31,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 
 Branches are stacked: `feat/F-108` → `feat/F-107`; `feat/F-111` also merges F-107. Open PRs for F-108, F-107 and F-111 against `main` in that order (merge `main` into each first), each green before the next. Worktrees: `/home/user/wt-F-1xx`.
 
-Next free ADR number: 0047 (0046 is F-205's).
+Next free ADR number: 0049 (0047 is F-203's, 0048 is F-208's).
 
 ## Decisions already taken on the plans' open points
 
@@ -150,7 +150,7 @@ Next free ADR number: 0047 (0046 is F-205's).
 - Point 10: add F-202 to F-207's `depends_on`, with the `scope-change` label and the ADR.
 - One ADR at landing for the sidecar v1 format. It also records that history is F-209's and autosave F-202's, correcting ADR 0039's attribution.
 
-### F-208 — [plan](plan-F-208.md)
+### F-208 (merged with its PR)
 - Accept every recommendation in section 6:
   - `style-src 'self' 'unsafe-inline'` for Monaco, as ADR 0014 anticipated. It amends ADR 0040's policy line with a new ADR, and adds a `cspProblems` rule allowing only those two style sources. The probe found 31 violations under the strict policy and none with inline styles.
   - `monaco-editor` 0.57.0, pinned, with lean imports and no React wrapper.

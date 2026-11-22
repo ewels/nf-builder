@@ -527,3 +527,22 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - `scope-change`: F-205 step 1 is reworded. The template check moves to F-203, which now depends on F-205.
   - A licences row for the corpus-derived baselines.
 - Blockers: none.
+
+## 2026-11-22 · F-208 · Claude (autonomous)
+- Did:
+  - A Graph, Split and Code toggle per tab, with G, S and C shortcuts.
+  - A lazily loaded Monaco editor with Shiki highlighting. Edits go to the engine as `ReplaceFileText` after a 300 ms pause, and the graph follows. A refused edit keeps its draft, marked with its problems, and the saved file is untouched.
+  - The review found that a refused draft could reach another project's file; the store now numbers project sessions and refuses commands for a closed one.
+- State: passing once CI is green with the new baselines.
+- Next: F-206, then F-207 and F-209.
+- Decisions:
+  - [ADR 0048](../adr/0048-code-view-monaco.md):
+    - `style-src 'self' 'unsafe-inline'` for Monaco, amending ADR 0040's policy (QA-30 updated); nothing else loosened, no `'wasm-unsafe-eval'`;
+    - three runtime dependencies: `monaco-editor` 0.57.0, `shiki` and `@shikijs/monaco` 4.6.0;
+    - the editing rules, drafts per session and project, and the AR-30 reading for editor buffers;
+    - eight IO-41 entries for URLs in Monaco's chunk.
+  - UX-27 now says what Split shows and what happens to a refused edit.
+  - Licences rows for Monaco, DOMPurify, the codicons, Shiki and the Nextflow grammars (MIT), which settles the "Check during F-304" row.
+  - The `nfBuilderWorkspace` test hook gains `apply`.
+  - F-205's canvas baselines are re-approved from CI because the toggle now shows in the tab strip (ADR 0021).
+- Blockers: none.
