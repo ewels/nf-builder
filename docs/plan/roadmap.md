@@ -6,7 +6,7 @@ Milestones run in order. A milestone is done when every feature tagged with it i
 
 Get the repo, the harness and the risky unknowns settled before writing product code.
 
-- Scaffold the monorepo, CI, Netlify deploy (`netlify.toml`), `pnpm check` and `pnpm smoke` (F-001 to F-004).
+- Scaffold the monorepo, CI, deploy, `pnpm check` and `pnpm smoke` (F-001 to F-004); production moved to GitHub Pages in F-011 (ADR 0040).
 - Corpus tooling (F-009).
 - Spikes S1 to S5 (F-005 to F-008, F-010).
 - Spikes, each ending in a short report in `docs/research/` and a `Spike result` section on the linked ADR (a superseding ADR if the decision changes):
@@ -59,7 +59,7 @@ Config, schema, `meta.yml` and other file editors, plus docs publishing to GitHu
 
 ## M7: Polish and first release
 
-**Exit:** the gated performance budgets (QA-01, QA-03, QA-06) and accessibility checks green, the other budgets reported (ADR 0030); read-only small-screen mode; user docs; `v0.1.0` tagged and live on Netlify; build-time scaffolding (vendored skills, mockup) removed (F-705).
+**Exit:** the gated performance budgets (QA-01, QA-03, QA-06) and accessibility checks green, the other budgets reported (ADR 0030); read-only small-screen mode; user docs; `v0.1.0` tagged and live on GitHub Pages; build-time scaffolding (vendored skills, mockup) removed (F-705).
 
 ## M8: Deferred past v0.1
 

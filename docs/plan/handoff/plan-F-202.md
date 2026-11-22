@@ -319,7 +319,7 @@ Branch `feat/F-202` after F-113 merges. In every task, write the tests first and
 8. **CI and the baseline** (orchestrator).
    - Push the branch. The Chromium `@visual` test fails on the changed header.
    - Download `playwright-chromium`, view `app-shell-default-actual.png`, and commit it at the baseline path (ADR 0021).
-   - Done when every job of `CI`, `Deploy check` and `Scope guard` is green, including Firefox and WebKit smoke.
+   - Done when every job of `CI` and `Scope guard` is green, including Firefox and WebKit smoke.
 9. **Records** (section 7).
    - Done when `pnpm check` passes and the Scope guard passes without `scope-change`.
 

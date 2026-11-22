@@ -23,11 +23,30 @@ const bundlePath = (name: string, version: string): string =>
 const pluginPath = (id: string, version: string): string =>
   `registry/plugins/${id}/${version}.json`;
 
-/** Checks the snapshot's index, ports, bundles and plugin files, read through `read` (a path or undefined). */
+type Sample = { modules: number; plugins: number };
+
+/** The post-deploy sample (ADR 0041): about 27 requests. A full check runs on the build before it is uploaded. */
+export const DEPLOYED_SAMPLE: Sample = { modules: 20, plugins: 5 };
+
+/** `n` items spread evenly over `items`, always keeping the first and last; all of them when n >= items.length. */
+export function evenlySpaced<T>(items: readonly T[], n: number): T[] {
+  if (n >= items.length) return [...items];
+  if (n === 1) return items.slice(0, 1);
+  const picked: T[] = [];
+  for (let i = 0; i < n; i++)
+    picked.push(items[Math.round((i * (items.length - 1)) / (n - 1))] as T);
+  return picked;
+}
+
+/**
+ * Checks the snapshot's index, ports, bundles and plugin files, read through `read` (a path or undefined).
+ * With a `sample`, only that many evenly spaced modules and plugins are read, and a bundle's `requires` aren't followed.
+ */
 function checkContents(
   read: (path: string) => string | undefined,
   budget: Budget,
   where: string,
+  sample?: Sample,
 ): SnapshotCheck {
   const problems: Problem[] = [];
   const warnings: Problem[] = [];
@@ -81,10 +100,13 @@ function checkContents(
   const portsByName = (ports?.modules ?? {}) as Json;
 
   const queue: string[] = [];
-  for (const m of (index.modules ?? []) as {
+  const allModules = (index.modules ?? []) as {
     name: string;
     version: string;
-  }[]) {
+  }[];
+  for (const m of sample
+    ? evenlySpaced(allModules, sample.modules)
+    : allModules) {
     if (ports && !(m.name in portsByName))
       fail(`registry/ports.json has no ports for ${m.name}`);
     queue.push(bundlePath(m.name, m.version));
@@ -99,13 +121,17 @@ function checkContents(
       fail(`${path} has format ${String(bundle.format)}, expected 1`);
     if (path !== bundlePath(String(bundle.name), String(bundle.version)))
       fail(`${path} holds ${String(bundle.name)}@${String(bundle.version)}`);
-    for (const pin of (bundle.requires ?? []) as {
-      name: string;
-      version: string;
-    }[])
-      queue.push(bundlePath(pin.name, pin.version));
+    if (!sample)
+      for (const pin of (bundle.requires ?? []) as {
+        name: string;
+        version: string;
+      }[])
+        queue.push(bundlePath(pin.name, pin.version));
   }
-  for (const p of (index.plugins ?? []) as { id: string; version: string }[]) {
+  const allPlugins = (index.plugins ?? []) as { id: string; version: string }[];
+  for (const p of sample
+    ? evenlySpaced(allPlugins, sample.plugins)
+    : allPlugins) {
     const path = pluginPath(p.id, p.version);
     const file = parse(path);
     if (
@@ -126,6 +152,8 @@ export function checkRegistrySnapshot(dir: string): SnapshotCheck {
 }
 
 type DeployedOptions = {
+  /** Undefined checks every file. */
+  sample?: Sample;
   timeoutMs: number;
   intervalMs: number;
   log?: (message: string) => void;
@@ -135,8 +163,9 @@ type DeployedOptions = {
 };
 
 /**
- * Polls `<site>/registry/index.json` until it is JSON with this `generatedAt` (the SPA fallback answers a missing file with
- * HTML and status 200), then checks the served snapshot: the index, ports, and every module bundle and plugin file.
+ * Polls `<site>/registry/index.json` until it is JSON with this `generatedAt` (a host with a fallback may answer a missing file
+ * with HTML and status 200), then checks the served snapshot: the index, ports, and every module bundle and plugin file, or a `sample` of them.
+ * Every GET carries a `?ts=` query, because Pages caches responses for ten minutes.
  */
 export async function checkDeployedSnapshot(
   site: string,
@@ -152,7 +181,7 @@ export async function checkDeployedSnapshot(
   const base = site.replace(/\/$/, "");
   const get = async (path: string): Promise<string | undefined> => {
     try {
-      const response = await doFetch(`${base}/${path}`);
+      const response = await doFetch(`${base}/${path}?ts=${now()}`);
       const type = response.headers.get("content-type") ?? "";
       return response.ok && type.includes("json")
         ? await response.text()
@@ -200,6 +229,7 @@ export async function checkDeployedSnapshot(
       },
       readBudget("QA-06"),
       base,
+      options.sample,
     );
     if (missing.size === 0) return result;
     for (const path of missing) cache.set(path, await get(path));
@@ -208,7 +238,8 @@ export async function checkDeployedSnapshot(
 
 async function main(argv: string[]): Promise<number> {
   const usage =
-    "usage: node scripts/check-registry-snapshot.ts <dir> | --url <site> --generated-at <iso>";
+    "usage: node scripts/check-registry-snapshot.ts <dir> | --url <site> --generated-at <iso> [--all]";
+  const all = argv.includes("--all");
   const urlAt = argv.indexOf("--url");
   const stampAt = argv.indexOf("--generated-at");
   let result: SnapshotCheck;
@@ -221,6 +252,7 @@ async function main(argv: string[]): Promise<number> {
         return 2;
       }
       result = await checkDeployedSnapshot(site, stamp, {
+        sample: all ? undefined : DEPLOYED_SAMPLE,
         timeoutMs: 15 * 60_000,
         intervalMs: 30_000,
         log: (m) => console.log(m),

@@ -7,7 +7,7 @@ import {
   VISUAL_TAG,
   visualEnabled,
 } from "./e2e/browsers.ts";
-import { DEV_URL, PREVIEW_URL } from "./e2e/urls.ts";
+import { DEV_URL, E2E_BASE_PATH, PREVIEW_URL } from "./e2e/urls.ts";
 
 const REGISTRY_FIXTURE = fileURLToPath(
   new URL("tools/registry-snapshot/test/fixtures/expected", import.meta.url),
@@ -72,17 +72,21 @@ export default defineConfig({
       : []),
   ]),
   webServer: [
-    // Always a fresh production build, served with the netlify.toml headers.
+    // Always a fresh production build, served under the base path with no headers, as GitHub Pages does (ADR 0040).
     {
       command: "pnpm build && pnpm preview",
       url: PREVIEW_URL,
       timeout: 120_000,
       // F-501: the fixture snapshot, so /registry/ has data without the registry-snapshot branch.
-      env: { REGISTRY_SNAPSHOT_DIR: REGISTRY_FIXTURE },
+      env: {
+        REGISTRY_SNAPSHOT_DIR: REGISTRY_FIXTURE,
+        BASE_PATH: E2E_BASE_PATH,
+      },
     },
     {
       command: "pnpm dev",
       url: DEV_URL,
+      env: { BASE_PATH: "/" },
       reuseExistingServer: !process.env.CI,
       timeout: 60_000,
     },

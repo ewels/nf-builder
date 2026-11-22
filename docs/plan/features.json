@@ -20,7 +20,7 @@
     {
       "id": "F-002",
       "milestone": "M0",
-      "description": "Minimal web app (header plus three empty columns) that builds with Vite and deploys to Netlify from `main` via `netlify.toml`.",
+      "description": "Minimal web app (header plus three empty columns) that builds with Vite and deploys to GitHub Pages from `main` (ADR 0040).",
       "spec": [
         "ADR-0002",
         "UX-01",
@@ -31,12 +31,12 @@
       ],
       "steps": [
         "`pnpm dev` serves the app locally; the header shows the app name",
-        "`netlify.toml` at the repo root sets the build command, publish directory, Node and pnpm versions, the QA-30 security headers and a single-page-app fallback",
-        "Merging to `main` deploys to https://nf-builder.netlify.app and the page loads; a pull request gets a deploy preview",
-        "The deployed page sends a Content-Security-Policy header that matches QA-30"
+        "`pnpm build` writes a static site to `apps/web/dist` with no single-page-app fallback (ADR 0040); `netlify.toml` keeps only the build command, publish directory, and Node and pnpm versions, for development builds",
+        "Merging to `main` deploys to https://ewels.github.io/nf-builder/ (placeholder; a custom domain may replace it) and the page loads; a pull request builds the site as Pages will in the CI `site` job",
+        "The deployed page carries a Content-Security-Policy `<meta>` element that matches QA-30"
       ],
       "passes": true,
-      "notes": "App name: nf-builder (Q1). Netlify site `nf-builder` already exists and deploys from this repo's `main`. Verified 2026-11-21: `pnpm test:e2e -- --grep F-002` (6 tests) and unit tests; deploy-check on PR #3 confirmed the preview's headers. Step 3's production half is confirmed by deploy-check on the push to `main` (Q11)."
+      "notes": "App name: nf-builder (Q1). Netlify site `nf-builder` already exists and deploys from this repo's `main`. Verified 2026-11-21: `pnpm test:e2e -- --grep F-002` (6 tests) and unit tests; deploy-check on PR #3 confirmed the preview's headers. Step 3's production half is confirmed by deploy-check on the push to `main` (Q11). Reworded 2026-11-22 under ADR 0040 (hosting moved to GitHub Pages; no SPA fallback or deploy previews); steps 3 and 4 are confirmed after merge by the Pages workflow's `verify` job (Q11)."
     },
     {
       "id": "F-003",
@@ -170,7 +170,7 @@
         "ADR 0009 updated with the outcome"
       ],
       "passes": true,
-      "notes": "Verified 2026-11-22 on PR #14: S4 probe run 44983841745 against deploy preview #14 (commit dd44cf4) in Chromium 159, Firefox 159 and WebKit 27.2 recorded status, CORS headers and timing for 16 targets (step 1); the @openapi test matched all 10 registry targets to OpenAPI 0.14.0 (step 2); ADR 0009 spike result appended (step 3). Report: docs/research/2026-11-22-spike-s4-cors.md. pnpm test:e2e -- --grep F-008 runs the two local page tests; the deployed probe runs under e2e/s4-probe.config.ts. Probe kept for re-runs until F-502."
+      "notes": "Verified 2026-11-22 on PR #14: S4 probe run 44983841745 against deploy preview #14 (commit dd44cf4) in Chromium 159, Firefox 159 and WebKit 27.2 recorded status, CORS headers and timing for 16 targets (step 1); the @openapi test matched all 10 registry targets to OpenAPI 0.14.0 (step 2); ADR 0009 spike result appended (step 3). Report: docs/research/2026-11-22-spike-s4-cors.md. pnpm test:e2e -- --grep F-008 runs the two local page tests; the deployed probe runs under e2e/s4-probe.config.ts. Probe kept for re-runs until F-502. From F-011: the S4 probe runs on dispatch only, against the Pages site, and its deployed run strips the meta policy (ADR 0040)."
     },
     {
       "id": "F-010",
@@ -190,6 +190,32 @@
       ],
       "passes": true,
       "notes": "Verified 2026-11-22 on PR #15: pnpm test:e2e -- --grep F-010 (Chromium, chromium-spikes project) passes locally and in CI: step 1 renders rnaseq_metro and sarek_metro to SVG in a worker under self-hosted Pyodide 314.0.8 with nf-metro 2.1.0; step 2 finds 0 differing pixels against the nf-metro CLI (Python 3.12 in CI, 3.13 locally); step 3 records 16.52 MB served (10.46 MB gzip) and first render 8.6 s median locally, 8.7 s in CI. Report: docs/research/2026-11-22-spike-s5-nf-metro.md; ADR 0013 spike result. Spike kept until FI-54 (F-607) replaces it."
+    },
+    {
+      "id": "F-011",
+      "milestone": "M0",
+      "description": "Host the app on GitHub Pages, deployed from GitHub Actions with the registry snapshot and no secrets; the QA-30 policy travels in `<meta>` elements, and the app also works embedded in an iframe (ADRs 0040, 0041, 0044).",
+      "spec": [
+        "ADR-0040",
+        "ADR-0041",
+        "QA-30",
+        "IO-31",
+        "IO-41",
+        "ADR-0044"
+      ],
+      "depends_on": [
+        "F-002",
+        "F-003"
+      ],
+      "steps": [
+        "A push to `main` runs the `Pages` workflow: it builds with the base path from `actions/configure-pages`, deploys, and its `verify` job finds the pushed commit in `version.json` at https://ewels.github.io/nf-builder/ (placeholder; a custom domain may replace it)",
+        "Every built page starts its `<head>` with the QA-30 policy in `<meta http-equiv=\"Content-Security-Policy\">` (ADR 0014's policy without `frame-ancestors`) followed by `<meta name=\"referrer\" content=\"no-referrer\">`; the CI `site` job checks a `/nf-builder/` build with `pnpm check:site` on every pull request, and `verify` checks the deployed page",
+        "`pnpm test:e2e` builds and previews under `/nf-builder/` with no security headers and no single-page-app fallback, as Pages serves it, and the app loads with no CSP violation or console error",
+        "Inside a cross-origin iframe the app loads and works: the shell mounts, the palette loads through the engine worker, and there is no CSP violation or console error (ADR 0044)",
+        "A successful `Registry snapshot` run on `main` triggers a Pages deploy that serves the snapshot at `/registry/` without any secret, and `verify` passes `pnpm check:registry --url` against the deployed site"
+      ],
+      "passes": true,
+      "notes": "Verified 2026-11-22: step 2 by the CI `site` job (`pnpm check:site` on a `/nf-builder/` build), test/check-site.test.ts, test/security-policy*.test.ts and e2e/pages-hosting.spec.ts; step 3 by `pnpm test:e2e` under `/nf-builder/` (pages-hosting.spec.ts and the F-002/F-011 preview test in app-shell.spec.ts); step 4 by the cross-origin iframe test in e2e/pages-hosting.spec.ts (ADR 0044). Steps 1 and 5 are confirmed after merge by `pages.yml`'s `verify` job: the push run, then the first `workflow_run` after a Registry snapshot run (Q11). Merge only once Pages' source is \"GitHub Actions\" (#35)."
     },
     {
       "id": "F-101",
@@ -496,7 +522,7 @@
         "Simulated quota at 85% shows the warning"
       ],
       "passes": false,
-      "notes": "From F-113: show loading progress from EngineApi.open's progress callback (phases and file counts); the main thread keeps only pack versions and palette search, everything else goes through getEngine(). From F-113 review: the settled F-202 decision adds readFile and close to F-113's EngineApi; F-113 merged without them, so F-202 adds them. Request the palette before open: the worker's queue is serial, so the palette would otherwise wait behind a long open (18 s on sarek)."
+      "notes": "From F-113: show loading progress from EngineApi.open's progress callback (phases and file counts); the main thread keeps only pack versions and palette search, everything else goes through getEngine(). From F-113 review: the settled F-202 decision adds readFile and close to F-113's EngineApi; F-113 merged without them, so F-202 adds them. Request the palette before open: the worker's queue is serial, so the palette would otherwise wait behind a long open (18 s on sarek). From F-011 (ADR 0044): the app may run in a cross-origin iframe, where storage is partitioned (a separate project list) and navigator.storage.persist() may be refused; show that in the storage notice rather than failing."
     },
     {
       "id": "F-203",
@@ -865,7 +891,7 @@
         "Delete a multi-selection: one undo step restores all"
       ],
       "passes": false,
-      "notes": "From F-111: group several commands as one undo step by committing each and concatenating the inverses in reverse."
+      "notes": "From F-111: group several commands as one undo step by committing each and concatenating the inverses in reverse. From F-011 (ADR 0044): inside an iframe the clipboard API needs the embedder's allow=\"clipboard-read; clipboard-write\"; fall back to in-app copy and paste when it is refused."
     },
     {
       "id": "F-311",
@@ -1045,7 +1071,7 @@
         "Spot check: nf-core/fastqc ports match its meta.yml and it is marked legacy (as of 2026-11)"
       ],
       "passes": false,
-      "notes": "From F-008 (S4): the snapshot is the browser's only registry source (registry.nextflow.io sends no CORS headers; bundle downloads redirect to public-cr-prod.seqera.io, also without CORS). Paths under /api/v1/, module names %2F-encoded; the list endpoint lacks port metadata, so fetch each module's release. See docs/research/2026-11-22-spike-s4-cors.md. Built 2026-11-22 (PR #29), not yet passing: blocked on maintainer issue #31. The repository is private, so Netlify builds can't read the registry-snapshot branch; until a read token is set (REGISTRY_SNAPSHOT_TOKEN) or the repository is public, builds warn and serve no snapshot. Evidence so far: the workflow's triggers and permissions (test/workflows.test.ts), serving (test/registry-snapshot-site.test.ts, e2e/registry-snapshot.spec.ts on the fixture snapshot), and a full local live build on 2026-11-22: index.json 169.3 kB gzipped (QA-06, 56%), ports.json 138.6 kB, 2,320 modules (10 typed), 104 plugins, 2 failures; nf-core/fastqc is a legacy process FASTQC with ports matching its meta.yml. To pass: a green PR or main run of the Registry snapshot workflow (steps 2 and 3 on live data), a publish to the branch, and a production deploy serving /registry/ (pnpm check:registry --url)."
+      "notes": "From F-008 (S4): the snapshot is the browser's only registry source (registry.nextflow.io sends no CORS headers; bundle downloads redirect to public-cr-prod.seqera.io, also without CORS). Paths under /api/v1/, module names %2F-encoded; the list endpoint lacks port metadata, so fetch each module's release. See docs/research/2026-11-22-spike-s4-cors.md. Built 2026-11-22 (PR #29), not yet passing: blocked on maintainer issue #31. The repository is private, so Netlify builds can't read the registry-snapshot branch; until a read token is set (REGISTRY_SNAPSHOT_TOKEN) or the repository is public, builds warn and serve no snapshot. Evidence so far: the workflow's triggers and permissions (test/workflows.test.ts), serving (test/registry-snapshot-site.test.ts, e2e/registry-snapshot.spec.ts on the fixture snapshot), and a full local live build on 2026-11-22: index.json 169.3 kB gzipped (QA-06, 56%), ports.json 138.6 kB, 2,320 modules (10 typed), 104 plugins, 2 failures; nf-core/fastqc is a legacy process FASTQC with ports matching its meta.yml. To pass: a green PR or main run of the Registry snapshot workflow (steps 2 and 3 on live data), a publish to the branch, and a production deploy serving /registry/ (pnpm check:registry --url). To pass (2026-11-22): the Pages deploy serves `/registry/` and the Pages workflow's `verify` job passes after a snapshot run (ADR 0041); #27 and #31 are closed and no longer block."
     },
     {
       "id": "F-502",
@@ -1063,7 +1089,7 @@
         "With live access (if S4 allowed it): palette shows live"
       ],
       "passes": false,
-      "notes": "From F-008 (S4, 2026-11-22): the registry sends no CORS headers, so the live client can't work from the browser today; step 2 applies only if a re-run of the S4 probe (dispatch the S4 probe workflow) shows access. Delete the probe page and workflow here (ADR 0023). From F-501: read /registry/index.json and check format === 1 and a JSON content type (the SPA fallback returns HTML 200 when it's missing, and the site serves no snapshot until issue #31 is resolved); the age is generatedAt; ports are in /registry/ports.json; Playwright's preview serves the fixture snapshot from REGISTRY_SNAPSHOT_DIR (tools/registry-snapshot/test/fixtures/expected)."
+      "notes": "From F-008 (S4, 2026-11-22): the registry sends no CORS headers, so the live client can't work from the browser today; step 2 applies only if a re-run of the S4 probe (dispatch the S4 probe workflow) shows access. Delete the probe page and workflow here (ADR 0023). From F-501: read /registry/index.json and check format === 1 and a JSON content type (the SPA fallback returns HTML 200 when it's missing, and the site serves no snapshot until issue #31 is resolved); the age is generatedAt; ports are in /registry/ports.json; Playwright's preview serves the fixture snapshot from REGISTRY_SNAPSHOT_DIR (tools/registry-snapshot/test/fixtures/expected). From F-011: fetch the snapshot with `import.meta.env.BASE_URL`, never `/registry/`; there is no SPA fallback, so a missing file is a 404, but keep the JSON content-type check; fetch in the document, not a worker (QA-30, ADR 0040)."
     },
     {
       "id": "F-503",
@@ -1283,7 +1309,7 @@
         "Docs oracle: `nf-metro validate` passes on every template's generated map"
       ],
       "passes": false,
-      "notes": "From F-010 (S5): nf-metro renders in the browser with no patches (ADR 0013 spike result): self-host Pyodide and five wheels (nf-metro, lark, drawsvg, networkx by URL, Pillow), lazy-load the worker with a boot timeout, add 'wasm-unsafe-eval' to netlify.toml, set Pyodide's package base URL (its default CDN string would trip IO-41), add licences.md entries, and delete spikes/s5-nf-metro/."
+      "notes": "From F-010 (S5): nf-metro renders in the browser with no patches (ADR 0013 spike result): self-host Pyodide and five wheels (nf-metro, lark, drawsvg, networkx by URL, Pillow), lazy-load the worker with a boot timeout, add 'wasm-unsafe-eval' to netlify.toml, set Pyodide's package base URL (its default CDN string would trip IO-41), add licences.md entries, and delete spikes/s5-nf-metro/. From F-011: on Pages workers aren't under the meta CSP, so no `'wasm-unsafe-eval'` is needed for Pyodide in a worker; add it to `scripts/security-policy.ts` only if the document compiles WebAssembly. Take `indexURL` from `BASE_URL`. Whether github.io serves `.wasm` as `application/wasm` is unconfirmed."
     },
     {
       "id": "F-701",
@@ -1348,7 +1374,7 @@
     {
       "id": "F-704",
       "milestone": "M7",
-      "description": "User docs (README, in-app help links) and the v0.1.0 release on Netlify.",
+      "description": "User docs (README, in-app help links) and the v0.1.0 release on GitHub Pages.",
       "spec": [
         "PR-01",
         "PR-07"
@@ -1359,10 +1385,10 @@
         "F-703"
       ],
       "steps": [
-        "Tag v0.1.0; https://nf-builder.netlify.app serves the release build; README explains what the app does and where projects are stored"
+        "Tag v0.1.0; https://ewels.github.io/nf-builder/ (or the custom domain that replaces it, ADR 0040) serves the release build; README explains what the app does and where projects are stored"
       ],
       "passes": false,
-      "notes": ""
+      "notes": "Hosting moved to GitHub Pages (ADR 0040); the URL is a placeholder until a custom domain is decided (#35)."
     },
     {
       "id": "F-705",

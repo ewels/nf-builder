@@ -424,3 +424,32 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - First numbers (local): sarek cold open 18.6 s of 30 s; edit p95 271 ms of 100 ms. The cost of re-projection and the double parse is noted in F-702.
   - The bench includes FASTQC under an alias to measure AddCall, since SAREK already calls FASTQC (a process is called once per workflow).
 - Blockers: none new.
+
+
+## 2026-11-22 · F-011 · Claude (autonomous)
+- Did:
+  - production hosting moved to GitHub Pages: `pages.yml` builds with configure-pages' base path and the registry snapshot branch, checks, deploys and verifies the live site, with no secrets;
+  - the QA-30 policy is in `<meta>` elements stamped into every built page from `scripts/security-policy.ts`, plus `pnpm check:site` and a CI `site` job;
+  - preview mirrors Pages, and the e2e tests run under `/nf-builder/`;
+  - the app loads and works inside frames, including cross-origin iframes (ADR 0044, at the maintainer's request; the first draft refused to run in a frame);
+  - the snapshot plugin is host-neutral and `check:registry --url` samples with cache-busting;
+  - Deploy check, the netlify.toml headers and the Netlify verify job are gone, and `netlify.toml` keeps only build settings.
+- State: passing (steps 1 and 5 confirmed by the first `verify` runs after merge, Q11); merges once the maintainer enables Pages (#35).
+- Next: F-111, then F-112 and F-113.
+- Decisions:
+  - [ADR 0040](../adr/0040-github-pages-hosting.md) and [ADR 0041](../adr/0041-registry-snapshot-deploy.md) (on `main` since fcc9483).
+  - `scope-change`: new feature F-011; F-002 reworded (no SPA fallback or deploy previews; the Pages URL); F-704's URL. Notes appended to F-008, F-501, F-502 and F-607.
+  - `.github/workflows/`: `pages.yml` is new and `deploy-check.yml` is deleted; `ci.yml` gains `site`, and `budget` and `hosts` build under `/nf-builder/`; `registry-snapshot.yml` loses `verify` and stops writing `netlify.toml`; `s4-probe.yml` runs on dispatch only.
+  - `check:hosts` ignores a CSP directive's closing `;` after a URL.
+  - `smol-toml` stays, for `test/netlify-toml.test.ts`.
+  - `SITE_CONTEXT` and `SITE_COMMIT` stamp `version.json`.
+  - The registry check samples 20 bundles and 5 plugins after deploys; the full check runs before upload.
+  - Tests removed with their behaviour, each replaced under ADR 0040 or 0041:
+    - `netlify-config.test.ts` moved to `netlify-toml.test.ts` and `security-policy.test.ts`;
+    - `check-deploy-headers.test.ts` moved to `check-site.test.ts` (`--allow-newer` dropped: Pages deploys are serialised);
+    - the SPA-fallback and header e2e assertions now assert their absence;
+    - the S4 pull-request trigger became dispatch-only;
+    - the registry `verify` job and hook moved to the `pages.yml` tests.
+  - A present but broken registry snapshot fails the deploy (the full `check:registry` before upload) until the next good snapshot; only a missing branch is skipped.
+  - [ADR 0044](../adr/0044-embeddable-in-frames.md) (maintainer's decision): no frame guard. An embedded copy has partitioned storage, so its own projects. Embedders grant clipboard and other permissions. Notes for F-202 and F-310.
+- Blockers: #35.

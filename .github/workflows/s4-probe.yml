@@ -2,18 +2,11 @@
 # Not a merge gate: third-party hosts change, so the probe fails only when the probe itself breaks.
 name: S4 probe
 on:
-  pull_request:
-    paths:
-      - "apps/web/public/spike/s4/**"
-      - "e2e/s4-probe/**"
-      - "e2e/s4-probe*"
-      - ".github/workflows/s4-probe.yml"
   workflow_dispatch:
     inputs:
       url:
-        description: "Site to probe: production or a deploy preview"
+        description: "Site to probe: the production Pages site"
         required: true
-        default: "https://nf-builder.netlify.app"
 permissions:
   contents: read
 concurrency:
@@ -22,22 +15,16 @@ concurrency:
 jobs:
   probe:
     name: S4 CORS probe
-    # Netlify builds deploy previews only for branches in this repository.
-    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
-      # Expressions only in env, never inside run: (no shell injection); probeOrigin() validates the value.
-      S4_PROBE_URL: ${{ github.event_name == 'pull_request' && format('https://deploy-preview-{0}--nf-builder.netlify.app', github.event.pull_request.number) || inputs.url }}
-      S4_EXPECTED_COMMIT: ${{ github.event.pull_request.head.sha }}
+      # Expressions only in env, never inside run: (no shell injection); probeSite() validates the value.
+      S4_PROBE_URL: ${{ inputs.url }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - uses: ./.github/actions/setup
-      - name: Wait for the deploy preview of this commit
-        if: github.event_name == 'pull_request'
-        run: node scripts/check-deploy-headers.ts --url "$S4_PROBE_URL" --commit "$S4_EXPECTED_COMMIT" --context deploy-preview
       - run: pnpm exec playwright install --with-deps chromium firefox webkit
       - name: Probe (F-008)
         env:

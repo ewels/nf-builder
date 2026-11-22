@@ -9,13 +9,14 @@ import {
   openApiGetPaths,
   type ProbeRecord,
   type ProbeRun,
-  probeOrigin,
+  probeSite,
+  stripPolicyMeta,
   toMarkdown,
 } from "./report.ts";
 import { probeServer } from "./server.ts";
 import { S4_TARGETS } from "./targets.ts";
 
-const BASE = probeOrigin(process.env.S4_PROBE_URL);
+const SITE = probeSite(process.env.S4_PROBE_URL);
 const REGISTRY = "https://registry.nextflow.io";
 
 function summary(markdown: string) {
@@ -43,13 +44,16 @@ test.describe("F-008 S4 probe against the deployed site", () => {
     browser,
     browserName,
   }, testInfo) => {
-    // Measure CORS, not our own CSP (ADR 0023): drop the CSP header from the probe document only.
+    // Measure CORS, not our own CSP (ADR 0023, 0040): drop the CSP <meta> from the probe document only.
     // The page keeps its origin, and this works the same in every engine (bypassCSP does not lift connect-src in WebKit).
-    await page.route(`${BASE}${PROBE_PATH}`, async (route) => {
+    await page.route(`${SITE.url}${PROBE_PATH}`, async (route) => {
       const response = await route.fetch();
-      const { "content-security-policy": _csp, ...headers } =
-        response.headers();
-      await route.fulfill({ response, headers });
+      const { "content-length": _length, ...headers } = response.headers();
+      await route.fulfill({
+        response,
+        headers,
+        body: stripPolicyMeta(await response.text()),
+      });
     });
 
     // Targets are probed one at a time, so console and failed-request messages belong to the target in flight.
@@ -68,7 +72,7 @@ test.describe("F-008 S4 probe against the deployed site", () => {
         ),
     );
 
-    const versionResponse = await request.get(`${BASE}/version.json`, {
+    const versionResponse = await request.get(`${SITE.url}version.json`, {
       headers: { "Cache-Control": "no-store" },
     });
     const version = (await versionResponse.json().catch(() => null)) as {
@@ -88,7 +92,7 @@ test.describe("F-008 S4 probe against the deployed site", () => {
       const [result] = await runInPage(page, [target]);
       expect(result?.id).toBe(target.id);
       const browserResult = result as BrowserResult;
-      const server = await probeServer(request, target.url, BASE);
+      const server = await probeServer(request, target.url, SITE.origin);
       const { verdict, reason } = classify(browserResult, server);
       records.push({
         target,
@@ -103,7 +107,7 @@ test.describe("F-008 S4 probe against the deployed site", () => {
 
     const run: ProbeRun = {
       probedAt: new Date().toISOString(),
-      pageUrl: `${BASE}/spike/s4/`,
+      pageUrl: `${SITE.url}${PROBE_PATH}`,
       deployed: version?.commit
         ? { commit: version.commit, context: version.context ?? "unknown" }
         : null,

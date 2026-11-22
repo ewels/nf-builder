@@ -1,3 +1,4 @@
+import { spawn } from "node:child_process";
 import { randomBytes } from "node:crypto";
 import {
   cpSync,
@@ -6,6 +7,8 @@ import {
   rmSync,
   writeFileSync,
 } from "node:fs";
+import { createServer } from "node:http";
+import type { AddressInfo } from "node:net";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { gzipSync } from "node:zlib";
@@ -14,6 +17,8 @@ import { readBudget } from "../scripts/check-bundle-budget.ts";
 import {
   checkDeployedSnapshot,
   checkRegistrySnapshot,
+  DEPLOYED_SAMPLE,
+  evenlySpaced,
 } from "../scripts/check-registry-snapshot.ts";
 
 const golden = join(
@@ -184,5 +189,182 @@ describe("F-501 registry snapshot check", () => {
     );
     expect(timedOut.ok).toBe(false);
     expect(messages(timedOut)).toMatch(/did not serve/);
+  });
+
+  /** A synthetic site: 50 modules (each requiring the next), 8 plugins, served from memory. */
+  function synthetic(overrides: Record<string, string> = {}) {
+    const generatedAt = "2026-11-22T00:00:00.000Z";
+    const modules = Array.from({ length: 50 }, (_, i) => ({
+      name: `nf-core/m${i}`,
+      version: "1.0.0",
+    }));
+    const plugins = Array.from({ length: 8 }, (_, i) => ({
+      id: `nf-p${i}`,
+      version: "1.0.0",
+    }));
+    const files: Record<string, string> = {
+      "registry/index.json": JSON.stringify({
+        format: 1,
+        generatedAt,
+        modules,
+        plugins,
+      }),
+      "registry/ports.json": JSON.stringify({
+        format: 1,
+        generatedAt,
+        modules: Object.fromEntries(modules.map((m) => [m.name, {}])),
+      }),
+    };
+    for (const [i, m] of modules.entries())
+      files[`registry/modules/${m.name}/${m.version}.json`] = JSON.stringify({
+        format: 1,
+        name: m.name,
+        version: m.version,
+        requires: i + 1 < modules.length ? [modules[i + 1]] : [],
+      });
+    for (const p of plugins)
+      files[`registry/plugins/${p.id}/${p.version}.json`] = JSON.stringify({
+        format: 1,
+        id: p.id,
+        version: p.version,
+      });
+    Object.assign(files, overrides);
+    const requests: string[] = [];
+    const fetcher = (async (input: string | URL | Request) => {
+      const url = new URL(String(input));
+      requests.push(`${url.pathname}${url.search}`);
+      const body = files[url.pathname.slice(1)];
+      return body === undefined
+        ? new Response("nope", { status: 404 })
+        : new Response(body, {
+            status: 200,
+            headers: { "content-type": "application/json" },
+          });
+    }) as typeof fetch;
+    return { generatedAt, fetcher, requests, modules, plugins, files };
+  }
+  const run = (
+    site: ReturnType<typeof synthetic>,
+    sample?: typeof DEPLOYED_SAMPLE,
+  ) =>
+    checkDeployedSnapshot("https://site.example", site.generatedAt, {
+      sample,
+      timeoutMs: 1000,
+      intervalMs: 1,
+      fetch: site.fetcher,
+      sleep: async () => {},
+      log: () => {},
+    });
+
+  it("F-501 F-011 step 5 ADR-0041: with a sample, checkDeployedSnapshot fetches only the index, ports.json, 20 evenly spaced bundles and 5 plugin files, each with a cache-busting query", async () => {
+    const site = synthetic();
+    const result = await run(site, DEPLOYED_SAMPLE);
+    expect(result.problems).toEqual([]);
+    for (const r of site.requests) expect(r).toMatch(/\?ts=\d+$/);
+    const paths = [...new Set(site.requests.map((r) => r.split("?")[0]))];
+    expect(paths).toHaveLength(2 + 20 + 5);
+    expect(paths.slice(0, 2)).toEqual([
+      "/registry/index.json",
+      "/registry/ports.json",
+    ]);
+    const bundles = paths.filter((p) => p?.includes("/modules/"));
+    expect(bundles).toContain("/registry/modules/nf-core/m0/1.0.0.json");
+    expect(bundles).toContain("/registry/modules/nf-core/m49/1.0.0.json");
+    expect(paths.filter((p) => p?.includes("/plugins/"))).toHaveLength(5);
+    // Without a sample every file is fetched, following requires.
+    const full = synthetic();
+    expect((await run(full)).problems).toEqual([]);
+    expect(new Set(full.requests.map((r) => r.split("?")[0])).size).toBe(
+      2 + 50 + 8,
+    );
+  });
+
+  it("F-501 ADR-0041: a sampled bundle that is missing, not JSON, or holds another version fails naming its path", async () => {
+    const path = "registry/modules/nf-core/m0/1.0.0.json";
+    const cases: [string, Record<string, string>][] = [
+      ["missing", {}],
+      ["not JSON", { [path]: "<!doctype html>" }],
+      [
+        "another version",
+        {
+          [path]: JSON.stringify({
+            format: 1,
+            name: "nf-core/m0",
+            version: "2.0.0",
+          }),
+        },
+      ],
+    ];
+    for (const [name, overrides] of cases) {
+      const site = synthetic(overrides);
+      if (name === "missing") {
+        const fetcher = site.fetcher;
+        site.fetcher = (async (input: string | URL | Request) =>
+          new URL(String(input)).pathname === `/${path}`
+            ? new Response("nope", { status: 404 })
+            : fetcher(input)) as typeof fetch;
+      }
+      const result = await run(site, DEPLOYED_SAMPLE);
+      expect(result.ok, name).toBe(false);
+      expect(messages(result), name).toContain(path);
+    }
+  });
+
+  it("F-501: evenlySpaced keeps the first and last items and returns all items when n exceeds the length", () => {
+    const items = Array.from({ length: 10 }, (_, i) => i);
+    const picked = evenlySpaced(items, 4);
+    expect(picked).toHaveLength(4);
+    expect(picked[0]).toBe(0);
+    expect(picked[3]).toBe(9);
+    expect(picked).toEqual([...picked].sort((a, b) => a - b));
+    expect(new Set(picked).size).toBe(4);
+    expect(evenlySpaced(items, 10)).toEqual(items);
+    expect(evenlySpaced(items, 99)).toEqual(items);
+    expect(evenlySpaced(items, 1)).toEqual([0]);
+    expect(evenlySpaced([], 3)).toEqual([]);
+  });
+
+  it("F-501 ADR-0041: check:registry --url samples by default and --all checks every file", async () => {
+    const site = synthetic();
+    const seen = new Set<string>();
+    const server = createServer((req, res) => {
+      const url = new URL(req.url ?? "/", "http://x");
+      seen.add(url.pathname);
+      const body = site.files[url.pathname.slice(1)];
+      res
+        .writeHead(body === undefined ? 404 : 200, {
+          "content-type": "application/json",
+        })
+        .end(body ?? "nope");
+    });
+    await new Promise<void>((r) => server.listen(0, "127.0.0.1", r));
+    try {
+      const url = `http://127.0.0.1:${(server.address() as AddressInfo).port}/`;
+      const cli = (...extra: string[]) =>
+        new Promise<number | null>((resolve) => {
+          seen.clear();
+          spawn(
+            process.execPath,
+            [
+              join(
+                import.meta.dirname,
+                "../scripts/check-registry-snapshot.ts",
+              ),
+              "--url",
+              url,
+              "--generated-at",
+              site.generatedAt,
+              ...extra,
+            ],
+            { stdio: "ignore" },
+          ).on("exit", resolve);
+        });
+      expect(await cli()).toBe(0);
+      expect(seen.size).toBe(2 + 20 + 5);
+      expect(await cli("--all")).toBe(0);
+      expect(seen.size).toBe(2 + 50 + 8);
+    } finally {
+      server.close();
+    }
   });
 });
