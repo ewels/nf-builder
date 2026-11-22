@@ -13,7 +13,7 @@ CI measures these. A breach fails the build unless the PR raises the budget with
 | QA-03 | While the worker parses and models a project, the canvas and UI stay responsive and show loading progress. Parsing and modelling nf-core/sarek (pinned) in the worker finishes within 30 s on the CI reference profile (ADR 0029). |
 | QA-04 | Apply an edit command on a file under 2,000 lines, re-parse and re-project: ≤ 100 ms at p95. Measured and reported in CI, not a merge gate (ADR 0030). |
 | QA-05 | Canvas with 300 nodes: pan and zoom without frames over 32 ms in a Playwright trace. Measured and reported in CI, not a merge gate (ADR 0030). |
-| QA-06 | Registry snapshot index: ≤ 300 KB gzipped |
+| QA-06 | Registry snapshot index: ≤ 300 KB gzipped. The module index is `registry/index.json`; ports are in `ports.json` (ADR 0035). |
 
 ## Accessibility
 

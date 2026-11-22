@@ -16,7 +16,7 @@ Browser-only visual builder for Nextflow pipelines (TypeScript, React). What it 
    - set `passes: true` only if every step in the feature passed;
    - append to `progress.md`;
    - open a PR using the template;
-   - when CI is green and the reviewer has nothing blocking, squash-merge it, delete the branch, update local `main`, and start again at step 1. "CI green" means every job of the `CI`, `Deploy check` and `Scope guard` workflows passed on the PR head (ADRs 0015, 0016).
+   - when CI is green and the reviewer has nothing blocking, squash-merge it, delete the branch, update local `main`, and start again at step 1. "CI green" means every job of the `CI`, `Deploy check` and `Scope guard` workflows passed on the PR head (ADRs 0015, 0016). The `Registry snapshot` workflow depends on a third party and is not a merge gate (ADR 0035).
 
 ## Commands
 
@@ -43,6 +43,8 @@ This table lists every root `package.json` script that `pnpm check` doesn't alre
 | `pnpm gen:palette 26.10` | After editing `packages/lang-2610/palette.yaml`: regenerate `palette.json`; `--check` compares (a unit test runs it in `pnpm check`) |
 | `pnpm corpus:lint` | After `pnpm corpus:fetch`: `nextflow lint -o json` on each pinned pipeline and the malformed fixtures into `.cache/corpus-lint/` (needs Java; cached per pin and Nextflow version). The launcher is `--nextflow <path>`, else `NXF_LAUNCHER`, else the pinned dist at `.cache/nextflow/<version>/nextflow-<version>-dist` (version from `packages/lang-2610/upstream.json`). The comment dump `pnpm test:corpus` needs (`<id>.comments.json`) is written only with the pinned dist |
 | `pnpm test:corpus` | After `corpus:lint`, and when touching the parser, model, projection or printer: parse every corpus file, compare with lint, compare comment attachment with nf-lang, write `.cache/reports/parse-corpus.{json,md}`, `ast-corpus.{json,md}` and `round-trip.md` (lossless round trip, F-104), `model-corpus.md` (include resolution, F-105), and check the config AST snapshots and ranges; `pnpm test:corpus config-ast -u` rewrites the snapshots after an intended AST change or a pin bump (about 4 minutes) |
+| `pnpm registry:snapshot` | Build the registry snapshot (F-501, IO-31) into `.cache/registry/out` with the 26.10 pack: `--out`, `--previous`, `--report`, `--only <names>` and `--plugins <ids>` for a few items, `--record <dir>` or `--replay <dir>` for fixtures. Live runs from the sandbox need `NODE_USE_ENV_PROXY=1`; a full run takes about 45 min |
+| `pnpm check:registry <dir>` | After `pnpm registry:snapshot`: QA-06 index size and snapshot integrity; `--url <site> --generated-at <iso>` polls a deployed site instead |
 
 Run `pnpm test:corpus` when touching the parser, model, projection or printer. The catalogue (`catalogue` job), the corpus parse (`corpus-parse` job) and the Nextflow oracle (`oracle` job) always run in CI. Running Nextflow locally as well is allowed for a faster loop (ADR 0018): use `pnpm nextflow` and `pnpm oracle`, which run the version pinned in `packages/lang-2610/upstream.json` (Java 17 to 26; ADR 0019); CI stays the authority.
 
@@ -80,7 +82,7 @@ Never edit these. Regenerate them.
 - `packages/lang-*/catalogue/*.json`: `pnpm gen:catalogue <version>` (CI job `catalogue` checks it)
 - `packages/lang-*/palette.json`: `pnpm gen:palette <version>` from the hand-edited `palette.yaml`
 - `packages/lang-*/test/printer/formatted*/**`: `pnpm oracle --write-format`
-- `apps/web/public/registry/**`: CI job `registry-snapshot`
+- the registry snapshot (branch `registry-snapshot`, served at `/registry/`): workflow `Registry snapshot`; never commit it
 - `.claude/skills/*/**` (vendored Nextflow skills): `.claude/skills/sync.sh`
 
 ## Decisions

@@ -228,4 +228,104 @@ describe("CI workflows", () => {
     expect(upload).toContain("playwright-report/");
     expect(upload).toContain("test-results/");
   });
+
+  describe("Registry snapshot workflow", () => {
+    const workflow = (): string =>
+      read(join(WORKFLOWS, "registry-snapshot.yml"));
+    /** The text of one job, up to the next job. */
+    const job = (name: string): string =>
+      workflow()
+        .split(new RegExp(`^ {2}${name}:\\s*$`, "m"))[1]
+        ?.split(/^ {2}[\w-]+:\s*$/m)[0] ?? "";
+
+    it("F-501 step 1 IO-31: Registry snapshot runs on a daily schedule, on dispatch, and as a dry run on pull requests touching the tool", () => {
+      const text = workflow();
+      expect(text).toMatch(/^name: Registry snapshot$/m);
+      expect(text).toMatch(/schedule:\n\s+- cron: "23 3 \* \* \*"/);
+      expect(text).toMatch(/^ {2}workflow_dispatch:/m);
+      expect(text).toMatch(
+        /pull_request:\n\s+paths:\n\s+- tools\/registry-snapshot\/\*\*\n\s+- scripts\/check-registry-snapshot\.ts\n\s+- \.github\/workflows\/registry-snapshot\.yml/,
+      );
+      expect(text).toMatch(/^permissions:\n {2}contents: read$/m);
+      expect(text).toMatch(
+        /cancel-in-progress: \$\{\{ github\.event_name == 'pull_request' \}\}/,
+      );
+      expect(job("build")).toContain("timeout-minutes: 120");
+      expect(job("build")).not.toMatch(/contents: write/);
+    });
+
+    it("F-501 step 1 ADR-0035: only the publish job may write, only off pull requests on main, and it pushes only to registry-snapshot", () => {
+      const text = workflow();
+      expect([...text.matchAll(/contents: write/g)]).toHaveLength(1);
+      const publish = job("publish");
+      expect(publish).toContain("contents: write");
+      expect(publish).toContain("needs: build");
+      expect(publish).toContain(
+        "if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'",
+      );
+      const pushes = [...text.matchAll(/^\s*(?:git .*)?push .*$/gm)].map(
+        (m) => m[0],
+      );
+      expect(pushes).toHaveLength(1);
+      expect(pushes[0]).toContain("--force");
+      expect(pushes[0]).toContain("HEAD:refs/heads/registry-snapshot");
+      expect(pushes[0]).not.toMatch(/main/);
+      expect(publish).toContain('ignore = "exit 0"');
+      // The job that can write checks out nothing and installs nothing.
+      expect(publish).not.toMatch(
+        /actions\/checkout|\.\/\.github\/actions\/setup|pnpm install/,
+      );
+      // The hook and the deployed-site check run in a separate read-only job.
+      const verify = job("verify");
+      expect(verify).toContain("needs: [build, publish]");
+      expect(verify).toContain(
+        "if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'",
+      );
+      expect(verify).toContain('install: "false"');
+      expect(verify).toMatch(
+        /NETLIFY_BUILD_HOOK: \$\{\{ secrets\.NETLIFY_BUILD_HOOK \}\}/,
+      );
+      expect(verify).toContain(
+        "pnpm check:registry --url https://nf-builder.netlify.app --generated-at",
+      );
+      expect(publish).not.toContain("NETLIFY_BUILD_HOOK");
+    });
+
+    it("F-501 step 1: the repository is private, so every git read or write of it carries the job token as an http.extraheader and never prompts", () => {
+      const text = workflow();
+      const gitCalls = [
+        ...text.matchAll(
+          /^\s*(?:status=.*)?git .*\b(ls-remote|clone|fetch|push|pull)\b.*$/gm,
+        ),
+      ].map((m) => m[0]);
+      expect(gitCalls.length).toBeGreaterThanOrEqual(3);
+      for (const call of gitCalls)
+        expect(call, call).toContain(
+          '-c "http.extraheader=Authorization: Basic $auth"',
+        );
+      // Each step that runs such a git call sets the token and GIT_TERMINAL_PROMPT=0.
+      for (const name of ["build", "publish"]) {
+        expect(job(name), name).toMatch(
+          /GITHUB_TOKEN: \$\{\{ github\.token \}\}/,
+        );
+        expect(job(name), name).toContain('GIT_TERMINAL_PROMPT: "0"');
+      }
+      expect(job("build")).not.toContain("contents: write");
+    });
+
+    it("F-501 step 2 QA-06: the build job runs pnpm check:registry before uploading", () => {
+      const build = job("build");
+      const run = build.indexOf("pnpm registry:snapshot");
+      const check = build.indexOf(
+        "run: pnpm check:registry .cache/registry/out",
+      );
+      const upload = build.indexOf("actions/upload-artifact@");
+      expect(run).toBeGreaterThanOrEqual(0);
+      expect(check).toBeGreaterThan(run);
+      expect(upload).toBeGreaterThan(check);
+      expect(build).toContain("GITHUB_STEP_SUMMARY");
+      expect(build).toContain("name: registry-snapshot");
+      expect(build).toContain("retention-days: 7");
+    });
+  });
 });

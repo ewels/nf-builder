@@ -38,3 +38,4 @@ Process: [0001](0001-record-decisions-as-adrs.md). Template: [template.md](templ
 | [0032](0032-printer-known-differences.md) | Print as `nextflow lint -format` does, except where its output is broken | Accepted (agent) |
 | [0033](0033-declaration-fallback-and-source-file.md) | Fall back per declaration, print untouched code from its source, and load the parser lazily | Accepted (agent) |
 | [0034](0034-include-resolution-and-incremental-model.md) | Resolve includes as nf-lang 26.10 does, and re-model a changed file and its direct dependants | Accepted (agent) |
+| [0035](0035-registry-snapshot.md) | Build the registry snapshot in a scheduled workflow and publish it through a snapshot branch | Accepted (agent) |

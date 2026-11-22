@@ -119,6 +119,45 @@ describe("ADR-0003 package boundaries", () => {
     );
   });
 
+  it("ADR-0003 F-501: tools/registry-snapshot may import lang-core and a pack entry, not pack internals or engine; other tools stay standalone", () => {
+    const dir = makeWorkDir();
+    mkdirSync(join(dir, "tools/corpus/src"), { recursive: true });
+    writeFileSync(
+      join(dir, "tools/corpus/src/index.ts"),
+      `export const c = 1;\n`,
+    );
+    const entry = runArch(dir);
+    expect(entry.output).toContain("no dependency violations found");
+    expect(entry.status).toBe(0);
+
+    const rule = "registry-snapshot-imports-only-lang-core-and-pack-entries";
+    const tool = "tools/registry-snapshot/src/bad.ts";
+    for (const [specifier, target] of [
+      [
+        "../../../packages/lang-2610/src/version",
+        "packages/lang-2610/src/version.ts",
+      ],
+      ["../../../packages/engine/src/index", "packages/engine/src/index.ts"],
+      ["../../corpus/src/index", "tools/corpus/src/index.ts"],
+    ] as const) {
+      writeFileSync(join(dir, tool), `export * from "${specifier}";\n`);
+      const { status, output } = runArch(dir);
+      expect(status, specifier).not.toBe(0);
+      expect(output).toContain(`error ${rule}: ${tool} → ${target}`);
+    }
+    rmSync(join(dir, tool));
+
+    writeFileSync(
+      join(dir, "tools/corpus/src/index.ts"),
+      `export * from "../../registry-snapshot/src/index";\n`,
+    );
+    const other = runArch(dir);
+    expect(other.status).not.toBe(0);
+    expect(other.output).toContain(
+      "error tools-standalone: tools/corpus/src/index.ts → tools/registry-snapshot/src/index.ts",
+    );
+  }, 30_000);
+
   const CORPUS = "tools/corpus/src/index.ts";
   const violations: [string, string, string, string][] = [
     [
