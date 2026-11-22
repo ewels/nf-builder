@@ -122,6 +122,8 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - `.github/workflows/ci.yml`: the Chromium e2e job runs on `ubuntu-24.04` (ADR 0021).
   - WCAG 2.5.7 single-pointer alternative deferred to F-701; the suggestions link to F-309 (notes).
   - AGENTS.md: the `*.netlify.app` note now says some sandboxes can't reach it (this one can).
+- Blockers: none.
+
 ## 2026-11-22 · F-005 · Claude (autonomous)
 - Did: `tools/oracle`: `pnpm nextflow` runs the pinned Nextflow release offline; `pnpm oracle` runs `nextflow lint` and `run -stub` on the cases in `tools/oracle/cases/cases.yaml` and lints the corpus fixtures against `fixtures.yaml`; CI job `oracle`. Spike S1 with eight cases; [report](../research/2026-11-22-spike-s1-typed-legacy-interop.md). PR #13.
 - State: passing.
