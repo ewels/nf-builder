@@ -38,6 +38,14 @@
         "pnpm"
       ],
       "groupName": "Node and pnpm"
+    },
+    {
+      "description": "antlr-ng and antlr4ng move together (antlr-ng pins the runtime exactly); then run pnpm gen:grammar 26.10; test/gen-grammar.test.ts fails until the generated parser is regenerated",
+      "matchPackageNames": [
+        "antlr-ng",
+        "antlr4ng"
+      ],
+      "groupName": "antlr-ng and antlr4ng"
     }
   ]
 }

@@ -1,0 +1,21 @@
+{
+  "date": "2026-11-22T03:30:22.542647463Z",
+  "summary": {
+    "errors": 0,
+    "filesWithErrors": 0,
+    "filesWithoutErrors": 7,
+    "filesFormatted": 0,
+    "warnings": 1,
+    "filesWithWarnings": 1,
+    "filesWithoutWarnings": 6
+  },
+  "errors": [],
+  "warnings": [
+    {
+      "filename": "main.nf",
+      "startLine": 51,
+      "startColumn": 20,
+      "message": "Parameter was not used -- prefix with `_` to suppress warning"
+    }
+  ]
+}

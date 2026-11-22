@@ -23,6 +23,7 @@ Process: [0001](0001-record-decisions-as-adrs.md). Template: [template.md](templ
 | [0017](0017-corpus-fetch.md) | Fetch the corpus by commit SHA with git and cache it in Actions | Accepted (agent) |
 | [0018](0018-parallel-features-and-local-nextflow.md) | Allow parallel features and local Nextflow runs | Accepted |
 | [0019](0019-nextflow-oracle.md) | Run the Nextflow oracle from the pinned release, locally and in CI | Accepted (agent) |
+| [0020](0020-parser-and-catalogue-generation.md) | Generate the parser with antlr-ng and the catalogue from the language server jar | Accepted (agent) |
 | [0021](0021-app-shell-layout.md) | Hand-roll the resizable shell and keep its layout in localStorage | Accepted (agent) |
 | [0023](0023-s4-probe.md) | Probe cross-origin access from the deployed site with a Playwright-driven page | Accepted (agent) |
 | [0024](0024-spike-s5-self-hosted-pyodide.md) | Run spike S5 as a local test page with pinned, self-hosted Pyodide | Accepted (agent) |
