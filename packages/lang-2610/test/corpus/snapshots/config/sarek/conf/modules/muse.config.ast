@@ -1,0 +1,21 @@
+ConfigFile 1:1-55:1
+  #block 1:1-12:3
+  #line 14:1-14:8
+  ConfigBlock process 16:1-54:2
+    ConfigSelector withName: 'MUSE_CALL' 18:5-27:6
+      ConfigAssign ext.args = Closure 19:9-19:50
+      ConfigAssign ext.when = Closure 20:9-20:71
+      ConfigAssign ext.prefix = Closure 21:9-21:38
+      #line 21:39-21:80
+      ConfigAssign publishDir = Map 22:9-26:14
+    ConfigSelector withName: 'MUSE_SUMP' 29:5-38:6
+      ConfigAssign ext.args = Closure 30:9-30:50
+      ConfigAssign ext.when = Closure 31:9-31:71
+      ConfigAssign ext.prefix = Closure 32:9-32:43
+      ConfigAssign publishDir = Map 33:9-37:14
+    ConfigSelector withName: 'CRAM_TO_BAM_TUMOR' 40:5-42:6
+      ConfigAssign ext.prefix = Closure 41:9-41:42
+    ConfigSelector withName: 'CRAM_TO_BAM_NORMAL' 44:5-46:6
+      ConfigAssign ext.prefix = Closure 45:9-45:43
+    ConfigSelector withName: 'TABIX_MUSE' 48:5-52:6
+      ConfigAssign publishDir = Map 49:9-51:10

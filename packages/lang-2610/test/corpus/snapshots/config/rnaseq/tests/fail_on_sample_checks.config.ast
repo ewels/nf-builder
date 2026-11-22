@@ -1,0 +1,3 @@
+ConfigFile 1:1-3:1
+  ConfigAssign process.errorStrategy = String 1:1-1:33
+  ConfigAssign workflow.failOnIgnore = Boolean 2:1-2:29

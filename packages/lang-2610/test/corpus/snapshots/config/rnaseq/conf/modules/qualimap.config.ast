@@ -1,0 +1,9 @@
+ConfigFile 1:1-23:1
+  ConfigBlock process 1:1-22:2
+    ConfigSelector withName: 'SAMTOOLS_SORT_QUALIMAP' 2:5-8:6
+      ConfigAssign ext.args = String 3:9-3:24
+      ConfigAssign ext.prefix = Closure 4:9-4:49
+      ConfigAssign publishDir = Map 5:9-7:10
+    ConfigSelector withName: 'QUALIMAP_RNASEQ' 10:5-21:6
+      ConfigAssign ext.args = Closure 11:9-16:22
+      ConfigAssign publishDir = Map 17:9-20:10

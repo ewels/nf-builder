@@ -1,0 +1,32 @@
+ConfigFile 1:1-101:1
+  #block 1:1-12:3
+  #line 14:1-14:11
+  ConfigBlock process 16:1-100:2
+    ConfigSelector withName: 'GATK4_MUTECT2' 18:9-31:10
+      ConfigAssign ext.args = Closure 19:13-23:36
+      ConfigAssign ext.prefix = Closure 24:13-24:121
+      ConfigAssign publishDir = Map 25:13-30:14
+    ConfigSelector withName: 'MERGE_MUTECT2.*' 33:9-40:10
+      ConfigAssign ext.prefix = Closure 34:13-34:50
+      ConfigAssign publishDir = Map 35:13-39:14
+    ConfigSelector withName: 'MERGEMUTECTSTATS' 42:9-49:10
+      ConfigAssign ext.prefix = Closure 43:13-43:50
+      ConfigAssign publishDir = Map 44:13-48:14
+    #line 51:9-51:119
+    ConfigSelector withName: '.*VCF_VARIANT_FILTERING_MUTECT2:GETPILEUPSUMMARIES_(NORMAL|TUMOR)' 52:9-60:10
+      ConfigAssign ext.prefix = Closure 53:13-53:149
+      ConfigAssign publishDir = Map 54:13-59:14
+    ConfigSelector withName: '.*VCF_VARIANT_FILTERING_MUTECT2:GATHERPILEUPSUMMARIES_(NORMAL|TUMOR)' 62:9-69:10
+      ConfigAssign ext.prefix = Closure 63:13-63:64
+      ConfigAssign publishDir = Map 64:13-68:14
+    ConfigSelector withName: '.*VCF_VARIANT_FILTERING_MUTECT2:CALCULATECONTAMINATION' 71:9-80:10
+      ConfigAssign ext.args = Closure 72:13-72:103
+      ConfigAssign ext.prefix = Closure 73:13-73:64
+      ConfigAssign publishDir = Map 74:13-79:14
+        #line 76:17-76:63
+    ConfigSelector withName: '.*VCF_VARIANT_FILTERING_MUTECT2:LEARNREADORIENTATIONMODEL' 82:9-89:10
+      ConfigAssign ext.prefix = Closure 83:13-83:78
+      ConfigAssign publishDir = Map 84:13-88:14
+    ConfigSelector withName: '.*VCF_VARIANT_FILTERING_MUTECT2:FILTERMUTECTCALLS' 91:9-98:10
+      ConfigAssign ext.prefix = Closure 92:13-92:73
+      ConfigAssign publishDir = Map 93:13-97:14

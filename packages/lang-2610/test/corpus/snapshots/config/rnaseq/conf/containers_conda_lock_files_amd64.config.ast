@@ -1,0 +1,100 @@
+ConfigFile 1:1-34:1
+  ConfigBlock process 1:1-1:142
+    ConfigSelector withName: 'BEDTOOLS_GENOMECOV' 1:11-1:140
+      ConfigAssign conda = String 1:44-1:138
+  ConfigBlock process 2:1-2:132
+    ConfigSelector withName: 'BOWTIE2_ALIGN' 2:11-2:130
+      ConfigAssign conda = String 2:39-2:128
+  ConfigBlock process 3:1-3:132
+    ConfigSelector withName: 'BOWTIE2_BUILD' 3:11-3:130
+      ConfigAssign conda = String 3:39-3:128
+  ConfigBlock process 4:1-4:156
+    ConfigSelector withName: 'CUSTOM_CATADDITIONALFASTA' 4:11-4:154
+      ConfigAssign conda = String 4:51-4:152
+  ConfigBlock process 5:1-5:138
+    ConfigSelector withName: 'CUSTOM_GTFFILTER' 5:11-5:136
+      ConfigAssign conda = String 5:42-5:134
+  ConfigBlock process 6:1-6:160
+    ConfigSelector withName: 'CUSTOM_MULTIQCCUSTOMBIOTYPE' 6:11-6:158
+      ConfigAssign conda = String 6:53-6:156
+  ConfigBlock process 7:1-7:150
+    ConfigSelector withName: 'CUSTOM_RSEMMERGECOUNTS' 7:11-7:148
+      ConfigAssign conda = String 7:48-7:146
+  ConfigBlock process 8:1-8:134
+    ConfigSelector withName: 'CUSTOM_TX2GENE' 8:11-8:132
+      ConfigAssign conda = String 8:40-8:130
+  ConfigBlock process 9:1-9:136
+    ConfigSelector withName: 'EAUTILS_GTF2BED' 9:11-9:134
+      ConfigAssign conda = String 9:41-9:132
+  ConfigBlock process 10:1-10:116
+    ConfigSelector withName: 'FASTP' 10:11-10:114
+      ConfigAssign conda = String 10:31-10:112
+  ConfigBlock process 11:1-11:118
+    ConfigSelector withName: 'FASTQC' 11:11-11:116
+      ConfigAssign conda = String 11:32-11:114
+  ConfigBlock process 12:1-12:130
+    ConfigSelector withName: 'HISAT2_ALIGN' 12:11-12:128
+      ConfigAssign conda = String 12:38-12:126
+  ConfigBlock process 13:1-13:130
+    ConfigSelector withName: 'HISAT2_BUILD' 13:11-13:128
+      ConfigAssign conda = String 13:38-13:126
+  ConfigBlock process 14:1-14:156
+    ConfigSelector withName: 'HISAT2_EXTRACTSPLICESITES' 14:11-14:154
+      ConfigAssign conda = String 14:51-14:152
+  ConfigBlock process 15:1-15:120
+    ConfigSelector withName: 'MULTIQC' 15:11-15:118
+      ConfigAssign conda = String 15:33-15:116
+  ConfigBlock process 16:1-16:148
+    ConfigSelector withName: 'PICARD_MARKDUPLICATES' 16:11-16:146
+      ConfigAssign conda = String 16:47-16:144
+  ConfigBlock process 17:1-17:136
+    ConfigSelector withName: 'QUALIMAP_RNASEQ' 17:11-17:134
+      ConfigAssign conda = String 17:41-17:132
+  ConfigBlock process 18:1-18:130
+    ConfigSelector withName: 'SALMON_INDEX' 18:11-18:128
+      ConfigAssign conda = String 18:38-18:126
+  ConfigBlock process 19:1-19:130
+    ConfigSelector withName: 'SALMON_QUANT' 19:11-19:128
+      ConfigAssign conda = String 19:38-19:126
+  ConfigBlock process 20:1-20:134
+    ConfigSelector withName: 'SAMTOOLS_FAIDX' 20:11-20:132
+      ConfigAssign conda = String 20:40-20:130
+  ConfigBlock process 21:1-21:134
+    ConfigSelector withName: 'SAMTOOLS_FASTQ' 21:11-21:132
+      ConfigAssign conda = String 21:40-21:130
+  ConfigBlock process 22:1-22:140
+    ConfigSelector withName: 'SAMTOOLS_FLAGSTAT' 22:11-22:138
+      ConfigAssign conda = String 22:43-22:136
+  ConfigBlock process 23:1-23:140
+    ConfigSelector withName: 'SAMTOOLS_IDXSTATS' 23:11-23:138
+      ConfigAssign conda = String 23:43-23:136
+  ConfigBlock process 24:1-24:134
+    ConfigSelector withName: 'SAMTOOLS_INDEX' 24:11-24:132
+      ConfigAssign conda = String 24:40-24:130
+  ConfigBlock process 25:1-25:132
+    ConfigSelector withName: 'SAMTOOLS_SORT' 25:11-25:130
+      ConfigAssign conda = String 25:39-25:128
+  ConfigBlock process 26:1-26:134
+    ConfigSelector withName: 'SAMTOOLS_STATS' 26:11-26:132
+      ConfigAssign conda = String 26:40-26:130
+  ConfigBlock process 27:1-27:132
+    ConfigSelector withName: 'SAMTOOLS_VIEW' 27:11-27:130
+      ConfigAssign conda = String 27:39-27:128
+  ConfigBlock process 28:1-28:142
+    ConfigSelector withName: 'SENTIEON_STARALIGN' 28:11-28:140
+      ConfigAssign conda = String 28:44-28:138
+  ConfigBlock process 29:1-29:134
+    ConfigSelector withName: 'SEQKIT_REPLACE' 29:11-29:132
+      ConfigAssign conda = String 29:40-29:130
+  ConfigBlock process 30:1-30:130
+    ConfigSelector withName: 'SEQKIT_STATS' 30:11-30:128
+      ConfigAssign conda = String 30:38-30:126
+  ConfigBlock process 31:1-31:144
+    ConfigSelector withName: 'STAR_GENOMEGENERATE' 31:11-31:142
+      ConfigAssign conda = String 31:45-31:140
+  ConfigBlock process 32:1-32:130
+    ConfigSelector withName: 'UCSC_BEDCLIP' 32:11-32:128
+      ConfigAssign conda = String 32:38-32:126
+  ConfigBlock process 33:1-33:148
+    ConfigSelector withName: 'UCSC_BEDGRAPHTOBIGWIG' 33:11-33:146
+      ConfigAssign conda = String 33:47-33:144

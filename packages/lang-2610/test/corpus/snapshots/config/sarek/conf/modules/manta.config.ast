@@ -1,0 +1,8 @@
+ConfigFile 1:1-27:1
+  #block 1:1-12:3
+  #line 14:1-14:9
+  ConfigBlock process 16:1-26:2
+    ConfigSelector withName: 'MANTA_GERMLINE|MANTA_TUMORONLY|MANTA_SOMATIC' 17:9-25:10
+      ConfigAssign ext.args = Closure 18:13-18:57
+      ConfigAssign ext.prefix = Closure 19:13-19:48
+      ConfigAssign publishDir = Map 20:13-24:14

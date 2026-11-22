@@ -1,0 +1,16 @@
+ConfigFile 1:1-41:1
+  #block 1:1-12:3
+  #line 14:1-14:30
+  ConfigBlock process 16:1-40:2
+    ConfigSelector withName: 'PARABRICKS_HAPLOTYPECALLER' 18:5-27:6
+      #line 19:9-19:92
+      #line 20:9-20:78
+      #line 21:9-21:70
+      ConfigAssign ext.prefix = Closure 22:9-22:69
+      ConfigAssign ext.args = Closure 23:9-23:63
+      ConfigAssign publishDir = Map 24:9-26:10
+    ConfigSelector withName: 'NFCORE_SAREK:SAREK:BAM_VARIANT_CALLING_GERMLINE_ALL:BAM_VARIANT_CALLING_PARABRICKS_HAPLOTYPECALLER:TABIX_BGZIPTABIX_(VCF|GVCF)' 29:5-38:6
+      ConfigAssign ext.prefix = Closure 30:9-30:65
+      ConfigAssign publishDir = Map 31:9-37:10
+        #line 34:13-34:96
+        #line 35:13-35:79

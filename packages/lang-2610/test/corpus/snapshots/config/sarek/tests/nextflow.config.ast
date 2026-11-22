@@ -1,0 +1,29 @@
+ConfigFile 1:1-59:1
+  #block 1:1-5:3
+  ConfigBlock params 7:1-10:2
+    ConfigAssign modules_testdata_base_path = String 8:5-8:105
+    ConfigAssign pipelines_testdata_base_path = String 9:5-9:100
+  #line 12:1-12:49
+  ConfigAssign aws.client.anonymous = Boolean 13:1-13:28
+  ConfigBlock process 15:1-51:2
+    ConfigSelector withName: SENTIEON_VARCAL_SNP 16:5-19:6
+      #line 17:9-17:87
+      ConfigAssign ext.args = Closure 18:9-18:89
+    ConfigSelector withName: 'PARABRICKS_MUTECTCALLER' 21:5-24:6
+      ConfigAssign accelerator = Map 22:9-22:35
+      ConfigAssign maxForks = Number 23:9-23:24
+    ConfigSelector withName: PARABRICKS_HAPLOTYPECALLER 26:5-35:6
+      ConfigAssign accelerator = Map 27:9-27:35
+      #line 28:9-28:99
+      ConfigAssign ext.args = Closure 29:9-34:10
+    ConfigSelector withName: DEEPSOMATIC 36:5-47:6
+      #line 37:9-37:72
+      #line 38:9-38:83
+      ConfigAssign ext.args = Closure 39:9-46:10
+    ConfigSelector withName: PARABRICKS_DEEPSOMATIC 48:5-50:6
+      ConfigAssign accelerator = Map 49:9-49:35
+  #line 53:1-53:71
+  ConfigAssign env.SENTIEON_LICENSE = Elvis 54:1-54:60
+  #line 56:1-56:71
+  ConfigAssign env.SENTIEON_AUTH_MECH = Elvis 57:1-57:61
+  ConfigAssign env.SENTIEON_AUTH_DATA = Elvis 58:1-58:62

@@ -1,0 +1,14 @@
+ConfigFile 1:1-47:1
+  #block 1:1-12:3
+  #line 14:1-14:15
+  ConfigBlock process 16:1-46:2
+    ConfigSelector withName: 'DEEPVARIANT_RUNDEEPVARIANT' 18:5-31:6
+      ConfigAssign ext.args = Closure 19:9-22:28
+      ConfigAssign ext.prefix = Closure 23:9-23:125
+      ConfigAssign ext.when = Closure 24:9-24:89
+      ConfigAssign publishDir = Map 25:9-30:10
+    ConfigSelector withName: 'MERGE_DEEPVARIANT_.*' 33:5-40:6
+      ConfigAssign ext.prefix = Closure 34:9-34:50
+      ConfigAssign publishDir = Map 35:9-39:10
+    ConfigSelector withName: 'MERGE_DEEPVARIANT_GVCF' 42:5-44:6
+      ConfigAssign ext.prefix = Closure 43:9-43:52

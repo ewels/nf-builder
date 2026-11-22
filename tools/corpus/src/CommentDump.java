@@ -1,11 +1,11 @@
 // Build-time tool (ADR 0017, ADR 0019). Run as: java -cp <nextflow-dist> tools/corpus/src/CommentDump.java <dir>
-// Needs a JDK 17 or later. For every `.nf` file under <dir> (sorted by relative path) it builds the AST with nf-lang's
-// ScriptAstBuilder, attaches comments with nf-lang's CommentAttacher (the code `nextflow lint -format` prints from) and
+// Needs a JDK 17 or later. For every `.nf` and `.config` file under <dir> (sorted by relative path) it builds the AST with nf-lang's
+// ScriptAstBuilder (a config with ConfigAstBuilder), attaches comments with nf-lang's CommentAttacher (the code `nextflow lint -format` prints from) and
 // prints one JSON document on stdout:
 //   { "files": [ { "file": "main.nf", "comments": [ { "line", "column", "text", "slot", "node": { "class", "line",
 //                  "column", "endLine", "endColumn" } } ] }, { "file": "bad.nf", "error": "..." } ] }
 // `slot` is leading, trailing or dangling; positions are nf-lang's (1-based, code points). A file the builder rejects has
-// an `error` and no `comments`. F-102 compares this with the slots of its own comment attachment over the corpus.
+// an `error` and no `comments`. F-102 and F-103 compare this with the slots of their own comment attachment over the corpus.
 
 import groovy.json.JsonOutput;
 import java.lang.reflect.Field;
@@ -19,6 +19,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import nextflow.config.parser.ConfigAstBuilder;
 import nextflow.script.formatter.Comment;
 import nextflow.script.formatter.CommentAttacher;
 import nextflow.script.parser.ScriptAstBuilder;
@@ -36,7 +37,8 @@ public class CommentDump {
         List<Path> files;
         try (var walk = Files.walk(root)) {
             files = walk
-                .filter(p -> Files.isRegularFile(p) && p.getFileName().toString().endsWith(".nf"))
+                .filter(p -> Files.isRegularFile(p) && (p.getFileName().toString().endsWith(".nf")
+                    || p.getFileName().toString().endsWith(".config")))
                 .sorted(Comparator.comparing(p -> root.relativize(p).toString()))
                 .collect(Collectors.toList());
         }
@@ -62,10 +64,13 @@ public class CommentDump {
         var text = Files.readString(file);
         var config = new CompilerConfiguration();
         var options = new HashMap<String, Boolean>(config.getOptimizationOptions());
-        options.put(ScriptAstBuilder.COMMENTS_OPTION, true);
+        var isConfig = file.getFileName().toString().endsWith(".config");
+        options.put(isConfig ? ConfigAstBuilder.COMMENTS_OPTION : ScriptAstBuilder.COMMENTS_OPTION, true);
         config.setOptimizationOptions(options);
         var source = new SourceUnit(file.toString(), text, config, null, new ErrorCollector(config));
-        var module = new ScriptAstBuilder(source).buildAST();
+        var module = isConfig
+            ? new ConfigAstBuilder(source).buildAST()
+            : new ScriptAstBuilder(source).buildAST();
         var attacher = CommentAttacher.of(module);
         var rows = new ArrayList<Map<String, Object>>();
         for (var slot : SLOTS) {

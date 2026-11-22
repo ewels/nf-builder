@@ -1,0 +1,9 @@
+ConfigFile 1:1-39:1
+  #block 1:1-12:3
+  #line 14:1-14:9
+  ConfigBlock process 16:1-38:2
+    ConfigSelector withName: 'ASCAT' 18:5-37:6
+      ConfigAssign ext.args = Closure 19:9-30:10
+        #line 26:85-26:126
+      ConfigAssign ext.when = Closure 31:9-31:83
+      ConfigAssign publishDir = Map 32:9-36:10

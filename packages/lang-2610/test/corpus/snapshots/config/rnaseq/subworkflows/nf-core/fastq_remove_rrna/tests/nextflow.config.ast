@@ -1,0 +1,30 @@
+ConfigFile 1:1-41:1
+  #line 1:1-1:3
+  #line 2:1-2:36
+  #line 3:1-3:3
+  ConfigBlock process 5:1-40:2
+    ConfigSelector withName: 'SORTMERNA' 7:5-9:6
+      ConfigAssign ext.args = String 8:9-8:32
+    ConfigSelector withName: 'SORTMERNA_INDEX' 10:5-12:6
+      ConfigAssign ext.args = String 11:9-11:32
+    ConfigSelector withName: 'RIBODETECTOR' 13:5-16:6
+      ConfigAssign ext.prefix = Closure 14:9-14:51
+      ConfigAssign ext.args = String 15:9-15:30
+    ConfigSelector withName: 'BOWTIE2_ALIGN' 17:5-20:6
+      ConfigAssign ext.prefix = Closure 18:9-18:51
+      ConfigAssign ext.args = String 19:9-19:63
+    ConfigSelector withName: 'BOWTIE2_ALIGN_PE' 21:5-24:6
+      ConfigAssign ext.prefix = Closure 22:9-22:51
+      ConfigAssign ext.args = String 23:9-23:63
+    ConfigSelector withName: 'SAMTOOLS_VIEW_BOWTIE2' 25:5-28:6
+      ConfigAssign ext.prefix = Closure 26:9-26:55
+      ConfigAssign ext.args = String 27:9-27:27
+      #line 27:29-27:77
+    ConfigSelector withName: 'SAMTOOLS_FASTQ_BOWTIE2' 29:5-31:6
+      ConfigAssign ext.prefix = Closure 30:9-30:55
+    ConfigSelector withName: 'SEQKIT_REPLACE' 32:5-35:6
+      ConfigAssign ext.args = String 33:9-33:66
+      ConfigAssign ext.prefix = Closure 34:9-34:47
+    ConfigSelector withName: 'SEQKIT_REPLACE_U2T' 36:5-39:6
+      ConfigAssign ext.args = String 37:9-37:65
+      ConfigAssign ext.prefix = Closure 38:9-38:48

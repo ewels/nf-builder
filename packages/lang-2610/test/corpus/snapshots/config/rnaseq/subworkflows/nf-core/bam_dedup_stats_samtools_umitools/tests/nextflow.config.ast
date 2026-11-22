@@ -1,0 +1,5 @@
+ConfigFile 1:1-7:1
+  ConfigBlock process 1:1-6:2
+    ConfigSelector withName: 'SAMTOOLS_VIEW_PRIMARY' 2:5-5:6
+      ConfigAssign ext.args = String 3:9-3:35
+      ConfigAssign ext.prefix = Closure 4:9-4:46

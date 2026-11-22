@@ -1,0 +1,9 @@
+ConfigFile 1:1-24:1
+  ConfigBlock process 1:1-23:2
+    #line 2:5-2:35
+    ConfigSelector withName: 'BBMAP_BBSPLIT' 3:5-22:6
+      ConfigAssign ext.args = String 4:9-4:63
+      ConfigAssign ext.prefix = Closure 5:9-5:122
+      #line 7:9-7:86
+      #line 8:9-8:84
+      ConfigAssign publishDir = Map 9:9-21:10

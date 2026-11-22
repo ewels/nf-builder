@@ -1,0 +1,10 @@
+ConfigFile 1:1-11:1
+  ConfigBlock env 1:1-10:2
+    #line 2:5-2:42
+    #line 3:5-3:75
+    ConfigAssign SENTIEON_LICENSE = MethodCall 4:5-4:62
+    #line 5:5-5:75
+    ConfigAssign SENTIEON_AUTH_MECH = MethodCall 6:5-6:61
+    ConfigAssign SENTIEON_AUTH_DATA = Property 7:5-7:52
+    #line 8:5-8:82
+    #line 9:5-9:102

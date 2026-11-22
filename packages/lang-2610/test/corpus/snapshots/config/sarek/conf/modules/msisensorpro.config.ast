@@ -1,0 +1,6 @@
+ConfigFile 1:1-25:1
+  #block 1:1-12:3
+  #line 14:1-14:16
+  ConfigBlock process 16:1-24:2
+    ConfigSelector withName: 'MSISENSORPRO_MSISOMATIC' 17:5-23:6
+      ConfigAssign publishDir = Map 18:9-22:10

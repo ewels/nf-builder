@@ -1,0 +1,68 @@
+ConfigFile 1:1-199:1
+  ConfigBlock process 1:1-198:2
+    ConfigSelector withName: 'GUNZIP_.*|.*MAKE_TRANSCRIPTS_FASTA' 2:5-8:6
+      ConfigAssign publishDir = Map 3:9-7:10
+    ConfigSelector withName: 'UNTAR_.*' 10:5-12:6
+      ConfigAssign ext.args2 = String 11:9-11:38
+    ConfigSelector withName: 'UNTAR_.*|STAR_GENOMEGENERATE|PARABRICKS_STARGENOMEGENERATE|HISAT2_BUILD' 14:5-20:6
+      ConfigAssign publishDir = Map 15:9-19:10
+    ConfigSelector withName: 'HISAT2_BUILD' 22:5-24:6
+      ConfigAssign memory = Closure 23:9-23:43
+    #line 26:5-26:66
+    ConfigSelector withName: 'STAR_GENOMEPARAMS_UPGRADE' 27:5-29:6
+      ConfigAssign publishDir = List 28:9-28:24
+    ConfigSelector withName: 'STAR_GENOMEGENERATE|PARABRICKS_STARGENOMEGENERATE' 31:5-40:6
+      ConfigAssign ext.args = Closure 32:9-39:10
+        #line 34:13-34:71
+    ConfigSelector withName: '.*PARABRICKS_STARGENOMEGENERATE' 42:5-49:6
+      ConfigAssign conda = String 43:9-43:110
+      ConfigAssign container = Closure 44:9-48:10
+    ConfigSelector withName: 'GFFREAD' 51:5-59:6
+      ConfigAssign ext.args = String 52:9-52:47
+      ConfigAssign ext.prefix = Closure 53:9-53:40
+      ConfigAssign publishDir = Map 54:9-58:10
+    ConfigSelector withName: 'GFFREAD_TRANSCRIPTS' 61:5-71:6
+      #line 62:9-62:68
+      #line 63:9-63:83
+      ConfigAssign ext.args = String 64:9-64:26
+      ConfigAssign ext.prefix = String 65:9-65:35
+      ConfigAssign publishDir = Map 66:9-70:10
+    ConfigSelector withName: 'GFFREAD_GENE_BED' 73:5-83:6
+      #line 74:9-74:77
+      #line 75:9-75:76
+      #line 76:9-76:73
+      ConfigAssign ext.args = String 77:9-77:29
+      ConfigAssign publishDir = Map 78:9-82:10
+    ConfigSelector withName: '.*:PREPARE_GENOME_INDICES:BOWTIE2_BUILD' 85:5-91:6
+      ConfigAssign publishDir = Map 86:9-90:10
+    ConfigSelector withName: 'HISAT2_EXTRACTSPLICESITES' 93:5-99:6
+      ConfigAssign publishDir = Map 94:9-98:10
+    ConfigSelector withName: 'SALMON_INDEX' 101:5-111:6
+      ConfigAssign ext.args = Closure 102:9-105:29
+      ConfigAssign publishDir = Map 106:9-110:10
+    ConfigSelector withName: '.*:PREPARE_GENOME_INDICES:SALMON_INDEX' 113:5-119:6
+      ConfigAssign ext.args = Closure 114:9-118:29
+    ConfigSelector withName: 'KALLISTO_INDEX' 121:5-128:6
+      ConfigAssign ext.args = Ternary 122:9-122:100
+      ConfigAssign publishDir = Map 123:9-127:10
+    ConfigSelector withName: '.*RSEM_PREPAREREFERENCE_GENOME' 130:5-136:6
+      ConfigAssign publishDir = Map 131:9-135:10
+    ConfigSelector withName: 'EAUTILS_GTF2BED' 138:5-144:6
+      ConfigAssign publishDir = Map 139:9-143:10
+    ConfigSelector withName: 'CUSTOM_CATADDITIONALFASTA' 146:5-153:6
+      ConfigAssign ext.prefix = Closure 147:9-147:84
+      ConfigAssign publishDir = Map 148:9-152:10
+    ConfigSelector withName: 'PREPROCESS_TRANSCRIPTS_FASTA_GENCODE' 155:5-161:6
+      ConfigAssign publishDir = Map 156:9-160:10
+    ConfigSelector withName: 'CUSTOM_GTFFILTER' 163:5-170:6
+      ConfigAssign ext.args = Closure 164:9-164:95
+      ConfigAssign publishDir = Map 165:9-169:10
+    ConfigSelector withName: 'SAMTOOLS_FAIDX' 172:5-178:6
+      ConfigAssign publishDir = Map 173:9-177:10
+    ConfigSelector withName: '.*:PREPARE_GENOME_INDICES:BBMAP_BBSPLIT' 180:5-188:6
+      ConfigAssign ext.args = String 181:9-181:31
+      ConfigAssign ext.prefix = String 182:9-182:44
+      ConfigAssign publishDir = Map 183:9-187:10
+    ConfigSelector withName: 'SORTMERNA_INDEX' 190:5-197:6
+      ConfigAssign ext.args = String 191:9-191:33
+      ConfigAssign publishDir = Map 192:9-196:10

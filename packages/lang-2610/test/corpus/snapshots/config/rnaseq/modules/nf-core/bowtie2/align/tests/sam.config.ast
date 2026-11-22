@@ -1,0 +1,7 @@
+ConfigFile 1:1-10:1
+  ConfigBlock process 1:1-9:2
+    ConfigSelector withName: BOWTIE2_BUILD 2:5-4:6
+      ConfigAssign ext.args = String 3:9-3:30
+    ConfigSelector withName: BOWTIE2_ALIGN 5:5-8:6
+      ConfigAssign ext.args = String 6:9-6:30
+      ConfigAssign ext.args2 = String 7:9-7:39

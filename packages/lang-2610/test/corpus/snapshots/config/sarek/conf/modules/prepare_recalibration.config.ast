@@ -1,0 +1,11 @@
+ConfigFile 1:1-38:1
+  #block 1:1-12:3
+  #line 14:1-14:25
+  ConfigBlock process 16:1-37:2
+    ConfigSelector withName: 'GATK4_BASERECALIBRATOR|GATK4SPARK_BASERECALIBRATOR' 18:5-26:6
+      ConfigAssign ext.prefix = Closure 19:9-19:121
+      ConfigAssign publishDir = Map 20:9-25:10
+    ConfigSelector withName: 'GATK4_GATHERBQSRREPORTS' 28:5-36:6
+      ConfigAssign ext.prefix = Closure 29:9-29:48
+      ConfigAssign ext.when = Closure 30:9-30:54
+      ConfigAssign publishDir = Map 31:9-35:10

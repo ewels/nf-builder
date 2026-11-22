@@ -1,0 +1,32 @@
+ConfigFile 1:1-52:1
+  #block 1:1-5:3
+  #line 7:1-7:56
+  #line 8:1-8:33
+  ConfigBlock params 9:1-14:2
+    ConfigAssign modules_testdata_base_path = String 10:5-10:79
+    ConfigAssign pipelines_testdata_base_path = String 11:5-11:95
+    ConfigAssign hisat2_build_memory = String 12:5-12:33
+    ConfigAssign outdir = String 13:5-13:23
+  #line 16:1-16:49
+  ConfigAssign aws.client.anonymous = Boolean 17:1-17:28
+  #line 19:1-19:47
+  ConfigBlock process 20:1-51:2
+    ConfigSelector withName: '.*' 21:5-25:6
+      ConfigAssign cpus = Number 22:9-22:19
+      ConfigAssign memory = Property 23:9-23:22
+      ConfigAssign time = Property 24:9-24:21
+    #line 27:5-27:63
+    ConfigSelector withName: 'FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS:FQ_LINT_AFTER_SORTMERNA' 28:5-30:6
+      ConfigAssign ext.args = Null 29:9-29:24
+    ConfigSelector withName: 'FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS:FQ_LINT_AFTER_RIBO_REMOVAL' 31:5-33:6
+      ConfigAssign ext.args = Null 32:9-32:24
+    #line 35:5-35:74
+    ConfigSelector withName: '.*:QUANTIFY_RSEM:RSEM_CALCULATEEXPRESSION|.*:QUANTIFY_RSEM:SENTIEON_RSEMCALCULATEEXPRESSION' 36:5-38:6
+      ConfigAssign ext.args = String 37:9-37:62
+    #line 40:5-40:89
+    ConfigSelector withName: '.*:PARABRICKS_RNA_FQ2BAM' 41:5-44:6
+      ConfigAssign memory = Property 42:9-42:25
+      ConfigAssign maxForks = Number 43:9-43:21
+    #line 46:5-46:87
+    ConfigSelector withName: '.*:RIBODETECTOR' 47:5-49:6
+      ConfigAssign maxForks = Number 48:9-48:21

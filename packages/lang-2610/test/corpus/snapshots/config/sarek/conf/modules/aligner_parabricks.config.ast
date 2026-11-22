@@ -1,0 +1,20 @@
+ConfigFile 1:1-83:1
+  #block 1:1-12:3
+  #line 14:1-14:27
+  ConfigBlock process 16:1-82:2
+    ConfigSelector withName: PARABRICKS_FQ2BAM 17:5-33:6
+      ConfigAssign ext.args = Closure 18:9-26:10
+      ConfigAssign publishDir = Map 27:9-32:10
+    ConfigSelector withName: PARABRICKS_APPLYBQSR 35:5-44:6
+      #line 36:9-36:97
+      ConfigAssign ext.prefix = Closure 37:9-37:43
+      ConfigAssign publishDir = Map 38:9-43:10
+    ConfigSelector withName: 'NFCORE_SAREK:SAREK:FASTQ_PREPROCESS_PARABRICKS:CRAM_MERGE_INDEX_SAMTOOLS:MERGE_CRAM' 46:5-54:6
+      ConfigAssign ext.args = String 47:9-47:53
+      ConfigAssign publishDir = Map 48:9-53:10
+    ConfigSelector withName: 'NFCORE_SAREK:SAREK:FASTQ_PREPROCESS_PARABRICKS:CRAM_MERGE_INDEX_SAMTOOLS:INDEX_CRAM' 56:5-63:6
+      ConfigAssign publishDir = Map 57:9-62:10
+    ConfigSelector withName: 'NFCORE_SAREK:SAREK:FASTQ_PREPROCESS_PARABRICKS:BAM_MERGE_INDEX_SAMTOOLS:MERGE_BAM' 65:5-72:6
+      ConfigAssign publishDir = Map 66:9-71:10
+    ConfigSelector withName: 'NFCORE_SAREK:SAREK:FASTQ_PREPROCESS_PARABRICKS:BAM_MERGE_INDEX_SAMTOOLS:INDEX_MERGE_BAM' 74:5-81:6
+      ConfigAssign publishDir = Map 75:9-80:10

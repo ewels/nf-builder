@@ -1,0 +1,11 @@
+ConfigFile 1:1-25:1
+  ConfigBlock process 1:1-24:2
+    ConfigSelector withName: '.*BAM_NGSCHECKMATE:BCFTOOLS_MPILEUP' 3:5-13:6
+      ConfigAssign ext.args2 = Closure 4:9-4:54
+      ConfigAssign ext.args3 = Closure 5:9-5:40
+      ConfigAssign ext.prefix = Closure 6:9-6:51
+      ConfigAssign ext.when = Closure 7:9-7:90
+      ConfigAssign publishDir = Map 8:9-12:10
+    ConfigSelector withName: '.*BAM_NGSCHECKMATE:NGSCHECKMATE_NCM' 15:5-22:6
+      ConfigAssign ext.args = Closure 16:9-16:28
+      ConfigAssign publishDir = Map 17:9-21:10

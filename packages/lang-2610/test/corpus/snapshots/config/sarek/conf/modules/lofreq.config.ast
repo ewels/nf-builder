@@ -1,0 +1,14 @@
+ConfigFile 1:1-44:1
+  #block 1:1-12:3
+  #line 14:1-14:9
+  ConfigBlock process 16:1-43:2
+    ConfigSelector withName: 'LOFREQ_CALLPARALLEL' 18:9-28:10
+      ConfigAssign ext.args = Closure 19:13-19:43
+      ConfigAssign ext.prefix = Closure 20:13-20:119
+      ConfigAssign ext.when = Closure 21:13-21:88
+      ConfigAssign publishDir = Map 22:13-27:14
+    ConfigSelector withName: 'VCFTOOLS_TSTV_COUNT' 30:9-32:10
+      ConfigAssign errorStrategy = String 31:13-31:37
+    ConfigSelector withName: 'MERGE_LOFREQ.*' 34:9-41:10
+      ConfigAssign ext.prefix = Closure 35:13-35:49
+      ConfigAssign publishDir = Map 36:13-40:14

@@ -1,0 +1,17 @@
+ConfigFile 1:1-27:1
+  ConfigBlock process 1:1-26:2
+    #line 3:5-3:73
+    #line 4:5-4:71
+    ConfigSelector withName: PRESEQ_LCEXTRAP 5:5-7:6
+      ConfigAssign errorStrategy = String 6:9-6:33
+    #line 9:5-9:76
+    #line 10:5-10:33
+    ConfigSelector withName: SUBREAD_FEATURECOUNTS 11:5-13:6
+      ConfigAssign ext.args = String 12:9-12:45
+    #line 15:5-15:34
+    ConfigSelector withName: SAMTOOLS_SORT_QUALIMAP 16:5-19:6
+      ConfigAssign ext.args = String 17:9-17:24
+      ConfigAssign ext.prefix = Closure 18:9-18:49
+    #line 21:5-21:42
+    ConfigSelector withName: QUALIMAP_RNASEQ 22:5-24:6
+      ConfigAssign ext.args = String 23:9-23:30

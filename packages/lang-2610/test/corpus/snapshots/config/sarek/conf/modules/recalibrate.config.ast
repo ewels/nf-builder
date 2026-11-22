@@ -1,0 +1,29 @@
+ConfigFile 1:1-94:1
+  #block 1:1-12:3
+  #line 14:1-14:15
+  ConfigBlock process 16:1-93:2
+    ConfigSelector withName: 'GATK4_APPLYBQSR' 18:5-21:6
+      #line 19:9-19:100
+      ConfigAssign ext.args2 = Closure 20:9-20:97
+    ConfigSelector withName: 'GATK4_APPLYBQSR|GATK4SPARK_APPLYBQSR' 23:5-36:6
+      ConfigAssign ext.prefix = Closure 24:9-26:10
+      #line 27:9-27:86
+      #line 28:9-28:84
+      ConfigAssign publishDir = Map 29:9-35:10
+        #line 33:13-33:83
+    ConfigSelector withName: 'NFCORE_SAREK:SAREK:FASTQ_PREPROCESS_GATK:BAM_APPLYBQSR_SPARK:CRAM_MERGE_INDEX_SAMTOOLS:MERGE_CRAM' 38:5-47:6
+      ConfigAssign ext.args = String 39:9-39:59
+      ConfigAssign ext.prefix = Closure 40:9-40:50
+      ConfigAssign publishDir = Map 41:9-46:10
+    ConfigSelector withName: 'NFCORE_SAREK:SAREK:FASTQ_PREPROCESS_GATK:BAM_APPLYBQSR:SAMTOOLS_MERGE' 49:5-63:6
+      ConfigAssign ext.args = Closure 50:9-50:97
+      ConfigAssign ext.prefix = Closure 51:9-51:50
+      ConfigAssign publishDir = Map 52:9-62:10
+    ConfigSelector withName: 'NFCORE_SAREK:SAREK:FASTQ_PREPROCESS_GATK:BAM_APPLYBQSR_SPARK:CRAM_MERGE_INDEX_SAMTOOLS:INDEX_CRAM' 65:5-72:6
+      ConfigAssign publishDir = Map 66:9-71:10
+    ConfigSelector withName: 'NFCORE_SAREK:SAREK:FASTQ_PREPROCESS_GATK:BAM_APPLYBQSR_SPARK:BAM_MERGE_INDEX_SAMTOOLS:MERGE_BAM' 74:5-82:6
+      ConfigAssign ext.prefix = Closure 75:9-75:50
+      ConfigAssign publishDir = Map 76:9-81:10
+    ConfigSelector withName: 'NFCORE_SAREK:SAREK:FASTQ_PREPROCESS_GATK:BAM_APPLYBQSR_SPARK:BAM_MERGE_INDEX_SAMTOOLS:INDEX_MERGE_BAM' 84:5-92:6
+      ConfigAssign publishDir = Map 85:9-91:10
+        #line 89:13-89:112

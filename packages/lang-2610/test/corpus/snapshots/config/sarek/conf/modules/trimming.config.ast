@@ -1,0 +1,21 @@
+ConfigFile 1:1-50:1
+  #block 1:1-12:3
+  #line 14:1-14:12
+  ConfigBlock process 16:1-49:2
+    ConfigSelector withName: 'FASTP' 18:5-48:6
+      ConfigAssign ext.args = MethodCall 19:9-31:27
+        #line 20:97-20:124
+        #line 21:97-21:135
+        #line 22:97-22:135
+        #line 23:97-23:185
+        #line 24:97-24:185
+        #line 25:97-25:182
+        #line 26:97-26:154
+        #line 27:97-27:131
+        #line 28:97-28:122
+        #line 29:97-29:120
+        #line 30:97-30:183
+      #line 32:9-32:86
+      #line 33:9-33:84
+      #line 34:9-34:83
+      ConfigAssign publishDir = Map 35:9-47:10

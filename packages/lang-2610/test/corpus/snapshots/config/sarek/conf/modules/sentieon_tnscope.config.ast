@@ -1,0 +1,12 @@
+ConfigFile 1:1-42:1
+  #block 1:1-12:3
+  #line 14:1-14:20
+  ConfigBlock process 16:1-41:2
+    ConfigSelector withName: 'SENTIEON_TNSCOPE' 18:5-30:6
+      ConfigAssign ext.prefix = Closure 19:9-19:123
+      ConfigAssign ext.args2 = Closure 20:9-22:79
+      ConfigAssign ext.when = Closure 23:9-23:100
+      ConfigAssign publishDir = Map 24:9-29:10
+    ConfigSelector withName: 'MERGE_TNSCOPE.*' 32:5-39:6
+      ConfigAssign ext.prefix = Closure 33:9-33:46
+      ConfigAssign publishDir = Map 34:9-38:10

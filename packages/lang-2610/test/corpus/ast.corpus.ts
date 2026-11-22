@@ -12,7 +12,9 @@ import {
   type Attachment,
   anchors,
   attachments,
+  type DumpRow,
   type Row,
+  toRow,
 } from "../ast/comment-anchors.ts";
 import { listSources } from "./corpus-files.ts";
 
@@ -44,19 +46,6 @@ type Built = {
   full: boolean;
 };
 type LintFile = { errors: { filename: string }[] };
-type DumpRow = {
-  line: number;
-  column: number;
-  text: string;
-  slot: Row["slot"];
-  node: {
-    class: string;
-    line: number;
-    column: number;
-    endLine: number;
-    endColumn: number;
-  };
-};
 type Dump = {
   files: { file: string; comments?: DumpRow[]; error?: string }[];
 };
@@ -220,15 +209,7 @@ describe("corpus AST", () => {
       for (const dumped of file.comments) {
         const key = `${dumped.line}:${dumped.column}`;
         const mine = (ours.get(key) as Attachment[])[0] as Attachment;
-        const row: Row = {
-          line: dumped.line,
-          column: dumped.column,
-          slot: dumped.slot,
-          anchor: dumped.node.class,
-          from: [dumped.node.line, dumped.node.column],
-          to: [dumped.node.endLine, dumped.node.endColumn],
-          text: dumped.text,
-        };
+        const row = toRow(dumped);
         const where = `${b.pipeline}/${b.file} ${key} ${JSON.stringify(dumped.text.slice(0, 30))}`;
         if (mine.slot !== row.slot) {
           differences.push(`${where}: slot ${mine.slot}, nf-lang ${row.slot}`);

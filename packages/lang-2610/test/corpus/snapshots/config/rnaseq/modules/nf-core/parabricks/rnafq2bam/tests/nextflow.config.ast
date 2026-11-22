@@ -1,0 +1,14 @@
+ConfigFile 1:1-22:1
+  ConfigBlock process 1:1-21:2
+    ConfigSelector withName: 'PARABRICKS_RNAFQ2BAM' 2:5-10:6
+      ConfigAssign ext.args = Closure 3:9-3:42
+      ConfigAssign accelerator = Map 4:9-4:35
+      #line 5:9-5:63
+      #line 6:9-6:68
+      #line 7:9-7:99
+      #line 8:9-8:73
+      ConfigAssign memory = Property 9:9-9:23
+    #line 12:5-12:47
+    ConfigSelector withName: 'STAR_GENOMEGENERATE' 13:5-20:6
+      ConfigAssign conda = String 14:9-14:110
+      ConfigAssign container = Closure 15:9-19:10

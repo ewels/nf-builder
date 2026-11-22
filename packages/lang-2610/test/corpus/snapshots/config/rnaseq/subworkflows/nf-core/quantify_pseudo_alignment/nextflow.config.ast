@@ -1,0 +1,7 @@
+ConfigFile 1:1-12:1
+  #line 1:1-1:60
+  ConfigBlock process 3:1-11:2
+    ConfigSelector withName: '.*:QUANTIFY_PSEUDO_ALIGNMENT:SALMON_QUANT' 4:5-6:6
+      ConfigAssign ext.args = Closure 5:9-5:62
+    ConfigSelector withName: '.*:QUANTIFY_PSEUDO_ALIGNMENT:KALLISTO_QUANT' 8:5-10:6
+      ConfigAssign ext.args = Elvis 9:9-9:58

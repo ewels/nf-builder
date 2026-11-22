@@ -1,0 +1,11 @@
+ConfigFile 1:1-16:1
+  ConfigInclude String "nextflow.config" 1:1-1:32
+  #line 3:1-3:3
+  #line 4:1-4:73
+  #line 5:1-5:69
+  #line 6:1-6:3
+  ConfigBlock process 8:1-15:2
+    ConfigSelector withName: '.*:FASTQ_SUBSAMPLE_FQ_SALMON:SALMON_INDEX' 9:5-11:6
+      ConfigAssign ext.when = Boolean 10:9-10:25
+    ConfigSelector withName: '.*:FASTQ_SUBSAMPLE_FQ_SALMON:SALMON_QUANT' 12:5-14:6
+      ConfigAssign ext.when = Boolean 13:9-13:25

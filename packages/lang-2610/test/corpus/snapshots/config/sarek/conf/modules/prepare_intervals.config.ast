@@ -1,0 +1,17 @@
+ConfigFile 1:1-61:1
+  #block 1:1-12:3
+  #line 14:1-14:21
+  ConfigBlock process 16:1-60:2
+    ConfigSelector withName: 'BUILD_INTERVALS' 18:5-21:6
+      ConfigAssign ext.args = Closure 19:9-19:78
+      ConfigAssign ext.suffix = Closure 20:9-20:31
+    ConfigSelector withName: 'BEDTOOLS_SORT' 23:5-31:6
+      ConfigAssign ext.prefix = Closure 24:9-24:45
+      ConfigAssign publishDir = Map 25:9-30:10
+    ConfigSelector withName: 'CREATE_INTERVALS_BED' 33:5-40:6
+      ConfigAssign publishDir = Map 34:9-39:10
+    ConfigSelector withName: 'GATK4_INTERVALLISTTOBED' 42:5-49:6
+      ConfigAssign publishDir = Map 43:9-48:10
+    ConfigSelector withName: 'TABIX_BGZIPTABIX_INTERVAL_SPLIT|TABIX_BGZIPTABIX_INTERVAL_COMBINED' 51:5-59:6
+      ConfigAssign ext.prefix = Closure 52:9-52:42
+      ConfigAssign publishDir = Map 53:9-58:10

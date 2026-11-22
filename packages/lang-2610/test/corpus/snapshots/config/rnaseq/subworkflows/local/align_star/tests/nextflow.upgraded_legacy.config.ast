@@ -1,0 +1,9 @@
+ConfigFile 1:1-18:1
+  #line 1:1-1:89
+  #line 2:1-2:91
+  #line 3:1-3:87
+  #line 4:1-4:66
+  ConfigBlock process 5:1-17:2
+    ConfigSelector withName: 'STAR_GENOMEGENERATE' 6:5-16:6
+      ConfigAssign conda = String 7:9-7:88
+      ConfigAssign container = Closure 8:9-15:10

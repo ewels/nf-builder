@@ -1,0 +1,4 @@
+ConfigFile 1:1-10:1
+  ConfigBlock process 1:1-9:2
+    ConfigSelector withName: 'SRA_RUNINFO_TO_FTP' 2:5-8:6
+      ConfigAssign publishDir = Map 3:9-7:10

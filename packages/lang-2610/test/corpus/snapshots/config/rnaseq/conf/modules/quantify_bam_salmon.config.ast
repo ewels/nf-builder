@@ -1,0 +1,45 @@
+ConfigFile 1:1-161:1
+  #line 1:1-1:3
+  #line 2:1-2:89
+  #line 3:1-3:3
+  ConfigBlock process 5:1-160:2
+    #line 6:5-6:86
+    ConfigSelector withName: '.*:QUANTIFY_BAM_SALMON:SALMON_QUANT' 7:5-13:6
+      ConfigAssign publishDir = Map 8:9-12:10
+    ConfigSelector withName: '.*:QUANTIFY_BAM_SALMON:QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT:(CUSTOM_TX2GENE|TXIMETA_TXIMPORT)' 15:5-25:6
+      ConfigAssign publishDir = Map 16:9-24:10
+    ConfigSelector withName: '.*:QUANTIFY_BAM_SALMON:QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT:SE_.*' 27:5-33:6
+      ConfigAssign publishDir = Map 28:9-32:10
+    ConfigSelector withName: '.*:QUANTIFY_BAM_SALMON:QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT:SE_GENE_UNIFIED' 35:5-37:6
+      ConfigAssign ext.prefix = Closure 36:9-36:46
+    ConfigSelector withName: '.*:QUANTIFY_BAM_SALMON:QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT:SE_TRANSCRIPT_UNIFIED' 39:5-41:6
+      ConfigAssign ext.prefix = Closure 40:9-40:52
+    #line 43:5-43:43
+    ConfigSelector withName: 'NFCORE_RNASEQ:RNASEQ:BAM_DEDUP_UMI:SAMTOOLS_SORT' 45:5-54:6
+      ConfigAssign ext.args = String 46:9-46:26
+      ConfigAssign ext.prefix = Closure 47:9-47:62
+      ConfigAssign publishDir = Map 48:9-53:10
+    ConfigSelector withName: 'NFCORE_RNASEQ:RNASEQ:BAM_DEDUP_UMI:UMITOOLS_PREPAREFORRSEM' 56:5-71:6
+      ConfigAssign ext.prefix = Closure 57:9-57:71
+      ConfigAssign publishDir = List 58:9-70:10
+    ConfigSelector withName: 'NFCORE_RNASEQ:RNASEQ:BAM_DEDUP_UMI:BAM_SORT_STATS_SAMTOOLS:SAMTOOLS_SORT' 73:5-75:6
+      ConfigAssign ext.prefix = Closure 74:9-74:59
+    ConfigSelector withName: 'NFCORE_RNASEQ:RNASEQ:BAM_DEDUP_UMI:BAM_SORT_STATS_SAMTOOLS:(SAMTOOLS_SORT|SAMTOOLS_INDEX)' 77:5-84:6
+      ConfigAssign publishDir = Map 78:9-83:10
+    ConfigSelector withName: 'NFCORE_RNASEQ:RNASEQ:BAM_DEDUP_UMI:BAM_SORT_STATS_SAMTOOLS:BAM_STATS_SAMTOOLS:.*' 86:5-94:6
+      ConfigAssign ext.prefix = Closure 87:9-87:63
+      ConfigAssign publishDir = Map 88:9-93:10
+    #line 96:5-96:66
+    ConfigSelector withName: '.*:BAM_DEDUP_STATS_SAMTOOLS_UMI(COLLAPSE|TOOLS)_TRANSCRIPTOME:UMI(COLLAPSE|TOOLS_DEDUP)' 98:5-100:6
+      ConfigAssign ext.prefix = Closure 99:9-99:69
+    #line 102:5-102:38
+    ConfigSelector withName: '.*:BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS_TRANSCRIPTOME:UMITOOLS_DEDUP' 104:5-123:6
+      ConfigAssign publishDir = List 105:9-122:10
+    #line 125:5-125:40
+    ConfigSelector withName: '.*:BAM_DEDUP_STATS_SAMTOOLS_UMICOLLAPSE_TRANSCRIPTOME:UMICOLLAPSE' 127:5-141:6
+      ConfigAssign publishDir = List 128:9-140:10
+    ConfigSelector withName: '.*:BAM_DEDUP_STATS_SAMTOOLS_UMI(COLLAPSE|TOOLS)_TRANSCRIPTOME:SAMTOOLS_INDEX' 143:5-150:6
+      ConfigAssign publishDir = Map 144:9-149:10
+    ConfigSelector withName: '.*:BAM_DEDUP_STATS_SAMTOOLS_UMI(COLLAPSE|TOOLS)_TRANSCRIPTOME:BAM_STATS_SAMTOOLS:.*' 152:5-159:6
+      ConfigAssign ext.prefix = Closure 153:9-153:73
+      ConfigAssign publishDir = Map 154:9-158:10

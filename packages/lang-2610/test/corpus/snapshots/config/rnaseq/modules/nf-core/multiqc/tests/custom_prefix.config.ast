@@ -1,0 +1,4 @@
+ConfigFile 1:1-6:1
+  ConfigBlock process 1:1-5:2
+    ConfigSelector withName: 'MULTIQC' 2:5-4:6
+      ConfigAssign ext.prefix = String 3:9-3:37

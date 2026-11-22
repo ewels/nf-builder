@@ -1,0 +1,218 @@
+ConfigFile 1:1-356:1
+  #block 1:1-7:3
+  #line 9:1-9:42
+  ConfigBlock params 10:1-52:2
+    #line 12:5-12:21
+    ConfigAssign input = Null 13:5-13:40
+    ConfigAssign nf_core_pipeline = Null 14:5-14:40
+    ConfigAssign nf_core_rnaseq_strandedness = String 15:5-15:42
+    ConfigAssign ena_metadata_fields = Null 16:5-16:40
+    ConfigAssign sample_mapping_fields = String 17:5-17:178
+    ConfigAssign download_method = String 18:5-18:41
+    ConfigAssign skip_fastq_download = Boolean 19:5-19:41
+    ConfigAssign dbgap_key = Null 20:5-20:40
+    #line 22:5-22:27
+    ConfigAssign outdir = Null 23:5-23:40
+    ConfigAssign publish_dir_mode = String 24:5-24:42
+    ConfigAssign email = Null 25:5-25:40
+    ConfigAssign email_on_fail = Null 26:5-26:40
+    ConfigAssign plaintext_email = Boolean 27:5-27:41
+    ConfigAssign monochrome_logs = Boolean 28:5-28:41
+    ConfigAssign help = Boolean 29:5-29:41
+    ConfigAssign help_full = Boolean 30:5-30:41
+    ConfigAssign show_hidden = Boolean 31:5-31:41
+    ConfigAssign version = Boolean 32:5-32:41
+    ConfigAssign modules_testdata_base_path = String 33:5-33:81
+    ConfigAssign pipelines_testdata_base_path = String 34:5-34:99
+    ConfigAssign trace_report_suffix = MethodCall 35:5-35:87
+    #line 37:5-37:22
+    ConfigAssign config_profile_name = Null 38:5-38:38
+    ConfigAssign config_profile_description = Null 39:5-39:38
+    ConfigAssign custom_config_version = String 41:5-41:42
+    ConfigAssign custom_config_base = GString 42:5-42:117
+    ConfigAssign config_profile_contact = Null 43:5-43:38
+    ConfigAssign config_profile_url = Null 44:5-44:38
+    #line 46:5-46:41
+    ConfigAssign validate_params = Boolean 47:5-47:40
+    #line 49:5-49:26
+    #line 50:5-50:75
+    ConfigAssign force_sratools_download = Boolean 51:5-51:41
+  #line 54:1-54:49
+  ConfigAssign outputDir = Property 55:1-55:26
+  ConfigAssign workflow.output.mode = Property 56:1-56:47
+  #line 58:1-58:49
+  ConfigInclude String "conf/base.config" 59:1-59:33
+  ConfigBlock profiles 61:1-173:2
+    ConfigBlock debug 62:5-67:6
+      ConfigAssign dumpHashes = Boolean 63:9-63:39
+      ConfigAssign process.beforeScript = String 64:9-64:51
+      ConfigAssign cleanup = Boolean 65:9-65:40
+      ConfigAssign nextflow.enable.configProcessNamesValidation = Boolean 66:9-66:60
+    ConfigBlock conda 68:5-77:6
+      ConfigAssign conda.enabled = Boolean 69:9-69:39
+      ConfigAssign docker.enabled = Boolean 70:9-70:40
+      ConfigAssign singularity.enabled = Boolean 71:9-71:40
+      ConfigAssign podman.enabled = Boolean 72:9-72:40
+      ConfigAssign shifter.enabled = Boolean 73:9-73:40
+      ConfigAssign charliecloud.enabled = Boolean 74:9-74:40
+      ConfigAssign conda.channels = List 75:9-75:62
+      ConfigAssign apptainer.enabled = Boolean 76:9-76:40
+    ConfigBlock mamba 78:5-87:6
+      ConfigAssign conda.enabled = Boolean 79:9-79:39
+      ConfigAssign conda.useMamba = Boolean 80:9-80:39
+      ConfigAssign docker.enabled = Boolean 81:9-81:40
+      ConfigAssign singularity.enabled = Boolean 82:9-82:40
+      ConfigAssign podman.enabled = Boolean 83:9-83:40
+      ConfigAssign shifter.enabled = Boolean 84:9-84:40
+      ConfigAssign charliecloud.enabled = Boolean 85:9-85:40
+      ConfigAssign apptainer.enabled = Boolean 86:9-86:40
+    ConfigBlock docker 88:5-97:6
+      ConfigAssign docker.enabled = Boolean 89:9-89:39
+      ConfigAssign conda.enabled = Boolean 90:9-90:40
+      ConfigAssign singularity.enabled = Boolean 91:9-91:40
+      ConfigAssign podman.enabled = Boolean 92:9-92:40
+      ConfigAssign shifter.enabled = Boolean 93:9-93:40
+      ConfigAssign charliecloud.enabled = Boolean 94:9-94:40
+      ConfigAssign apptainer.enabled = Boolean 95:9-95:40
+      ConfigAssign docker.runOptions = String 96:9-96:57
+    ConfigBlock arm64 98:5-108:6
+      ConfigAssign process.arch = String 99:9-99:42
+      #line 100:9-100:63
+      #line 101:9-101:94
+      #line 102:9-102:24
+      ConfigAssign apptainer.ociAutoPull = Boolean 103:9-103:39
+      ConfigAssign singularity.ociAutoPull = Boolean 104:9-104:39
+      ConfigAssign wave.enabled = Boolean 105:9-105:39
+      ConfigAssign wave.freeze = Boolean 106:9-106:39
+      ConfigAssign wave.strategy = String 107:9-107:52
+    ConfigBlock emulate_amd64 109:5-111:6
+      ConfigAssign docker.runOptions = String 110:9-110:80
+    ConfigBlock singularity 112:5-121:6
+      ConfigAssign singularity.enabled = Boolean 113:9-113:39
+      ConfigAssign singularity.autoMounts = Boolean 114:9-114:39
+      ConfigAssign conda.enabled = Boolean 115:9-115:40
+      ConfigAssign docker.enabled = Boolean 116:9-116:40
+      ConfigAssign podman.enabled = Boolean 117:9-117:40
+      ConfigAssign shifter.enabled = Boolean 118:9-118:40
+      ConfigAssign charliecloud.enabled = Boolean 119:9-119:40
+      ConfigAssign apptainer.enabled = Boolean 120:9-120:40
+    ConfigBlock podman 122:5-130:6
+      ConfigAssign podman.enabled = Boolean 123:9-123:39
+      ConfigAssign conda.enabled = Boolean 124:9-124:40
+      ConfigAssign docker.enabled = Boolean 125:9-125:40
+      ConfigAssign singularity.enabled = Boolean 126:9-126:40
+      ConfigAssign shifter.enabled = Boolean 127:9-127:40
+      ConfigAssign charliecloud.enabled = Boolean 128:9-128:40
+      ConfigAssign apptainer.enabled = Boolean 129:9-129:40
+    ConfigBlock shifter 131:5-139:6
+      ConfigAssign shifter.enabled = Boolean 132:9-132:39
+      ConfigAssign conda.enabled = Boolean 133:9-133:40
+      ConfigAssign docker.enabled = Boolean 134:9-134:40
+      ConfigAssign singularity.enabled = Boolean 135:9-135:40
+      ConfigAssign podman.enabled = Boolean 136:9-136:40
+      ConfigAssign charliecloud.enabled = Boolean 137:9-137:40
+      ConfigAssign apptainer.enabled = Boolean 138:9-138:40
+    ConfigBlock charliecloud 140:5-148:6
+      ConfigAssign charliecloud.enabled = Boolean 141:9-141:39
+      ConfigAssign conda.enabled = Boolean 142:9-142:40
+      ConfigAssign docker.enabled = Boolean 143:9-143:40
+      ConfigAssign singularity.enabled = Boolean 144:9-144:40
+      ConfigAssign podman.enabled = Boolean 145:9-145:40
+      ConfigAssign shifter.enabled = Boolean 146:9-146:40
+      ConfigAssign apptainer.enabled = Boolean 147:9-147:40
+    ConfigBlock apptainer 149:5-158:6
+      ConfigAssign apptainer.enabled = Boolean 150:9-150:39
+      ConfigAssign apptainer.autoMounts = Boolean 151:9-151:39
+      ConfigAssign conda.enabled = Boolean 152:9-152:40
+      ConfigAssign docker.enabled = Boolean 153:9-153:40
+      ConfigAssign singularity.enabled = Boolean 154:9-154:40
+      ConfigAssign podman.enabled = Boolean 155:9-155:40
+      ConfigAssign shifter.enabled = Boolean 156:9-156:40
+      ConfigAssign charliecloud.enabled = Boolean 157:9-157:40
+    ConfigBlock wave 159:5-165:6
+      ConfigAssign apptainer.ociAutoPull = Boolean 160:9-160:39
+      ConfigAssign singularity.ociAutoPull = Boolean 161:9-161:39
+      ConfigAssign wave.enabled = Boolean 162:9-162:39
+      ConfigAssign wave.freeze = Boolean 163:9-163:39
+      ConfigAssign wave.strategy = String 164:9-164:52
+    ConfigBlock gpu 166:5-170:6
+      ConfigAssign docker.runOptions = String 167:9-167:68
+      ConfigAssign apptainer.runOptions = String 168:9-168:41
+      ConfigAssign singularity.runOptions = String 169:9-169:41
+    ConfigBlock test 171:5-171:56
+      ConfigInclude String "conf/test.config" 171:17-171:49
+    ConfigBlock test_full 172:5-172:56
+      ConfigInclude String "conf/test_full.config" 172:17-172:54
+  #line 175:1-175:60
+  #line 177:1-177:216
+  #line 178:1-178:70
+  ConfigInclude Ternary 179:1-179:192
+  #line 182:1-182:70
+  #line 183:1-183:114
+  ConfigInclude Ternary 184:1-184:196
+  #line 186:1-186:108
+  #line 187:1-187:96
+  #line 188:1-188:59
+  ConfigAssign apptainer.registry = String 189:1-189:34
+  ConfigAssign docker.registry = String 190:1-190:34
+  ConfigAssign podman.registry = String 191:1-191:34
+  ConfigAssign singularity.registry = String 192:1-192:34
+  ConfigAssign charliecloud.registry = String 193:1-193:34
+  #line 197:1-197:107
+  #line 198:1-198:136
+  #line 199:1-199:169
+  ConfigBlock env 201:1-206:2
+    ConfigAssign PYTHONNOUSERSITE = Number 202:5-202:25
+    ConfigAssign R_PROFILE_USER = String 203:5-203:36
+    ConfigAssign R_ENVIRON_USER = String 204:5-204:36
+    ConfigAssign JULIA_DEPOT_PATH = String 205:5-205:48
+  #line 208:1-208:20
+  ConfigAssign process.shell = List 209:1-216:2
+    #line 211:19-211:85
+    #line 212:19-212:72
+    #line 213:19-213:70
+    #line 214:19-214:70
+    #line 215:19-215:84
+  #line 218:1-218:87
+  ConfigAssign nextflow.enable.configProcessNamesValidation = Boolean 219:1-219:53
+  ConfigBlock timeline 221:1-224:2
+    ConfigAssign enabled = Boolean 222:5-222:19
+    ConfigAssign file = GString 223:5-223:101
+  ConfigBlock report 225:1-228:2
+    ConfigAssign enabled = Boolean 226:5-226:19
+    ConfigAssign file = GString 227:5-227:99
+  ConfigBlock trace 229:1-232:2
+    ConfigAssign enabled = Boolean 230:5-230:19
+    ConfigAssign file = GString 231:5-231:97
+  ConfigBlock dag 233:1-236:2
+    ConfigAssign enabled = Boolean 234:5-234:19
+    ConfigAssign file = GString 235:5-235:95
+  ConfigBlock manifest 238:1-334:2
+    ConfigAssign name = String 239:5-239:41
+    ConfigAssign contributors = List 240:5-325:6
+    ConfigAssign homePage = String 326:5-326:60
+    ConfigAssign description = String 327:5-327:97
+    ConfigAssign mainScript = String 328:5-328:32
+    ConfigAssign defaultBranch = String 329:5-329:31
+    ConfigAssign nextflowVersion = String 330:5-330:35
+    ConfigAssign version = String 331:5-331:31
+    ConfigAssign doi = String 332:5-332:47
+    ConfigAssign diagram = String 333:5-333:72
+  #line 336:1-336:20
+  ConfigApplyBlock plugins 337:1-340:2
+    ConfigApply id (1 arguments) 338:5-338:29
+    #line 338:30-338:98
+    ConfigApply id (1 arguments) 339:5-339:25
+    #line 339:26-339:115
+  ConfigBlock validation 342:1-345:2
+    ConfigAssign defaultIgnoreParams = List 343:5-343:38
+    ConfigAssign monochromeLogs = Property 344:5-344:44
+  #line 347:1-347:56
+  ConfigInclude String "./modules/local/multiqc_mappings_config/nextflow.config" 348:1-348:72
+  ConfigInclude String "./modules/local/aspera_cli/nextflow.config" 349:1-349:59
+  ConfigInclude String "./modules/local/sra_fastq_ftp/nextflow.config" 350:1-350:62
+  ConfigInclude String "./modules/local/sra_ids_to_runinfo/nextflow.config" 351:1-351:67
+  ConfigInclude String "./modules/local/sra_runinfo_to_ftp/nextflow.config" 352:1-352:67
+  ConfigInclude String "./modules/nf-core/sratools/prefetch/nextflow.config" 353:1-353:68
+  ConfigInclude String "./modules/nf-core/fastqdl/nextflow.config" 354:1-354:58
+  ConfigInclude String "./subworkflows/nf-core/fastq_download_prefetch_fasterqdump_sratools/nextflow.config" 355:1-355:100

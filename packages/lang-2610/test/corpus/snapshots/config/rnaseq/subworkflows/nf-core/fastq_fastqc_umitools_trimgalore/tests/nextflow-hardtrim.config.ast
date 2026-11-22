@@ -1,0 +1,9 @@
+ConfigFile 1:1-12:1
+  ConfigBlock process 1:1-11:2
+    ConfigSelector withName: UMITOOLS_EXTRACT 2:5-4:6
+      ConfigAssign ext.args = String 3:9-3:41
+    ConfigSelector withName: TRIMGALORE 5:5-10:6
+      #line 6:9-6:88
+      #line 7:9-7:86
+      #line 8:9-8:71
+      ConfigAssign ext.args = String 9:9-9:35

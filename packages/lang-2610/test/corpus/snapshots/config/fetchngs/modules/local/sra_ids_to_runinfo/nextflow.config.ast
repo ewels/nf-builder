@@ -1,0 +1,4 @@
+ConfigFile 1:1-9:1
+  ConfigBlock process 1:1-8:2
+    ConfigSelector withName: 'SRA_IDS_TO_RUNINFO' 2:5-7:6
+      ConfigAssign publishDir = Map 3:9-6:10

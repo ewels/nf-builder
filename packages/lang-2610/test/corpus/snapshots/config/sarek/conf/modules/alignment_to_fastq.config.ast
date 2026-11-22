@@ -1,0 +1,41 @@
+ConfigFile 1:1-86:1
+  #block 1:1-12:3
+  #line 14:1-14:16
+  ConfigBlock process 16:1-85:2
+    ConfigSelector withName: 'COLLATE_FASTQ_MAP' 18:5-25:6
+      ConfigAssign ext.args2 = Closure 19:9-19:30
+      ConfigAssign ext.prefix = Closure 20:9-20:45
+      ConfigAssign publishDir = Map 21:9-24:10
+        #line 22:13-22:65
+    ConfigSelector withName: 'COLLATE_FASTQ_UNMAP' 27:5-34:6
+      ConfigAssign ext.args2 = Closure 28:9-28:30
+      ConfigAssign ext.prefix = Closure 29:9-29:47
+      ConfigAssign publishDir = Map 30:9-33:10
+        #line 31:13-31:65
+    ConfigSelector withName: 'SAMTOOLS_VIEW_MAP_MAP' 36:5-43:6
+      ConfigAssign ext.args = Closure 37:9-37:39
+      ConfigAssign ext.prefix = Closure 38:9-38:46
+      ConfigAssign publishDir = Map 39:9-42:10
+        #line 40:13-40:65
+    ConfigSelector withName: 'SAMTOOLS_VIEW_MAP_UNMAP' 45:5-52:6
+      ConfigAssign ext.args = Closure 46:9-46:40
+      ConfigAssign ext.prefix = Closure 47:9-47:48
+      ConfigAssign publishDir = Map 48:9-51:10
+        #line 49:13-49:65
+    ConfigSelector withName: 'SAMTOOLS_VIEW_UNMAP_MAP' 54:5-61:6
+      ConfigAssign ext.args = Closure 55:9-55:40
+      ConfigAssign ext.prefix = Closure 56:9-56:48
+      ConfigAssign publishDir = Map 57:9-60:10
+        #line 58:13-58:65
+    ConfigSelector withName: 'SAMTOOLS_VIEW_UNMAP_UNMAP' 63:5-70:6
+      ConfigAssign ext.args = Closure 64:9-64:41
+      ConfigAssign ext.prefix = Closure 65:9-65:50
+      ConfigAssign publishDir = Map 66:9-69:10
+        #line 67:13-67:65
+    ConfigSelector withName: 'SAMTOOLS_MERGE_UNMAP' 72:5-78:6
+      ConfigAssign ext.prefix = Closure 73:9-73:51
+      ConfigAssign publishDir = Map 74:9-77:10
+        #line 75:13-75:65
+    ConfigSelector withName: 'CAT_FASTQ' 79:5-84:6
+      ConfigAssign publishDir = Map 80:9-83:10
+        #line 81:13-81:65

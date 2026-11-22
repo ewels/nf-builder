@@ -1,0 +1,22 @@
+ConfigFile 1:1-69:1
+  #block 1:1-12:3
+  #line 14:1-14:19
+  ConfigBlock process 16:1-68:2
+    ConfigSelector withName: 'GATK4_HAPLOTYPECALLER' 18:5-31:6
+      ConfigAssign ext.args = Closure 19:9-22:29
+      ConfigAssign ext.prefix = Closure 23:9-23:276
+      ConfigAssign ext.when = Closure 24:9-24:93
+      ConfigAssign publishDir = Map 25:9-30:10
+    ConfigSelector withName: 'MERGE_HAPLOTYPECALLER' 33:5-40:6
+      ConfigAssign ext.prefix = Closure 34:9-34:111
+      ConfigAssign publishDir = Map 35:9-39:10
+    ConfigSelector withName: 'CNNSCOREVARIANTS' 42:5-47:6
+      ConfigAssign publishDir = Map 43:9-46:10
+        #line 44:13-44:43
+    ConfigSelector withName: '.*:VCF_VARIANT_FILTERING_HAPLOTYPECALLER:FILTERVARIANTTRANCHES' 49:5-57:6
+      ConfigAssign ext.args = Closure 50:9-50:45
+      ConfigAssign ext.prefix = Closure 51:9-51:54
+      ConfigAssign publishDir = Map 52:9-56:10
+    ConfigSelector withName: 'NFCORE_SAREK:SAREK:BAM_VARIANT_CALLING_GERMLINE_ALL:BAM_VARIANT_CALLING_HAPLOTYPECALLER:BAM_MERGE_INDEX_SAMTOOLS:(MERGE_BAM|INDEX_MERGE_BAM)' 59:9-67:10
+      ConfigAssign ext.prefix = Closure 60:13-60:52
+      ConfigAssign publishDir = Map 61:13-66:14

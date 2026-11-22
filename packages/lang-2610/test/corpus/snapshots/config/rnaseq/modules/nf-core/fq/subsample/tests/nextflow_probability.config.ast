@@ -1,0 +1,4 @@
+ConfigFile 1:1-8:1
+  ConfigBlock process 1:1-7:2
+    ConfigSelector withName: FQ_SUBSAMPLE 3:5-5:6
+      ConfigAssign ext.args = String 4:9-4:35

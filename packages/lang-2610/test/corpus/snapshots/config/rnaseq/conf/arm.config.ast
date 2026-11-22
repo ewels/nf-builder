@@ -1,0 +1,156 @@
+ConfigFile 1:1-320:1
+  #block 1:1-11:3
+  ConfigBlock process 13:1-319:2
+    #line 15:5-15:7
+    #line 16:5-16:59
+    #line 17:5-17:7
+    ConfigSelector withName: 'BBMAP_BBSPLIT' 19:5-21:6
+      ConfigAssign container = Closure 20:9-20:338
+    ConfigSelector withName: 'BEDTOOLS_GENOMECOV' 23:5-25:6
+      ConfigAssign container = Closure 24:9-24:344
+    ConfigSelector withName: 'BOWTIE2_ALIGN' 27:5-29:6
+      ConfigAssign container = Closure 28:9-28:356
+    ConfigSelector withName: 'BOWTIE2_BUILD' 31:5-33:6
+      ConfigAssign container = Closure 32:9-32:356
+    ConfigSelector withName: 'BRACKEN_BRACKEN' 35:5-37:6
+      ConfigAssign container = Closure 36:9-36:340
+    ConfigSelector withName: 'CAT_FASTQ' 39:5-41:6
+      ConfigAssign container = Closure 40:9-40:361
+    ConfigSelector withName: 'CUSTOM_CATADDITIONALFASTA' 43:5-45:6
+      ConfigAssign container = Closure 44:9-44:342
+    ConfigSelector withName: 'CUSTOM_RSEMMERGECOUNTS' 47:5-49:6
+      ConfigAssign container = Closure 48:9-48:336
+    ConfigSelector withName: 'CUSTOM_TX2GENE' 51:5-53:6
+      ConfigAssign container = Closure 52:9-52:342
+    ConfigSelector withName: 'DESEQ2_QC' 55:5-57:6
+      ConfigAssign container = Closure 56:9-56:377
+    ConfigSelector withName: 'DUPRADAR' 59:5-61:6
+      ConfigAssign container = Closure 60:9-60:357
+    ConfigSelector withName: 'FASTP' 63:5-65:6
+      ConfigAssign container = Closure 64:9-64:340
+    ConfigSelector withName: 'FASTQC' 67:5-69:6
+      ConfigAssign container = Closure 68:9-68:342
+    ConfigSelector withName: 'FQ_LINT' 71:5-73:6
+      ConfigAssign container = Closure 72:9-72:338
+    ConfigSelector withName: 'FQ_SUBSAMPLE' 75:5-77:6
+      ConfigAssign container = Closure 76:9-76:338
+    ConfigSelector withName: 'GFFREAD' 79:5-81:6
+      ConfigAssign container = Closure 80:9-80:343
+    ConfigSelector withName: 'EAUTILS_GTF2BED' 83:5-85:6
+      ConfigAssign container = Closure 84:9-84:340
+    ConfigSelector withName: 'CUSTOM_GTFFILTER' 87:5-89:6
+      ConfigAssign container = Closure 88:9-88:342
+    ConfigSelector withName: 'GUNZIP' 91:5-93:6
+      ConfigAssign container = Closure 92:9-92:361
+    ConfigSelector withName: 'HISAT2_ALIGN' 95:5-97:6
+      ConfigAssign container = Closure 96:9-96:343
+    ConfigSelector withName: 'HISAT2_BUILD' 99:5-101:6
+      ConfigAssign container = Closure 100:9-100:341
+    ConfigSelector withName: 'HISAT2_EXTRACTSPLICESITES' 103:5-105:6
+      ConfigAssign container = Closure 104:9-104:343
+    ConfigSelector withName: 'KALLISTO_INDEX' 107:5-109:6
+      ConfigAssign container = Closure 108:9-108:344
+    ConfigSelector withName: 'KALLISTO_QUANT' 111:5-113:6
+      ConfigAssign container = Closure 112:9-112:344
+    ConfigSelector withName: 'KRAKEN2_KRAKEN2' 115:5-117:6
+      ConfigAssign container = Closure 116:9-116:350
+    ConfigSelector withName: 'MULTIQC' 119:5-121:6
+      ConfigAssign container = Closure 120:9-120:341
+    ConfigSelector withName: 'CUSTOM_MULTIQCCUSTOMBIOTYPE' 123:5-125:6
+      ConfigAssign container = Closure 124:9-124:343
+    ConfigSelector withName: 'PICARD_MARKDUPLICATES' 127:5-129:6
+      ConfigAssign container = Closure 128:9-128:341
+    ConfigSelector withName: 'PREPROCESS_TRANSCRIPTS_FASTA_GENCODE' 131:5-133:6
+      ConfigAssign container = Closure 132:9-132:336
+    ConfigSelector withName: 'PRESEQ_LCEXTRAP' 135:5-137:6
+      ConfigAssign container = Closure 136:9-136:341
+    ConfigSelector withName: 'QUALIMAP_RNASEQ' 139:5-141:6
+      ConfigAssign container = Closure 140:9-140:341
+    ConfigSelector withName: 'RIBODETECTOR' 143:5-145:6
+      ConfigAssign container = Closure 144:9-144:347
+    ConfigSelector withName: 'RSEM_CALCULATEEXPRESSION' 147:5-149:6
+      ConfigAssign container = Closure 148:9-148:339
+    ConfigSelector withName: 'RSEM_PREPAREREFERENCE' 151:5-153:6
+      ConfigAssign container = Closure 152:9-152:339
+    ConfigSelector withName: 'RSEQC_BAMSTAT' 155:5-157:6
+      ConfigAssign container = Closure 156:9-156:340
+    ConfigSelector withName: 'RSEQC_INFEREXPERIMENT' 159:5-161:6
+      ConfigAssign container = Closure 160:9-160:340
+    ConfigSelector withName: 'RSEQC_INNERDISTANCE' 163:5-165:6
+      ConfigAssign container = Closure 164:9-164:340
+    ConfigSelector withName: 'RSEQC_JUNCTIONANNOTATION' 167:5-169:6
+      ConfigAssign container = Closure 168:9-168:340
+    ConfigSelector withName: 'RSEQC_JUNCTIONSATURATION' 171:5-173:6
+      ConfigAssign container = Closure 172:9-172:340
+    ConfigSelector withName: 'RSEQC_READDISTRIBUTION' 175:5-177:6
+      ConfigAssign container = Closure 176:9-176:340
+    ConfigSelector withName: 'RSEQC_READDUPLICATION' 179:5-181:6
+      ConfigAssign container = Closure 180:9-180:340
+    ConfigSelector withName: 'RSEQC_TIN' 183:5-185:6
+      ConfigAssign container = Closure 184:9-184:340
+    ConfigSelector withName: 'SALMON_INDEX' 187:5-189:6
+      ConfigAssign container = Closure 188:9-188:342
+    ConfigSelector withName: 'SALMON_QUANT' 191:5-193:6
+      ConfigAssign container = Closure 192:9-192:342
+    ConfigSelector withName: 'SAMTOOLS_FAIDX' 195:5-197:6
+      ConfigAssign container = Closure 196:9-196:349
+    ConfigSelector withName: 'SAMTOOLS_FASTQ' 199:5-201:6
+      ConfigAssign container = Closure 200:9-200:349
+    ConfigSelector withName: 'SAMTOOLS_FLAGSTAT' 203:5-205:6
+      ConfigAssign container = Closure 204:9-204:349
+    ConfigSelector withName: 'SAMTOOLS_IDXSTATS' 207:5-209:6
+      ConfigAssign container = Closure 208:9-208:349
+    ConfigSelector withName: 'SAMTOOLS_INDEX' 211:5-213:6
+      ConfigAssign container = Closure 212:9-212:349
+    ConfigSelector withName: 'SAMTOOLS_SORT' 215:5-217:6
+      ConfigAssign container = Closure 216:9-216:349
+    ConfigSelector withName: 'SAMTOOLS_STATS' 219:5-221:6
+      ConfigAssign container = Closure 220:9-220:349
+    ConfigSelector withName: 'SAMTOOLS_VIEW' 223:5-225:6
+      ConfigAssign container = Closure 224:9-224:349
+    ConfigSelector withName: 'SEQKIT_REPLACE' 227:5-229:6
+      ConfigAssign container = Closure 228:9-228:342
+    ConfigSelector withName: 'SEQKIT_REPLACE_U2T' 231:5-233:6
+      ConfigAssign container = Closure 232:9-232:342
+    ConfigSelector withName: 'SEQKIT_STATS' 235:5-237:6
+      ConfigAssign container = Closure 236:9-236:342
+    ConfigSelector withName: 'STAR_ALIGN' 239:5-241:6
+      ConfigAssign container = Closure 240:9-240:353
+    ConfigSelector withName: 'STAR_GENOMEPARAMS_UPGRADE' 243:5-245:6
+      ConfigAssign container = Closure 244:9-244:339
+    ConfigSelector withName: 'STAR_GENOMEGENERATE' 247:5-249:6
+      ConfigAssign container = Closure 248:9-248:353
+    ConfigSelector withName: 'STRINGTIE_STRINGTIE' 251:5-253:6
+      ConfigAssign container = Closure 252:9-252:344
+    ConfigSelector withName: 'STRINGTIE_MERGE' 255:5-257:6
+      ConfigAssign container = Closure 256:9-256:344
+    ConfigSelector withName: 'SUBREAD_FEATURECOUNTS' 259:5-261:6
+      ConfigAssign container = Closure 260:9-260:342
+    ConfigSelector withName: 'SUMMARIZEDEXPERIMENT_SUMMARIZEDEXPERIMENT' 263:5-265:6
+      ConfigAssign container = Closure 264:9-264:369
+    ConfigSelector withName: 'SYLPH_PROFILE' 267:5-269:6
+      ConfigAssign container = Closure 268:9-268:340
+    ConfigSelector withName: 'SYLPHTAX_TAXPROF' 271:5-273:6
+      ConfigAssign container = Closure 272:9-272:344
+    ConfigSelector withName: 'TRIMGALORE' 275:5-277:6
+      ConfigAssign container = Closure 276:9-276:346
+    ConfigSelector withName: 'TXIMETA_TXIMPORT' 279:5-281:6
+      ConfigAssign container = Closure 280:9-280:351
+    ConfigSelector withName: 'UCSC_BEDCLIP' 283:5-285:6
+      ConfigAssign container = Closure 284:9-284:345
+    ConfigSelector withName: 'UCSC_BEDGRAPHTOBIGWIG' 287:5-289:6
+      ConfigAssign container = Closure 288:9-288:354
+    ConfigSelector withName: 'UMICOLLAPSE' 291:5-293:6
+      ConfigAssign container = Closure 292:9-292:346
+    ConfigSelector withName: 'UMITOOLS_DEDUP' 295:5-297:6
+      ConfigAssign container = Closure 296:9-296:368
+    ConfigSelector withName: 'UMITOOLS_EXTRACT' 299:5-301:6
+      ConfigAssign container = Closure 300:9-300:368
+    ConfigSelector withName: 'UMITOOLS_PREPAREFORRSEM' 303:5-305:6
+      ConfigAssign container = Closure 304:9-304:368
+    ConfigSelector withName: 'UNTAR' 307:5-309:6
+      ConfigAssign container = Closure 308:9-308:361
+    ConfigSelector withName: 'RUSTQC' 311:5-313:6
+      ConfigAssign container = Closure 312:9-312:341
+    ConfigSelector withName: 'SORTMERNA' 315:5-317:6
+      ConfigAssign container = Closure 316:9-316:344

@@ -1,0 +1,10 @@
+ConfigFile 1:1-25:1
+  #block 1:1-5:3
+  ConfigBlock process 7:1-24:2
+    ConfigSelector withName: 'PARABRICKS_DEEPSOMATIC' 9:5-13:6
+      ConfigAssign ext.args = Closure 10:9-10:59
+      ConfigAssign ext.prefix = Closure 11:9-11:65
+      ConfigAssign publishDir = Map 12:9-12:38
+    ConfigSelector withName: 'TABIX_VC_PARABRICKS_DEEPSOMATIC' 15:5-22:6
+      ConfigAssign ext.prefix = Closure 16:9-16:61
+      ConfigAssign publishDir = Map 17:9-21:10

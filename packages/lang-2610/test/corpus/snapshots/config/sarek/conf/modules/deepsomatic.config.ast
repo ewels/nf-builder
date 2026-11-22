@@ -1,0 +1,14 @@
+ConfigFile 1:1-44:1
+  #block 1:1-5:3
+  ConfigBlock process 7:1-43:2
+    ConfigSelector withName: 'DEEPSOMATIC' 9:5-23:6
+      ConfigAssign ext.args = Closure 10:9-15:28
+        #line 12:13-12:253
+      ConfigAssign ext.prefix = Closure 16:9-16:125
+      ConfigAssign publishDir = Map 17:9-22:10
+    ConfigSelector withName: 'MERGE_DEEPSOMATIC_VCF' 25:5-32:6
+      ConfigAssign ext.prefix = Closure 26:9-26:50
+      ConfigAssign publishDir = Map 27:9-31:10
+    ConfigSelector withName: 'MERGE_DEEPSOMATIC_GVCF' 34:5-41:6
+      ConfigAssign ext.prefix = Closure 35:9-35:52
+      ConfigAssign publishDir = Map 36:9-40:10

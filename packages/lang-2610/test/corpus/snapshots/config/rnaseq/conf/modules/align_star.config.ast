@@ -1,0 +1,27 @@
+ConfigFile 1:1-158:1
+  ConfigBlock process 1:1-157:2
+    #line 3:5-3:36
+    #line 4:5-4:77
+    ConfigSelector withName: '.*ALIGN_STAR:STAR_ALIGN|.*ALIGN_STAR:SENTIEON_STAR_ALIGN|.*ALIGN_STAR:PARABRICKS_RNA_FQ2BAM' 6:5-155:6
+      ConfigAssign ext.args = Closure 7:9-135:10
+        #line 14:13-14:63
+        #line 32:13-32:40
+        #line 33:13-33:15
+        #line 34:13-34:84
+        #line 35:13-35:103
+        #line 36:13-36:99
+        #line 37:13-37:98
+        #line 38:13-38:96
+        #line 39:13-39:110
+        #line 40:13-40:15
+        #line 84:25-84:89
+        #line 85:25-85:92
+        #line 86:25-86:94
+        #line 92:13-92:37
+        #line 99:13-99:54
+        #line 108:13-108:76
+        #line 109:13-109:86
+        #line 120:13-120:90
+        #line 121:13-121:71
+        #line 125:17-125:82
+      ConfigAssign publishDir = List 136:9-154:10

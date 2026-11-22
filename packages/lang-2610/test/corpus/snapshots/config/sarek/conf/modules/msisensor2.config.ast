@@ -1,0 +1,7 @@
+ConfigFile 1:1-26:1
+  #block 1:1-12:3
+  #line 14:1-14:14
+  ConfigBlock process 16:1-25:2
+    ConfigSelector withName: 'MSISENSOR2_MSI' 17:5-24:6
+      ConfigAssign ext.args = Closure 18:9-18:53
+      ConfigAssign publishDir = Map 19:9-23:10

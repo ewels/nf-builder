@@ -105,3 +105,13 @@ cases:
     lint:
       expect: error
       errors: ["`undefined_channel` is not defined"]
+  # F-103: the config AST fixtures. Every file lints clean (warnings allowed); packages/lang-2610/test/config-ast reads them by path.
+  - id: config-constructs
+    about: Every config construct the config AST models, from the config docs, nf-lang's config tests and the nf-core shapes.
+    spec: [F-103, FI-01, FI-05]
+    sources:
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/config.mdx#L29-L95
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/config.mdx#L185-L357
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/modules/nf-lang/src/test/groovy/nextflow/config/formatter/ConfigFormatterTest.groovy#L102-L141
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/modules/nextflow/src/test/groovy/nextflow/config/ConfigParserV2Test.groovy#L60-L82
+    lint: { expect: ok }

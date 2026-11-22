@@ -1,0 +1,380 @@
+ConfigFile 1:1-536:1
+  #block 1:1-7:3
+  #line 9:1-9:42
+  ConfigBlock params 10:1-164:2
+    #line 12:5-12:21
+    ConfigAssign input = Null 13:5-13:38
+    #line 15:5-15:18
+    ConfigAssign genome = Null 16:5-16:38
+    ConfigAssign splicesites = Null 17:5-17:38
+    ConfigAssign gtf_extra_attributes = String 18:5-18:45
+    ConfigAssign gtf_group_features = String 19:5-19:43
+    ConfigAssign skip_gtf_filter = Boolean 20:5-20:39
+    ConfigAssign skip_gtf_transcript_filter = Boolean 21:5-21:39
+    ConfigAssign featurecounts_feature_type = String 22:5-22:40
+    ConfigAssign featurecounts_group_type = String 23:5-23:48
+    ConfigAssign gencode = Boolean 24:5-24:39
+    ConfigAssign prokaryotic = Boolean 25:5-25:39
+    ConfigAssign gffread_transcript_fasta = Boolean 26:5-26:39
+    ConfigAssign save_reference = Boolean 27:5-27:39
+    ConfigAssign igenomes_base = String 28:5-28:63
+    ConfigAssign igenomes_ignore = Boolean 29:5-29:39
+    ConfigAssign arm = Boolean 30:5-30:39
+    #line 32:5-32:20
+    ConfigAssign with_umi = Boolean 33:5-33:39
+    ConfigAssign skip_umi_extract = Boolean 34:5-34:39
+    ConfigAssign umitools_extract_method = String 35:5-35:42
+    ConfigAssign umi_dedup_tool = String 36:5-36:44
+    ConfigAssign umitools_grouping_method = String 37:5-37:47
+    ConfigAssign umitools_dedup_stats = Boolean 38:5-38:39
+    ConfigAssign umitools_dedup_primary_only = Boolean 39:5-39:40
+    ConfigAssign umitools_bc_pattern = Null 40:5-40:38
+    ConfigAssign umitools_bc_pattern2 = Null 41:5-41:38
+    ConfigAssign umitools_umi_separator = Null 42:5-42:38
+    ConfigAssign umi_discard_read = Number 43:5-43:35
+    ConfigAssign save_umi_intermeds = Boolean 44:5-44:39
+    #line 46:5-46:15
+    ConfigAssign skip_linting = Boolean 47:5-47:39
+    ConfigAssign extra_fqlint_args = String 48:5-48:60
+    #line 50:5-50:16
+    ConfigAssign trimmer = String 51:5-51:46
+    ConfigAssign min_trimmed_reads = Number 52:5-52:39
+    ConfigAssign extra_trimgalore_args = Null 53:5-53:38
+    ConfigAssign extra_fastp_args = Null 54:5-54:38
+    ConfigAssign save_trimmed = Boolean 55:5-55:39
+    ConfigAssign skip_trimming = Boolean 56:5-56:39
+    #line 58:5-58:32
+    ConfigAssign bbsplit_fasta_list = Null 59:5-59:38
+    ConfigAssign save_bbsplit_reads = Boolean 60:5-60:39
+    ConfigAssign skip_bbsplit = Boolean 61:5-61:38
+    #line 63:5-63:29
+    ConfigAssign remove_ribo_rna = Boolean 64:5-64:39
+    ConfigAssign ribo_removal_tool = String 65:5-65:45
+    ConfigAssign use_gpu_ribodetector = Boolean 66:5-66:39
+    ConfigAssign save_non_ribo_reads = Boolean 67:5-67:39
+    ConfigAssign ribo_database_manifest = GString 68:5-68:77
+    ConfigAssign bowtie2_rrna_index = Null 69:5-69:38
+    #line 71:5-71:17
+    ConfigAssign aligner = String 72:5-72:47
+    ConfigAssign use_sentieon_star = Boolean 73:5-73:39
+    ConfigAssign use_parabricks_star = Boolean 74:5-74:39
+    ConfigAssign use_rustqc = Boolean 75:5-75:39
+    ConfigAssign gpu_container_options = Null 76:5-76:38
+    ConfigAssign pseudo_aligner = Null 77:5-77:38
+    ConfigAssign pseudo_aligner_kmer_size = Number 78:5-78:36
+    ConfigAssign seq_center = Null 79:5-79:38
+    ConfigAssign seq_platform = Null 80:5-80:38
+    ConfigAssign bam_csi_index = Boolean 81:5-81:39
+    ConfigAssign star_ignore_sjdbgtf = Boolean 82:5-82:39
+    ConfigAssign salmon_quant_libtype = Null 83:5-83:38
+    ConfigAssign hisat2_build_memory = String 84:5-84:42
+    #line 84:44-84:112
+    ConfigAssign stringtie_ignore_gtf = Boolean 85:5-85:39
+    ConfigAssign min_mapped_reads = Number 86:5-86:35
+    ConfigAssign extra_star_align_args = Null 87:5-87:38
+    ConfigAssign extra_hisat2_align_args = Null 88:5-88:38
+    ConfigAssign extra_bowtie2_align_args = Null 89:5-89:38
+    ConfigAssign extra_salmon_index_args = Null 90:5-90:38
+    ConfigAssign extra_salmon_quant_args = Null 91:5-91:38
+    ConfigAssign extra_kallisto_quant_args = Null 92:5-92:38
+    ConfigAssign kallisto_quant_fraglen = Number 93:5-93:37
+    ConfigAssign kallisto_quant_fraglen_sd = Number 94:5-94:37
+    ConfigAssign save_merged_fastq = Boolean 95:5-95:39
+    ConfigAssign save_unaligned = Boolean 96:5-96:39
+    ConfigAssign save_align_intermeds = Boolean 97:5-97:39
+    ConfigAssign skip_markduplicates = Boolean 98:5-98:39
+    ConfigAssign skip_alignment = Boolean 99:5-99:39
+    ConfigAssign skip_pseudo_alignment = Boolean 100:5-100:39
+    ConfigAssign skip_quantification_merge = Boolean 101:5-101:39
+    ConfigAssign stranded_threshold = Number 102:5-102:37
+    ConfigAssign unstranded_threshold = Number 103:5-103:37
+    ConfigAssign fail_on_low_trimmed_reads = Boolean 104:5-104:39
+    ConfigAssign fail_on_low_mapped_reads = Boolean 105:5-105:39
+    ConfigAssign fail_on_undetermined_strandedness = Boolean 106:5-106:46
+    #line 108:5-108:10
+    ConfigAssign skip_qc = Boolean 109:5-109:39
+    ConfigAssign skip_bigwig = Boolean 110:5-110:39
+    ConfigAssign skip_stringtie = Boolean 111:5-111:39
+    ConfigAssign skip_fastqc = Boolean 112:5-112:39
+    ConfigAssign skip_preseq = Boolean 113:5-113:38
+    ConfigAssign skip_dupradar = Boolean 114:5-114:39
+    ConfigAssign skip_qualimap = Boolean 115:5-115:39
+    ConfigAssign contaminant_screening = Null 116:5-116:38
+    ConfigAssign contaminant_screening_input = String 117:5-117:45
+    ConfigAssign kraken_db = Null 118:5-118:38
+    ConfigAssign save_kraken_assignments = Boolean 119:5-119:39
+    ConfigAssign save_kraken_unassigned = Boolean 120:5-120:39
+    ConfigAssign bracken_precision = String 121:5-121:37
+    ConfigAssign sylph_db = Null 122:5-122:38
+    ConfigAssign sylph_taxonomy = Null 123:5-123:38
+    ConfigAssign skip_rseqc = Boolean 124:5-124:39
+    ConfigAssign skip_biotype_qc = Boolean 125:5-125:39
+    ConfigAssign skip_deseq2_qc = Boolean 126:5-126:39
+    ConfigAssign skip_multiqc = Boolean 127:5-127:39
+    ConfigAssign deseq2_vst = Boolean 128:5-128:38
+    ConfigAssign rseqc_modules = String 129:5-129:151
+    #line 131:5-131:23
+    ConfigAssign multiqc_config = Null 132:5-132:38
+    ConfigAssign multiqc_title = Null 133:5-133:38
+    ConfigAssign multiqc_logo = Null 134:5-134:38
+    ConfigAssign max_multiqc_email_size = String 135:5-135:41
+    ConfigAssign multiqc_methods_description = Null 136:5-136:39
+    #line 138:5-138:27
+    ConfigAssign outdir = Null 139:5-139:40
+    ConfigAssign publish_dir_mode = String 140:5-140:42
+    ConfigAssign email = Null 141:5-141:40
+    ConfigAssign email_on_fail = Null 142:5-142:40
+    ConfigAssign plaintext_email = Boolean 143:5-143:41
+    ConfigAssign force_completion_email = Boolean 144:5-144:41
+    ConfigAssign monochrome_logs = Boolean 145:5-145:41
+    ConfigAssign help = Boolean 146:5-146:41
+    ConfigAssign help_full = Boolean 147:5-147:41
+    ConfigAssign show_hidden = Boolean 148:5-148:41
+    ConfigAssign version = Boolean 149:5-149:41
+    ConfigAssign pipelines_testdata_base_path = String 150:5-150:135
+    ConfigAssign trace_report_suffix = MethodCall 151:5-151:87
+    #line 153:5-153:22
+    ConfigAssign config_profile_name = Null 154:5-154:38
+    ConfigAssign config_profile_description = Null 155:5-155:38
+    ConfigAssign custom_config_version = String 157:5-157:42
+    ConfigAssign custom_config_base = GString 158:5-158:117
+    ConfigAssign config_profile_contact = Null 159:5-159:38
+    ConfigAssign config_profile_url = Null 160:5-160:38
+    #line 162:5-162:41
+    ConfigAssign validate_params = Boolean 163:5-163:38
+  #line 166:1-166:49
+  ConfigAssign outputDir = Property 167:1-167:26
+  ConfigAssign workflow.output.mode = Property 168:1-168:47
+  #line 170:1-170:41
+  ConfigBlock process 171:1-186:2
+    #line 172:5-172:76
+    #line 173:5-173:75
+    #line 174:5-174:80
+    #line 175:5-175:72
+    #line 176:5-176:76
+    ConfigAssign ext.publish_prefix = Closure 177:5-179:6
+    ConfigAssign publishDir = Map 181:5-185:6
+  #line 188:1-188:49
+  ConfigInclude String "conf/base.config" 189:1-189:33
+  ConfigBlock profiles 191:1-329:2
+    ConfigBlock debug 192:5-197:6
+      ConfigAssign dumpHashes = Boolean 193:9-193:39
+      ConfigAssign process.beforeScript = String 194:9-194:51
+      ConfigAssign cleanup = Boolean 195:9-195:40
+      ConfigAssign nextflow.enable.configProcessNamesValidation = Boolean 196:9-196:60
+    ConfigBlock conda 198:5-207:6
+      ConfigAssign conda.enabled = Boolean 199:9-199:39
+      ConfigAssign docker.enabled = Boolean 200:9-200:40
+      ConfigAssign singularity.enabled = Boolean 201:9-201:40
+      ConfigAssign podman.enabled = Boolean 202:9-202:40
+      ConfigAssign shifter.enabled = Boolean 203:9-203:40
+      ConfigAssign charliecloud.enabled = Boolean 204:9-204:40
+      ConfigAssign conda.channels = List 205:9-205:62
+      ConfigAssign apptainer.enabled = Boolean 206:9-206:40
+    ConfigBlock mamba 208:5-217:6
+      ConfigAssign conda.enabled = Boolean 209:9-209:39
+      ConfigAssign conda.useMamba = Boolean 210:9-210:39
+      ConfigAssign docker.enabled = Boolean 211:9-211:40
+      ConfigAssign singularity.enabled = Boolean 212:9-212:40
+      ConfigAssign podman.enabled = Boolean 213:9-213:40
+      ConfigAssign shifter.enabled = Boolean 214:9-214:40
+      ConfigAssign charliecloud.enabled = Boolean 215:9-215:40
+      ConfigAssign apptainer.enabled = Boolean 216:9-216:40
+    ConfigBlock docker 218:5-227:6
+      ConfigAssign docker.enabled = Boolean 219:9-219:39
+      ConfigAssign conda.enabled = Boolean 220:9-220:40
+      ConfigAssign singularity.enabled = Boolean 221:9-221:40
+      ConfigAssign podman.enabled = Boolean 222:9-222:40
+      ConfigAssign shifter.enabled = Boolean 223:9-223:40
+      ConfigAssign charliecloud.enabled = Boolean 224:9-224:40
+      ConfigAssign apptainer.enabled = Boolean 225:9-225:40
+      ConfigAssign docker.runOptions = String 226:9-226:57
+    ConfigBlock arm64 228:5-232:6
+      ConfigAssign params.arm = Boolean 229:9-229:39
+      ConfigAssign process.arch = String 230:9-230:42
+      ConfigInclude String "conf/arm.config" 231:9-231:40
+    ConfigBlock emulate_amd64 233:5-236:6
+      #line 234:9-234:93
+      ConfigAssign docker.runOptions = String 235:9-235:80
+    ConfigBlock singularity 237:5-246:6
+      ConfigAssign singularity.enabled = Boolean 238:9-238:39
+      ConfigAssign singularity.autoMounts = Boolean 239:9-239:39
+      ConfigAssign conda.enabled = Boolean 240:9-240:40
+      ConfigAssign docker.enabled = Boolean 241:9-241:40
+      ConfigAssign podman.enabled = Boolean 242:9-242:40
+      ConfigAssign shifter.enabled = Boolean 243:9-243:40
+      ConfigAssign charliecloud.enabled = Boolean 244:9-244:40
+      ConfigAssign apptainer.enabled = Boolean 245:9-245:40
+    ConfigBlock podman 247:5-255:6
+      ConfigAssign podman.enabled = Boolean 248:9-248:39
+      ConfigAssign conda.enabled = Boolean 249:9-249:40
+      ConfigAssign docker.enabled = Boolean 250:9-250:40
+      ConfigAssign singularity.enabled = Boolean 251:9-251:40
+      ConfigAssign shifter.enabled = Boolean 252:9-252:40
+      ConfigAssign charliecloud.enabled = Boolean 253:9-253:40
+      ConfigAssign apptainer.enabled = Boolean 254:9-254:40
+    ConfigBlock shifter 256:5-264:6
+      ConfigAssign shifter.enabled = Boolean 257:9-257:39
+      ConfigAssign conda.enabled = Boolean 258:9-258:40
+      ConfigAssign docker.enabled = Boolean 259:9-259:40
+      ConfigAssign singularity.enabled = Boolean 260:9-260:40
+      ConfigAssign podman.enabled = Boolean 261:9-261:40
+      ConfigAssign charliecloud.enabled = Boolean 262:9-262:40
+      ConfigAssign apptainer.enabled = Boolean 263:9-263:40
+    ConfigBlock charliecloud 265:5-273:6
+      ConfigAssign charliecloud.enabled = Boolean 266:9-266:39
+      ConfigAssign conda.enabled = Boolean 267:9-267:40
+      ConfigAssign docker.enabled = Boolean 268:9-268:40
+      ConfigAssign singularity.enabled = Boolean 269:9-269:40
+      ConfigAssign podman.enabled = Boolean 270:9-270:40
+      ConfigAssign shifter.enabled = Boolean 271:9-271:40
+      ConfigAssign apptainer.enabled = Boolean 272:9-272:40
+    ConfigBlock apptainer 274:5-283:6
+      ConfigAssign apptainer.enabled = Boolean 275:9-275:39
+      ConfigAssign apptainer.autoMounts = Boolean 276:9-276:39
+      ConfigAssign conda.enabled = Boolean 277:9-277:40
+      ConfigAssign docker.enabled = Boolean 278:9-278:40
+      ConfigAssign singularity.enabled = Boolean 279:9-279:40
+      ConfigAssign podman.enabled = Boolean 280:9-280:40
+      ConfigAssign shifter.enabled = Boolean 281:9-281:40
+      ConfigAssign charliecloud.enabled = Boolean 282:9-282:40
+    ConfigBlock wave 284:5-290:6
+      ConfigAssign apptainer.ociAutoPull = Boolean 285:9-285:39
+      ConfigAssign singularity.ociAutoPull = Boolean 286:9-286:39
+      ConfigAssign wave.enabled = Boolean 287:9-287:39
+      ConfigAssign wave.freeze = Boolean 288:9-288:39
+      ConfigAssign wave.strategy = String 289:9-289:52
+    ConfigBlock test 291:5-300:6
+      ConfigInclude String "conf/test.config" 292:9-292:41
+      ConfigBlock process 293:9-299:10
+        ConfigAssign resourceLimits = Map 294:13-298:14
+    ConfigBlock test_gpu 301:5-310:6
+      ConfigInclude String "conf/test.config" 302:9-302:41
+      ConfigBlock process 303:9-309:10
+        ConfigAssign resourceLimits = Map 304:13-308:14
+    ConfigBlock test_full 311:5-311:70
+      ConfigInclude String "conf/test_full.config" 311:24-311:61
+    ConfigBlock test_prokaryotic 312:5-315:6
+      ConfigInclude String "conf/prokaryotic.config" 313:9-313:48
+      ConfigInclude String "conf/test_prokaryotic.config" 314:9-314:53
+    ConfigBlock prokaryotic 316:5-316:70
+      ConfigInclude String "conf/prokaryotic.config" 316:24-316:63
+    ConfigBlock rapid_quant 317:5-317:69
+      ConfigInclude String "conf/rapid_quant.config" 317:24-317:63
+    ConfigBlock test_full_aws 318:5-320:6
+      ConfigInclude String "conf/test_full.config" 319:9-319:46
+    ConfigBlock test_full_gcp 321:5-324:6
+      ConfigInclude String "conf/test_full.config" 322:9-322:46
+      ConfigAssign params.input = String 323:9-323:131
+    ConfigBlock test_full_azure 325:5-328:6
+      ConfigInclude String "conf/test_full.config" 326:9-326:46
+      ConfigAssign params.input = String 327:9-327:133
+  #line 331:1-331:60
+  #line 333:1-333:216
+  #line 334:1-334:68
+  ConfigInclude Ternary 335:1-335:192
+  #line 337:1-337:68
+  ConfigInclude Ternary 338:1-338:194
+  #line 340:1-340:108
+  #line 341:1-341:96
+  #line 342:1-342:59
+  ConfigAssign apptainer.registry = String 343:1-343:34
+  ConfigAssign docker.registry = String 344:1-344:34
+  ConfigAssign podman.registry = String 345:1-345:34
+  ConfigAssign singularity.registry = String 346:1-346:34
+  ConfigAssign charliecloud.registry = String 347:1-347:34
+  #line 349:1-349:36
+  ConfigInclude Ternary 350:1-350:96
+  #line 352:1-352:107
+  #line 353:1-353:136
+  #line 354:1-354:169
+  ConfigBlock env 356:1-361:2
+    ConfigAssign PYTHONNOUSERSITE = Number 357:5-357:25
+    ConfigAssign R_PROFILE_USER = String 358:5-358:36
+    ConfigAssign R_ENVIRON_USER = String 359:5-359:36
+    ConfigAssign JULIA_DEPOT_PATH = String 360:5-360:48
+  #line 363:1-363:20
+  ConfigAssign process.shell = List 364:1-371:2
+    #line 366:19-366:85
+    #line 367:19-367:72
+    #line 368:19-368:70
+    #line 369:19-369:70
+    #line 370:19-370:84
+  #line 373:1-373:87
+  ConfigAssign nextflow.enable.configProcessNamesValidation = Boolean 374:1-374:53
+  ConfigBlock timeline 376:1-379:2
+    ConfigAssign enabled = Boolean 377:5-377:19
+    ConfigAssign file = GString 378:5-378:101
+  ConfigBlock report 380:1-383:2
+    ConfigAssign enabled = Boolean 381:5-381:19
+    ConfigAssign file = GString 382:5-382:99
+  ConfigBlock trace 384:1-387:2
+    ConfigAssign enabled = Boolean 385:5-385:19
+    ConfigAssign file = GString 386:5-386:97
+  ConfigBlock dag 388:1-391:2
+    ConfigAssign enabled = Boolean 389:5-389:19
+    ConfigAssign file = GString 390:5-390:95
+  ConfigBlock manifest 393:1-474:2
+    ConfigAssign name = String 394:5-394:39
+    ConfigAssign contributors = List 395:5-465:6
+    ConfigAssign homePage = String 466:5-466:58
+    ConfigAssign description = String 467:5-467:124
+    ConfigAssign mainScript = String 468:5-468:32
+    ConfigAssign defaultBranch = String 469:5-469:31
+    ConfigAssign nextflowVersion = String 470:5-470:35
+    ConfigAssign version = String 471:5-471:31
+    ConfigAssign doi = String 472:5-472:63
+    ConfigAssign diagram = String 473:5-473:74
+  #line 476:1-476:20
+  ConfigApplyBlock plugins 477:1-480:2
+    ConfigApply id (1 arguments) 478:5-478:25
+    #line 478:26-478:115
+    ConfigApply id (1 arguments) 479:5-479:29
+    #line 479:30-479:105
+  ConfigBlock validation 482:1-485:2
+    ConfigAssign defaultIgnoreParams = List 483:5-483:55
+    ConfigAssign monochromeLogs = Property 484:5-484:44
+  #line 486:1-486:37
+  #line 488:1-488:21
+  ConfigInclude String "conf/modules/prepare_genome.config" 489:1-489:51
+  #line 491:1-491:18
+  ConfigInclude String "conf/modules/cat_fastq.config" 492:1-492:46
+  ConfigInclude String "conf/modules/fastp.config" 493:1-493:42
+  ConfigInclude String "conf/modules/trimgalore.config" 494:1-494:47
+  ConfigInclude String "conf/modules/qc_trim_filter.config" 495:1-495:51
+  ConfigInclude String "conf/modules/strandedness.config" 496:1-496:49
+  ConfigInclude String "conf/modules/bbsplit.config" 497:1-497:44
+  ConfigInclude String "conf/modules/sortmerna.config" 498:1-498:46
+  #line 500:1-500:13
+  ConfigInclude String "conf/modules/align_star.config" 501:1-501:47
+  ConfigInclude String "conf/modules/align_bowtie2.config" 502:1-502:50
+  ConfigInclude String "conf/modules/align_hisat2.config" 503:1-503:49
+  ConfigInclude String "conf/modules/markduplicates.config" 504:1-504:51
+  #line 506:1-506:18
+  ConfigInclude String "./subworkflows/nf-core/quantify_rsem/nextflow.config" 507:1-507:69
+  ConfigInclude String "./subworkflows/nf-core/quantify_pseudo_alignment/nextflow.config" 508:1-508:81
+  ConfigInclude String "./subworkflows/nf-core/quant_tximport_summarizedexperiment/nextflow.config" 509:1-509:91
+  #line 511:1-511:6
+  ConfigInclude String "conf/modules/featurecounts.config" 512:1-512:50
+  ConfigInclude String "conf/modules/multiqc_custom_biotype.config" 513:1-513:59
+  ConfigInclude String "conf/modules/stringtie.config" 514:1-514:46
+  ConfigInclude String "conf/modules/rseqc.config" 515:1-515:42
+  ConfigInclude String "conf/modules/qualimap.config" 516:1-516:45
+  ConfigInclude String "conf/modules/dupradar.config" 517:1-517:45
+  ConfigInclude String "conf/modules/preseq.config" 518:1-518:43
+  ConfigInclude String "conf/modules/rustqc.config" 519:1-519:43
+  ConfigInclude String "conf/modules/kraken2.config" 520:1-520:44
+  ConfigInclude String "conf/modules/bracken.config" 521:1-521:44
+  ConfigInclude String "conf/modules/sylph.config" 522:1-522:42
+  ConfigInclude String "conf/modules/sylphtax.config" 523:1-523:45
+  ConfigInclude String "conf/modules/multiqc.config" 524:1-524:44
+  #line 526:1-526:36
+  #line 527:1-527:69
+  #line 528:1-528:46
+  ConfigInclude String "conf/modules/quantify_bam_salmon.config" 529:1-529:56
+  ConfigInclude String "conf/modules/alignment.config" 530:1-530:46
+  ConfigInclude String "conf/modules/umi_dedup.config" 531:1-531:46
+  ConfigInclude String "conf/modules/bigwig.config" 532:1-532:43
+  ConfigInclude String "conf/modules/deseq2_qc.config" 533:1-533:46
+  ConfigInclude String "conf/modules/quantify_rsem.config" 534:1-534:50
+  ConfigInclude String "conf/modules/quantify_pseudo_alignment.config" 535:1-535:62

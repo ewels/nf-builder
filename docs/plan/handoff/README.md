@@ -6,8 +6,8 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 
 | Feature | Branch | State |
 |---|---|---|
-| F-102 script AST | `feat/F-102`, PR #23 | Plan deleted in the PR that merges it. |
-| F-103 config AST | `feat/F-103` (pushed, stacked on `feat/F-102` at `83511c3`) | Built and committed: config AST, 228 corpus snapshots, range property test, ConfigAstBuilder errors, oracle cases. After F-102 merges: merge `main`; fill comment slots with F-102's `attachComments`; delete `src/ast/config/literal-errors.ts` and its number handling, since the shared builders now report escapes (`checkEscapes` in `stringLiteral`/`gstringText`), keyword and duplicate-argument errors, and number formats (call `cx.failOnNumberFormat()` at the end of the config unit); check config paths and block headers still get escape checks; records; PR. |
+| F-102 script AST | merged, PR #23 | |
+| F-103 config AST | `feat/F-103`, in PR | Plan deleted in its PR. |
 | F-104 round trip | not started | [plan](plan-F-104.md). Branch from `main` after F-102 (and F-103) merge. |
 | F-110 printer | `feat/F-110` | Tasks 1–4 committed; task 5 building. [plan](plan-F-110.md). |
 
@@ -22,7 +22,7 @@ Next free ADR number: 0032.
 - Report every ScriptAstBuilder error; `-1:-1` upstream errors at the real node; vendored nf-core/fastqc fixture module (MIT) allowed; oracle extended to lint the fixture and error trees (an AGENTS.md "Nextflow knowledge" line says the oracle reproduces `errors.json`); comment-dump oracle in `pnpm test:corpus`.
 - Records at landing: `docs/licences.md` rows for the ported `ScriptAstBuilder`, `CommentAttacher`, `Comments`, `EscapeUtils`, Groovy `StringUtils`/`Numbers` logic, the syntax-reference snippets in fixtures (Apache-2.0) and the vendored fastqc module (MIT); notes from the plan's section 9.
 
-### F-103 — [plan](plan-F-103.md)
+### F-103 (merged with its PR)
 - Reuses F-102's base types and expression/statement builders (the plan's tasks 1–2 are covered by F-102).
 - Snapshots all 228 corpus configs (one line per statement); fixture configs are oracle cases; integer number-format errors ported; `parseConfig` off the pack entry.
 - Records at landing: licences rows for ported `ConfigAstBuilder`, `EscapeUtils`, Groovy `Numbers` and the corpus-derived snapshots; AGENTS.md `pnpm test:corpus` row mentions `pnpm test:corpus config-ast -u`; F-112 notes for keyword checks, duplicate named arguments, decimal-number errors, selector placement and include resolution.
