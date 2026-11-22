@@ -3,7 +3,6 @@ export type {
   PaletteIcon,
   PaletteView,
   PaletteViewCategory,
-  PaletteViewGroup,
   PaletteViewItem,
 } from "@nf-builder/lang-core";
 export { installedPackVersions } from "./packs";

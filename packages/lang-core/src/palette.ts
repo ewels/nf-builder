@@ -82,12 +82,10 @@ export type PaletteDefinition = { categories: PaletteCategory[] };
 
 // The resolved palette the web app renders (ADR 0028): plain, serialisable data, so it can cross a worker boundary.
 
-export type PaletteItemKind = PaletteItem["kind"];
-
 export type PaletteViewItem = {
   /** Construct id, or `${kind}:${name}`; unique in the palette. */
   readonly key: string;
-  readonly kind: PaletteItemKind;
+  readonly kind: PaletteItem["kind"];
   /** Catalogue name (operator, factory, config scope) or construct id. Searched. */
   readonly name: string;
   /** Display text: construct label, else the catalogue name. Searched. */

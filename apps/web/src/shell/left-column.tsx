@@ -3,13 +3,13 @@ import { useState } from "react";
 import { PalettePanel } from "../palette/palette-panel";
 import { SideColumn } from "./side-column";
 
-export type LeftView = "components" | "files";
+type LeftView = "components" | "files";
 const VIEWS: readonly { readonly view: LeftView; readonly label: string }[] = [
   { view: "components", label: "Components" },
   { view: "files", label: "Files" },
 ];
 
-export function LeftColumnTabs({
+function LeftColumnTabs({
   view,
   onChange,
 }: {
@@ -18,17 +18,14 @@ export function LeftColumnTabs({
 }): JSX.Element {
   const move = (event: KeyboardEvent<HTMLDivElement>) => {
     const index = VIEWS.findIndex((v) => v.view === view);
-    const next =
-      event.key === "ArrowRight"
-        ? (index + 1) % VIEWS.length
-        : event.key === "ArrowLeft"
-          ? (index + VIEWS.length - 1) % VIEWS.length
-          : event.key === "Home"
-            ? 0
-            : event.key === "End"
-              ? VIEWS.length - 1
-              : -1;
-    const target = VIEWS[next];
+    const last = VIEWS.length - 1;
+    const targets: Record<string, number> = {
+      ArrowRight: index === last ? 0 : index + 1,
+      ArrowLeft: index === 0 ? last : index - 1,
+      Home: 0,
+      End: last,
+    };
+    const target = VIEWS[targets[event.key] ?? -1];
     if (!target) return;
     event.preventDefault();
     onChange(target.view);
@@ -70,7 +67,6 @@ export function LeftColumn({
     <SideColumn
       side="left"
       label="Components and files"
-      title="Components"
       header={<LeftColumnTabs view={view} onChange={setView} />}
     >
       {/* Both panels stay mounted so the query and the loaded palette survive switching. */}

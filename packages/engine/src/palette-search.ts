@@ -10,7 +10,7 @@ export function queryTerms(query: string): string[] {
 }
 
 /** Every term is a substring of label, name, description or a keyword (case-insensitive). [] matches everything. */
-export function paletteItemMatches(
+function paletteItemMatches(
   item: PaletteViewItem,
   terms: readonly string[],
 ): boolean {

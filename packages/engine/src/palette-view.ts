@@ -1,8 +1,7 @@
 import type {
   Catalogue,
-  CatalogueEntry,
-  ConfigNode,
   PaletteDefinition,
+  PaletteIcon,
   PaletteItem,
   PaletteView,
   PaletteViewItem,
@@ -31,52 +30,46 @@ export function firstParagraph(text: string): string {
   return text.split("\n\n")[0] ?? "";
 }
 
-const first = <T>(
-  list: readonly T[],
-  preferred?: (x: T) => boolean,
-): T | undefined => (preferred ? list.find(preferred) : undefined) ?? list[0];
-
 function operatorDescription(catalogue: Catalogue, name: string) {
+  const modern = catalogue.script.operators.filter(
+    (o) => o.name === name && !o.deprecated,
+  );
   const entries = catalogue.script.operators.filter((o) => o.name === name);
-  const modern = entries.filter((o) => !o.deprecated);
-  return (first(modern, (o) => o.receiver === "Channel") ?? first(entries))
-    ?.description;
+  return (
+    modern.find((o) => o.receiver === "Channel") ??
+    modern[0] ??
+    entries[0]
+  )?.description;
 }
 
 function factoryDescription(catalogue: Catalogue, name: string) {
-  const entries: CatalogueEntry[] = catalogue.script.factories.filter(
-    (f) => f.name === name,
-  );
-  return first(entries, (f) => !f.deprecated)?.description;
-}
-
-function configDescription(catalogue: Catalogue, name: string) {
-  const node: ConfigNode | undefined = catalogue.config.scopes.find(
-    (n) => n.name === name,
-  );
-  return node?.description;
+  const entries = catalogue.script.factories.filter((f) => f.name === name);
+  return (entries.find((f) => !f.deprecated) ?? entries[0])?.description;
 }
 
 function resolveItem(
   version: string,
   item: PaletteItem,
-  categoryIcon: PaletteViewItem["icon"],
+  categoryIcon: PaletteIcon,
   catalogue: Catalogue,
 ): PaletteViewItem {
-  const key = item.kind === "construct" ? item.id : `${item.kind}:${item.name}`;
+  let key: string;
   let label: string;
   let markdown: string | undefined;
   if (item.kind === "construct") {
+    key = item.id;
     label = item.label;
     markdown = item.description;
   } else {
+    key = `${item.kind}:${item.name}`;
     label = item.name;
     markdown =
       item.kind === "operator"
         ? operatorDescription(catalogue, item.name)
         : item.kind === "factory"
           ? factoryDescription(catalogue, item.name)
-          : configDescription(catalogue, item.name);
+          : catalogue.config.scopes.find((n) => n.name === item.name)
+              ?.description;
     if (markdown === undefined)
       throw new Error(
         `palette item ${key}: no ${item.kind} "${item.name}" in the ${version} catalogue`,
@@ -103,7 +96,7 @@ export function resolvePaletteView(
   palette: PaletteDefinition,
   catalogue: Catalogue,
 ): PaletteView {
-  const resolve = (item: PaletteItem, icon: PaletteViewItem["icon"]) =>
+  const resolve = (item: PaletteItem, icon: PaletteIcon) =>
     resolveItem(version, item, icon, catalogue);
   return {
     version,

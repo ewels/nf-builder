@@ -55,7 +55,6 @@ interface LanguagePack {
   parseConfig(text: string): ParseResult;
   palette: PaletteDefinition;           // palette.json, ADR 0025
   loadCatalogue(): Promise<Catalogue>;  // generated, lazily loaded (ADR 0005, ADR 0028)
-  palette: PaletteDefinition;           // catalogue + palette.yaml overlay
   printer: Printer;                     // declarations → text, ADR 0005
   lints: LintRule[];
   templates: Template[];

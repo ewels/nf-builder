@@ -37,7 +37,11 @@ export function AppShell(): JSX.Element {
         {right.collapsed ? null : (
           <ColumnSeparator side="right" label="Resize details" />
         )}
-        <SideColumn side="right" label="Details" title="Details">
+        <SideColumn
+          side="right"
+          label="Details"
+          header={<h2 className="column-title">Details</h2>}
+        >
           <p className="muted">Nothing selected</p>
         </SideColumn>
       </div>

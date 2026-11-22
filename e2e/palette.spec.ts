@@ -35,6 +35,20 @@ async function panelOf(page: Page, label: string) {
   const id = await category(page, label).getAttribute("aria-controls");
   return page.locator(`[id="${id}"]`);
 }
+async function openAll(page: Page) {
+  for (const label of CATEGORIES)
+    if (!DEFAULT_OPEN.has(label)) await category(page, label).click();
+}
+function scriptCatalogue(version: string) {
+  const dir = packFor(version, "catalogue/script.json", "catalogue");
+  return JSON.parse(
+    readFileSync(join(dir, "catalogue/script.json"), "utf8"),
+  ) as {
+    source: { jarSha256: string };
+    operators: { name: string; deprecated: boolean }[];
+    factories: { name: string; deprecated: boolean }[];
+  };
+}
 async function expectState(page: Page, label: string, expanded: boolean) {
   await expect(category(page, label)).toHaveAttribute(
     "aria-expanded",
@@ -150,18 +164,7 @@ test("F-204 step 3 UX-13 ADR-0007: no legacy-only operator or factory appears, e
 }) => {
   await open(page);
   const v = await version(page);
-  const catalogue = JSON.parse(
-    readFileSync(
-      join(
-        packFor(v, "catalogue/script.json", "catalogue"),
-        "catalogue/script.json",
-      ),
-      "utf8",
-    ),
-  ) as {
-    operators: { name: string; deprecated: boolean }[];
-    factories: { name: string; deprecated: boolean }[];
-  };
+  const catalogue = scriptCatalogue(v);
   const entries = [...catalogue.operators, ...catalogue.factories];
   const names = new Set(entries.map((e) => e.name));
   const modern = new Set(
@@ -169,8 +172,7 @@ test("F-204 step 3 UX-13 ADR-0007: no legacy-only operator or factory appears, e
   );
   const legacy = [...names].filter((n) => !modern.has(n));
   expect(legacy).toContain("groupTuple");
-  for (const label of CATEGORIES)
-    if (!DEFAULT_OPEN.has(label)) await category(page, label).click();
+  await openAll(page);
   const labels = await palette(page)
     .locator(".palette-item-label")
     .allInnerTexts();
@@ -207,8 +209,7 @@ test("F-204 UX-13: only preview items carry the preview badge", async ({
     ])
     .filter((i) => i.preview).length;
   expect(previews).toBeGreaterThan(0);
-  for (const label of CATEGORIES)
-    if (!DEFAULT_OPEN.has(label)) await category(page, label).click();
+  await openAll(page);
   await expect(palette(page).locator(".badge-preview")).toHaveCount(previews);
   await expect(
     palette(page).locator(".palette-item", { hasText: "Agent" }),
@@ -240,17 +241,7 @@ test("F-204 QA-01 QA-30 ADR-0028: the catalogue loads lazily, outside the initia
   const watch = await watchForCspViolations(page);
   await open(page);
   const v = await version(page);
-  const sha = (
-    JSON.parse(
-      readFileSync(
-        join(
-          packFor(v, "catalogue/script.json", "catalogue"),
-          "catalogue/script.json",
-        ),
-        "utf8",
-      ),
-    ) as { source: { jarSha256: string } }
-  ).source.jarSha256;
+  const sha = scriptCatalogue(v).source.jarSha256;
   const manifest = JSON.parse(
     readFileSync(join(WEB_DIST, ".vite/manifest.json"), "utf8"),
   ) as Manifest;

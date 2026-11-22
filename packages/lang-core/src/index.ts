@@ -32,7 +32,6 @@ export type {
   PaletteGroup,
   PaletteIcon,
   PaletteItem,
-  PaletteItemKind,
   PaletteView,
   PaletteViewCategory,
   PaletteViewGroup,

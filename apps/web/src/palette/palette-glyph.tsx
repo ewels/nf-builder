@@ -33,7 +33,7 @@ export function PaletteGlyph({
 }): JSX.Element {
   const glyph = GLYPHS[icon];
   return (
-    <span className={`palette-glyph tone-${glyph.tone}`} aria-hidden="true">
+    <span className={`palette-glyph tone-${glyph.tone}`}>
       <svg
         width="14"
         height="14"

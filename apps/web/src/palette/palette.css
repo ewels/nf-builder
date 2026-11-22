@@ -117,7 +117,6 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  min-width: 0;
   padding: 3px 6px;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
@@ -125,7 +124,6 @@
 }
 
 .palette-item-label {
-  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -176,16 +174,13 @@
   background: #e5e7eb;
 }
 
-.badge {
+.badge-preview {
   flex: none;
   margin-left: auto;
   padding: 0 6px;
   font-size: 11px;
   line-height: 16px;
   border-radius: 8px;
-}
-
-.badge-preview {
   color: #78350f;
   background: #fbe8c4;
   border: 1px solid #e0b565;

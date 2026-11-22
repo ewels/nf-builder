@@ -107,17 +107,12 @@ function jsonChunks(distDir: string): Set<string> {
   const path = join(distDir, ".vite/manifest.json");
   const chunks = new Set<string>();
   if (!existsSync(path)) return chunks;
-  const manifest: unknown = JSON.parse(readFileSync(path, "utf8"));
-  if (typeof manifest !== "object" || manifest === null) return chunks;
-  for (const entry of Object.values(manifest)) {
-    const { src, file } = entry as { src?: unknown; file?: unknown };
-    if (
-      typeof src === "string" &&
-      typeof file === "string" &&
-      src.endsWith(".json")
-    )
-      chunks.add(resolve(distDir, file));
-  }
+  const manifest = JSON.parse(readFileSync(path, "utf8")) as Record<
+    string,
+    { src?: string; file: string }
+  >;
+  for (const { src, file } of Object.values(manifest))
+    if (src?.endsWith(".json")) chunks.add(resolve(distDir, file));
   return chunks;
 }
 

@@ -20,9 +20,7 @@ export function loadPalette(
         resolvePaletteView(pack.version, pack.palette, catalogue),
       );
     views.set(pack, view);
-    view.catch(() => {
-      if (views.get(pack) === view) views.delete(pack);
-    });
+    view.catch(() => views.delete(pack));
   }
   return view;
 }
