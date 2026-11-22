@@ -115,3 +115,31 @@ cases:
       - https://github.com/nextflow-io/nextflow/blob/v26.10.7/modules/nf-lang/src/test/groovy/nextflow/config/formatter/ConfigFormatterTest.groovy#L102-L141
       - https://github.com/nextflow-io/nextflow/blob/v26.10.7/modules/nextflow/src/test/groovy/nextflow/config/ConfigParserV2Test.groovy#L60-L82
     lint: { expect: ok }
+  # F-105: include resolution. Both trees are lint-only; a missing registry module makes lint download or abort, so those are unit-tested.
+  - id: f105-includes-resolve
+    about: Every include form that resolves (directory, .nf appended, explicit .nf, ../, registry at the root and nested, plugin/, pipeline entries) and nested includeConfig; lint reports no errors.
+    spec: [F-105, AR-03, FI-05, IO-32]
+    sources:
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/modules/nf-lang/src/main/java/nextflow/script/control/ResolveIncludeVisitor.java#L90-L141
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/modules/nf-lang/src/main/java/nextflow/script/control/ModuleResolver.java#L150-L181
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/modules/nf-lang/src/main/java/nextflow/module/spi/RemoteModuleResolver.java#L61-L93
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/modules/nf-lang/src/main/java/nextflow/config/control/ResolveIncludeVisitor.java#L65-L78
+    lint: { expect: ok }
+  - id: f105-includes-missing
+    about: Includes that do not resolve (missing file, directory without main.nf, path outside the project, unknown name, target that does not parse) and missing includeConfig targets, kept out of the root nextflow.config.
+    spec: [F-105, AR-03, FI-05]
+    sources:
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/modules/nf-lang/src/main/java/nextflow/script/control/ResolveIncludeVisitor.java#L90-L141
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/modules/nf-lang/src/main/java/nextflow/config/control/ResolveIncludeVisitor.java#L65-L78
+    lint:
+      expect: error
+      errors:
+        [
+          "missing/c.nf'",
+          "Included name 'NOPE' is not defined in module '",
+          "modules/b/main.nf'",
+          "Module could not be parsed: '",
+          "outside/d.nf'",
+          "conf/missing.config'",
+          "conf/test'",
+        ]

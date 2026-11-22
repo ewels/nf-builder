@@ -27,6 +27,14 @@ export type {
   ScriptCatalogue,
   Signature,
 } from "./catalogue.ts";
+export type { Diagnostic, DiagnosticSeverity } from "./diagnostic.ts";
+export type {
+  Includable,
+  IncludableDeclaration,
+  IncludeRules,
+  IncludeTarget,
+  ProjectTree,
+} from "./includes.ts";
 export type {
   CatalogueItem,
   ConstructItem,

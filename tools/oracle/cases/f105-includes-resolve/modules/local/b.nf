@@ -1,0 +1,4 @@
+process B {
+    script:
+    "echo"
+}
