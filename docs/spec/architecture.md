@@ -20,7 +20,7 @@ files (IndexedDB) ──► engine worker: parse ─► AST ─► semantic mode
 |---|---|
 | AR-01 | `SourceFile` holds path, text, language (`nextflow`, `config`, `json`, `yaml`, `markdown`, `text`), parse status, AST, and comment map. |
 | AR-02 | The AST is our own typed tree built from the ANTLR parse tree. Every node has a source range. Comments are attached as leading, trailing or dangling comments, as nf-lang's `CommentAttacher` does (ADR 0027). |
-| AR-03 | The semantic model resolves includes across files, declarations by name, workflow bodies into statements, and statements into calls, chains, assignments and code nodes. Includes of registry modules resolve to `modules/<namespace>/<name>/`. |
+| AR-03 | The semantic model resolves includes across files, declarations by name, workflow bodies into statements, and statements into calls, chains, assignments and code nodes. Includes of registry modules resolve to `modules/<namespace>/<name>/` under the project root, or under the including script's directory when that lies in a `modules/` directory (nested vendoring, ADR 0034). |
 | AR-04 | Re-parsing is per file. A change to one file re-parses that file and recomputes the model for files that depend on it. |
 | AR-05 | Diagnostics come from the parser, the model, and pack lint rules. Each has a range, severity, message, and optional quick fix (an edit command). |
 
@@ -52,6 +52,7 @@ Sketch, to be fixed in M1:
 interface LanguagePack {
   version: string;                      // "26.10"
   loadParser(): Promise<SourceParser>;  // parser and printer, lazily loaded (ADR 0033)
+  includes: IncludeRules;               // include resolution and includable names (ADR 0034)
   palette: PaletteDefinition;           // palette.json, ADR 0025
   loadCatalogue(): Promise<Catalogue>;  // generated, lazily loaded (ADR 0005, ADR 0028)
   lints: LintRule[];
