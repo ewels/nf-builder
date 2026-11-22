@@ -1,0 +1,89 @@
+workflow main.nf# legacy
+main.nf#/:params params "params" @40:1
+  out reads (reads): -
+  out threshold (threshold): -
+main.nf#/reads_ch factory "channel.of" factory=channel.of @42:16
+  out out (out): Channel<String>
+main.nf#/summary code "def summary = [:]" @44:5
+  out summary (summary): Map
+main.nf#/:code@1 code "summary['reads'] = params.reads" @45:5
+  in params.reads (params.reads): -
+    <- main.nf#/:params[reads] ? via params.reads indirect
+  in summary (summary): -
+    <- main.nf#/summary[summary] Map via summary indirect
+main.nf#/mode code "if (params.reads) {" @47:5
+  in params.reads (params.reads): -
+    <- main.nf#/:params[reads] ? via params.reads indirect
+  out mode (mode): -
+main.nf#/threshold code "try {" @56:5
+  in params.threshold (params.threshold): -
+    <- main.nf#/:params[threshold] ? via params.threshold indirect
+  out threshold (threshold): -
+main.nf#/count code "count = 0" @63:5
+  out count (count): Integer
+main.nf#/count~2 code "count += 1" @64:5
+  in count (count): -
+    <- main.nf#/count[count] Integer via count indirect
+  out count (count): -
+main.nf#/label code "label = "run ${mode} with ${threshold}"" @66:5
+  in mode (mode): -
+    <- main.nf#/mode[mode] ? via mode indirect
+  in threshold (threshold): -
+    <- main.nf#/threshold[threshold] ? via threshold indirect
+  out label (label): String
+main.nf#/:code@2 code "log.info("starting ${label}")" @67:5
+  in label (label): -
+    <- main.nf#/label[label] String via label indirect
+main.nf#/lst code "lst = []" @69:5
+  out lst (lst): List
+main.nf#/:code@3 code "lst << mode" @70:5
+  in lst (lst): -
+    <- main.nf#/lst[lst] List via lst indirect
+  in mode (mode): -
+    <- main.nf#/mode[mode] ? via mode indirect
+main.nf#/scale code "scale = { v -> v * threshold }" @72:5
+  in threshold (threshold): -
+    <- main.nf#/threshold[threshold] ? via threshold indirect
+  out scale (scale): -
+main.nf#/:code@4 code "assert threshold >= 0" @73:5
+  in threshold (threshold): -
+    <- main.nf#/threshold[threshold] ? via threshold indirect
+main.nf#/res code "res = helper(reads_ch)" @75:5
+  in reads_ch (reads_ch): -
+    <- main.nf#/reads_ch[out] Channel<String> via reads_ch indirect
+  out res (res): -
+main.nf#/unwired chain ".map" steps=map @77:15
+  in in (in): -
+    <- main.nf#/reads_ch[out] Channel<String> via reads_ch
+  out out (out): Channel<?>
+main.nf#/meta_ch chain ".map" steps=map @79:15
+  in in (in): -
+    <- main.nf#/reads_ch[out] Channel<String> via reads_ch
+  out out (out): Channel<?>
+main.nf#/annotated call "ANNOTATE" callee=ANNOTATE:process:modelled:legacy @80:17
+  in $1 ($1): -
+    <- main.nf#/meta_ch[out] Channel<?> via meta_ch
+  out out (out): -
+main.nf#/summarised call "SUMMARISE" callee=SUMMARISE:workflow:modelled:legacy @81:18
+  in pairs (pairs): -
+    <- main.nf#/res[res] ? via res
+  out tagged (tagged): ?
+main.nf#/typed call "TYPED_TAIL" callee=TYPED_TAIL:workflow:modelled:typed @82:13
+  in names (names): Channel<String>
+    <- main.nf#/unwired[out] Channel<?> via unwired
+  out out (out): Channel<String>
+main.nf#/:code@5 code "workflow.onComplete {" @84:5
+  in count (count): -
+    <- main.nf#/count~2[count] ? via count indirect
+main.nf#/.view@1 chain ".view" steps=view @88:5
+  in in (in): -
+    <- main.nf#/annotated[out] ? via annotated indirect
+  out out (out): ?
+main.nf#/.view@2 chain ".view" steps=view @89:5
+  in in (in): -
+    <- main.nf#/summarised[tagged] ? via summarised.tagged
+  out out (out): ?
+main.nf#/.view@3 chain ".view" steps=view @90:5
+  in in (in): -
+    <- main.nf#/typed[out] Channel<String> via typed.out
+  out out (out): Channel<String>

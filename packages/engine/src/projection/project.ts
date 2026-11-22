@@ -24,6 +24,7 @@ import type {
 } from "@nf-builder/lang-core";
 import type { Binding } from "../model/file-model";
 import type { ProjectModel } from "../model/project";
+import { buildCodeNode } from "./code";
 import { inlineType } from "./inline";
 import { KeyAllocator } from "./keys";
 import {
@@ -368,42 +369,22 @@ class Projecting {
       if (variable !== null) this.#scope.bind(variable, [value]);
       return;
     }
-    this.#code(statement, variable, expression);
+    this.#code(statement);
   }
 
-  #code(
-    statement: Statement,
-    variable: string | null,
-    expression: Expression | null,
-  ): void {
-    const id =
-      variable === null ? this.#keys.code() : this.#keys.assigned(variable);
-    const outputs =
-      variable === null
-        ? []
-        : [
-            spec(
-              variable,
-              // a copy of a graph value (`w2 = w`) has that value's type; anything else an inline one
-              expression === null ? null : this.#feed(expression).type,
-            ),
-          ];
-    const first = (
-      this.text
-        .slice(statement.range.start, statement.range.end)
-        .split("\n")[0] ?? ""
-    ).trim();
-    const label = first.length > 60 ? `${first.slice(0, 59)}…` : first;
-    this.#nodes.push({
-      id,
-      kind: "code",
-      label,
-      inputs: [],
-      outputs: outputs.map((s) => port(s)),
-      range: statement.range,
+  #code(statement: Statement): void {
+    const { node, edges, writes } = buildCodeNode(statement, {
+      scope: this.#scope,
+      keys: this.#keys,
+      text: this.text,
+      // a copy of a graph value (`w2 = w`) has that value's type; anything else an inline one
+      typeOf: (expression) => this.#feed(expression).type,
     });
-    if (variable !== null)
-      this.#scope.bind(variable, [{ node: id, ports: outputs }]);
+    this.#nodes.push(node);
+    for (const edge of edges) this.#edges.set(edge.id, edge);
+    // each assigned name now stands for this node's port of that name, replacing an earlier binding
+    for (const output of writes)
+      this.#scope.bind(output.id, [{ node: node.id, ports: [output] }]);
   }
 
   // ---- dataflow expressions ----
