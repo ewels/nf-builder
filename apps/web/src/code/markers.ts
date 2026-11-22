@@ -1,7 +1,7 @@
 // Parse problems as Monaco markers (F-208, AR-24). The engine counts columns in code points; Monaco counts UTF-16 units.
 import type { ParseProblem } from "@nf-builder/engine";
 
-export interface MarkerSpec {
+interface MarkerSpec {
   readonly startLineNumber: number;
   readonly startColumn: number;
   readonly endLineNumber: number;
@@ -10,11 +10,8 @@ export interface MarkerSpec {
 }
 
 /** The last line number that exists, at most `line`. */
-function clampLine(line: number, lineAt: (n: number) => string | null): number {
-  let n = Math.max(1, Math.floor(line));
-  while (n > 1 && lineAt(n) === null) n--;
-  return n;
-}
+const clampLine = (line: number, lines: readonly string[]): number =>
+  Math.max(1, Math.min(Math.floor(line), lines.length));
 
 /** The 1-based UTF-16 column of a 1-based code-point column on `text`, clamped to the end of the line. */
 function utf16Column(text: string, column: number): number {
@@ -30,13 +27,13 @@ function utf16Column(text: string, column: number): number {
 
 export function problemsToMarkers(
   problems: readonly ParseProblem[],
-  lineAt: (line: number) => string | null,
+  lines: readonly string[],
 ): MarkerSpec[] {
   return problems.map((p) => {
-    const startLine = clampLine(p.line, lineAt);
-    const endLine = Math.max(startLine, clampLine(p.endLine, lineAt));
-    const startColumn = utf16Column(lineAt(startLine) ?? "", p.column);
-    let endColumn = utf16Column(lineAt(endLine) ?? "", p.endColumn);
+    const startLine = clampLine(p.line, lines);
+    const endLine = Math.max(startLine, clampLine(p.endLine, lines));
+    const startColumn = utf16Column(lines[startLine - 1] ?? "", p.column);
+    let endColumn = utf16Column(lines[endLine - 1] ?? "", p.endColumn);
     if (endLine === startLine && endColumn < startColumn)
       endColumn = startColumn;
     return {

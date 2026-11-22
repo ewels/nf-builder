@@ -16,12 +16,8 @@ const EDITABLE =
 
 /** Whether typing into `target` is text entry, so a letter there is never a shortcut. */
 export function isEditableTarget(target: EventTarget | null): boolean {
-  if (target === null) return false;
-  const closest = (target as { closest?: unknown }).closest;
-  return (
-    typeof closest === "function" &&
-    (closest as (selector: string) => unknown).call(target, EDITABLE) !== null
-  );
+  const el = target as { closest?: (selector: string) => unknown } | null;
+  return typeof el?.closest === "function" && el.closest(EDITABLE) !== null;
 }
 
 export interface ViewModeKey {

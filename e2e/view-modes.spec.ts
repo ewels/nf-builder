@@ -11,9 +11,14 @@ import {
   insertAfterLine,
   lineNumberOf,
   openCodeFixture,
-  readFileIn,
 } from "./code-view.ts";
-import { createProjectInUi, switcher } from "./projects.ts";
+import {
+  createProjectInUi,
+  readFile,
+  saveState,
+  switcher,
+  type WorkspaceHook,
+} from "./projects.ts";
 
 const mode = (page: Page) => page.locator("#canvas-panel");
 const radio = (page: Page, name: string) =>
@@ -116,7 +121,7 @@ test("F-208 step 2 UX-27: in Split mode a valid edit updates the graph", async (
   await expect(page.getByRole("contentinfo")).toContainText(
     `${before.length + 1} nodes`,
   );
-  expect(await readFileIn(page, "main.nf")).toBe(fileText(F208_AFTER));
+  expect(await readFile(page, "main.nf")).toBe(fileText(F208_AFTER));
 });
 
 test("F-208 step 2 AR-24 ADR-0039: an invalid edit shows a diagnostic and leaves the graph unchanged", async ({
@@ -134,7 +139,7 @@ test("F-208 step 2 AR-24 ADR-0039: an invalid edit shows a diagnostic and leaves
   );
   await expect(page.locator(".squiggly-error").first()).toBeVisible();
   expect(await canvasIds(page)).toEqual(ids);
-  expect(await readFileIn(page, "main.nf")).toBe(original);
+  expect(await readFile(page, "main.nf")).toBe(original);
   // removing the token makes the text parse again, and the diagnostic goes
   await page.keyboard.press("Backspace");
   await page.keyboard.press("Backspace");
@@ -175,13 +180,8 @@ test("F-208 IO-01: a Code view edit survives a reload", async ({ page }) => {
   await expect(switcher(page)).toBeEnabled();
   await createProjectInUi(page, "Code edit");
   await page.evaluate(async (text) => {
-    const engine = (
-      window as unknown as {
-        nfBuilderEngine: {
-          writeFiles(files: { path: string; text: string }[]): Promise<unknown>;
-        };
-      }
-    ).nfBuilderEngine;
+    const engine = (window as unknown as { nfBuilderEngine: WorkspaceHook })
+      .nfBuilderEngine;
     await engine.writeFiles([{ path: "main.nf", text }]);
   }, fileText(F208_BEFORE));
   await canvasReady(page);
@@ -190,14 +190,10 @@ test("F-208 IO-01: a Code view edit survives a reload", async ({ page }) => {
   const line = lineNumberOf(F208_BEFORE, GREETED_LINE);
   await insertAfterLine(page, line, "shouted = SHOUT(greeted)");
   await expect(syncStatus(page)).toHaveAttribute("data-sync", "idle");
-  await expect(page.getByRole("banner").locator(".save-state")).toHaveText(
-    "Saved",
-  );
+  await expect(saveState(page)).toHaveText("Saved");
   await page.reload();
   await canvasReady(page);
-  await expect
-    .poll(() => readFileIn(page, "main.nf"))
-    .toBe(fileText(F208_AFTER));
+  await expect.poll(() => readFile(page, "main.nf")).toBe(fileText(F208_AFTER));
 });
 
 test("F-208 step 5 UX-27: Nextflow highlighting gives a keyword and an identifier different token classes", async ({

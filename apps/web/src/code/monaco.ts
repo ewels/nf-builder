@@ -22,9 +22,7 @@ import "monaco-editor/editor/contrib/toggleTabFocusMode/browser/toggleTabFocusMo
 // A bundled worker file, so Monaco never falls back to a blob: worker (worker-src 'self', QA-30).
 import EditorWorker from "monaco-editor/editor/editor.worker.js?worker";
 
-(
-  globalThis as unknown as { MonacoEnvironment: monaco.Environment }
-).MonacoEnvironment = {
+globalThis.MonacoEnvironment = {
   getWorker: () => new EditorWorker({ name: "monaco-editor" }),
 };
 

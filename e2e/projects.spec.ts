@@ -4,23 +4,14 @@ import { watchForCspViolations } from "./csp.ts";
 import {
   createProjectInUi,
   editReadme,
+  readFile,
   readStoredDatabase,
   recordSaveStates,
   saveState,
   stubStorage,
   switcher,
-  type WorkspaceHook,
 } from "./projects.ts";
 import { PREVIEW_URL } from "./urls.ts";
-
-const readFile = (page: Page, path: string) =>
-  page.evaluate(
-    (p) =>
-      (
-        window as unknown as { nfBuilderEngine: WorkspaceHook }
-      ).nfBuilderEngine.readFile(p),
-    path,
-  );
 
 const warning = (page: Page) =>
   page

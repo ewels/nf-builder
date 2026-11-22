@@ -1,5 +1,5 @@
-// Sends the editor's text to the engine as whole-file ReplaceFileText commands (F-208, AR-24, ADR 0039). Pure: the
-// timers and the send function are injected. A refused text is kept by the editor; this only reports the refusal.
+// Sends the editor's text to the engine as whole-file ReplaceFileText commands (F-208, AR-24, ADR 0039). Pure: the send
+// function is injected. A refused text is kept by the editor; this only reports the refusal.
 import type { ApplyOutcome, ParseProblem } from "@nf-builder/engine";
 
 export const SYNC_DELAY_MS = 300;
@@ -16,14 +16,9 @@ export type SyncState =
     }
   | { readonly status: "failed"; readonly message: string };
 
-export interface TextSyncOptions {
-  readonly delayMs: number;
+interface TextSyncOptions {
   send(text: string): Promise<ApplyOutcome>;
   onState(state: SyncState): void;
-  readonly timers?: {
-    set(fn: () => void, ms: number): unknown;
-    clear(handle: unknown): void;
-  };
 }
 
 export interface TextSync {
@@ -36,30 +31,20 @@ export interface TextSync {
   dispose(): void;
 }
 
-const defaultTimers = {
-  set: (fn: () => void, ms: number): unknown => setTimeout(fn, ms),
-  clear: (handle: unknown): void =>
-    clearTimeout(handle as ReturnType<typeof setTimeout>),
-};
-
-const messageOf = (error: unknown): string =>
-  error instanceof Error ? error.message : String(error);
-
 export function createTextSync(
   synced: string,
   options: TextSyncOptions,
 ): TextSync {
-  const timers = options.timers ?? defaultTimers;
   let syncedText = synced;
   /** The newest text not yet known to be applied. */
   let latest: string | null = null;
-  let timer: unknown = null;
+  let timer: ReturnType<typeof setTimeout> | null = null;
   let wanted = false;
   let running: Promise<void> | null = null;
   let disposed = false;
 
   const cancelTimer = () => {
-    if (timer !== null) timers.clear(timer);
+    if (timer !== null) clearTimeout(timer);
     timer = null;
   };
 
@@ -67,11 +52,12 @@ export function createTextSync(
     try {
       return await options.send(text);
     } catch (error) {
-      return error instanceof Error ? error : new Error(messageOf(error));
+      return error instanceof Error ? error : new Error(String(error));
     }
   }
 
   async function loop(): Promise<void> {
+    // Yield first: without it a loop with nothing to send reaches `finally` before `running ??=` assigns.
     await Promise.resolve();
     try {
       while (wanted) {
@@ -129,10 +115,10 @@ export function createTextSync(
         return;
       }
       options.onState({ status: "pending" });
-      timer = timers.set(() => {
+      timer = setTimeout(() => {
         timer = null;
         void request();
-      }, options.delayMs);
+      }, SYNC_DELAY_MS);
     },
     async flush() {
       cancelTimer();

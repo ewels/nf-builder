@@ -14,6 +14,16 @@ declare global {
   }
 }
 
+/** The current text of `path` in the open project, from the engine. */
+export const readFile = (page: Page, path: string): Promise<string | null> =>
+  page.evaluate(
+    (p) =>
+      (
+        window as unknown as { nfBuilderEngine: WorkspaceHook }
+      ).nfBuilderEngine.readFile(p),
+    path,
+  );
+
 /** The header button that opens the project panel. */
 export const switcher = (page: Page): Locator =>
   page.getByRole("banner").locator(".project-switcher-button");

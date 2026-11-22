@@ -6,21 +6,21 @@ import { createHighlighterCore } from "shiki/core";
 import { createJavaScriptRegexEngine } from "shiki/engine/javascript";
 import nextflow from "shiki/langs/nextflow.mjs";
 import githubLight from "shiki/themes/github-light.mjs";
-import { type monaco, NEXTFLOW_LANGUAGE_ID } from "./monaco";
+import { monaco, NEXTFLOW_LANGUAGE_ID } from "./monaco";
 
 export const NEXTFLOW_THEME = "github-light";
 
 let registered: Promise<void> | undefined;
 
 /** Registers the language, its configuration and the highlighting once. */
-export function registerNextflow(m: typeof monaco): Promise<void> {
+export function registerNextflow(): Promise<void> {
   registered ??= (async () => {
-    m.languages.register({
+    monaco.languages.register({
       id: NEXTFLOW_LANGUAGE_ID,
       extensions: [".nf"],
       aliases: ["Nextflow"],
     });
-    m.languages.setLanguageConfiguration(NEXTFLOW_LANGUAGE_ID, {
+    monaco.languages.setLanguageConfiguration(NEXTFLOW_LANGUAGE_ID, {
       comments: { lineComment: "//", blockComment: ["/*", "*/"] },
       brackets: [
         ["{", "}"],
@@ -49,7 +49,7 @@ export function registerNextflow(m: typeof monaco): Promise<void> {
     });
     shikiToMonaco(
       highlighter,
-      m as unknown as Parameters<typeof shikiToMonaco>[1],
+      monaco as unknown as Parameters<typeof shikiToMonaco>[1],
     );
   })();
   return registered;

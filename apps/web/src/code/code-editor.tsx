@@ -3,10 +3,10 @@ import { useEffect, useRef, useState } from "react";
 import { canvasStore } from "../canvas/canvas-store";
 import { getEngine } from "../engine/engine-client";
 import { problemsToMarkers } from "./markers";
-import { type FileModel, modelFor } from "./models";
-import { monaco, NEXTFLOW_LANGUAGE_ID } from "./monaco";
+import { modelFor } from "./models";
+import { monaco } from "./monaco";
 import { NEXTFLOW_THEME, registerNextflow } from "./nextflow-language";
-import { createTextSync, SYNC_DELAY_MS, type SyncState } from "./text-sync";
+import { createTextSync, type SyncState } from "./text-sync";
 
 const MARKER_OWNER = "nf-builder-refusal";
 
@@ -68,18 +68,16 @@ export default function CodeEditor({
     (async () => {
       const [text] = await Promise.all([
         getEngine().readFile(path),
-        registerNextflow(monaco),
+        registerNextflow(),
       ]);
       if (cancelled || host.current === null) return;
       if (text === null) {
         setProblem(`${path} is not in the project.`);
         return;
       }
-      const file: FileModel = modelFor(monaco, path, text);
+      const file = modelFor(path, text);
       const { model } = file;
-      monaco.editor.setModelLanguage(model, NEXTFLOW_LANGUAGE_ID);
       const sync = createTextSync(file.synced.text, {
-        delayMs: SYNC_DELAY_MS,
         send: async (sent) => {
           const outcome = await canvasStore
             .getState()
@@ -94,9 +92,9 @@ export default function CodeEditor({
               monaco.editor.setModelMarkers(
                 model,
                 MARKER_OWNER,
-                problemsToMarkers(state.problems, (n) =>
-                  n <= model.getLineCount() ? model.getLineContent(n) : null,
-                ).map((m) => ({ ...m, severity: monaco.MarkerSeverity.Error })),
+                problemsToMarkers(state.problems, model.getLinesContent()).map(
+                  (m) => ({ ...m, severity: monaco.MarkerSeverity.Error }),
+                ),
               );
           } else if (state.status === "idle")
             monaco.editor.setModelMarkers(model, MARKER_OWNER, []);

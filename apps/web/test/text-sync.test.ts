@@ -42,7 +42,6 @@ describe("F-208 text sync", () => {
   it("F-208: an edit is sent once, 300 ms after the last change", async () => {
     const g = gated();
     const sync = createTextSync("a", {
-      delayMs: SYNC_DELAY_MS,
       send: g.send,
       onState: () => undefined,
     });
@@ -63,7 +62,6 @@ describe("F-208 text sync", () => {
     const g = gated();
     const states: SyncState[] = [];
     const sync = createTextSync("a", {
-      delayMs: 300,
       send: g.send,
       onState: (s) => states.push(s),
     });
@@ -90,7 +88,6 @@ describe("F-208 text sync", () => {
     const states: SyncState[] = [];
     const problems = [{ message: "bad" }];
     const sync = createTextSync("a", {
-      delayMs: 300,
       send: g.send,
       onState: (s) => states.push(s),
     });
@@ -123,7 +120,6 @@ describe("F-208 text sync", () => {
   it("F-208: a stale refusal is retried once; flush sends at once; dispose cancels the timer", async () => {
     const g = gated();
     const sync = createTextSync("a", {
-      delayMs: 300,
       send: g.send,
       onState: () => undefined,
     });
@@ -146,7 +142,6 @@ describe("F-208 text sync", () => {
   it("F-208: reset adopts a new synced text and drops a pending edit", async () => {
     const g = gated();
     const sync = createTextSync("a", {
-      delayMs: 300,
       send: g.send,
       onState: () => undefined,
     });

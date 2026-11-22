@@ -48,16 +48,21 @@ export const editor = (page: Page): Locator => page.locator(".monaco-editor");
 export const openCodeFixture = (page: Page) =>
   openProject(page, readProject(F208_BEFORE));
 
-/** Puts the cursor at the end of 1-based `line` and starts a new line holding `text` (the editor keeps the indent). */
+/** Puts the cursor at the end of 1-based `line`. */
+async function toLineEnd(page: Page, line: number): Promise<void> {
+  await page.locator(".monaco-editor .view-lines").click();
+  await page.keyboard.press("ControlOrMeta+Home");
+  for (let i = 1; i < line; i++) await page.keyboard.press("ArrowDown");
+  await page.keyboard.press("End");
+}
+
+/** Starts a new line after 1-based `line` holding `text` (the editor keeps the indent). */
 export async function insertAfterLine(
   page: Page,
   line: number,
   text: string,
 ): Promise<void> {
-  await page.locator(".monaco-editor .view-lines").click();
-  await page.keyboard.press("ControlOrMeta+Home");
-  for (let i = 1; i < line; i++) await page.keyboard.press("ArrowDown");
-  await page.keyboard.press("End");
+  await toLineEnd(page, line);
   await page.keyboard.press("Enter");
   await page.keyboard.insertText(text);
 }
@@ -68,34 +73,18 @@ export async function appendToLine(
   line: number,
   text: string,
 ): Promise<void> {
-  await page.locator(".monaco-editor .view-lines").click();
-  await page.keyboard.press("ControlOrMeta+Home");
-  for (let i = 1; i < line; i++) await page.keyboard.press("ArrowDown");
-  await page.keyboard.press("End");
+  await toLineEnd(page, line);
   await page.keyboard.insertText(text);
 }
-
-/** 1-based number of the first line of `main.nf` that equals `line`. */
-export function lineNumberOf(dir: string, line: string): number {
-  const text = readFileSync(join(dir, "main.nf"), "utf8");
-  return text.split("\n").indexOf(line) + 1;
-}
-
-export const GREETED_LINE = "    greeted = GREET(names)";
 
 export const fileText = (dir: string): string =>
   readFileSync(join(dir, "main.nf"), "utf8");
 
-export const readFileIn = (page: Page, path: string): Promise<string | null> =>
-  page.evaluate(
-    (p) =>
-      (
-        window as unknown as {
-          nfBuilderEngine: { readFile(path: string): Promise<string | null> };
-        }
-      ).nfBuilderEngine.readFile(p),
-    path,
-  );
+/** 1-based number of the first line of `main.nf` that equals `line`. */
+export const lineNumberOf = (dir: string, line: string): number =>
+  fileText(dir).split("\n").indexOf(line) + 1;
+
+export const GREETED_LINE = "    greeted = GREET(names)";
 
 /** The ids of the nodes drawn on the canvas, sorted. */
 export const canvasIds = async (page: Page): Promise<string[]> =>

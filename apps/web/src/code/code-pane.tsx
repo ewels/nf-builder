@@ -7,7 +7,7 @@ import type { SyncState } from "./text-sync";
 const CodeEditor = lazy(() => import("./code-editor"));
 
 /** The status line text of a sync state (empty when there is nothing to say). */
-export function syncText(state: SyncState): string {
+function syncText(state: SyncState): string {
   switch (state.status) {
     case "idle":
       return "";

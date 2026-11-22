@@ -1,9 +1,7 @@
 // One Monaco model per path for the session (F-208), shared by the Split and Code views.
-import type { monaco } from "./monaco";
+import { monaco, NEXTFLOW_LANGUAGE_ID } from "./monaco";
 
-type Monaco = typeof monaco;
-
-export interface FileModel {
+interface FileModel {
   readonly model: monaco.editor.ITextModel;
   /** The text the project holds, as last read or sent. */
   readonly synced: { text: string };
@@ -12,9 +10,9 @@ export interface FileModel {
 const models = new Map<string, FileModel>();
 
 /** The model of `path`; an unedited one follows `text`, an edited one keeps its buffer. */
-export function modelFor(m: Monaco, path: string, text: string): FileModel {
+export function modelFor(path: string, text: string): FileModel {
   const found = models.get(path);
-  if (found !== undefined && !found.model.isDisposed()) {
+  if (found !== undefined) {
     if (found.model.getValue() === found.synced.text) {
       found.model.setValue(text);
       found.synced.text = text;
@@ -22,10 +20,10 @@ export function modelFor(m: Monaco, path: string, text: string): FileModel {
     return found;
   }
   const made: FileModel = {
-    model: m.editor.createModel(
+    model: monaco.editor.createModel(
       text,
-      undefined,
-      m.Uri.from({ scheme: "nf-builder", path: `/${path}` }),
+      NEXTFLOW_LANGUAGE_ID,
+      monaco.Uri.from({ scheme: "nf-builder", path: `/${path}` }),
     ),
     synced: { text },
   };
