@@ -13,7 +13,9 @@ describe("F-005 spike S1 documents", () => {
   it("F-005 ADR-0007 ADR-0009 LA-14: the S1 report names every case, both ADRs link it, and LA-14 has no interim warning", () => {
     const ids = [
       ...read("tools/oracle/cases/cases.yaml").matchAll(/^\s*- id: (\S+)/gm),
-    ].map((m) => m[1] ?? "");
+    ]
+      .map((m) => m[1] ?? "")
+      .filter((id) => id.startsWith("s1-"));
     expect(ids.length).toBeGreaterThan(0);
     const report = read(REPORT);
     for (const id of ids) expect(report, id).toContain(id);
