@@ -20,6 +20,7 @@ To reproduce with the pinned dist: `NXF_OFFLINE=true .cache/nextflow/26.10.7/nex
 | 8 | nf-lang lint | Lint doesn't check the arity of a legacy tuple input called from typed code; the run fails instead | F-005 (spike S1) | no |
 | 9 | Nextflow docs | `nextflow.preview.recursion` is modelled by nf-lang but missing from `feature-flags.mdx` | F-006 (spike S2) | no |
 | 10 | Nextflow docs | `groupBy` is documented as a typed operator but missing from the legacy `operator.mdx` | F-006 (spike S2) | no |
+| 11 | nf-lang formatter | `lint -format` drops a directive's parentheses when a comment wraps its arguments, so the result fails lint | F-110 | no |
 
 ## Details
 
@@ -120,13 +121,24 @@ workflow {
 
 ### 7. The formatter's comma before named arguments
 
-Two shapes, both from `Formatter.arguments` appending `,` after the positional arguments even when `positionalArgs` has already added a trailing comma or a trailing comment:
+```nextflow
+def paths() {
+    def a = file(
+        'a',
+        'b',
+        checkIfExists: true
+    )
+    def b = file(
+        'c', // the path
+        checkIfExists: true // checked
+    )
+    return [a, b]
+}
+```
 
-- two or more wrapped positional arguments followed by a named argument print `'b',,` (a double comma, invalid code);
-- a single positional argument with a trailing end-of-line comment, followed by a named argument, prints `'a' // one,`, which puts the comma inside the comment and breaks the code.
-
+- **What happens:** `lint -format` prints `'b',,` (a double comma) and `'c' // the path,` (the comma inside the comment). Neither result parses. `Formatter.arguments` appends `,` after the positional arguments even when `positionalArgs` has already written a trailing comma or a trailing comment.
 - **Expected:** one comma, before any trailing comment.
-- **nf-builder:** prints valid code; known difference `named-args-comma` (F-110). The exact reproducer is the F-110 fixture `packages/lang-2610/test/printer/input/known/` (added with F-110).
+- **nf-builder:** prints valid code; known difference `named-args-comma` (F-110, fixture `packages/lang-2610/test/printer/input/known/named-args.nf`).
 
 ### 8. Lint doesn't check a legacy tuple input's arity from typed code
 
@@ -142,3 +154,23 @@ nf-lang 26.10 models the `nextflow.preview.recursion` feature flag, but `docs/re
 ### 10. `groupBy` is missing from the legacy operator docs
 
 `groupBy` is documented as a typed operator (`docs/reference/stdlib-types/channel.mdx:72`) but not in the legacy `docs/reference/operator.mdx` (spike S2). Worth checking whether it is meant to be typed-only and, if so, saying so.
+
+### 11. The formatter drops a directive's parentheses around a comment
+
+```nextflow
+process HELLO {
+    memory(
+        // enough for the index
+        2.GB
+    )
+
+    script:
+    """
+    echo hello
+    """
+}
+```
+
+- **What happens:** the input passes `nextflow lint`; `lint -format` prints `memory`, the comment and `2.GB` on separate lines without the parentheses, plus a whitespace-only line, and the result fails lint.
+- **Expected:** keep the parentheses when the arguments wrap.
+- **nf-builder:** keeps them; known difference `directive-comment` (F-110).
