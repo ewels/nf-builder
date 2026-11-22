@@ -107,11 +107,12 @@ export async function expectBaseline(
   page: Page,
   testInfo: TestInfo,
   name: string,
-  options: { target?: Locator; clip?: Clip } = {},
+  options: { target?: Locator; clip?: Clip; mask?: Locator[] } = {},
 ): Promise<void> {
   const shot = {
     animations: "disabled",
     caret: "hide",
+    mask: options.mask,
   } as const;
   if (!existsSync(testInfo.snapshotPath(name))) {
     const actual = testInfo.outputPath(name.replace(/\.png$/, "-actual.png"));
@@ -127,10 +128,13 @@ export async function expectBaseline(
     );
   }
   if (options.target !== undefined)
-    await expect(options.target, BASELINE_GUIDANCE).toHaveScreenshot(name);
+    await expect(options.target, BASELINE_GUIDANCE).toHaveScreenshot(name, {
+      mask: options.mask,
+    });
   else
     await expect(page, BASELINE_GUIDANCE).toHaveScreenshot(name, {
       clip: options.clip,
+      mask: options.mask,
     });
 }
 

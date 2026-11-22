@@ -1,6 +1,9 @@
-import { expect, type Page, test } from "@playwright/test";
+import { expect, type Locator, type Page, test } from "@playwright/test";
+import { VISUAL_TAG } from "./browsers.ts";
 import {
   canvasReady,
+  expectBaseline,
+  layoutSettled,
   openFixture,
   openProject,
   openWorkflow,
@@ -305,4 +308,59 @@ test("F-208 UX-27: the sync status of one file's code does not carry over to ano
   );
   await expect(syncStatus(page)).toHaveAttribute("data-sync", "idle");
   await expect(syncStatus(page)).toHaveText("");
+});
+
+/** Waits for the editor, Shiki's token colours and a settled layout, then hides what blinks or follows focus. */
+async function visualReady(page: Page): Promise<Locator[]> {
+  await expect(editor(page)).toBeVisible();
+  await expect
+    .poll(async () =>
+      page
+        .locator(".monaco-editor .view-line span[class^='mtk']")
+        .evaluateAll(
+          (els) => new Set(els.map((el) => el.getAttribute("class"))).size,
+        ),
+    )
+    .toBeGreaterThan(2);
+  await layoutSettled(page);
+  await page.evaluate(() => (document.activeElement as HTMLElement)?.blur());
+  return [
+    page.locator(".monaco-editor .cursors-layer"),
+    page.locator(".monaco-editor .current-line"),
+    page.locator(".monaco-editor .current-line-margin"),
+  ];
+}
+
+test.describe("F-208 views, visual", () => {
+  test(
+    "F-208 UX-27: Split and Code views match their approved baselines",
+    { tag: VISUAL_TAG },
+    async ({ page }, testInfo) => {
+      await page.goto("./");
+      await openCodeFixture(page);
+      await canvasReady(page);
+      const centre = page.locator(".column-centre");
+      const problems: string[] = [];
+      const check = async (name: string, mask: Locator[]) => {
+        try {
+          await expectBaseline(page, testInfo, `view-modes-${name}.png`, {
+            target: centre,
+            mask,
+          });
+        } catch (error) {
+          problems.push(String(error instanceof Error ? error.message : error));
+        }
+      };
+      await radio(page, "Split").click();
+      await check("split", await visualReady(page));
+      await radio(page, "Code").click();
+      await check("code", await visualReady(page));
+      await radio(page, "Split").click();
+      await appendToLine(page, lineNumberOf(F208_BEFORE, GREETED_LINE), " )");
+      await expect(syncStatus(page)).toHaveAttribute("data-sync", "refused");
+      await expect(page.locator(".squiggly-error").first()).toBeVisible();
+      await check("split-refused", await visualReady(page));
+      expect(problems, problems.join("\n")).toEqual([]);
+    },
+  );
 });
