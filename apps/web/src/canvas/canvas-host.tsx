@@ -2,6 +2,7 @@ import type { JSX } from "react";
 import { lazy, Suspense } from "react";
 import { workflowTabId } from "../shell/tab-strip";
 import { useWorkspace } from "../workspace/workspace-store";
+import { CanvasErrorBoundary } from "./canvas-error-boundary";
 
 // React Flow is in this chunk only (QA-01, ADR 0003).
 const WorkflowCanvas = lazy(() => import("./workflow-canvas"));
@@ -27,14 +28,16 @@ export function CanvasHost(): JSX.Element {
     );
   else if (content.status === "ready")
     body = (
-      <Suspense fallback={<p className="muted">Loading canvas…</p>}>
-        <WorkflowCanvas
-          key={activeTab ?? ""}
-          projection={content.projection}
-          portLabels={portLabels}
-          onPortLabelsChange={setPortLabels}
-        />
-      </Suspense>
+      <CanvasErrorBoundary>
+        <Suspense fallback={<p className="muted">Loading canvas…</p>}>
+          <WorkflowCanvas
+            key={activeTab ?? ""}
+            projection={content.projection}
+            portLabels={portLabels}
+            onPortLabelsChange={setPortLabels}
+          />
+        </Suspense>
+      </CanvasErrorBoundary>
     );
   else if (content.status === "unavailable")
     body = <p className="muted">{content.message}</p>;

@@ -130,11 +130,12 @@
 }
 
 .palette-item-label.is-code {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 12px;
 }
 
-.palette-glyph {
+.palette-glyph,
+.canvas-glyph {
   flex: none;
   display: inline-flex;
   align-items: center;

@@ -2,7 +2,6 @@
 import { canvasView, type Projection } from "@nf-builder/engine";
 import {
   Background,
-  BackgroundVariant,
   ControlButton,
   Controls,
   MiniMap,
@@ -16,14 +15,12 @@ import "@xyflow/react/dist/style.css";
 import { type JSX, type MouseEvent, useEffect, useMemo, useState } from "react";
 import "./canvas.css";
 import { NODE_TYPES } from "./canvas-nodes";
-import { EdgeTooltip, type EdgeTooltipState } from "./edge-tooltip";
 import { EDGE_TYPES } from "./flow-edge";
 import { type CanvasFlowEdge, toFlowEdges, toFlowNodes } from "./flow-elements";
 
 /** Sentence-case labels with no delete wording (nodes can't be deleted yet). */
-export const CANVAS_ARIA_LABELS = {
-  "node.a11yDescription.default":
-    "Press enter or space to select this node. Use the arrow keys to move between nodes.",
+const CANVAS_ARIA_LABELS = {
+  "node.a11yDescription.default": "Press enter or space to select this node.",
   "node.a11yDescription.keyboardDisabled":
     "Press enter or space to select this node.",
   "node.a11yDescription.ariaLiveMessage": ({
@@ -41,10 +38,11 @@ export const CANVAS_ARIA_LABELS = {
   "controls.zoomIn.ariaLabel": "Zoom in",
   "controls.zoomOut.ariaLabel": "Zoom out",
   "controls.fitView.ariaLabel": "Fit view",
-  "controls.interactive.ariaLabel": "Toggle interactivity",
   "minimap.ariaLabel": "Minimap",
   "handle.ariaLabel": "Connection point",
 } as const;
+
+const FIT = { maxZoom: 1 } as const;
 
 interface WorkflowCanvasProps {
   readonly projection: Projection;
@@ -69,7 +67,12 @@ function CanvasInner({
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   useEffect(() => setNodes(initialNodes), [initialNodes, setNodes]);
   const edges = useMemo(() => toFlowEdges(view), [view]);
-  const [tooltip, setTooltip] = useState<EdgeTooltipState | null>(null);
+  // shown at the pointer, outside the zoomed viewport so it stays readable (UX-24)
+  const [tooltip, setTooltip] = useState<{
+    text: string;
+    x: number;
+    y: number;
+  } | null>(null);
   const showTooltip = (event: MouseEvent, edge: CanvasFlowEdge) => {
     setTooltip({
       text: edge.data?.tooltip ?? "",
@@ -83,7 +86,7 @@ function CanvasInner({
   useEffect(() => {
     if (!initialized) return;
     let cancelled = false;
-    void Promise.resolve(fitView({ maxZoom: 1 })).then(() => {
+    void fitView(FIT).then(() => {
       if (!cancelled) setReady(true);
     });
     return () => {
@@ -103,30 +106,50 @@ function CanvasInner({
         edgeTypes={EDGE_TYPES}
         forceColorMode="light"
         fitView
-        fitViewOptions={{ maxZoom: 1 }}
+        fitViewOptions={FIT}
         nodesDraggable={false}
         nodesConnectable={false}
         deleteKeyCode={null}
         ariaLabelConfig={CANVAS_ARIA_LABELS}
         attributionPosition="bottom-center"
-        onEdgeMouseEnter={(e, edge) => showTooltip(e, edge as CanvasFlowEdge)}
-        onEdgeMouseMove={(e, edge) => showTooltip(e, edge as CanvasFlowEdge)}
+        onEdgeMouseEnter={showTooltip}
+        onEdgeMouseMove={showTooltip}
         onEdgeMouseLeave={() => setTooltip(null)}
       >
-        <Background variant={BackgroundVariant.Dots} gap={20} />
-        <Controls showInteractive={false}>
+        <Background />
+        <Controls showInteractive={false} fitViewOptions={FIT}>
           <ControlButton
             onClick={() => onPortLabelsChange(!portLabels)}
-            aria-pressed={!portLabels}
-            title={portLabels ? "Hide port labels" : "Show port labels"}
-            aria-label={portLabels ? "Hide port labels" : "Show port labels"}
+            aria-pressed={portLabels}
+            title="Port labels"
+            aria-label="Port labels"
           >
-            <span aria-hidden="true">P</span>
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 16 16"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <path d="M2 4h3M7 4h7M2 8h3M7 8h7M2 12h3M7 12h7" />
+            </svg>
           </ControlButton>
         </Controls>
-        <MiniMap ariaLabel="Minimap" pannable zoomable />
+        <MiniMap pannable zoomable />
       </ReactFlow>
-      <EdgeTooltip tooltip={tooltip} />
+      {tooltip === null ? null : (
+        <div
+          role="tooltip"
+          className="edge-tooltip"
+          style={{ left: tooltip.x + 12, top: tooltip.y + 12 }}
+        >
+          {tooltip.text}
+        </div>
+      )}
     </div>
   );
 }

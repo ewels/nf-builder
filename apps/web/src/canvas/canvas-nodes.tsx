@@ -2,54 +2,49 @@
 import { CANVAS_METRICS, type CanvasAppearance } from "@nf-builder/engine";
 import { Handle, type NodeProps, Position } from "@xyflow/react";
 import type { CSSProperties, JSX } from "react";
-import { CANVAS_GLYPHS, type Glyph, PALETTE_GLYPHS } from "../glyphs";
+import { type Glyph, GlyphIcon, PALETTE_GLYPHS } from "../glyphs";
 import {
   type CanvasFlowNode,
   inputHandle,
   outputHandle,
 } from "./flow-elements";
 
+/** The palette's glyph where there is one; else a cube for modules, arrows for take and emit, braces for code, a warning triangle. */
 const APPEARANCE_GLYPHS: Record<CanvasAppearance, Glyph> = {
   process: PALETTE_GLYPHS.process,
-  module: CANVAS_GLYPHS.module,
+  agent: PALETTE_GLYPHS.agent,
+  module: {
+    tone: "green",
+    path: "M8 2.5l5 2.5v6l-5 2.5L3 11V5zM3 5l5 2.5L13 5M8 7.5v6",
+  },
   workflow: PALETTE_GLYPHS.workflow,
   chain: PALETTE_GLYPHS.operator,
   factory: PALETTE_GLYPHS.factory,
   params: PALETTE_GLYPHS.params,
   output: PALETTE_GLYPHS.output,
-  take: CANVAS_GLYPHS.take,
-  emit: CANVAS_GLYPHS.emit,
-  code: CANVAS_GLYPHS.code,
-  unparsed: CANVAS_GLYPHS.unparsed,
+  take: { tone: "grey", path: "M2 8h8M7 5l3 3-3 3M13 3v10" },
+  emit: { tone: "grey", path: "M3 3v10M6 8h8M11 5l3 3-3 3" },
+  code: { tone: "grey", path: "M6 4 3 8l3 4M10 4l3 4-3 4" },
+  unparsed: { tone: "red", path: "M8 2.5 14 13H2zM8 6.5v3M8 11.2v.1" },
 };
+
+type NodeData = CanvasFlowNode["data"];
 
 function NodeGlyph({
   appearance,
 }: {
   appearance: CanvasAppearance;
 }): JSX.Element {
-  const glyph = APPEARANCE_GLYPHS[appearance];
   return (
-    <span className={`canvas-glyph tone-${glyph.tone}`} data-glyph={appearance}>
-      <svg
-        width="14"
-        height="14"
-        viewBox="0 0 16 16"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden="true"
-        focusable="false"
-      >
-        <path d={glyph.path} />
-      </svg>
-    </span>
+    <GlyphIcon
+      glyph={APPEARANCE_GLYPHS[appearance]}
+      className="canvas-glyph"
+      name={appearance}
+    />
   );
 }
 
-function Handles({ data }: { data: CanvasFlowNode["data"] }): JSX.Element {
+function Handles({ data }: { data: NodeData }): JSX.Element {
   const { view } = data;
   const top = (i: number) =>
     view.shape === "pill"
@@ -79,44 +74,44 @@ function Handles({ data }: { data: CanvasFlowNode["data"] }): JSX.Element {
   );
 }
 
-function nodeStyle(data: CanvasFlowNode["data"]): CSSProperties {
-  return { width: data.view.width, height: data.view.height };
+/** The outer box's classes and the size `canvasView` computed. */
+function frame({ view, portLabels }: NodeData) {
+  return {
+    className: `canvas-node is-${view.appearance} is-${view.shape}${portLabels ? "" : " is-compact"}`,
+    style: {
+      width: view.width,
+      height: view.height,
+      "--port-row": `${view.rowHeight}px`,
+    } as CSSProperties,
+  };
 }
 
-function nodeClass(data: CanvasFlowNode["data"], shape: string): string {
-  const { view, portLabels } = data;
-  return `canvas-node is-${view.appearance} is-${shape}${portLabels ? "" : " is-compact"}`;
-}
-
-function PortRows({
-  data,
-}: {
-  data: CanvasFlowNode["data"];
-}): JSX.Element | null {
+function PortRows({ data }: { data: NodeData }): JSX.Element | null {
   const { view, portLabels } = data;
   if (!portLabels) return null;
   const rows = Math.max(view.inputs.length, view.outputs.length);
   return (
     <div className="canvas-ports">
-      {Array.from({ length: rows }, (_, i) => (
-        <div
-          className="canvas-port-row"
-          key={view.inputs[i]?.id ?? view.outputs[i]?.id ?? i}
-        >
-          <span
-            className="canvas-port is-input"
-            title={view.inputs[i]?.type ?? view.inputs[i]?.label}
-          >
-            {view.inputs[i]?.label}
-          </span>
-          <span
-            className="canvas-port is-output"
-            title={view.outputs[i]?.type ?? view.outputs[i]?.label}
-          >
-            {view.outputs[i]?.label}
-          </span>
-        </div>
-      ))}
+      {Array.from({ length: rows }, (_, i) => {
+        const input = view.inputs[i];
+        const output = view.outputs[i];
+        return (
+          <div className="canvas-port-row" key={input?.id ?? output?.id ?? i}>
+            <span
+              className="canvas-port is-input"
+              title={input?.type ?? input?.label}
+            >
+              {input?.label}
+            </span>
+            <span
+              className="canvas-port is-output"
+              title={output?.type ?? output?.label}
+            >
+              {output?.label}
+            </span>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -124,15 +119,7 @@ function PortRows({
 export function CardNode({ data }: NodeProps<CanvasFlowNode>): JSX.Element {
   const { view } = data;
   return (
-    <div
-      className={nodeClass(data, "card")}
-      style={
-        {
-          ...nodeStyle(data),
-          "--port-row": `${view.rowHeight}px`,
-        } as CSSProperties
-      }
-    >
+    <div {...frame(data)}>
       {view.badge === null ? null : (
         <span className="canvas-badge">{view.badge}</span>
       )}
@@ -161,23 +148,15 @@ export function CardNode({ data }: NodeProps<CanvasFlowNode>): JSX.Element {
   );
 }
 
+/** Chains, take and emit. Take and emit show their kind as a prefix; a chain has no subtitle. */
 export function PillNode({ data }: NodeProps<CanvasFlowNode>): JSX.Element {
   const { view } = data;
-  const prefix = view.appearance === "take" || view.appearance === "emit";
   return (
-    <div
-      className={nodeClass(data, "pill")}
-      style={
-        {
-          ...nodeStyle(data),
-          "--port-row": `${view.rowHeight}px`,
-        } as CSSProperties
-      }
-    >
+    <div {...frame(data)}>
       <NodeGlyph appearance={view.appearance} />
-      {prefix && view.subtitle !== null ? (
+      {view.subtitle === null ? null : (
         <span className="canvas-pill-prefix">{view.subtitle}</span>
-      ) : null}
+      )}
       <span className="canvas-node-title" title={view.title}>
         {view.title}
       </span>

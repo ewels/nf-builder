@@ -1,5 +1,5 @@
 // Helpers for the canvas end-to-end tests (F-205). The workspace hook is `window.nfBuilderWorkspace`.
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import {
   expect,
@@ -18,8 +18,8 @@ interface WorkspaceHook {
   openWorkflow(path: string, workflow: string | null): Promise<void>;
 }
 
-export const F205_FIXTURE = join(REPO_ROOT, "tools/oracle/cases/f205-canvas");
-export const BAD_DECLARATION = join(
+const F205_FIXTURE = join(REPO_ROOT, "tools/oracle/cases/f205-canvas");
+const BAD_DECLARATION = join(
   REPO_ROOT,
   "tools/corpus/fixtures/bad-declaration.nf",
 );
@@ -32,7 +32,6 @@ export const NODE = {
   wc: "main.nf#/wc",
   shouted: "main.nf#/shouted",
   tail: "main.nf#/tail",
-  upper: "main.nf#/upper",
   output: "main.nf#/:output",
   names: "main.nf#/ch_names",
   total: "main.nf#/total",
@@ -55,8 +54,14 @@ export async function openProject(
   );
 }
 
-export const openFixture = (page: Page, dir = F205_FIXTURE) =>
-  openProject(page, readProject(dir));
+export const openFixture = (page: Page) =>
+  openProject(page, readProject(F205_FIXTURE));
+
+/** Opens `bad-declaration.nf` as `main.nf`: its entry workflow calls the unparsed `SECOND`. */
+export const openBadDeclaration = (page: Page) =>
+  openProject(page, [
+    { path: "main.nf", text: readFileSync(BAD_DECLARATION, "utf8") },
+  ]);
 
 export async function openWorkflow(
   page: Page,
@@ -82,9 +87,6 @@ export async function canvasReady(page: Page): Promise<void> {
 
 export const node = (page: Page, id: string): Locator =>
   page.locator(`.react-flow__node[data-id="${id}"]`);
-
-export const edge = (page: Page, id: string): Locator =>
-  page.locator(`.react-flow__edge[data-id="${id}"]`);
 
 /** The viewport's zoom, read from its transform. */
 export function viewportZoom(page: Page): Promise<number> {

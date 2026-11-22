@@ -48,18 +48,6 @@ export interface WorkspaceActions {
   setPortLabels(value: boolean): void;
 }
 
-/** The test hook on `window.nfBuilderWorkspace` (e2e only; no user path opens a project before F-202). */
-export interface WorkspaceHook {
-  open: WorkspaceActions["open"];
-  openWorkflow: WorkspaceActions["openWorkflow"];
-}
-
-declare global {
-  interface Window {
-    nfBuilderWorkspace?: WorkspaceHook;
-  }
-}
-
 /** The workflow a project opens with: main.nf's entry, else the first entry workflow, else the first named one. */
 export function defaultWorkflow(
   workflows: readonly WorkflowRef[],
@@ -95,7 +83,7 @@ const messageOf = (error: unknown): string =>
 export function createWorkspaceStore(
   engine: () => EngineApi,
 ): StoreApi<WorkspaceState & WorkspaceActions> {
-  const store = createStore<WorkspaceState & WorkspaceActions>()((set, get) => {
+  return createStore<WorkspaceState & WorkspaceActions>()((set, get) => {
     // a result for a superseded tab or project is dropped
     let generation = 0;
 
@@ -173,7 +161,6 @@ export function createWorkspaceStore(
       },
     };
   });
-  return store;
 }
 
 export const workspaceStore = createWorkspaceStore(getEngine);

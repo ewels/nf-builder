@@ -1,4 +1,3 @@
-export { type LayoutNode, layeredLayout } from "./layout";
 export { CANVAS_METRICS } from "./metrics";
 export type {
   CanvasAppearance,

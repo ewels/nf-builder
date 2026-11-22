@@ -12,6 +12,8 @@ export const CANVAS_METRICS = {
   pillMaxWidth: 240,
   pillCharWidth: 8,
   pillPadding: 48,
+  /** The uppercase "TAKE" or "EMIT" prefix and its gap. */
+  pillPrefixWidth: 40,
   columnGap: 64,
   rowGap: 24,
 } as const;

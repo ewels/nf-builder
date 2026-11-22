@@ -7,12 +7,12 @@ import type {
 } from "@nf-builder/engine";
 import type { Edge, Node } from "@xyflow/react";
 
-export type CanvasNodeData = {
+type CanvasNodeData = {
   view: CanvasNodeView;
   portLabels: boolean;
 } & Record<string, unknown>;
 export type CanvasFlowNode = Node<CanvasNodeData, "card" | "pill">;
-export type CanvasEdgeData = {
+type CanvasEdgeData = {
   dataflow: EdgeDataflow;
   tooltip: string;
 } & Record<string, unknown>;
@@ -43,9 +43,9 @@ export function toFlowEdges(view: CanvasView): CanvasFlowEdge[] {
     id: e.id,
     type: "flow",
     source: e.source,
-    sourceHandle: `out:${e.sourcePort}`,
+    sourceHandle: outputHandle({ id: e.sourcePort }),
     target: e.target,
-    targetHandle: `in:${e.targetPort}`,
+    targetHandle: inputHandle({ id: e.targetPort }),
     data: { dataflow: e.dataflow, tooltip: e.tooltip },
     ariaLabel: e.tooltip,
   }));

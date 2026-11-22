@@ -8,12 +8,12 @@ import {
 import { REPO_ROOT, WEB_DIST } from "../scripts/check-common.ts";
 import { SMOKE_TAG, VISUAL_TAG } from "./browsers.ts";
 import {
-  BAD_DECLARATION,
   canvasReady,
   expectBaseline,
   NODE,
   node,
   nodeClip,
+  openBadDeclaration,
   openFixture,
   openProject,
   openWorkflow,
@@ -175,16 +175,15 @@ test("F-205 UX-21: the port labels toggle hides and restores labels and node hei
   await canvasReady(page);
   const greeted = node(page, NODE.greeted);
   const labelled = await greeted.boundingBox();
-  const toggle = page.getByRole("button", { name: "Hide port labels" });
-  await expect(toggle).toHaveAttribute("aria-pressed", "false");
+  const toggle = page.getByRole("button", { name: "Port labels" });
+  await expect(toggle).toHaveAttribute("aria-pressed", "true");
   await toggle.click();
-  const show = page.getByRole("button", { name: "Show port labels" });
-  await expect(show).toHaveAttribute("aria-pressed", "true");
+  await expect(toggle).toHaveAttribute("aria-pressed", "false");
   await expect(greeted.locator(".canvas-port")).toHaveCount(0);
   await expect
     .poll(async () => (await greeted.boundingBox())?.height ?? 0)
     .toBeLessThan((labelled?.height ?? 0) - 1);
-  await show.click();
+  await toggle.click();
   await expect(greeted.locator(".canvas-port").first()).toBeVisible();
   await expect
     .poll(async () => (await greeted.boundingBox())?.height ?? 0)
@@ -195,9 +194,7 @@ test('F-205 UX-22: an unparsed callee draws with an error outline and "could not
   page,
 }) => {
   await page.goto("./");
-  await openProject(page, [
-    { path: "main.nf", text: readFileSync(BAD_DECLARATION, "utf8") },
-  ]);
+  await openBadDeclaration(page);
   await canvasReady(page);
   const bad = page.locator(".canvas-node.is-unparsed");
   await expect(bad).toHaveCount(1);
@@ -232,6 +229,94 @@ test("F-205 step 2 UX-24 QA-12 LA-28: value edges are dashed, channel edges soli
       .first()
       .evaluate((el) => getComputedStyle(el).stroke);
   expect(await stroke("unknown")).not.toBe(await stroke("channel"));
+  const width = (cls: string) =>
+    page
+      .locator(`.react-flow__edge-path.edge-${cls}`)
+      .first()
+      .evaluate((el) => getComputedStyle(el).strokeWidth);
+  expect(await width("unknown")).toBe("1px");
+  expect(await width("channel")).not.toBe("1px");
+});
+
+test("F-205 UX-21: node names are in monospace, take and emit pills are grey, and an unparsed node has a grey background", async ({
+  page,
+}) => {
+  await page.goto("./");
+  await openFixture(page);
+  await canvasReady(page);
+  const family = (loc: Locator) =>
+    loc.evaluate((el) => getComputedStyle(el).fontFamily);
+  const mono = await page.evaluate(() =>
+    getComputedStyle(document.documentElement)
+      .getPropertyValue("--font-mono")
+      .trim(),
+  );
+  expect(mono).toContain("monospace");
+  const title = node(page, NODE.greeted).locator(".canvas-node-title");
+  expect(await family(title)).toBe(mono);
+  await openWorkflow(page, "workflows.nf", "SHOUT");
+  await canvasReady(page);
+  const grey = await page.evaluate(() => {
+    const s = getComputedStyle(document.documentElement);
+    return {
+      fg: s.getPropertyValue("--tone-grey-fg").trim(),
+      bg: s.getPropertyValue("--tone-grey-bg").trim(),
+    };
+  });
+  const rgb = (hex: string) => {
+    const n = Number.parseInt(hex.slice(1), 16);
+    return `rgb(${n >> 16}, ${(n >> 8) & 255}, ${n & 255})`;
+  };
+  for (const kind of ["take", "emit"]) {
+    const pill = page.locator(`.canvas-node.is-${kind}`).first();
+    await expect(pill).toHaveCSS("border-top-color", rgb(grey.fg));
+    await expect(pill).toHaveCSS("background-color", rgb(grey.bg));
+    await expect(pill).toHaveCSS("border-top-style", "solid");
+    await expect(pill.locator("[data-glyph] ").first()).toHaveClass(
+      /tone-grey/,
+    );
+  }
+  await page.goto("./");
+  await openBadDeclaration(page);
+  await canvasReady(page);
+  await expect(page.locator(".canvas-node.is-unparsed")).toHaveCSS(
+    "background-color",
+    rgb(grey.bg),
+  );
+});
+
+test("F-205 UX-21: no node title is truncated, including take and emit pills", async ({
+  page,
+}) => {
+  const dir = join(REPO_ROOT, ".cache/corpus/rnaseq-nf-typed");
+  if (!existsSync(dir))
+    throw new Error(
+      "The rnaseq-nf-typed corpus is missing: run pnpm corpus:fetch",
+    );
+  const truncated = () =>
+    page
+      .locator(".canvas-node-title")
+      .evaluateAll((els) =>
+        els
+          .filter((el) => el.scrollWidth > el.clientWidth)
+          .map((el) => el.textContent),
+      );
+  await page.goto("./");
+  await openFixture(page);
+  await canvasReady(page);
+  await openWorkflow(page, "workflows.nf", "SHOUT");
+  await canvasReady(page);
+  await expect(page.locator(".canvas-node.is-take")).not.toHaveCount(0);
+  expect(await truncated()).toEqual([]);
+  await page.goto("./");
+  await openProject(page, readProject(dir));
+  await canvasReady(page);
+  await openWorkflow(page, "modules/rnaseq.nf", "RNASEQ");
+  await canvasReady(page);
+  await expect(
+    page.locator(".canvas-node.is-take", { hasText: "read_pairs_ch" }),
+  ).toHaveCount(1);
+  expect(await truncated()).toEqual([]);
 });
 
 test("F-205 step 3 UX-24: hovering an edge shows its type and source", async ({
@@ -295,16 +380,16 @@ test.describe("F-205 node baselines", () => {
   test.use({ viewport: { width: 2560, height: 1440 } });
 
   const KINDS: readonly (readonly [string, string])[] = [
-    ["process", `.react-flow__node[data-id="${NODE.greeted}"]`],
-    ["process-legacy", `.react-flow__node[data-id="${NODE.counted}"]`],
-    ["module", `.react-flow__node[data-id="${NODE.wc}"]`],
-    ["workflow", `.react-flow__node[data-id="${NODE.shouted}"]`],
-    ["workflow-legacy", `.react-flow__node[data-id="${NODE.tail}"]`],
-    ["chain", `.react-flow__node[data-id="${NODE.total}"]`],
-    ["factory", `.react-flow__node[data-id="${NODE.names}"]`],
-    ["params", `.react-flow__node[data-id="${NODE.params}"]`],
-    ["output", `.react-flow__node[data-id="${NODE.output}"]`],
-    ["code", `.react-flow__node[data-id="${NODE.code}"]`],
+    ["process", NODE.greeted],
+    ["process-legacy", NODE.counted],
+    ["module", NODE.wc],
+    ["workflow", NODE.shouted],
+    ["workflow-legacy", NODE.tail],
+    ["chain", NODE.total],
+    ["factory", NODE.names],
+    ["params", NODE.params],
+    ["output", NODE.output],
+    ["code", NODE.code],
   ];
 
   test(
@@ -327,12 +412,11 @@ test.describe("F-205 node baselines", () => {
           problems.push(String(error instanceof Error ? error.message : error));
         }
       };
-      for (const [name, selector] of KINDS)
-        await check(name, page.locator(selector));
-      await page.getByRole("button", { name: "Hide port labels" }).click();
+      for (const [name, id] of KINDS) await check(name, node(page, id));
+      await page.getByRole("button", { name: "Port labels" }).click();
       await expect(page.locator(".canvas-port")).toHaveCount(0);
       await check("process-compact", node(page, NODE.greeted));
-      await page.getByRole("button", { name: "Show port labels" }).click();
+      await page.getByRole("button", { name: "Port labels" }).click();
       // take and emit are in the typed named workflow
       await openWorkflow(page, "workflows.nf", "SHOUT");
       await canvasReady(page);
@@ -340,9 +424,7 @@ test.describe("F-205 node baselines", () => {
       await check("take", page.locator(".canvas-node.is-take").first());
       await check("emit", page.locator(".canvas-node.is-emit").first());
       await page.goto("./");
-      await openProject(page, [
-        { path: "main.nf", text: readFileSync(BAD_DECLARATION, "utf8") },
-      ]);
+      await openBadDeclaration(page);
       await canvasReady(page);
       expect(await viewportZoom(page), "fit stays at zoom 1").toBeCloseTo(1, 2);
       await check("unparsed", page.locator(".canvas-node.is-unparsed"));

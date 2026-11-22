@@ -27,21 +27,22 @@ interface Look {
   readonly subtitle: string | null;
 }
 
+const card = (
+  appearance: CanvasAppearance,
+  title: string,
+  subtitle: string,
+): Look => ({ appearance, shape: "card", title, subtitle });
+
 function callLook(label: string, callee: Callee): Look {
-  const base = { shape: "card", title: label } as const;
   if (callee.status === "unparsed")
-    return { ...base, appearance: "unparsed", subtitle: "could not be parsed" };
+    return card("unparsed", label, "could not be parsed");
   if (callee.status === "unresolved")
-    return { ...base, appearance: "unparsed", subtitle: "not found" };
+    return card("unparsed", label, "not found");
   if (callee.kind === "workflow" || callee.kind === "pipeline")
-    return {
-      ...base,
-      appearance: "workflow",
-      subtitle: callee.module ?? callee.kind,
-    };
-  if (callee.module !== null)
-    return { ...base, appearance: "module", subtitle: callee.module };
-  return { ...base, appearance: "process", subtitle: callee.kind ?? "process" };
+    return card("workflow", label, callee.module ?? callee.kind);
+  if (callee.module !== null) return card("module", label, callee.module);
+  if (callee.kind === "agent") return card("agent", label, "agent");
+  return card("process", label, callee.kind ?? "process");
 }
 
 function look(node: GraphNode): Look {
@@ -56,26 +57,11 @@ function look(node: GraphNode): Look {
         subtitle: null,
       };
     case "factory":
-      return {
-        appearance: "factory",
-        shape: "card",
-        title: node.label,
-        subtitle: "channel factory",
-      };
+      return card("factory", node.label, "channel factory");
     case "params":
-      return {
-        appearance: "params",
-        shape: "card",
-        title: "params",
-        subtitle: "pipeline inputs",
-      };
+      return card("params", "params", "pipeline inputs");
     case "output":
-      return {
-        appearance: "output",
-        shape: "card",
-        title: "output",
-        subtitle: "publish",
-      };
+      return card("output", "output", "publish");
     case "take":
     case "emit":
       return {
@@ -85,12 +71,7 @@ function look(node: GraphNode): Look {
         subtitle: node.kind,
       };
     case "code":
-      return {
-        appearance: "code",
-        shape: "card",
-        title: node.label,
-        subtitle: "code",
-      };
+      return card("code", node.label, "code");
   }
 }
 
@@ -110,6 +91,7 @@ const count = (n: number, noun: string) => `${n} ${noun}${n === 1 ? "" : "s"}`;
 function size(
   shape: "card" | "pill",
   title: string,
+  prefixed: boolean,
   ports: number,
   rowHeight: number,
 ): { width: number; height: number } {
@@ -120,7 +102,9 @@ function size(
         m.pillMaxWidth,
         Math.max(
           m.pillMinWidth,
-          title.length * m.pillCharWidth + m.pillPadding,
+          title.length * m.pillCharWidth +
+            m.pillPadding +
+            (prefixed ? m.pillPrefixWidth : 0),
         ),
       ),
       height: m.pillHeight,
@@ -140,18 +124,14 @@ export function canvasView(
     const dims = size(
       l.shape,
       l.title,
+      l.subtitle !== null,
       Math.max(node.inputs.length, node.outputs.length),
       rowHeight,
     );
-    return { node, look: l, ...dims };
+    return { id: node.id, kind: node.kind, node, look: l, ...dims };
   });
   const positions = layeredLayout(
-    sized.map((s) => ({
-      id: s.node.id,
-      kind: s.node.kind,
-      width: s.width,
-      height: s.height,
-    })),
+    sized,
     projection.edges.map((e) => ({ source: e.from.node, target: e.to.node })),
   );
   const nodes: CanvasNodeView[] = sized.map(

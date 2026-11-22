@@ -35,12 +35,8 @@ export function layeredLayout(
   const rank: number[] = nodes.map(() => 0);
   const done: boolean[] = nodes.map(() => false);
   const queue: number[] = [];
-  const queued: boolean[] = nodes.map(() => false);
   indegree.forEach((d, i) => {
-    if (d === 0) {
-      queue.push(i);
-      queued[i] = true;
-    }
+    if (d === 0) queue.push(i);
   });
   let head = 0;
   let scan = 0;
@@ -48,7 +44,7 @@ export function layeredLayout(
     let n: number;
     if (head < queue.length) n = queue[head++] as number;
     else {
-      while (done[scan] || queued[scan]) scan++;
+      while (done[scan]) scan++;
       n = scan;
     }
     done[n] = true;
@@ -56,21 +52,19 @@ export function layeredLayout(
       if (done[m]) continue;
       rank[m] = Math.max(rank[m] ?? 0, (rank[n] ?? 0) + 1);
       indegree[m] = (indegree[m] ?? 0) - 1;
-      if (indegree[m] === 0 && !queued[m]) {
-        queue.push(m);
-        queued[m] = true;
-      }
+      if (indegree[m] === 0) queue.push(m);
     }
   }
   const isLast = (n: LayoutNode) => n.kind === "emit" || n.kind === "output";
   let deepest = -1;
   nodes.forEach((n, i) => {
-    if (n.kind === "take") rank[i] = 0;
-    else if (!isLast(n)) deepest = Math.max(deepest, rank[i] ?? 0);
+    if (n.kind === "take") {
+      rank[i] = 0;
+      deepest = Math.max(deepest, 0);
+    } else if (!isLast(n)) deepest = Math.max(deepest, rank[i] ?? 0);
   });
-  const lastRank = Math.max(deepest + 1, 0);
   nodes.forEach((n, i) => {
-    if (isLast(n)) rank[i] = lastRank;
+    if (isLast(n)) rank[i] = deepest + 1;
   });
 
   const columns: number[][] = [];
@@ -81,7 +75,7 @@ export function layeredLayout(
   });
   const { columnGap, rowGap } = CANVAS_METRICS;
   const heights = columns.map((c) =>
-    (c ?? []).reduce(
+    c.reduce(
       (sum, i, k) => sum + (nodes[i]?.height ?? 0) + (k > 0 ? rowGap : 0),
       0,
     ),
@@ -92,14 +86,14 @@ export function layeredLayout(
   columns.forEach((column, c) => {
     let y = Math.round((tallest - (heights[c] ?? 0)) / 2);
     let width = 0;
-    for (const i of column ?? []) {
+    for (const i of column) {
       const n = nodes[i];
       if (n === undefined) continue;
       positions.set(n.id, { x, y });
       y += n.height + rowGap;
       width = Math.max(width, n.width);
     }
-    if (column !== undefined && column.length > 0) x += width + columnGap;
+    x += width + columnGap;
   });
   return positions;
 }

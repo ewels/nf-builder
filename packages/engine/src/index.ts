@@ -58,9 +58,8 @@ export type {
   CanvasView,
   CanvasViewOptions,
   EdgeDataflow,
-  LayoutNode,
 } from "./canvas";
-export { CANVAS_METRICS, canvasView, layeredLayout } from "./canvas";
+export { CANVAS_METRICS, canvasView } from "./canvas";
 export {
   applyCommand,
   commit,

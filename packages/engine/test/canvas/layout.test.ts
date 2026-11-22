@@ -52,6 +52,19 @@ describe("F-205 interim layered layout", () => {
     expect(pos.get("b")?.x).toBeGreaterThan(pos.get("a")?.x ?? 0);
   });
 
+  it("F-205 UX-51: in a take to emit pass-through the emit is after the take", () => {
+    const pos = layeredLayout(
+      [node("t", "take"), node("e", "emit")],
+      edges(["t", "e"]),
+    );
+    expect(pos.get("e")?.x ?? 0).toBeGreaterThan(pos.get("t")?.x ?? 0);
+    const lone = layeredLayout(
+      [node("t", "take"), node("o", "output")],
+      edges(),
+    );
+    expect(lone.get("o")?.x ?? 0).toBeGreaterThan(lone.get("t")?.x ?? 0);
+  });
+
   it("F-205: nodes in a column keep projection order and don't overlap", () => {
     const pos = layeredLayout(
       [node("s"), node("x", "call", 40), node("y", "call", 80), node("z")],

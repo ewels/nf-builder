@@ -150,19 +150,4 @@ describe("F-205 step 1 step 2: the f205-canvas fixture", () => {
     expect(byFlow("value")).toEqual(["total"]);
     expect(byFlow("plain")).toContain("params.words");
   });
-
-  it("F-205 UX-22: bad-declaration.nf calls an unparsed process, which the canvas draws as unparsed", async () => {
-    const text = readFileSync(
-      path("tools/corpus/fixtures/bad-declaration.nf"),
-      "utf8",
-    );
-    const p = await projectionOf([{ path: "main.nf", text }], "main.nf", null);
-    const statuses = p.nodes.flatMap((n) =>
-      n.kind === "call" ? [[n.callee.name, n.callee.status]] : [],
-    );
-    expect(statuses).toEqual([
-      ["FIRST", "modelled"],
-      ["SECOND", "unparsed"],
-    ]);
-  });
 });

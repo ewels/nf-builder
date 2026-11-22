@@ -8,7 +8,7 @@ import type {
   WorkflowRef,
 } from "@nf-builder/lang-core";
 import { describe, expect, it } from "vitest";
-import { canvasView } from "../../src/canvas";
+import { CANVAS_METRICS, canvasView } from "../../src/canvas";
 
 const range = {
   start: 0,
@@ -94,7 +94,7 @@ describe("F-205 canvas view", () => {
   it("F-205 UX-21 UX-22: each node kind and callee variant maps to its appearance, shape, title and subtitle", () => {
     const rows: [GraphNode, string, string, string, string | null][] = [
       [call("a", { kind: "process" }), "process", "card", "P", "process"],
-      [call("a", { kind: "agent" }), "process", "card", "P", "agent"],
+      [call("a", { kind: "agent" }), "agent", "card", "P", "agent"],
       [call("a", { kind: "workflow" }), "workflow", "card", "P", "workflow"],
       [call("a", { kind: "pipeline" }), "workflow", "card", "P", "pipeline"],
       [
@@ -210,11 +210,41 @@ describe("F-205 canvas view", () => {
 
   it("F-205 UX-22 ADR-0008: a chain's title lists its operators joined by arrows", () => {
     const v = one({
+      ...base("c", ".map.collect", [port("in")], [port("out")]),
+      kind: "chain",
+      steps: [
+        { operator: "map", range, known: true },
+        { operator: "collect", range, known: true },
+      ],
+    });
+    expect(v.title).toBe("map → collect");
+  });
+
+  it("F-205 UX-21: a take or emit pill is wide enough for its prefix as well as its name", () => {
+    const m = CANVAS_METRICS;
+    const take = one({
+      ...base("t", "read_pairs_ch", [], [port("out")]),
+      kind: "take",
+      name: "read_pairs_ch",
+    });
+    const chain = one({
       ...base("c", ".map", [port("in")], [port("out")]),
       kind: "chain",
       steps: [{ operator: "map", range, known: true }],
     });
-    expect(v.title).toBe("map");
+    expect(m.pillPrefixWidth).toBeGreaterThan(0);
+    expect(take.width).toBe(
+      "read_pairs_ch".length * m.pillCharWidth +
+        m.pillPadding +
+        m.pillPrefixWidth,
+    );
+    expect(chain.width).toBe(m.pillMinWidth);
+    const long = one({
+      ...base("e", "x", [port("in")], []),
+      kind: "emit",
+      name: "x".repeat(100),
+    });
+    expect(long.width).toBe(m.pillMaxWidth);
   });
 
   it("F-205 UX-24 LA-28: edge dataflow comes from the type; null is unknown", () => {

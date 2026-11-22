@@ -136,7 +136,7 @@ describe("F-205 workspace store", () => {
     expect(calls.at(-1)).toBe("main.nf#");
   });
 
-  it("F-205: a projection for a superseded tab or revision is ignored", async () => {
+  it("F-205: a projection for a superseded tab is ignored", async () => {
     const wf = [ref("main.nf", null), ref("lib.nf", "LIB")];
     let release: () => void = () => undefined;
     const gate = new Promise<void>((resolve) => {

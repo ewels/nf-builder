@@ -1,14 +1,8 @@
 // Icon shapes shared by the palette and the canvas (UX-22). Kinds differ by shape as well as colour (QA-12).
 import type { PaletteIcon } from "@nf-builder/engine";
+import type { JSX } from "react";
 
-export type Tone =
-  | "green"
-  | "blue"
-  | "amber"
-  | "purple"
-  | "pink"
-  | "grey"
-  | "red";
+type Tone = "green" | "blue" | "amber" | "purple" | "pink" | "grey" | "red";
 
 export type Glyph = { readonly tone: Tone; readonly path: string };
 
@@ -34,14 +28,32 @@ export const PALETTE_GLYPHS: Record<PaletteIcon, Glyph> = {
   config: { tone: "grey", path: "M4 4v8M8 4v8M12 4v8M3 6h2M7 10h2M11 7h2" },
 };
 
-/** Canvas-only glyphs: a cube for modules, arrows for take and emit, braces for code, a warning triangle. */
-export const CANVAS_GLYPHS = {
-  module: {
-    tone: "green",
-    path: "M8 2.5l5 2.5v6l-5 2.5L3 11V5zM3 5l5 2.5L13 5M8 7.5v6",
-  },
-  take: { tone: "blue", path: "M2 8h8M7 5l3 3-3 3M13 3v10" },
-  emit: { tone: "pink", path: "M3 3v10M6 8h8M11 5l3 3-3 3" },
-  code: { tone: "grey", path: "M6 4 3 8l3 4M10 4l3 4-3 4" },
-  unparsed: { tone: "red", path: "M8 2.5 14 13H2zM8 6.5v3M8 11.2v.1" },
-} as const satisfies Record<string, Glyph>;
+/** A glyph in its tone tile; `name` becomes `data-glyph` when given. */
+export function GlyphIcon({
+  glyph,
+  className,
+  name,
+}: {
+  readonly glyph: Glyph;
+  readonly className: string;
+  readonly name?: string;
+}): JSX.Element {
+  return (
+    <span className={`${className} tone-${glyph.tone}`} data-glyph={name}>
+      <svg
+        width="14"
+        height="14"
+        viewBox="0 0 16 16"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+        focusable="false"
+      >
+        <path d={glyph.path} />
+      </svg>
+    </span>
+  );
+}

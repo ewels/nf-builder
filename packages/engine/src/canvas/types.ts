@@ -4,6 +4,7 @@ import type { Dataflow, GraphNodeKind } from "@nf-builder/lang-core";
 
 export type CanvasAppearance =
   | "process"
+  | "agent"
   | "module"
   | "workflow"
   | "chain"
