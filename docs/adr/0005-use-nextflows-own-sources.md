@@ -38,3 +38,7 @@ See [research](../research/2026-11-21-nextflow-language-and-tooling.md).
 - tree-sitter-nextflow: not authoritative.
 - Scraping the docs: brittle.
 - House formatting style: diffs the moment someone runs the official formatter.
+
+## Spike result
+
+2026-11-22, spike S2 ([report](../research/2026-11-22-spike-s2-parser.md)): the 26.10.7 grammars, with a hand port of their Java actions, generate a TypeScript parser (antlr-ng, ADR 0020) that parses every corpus file `nextflow lint` 26.10.7 accepts, 570 of 570. Warm parsing is fast; cold parsing of a sarek-sized project takes about 16 s in Node, so QA-03 needs cold-start work in F-113. The catalogue is generated from the newest 26.10 language server, v26.10.2, which embeds nf-lang 26.10.4 rather than "the pack's version" 26.10.7; the grammars are identical, and the docs comparison explains every gap. `tools/spec-extract` may also run locally (ADR 0018); CI checks it on every PR. The decision stands.
