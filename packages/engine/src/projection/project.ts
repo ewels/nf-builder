@@ -9,6 +9,7 @@ import type {
   GraphEdge,
   GraphNode,
   IncludableDeclaration,
+  LegacyOperator,
   MethodCall,
   Port,
   PortRef,
@@ -42,6 +43,9 @@ import {
   callDataflow,
   emitName,
   fallbackSignature,
+  type LegacySignature,
+  legacyProcessSignature,
+  legacyResultDataflow,
   type PortSpec,
   pipelineSignature,
   processSignature,
@@ -135,6 +139,8 @@ type EmitTypes = (
 interface Callable {
   readonly callee: Callee;
   readonly signature: (argumentCount: number) => Signature;
+  /** A legacy process's ports, which also give its results' dataflow kind (F-107). */
+  readonly legacy?: LegacySignature;
 }
 
 /** What a feeding expression contributes to an input port. */
@@ -522,8 +528,13 @@ class Projecting {
     switch (declaration.kind) {
       case "Process":
       case "Agent": {
-        if (declaration.kind === "Process" && !declaration.typed)
-          return callable("process", "modelled", false);
+        if (declaration.kind === "Process" && !declaration.typed) {
+          const legacy = legacyProcessSignature(declaration, this.library);
+          return {
+            ...callable("process", "modelled", false, () => legacy),
+            legacy,
+          };
+        }
         const signature = processSignature(declaration, this.library);
         return callable(
           declaration.kind === "Agent" ? "agent" : "process",
@@ -679,10 +690,17 @@ class Projecting {
       }
     }
     const { callee } = callable;
-    const kind = callDataflow(feeds.map((f) => f.type));
+    const kind =
+      callable.legacy === undefined
+        ? callDataflow(feeds.map((f) => f.type))
+        : legacyResultDataflow(
+            callable.legacy,
+            feeds.map((f) => f.type?.dataflow ?? null),
+          );
     const processLike = callee.kind === "process" || callee.kind === "agent";
     const outputs = signature.outputs.map((o): PortSpec => {
-      if (!processLike || !callee.typed) return o;
+      if (!processLike || (!callee.typed && callable.legacy === undefined))
+        return o;
       const element = o.type?.element ?? null;
       return {
         ...o,
@@ -902,11 +920,17 @@ function inferredEmits(projection: Projection): ReadonlyMap<string, FlowType> {
   return types;
 }
 
+export interface ProjectorOptions {
+  /** The pack's legacy-only operators (F-107). */
+  readonly legacyOperators?: readonly LegacyOperator[];
+}
+
 export function createProjector(
   model: ProjectModel,
   catalogue: ScriptCatalogue,
+  options: ProjectorOptions = {},
 ): Projector {
-  const library = dataflowLibrary(catalogue);
+  const library = dataflowLibrary(catalogue, options.legacyOperators);
   // a projector is a snapshot of the model (F-113 replaces it after a change)
   let all: Listed[] | undefined;
   const listed = (): Listed[] =>

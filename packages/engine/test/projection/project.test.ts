@@ -448,7 +448,7 @@ describe("F-106 AR-10 LA-20 projector", () => {
     ]);
   });
 
-  it("F-106 LA-14: a typed workflow's call to a legacy process is a call node with argument ports", () => {
+  it("F-106 LA-14 F-107 LA-21: a typed workflow's call to a legacy process is a call node with its qualifier ports", () => {
     const main = must(projector, "main.nf", null);
     const counts = node(main, "main.nf#/counts") as CallNode;
     expect(counts.callee).toMatchObject({
@@ -456,10 +456,11 @@ describe("F-106 AR-10 LA-20 projector", () => {
       kind: "process",
       typed: false,
     });
-    expect(ports(counts, "inputs")).toEqual(["$1"]);
-    expect(ports(counts, "outputs")).toEqual(["out"]);
-    expect(type(counts, "out")).toBe("-");
-    expect(into(main, counts.id, "$1")).toMatchObject([
+    // F-107 LA-21: the ports come from the qualifiers, and the result kind from the arguments
+    expect(ports(counts, "inputs")).toEqual(["reads"]);
+    expect(ports(counts, "outputs")).toEqual(["txt"]);
+    expect(type(counts, "txt")).toBe("Channel<Path>");
+    expect(into(main, counts.id, "reads")).toMatchObject([
       { from: { node: "main.nf#/prepared", port: "bams" } },
     ]);
   });

@@ -13,9 +13,9 @@ main.nf#/prepared call "PREPARE" callee=PREPARE:workflow:modelled:typed @17:16
   out logs (logs): Channel<String>
   out index (index): Value<Path>
 main.nf#/counts call "LEGACY_COUNT" callee=LEGACY_COUNT:process:modelled:legacy @18:14
-  in $1 ($1): -
+  in reads (reads): Path
     <- main.nf#/prepared[bams] Channel<Path> via prepared.bams
-  out out (out): -
+  out txt (txt): Channel<Path>
 main.nf#/ch_names factory "channel.fromList" factory=channel.fromList @19:16
   out out (out): Channel<?>
 main.nf#/channel.of@1 factory "channel.of" factory=channel.of @20:29
