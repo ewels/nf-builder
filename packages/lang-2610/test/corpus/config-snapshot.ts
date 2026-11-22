@@ -2,6 +2,7 @@ import type {
   Comment,
   ConfigApply,
   ConfigAst,
+  ConfigItem,
   ConfigName,
   ConfigStatement,
   ParseProblem,
@@ -21,7 +22,7 @@ const pathText = (path: readonly ConfigName[]) => path.map(nameText).join(".");
 
 type Entry = { line: string; range: Range; children: Entry[] };
 
-function summary(s: ConfigStatement | ConfigApply): string {
+function summary(s: ConfigItem | ConfigApply): string {
   switch (s.kind) {
     case "ConfigAssign":
       return `${pathText(s.path)} = ${s.value.kind}`;
@@ -40,10 +41,12 @@ function summary(s: ConfigStatement | ConfigApply): string {
       return `${pathText(s.path)}${s.trailingDot ? "." : ""}`;
     case "ConfigInvalid":
       return s.statement?.kind ?? "(none)";
+    case "Unparsed":
+      return s.head ? `${s.head.keyword} ${s.head.name ?? ""}`.trim() : "";
   }
 }
 
-function entry(s: ConfigStatement | ConfigApply): Entry {
+function entry(s: ConfigItem | ConfigApply): Entry {
   const children =
     s.kind === "ConfigBlock" ||
     s.kind === "ConfigSelector" ||

@@ -39,3 +39,15 @@ export type {
   PaletteViewGroup,
   PaletteViewItem,
 } from "./palette.ts";
+export type {
+  ConfigSourceFile,
+  ConfigSourceParse,
+  ParseStatus,
+  PlainSourceFile,
+  ScriptSourceFile,
+  ScriptSourceParse,
+  SourceFile,
+  SourceLanguage,
+  SourceParse,
+  SourceParser,
+} from "./source-file.ts";

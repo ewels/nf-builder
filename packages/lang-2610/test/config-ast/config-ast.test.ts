@@ -5,6 +5,7 @@ import {
   type ConfigAssign,
   type ConfigAst,
   type ConfigBlock,
+  type ConfigItem,
   type ConfigSelector,
   type ConfigStatement,
   walk,
@@ -28,7 +29,7 @@ const find = <T extends AstNode>(ast: ConfigAst, kind: T["kind"]) => {
 };
 /** Each assignment's full path, joining the enclosing block names (selectors count their target). */
 const fullPaths = (
-  statements: readonly ConfigStatement[],
+  statements: readonly ConfigItem[],
   prefix: string[] = [],
 ): string[] =>
   statements.flatMap((s) => {

@@ -14,4 +14,5 @@ export type {
   Range,
 } from "./range.ts";
 export * from "./script.ts";
+export type { DeclarationHead, Unparsed } from "./unparsed.ts";
 export { type AstNode, childNodes, walk } from "./walk.ts";

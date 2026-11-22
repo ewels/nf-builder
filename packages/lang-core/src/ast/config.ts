@@ -10,6 +10,7 @@ import type {
   TryCatch,
   VariableDeclaration,
 } from "./script.ts";
+import type { Unparsed } from "./unparsed.ts";
 
 /** A name in a config path, block header or selector: `docker`, `'foo-bar'` (`name` is the decoded value), `int`. */
 export interface ConfigName extends NodeBase<"ConfigName"> {
@@ -65,10 +66,12 @@ export type ConfigStatement =
   | ConfigInclude
   | ConfigIncomplete
   | ConfigInvalid;
+/** A top-level config item: a statement, or text the F-104 fallback kept as is. Nested blocks hold statements only. */
+export type ConfigItem = ConfigStatement | Unparsed;
 
 /** The config root: the whole text. */
 export interface ConfigAst extends NodeBase<"ConfigFile"> {
-  readonly statements: readonly ConfigStatement[];
+  readonly statements: readonly ConfigItem[];
   /** The comment map (AR-01): every comment, in source order. */
   readonly comments: readonly Comment[];
 }
