@@ -2,6 +2,7 @@
 // header's Templates button opens the New project dialog too.
 import { installedPackVersions } from "@nf-builder/engine";
 import { type JSX, useEffect, useRef } from "react";
+import { focusTarget } from "./focus-target";
 import { NewProjectDialog } from "./new-project-dialog";
 import { DeleteProjectDialog, ProjectNameDialog } from "./project-dialogs";
 import { useProjects } from "./project-store";
@@ -27,8 +28,7 @@ export function ProjectControls(): JSX.Element {
   const shown = useRef(false);
   useEffect(() => {
     if (dialog === null && shown.current) {
-      const target = opener?.isConnected ? opener : button.current;
-      target?.focus();
+      focusTarget(opener, button.current)?.focus();
     }
     shown.current = dialog !== null;
   }, [dialog, opener]);
