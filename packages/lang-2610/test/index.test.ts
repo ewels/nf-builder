@@ -34,6 +34,26 @@ describe("F-104 the pack loads its parser lazily", () => {
     expect(await entry.pack.loadParser()).toEqual(parser);
   });
 
+  it("F-104 F-110 ADR-0027 LA-45: the lazy loader also carries the printer, which prints a parsed fixture as nextflow lint -format does", async () => {
+    const dir = new URL("./printer/", import.meta.url);
+    const input = readFileSync(
+      new URL("input/typed/feature-flags.nf", dir),
+      "utf8",
+    );
+    const formatted = readFileSync(
+      new URL("formatted/typed/feature-flags.nf", dir),
+      "utf8",
+    );
+    const { parseScript, printer } = await entry.pack.loadParser();
+    const parsed = parseScript(input);
+    expect(parsed.status).toBe("modelled");
+    if (!parsed.ast) throw new Error("no AST");
+    const result = printer.printScript(parsed.ast, {
+      layout: printer.createLayout(input),
+    });
+    expect(result.text).toBe(formatted);
+  });
+
   it("F-104 ADR-0027 QA-01: the pack entry imports no parser module statically", () => {
     const source = readFileSync(
       new URL("../src/index.ts", import.meta.url),

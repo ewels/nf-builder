@@ -67,6 +67,7 @@ describe("F-104 AR-01 IO-14: createSourceFile", () => {
 
   it("F-104 IO-14: createSourceFile never throws, even when the pack parser does", () => {
     const throwing: SourceParser = {
+      printer: {} as SourceParser["printer"],
       parseScript: () => {
         throw new Error("boom");
       },
@@ -109,6 +110,7 @@ describe("F-104 AR-01 IO-14: createSourceFile", () => {
       typesEnabled: false,
     });
     const stubFor = (body: ScriptAst["body"]): SourceParser => ({
+      printer: {} as SourceParser["printer"],
       parseScript: (): ScriptSourceParse => ({
         status: "partial",
         ast: ast(body),

@@ -11,7 +11,11 @@ import { WEB_DIST } from "../scripts/check-common.ts";
 const PARSER_MARKER =
   "check for an unclosed brace, bracket, parenthesis, or string";
 
-test("F-104 QA-01 ADR-0027: the parser loads in a lazy chunk, outside the initial JavaScript", () => {
+// A message of the printer (F-110): the printer shares the parser's lazy chunk.
+const PRINTER_MARKER =
+  "a script cannot mix top-level statements and declarations";
+
+test("F-104 F-110 QA-01 ADR-0027: the parser loads in a lazy chunk, outside the initial JavaScript", () => {
   const manifest = JSON.parse(
     readFileSync(join(WEB_DIST, ".vite/manifest.json"), "utf8"),
   ) as Manifest;
@@ -22,6 +26,10 @@ test("F-104 QA-01 ADR-0027: the parser loads in a lazy chunk, outside the initia
     expect(readFileSync(join(WEB_DIST, file), "utf8"), file).not.toContain(
       PARSER_MARKER,
     );
+  for (const file of initial)
+    expect(readFileSync(join(WEB_DIST, file), "utf8"), file).not.toContain(
+      PRINTER_MARKER,
+    );
   const lazy = readdirSync(join(WEB_DIST, "assets"))
     .filter((f) => f.endsWith(".js"))
     .map((f) => `assets/${f}`)
@@ -30,5 +38,11 @@ test("F-104 QA-01 ADR-0027: the parser loads in a lazy chunk, outside the initia
     lazy.some((f) =>
       readFileSync(join(WEB_DIST, f), "utf8").includes(PARSER_MARKER),
     ),
+  ).toBe(true);
+  expect(
+    lazy.some((f) => {
+      const code = readFileSync(join(WEB_DIST, f), "utf8");
+      return code.includes(PARSER_MARKER) && code.includes(PRINTER_MARKER);
+    }),
   ).toBe(true);
 });

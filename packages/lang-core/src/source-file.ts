@@ -3,6 +3,7 @@ import type { ConfigAst } from "./ast/config.ts";
 import type { ParseProblem } from "./ast/parse-result.ts";
 import type { Comment } from "./ast/range.ts";
 import type { ScriptAst } from "./ast/script.ts";
+import type { ScriptPrinter } from "./printer.ts";
 
 export type SourceLanguage =
   | "nextflow"
@@ -32,8 +33,12 @@ export type SourceParse<Ast> =
 export type ScriptSourceParse = SourceParse<ScriptAst>;
 export type ConfigSourceParse = SourceParse<ConfigAst>;
 
-/** A pack's parser with declaration-level fallback (ADR 0004). Never throws, whatever the input (IO-14). */
+/**
+ * A pack's parser with declaration-level fallback (ADR 0004), and its printer. Parsing never throws, whatever the input
+ * (IO-14). Both come from one lazy chunk, so one `pack.loadParser()` carries them.
+ */
 export interface SourceParser {
+  readonly printer: ScriptPrinter;
   parseScript(text: string): ScriptSourceParse;
   parseConfig(text: string): ConfigSourceParse;
 }

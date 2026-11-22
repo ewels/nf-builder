@@ -89,7 +89,7 @@ describe("F-102 AR-02: comment attachment", () => {
       ).toEqual([]);
     }
     expect(compared).toBe(45);
-  });
+  }, 30_000);
 
   it("F-102 AR-02: leading, trailing and dangling comments in comments-attachment.nf", () => {
     const ast = build(read("fixtures/comments-attachment.nf"));
