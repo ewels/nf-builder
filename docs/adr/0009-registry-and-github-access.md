@@ -43,3 +43,7 @@ Private repos use a token and the blobs API. The token is held in memory unless 
 
 - Proxy service: ruled out by ADR 0002.
 - isomorphic-git or archive zips: need a proxy, or have unverified CORS.
+
+## Spike result
+
+2026-11-22, spike S1 ([report](../research/2026-11-22-spike-s1-typed-legacy-interop.md)), Nextflow 26.10.7 source: `.module-info` is a Java properties file (written with `Properties.store`, so a `#<date>` comment line comes first and `:` in values is escaped as `\:`) with two keys: `checksum`, the SHA-256 of the installed module directory without `.module-info`, and `registryUrl`, the URL the bundle was downloaded from. Nextflow writes it on `module install`, uses it as the marker for `module list`, and compares the checksum to detect local changes; without it, `module remove` refuses the folder unless `-force` is given. The checksum comes from `io.seqera:npr-client` (`ModuleChecksum.computeDirectory`), whose file order and normalisation the spike couldn't read. Inserting a module therefore doesn't write `.module-info` yet; F-504 decides once the algorithm is verified with the oracle (`nextflow module list` on a written module). Spike S4 is still open.

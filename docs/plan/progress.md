@@ -123,3 +123,16 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - WCAG 2.5.7 single-pointer alternative deferred to F-701; the suggestions link to F-309 (notes).
   - AGENTS.md: the `*.netlify.app` note now says some sandboxes can't reach it (this one can).
 - Blockers: none.
+
+## 2026-11-22 · F-005 · Claude (autonomous)
+- Did: `tools/oracle`: `pnpm nextflow` runs the pinned Nextflow release offline; `pnpm oracle` runs `nextflow lint` and `run -stub` on the cases in `tools/oracle/cases/cases.yaml` and lints the corpus fixtures against `fixtures.yaml`; CI job `oracle`. Spike S1 with eight cases; [report](../research/2026-11-22-spike-s1-typed-legacy-interop.md). PR #13.
+- State: passing.
+- Next: F-006 (parser speed under investigation), F-008 in progress, then F-010 and F-007.
+- Decisions:
+  - Oracle from the pinned release jar locally and in CI; pin in `packages/lang-2610/upstream.json`; `tools/oracle` joins the ADR 0003 tools; build-time hosts github.com release downloads ([ADR 0019](../adr/0019-nextflow-oracle.md), amending ADR 0011 as ADR 0018 did).
+  - `.github/workflows/ci.yml`: new `oracle` job with `actions/setup-java` pinned by SHA (ADR 0019).
+  - S1 found typed code must pass legacy tuple inputs as `tuple(...)`: a mixed list literal fails lint, and lint doesn't check arity. LA-14 drops its warning and says so (ADR 0007 spike result, no new ADR); notes on F-110, F-302 and F-504.
+  - LA-03: `>=26.10.6` confirmed, 26.10.7 latest.
+  - `.module-info`: format recorded, writing deferred to F-504 (ADR 0009 spike result).
+  - AGENTS.md: oracle cases marked `expect: error` are exempt from "must pass the oracle", like the corpus fixtures.
+- Blockers: none.

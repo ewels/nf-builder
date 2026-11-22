@@ -1,0 +1,98 @@
+# Nextflow oracle cases (ADR 0011, ADR 0019). Each case is the directory <id>/ next to this file.
+# pnpm oracle copies it to .cache/oracle/runs/<id>/ and runs the pinned Nextflow (packages/lang-2610/upstream.json) there:
+#   lint: nextflow lint -o json .      run: nextflow run <script> <args> (script main.nf, args [-stub] by default)
+# expect: ok = exit status 0 (warnings allowed); error = non-zero exit status.
+# errors (lint): each text must appear in one reported error message. output (run): each text must appear in stdout or stderr.
+# Expectations must match real Nextflow; a PR that changes one says why.
+cases:
+  # Spike S1 (F-005): typed and legacy code across files, and in one script.
+  - id: s1-typed-calls-legacy
+    about: A typed entry workflow calls a legacy process and a legacy workflow included from another file.
+    spec: [F-005, LA-14, ADR-0007]
+    sources:
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/modules/nextflow/src/test/groovy/nextflow/script/DataflowTypesTest.groovy#L119-L162
+    lint: { expect: ok }
+    run: { expect: ok }
+  - id: s1-typed-calls-legacy-module
+    about: A typed entry workflow calls an nf-core-shaped legacy process from modules/local/ and reads its named outputs.
+    spec: [F-005, LA-14, ADR-0007]
+    sources:
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/modules/nextflow/src/test/groovy/nextflow/script/DataflowTypesTest.groovy#L211-L253
+      - https://github.com/nf-core/modules/blob/bbd7054a060ab558521f3c6601df5323c96362fd/modules/nf-core/fastqc/main.nf#L5-L17
+    lint: { expect: ok }
+    run:
+      expect: ok
+      output: ["txt: ", "s1.count.txt", "versions: "]
+  - id: s1-typed-list-literal-tuple
+    about: Typed code builds a legacy tuple input with a mixed list literal; lint rejects it and run only warns.
+    spec: [F-005, LA-14, ADR-0007]
+    sources:
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/modules/nf-lang/src/main/java/nextflow/script/control/TypeCheckingVisitor.java#L1403-L1424
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/migrations/26-10.mdx#L22
+    lint:
+      expect: error
+      errors: ["List expression has inconsistent element types"]
+    run:
+      expect: ok
+      output: ["Type checking found 1 error", "txt: "]
+  - id: s1-typed-legacy-tuple-arity
+    about: Typed code passes a one-component tuple to a two-component legacy tuple input; lint accepts it and run fails.
+    spec: [F-005, LA-14, ADR-0007]
+    sources:
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/modules/nf-lang/src/main/java/nextflow/script/control/TypeCheckingVisitor.java#L990-L994
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/modules/nf-lang/src/main/java/nextflow/script/control/TypeCheckingVisitor.java#L1027-L1033
+    lint: { expect: ok }
+    run:
+      expect: error
+      output: ["Input tuple does not match tuple declaration"]
+  - id: s1-legacy-calls-typed
+    about: A legacy entry workflow calls a typed process and a typed workflow included from another file.
+    spec: [F-005, LA-14, ADR-0007]
+    sources:
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/modules/nextflow/src/test/groovy/nextflow/script/DataflowTypesTest.groovy#L74-L117
+    lint: { expect: ok }
+    run: { expect: ok }
+  - id: s1-legacy-calls-typed-module
+    about: A legacy entry workflow builds records and calls a typed process with a record input from modules/local/.
+    spec: [F-005, LA-14, ADR-0007]
+    sources:
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/process-typed.mdx#L145-L165
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/reference/stdlib-namespaces/global.mdx#L184
+    lint: { expect: ok }
+    run:
+      expect: ok
+      output: ["count: ", "count.txt"]
+  - id: s1-mixed-types-on
+    about: One script enables types and defines both a typed and a legacy process.
+    spec: [F-005, LA-13, ADR-0007]
+    sources:
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/static-typing.mdx#L50
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/modules/nf-lang/src/test/groovy/nextflow/script/parser/ScriptAstBuilderTest.groovy#L544-L585
+    lint:
+      expect: error
+      errors: ["Invalid input declaration in typed process"]
+    run:
+      expect: error
+      output:
+        [
+          "Script compilation failed",
+          "Invalid input declaration in typed process",
+        ]
+  - id: s1-mixed-types-off
+    about: One script without the types flag defines both a legacy and a typed process.
+    spec: [F-005, LA-13, ADR-0007]
+    sources:
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/modules/nf-lang/src/test/groovy/nextflow/script/parser/ScriptAstBuilderTest.groovy#L498-L542
+    lint:
+      expect: error
+      errors:
+        [
+          "Typed input declaration is not allowed in legacy process -- set `nextflow.enable.types = true` to use typed processes in this script",
+        ]
+    run:
+      expect: error
+      output:
+        [
+          "Script compilation failed",
+          "Typed input declaration is not allowed in legacy process",
+        ]
