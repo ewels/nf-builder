@@ -25,6 +25,7 @@ To reproduce with the pinned dist: `NXF_OFFLINE=true .cache/nextflow/26.10.7/nex
 | 13 | Nextflow lint | A registry module missing `meta.yml` aborts lint ("corrupted") instead of giving a diagnostic | F-105 plan | no |
 | 14 | nf-lang config resolver | `includeConfig` of a directory passes lint; `nextflow run` then fails to parse the config | F-105 plan | no |
 | 15 | Nextflow lint | Lint downloads a missing registry module into the project even with `NXF_OFFLINE=true` (may be intended) | F-105 plan | no |
+| 16 | nf-lang lexer | A stray top-level `}` is silently accepted by lint and run | F-104 review | no |
 
 ## Details
 
@@ -226,3 +227,16 @@ with `modules/nf-core/nometa/main.nf` holding a process `NOMETA` and no `meta.ym
 - **What happens:** with `NXF_OFFLINE=true`, `nextflow lint .` downloads the module into `modules/nf-core/fastqc/` and reports only a warning. Linting changes the project, and the offline setting is ignored.
 - **Expected:** possibly intended (lint resolves modules as `run` does), but offline mode should not reach the registry, and a read-only check arguably shouldn't write files. Raise as a question rather than a bug.
 - **nf-builder:** reports a missing registry module as a diagnostic naming `modules/nf-core/fastqc/main.nf` (F-105).
+
+### 16. A stray closing brace is silently accepted
+
+```nextflow
+workflow {
+    println('hi')
+}
+}
+```
+
+- **What happens:** `nextflow lint .` reports no errors and `nextflow run main.nf` succeeds. The last `}` pops a lexer mode with nothing left to pop (`ScriptLexer.g4` L737); the ANTLR runtime's empty-stack exception is not reported as a syntax error.
+- **Expected:** a syntax error at 4:1 (`Unexpected input: '}'`), as for any other unexpected token.
+- **nf-builder:** follows upstream so lint-clean files stay fully modelled (F-104).
