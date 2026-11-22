@@ -52,7 +52,12 @@ describe("ADR 0003: build-time tools", () => {
     })
       .filter((entry) => entry.isDirectory())
       .map((entry) => `tools/${entry.name}`);
-    const allowed = ["tools/corpus", "tools/oracle", "tools/spec-extract"];
+    const allowed = [
+      "tools/corpus",
+      "tools/oracle",
+      "tools/registry-snapshot",
+      "tools/spec-extract",
+    ];
     for (const dir of tools) {
       expect(allowed, dir).toContain(dir);
       expect(isDir(join(repoRoot, dir, "src")), `${dir}/src`).toBe(true);

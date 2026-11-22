@@ -1,0 +1,134 @@
+# Registry snapshot (F-501, IO-31, ADR 0035). Builds the static registry snapshot daily and publishes it to the orphan
+# branch `registry-snapshot`, which every Netlify build copies into the site at /registry/.
+# Not a merge gate: it depends on registry.nextflow.io, so AGENTS.md's "CI green" does not include it. A pull request that
+# touches the tool gets a dry run (build and check, never publish) as evidence.
+name: Registry snapshot
+
+on:
+  schedule:
+    - cron: "23 3 * * *"
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - tools/registry-snapshot/**
+      - scripts/check-registry-snapshot.ts
+      - .github/workflows/registry-snapshot.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: registry-snapshot-${{ github.event.pull_request.number || 'main' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build:
+    name: Build and check the snapshot
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    outputs:
+      generated-at: ${{ steps.stamp.outputs.generated-at }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Fetch the previous snapshot, if there is one
+        env:
+          # The repository is private: read it with the job's read-only token, and never prompt.
+          GITHUB_TOKEN: ${{ github.token }}
+          GIT_TERMINAL_PROMPT: "0"
+          REPO_URL: https://github.com/${{ github.repository }}.git
+        run: |
+          mkdir -p .cache/registry
+          auth="$(printf 'x-access-token:%s' "$GITHUB_TOKEN" | base64 -w0)"
+          set +e
+          git -c "http.extraheader=Authorization: Basic $auth" ls-remote --exit-code --heads "$REPO_URL" registry-snapshot > /dev/null
+          status=$?
+          set -e
+          if [ "$status" -eq 0 ]; then
+            git -c "http.extraheader=Authorization: Basic $auth" clone --quiet --depth 1 --branch registry-snapshot --single-branch "$REPO_URL" .cache/registry/previous
+          elif [ "$status" -eq 2 ]; then
+            echo "No registry-snapshot branch yet: this is the first run."
+          else
+            exit "$status"
+          fi
+      - name: Build the snapshot
+        run: pnpm registry:snapshot --out .cache/registry/out --previous .cache/registry/previous --report .cache/registry/report.md
+      - name: Check QA-06 and integrity
+        run: pnpm check:registry .cache/registry/out
+      - name: Read the generation time
+        id: stamp
+        run: echo "generated-at=$(node -p "JSON.parse(require('fs').readFileSync('.cache/registry/out/registry/index.json', 'utf8')).generatedAt")" >> "$GITHUB_OUTPUT"
+      - name: Write the report to the job summary
+        if: always()
+        run: |
+          if [ -f .cache/registry/report.md ]; then cat .cache/registry/report.md >> "$GITHUB_STEP_SUMMARY"; fi
+      - name: Upload the snapshot
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: registry-snapshot
+          path: |
+            .cache/registry/out/
+            .cache/registry/report.md
+          if-no-files-found: ignore
+          retention-days: 7
+
+  publish:
+    name: Publish to the registry-snapshot branch
+    needs: build
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    steps:
+      # This job can write to the repository, so it checks out nothing and installs nothing: it only moves the artefact.
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: registry-snapshot
+          path: .cache/registry
+      - name: Push one orphan commit to registry-snapshot
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GIT_TERMINAL_PROMPT: "0"
+          REPO_URL: https://github.com/${{ github.repository }}.git
+          GENERATED_AT: ${{ needs.build.outputs.generated-at }}
+        run: |
+          work="$(mktemp -d)"
+          cp -r .cache/registry/out/registry "$work/registry"
+          printf '[build]\n  ignore = "exit 0"\n' > "$work/netlify.toml"
+          cd "$work"
+          git init --quiet --initial-branch registry-snapshot
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add registry netlify.toml
+          git commit --quiet -m "Registry snapshot $GENERATED_AT"
+          auth="$(printf 'x-access-token:%s' "$GITHUB_TOKEN" | base64 -w0)"
+          git -c "http.extraheader=Authorization: Basic $auth" push --force "$REPO_URL" HEAD:refs/heads/registry-snapshot
+
+  verify:
+    name: Trigger Netlify and check the deployed snapshot
+    needs: [build, publish]
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+        with:
+          install: "false"
+      - name: Trigger a Netlify build and check the deployed snapshot
+        env:
+          NETLIFY_BUILD_HOOK: ${{ secrets.NETLIFY_BUILD_HOOK }}
+          GENERATED_AT: ${{ needs.build.outputs.generated-at }}
+        run: |
+          if [ -z "$NETLIFY_BUILD_HOOK" ]; then
+            echo "NETLIFY_BUILD_HOOK is not set: the snapshot reaches the site at the next production deploy."
+            exit 0
+          fi
+          curl --fail --silent --show-error --request POST "$NETLIFY_BUILD_HOOK" > /dev/null
+          pnpm check:registry --url https://nf-builder.netlify.app --generated-at "$GENERATED_AT"

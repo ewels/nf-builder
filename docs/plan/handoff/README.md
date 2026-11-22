@@ -10,13 +10,13 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-103 config AST | merged, PR #24 | |
 | F-104 round trip | merged, PR #26 | |
 | F-110 printer | merged, PR #25 | |
-| F-105 semantic model | `feat/F-105`, in PR | Plan deleted in its PR. |
-| F-106 typed projection | not started | [plan](plan-F-106.md). Branch from `main` after F-105 merges. |
+| F-105 semantic model | merged, PR #30 | |
+| F-106 typed projection | `feat/F-106` | Tasks 1–2 committed; 3–4 building. [plan](plan-F-106.md). |
 | F-107 legacy projection | not started | [plan](plan-F-107.md). After F-106; parallel with F-108. |
 | F-108 code nodes | not started | [plan](plan-F-108.md). After F-106; parallel with F-107. |
 | F-111 edit commands | not started | [plan](plan-F-111.md). Tasks 1–6 need only F-105; 7 onwards need F-106. |
 | F-112 diagnostics | not started | [plan](plan-F-112.md). After F-106 (and F-111 for fixes). |
-| F-501 registry snapshot | `feat/F-501` | Task 1 building. [plan](plan-F-501.md). Maintainer issue #27 (build hook) opened. |
+| F-501 registry snapshot | merged, PR #29, **not passing** | Blocked on #31 (Netlify can't read the snapshot branch of a private repository). F-502 to F-506, F-702, F-704 and F-705 depend on it. #27 (build hook). |
 
 Next free ADR number: 0036 (0034 is F-105's, 0035 F-501's).
 
@@ -66,7 +66,7 @@ Next free ADR number: 0036 (0034 is F-105's, 0035 F-501's).
 - LA-33 amended: a missing argument is an error (nf-lang rejects it), an unused output a warning. LA-31 and a new LA-37 row as in point 7. `Port.argumentType` is added to F-106 (point 13).
 - Rules behind a lazy `LanguagePack.loadLints()`, one ADR at landing.
 
-### F-501 — [plan](plan-F-501.md)
+### F-501 (merged with its PR)
 - Accept every recommendation in section 6: an orphan `registry-snapshot` branch fetched by each Netlify build; ship without the build-hook secret and open a `maintainer` issue for it; split `index.json` (QA-06) and `ports.json`, with IO-31 read as the pair; `tools/registry-snapshot` may import lang-core and pack entries (amends ADR 0003); make lang-2610 erasable for plain Node; ports from registry metadata in `meta.yml` order; parser wins on kind and component; every bundle file; pinned dependency closure; plugin release admitted by the pinned Nextflow; the failure policy; a path-filtered PR dry run outside "CI green"; daily at 03:23 UTC; the fixture snapshot for e2e. ADR 0035 (F-105 takes 0034).
 
 ## Process notes for the next session

@@ -78,7 +78,10 @@ export class Formatter {
   private currentRootExpr: Expression | null = null;
   private inWrappedMethodChain = false;
 
-  constructor(private readonly layout: SourceLayout = FRESH_LAYOUT) {}
+  private readonly layout: SourceLayout;
+  constructor(layout: SourceLayout = FRESH_LAYOUT) {
+    this.layout = layout;
+  }
 
   toString(): string {
     return this.buffer;

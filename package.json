@@ -31,7 +31,9 @@
     "corpus:lint": "node tools/corpus/src/lint-cli.ts",
     "test:corpus": "vitest run --config vitest.corpus.config.ts",
     "nextflow": "node tools/oracle/src/nextflow-cli.ts",
-    "oracle": "node tools/oracle/src/cli.ts"
+    "oracle": "node tools/oracle/src/cli.ts",
+    "registry:snapshot": "node tools/registry-snapshot/src/cli.ts",
+    "check:registry": "node scripts/check-registry-snapshot.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "2.6.8",

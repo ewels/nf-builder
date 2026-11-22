@@ -4,5 +4,10 @@
     "description": "Initial JavaScript, gzipped, excluding Monaco and the optional language server",
     "maxBytes": 450000,
     "reason": "QA-01 as specified"
+  },
+  "QA-06": {
+    "description": "Registry snapshot index (registry/index.json), gzipped",
+    "maxBytes": 300000,
+    "reason": "QA-06 as specified"
   }
 }
