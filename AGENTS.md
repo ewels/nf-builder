@@ -35,6 +35,7 @@ This table lists every root `package.json` script that `pnpm check` doesn't alre
 | `pnpm check:budget` and `pnpm check:hosts` | After `pnpm build`: QA-01 bundle budget and IO-41 host allow-list (ADR 0015) |
 | `pnpm test:e2e -- --grep F-123` | The feature's end-to-end test |
 | `pnpm corpus:fetch` | Fetch the pinned pipeline corpus into `.cache/corpus/` (git over github.com; second run is a no-op) |
+| `pnpm spike:s5` | Spike S5 (F-010): fetch the pinned Pyodide and nf-metro files, render the CLI references, then serve the test page on http://localhost:4175 (needs Python 3.11+) |
 | `pnpm nextflow -- <args>` | Run the pinned Nextflow (`packages/lang-2610/upstream.json`, Java 17 to 26): downloads the release once into `.cache/nextflow/`, checks its SHA-256, runs offline |
 | `pnpm oracle` | After changing Nextflow fixtures, templates or the printer: `nextflow lint` and `nextflow run -stub` on every case in `tools/oracle/cases/cases.yaml`; report in `.cache/oracle/report.md` (CI job `oracle`) |
 

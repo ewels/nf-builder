@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "types": [
+      "node"
+    ],
+    "erasableSyntaxOnly": true
+  },
+  "include": [
+    "prepare.ts",
+    "headers.ts",
+    "serve.ts",
+    "vite.config.ts",
+    "src/protocol.ts"
+  ]
+}
