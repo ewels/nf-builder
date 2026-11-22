@@ -278,3 +278,15 @@ cases:
       expect: ok
       args: ["-stub", "--reads", "x", "--threshold", "3"]
       output: ["txt: ", "tagged: R1:", "typed: "]
+  # F-205: the canvas fixture, one node of every kind the canvas draws.
+  - id: f205-canvas
+    about: A typed entry workflow with params, a channel factory, typed and legacy local processes, a registry-shaped legacy module, a typed and a legacy named workflow, a chain, a code statement and an output block; channel, value and plain edges.
+    spec: [F-205, UX-21, UX-22, UX-23, UX-24, ADR-0007]
+    sources:
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/process-typed.mdx
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/workflow-typed.mdx
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/modules/nf-lang/src/main/java/nextflow/script/control/ResolveIncludeVisitor.java#L90-L141
+    lint: { expect: ok }
+    run:
+      expect: ok
+      args: ["-stub", "--words", "data/words.txt"]
