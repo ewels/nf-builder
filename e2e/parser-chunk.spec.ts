@@ -22,14 +22,11 @@ test("F-104 F-110 QA-01 ADR-0027: the parser loads in a lazy chunk, outside the 
   const html = readFileSync(join(WEB_DIST, "index.html"), "utf8");
   const initial = initialJsFiles(manifest, html);
   expect(initial.length).toBeGreaterThan(0);
-  for (const file of initial)
-    expect(readFileSync(join(WEB_DIST, file), "utf8"), file).not.toContain(
-      PARSER_MARKER,
-    );
-  for (const file of initial)
-    expect(readFileSync(join(WEB_DIST, file), "utf8"), file).not.toContain(
-      PRINTER_MARKER,
-    );
+  for (const file of initial) {
+    const code = readFileSync(join(WEB_DIST, file), "utf8");
+    expect(code, file).not.toContain(PARSER_MARKER);
+    expect(code, file).not.toContain(PRINTER_MARKER);
+  }
   const lazy = readdirSync(join(WEB_DIST, "assets"))
     .filter((f) => f.endsWith(".js"))
     .map((f) => `assets/${f}`)

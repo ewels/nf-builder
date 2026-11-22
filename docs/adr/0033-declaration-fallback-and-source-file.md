@@ -10,11 +10,11 @@ ADR 0004 says files are authoritative: a file the strict grammar rejects is kept
 ## Decision
 
 - **Two tiers.** Each file is parsed whole first. If the grammar rejects it, a hand-written pre-scanner (`packages/lang-2610/src/source/prescan.ts`) splits it into top-level chunks; each chunk is parsed alone in fragment mode (whole-script checks off, the types flag carried forward) and its ranges are shifted back to file positions. A chunk that still fails becomes an `Unparsed` item holding its exact text, its head (keyword and name) and its own errors. If the grammar accepts the file, any item an error starts inside, and any `InvalidDeclaration`, becomes `Unparsed`; code the builder dropped is kept as `Unparsed` too.
-- **The pre-scanner** is lexical, linear, never throws and never recurses. It knows comments (an unterminated `/*` runs to the end, so `unclosed-comment.nf` stays verbatim as recorded), strings, GStrings and slashy strings. It splits scripts after a `}` that closes depth 0 and before a top-level starter keyword, and configs before each top-level statement, unless the neighbouring line continues the expression. Comment-only lines between declarations lead the next chunk, as nf-lang attaches them.
+- **The pre-scanner** is lexical, linear, never throws and never recurses. It knows comments (an unterminated `/*` runs to the end, so `unclosed-comment.nf` stays verbatim as recorded), strings, GStrings and slashy strings. It splits scripts after a `}` that closes depth 0 and before a top-level starter keyword, and configs before each top-level statement, unless the neighbouring line continues the expression. Comment-only lines between declarations lead the next chunk, as nf-lang attaches them. On a file that already failed to parse, a line starting at column 1 with a declaration keyword (`process`, `workflow`, `include`, `output`, `enum`, `record`, `agent`, `params`) and a name or `{` also starts a chunk, even inside an unclosed brace or string, so one unclosed declaration doesn't swallow the ones after it.
 - **Whole-script checks** (duplicate params, output or entry workflow, mixed statements and declarations, and the rest of nf-lang's file-level errors) carry `scope: "file"`: they stay file problems and never isolate a declaration.
 - **Status:** `modelled` (no `Unparsed`), `partial` (some), `verbatim` (something failed and nothing could be modelled), `plain` (not Nextflow).
 - **`Unparsed` joins the script and config item unions**, so every consumer handles it.
-- **`ParseProblem.source` gains `"internal"`** for exceptions and model-check failures, which downgrade the file to verbatim instead of failing.
+- **`ParseProblem.source` gains `"internal"`** for exceptions and model-check failures. On the whole-file path or a failed model check they downgrade the file to verbatim; in the chunk path only the chunk that threw becomes `Unparsed`.
 - **Print** emits each untouched item from its source slice and the trivia between items from the file text, so an unedited file prints byte for byte. The printer (ADR 0032) is used only for new and edited declarations (F-111).
 - **Equivalent** (the glossary) is read as: same language and status family; ASTs equal after dropping ranges and comment slots, with line endings normalised inside strings; `Unparsed` compared by normalised text and head; comments compared as the ordered list of kind and normalised text; verbatim and plain files compared as normalised text (line endings unified, trailing whitespace dropped at line ends and at the end).
 - **`LanguagePack.loadParser()`** replaces the sketch's synchronous parse methods. It is a dynamic import, like `loadCatalogue()` (ADR 0028), and the loaded `SourceParser` also carries the pack's printer, so parser and printer share one lazy chunk. The engine memoises it per pack.
@@ -26,6 +26,10 @@ ADR 0004 says files are authoritative: a file the strict grammar rejects is kept
 - Every lint-clean corpus file is fully modelled and every corpus file prints back byte for byte; the forced-chunk property (every corpus file split and stitched back) guards the pre-scanner on real code.
 - F-111 can splice printer output into one item's slice and check every other item stays equivalent; F-404 exports untouched files byte for byte.
 - The parser and printer stay out of the initial bundle (QA-01); an end-to-end test checks the built manifest.
+
+Accepted limitations:
+- An unclosed brace or string whose following declarations are indented, or start with a word that isn't a declaration keyword, still runs to the end of the file as one `Unparsed` item; no text is lost.
+- In configs, `if (x)` followed by `a = 1` on the next line is modelled as an unconditional assignment when the file fails to parse elsewhere, because the scanner splits before `a`.
 
 ## Alternatives
 

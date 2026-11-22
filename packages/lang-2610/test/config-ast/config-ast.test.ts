@@ -7,7 +7,6 @@ import {
   type ConfigBlock,
   type ConfigItem,
   type ConfigSelector,
-  type ConfigStatement,
   walk,
 } from "@nf-builder/lang-core";
 import { describe, expect, it } from "vitest";

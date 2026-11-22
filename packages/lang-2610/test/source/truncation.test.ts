@@ -1,30 +1,11 @@
-import { readdirSync, readFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
+import { readFileSync } from "node:fs";
 import { describe, it } from "vitest";
 import { assertCut, cutSet } from "./cuts.ts";
-
-const root = (p: string) =>
-  fileURLToPath(new URL(`../../../../${p}`, import.meta.url));
-const filesIn = (dir: string, ext: RegExp): string[] =>
-  readdirSync(dir, { withFileTypes: true }).flatMap((e) =>
-    e.isDirectory()
-      ? filesIn(`${dir}/${e.name}`, ext)
-      : ext.test(e.name)
-        ? [`${dir}/${e.name}`]
-        : [],
-  );
+import { configFixtures, scriptFixtures } from "./files.ts";
 
 const files = [
-  ...filesIn(
-    fileURLToPath(new URL("../ast/fixtures", import.meta.url)),
-    /\.nf$/,
-  ).map((path) => ({ path, config: false })),
-  ...filesIn(root("tools/oracle/cases/config-constructs"), /\.config$/).map(
-    (path) => ({
-      path,
-      config: true,
-    }),
-  ),
+  ...scriptFixtures().map((path) => ({ path, config: false })),
+  ...configFixtures().map((path) => ({ path, config: true })),
 ];
 
 describe("F-104 IO-14 ADR-0004: truncating a file", () => {

@@ -20,7 +20,7 @@ describe("F-104 IO-20 ADR-0004: printSourceFile", () => {
       ["main.nf", (good + bad).replaceAll("\n", "\r\n"), "partial"],
       ["main.nf", `${good}${bad}`, "partial"],
       ["main.nf", bad, "verbatim"],
-      ["main.nf", "/* open\n" + good, "verbatim"],
+      ["main.nf", `/* open\n${good}`, "verbatim"],
       [
         "nextflow.config",
         "docker.enabled = true   \r\n\r\nprocess { cpus = 1 }\n",

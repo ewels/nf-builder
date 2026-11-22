@@ -264,6 +264,8 @@ interface Handlers {
     unterminated: boolean,
     hasTerminator: boolean,
   ): void;
+  /** Lexing starts over at `at`, the start of a line: an unclosed frame or string is given up (see `startsDeclaration`). */
+  resync(at: number): void;
   /** A line terminator in code state; `end` is the offset just past it; `lf` is false for a lone "\r". */
   newline(end: number, lf: boolean): void;
 }
@@ -277,6 +279,8 @@ const Frame = {
   Tdq: 5,
 } as const;
 type Frame = (typeof Frame)[keyof typeof Frame];
+/** What `Prescan.open` calls each frame, indexed by `Frame`. */
+const OPENED = ["(", "[", "{", "${", "string", "string"] as const;
 
 /** `isFollowedByJavaLetterInGString` (semantic-predicates.ts) for the character after a `$`. */
 function dollarStartsPath(text: string, i: number): boolean {
@@ -310,7 +314,9 @@ function tripleQuoteIsContent(text: string, i: number, quote: number): boolean {
 }
 
 interface QuotedEnd {
+  /** Where the string ends, or where lexing starts over when `resynced`. */
   readonly end: number;
+  readonly resynced?: boolean;
   /** Ran to the end of the text without a closing quote. */
   readonly open: boolean;
 }
@@ -328,21 +334,54 @@ function singleQuotedEnd(text: string, i: number): QuotedEnd {
 }
 
 /** `'''...'''`, from the first opening quote at `i`: ends at the closing quotes or at the end of the text. */
-function tripleSingleQuotedEnd(text: string, i: number): QuotedEnd {
+function tripleSingleQuotedEnd(
+  text: string,
+  i: number,
+  resync: boolean,
+): QuotedEnd {
   let j = i + 3;
   for (;;) {
     if (j >= text.length) return { end: text.length, open: true };
     const c = text.charCodeAt(j);
+    if (c === LF && resync && startsDeclaration(text, j + 1))
+      return { end: j + 1, open: false, resynced: true };
     if (c === SQUOTE && !tripleQuoteIsContent(text, j, SQUOTE))
       return { end: j + 3, open: false };
     j += c === BACKSLASH ? 2 : 1;
   }
 }
 
+/**
+ * A line that starts in column 1 with a declaration keyword, blanks, and a name or `{`: where a script's chunk starts over
+ * whatever is still open before it (an unclosed `{`, `"""` or `${` would otherwise swallow every later declaration).
+ * Only for files the whole-file parse rejected; indented lines never count.
+ */
+const RESYNC_WORDS = [
+  "process",
+  "workflow",
+  "include",
+  "output",
+  "enum",
+  "record",
+  "agent",
+  "params",
+];
+function startsDeclaration(text: string, at: number): boolean {
+  if (at > 0 && text.charCodeAt(at - 1) !== LF) return false;
+  const end = wordEnd(text, at);
+  if (end === at || !RESYNC_WORDS.includes(text.slice(at, end))) return false;
+  const next = skipBlanks(text, end);
+  return (
+    next > end &&
+    (text.charCodeAt(next) === LBRACE || identifierStartLength(text, next) > 0)
+  );
+}
+
 function lex(
   text: string,
   grammar: Grammar,
   allowShebang: boolean,
+  resync: boolean,
   h: Handlers,
 ): Prescan["open"] {
   const n = text.length;
@@ -353,6 +392,14 @@ function lex(
   /** After this token a slash is division (the lexer's REGEX_CHECK_ARRAY). */
   let lastIsValue = false;
   let i = 0;
+
+  const startOver = (at: number): number => {
+    stack.length = 0;
+    unterminatedString = false;
+    lastIsValue = false;
+    h.resync(at);
+    return at;
+  };
 
   const findOpener = (closer: number): number => {
     for (let k = stack.length - 1; k >= 0; k--) {
@@ -413,6 +460,13 @@ function lex(
           return j + 3;
         }
         j++;
+      } else if (
+        triple &&
+        c === LF &&
+        resync &&
+        startsDeclaration(text, j + 1)
+      ) {
+        return startOver(j + 1);
       } else if (!triple && isTerminator(c)) {
         stack.pop();
         lastIsValue = true;
@@ -442,11 +496,15 @@ function lex(
       i++;
       lastIsValue = false;
       h.newline(i, true);
+      if (resync && stack.length > 0 && startsDeclaration(text, i))
+        i = startOver(i);
     } else if (c === CR) {
       const crlf = text.charCodeAt(i + 1) === LF;
       i += crlf ? 2 : 1;
       lastIsValue = false;
       h.newline(i, crlf);
+      if (crlf && resync && stack.length > 0 && startsDeclaration(text, i))
+        i = startOver(i);
     } else if (c === BACKSLASH) {
       const next = text.charCodeAt(i + 1);
       if (next === CR && text.charCodeAt(i + 2) === LF) i += 3;
@@ -490,12 +548,12 @@ function lex(
       const triple =
         text.charCodeAt(i + 1) === SQUOTE && text.charCodeAt(i + 2) === SQUOTE;
       const q = triple
-        ? tripleSingleQuotedEnd(text, i)
+        ? tripleSingleQuotedEnd(text, i, resync)
         : singleQuotedEnd(text, i);
       h.token(Tok.String, i, q.end, depth, depth);
       if (q.open) unterminatedString = true;
       lastIsValue = true;
-      i = q.end;
+      i = q.resynced ? startOver(q.end) : q.end;
     } else if (c === DQUOTE) {
       const triple =
         text.charCodeAt(i + 1) === DQUOTE && text.charCodeAt(i + 2) === DQUOTE;
@@ -555,17 +613,7 @@ function lex(
   }
 
   if (stack.some((f) => f === Frame.Dq || f === Frame.Tdq)) h.stringEnd(n);
-  const open: Prescan["open"][number][] = stack.map((f) =>
-    f === Frame.Paren
-      ? "("
-      : f === Frame.Bracket
-        ? "["
-        : f === Frame.Brace
-          ? "{"
-          : f === Frame.Interpolation
-            ? "${"
-            : "string",
-  );
+  const open: Prescan["open"][number][] = stack.map((f) => OPENED[f]);
   if (
     unterminatedString &&
     stack.at(-1) !== Frame.Dq &&
@@ -579,7 +627,7 @@ function lex(
 // Positions
 
 /** Line and code-point column at increasing offsets, in one pass (lines end at "\n" only). */
-class Positioner {
+export class Positioner {
   private offset = 0;
   private line = 1;
   private column = 1;
@@ -605,6 +653,19 @@ class Positioner {
     this.offset = offset;
     return { line: this.line, column: this.column };
   }
+
+  range(start: number, end: number): Range {
+    const from = this.at(start);
+    const to = this.at(end);
+    return {
+      start,
+      end,
+      line: from.line,
+      column: from.column,
+      endLine: to.line,
+      endColumn: to.column,
+    };
+  }
 }
 
 interface CommentRecord {
@@ -619,20 +680,10 @@ function toComment(
   record: CommentRecord,
   positions: Positioner,
 ): Comment {
-  const from = positions.at(record.start);
-  const to = positions.at(record.end);
-  const range: Range = {
-    start: record.start,
-    end: record.end,
-    line: from.line,
-    column: from.column,
-    endLine: to.line,
-    endColumn: to.column,
-  };
   return {
     kind: record.kind,
     text: text.slice(record.start, record.end),
-    range,
+    range: positions.range(record.start, record.end),
     ownLine: record.ownLine,
   };
 }
@@ -803,7 +854,7 @@ export function prescan(text: string, grammar: Grammar): Prescan {
     );
   };
 
-  const open = lex(text, grammar, true, {
+  const open = lex(text, grammar, grammar === "script", grammar === "script", {
     token(kind, start, end, depthBefore, depthAfter) {
       if (
         depthBefore === 0 &&
@@ -855,6 +906,14 @@ export function prescan(text: string, grammar: Grammar): Prescan {
           ownLine,
         });
       if (hasTerminator) lineHasCode = false;
+    },
+    resync(at) {
+      const b =
+        afterNewline > current.start && afterNewline <= at ? afterNewline : at;
+      if (b > current.start) cut(b);
+      lineHasCode = false;
+      afterNewline = -1;
+      previous = null;
     },
     newline(end, lf) {
       lineHasCode = false;
@@ -951,9 +1010,8 @@ function scriptHead(text: string, at: number): DeclarationHead | null {
     }
     case "nextflow": {
       const path = dottedPath(text, at);
-      return path !== null &&
-        path.path.startsWith("nextflow.") &&
-        isPlainAssign(text, skipBlanks(text, path.end))
+      if (!path?.path.startsWith("nextflow.")) return null;
+      return isPlainAssign(text, skipBlanks(text, path.end))
         ? { keyword: "featureFlag", name: path.path }
         : null;
     }
@@ -1037,7 +1095,7 @@ export function scanHead(
 // Code spans
 
 /**
- * The first and last code characters in `text[from, to)`: whatever is not whitespace, `;` or a comment (a `#!` first
+ * The first and last code characters in `text[from, to)`: whatever is not whitespace, `;`, a stray closing bracket or a comment (a `#!` first
  * line counts as a comment only at offset 0). Null when there is none. Strings are lexed, so a comment marker inside one
  * is not a comment.
  */
@@ -1050,9 +1108,11 @@ export function codeSpan(
   const slice = text.slice(from, to);
   let start = -1;
   let end = -1;
-  lex(slice, grammar, from === 0, {
-    token(kind, s, e) {
-      if (kind === Tok.Semi) return;
+  lex(slice, grammar, from === 0 && grammar === "script", false, {
+    token(kind, s, e, depthBefore) {
+      // a closing bracket with nothing open is dropped by the lexer, so it is not code
+      if (kind === Tok.Semi || (kind === Tok.Close && depthBefore === 0))
+        return;
       if (start < 0) start = s;
       end = Math.max(end, e);
     },
@@ -1060,6 +1120,7 @@ export function codeSpan(
       end = Math.max(end, e);
     },
     comment() {},
+    resync() {},
     newline() {},
   });
   return start < 0 ? null : { start: start + from, end: end + from };

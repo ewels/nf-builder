@@ -24,7 +24,6 @@ import type {
   Comment,
   ConfigAst,
   ConfigItem,
-  ConfigStatement,
   Expression,
   IfStatement,
   MethodCall,

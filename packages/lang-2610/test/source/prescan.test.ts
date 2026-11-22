@@ -1,20 +1,24 @@
-import { readdirSync, readFileSync, statSync } from "node:fs";
-import { join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { PositionIndex } from "../../src/ast/positions.ts";
 import { ConfigLexer } from "../../src/generated/ConfigLexer.ts";
 import { ScriptLexer } from "../../src/generated/ScriptLexer.ts";
 import {
   type Chunk,
+  codeSpan,
   type Grammar,
   KEYWORDS,
   prescan,
   SCRIPT_STARTERS,
   scanHead,
 } from "../../src/source/prescan.ts";
-
-const here = (path: string) => fileURLToPath(new URL(path, import.meta.url));
+import {
+  configFixtures,
+  filesIn,
+  malformed,
+  repo,
+  scriptFixtures,
+} from "./files.ts";
 
 const chunksOf = (text: string, grammar: Grammar = "script") =>
   prescan(text, grammar).chunks;
@@ -185,6 +189,7 @@ describe("F-104 step 2 ADR-0004: the pre-scanner splits a file into top-level ch
   });
 
   it("F-104 step 2: GString interpolation is balanced inside strings", () => {
+    // biome-ignore-start lint/suspicious/noTemplateCurlyInString: Groovy source text, not a template
     const bodies = [
       '"${ xs.collect { it } }"',
       '"${ "}" }"',
@@ -192,6 +197,7 @@ describe("F-104 step 2 ADR-0004: the pre-scanner splits a file into top-level ch
       '"$a.b }"',
       '"\\${x} }"',
     ];
+    // biome-ignore-end lint/suspicious/noTemplateCurlyInString: see above
     for (const body of bodies) {
       const text = `process A {\n  x = ${body}\n}\nprocess B {\n}\n`;
       expect(heads(text), body).toEqual(["process A", "process B"]);
@@ -319,14 +325,86 @@ describe("F-104 step 2 ADR-0004: the pre-scanner splits a file into top-level ch
   });
 
   it("F-104 step 2 ADR-0004: an unclosed brace runs its chunk to the end of the text", () => {
-    const text = "process A {\n}\nworkflow {\n  A()\n\nprocess C {\n}\n";
+    const text = "process A {\n}\nworkflow {\n  A()\n\n  B()\n";
     const scan = prescan(text, "script");
     expect(scan.chunks.map((c) => text.slice(c.start, c.end))).toEqual([
       "process A {\n}\n",
-      "workflow {\n  A()\n\nprocess C {\n}\n",
+      "workflow {\n  A()\n\n  B()\n",
     ]);
     expect(scan.open.at(-1)).toBe("{");
     expect(scan.open).toEqual(["{"]);
+  });
+
+  it("F-104 step 2 ADR-0004: a declaration keyword in column 1 starts over whatever is still open", () => {
+    // an unclosed brace in a middle include no longer swallows the later declarations
+    const includes =
+      "include { A } from './a'\ninclude { B from './b'\ninclude { C } from './c'\n\nworkflow {\n  A()\n}\n";
+    expect(heads(includes)).toEqual([
+      "include",
+      "include",
+      "include",
+      "workflow",
+    ]);
+    expect(prescan(includes, "script").open).toEqual([]);
+    // a process missing its closing brace, then another process and a workflow
+    const process =
+      "process A {\n  script:\n  'x'\n}\n\nprocess B {\n  script:\n  'x'\n\nprocess C {\n  script:\n  'x'\n}\n\nworkflow {\n  C()\n}\n";
+    expect(heads(process)).toEqual([
+      "process A",
+      "process B",
+      "process C",
+      "workflow",
+    ]);
+    expect(chunkTexts(process)[1]).toBe("\nprocess B {\n  script:\n  'x'\n");
+    const crlf = process.replaceAll("\n", "\r\n");
+    expect(heads(crlf)).toEqual([
+      "process A",
+      "process B",
+      "process C",
+      "workflow",
+    ]);
+    // an unclosed triple-quoted string or interpolation too
+    const triple =
+      'process A {\n  script:\n  """\n  echo\n}\n\nprocess B {\n}\n';
+    expect(heads(triple)).toEqual(["process A", "process B"]);
+    const tsq = "process A {\n  script:\n  '''\n  echo\n}\n\nworkflow {\n}\n";
+    expect(heads(tsq)).toEqual(["process A", "workflow"]);
+    // biome-ignore lint/suspicious/noTemplateCurlyInString: Groovy source text, not a template
+    const interpolation = 'x = "${ foo(\nprocess B {\n}\n';
+    expect(heads(interpolation)).toEqual([null, "process B"]);
+    // an indented keyword inside a block does not cut, nor does one not followed by a name or a brace
+    const indented = "process A {\n  script:\n  'x'\n\n  process B {\n";
+    expect(chunkTexts(indented)).toEqual([indented]);
+    const bare = "workflow {\n  A()\nprocess:\n";
+    expect(chunkTexts(bare)).toEqual([bare]);
+    // configs are not affected
+    const config = "process {\n  cpus = 1\nprocess x {\n";
+    expect(chunkTexts(config, "config")).toEqual([config]);
+  });
+
+  it("F-104 step 2: a stray closing bracket at the top level is not code, in a script or a config", () => {
+    expect(codeSpan("  } \n)\n", 0, 7, "script")).toBeNull();
+    expect(codeSpan("  } x = 1 ]\n", 0, 12, "config")).toEqual({
+      start: 4,
+      end: 9,
+    });
+    expect(codeSpan("foo( }", 0, 6, "script")).toEqual({ start: 0, end: 6 });
+  });
+
+  it("F-104 step 2: a #! line is a shebang in a script and not in a config (ConfigLexer.g4 has no SH_COMMENT)", () => {
+    const text = "#!x\na = 1\nb = 2\n";
+    const script = chunksOf(text, "script");
+    expect(script).toHaveLength(1);
+    expect(script[0]?.leadingComments.map((c) => c.kind)).toEqual(["shebang"]);
+    const config = chunksOf(text, "config");
+    expect(config.map((c) => text.slice(c.start, c.end))).toEqual([
+      "#!x\n",
+      "a = 1\n",
+      "b = 2\n",
+    ]);
+    expect(config[0]?.leadingComments).toEqual([]);
+    expect(codeSpan(text, 0, 4, "config")).toEqual({ start: 0, end: 3 });
+    expect(codeSpan(text, 0, 4, "script")).toBeNull();
   });
 
   it("F-104 step 2: unterminated strings and comments are bounded as the lexer would", () => {
@@ -334,7 +412,7 @@ describe("F-104 step 2 ADR-0004: the pre-scanner splits a file into top-level ch
     const sq = "a = 'abc\nprocess B {\n}\n";
     expect(heads(sq)).toEqual([null, "process B"]);
     // triple quotes and block comments run to the end of the text
-    expect(chunkTexts('a = """abc\nprocess B {\n}\n')).toHaveLength(1);
+    expect(chunkTexts('a = """abc\n  process B {\n}\n')).toHaveLength(1);
     expect(prescan('a = """abc\n}\n', "script").open).toEqual(["string"]);
     expect(prescan("a = '''abc\n}\n", "script").open).toEqual(["string"]);
     expect(prescan("x = 1\n/* abc\nprocess B {\n}\n", "script").open).toEqual([
@@ -441,22 +519,15 @@ describe("F-104 step 2 ADR-0004: the pre-scanner splits a file into top-level ch
   });
 
   it("F-104 step 2: chunks tile the text and start at line starts, for every AST fixture and malformed fixture", () => {
-    const files: { path: string; grammar: Grammar }[] = [];
-    const walk = (dir: string, ext: string, grammar: Grammar) => {
-      for (const name of readdirSync(dir)) {
-        const path = join(dir, name);
-        if (statSync(path).isDirectory()) walk(path, ext, grammar);
-        else if (name.endsWith(ext)) files.push({ path, grammar });
-      }
-    };
-    walk(here("../ast/fixtures"), ".nf", "script");
-    walk(
-      here("../../../../tools/oracle/cases/config-constructs"),
-      ".config",
-      "config",
-    );
-    walk(here("../../../../tools/corpus/fixtures"), ".nf", "script");
-    walk(here("../../../../tools/corpus/fixtures"), ".config", "config");
+    const malformedDir = repo("tools/corpus/fixtures");
+    const files = [
+      ...[...scriptFixtures(), ...filesIn(malformedDir, /\.nf$/)].map(
+        (path) => ({ path, grammar: "script" as Grammar }),
+      ),
+      ...[...configFixtures(), ...filesIn(malformedDir, /\.config$/)].map(
+        (path) => ({ path, grammar: "config" as Grammar }),
+      ),
+    ];
     expect(files.length).toBeGreaterThan(60);
     for (const { path, grammar } of files) {
       const text = readFileSync(path, "utf8");
@@ -465,24 +536,22 @@ describe("F-104 step 2 ADR-0004: the pre-scanner splits a file into top-level ch
   });
 
   it("F-104 step 2 ADR-0004: the malformed fixtures split where the fixture file says", () => {
-    const fixture = (name: string) =>
-      readFileSync(here(`../../../../tools/corpus/fixtures/${name}`), "utf8");
-    expect(heads(fixture("bad-declaration.nf"))).toEqual([
+    expect(heads(malformed("bad-declaration.nf"))).toEqual([
       "process FIRST",
       "process SECOND",
       "workflow",
     ]);
-    expect(heads(fixture("unclosed-brace.nf"))).toEqual([
+    expect(heads(malformed("unclosed-brace.nf"))).toEqual([
       "process SAY_HELLO",
       "workflow",
     ]);
-    expect(heads(fixture("unclosed-comment.nf"))).toEqual([null, null]);
-    expect(heads(fixture("bad-config-block.config"), "config")).toEqual([
+    expect(heads(malformed("unclosed-comment.nf"))).toEqual([null, null]);
+    expect(heads(malformed("bad-config-block.config"), "config")).toEqual([
       "assign docker.enabled",
       "block process",
       "assign params.outdir",
     ]);
-    expect(heads(fixture("unclosed-config-block.config"), "config")).toEqual([
+    expect(heads(malformed("unclosed-config-block.config"), "config")).toEqual([
       "assign params.outdir",
       "block profiles",
     ]);

@@ -4,10 +4,11 @@ export type Equivalence =
   | { readonly equivalent: true }
   | { readonly equivalent: false; readonly reason: string };
 
+const newlines = (s: string) => s.replace(/\r\n?/g, "\n");
+
 /** Line endings to "\n", trailing whitespace stripped from every line and from the end of the text. */
 export function normaliseText(text: string): string {
-  return text
-    .replace(/\r\n?/g, "\n")
+  return newlines(text)
     .replace(/[ \t]+$/gm, "")
     .replace(/\s+$/, "");
 }
@@ -35,8 +36,6 @@ const render = (path: Path | null): string => {
   for (let p = path; p; p = p.parent) parts.push(p.key);
   return parts.reverse().join("").replace(/^\./, "") || "ast";
 };
-
-const newlines = (s: string) => s.replace(/\r\n?/g, "\n");
 
 /** The first difference between two ASTs ignoring positions and comment slots; null when there is none. Iterative. */
 function diffAst(a: unknown, b: unknown): string | null {
@@ -73,14 +72,11 @@ function diffAst(a: unknown, b: unknown): string | null {
         (k) => !IGNORED.has(k) && o[k] !== undefined && !isRange(o[k]),
       );
     const kx = keys(x);
-    const ky = new Set(keys(y));
-    for (const k of kx)
-      if (!ky.has(k))
-        return `${render({ parent: path, key: `.${k}` })} is missing on one side`;
-    if (ky.size !== kx.length) {
-      const missing = [...ky].find((k) => !kx.includes(k)) as string;
+    const ky = keys(y);
+    const missing =
+      kx.find((k) => !ky.includes(k)) ?? ky.find((k) => !kx.includes(k));
+    if (missing !== undefined)
       return `${render({ parent: path, key: `.${missing}` })} is missing on one side`;
-    }
     for (let i = kx.length - 1; i >= 0; i--) {
       const k = kx[i] as string;
       stack.push([x[k], y[k], { parent: path, key: `.${k}` }]);

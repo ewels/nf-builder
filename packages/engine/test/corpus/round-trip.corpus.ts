@@ -15,6 +15,7 @@ import { beforeAll, describe, expect, it } from "vitest";
 import {
   createSourceFile,
   equivalent,
+  installedPackVersions,
   loadParser,
   printSourceFile,
   type SourceFile,
@@ -35,7 +36,7 @@ const pinned = [
 const IDS = [...pinned, "fixtures"];
 const dirOf = (id: string) => (id === "fixtures" ? FIXTURES : join(CORPUS, id));
 
-/** nextflow lint's default excludes (26.10), as in lang-2610's corpus-files.ts. */
+/** nextflow lint's default excludes, as in lang-2610's corpus-files.ts. */
 const LINT_EXCLUDES = [
   ".git",
   ".lineage",
@@ -70,6 +71,7 @@ type Row = {
   printed: string;
   reparsed: SourceFile;
 };
+let parser: SourceParser;
 const state = {
   lint: new Map<string, LintFile>(),
   rows: [] as Row[],
@@ -77,7 +79,7 @@ const state = {
 };
 
 beforeAll(async () => {
-  const parser: SourceParser = await loadParser("26.10");
+  parser = await loadParser(installedPackVersions()[0] as string);
   for (const id of IDS) {
     const lintPath = join(LINT, `${id}.json`);
     if (!existsSync(dirOf(id)) || !existsSync(lintPath)) continue;
@@ -128,6 +130,34 @@ describe("F-104 step 1: the round trip over the corpus", () => {
       return e.equivalent ? [] : [`${name(r)}: ${e.reason}`];
     });
     expect(different).toEqual([]);
+  });
+
+  it("F-104 step 1 IO-20 ADR-0004: with CRLF line endings every file is still equivalent, and a changed character is not", () => {
+    const crlfDifferent: string[] = [];
+    const mutatedEquivalent: string[] = [];
+    let mutated = 0;
+    for (const r of state.rows) {
+      const crlf = createSourceFile(
+        r.path,
+        r.text.replace(/\r?\n/g, "\r\n"),
+        parser,
+      );
+      const e = equivalent(r.file, crlf);
+      if (!e.equivalent) crlfDifferent.push(`${name(r)}: ${e.reason}`);
+      // change one character inside the first '...' string
+      const m = /'[^'\n\\]*?([^'\s\\])[^'\n\\]*'/.exec(r.text);
+      if (!m) continue;
+      const at = m.index + m[0].indexOf(m[1] as string, 1);
+      const changed = `${r.text.slice(0, at)}${m[1] === "Z" ? "Y" : "Z"}${r.text.slice(at + 1)}`;
+      mutated++;
+      if (
+        equivalent(r.file, createSourceFile(r.path, changed, parser)).equivalent
+      )
+        mutatedEquivalent.push(name(r));
+    }
+    expect(crlfDifferent).toEqual([]);
+    expect(mutatedEquivalent).toEqual([]);
+    expect(mutated).toBeGreaterThan(400);
   });
 
   it("F-104 step 1 ADR-0004: every file's model accounts for every character", () => {

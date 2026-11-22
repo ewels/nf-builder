@@ -8,6 +8,6 @@ export function languageOf(path: string): SourceLanguage {
   if (name.endsWith(".config")) return "config";
   if (name.endsWith(".json")) return "json";
   if (name.endsWith(".yml") || name.endsWith(".yaml")) return "yaml";
-  if (name.endsWith(".md")) return "markdown";
+  if (name.endsWith(".md") || name.endsWith(".markdown")) return "markdown";
   return "text";
 }

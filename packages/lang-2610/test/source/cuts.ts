@@ -20,19 +20,14 @@ export interface CutSet {
 }
 
 /** The cut points of F-104's truncation property: every chunk start and its neighbours, plus `random` seeded offsets. */
-export function cutSet(
-  text: string,
-  config: boolean,
-  random: number,
-  seed = 7,
-): CutSet {
+export function cutSet(text: string, config: boolean, random: number): CutSet {
   const whole = config ? parseConfigAst(text) : parseScriptAst(text);
   const chunks = prescan(text, config ? "config" : "script").chunks;
   const cuts = new Set<number>();
   for (const c of chunks)
     for (const d of [-1, 0, 1])
       cuts.add(Math.max(0, Math.min(text.length, c.start + d)));
-  let s = seed;
+  let s = 7;
   for (let i = 0; i < random; i++) {
     s = (s * 1103515245 + 12345) & 0x7fffffff;
     cuts.add(s % (text.length + 1));

@@ -1,5 +1,4 @@
-import { readdirSync, readFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
+import { readFileSync } from "node:fs";
 import type { Unparsed } from "@nf-builder/lang-core";
 import { describe, expect, it } from "vitest";
 import { parseConfigAst, parseScriptAst } from "../../src/ast/index.ts";
@@ -8,16 +7,9 @@ import {
   parseScriptSource,
   statusOf,
 } from "../../src/source/parse-source.ts";
+import { configFixtures, malformed, scriptFixtures } from "./files.ts";
 import { labelOf } from "./labels.ts";
 import { checkTiling } from "./tiling.ts";
-
-const fixture = (name: string) =>
-  readFileSync(
-    fileURLToPath(
-      new URL(`../../../../tools/corpus/fixtures/${name}`, import.meta.url),
-    ),
-    "utf8",
-  );
 
 describe("F-104 ADR-0004: isolating declarations on the whole-file path", () => {
   it("F-104 ADR-0004: a file that parses with no errors is fully modelled and its AST is the builder's", () => {
@@ -39,7 +31,7 @@ describe("F-104 ADR-0004: isolating declarations on the whole-file path", () => 
   });
 
   it("F-104 step 2 ADR-0004: a declaration with a builder error becomes Unparsed with its exact text, head and problems", () => {
-    const text = fixture("typed-without-flag.nf");
+    const text = malformed("typed-without-flag.nf");
     const r = parseScriptSource(text);
     expect(r.status).toBe("partial");
     const ast = r.ast;
@@ -59,7 +51,7 @@ describe("F-104 ADR-0004: isolating declarations on the whole-file path", () => 
   });
 
   it("F-104: an InvalidDeclaration is Unparsed and named by the pre-scanner", () => {
-    const text = fixture("section-order.nf");
+    const text = malformed("section-order.nf");
     const body = parseScriptSource(text).ast?.body ?? [];
     expect(body.map((i) => i.kind)).toEqual(["Unparsed", "Process"]);
     expect((body[0] as Unparsed).head).toEqual({
@@ -143,7 +135,7 @@ describe("F-104 ADR-0004: isolating declarations on the whole-file path", () => 
 
   it("F-104 IO-14: a file that parses but has only builder-error items is verbatim", () => {
     const r = parseScriptSource(
-      fixture("typed-without-flag.nf").split("process GOODBYE")[0] as string,
+      malformed("typed-without-flag.nf").split("process GOODBYE")[0] as string,
     );
     expect(r.status).toBe("verbatim");
     expect(r.ast).toBeNull();
@@ -153,23 +145,7 @@ describe("F-104 ADR-0004: isolating declarations on the whole-file path", () => 
 
 describe("F-104 ADR-0004: nothing is isolated that the builder accepts", () => {
   it("F-104 ADR-0004: every error-free AST and config fixture stays fully modelled with nothing left over", () => {
-    const base = fileURLToPath(new URL("../", import.meta.url));
-    const files: string[] = [];
-    const walk = (dir: string) => {
-      for (const e of readdirSync(dir, { withFileTypes: true })) {
-        if (e.isDirectory()) walk(`${dir}/${e.name}`);
-        else if (/\.(nf|config)$/.test(e.name)) files.push(`${dir}/${e.name}`);
-      }
-    };
-    walk(`${base}ast/fixtures`);
-    walk(
-      fileURLToPath(
-        new URL(
-          "../../../../tools/oracle/cases/config-constructs",
-          import.meta.url,
-        ),
-      ),
-    );
+    const files = [...scriptFixtures(), ...configFixtures()];
     let clean = 0;
     for (const file of files) {
       const text = readFileSync(file, "utf8");

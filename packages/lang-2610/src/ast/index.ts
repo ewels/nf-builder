@@ -45,5 +45,4 @@ export function parseScriptAst(
   }
 }
 
-export type { ScriptBuildOptions } from "./build/context.ts";
 export { parseConfigAst } from "./config/parse.ts";

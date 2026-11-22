@@ -65,6 +65,19 @@ describe("F-104 AR-01 IO-14: createSourceFile", () => {
     expect(topLevelItems(verbatim)).toEqual([]);
   });
 
+  it("F-104 IO-14 ADR-0004: a stray closing brace, which nextflow lint accepts, leaves the file modelled and prints back", () => {
+    for (const [path, text] of [
+      ["main.nf", "workflow {\n}\n}\n"],
+      ["nextflow.config", "a = 1\n}\nb = 2\n"],
+    ] as const) {
+      const f = createSourceFile(path, text, parser);
+      expect(f.status, path).toBe("modelled");
+      expect(f.problems, path).toEqual([]);
+      expect(verifyModel(f), path).toEqual([]);
+      expect(printSourceFile(f)).toBe(text);
+    }
+  });
+
   it("F-104 IO-14: createSourceFile never throws, even when the pack parser does", () => {
     const throwing: SourceParser = {
       printer: {} as SourceParser["printer"],
@@ -163,7 +176,7 @@ describe("F-104 AR-01 IO-14: createSourceFile", () => {
       "\udc00 x",
       "a \ud83d b",
       "{".repeat(4_000),
-      "process A {\n" + "(".repeat(4_000) + "\n",
+      `process A {\n${"(".repeat(4_000)}\n`,
     ];
     for (let k = 0; k < 200; k++) {
       let t = "";

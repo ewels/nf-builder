@@ -6,13 +6,13 @@ import type {
   Comment,
   ConfigAst,
   ConfigItem,
-  ConfigParseResult,
   ConfigSourceParse,
   ParseProblem,
+  ParseResult,
   ScriptAst,
   ScriptItem,
-  ScriptParseResult,
   ScriptSourceParse,
+  SourceParse,
   Unparsed,
 } from "@nf-builder/lang-core";
 import { parseConfigAst, parseScriptAst } from "../ast/index.ts";
@@ -30,6 +30,11 @@ export function statusOf(
   return unparsed > 0 ? "partial" : "modelled";
 }
 
+const statusFor = (items: readonly { kind: string }[], failed: boolean) => {
+  const unparsed = items.filter((i) => i.kind === "Unparsed").length;
+  return statusOf(items.length - unparsed, unparsed, failed);
+};
+
 const internalProblem = (error: unknown): ParseProblem => ({
   source: "internal",
   message: `The parser could not process this text: ${error instanceof Error ? error.message : String(error)}`,
@@ -41,11 +46,14 @@ const internalProblem = (error: unknown): ParseProblem => ({
 
 const byStart = (a: Comment, b: Comment) => a.range.start - b.range.start;
 
+type Ast = ScriptAst | ConfigAst;
+const itemsOf = (ast: Ast): readonly (ScriptItem | ConfigItem)[] =>
+  ast.kind === "Script" ? ast.body : ast.statements;
+
 /** The Unparsed for a chunk that could not be parsed: from its first code (or its first non-blank character) to its last. */
 function failedChunk(
   text: string,
   chunk: Chunk,
-  grammar: Grammar,
   problems: readonly ParseProblem[],
 ): { unparsed: Unparsed | null; comments: Comment[]; shebang: Comment | null } {
   const slice = text.slice(chunk.start, chunk.end);
@@ -66,155 +74,117 @@ function failedChunk(
     problems,
     ...(rest.length > 0 ? { leadingComments: rest } : {}),
   };
-  void grammar;
   return { unparsed, comments: rest, shebang };
 }
 
-const shiftBy = (chunk: Chunk) => ({
-  offset: chunk.start,
-  line: chunk.line - 1,
-});
-
-export function parseScriptChunks(
+function parseChunks(
   text: string,
-  problems: readonly ParseProblem[] = [],
-): ScriptSourceParse {
+  grammar: Grammar,
+  problems: readonly ParseProblem[],
+): SourceParse<Ast> {
   let typesEnabled = false;
   let shebang: Comment | null = null;
-  const items: ScriptItem[] = [];
+  const items: (ScriptItem | ConfigItem)[] = [];
   const comments: Comment[] = [];
   const dangling: Comment[] = [];
-  for (const chunk of prescan(text, "script").chunks) {
+  for (const chunk of prescan(text, grammar).chunks) {
     const slice = text.slice(chunk.start, chunk.end);
-    const by = shiftBy(chunk);
-    let result: ScriptParseResult;
+    const by = { offset: chunk.start, line: chunk.line - 1 };
+    let result: ParseResult<Ast>;
     try {
-      result = parseScriptAst(slice, { fragment: true, typesEnabled });
+      result =
+        grammar === "script"
+          ? parseScriptAst(slice, { fragment: true, typesEnabled })
+          : parseConfigAst(slice);
       if (result.ok) {
-        const ast = shiftPositions(result.ast, by);
+        const ast: Ast = shiftPositions(result.ast, by);
         const errors = shiftPositions(result.errors, by);
         const isolated = isolate(
-          ast.body,
+          itemsOf(ast),
           errors,
           text,
-          "script",
+          grammar,
           ast.comments,
           chunk,
         );
         items.push(...isolated.items);
         comments.push(...isolated.comments);
-        typesEnabled = ast.typesEnabled;
-        shebang ??= ast.shebang;
+        if (ast.kind === "Script") {
+          typesEnabled = ast.typesEnabled;
+          shebang ??= ast.shebang;
+        }
         dangling.push(...(ast.danglingComments ?? []));
         continue;
       }
     } catch (error) {
       result = { ok: false, errors: [internalProblem(error)] };
     }
-    const failed = failedChunk(
-      text,
-      chunk,
-      "script",
-      shiftPositions(result.errors, by),
-    );
+    const failed = failedChunk(text, chunk, shiftPositions(result.errors, by));
     if (failed.unparsed) items.push(failed.unparsed);
     comments.push(...failed.comments);
     shebang ??= failed.shebang;
   }
-  const unparsed = items.filter((i) => i.kind === "Unparsed").length;
-  const status = statusOf(items.length - unparsed, unparsed, true);
+  const status = statusFor(items, true);
   if (status === "verbatim") return { status, ast: null, problems };
-  const ast: ScriptAst = {
-    kind: "Script",
-    range: rangeOf(text, 0, text.length),
-    shebang,
-    body: items,
-    comments: comments.sort(byStart),
-    typesEnabled,
-    ...(dangling.length > 0 ? { danglingComments: dangling } : {}),
-  };
+  const range = rangeOf(text, 0, text.length);
+  comments.sort(byStart);
+  const extra = dangling.length > 0 ? { danglingComments: dangling } : {};
+  const ast: Ast =
+    grammar === "script"
+      ? {
+          kind: "Script",
+          range,
+          shebang,
+          body: items as ScriptItem[],
+          comments,
+          typesEnabled,
+          ...extra,
+        }
+      : {
+          kind: "ConfigFile",
+          range,
+          statements: items as ConfigItem[],
+          comments,
+          ...extra,
+        };
   return { status, ast, problems };
 }
 
-export function parseConfigChunks(
+export const parseScriptChunks = (
   text: string,
   problems: readonly ParseProblem[] = [],
-): ConfigSourceParse {
-  const items: ConfigItem[] = [];
-  const comments: Comment[] = [];
-  const dangling: Comment[] = [];
-  for (const chunk of prescan(text, "config").chunks) {
-    const slice = text.slice(chunk.start, chunk.end);
-    const by = shiftBy(chunk);
-    let result: ConfigParseResult;
-    try {
-      result = parseConfigAst(slice);
-      if (result.ok) {
-        const ast = shiftPositions(result.ast, by);
-        const errors = shiftPositions(result.errors, by);
-        const isolated = isolate(
-          ast.statements,
-          errors,
-          text,
-          "config",
-          ast.comments,
-          chunk,
-        );
-        items.push(...isolated.items);
-        comments.push(...isolated.comments);
-        dangling.push(...(ast.danglingComments ?? []));
-        continue;
-      }
-    } catch (error) {
-      result = { ok: false, errors: [internalProblem(error)] };
-    }
-    const failed = failedChunk(
-      text,
-      chunk,
-      "config",
-      shiftPositions(result.errors, by),
-    );
-    if (failed.unparsed) items.push(failed.unparsed);
-    comments.push(...failed.comments);
-  }
-  const unparsed = items.filter((i) => i.kind === "Unparsed").length;
-  const status = statusOf(items.length - unparsed, unparsed, true);
-  if (status === "verbatim") return { status, ast: null, problems };
-  const ast: ConfigAst = {
-    kind: "ConfigFile",
-    range: rangeOf(text, 0, text.length),
-    statements: items,
-    comments: comments.sort(byStart),
-    ...(dangling.length > 0 ? { danglingComments: dangling } : {}),
-  };
-  return { status, ast, problems };
-}
+) => parseChunks(text, "script", problems) as ScriptSourceParse;
 
-export function parseScriptSource(text: string): ScriptSourceParse {
+export const parseConfigChunks = (
+  text: string,
+  problems: readonly ParseProblem[] = [],
+) => parseChunks(text, "config", problems) as ConfigSourceParse;
+
+function parseSource(text: string, grammar: Grammar): SourceParse<Ast> {
   try {
-    let whole: ScriptParseResult;
+    let whole: ParseResult<Ast>;
     try {
-      whole = parseScriptAst(text);
+      whole =
+        grammar === "script" ? parseScriptAst(text) : parseConfigAst(text);
     } catch (error) {
       whole = { ok: false, errors: [internalProblem(error)] };
     }
-    if (!whole.ok) return parseScriptChunks(text, whole.errors);
+    if (!whole.ok) return parseChunks(text, grammar, whole.errors);
     const { items, comments } = isolate(
-      whole.ast.body,
+      itemsOf(whole.ast),
       whole.errors,
       text,
-      "script",
+      grammar,
       whole.ast.comments,
     );
-    const unparsed = items.filter((i) => i.kind === "Unparsed").length;
-    const status = statusOf(items.length - unparsed, unparsed, false);
-    return status === "verbatim"
-      ? { status, ast: null, problems: whole.errors }
-      : {
-          status,
-          ast: { ...whole.ast, body: items, comments },
-          problems: whole.errors,
-        };
+    const status = statusFor(items, false);
+    if (status === "verbatim")
+      return { status, ast: null, problems: whole.errors };
+    const ast: Ast =
+      whole.ast.kind === "Script"
+        ? { ...whole.ast, body: items as ScriptItem[], comments }
+        : { ...whole.ast, statements: items as ConfigItem[], comments };
+    return { status, ast, problems: whole.errors };
   } catch (error) {
     return {
       status: "verbatim",
@@ -224,36 +194,8 @@ export function parseScriptSource(text: string): ScriptSourceParse {
   }
 }
 
-export function parseConfigSource(text: string): ConfigSourceParse {
-  try {
-    let whole: ConfigParseResult;
-    try {
-      whole = parseConfigAst(text);
-    } catch (error) {
-      whole = { ok: false, errors: [internalProblem(error)] };
-    }
-    if (!whole.ok) return parseConfigChunks(text, whole.errors);
-    const { items, comments } = isolate(
-      whole.ast.statements,
-      whole.errors,
-      text,
-      "config",
-      whole.ast.comments,
-    );
-    const unparsed = items.filter((i) => i.kind === "Unparsed").length;
-    const status = statusOf(items.length - unparsed, unparsed, false);
-    return status === "verbatim"
-      ? { status, ast: null, problems: whole.errors }
-      : {
-          status,
-          ast: { ...whole.ast, statements: items, comments },
-          problems: whole.errors,
-        };
-  } catch (error) {
-    return {
-      status: "verbatim",
-      ast: null,
-      problems: [internalProblem(error)],
-    };
-  }
-}
+export const parseScriptSource = (text: string) =>
+  parseSource(text, "script") as ScriptSourceParse;
+
+export const parseConfigSource = (text: string) =>
+  parseSource(text, "config") as ConfigSourceParse;

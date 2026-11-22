@@ -4,7 +4,6 @@ import type {
   ConfigAst,
   ConfigItem,
   ConfigName,
-  ConfigStatement,
   ParseProblem,
   Range,
 } from "@nf-builder/lang-core";

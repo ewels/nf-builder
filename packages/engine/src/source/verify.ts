@@ -80,7 +80,7 @@ export function verifyModel(file: SourceFile): string[] {
       problems.push(`comment at ${c.range.start} is in ${n} slots, not 1`);
   }
 
-  // between items: only whitespace, `;` and comments
+  // between items: only whitespace, `;`, stray closing brackets (the lexer drops them) and comments
   const shebang = ast.kind === "Script" ? ast.shebang : null;
   const comments = [...ast.comments, ...(shebang ? [shebang] : [])].sort(
     (a, b) => a.range.start - b.range.start,
@@ -103,7 +103,7 @@ export function verifyModel(file: SourceFile): string[] {
       }
     }
     rest += text.slice(pos, gap.end);
-    if (!/^[\s;]*$/.test(rest))
+    if (!/^[\s;)\]}]*$/.test(rest))
       problems.push(`code outside the items at ${gap.start}-${gap.end}`);
   }
   return problems;

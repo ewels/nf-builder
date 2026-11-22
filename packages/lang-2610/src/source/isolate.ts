@@ -9,69 +9,17 @@ import type {
   Range,
   Unparsed,
 } from "@nf-builder/lang-core";
-import { codeSpan, type Grammar, scanHead } from "./prescan.ts";
+import { codeSpan, type Grammar, Positioner, scanHead } from "./prescan.ts";
 
 type Point = { readonly line: number; readonly column: number };
 const compare = (a: Point, b: Point) => a.line - b.line || a.column - b.column;
 
-const isHighSurrogate = (c: number) => c >= 0xd800 && c <= 0xdbff;
-const isLowSurrogate = (c: number) => c >= 0xdc00 && c <= 0xdfff;
-
-/** Line starts of one text, built once (lines end at "\n" only). */
-class Locator {
-  private readonly lineStarts: number[] = [0];
-  constructor(private readonly text: string) {
-    for (let i = text.indexOf("\n"); i >= 0; i = text.indexOf("\n", i + 1))
-      this.lineStarts.push(i + 1);
-  }
-
-  position(offset: number): { line: number; column: number } {
-    let lo = 0;
-    let hi = this.lineStarts.length - 1;
-    while (lo < hi) {
-      const mid = (lo + hi + 1) >> 1;
-      if ((this.lineStarts[mid] as number) <= offset) lo = mid;
-      else hi = mid - 1;
-    }
-    let column = 1;
-    for (let i = this.lineStarts[lo] as number; i < offset; i++) {
-      const c = this.text.charCodeAt(i);
-      if (
-        !(
-          isLowSurrogate(c) &&
-          i > 0 &&
-          isHighSurrogate(this.text.charCodeAt(i - 1))
-        )
-      )
-        column++;
-    }
-    return { line: lo + 1, column };
-  }
-
-  range(start: number, end: number): Range {
-    const from = this.position(start);
-    const to = this.position(end);
-    return {
-      start,
-      end,
-      line: from.line,
-      column: from.column,
-      endLine: to.line,
-      endColumn: to.column,
-    };
-  }
+let cached: { text: string; positions: Positioner } | null = null;
+/** The range of `text[start, end)`; the positioner is kept for the next call (a file is isolated chunk by chunk). */
+export function rangeOf(text: string, start: number, end: number): Range {
+  if (cached?.text !== text) cached = { text, positions: new Positioner(text) };
+  return cached.positions.range(start, end);
 }
-
-let cached: { text: string; locator: Locator } | null = null;
-/** A locator for `text`, remembered for the next call (a file is isolated chunk by chunk). */
-export function locatorFor(text: string): Locator {
-  if (cached?.text !== text) cached = { text, locator: new Locator(text) };
-  return cached.locator;
-}
-
-/** The range of `text[start, end)` in file coordinates. */
-export const rangeOf = (text: string, start: number, end: number): Range =>
-  locatorFor(text).range(start, end);
 
 /**
  * Isolate the items that cannot be modelled. `problems` are the whole-file parse's errors: those with `scope: "file"`

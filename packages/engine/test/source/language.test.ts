@@ -15,6 +15,7 @@ describe("F-104 AR-01: languageOf", () => {
       ["a/b/meta.yml", "yaml"],
       ["a.yaml", "yaml"],
       ["README.md", "markdown"],
+      ["notes.markdown", "markdown"],
       ["LICENSE", "text"],
       ["Dockerfile", "text"],
       ["MAIN.NF", "text"],
