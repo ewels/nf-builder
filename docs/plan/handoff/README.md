@@ -7,14 +7,13 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | Feature | Branch | State |
 |---|---|---|
 | F-102 script AST | merged, PR #23 | |
-| F-103 config AST | `feat/F-103`, in PR | Plan deleted in its PR. |
-| F-104 round trip | not started | [plan](plan-F-104.md). Branch from `main` after F-102 (and F-103) merge. |
-| F-110 printer | `feat/F-110` | Tasks 1–4 committed; task 5 building. [plan](plan-F-110.md). |
-
+| F-103 config AST | merged, PR #24 | |
+| F-104 round trip | `feat/F-104` | Tasks 1–2 building. [plan](plan-F-104.md). |
+| F-110 printer | `feat/F-110`, in PR | Plan deleted in its PR. |
 | F-105 semantic model | not started | [plan](plan-F-105.md). Branch from `main` after F-104 merges. |
 | F-106 typed projection | not started | [plan](plan-F-106.md). Branch from `main` after F-105 merges. |
 
-Next free ADR number: 0032.
+Next free ADR number: 0033.
 
 ## Decisions already taken on the plans' open points
 
@@ -31,7 +30,7 @@ Next free ADR number: 0032.
 ### F-104 — [plan](plan-F-104.md)
 - Accept the plan's recommendations: a new ADR for `LanguagePack.loadParser()` (lazy, like ADR 0028's `loadCatalogue()`) replacing the synchronous parse methods in the architecture sketch; `Unparsed` joins the AST unions; the plan's isolation and verbatim rules; its reading of the glossary's "equivalent"; chunks parsed by slicing and shifting; `SourceFile` in memory only; `yaml` as a lang-2610 dev dependency and Node types for engine tests are fine.
 
-### F-110 — [plan](plan-F-110.md)
+### F-110 (merged with its PR)
 - One new ADR listing the upstream formatter bugs as known differences (ADR 0005), `NO_RANGE` for new nodes (amending ADR 0027) and the blank-line layout for new declarations.
 - Port legacy printing too; default formatter flags only; no pack loader in F-110 (the parser loader from F-104 or F-111 carries the printer); the plan's oracle extension; corpus parity in the `corpus-parse` job; reuse F-102's fixtures by path; statement-level printing left to F-111; no fast-check yet.
 - Spec gap: also print feature flags, enums and agents if cheap; record what LA-45 formats.

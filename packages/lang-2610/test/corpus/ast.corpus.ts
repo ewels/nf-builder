@@ -13,7 +13,6 @@ import {
   anchors,
   attachments,
   type DumpRow,
-  type Row,
   toRow,
 } from "../ast/comment-anchors.ts";
 import { listSources } from "./corpus-files.ts";

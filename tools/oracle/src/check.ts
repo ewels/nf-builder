@@ -33,7 +33,49 @@ export function stripAnsi(text: string): string {
   return text.replace(/\u001b\[[0-9;?]*[ -/]*[@-~]/g, "");
 }
 
-export type CheckKind = "lint" | "run";
+/** What `nextflow lint -format -o json` prints that the format checks use: the summary counts and the errors with their positions. */
+export type FormatReport = {
+  summary: { errors: number; filesFormatted: number };
+  errors: {
+    filename: string;
+    startLine: number;
+    startColumn: number;
+    message: string;
+  }[];
+};
+
+/** Finds the JSON object `nextflow lint -format -o json` prints (as parseLintJson); null if there is none, it doesn't parse or it lacks a summary. */
+export function parseFormatJson(stdout: string): FormatReport | null {
+  const lines = stdout.split("\n");
+  const start = lines.findIndex((l) => l.trimEnd() === "{");
+  if (start < 0) return null;
+  try {
+    const value: unknown = JSON.parse(lines.slice(start).join("\n"));
+    if (typeof value !== "object" || value === null) return null;
+    const { summary, errors } = value as {
+      summary?: { errors?: unknown; filesFormatted?: unknown };
+      errors?: unknown;
+    };
+    if (
+      typeof summary !== "object" ||
+      summary === null ||
+      typeof summary.errors !== "number" ||
+      typeof summary.filesFormatted !== "number"
+    )
+      return null;
+    return {
+      summary: {
+        errors: summary.errors,
+        filesFormatted: summary.filesFormatted,
+      },
+      errors: Array.isArray(errors) ? (errors as FormatReport["errors"]) : [],
+    };
+  } catch {
+    return null;
+  }
+}
+
+export type CheckKind = "lint" | "run" | "format" | "fixed-point";
 export type Evaluation = {
   actual: Outcome;
   matched: boolean;
