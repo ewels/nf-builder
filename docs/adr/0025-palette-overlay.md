@@ -9,8 +9,8 @@ ADR 0005 adds a small hand-written `palette.yaml` to each pack for grouping, ico
 
 ## Decision
 
-- `packages/lang-2610/palette.yaml` is the hand-edited source. `pnpm gen:palette` validates it and writes `palette.json` beside it, a generated file that is committed; a unit test in `pnpm check` fails when they differ. The pack reads the JSON (`src/palette.ts`), so runtime dependencies don't change; `yaml` is a root dev dependency only. The types live in `@nf-builder/lang-core`.
-- Each palette item names either a catalogue entry (factory, operator, function, directive, feature flag, config scope) or a construct, which names a rule of the pack's own grammar and is checked against the generated parser's rule names.
+- `packages/lang-2610/palette.yaml` is the hand-edited source. `pnpm gen:palette` parses it and writes `palette.json` beside it, a generated file that is committed; unit tests in `pnpm check` fail when they differ and validate every name. The pack reads the JSON (`src/palette.ts`), so runtime dependencies don't change; `yaml` is a root dev dependency only. The types live in `@nf-builder/lang-core`.
+- Each palette item names either a catalogue entry (a channel factory, an operator or a config scope) or a construct, which names a rule of the pack's own grammar and is checked against the generated parser's rule names.
 - Legacy-only items are refused: a factory or operator whose every catalogue entry is `deprecated`, and constructs the grammar marks as legacy (`importDeclaration`, `paramDeclarationV1`, `legacyType`) or LA-34 forbids (`processWhen`). Groups that would be empty in 26.10 (UX-12's fork and split) are left out.
 - Preview features stay in the palette with a `preview` badge, starting with `agent` (Q4).
 - The palette and catalogue are not yet part of `LanguagePack`, so the main thread doesn't load them; F-204 decides how the palette reaches the UI.
