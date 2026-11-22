@@ -5,11 +5,11 @@
 
 ## Context
 
-ADR 0010 said to ship the language server under CheerpJ as an opt-in "Advanced checks" setting if it met three thresholds. Spike S3 ([report](../research/2026-11-22-spike-s3-language-server-cheerpj.md)) found that it gives correct diagnostics, and that only a preload variant meets the cold-start threshold, by 0.4 s on one machine (9.6 s against 10 s; the default setup takes 13.4 s). Memory and diagnostics latency pass easily. CheerpJ also needs `'unsafe-eval'`, which QA-30 forbids and ADR 0014 keeps out of the CSP; it loads from its own CDN, which isn't on ADR 0002's allow-list; and it is commercial software, free for FOSS projects, which the maintainer has to accept (Q3). No feature in the v0.1 list builds "Advanced checks".
+ADR 0010 said to ship the language server under CheerpJ as an opt-in "Advanced checks" setting if it met three thresholds. Spike S3 ([report](../research/2026-11-22-spike-s3-language-server-cheerpj.md)) found that it gives correct diagnostics and stays well under the memory threshold. Only a preload variant meets the cold-start threshold, by 0.4 s on one machine (9.6 s against 10 s; the default setup takes 13.4 s). Diagnostics after an edit take 0.9 s, but the first diagnostics after opening the 500-line file take about 4.2 s in every variant, twice the 2 s threshold. CheerpJ also needs `'unsafe-eval'`, which QA-30 forbids and ADR 0014 keeps out of the CSP; it loads from its own CDN, which isn't on ADR 0002's allow-list; and it is commercial software, free for FOSS projects, which the maintainer has to accept (Q3). No feature in the v0.1 list builds "Advanced checks".
 
 ## Decision
 
-This supersedes ADR 0010's "then ship it" branch; its fallback stands.
+This supersedes ADR 0010's "then ship it" branch; its fallback stands, and the app never depends on the language server: the editing loop never waits on it.
 
 - v0.1 doesn't ship the language server. Diagnostics come from our own lints (F-112) and the CI oracle; migrations are rule-based.
 - `e2e/s3-spike/` stays for re-runs (ADR 0022).

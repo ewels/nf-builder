@@ -4,15 +4,15 @@
 
 ## Answer
 
-It runs and gives the right answer: in a Web Worker under CheerpJ 5.0 (Java 17), the language server answers `initialize`, and after `textDocument/didOpen` publishes exactly the diagnostic plain Java gives for the fixture. The default setup misses the cold-start threshold (13.4 s); preloading the classes the first run used brings it to 9.6 s, inside the threshold by 0.4 s. Memory (326 MB over baseline) and edit diagnostics (0.9 s) pass comfortably. But CheerpJ's JIT evaluates strings as JavaScript, so it needs `'unsafe-eval'`, which QA-30 forbids; it also loads from its own CDN and is commercial software, free for FOSS projects. It is not shipped in v0.1 ([ADR 0026](../adr/0026-no-language-server-in-v0-1.md)).
+It runs and gives the right answer: in a Web Worker under CheerpJ 5.0 (Java 17), the language server answers `initialize`, and after `textDocument/didOpen` publishes exactly the diagnostic plain Java gives for the fixture. The default setup misses the cold-start threshold (13.4 s); preloading the CheerpJ runtime resources an earlier run fetched brings it to 9.6 s, inside the threshold by 0.4 s. Memory (326 MB over baseline) passes comfortably. Diagnostics depend on which moment counts: after an edit they arrive in 0.9 s, but the first diagnostics after opening the 500-line file take 4.1 to 4.2 s in every variant (plain Java: 1.1 s), so under that reading no variant meets the 2 s threshold. But CheerpJ's JIT evaluates strings as JavaScript, so it needs `'unsafe-eval'`, which QA-30 forbids; it also loads from its own CDN and is commercial software, free for FOSS projects. It is not shipped in v0.1 ([ADR 0026](../adr/0026-no-language-server-in-v0-1.md)).
 
 ## Setup
 
 - Jar: the 26.10 pack's language server, v26.10.2, SHA-256 `20326778…4b26` (`packages/lang-2610/upstream.json`).
 - CheerpJ 5.0 from `cjrtnc.leaningtech.com`, loader SHA-256 `280a353f…1520`, in a classic Web Worker, library mode. Messages go over `java.nio` pipes with LSP framing, one Java call at a time (piped streams failed with "Write end dead", and `Class.forName` from JavaScript hung).
-- Fixture: a 500-line typed script with one undefined variable on line 487, also an oracle case (`tools/oracle/cases/s3-known-error-500/`), so CI checks the expected `nextflow lint` error.
+- Fixture: a 500-line legacy (untyped) script with one undefined variable on line 487, also an oracle case (`tools/oracle/cases/s3-known-error-500/`), so CI checks the expected `nextflow lint` error.
 - Browser: Chromium 157 in the agent sandbox (4 vCPU Xeon 2.1 GHz, 16 GB), through an HTTPS proxy. Pages served locally on ports 4177 (site headers plus the CDN and `'unsafe-eval'`) and 4178 (site headers plus the CDN and only `'wasm-unsafe-eval'`).
-- Reproduce: `pnpm test:e2e -- --config e2e/s3-spike.config.ts` after `node e2e/s3-spike/prepare.ts`; results in `.cache/s3-spike/results/latest.md`.
+- Reproduce: `node e2e/s3-spike/prepare.ts`, then `S3_VARIANTS="java=17;java=17&preload=1;java=17&wasmGC=1;java=21" pnpm test:e2e -- --config e2e/s3-spike.config.ts` (without `S3_VARIANTS` only the default variant runs); results in `.cache/s3-spike/results/latest.md`.
 
 ## Results
 
@@ -36,7 +36,7 @@ E3, the strictest QA-30-compatible policy (CDN plus `'wasm-unsafe-eval'`, no `'u
 ## Limits
 
 - One machine, through a proxy; a slower laptop would lose the 0.4 s margin.
-- The preload list is captured from a previous run of the same Java version; shipping it means generating and versioning it with the jar.
+- The preload list (byte ranges of CheerpJ runtime files, from `cjGetRuntimeResources()`) is captured from a previous run of the same Java version; shipping it means generating and versioning it with the jar.
 - The wasmGC and Java 21 variants were recorded, not debugged.
 
 ## Consequences
