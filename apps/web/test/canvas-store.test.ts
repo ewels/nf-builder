@@ -47,6 +47,8 @@ function fake(
   options: {
     refuse?: boolean;
     nullFor?: string;
+    /** The revision the engine answers with (default 1); change it between calls to simulate an edit. */
+    revision?: number;
     gates?: Map<string, Promise<void>>;
     details?: (node: string) => Promise<unknown>;
   } = {},
@@ -74,7 +76,7 @@ function fake(
         (w) => w.path === path && w.name === workflow,
       );
       return {
-        revision: 1,
+        revision: options.revision ?? 1,
         projection:
           found === undefined || key === options.nullFor
             ? null
@@ -84,7 +86,7 @@ function fake(
     details: async (_path: string, _workflow: string | null, node: string) =>
       options.details === undefined
         ? {
-            revision: 1,
+            revision: options.revision ?? 1,
             details: {
               node,
               declaration: {
@@ -388,14 +390,46 @@ describe("F-206 selection", () => {
     expect(store.getState().details).toEqual({ status: "idle" });
   });
 
-  it("F-206: a refresh keeps the selection and loads its details again", async () => {
-    const store = createCanvasStore(() => fake(wf).engine);
+  it("F-206 UX-30: a refresh keeps the selection and loads its details again at the new revision", async () => {
+    const options: Parameters<typeof fake>[1] = {};
+    const store = createCanvasStore(() => fake(wf, options).engine);
     await store.getState().open(request);
     await store.getState().select("a");
+    options.revision = 2;
     await store
       .getState()
       .changed({ revision: 2, files: [], remodelled: [], workflows: wf });
     expect(store.getState().selected).toBe("a");
-    expect(store.getState().details.status).toBe("ready");
+    const d = store.getState().details;
+    expect(d.status === "ready" && d.revision).toBe(2);
+  });
+
+  it("F-206 UX-31: details at a newer revision than the canvas show loading, not a stale-selection message", async () => {
+    const options: Parameters<typeof fake>[1] = {};
+    const store = createCanvasStore(() => fake(wf, options).engine);
+    await store.getState().open(request);
+    options.revision = 2;
+    await store.getState().select("a");
+    expect(store.getState().selected).toBe("a");
+    expect(store.getState().details).toEqual({ status: "loading", node: "a" });
+    await store
+      .getState()
+      .changed({ revision: 2, files: [], remodelled: [], workflows: wf });
+    const d = store.getState().details;
+    expect(d.status === "ready" && d.revision).toBe(2);
+  });
+
+  it("F-206 UX-30: a refresh that leaves no canvas (unparseable) clears the selection", async () => {
+    const options: Parameters<typeof fake>[1] = {};
+    const store = createCanvasStore(() => fake(wf, options).engine);
+    await store.getState().open(request);
+    await store.getState().select("a");
+    options.nullFor = "main.nf#";
+    await store
+      .getState()
+      .changed({ revision: 2, files: [], remodelled: [], workflows: wf });
+    expect(store.getState().content.status).toBe("unavailable");
+    expect(store.getState().selected).toBeNull();
+    expect(store.getState().details).toEqual({ status: "idle" });
   });
 });

@@ -156,7 +156,10 @@ export function createCanvasStore(
       } catch (error) {
         content = { status: "unavailable", message: messageOf(error) };
       }
-      if (mine === generation) set({ content });
+      if (mine !== generation) return;
+      set({ content });
+      // no canvas, so no node to select (the header and the body agree)
+      if (content.status !== "ready") clearSelection();
     }
 
     async function loadDetails(id: string): Promise<void> {
@@ -180,15 +183,21 @@ export function createCanvasStore(
           return;
         } else {
           const current = get().content;
-          details =
-            current.status === "ready" && current.revision === result.revision
-              ? {
-                  status: "ready",
-                  node: id,
-                  revision: result.revision,
-                  details: result.details,
-                }
-              : unavailable("The project changed. Select the node again.");
+          const shown = current.status === "ready" ? current.revision : null;
+          if (shown !== null && shown === result.revision)
+            details = {
+              status: "ready",
+              node: id,
+              revision: result.revision,
+              details: result.details,
+            };
+          else if (shown !== null && result.revision > shown)
+            // the reprojection is on its way, and `changed` loads the details again
+            return;
+          else
+            details = unavailable(
+              "The project changed. Select the node again.",
+            );
         }
       } catch (error) {
         if (mine !== selection) return;
