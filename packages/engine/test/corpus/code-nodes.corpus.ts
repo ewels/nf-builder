@@ -68,6 +68,11 @@ describe("F-108 step 2 corpus code nodes", () => {
         const body = [...parser.workflows(wrapped(node, typed)).values()][0];
         expect(body, where).toHaveLength(1);
         expect(plain(body?.[0]), where).toBe(plain(statementOf(ast, node)));
+        // a read of `params.x` is wired to its own port, never to the whole of `:params`
+        expect(
+          node.inputs.map((i) => i.id),
+          where,
+        ).not.toContain("params");
         inputs += node.inputs.length;
         outputs += node.outputs.length;
       }

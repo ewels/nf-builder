@@ -254,8 +254,9 @@ class Projecting {
       node.kind === "Workflow"
         ? [node.main, node.emits, node.publishers].filter((s) => s !== null)
         : scriptStatements(node);
+    // closure reads count too: a code node's closures read parameters it is wired to
     for (const section of sections)
-      for (const r of variablesRead(section, { closures: false }))
+      for (const r of variablesRead(section))
         if (r.name === "params" && r.property !== null) read.add(r.property);
     const entry = this.ref.name === null;
     if (!(entry && block !== null) && read.size === 0) return;
@@ -369,21 +370,29 @@ class Projecting {
       if (variable !== null) this.#scope.bind(variable, [value]);
       return;
     }
-    this.#code(statement);
+    this.#code(statement, variable, expression);
   }
 
-  #code(statement: Statement): void {
-    const { node, edges, writes } = buildCodeNode(statement, {
+  #code(
+    statement: Statement,
+    variable: string | null,
+    expression: Expression | null,
+  ): void {
+    const { node, edges } = buildCodeNode(statement, {
       scope: this.#scope,
       keys: this.#keys,
       text: this.text,
+      isCode: (id) => this.#nodes.some((n) => n.id === id && n.kind === "code"),
       // a copy of a graph value (`w2 = w`) has that value's type; anything else an inline one
-      typeOf: (expression) => this.#feed(expression).type,
+      assignedType: () =>
+        variable === null || expression === null
+          ? null
+          : this.#feed(expression).type,
     });
     this.#nodes.push(node);
     for (const edge of edges) this.#edges.set(edge.id, edge);
     // each assigned name now stands for this node's port of that name, replacing an earlier binding
-    for (const output of writes)
+    for (const output of node.outputs)
       this.#scope.bind(output.id, [{ node: node.id, ports: [output] }]);
   }
 
@@ -867,6 +876,7 @@ const isChain = (e: Expression): boolean =>
   e.kind === "Variable" ||
   (e.kind === "Property" &&
     e.property.kind === "Identifier" &&
+    e.navigation !== "*." &&
     isChain(e.object));
 
 /** The types of a projection's emits that come straight from one value: its emit nodes' single direct feed. */

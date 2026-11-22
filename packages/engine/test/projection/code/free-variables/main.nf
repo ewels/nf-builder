@@ -202,3 +202,8 @@ workflow P36 {
     r36 = a36.findAll { it > t36 }.size() + params.n36
     probe_36 = [r36]
 }
+
+workflow P37 {
+    r37 = a37.collect { -> it + b37 }
+    probe_37 = [r37]
+}

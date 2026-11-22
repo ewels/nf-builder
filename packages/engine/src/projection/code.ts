@@ -4,7 +4,6 @@
 
 import type {
   CodeNode,
-  Expression,
   FlowType,
   GraphEdge,
   Port,
@@ -13,87 +12,66 @@ import type {
 import { statementVariables } from "./free-variables";
 import type { KeyAllocator } from "./keys";
 import type { WorkflowScope } from "./scope";
-import { type PortSpec, spec } from "./signature";
 import { UNKNOWN } from "./types";
 
-export interface CodeContext {
+interface CodeContext {
   readonly scope: WorkflowScope;
   readonly keys: KeyAllocator;
   /** The whole source text of the workflow's file. */
   readonly text: string;
-  /** The type of the expression a single assignment copies or computes (F-106's inline typing). */
-  readonly typeOf: (expression: Expression) => FlowType | null;
+  /** Whether the node is a code node: a property read from a code node's value is never one of its ports. */
+  readonly isCode: (nodeId: string) => boolean;
+  /** The type of the value a single assignment `x = e` or `def x = e` copies or computes; null for other statements. */
+  readonly assignedType: () => FlowType | null;
 }
 
 const LABEL_LENGTH = 60;
 
-/** The expression of a single assignment `x = e` or `def x = e`; null for any other statement. */
-function assignedValue(statement: Statement): Expression | null {
-  if (
-    statement.kind === "VariableDeclaration" &&
-    !statement.multiple &&
-    statement.targets.length === 1
-  )
-    return statement.initializer;
-  if (
-    statement.kind === "Assignment" &&
-    statement.operator === "=" &&
-    statement.target.kind === "Variable"
-  )
-    return statement.value;
-  return null;
-}
+const port = (id: string, type: FlowType | null): Port => ({
+  id,
+  label: id,
+  type,
+  argument: null,
+  argumentType: null,
+});
 
 export function buildCodeNode(
   statement: Statement,
   context: CodeContext,
-): {
-  readonly node: CodeNode;
-  readonly edges: readonly GraphEdge[];
-  readonly writes: readonly PortSpec[];
-} {
+): { readonly node: CodeNode; readonly edges: readonly GraphEdge[] } {
   const { scope, keys, text } = context;
   const { reads, writes } = statementVariables(statement);
-
-  const inputs = new Map<string, Port>();
-  const seen = new Set<string>();
-  const wires: { variable: string; from: GraphEdge["from"]; type: FlowType }[] =
-    [];
-  for (const read of reads) {
-    // `params` as a whole is not a value to wire (`params.x` is)
-    if (read.name === "params" && read.properties.length === 0) continue;
-    const resolved = scope.resolveRead(read);
-    if (resolved === null) continue;
-    if (!inputs.has(resolved.variable))
-      inputs.set(resolved.variable, {
-        id: resolved.variable,
-        label: resolved.variable,
-        type: null,
-        argument: null,
-        argumentType: null,
-      });
-    for (const s of resolved.sources) {
-      const key = `${resolved.variable}\n${s.port.node}[${s.port.port}]`;
-      if (seen.has(key)) continue;
-      seen.add(key);
-      wires.push({
-        variable: resolved.variable,
-        from: s.port,
-        type: s.type ?? UNKNOWN,
-      });
-    }
-  }
-
-  const value = assignedValue(statement);
-  const outputs = writes.map((w) =>
-    spec(
-      w.name,
-      writes.length === 1 && value !== null ? context.typeOf(value) : null,
-    ),
-  );
   const first = writes[0];
   const id = first === undefined ? keys.code() : keys.assigned(first.name);
 
+  const edges = new Map<string, GraphEdge>();
+  for (const read of reads) {
+    // `params` as a whole is not a value to wire (`params.x` is)
+    if (read.name === "params" && read.properties.length === 0) continue;
+    // `x = [x: 1]; y = x.x`: the output port of a code node is named like the variable, but `.x` reads the value's property
+    const whole = scope.lookup(read.name).every((v) => context.isCode(v.node));
+    const resolved = scope.resolveRead(
+      whole ? { name: read.name, properties: [] } : read,
+    );
+    if (resolved === null) continue;
+    const { variable } = resolved;
+    for (const { port: from, type } of resolved.sources) {
+      const edge = `${from.node}[${from.port}] -> ${id}[${variable}]`;
+      if (!edges.has(edge))
+        edges.set(edge, {
+          id: edge,
+          from,
+          to: { node: id, port: variable },
+          type: type ?? UNKNOWN,
+          variable,
+          direct: false,
+        });
+    }
+  }
+  const inputs = new Set([...edges.values()].map((e) => e.to.port));
+
+  // with one write, the statement may be a single assignment to it
+  const type = writes.length === 1 ? context.assignedType() : null;
   const source = text.slice(statement.range.start, statement.range.end);
   const line = (source.split("\n").find((l) => l.trim() !== "") ?? "").trim();
   const node: CodeNode = {
@@ -101,24 +79,10 @@ export function buildCodeNode(
     kind: "code",
     label:
       line.length > LABEL_LENGTH ? `${line.slice(0, LABEL_LENGTH - 1)}…` : line,
-    inputs: [...inputs.values()],
-    outputs: outputs.map((o) => ({
-      id: o.id,
-      label: o.label,
-      type: o.type,
-      argument: null,
-      argumentType: null,
-    })),
+    inputs: [...inputs].map((v) => port(v, null)),
+    outputs: writes.map((w) => port(w.name, type)),
     range: statement.range,
     text: source,
   };
-  const edges = wires.map((w) => ({
-    id: `${w.from.node}[${w.from.port}] -> ${id}[${w.variable}]`,
-    from: w.from,
-    to: { node: id, port: w.variable },
-    type: w.type,
-    variable: w.variable,
-    direct: false,
-  }));
-  return { node, edges, writes: outputs };
+  return { node, edges: [...edges.values()] };
 }
