@@ -20,9 +20,10 @@ AR-20 to AR-24 make every canvas or form change a command that the engine applie
 - **AR-24, read as "no problem the file didn't have":** a result is refused when a changed file gains a problem key (lexer, parser, builder or internal) it didn't have before. Problems already in the file don't block, so partial imports stay editable and `ReplaceFileText` can repair a broken file.
 - **LA-13:** our own check refuses a result that newly mixes typed and legacy definitions in a script, whatever the order, because lint doesn't catch every case. The pack tags nf-lang's mixing errors with `ParseProblem.code` `mixed-definitions`. Files that are already mixed stay editable.
 - **Code conventions:**
-  - **Placeholders:** a missing earlier positional input is `null`. Disconnect removes a trailing positional argument and replaces an earlier one with `null`.
-  - **New variables:** the callee in lower case (`FASTQC` becomes `fastqc`), or `<factory or last operator>_ch`, then `_2`, `_3` until the name is free. AddCall never assigns.
+  - **Placeholders:** a missing earlier positional input is `null`. Disconnect removes a trailing positional argument and replaces an earlier one with `null`. `null` passes lint, but a run rejects it for a typed input that isn't nullable (`String?`), so it marks an input that is still unconnected; F-112 reports it (LA-33).
+  - **New variables:** the callee in lower case (`FASTQC` becomes `fastqc`), or `<factory or last operator>_ch`, then `_2`, `_3` until the name is free. AddCall never assigns. Names never shadow the catalogue's globals or `params`, `Channel` and `task`.
   - **Connect:** moves a later source above its target when that is safe, otherwise refuses.
+  - **AddCall** refuses a process the workflow already calls: Nextflow 26.10.7 fails at run time ("called twice") though lint accepts it (upstream bug 24); a workflow may be called twice. Reads of a legacy call's unnamed outputs are written `CALLEE.out[n]`.
   - **DeleteNode:** removes the statement and clears the direct arguments it fed. Indirect reads stay for F-112 to report. Role nodes can't be deleted.
 - **CreateProcess (LA-12):** writes `modules/local/<lower>/main.nf` from `LanguagePack.scaffold`, script-only with no ports, and includes it as `<rel>/modules/local/<lower>/main.nf`. Ports come from Configure (F-303).
 - **Rename limits:**
@@ -31,7 +32,7 @@ AR-20 to AR-24 make every canvas or form change a command that the engine applie
   - shadowing is ignored;
   - `Unparsed` text is left alone.
 - **Interface growth:** `LanguagePack.scaffold` and `ParseProblem.code`. Both live in memory, with no change to package boundaries or dependency-cruiser rules.
-- **Known difference `string-reindent`** (amends ADR 0032): the printer keeps multi-line string content verbatim, where `nextflow lint -format` re-indents it. This is a sixth known difference, with a fixture, corpus entries and the three ported formatter cases marked. It lets reprinted declarations compare exactly with the corpus.
+- **Known difference `string-reindent`** (amends ADR 0032): the printer keeps multi-line string content verbatim, where `nextflow lint -format` re-indents it. This is a sixth known difference, with a fixture, corpus entries and the three ported formatter cases marked. It lets reprinted declarations compare exactly with the corpus. It covers process scripts too: Nextflow 26.10.7 strips their common indentation when it writes `.command.sh` (checked with a run), so either form runs the same, and one rule for every string is simpler than telling scripts apart.
 - **fast-check 4.11.0** is an engine dev dependency for the property tests (ADR 0011).
 
 ## Consequences
