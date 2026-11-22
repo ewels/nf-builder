@@ -64,7 +64,29 @@ export type {
   CanvasViewOptions,
   EdgeDataflow,
 } from "./canvas";
-export { CANVAS_METRICS, canvasView } from "./canvas";
+export { CANVAS_METRICS, canvasView, nodeTitle } from "./canvas";
+export type {
+  DeclarationDetails,
+  DetailRow,
+  NodeDetails,
+  NodeView,
+  OperatorDetail,
+  PortConnection,
+  PortDetail,
+  Preview,
+  SummaryCall,
+  SummaryModule,
+  SummaryPort,
+  WorkflowSummary,
+} from "./details";
+export {
+  kindLabel,
+  nodeView,
+  PREVIEW_LINES,
+  portTypeText,
+  VALUE_CHARS,
+  workflowSummary,
+} from "./details";
 export {
   compareDiagnostics,
   countDiagnostics,
