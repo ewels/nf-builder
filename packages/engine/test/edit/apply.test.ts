@@ -1,0 +1,96 @@
+import {
+  type CommandResult,
+  EDIT_COMMAND_KINDS,
+  type EditCommand,
+} from "@nf-builder/lang-core";
+import { describe, expect, it } from "vitest";
+import { applyCommand, commit } from "../../src/edit/apply";
+import { applyPatches } from "../../src/edit/patches";
+import { stateFor, texts } from "./helpers";
+
+const proc = "process B {\n    script:\n    'B'\n}\n";
+const files = {
+  "main.nf": `include { B } from './b.nf'\n\nworkflow {\n    B()\n}\n`,
+  "b.nf": proc,
+};
+const target = { path: "main.nf", workflow: null };
+const port = { node: "n", port: "p" };
+const commands: Record<EditCommand["kind"], EditCommand> = {
+  createProcess: { kind: "createProcess", name: "HELLO", caller: "main.nf" },
+  addCall: { kind: "addCall", target, callee: "B" },
+  connect: { kind: "connect", target, from: port, to: port },
+  disconnect: { kind: "disconnect", target, port },
+  deleteNode: { kind: "deleteNode", target, node: "n" },
+  renameDeclaration: {
+    kind: "renameDeclaration",
+    path: "b.nf",
+    name: "B",
+    newName: "C",
+  },
+  replaceFileText: { kind: "replaceFileText", path: "main.nf", text: "" },
+};
+
+describe("F-111 applyCommand", () => {
+  it("F-111 AR-20: commands and results are plain data, and applyCommand is pure", async () => {
+    const state = await stateFor(files);
+    const before = texts(state);
+    for (const kind of EDIT_COMMAND_KINDS) {
+      const command = commands[kind];
+      expect(structuredClone(command)).toEqual(command);
+      const one = applyCommand(state, command);
+      const two = applyCommand(state, command);
+      expect(one, kind).toEqual(two);
+      expect(structuredClone(one), kind).toEqual(one);
+      expect(typeof one.ok, kind).toBe("boolean");
+    }
+    expect(texts(state)).toEqual(before);
+  });
+
+  it("F-111 AR-23: the inverse of an accepted result restores the exact files, and commit writes the model", async () => {
+    const state = await stateFor(files);
+    const before = texts(state);
+    const result = applyCommand(state, commands.createProcess);
+    if (!result.ok) throw new Error(result.message);
+    const remodelled = commit(state, result);
+    expect(remodelled).toContain("main.nf");
+    expect(state.model.paths()).toContain("modules/local/hello/main.nf");
+    const undone = applyPatches(new Map(Object.entries(texts(state))), [
+      ...result.inverse,
+    ]);
+    expect(Object.fromEntries(undone.files)).toEqual(before);
+    // commit of the inverse's files returns the model to the start
+    const back: CommandResult = {
+      ok: true,
+      patches: result.inverse,
+      inverse: result.patches,
+      files: [
+        { path: "modules/local/hello/main.nf", text: null },
+        { path: "main.nf", text: before["main.nf"] as string },
+      ],
+    };
+    commit(state, back);
+    expect(texts(state)).toEqual(before);
+  });
+
+  it("F-111 AR-24: a refused command returns a message and no patches", async () => {
+    const state = await stateFor(files);
+    const r = applyCommand(state, {
+      kind: "createProcess",
+      name: "not valid",
+      caller: "main.nf",
+    });
+    expect(r.ok).toBe(false);
+    if (r.ok) return;
+    expect(r.message.length).toBeGreaterThan(10);
+    expect(r).not.toHaveProperty("patches");
+  });
+
+  it("F-113: createEditState passes a trace option to the model", async () => {
+    const { createEditState } = await import("../../src/edit/apply");
+    const events: string[] = [];
+    await createEditState("26.10", [{ path: "main.nf", text: "" }], {
+      trace: (e) => events.push(`${e.kind}:${e.path}`),
+    });
+    expect(events).toEqual(["parse:main.nf", "model:main.nf"]);
+  });
+});
