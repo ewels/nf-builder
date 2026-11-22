@@ -104,4 +104,8 @@ export interface EngineApi {
     workflow: string | null,
   ): Promise<ProjectionResult | EngineRefusal>;
   diagnostics(): Promise<DiagnosticsResult | EngineRefusal>;
+  /** The current text of a file, or null with no project or no such file. */
+  readFile(path: string): Promise<string | null>;
+  /** Drops the open project; later calls answer `no-project` until the next `open`. The revision counter keeps counting. */
+  close(): Promise<void>;
 }

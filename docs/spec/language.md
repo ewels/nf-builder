@@ -41,12 +41,13 @@ Severity levels: **error** (Nextflow would reject it), **warning** (deprecated o
 | ID | Rule | Severity |
 |---|---|---|
 | LA-30 | Syntax errors from the parser | error |
-| LA-31 | Construct not valid for the project's language version | error |
+| LA-31 | Construct not valid for the project's language version, including feature flags, pipeline include typing, agent outputs and `includeConfig` placement (ADR 0042) | error |
 | LA-32 | Type mismatch on an edge or call argument | error |
-| LA-33 | Unconnected required input; unused output of a process with no topic or publish use | warning |
+| LA-33 | Unconnected required input, or a call with the wrong number of arguments (error, as nf-lang rejects it); unused output of a process with no topic or publish use (warning) (ADR 0042) | error / warning |
 | LA-34 | Deprecated constructs: `when:`, `storeDir`, `shell:`, `Channel.` factories, implicit `it` | warning |
 | LA-35 | Legacy process or workflow (offer "Migrate to typed" when available) | suggestion |
 | LA-36 | `tuple` where a record would fit; `publishDir` where workflow outputs would fit; legacy `params.x =` assignments; `params` used outside the entry workflow and `output` block | suggestion |
+| LA-37 | Typed-code warnings that `nextflow lint` reports: missing type annotations, several typed process outputs, a type in `publish:` (ADR 0042) | warning |
 
 Every lint message says what to do. Mechanical fixes are offered as quick fixes.
 

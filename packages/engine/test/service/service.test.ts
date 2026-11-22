@@ -169,6 +169,36 @@ describe("F-113 engine service", () => {
     expect(applied.workflows.map((w) => w.name)).toEqual([null]);
   });
 
+  it("F-112 F-113 AR-05: diagnostics() returns the pack lint codes and is recomputed after a change", async () => {
+    const service = createEngineService();
+    const legacy = (receiver: string) =>
+      `workflow {\n    ${receiver}.of(1).view()\n}\n`;
+    const summary = await service.open({
+      version,
+      files: [{ path: "main.nf", text: legacy("Channel") }],
+    });
+    const codes = (r: Awaited<ReturnType<typeof service.diagnostics>>) => {
+      if (!("diagnostics" in r)) throw new Error(`refused: ${r.code}`);
+      return r.diagnostics.map((d) => d.code);
+    };
+    const before = await service.diagnostics();
+    expect(codes(before)).toContain("deprecated-channel");
+    expect("revision" in before && before.revision).toBe(summary.revision);
+    const applied = ok(
+      await service.apply(
+        {
+          kind: "replaceFileText",
+          path: "main.nf",
+          text: legacy("channel"),
+        },
+        summary.revision,
+      ),
+    );
+    const after = await service.diagnostics();
+    expect(codes(after)).not.toContain("deprecated-channel");
+    expect("revision" in after && after.revision).toBe(applied.revision);
+  });
+
   it("F-113: a command or patch list built on an older revision is refused as stale", async () => {
     const { service, summary } = await opened();
     const first = ok(await service.apply(addB, summary.revision));
@@ -276,5 +306,46 @@ describe("F-113 engine service", () => {
     );
     const next = ok(await service.apply(addB, summary.revision + 1));
     expect(next.revision).toBe(summary.revision + 2);
+  });
+  it("F-202 IO-01: readFile returns the current text after writeFiles and apply, and null for a missing path or with no project", async () => {
+    const empty = createEngineService();
+    expect(await empty.readFile("README.md")).toBeNull();
+    const { service } = await opened();
+    expect(await service.readFile("README.md")).toBe("# hello\n");
+    expect(await service.readFile("nope.nf")).toBeNull();
+    ok(await service.writeFiles([{ path: "README.md", text: "two\n" }]));
+    expect(await service.readFile("README.md")).toBe("two\n");
+    ok(await service.apply(replaceA(proc("Z")), 2));
+    expect(await service.readFile("a.nf")).toBe(proc("Z"));
+    ok(await service.writeFiles([{ path: "README.md", text: null }]));
+    expect(await service.readFile("README.md")).toBeNull();
+  });
+
+  it("F-202: readFile runs in the serial queue, after earlier calls", async () => {
+    const { service } = await opened();
+    const writing = service.writeFiles([{ path: "README.md", text: "late\n" }]);
+    const reading = service.readFile("README.md");
+    await writing;
+    expect(await reading).toBe("late\n");
+  });
+
+  it("F-202: close drops the open project; later calls answer no-project", async () => {
+    const { service } = await opened();
+    await service.close();
+    expect(await service.readFile("README.md")).toBeNull();
+    for (const r of [
+      await service.apply(addB, 1),
+      await service.writeFiles([]),
+      await service.project("main.nf", null),
+      await service.diagnostics(),
+    ])
+      expect(r).toMatchObject({
+        ok: false,
+        code: "no-project",
+        revision: null,
+      });
+    await service.close();
+    const summary = await service.open({ version, files });
+    expect(summary.revision).toBeGreaterThan(1);
   });
 });

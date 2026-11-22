@@ -1,6 +1,6 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { expect, type Locator, test } from "@playwright/test";
+import { expect, type Locator, type Page, test } from "@playwright/test";
 import {
   initialJsFiles,
   type Manifest,
@@ -21,6 +21,7 @@ import {
 } from "./canvas.ts";
 import { watchForCspViolations } from "./csp.ts";
 import { type EngineHook, readProject } from "./engine.ts";
+import { createProjectInUi, switcher } from "./projects.ts";
 import { E2E_BASE_PATH } from "./urls.ts";
 
 interface Counts {
@@ -470,3 +471,75 @@ test(
     expect(problems, problems.join("\n")).toEqual([]);
   },
 );
+
+const MAIN_NF = `workflow {
+    channel.of(1, 2, 3).view()
+}
+`;
+
+/** Writes a main.nf into the open project through the engine hook, as the Code view will. */
+const writeMain = (page: Page) =>
+  page.evaluate(async (text) => {
+    const engine = (window as unknown as { nfBuilderEngine: EngineHook })
+      .nfBuilderEngine;
+    await engine.writeFiles([{ path: "main.nf", text }]);
+  }, MAIN_NF);
+
+test("F-205 F-202 UX-20 IO-01: a project created in the UI shows its canvas, and an edit made through the engine refreshes it", async ({
+  page,
+}) => {
+  await page.goto("./");
+  await expect(switcher(page)).toBeEnabled();
+  await createProjectInUi(page, "Canvas project");
+  await expect(page.locator(".canvas-area")).toContainText("No workflow open");
+  await writeMain(page);
+  await canvasReady(page);
+  await expect(page.getByRole("tab", { name: "main.nf" })).toHaveAttribute(
+    "aria-selected",
+    "true",
+  );
+  await expect(page.locator(".react-flow__node").first()).toBeVisible();
+});
+
+test("F-205 F-202 UX-20 IO-01: after a reload the reopened project's canvas shows", async ({
+  page,
+}) => {
+  await page.goto("./");
+  await expect(switcher(page)).toBeEnabled();
+  await createProjectInUi(page, "Reload me");
+  await writeMain(page);
+  await canvasReady(page);
+  const nodes = await page.locator(".react-flow__node").count();
+  await expect(page.getByRole("banner").locator(".save-state")).toHaveText(
+    "Saved",
+  );
+  await page.reload();
+  await canvasReady(page);
+  await expect(page.getByRole("tab", { name: "main.nf" })).toBeVisible();
+  await expect(page.locator(".react-flow__node")).toHaveCount(nodes);
+});
+
+test("F-205 F-202 UX-20: deleting the open project resets the canvas, and a hook-opened project survives a status change", async ({
+  page,
+}) => {
+  await page.goto("./");
+  await expect(switcher(page)).toBeEnabled();
+  await createProjectInUi(page, "Doomed canvas");
+  await writeMain(page);
+  await canvasReady(page);
+  await switcher(page).click();
+  await page.getByRole("button", { name: "Delete project…" }).click();
+  const dialog = page.getByRole("dialog", { name: "Delete project" });
+  await dialog.getByRole("button", { name: "Delete", exact: true }).click();
+  await expect(dialog).toBeHidden();
+  await expect(page.locator(".workflow-canvas")).toHaveCount(0);
+  await expect(page.locator(".canvas-area")).toContainText("No project open");
+  await expect(page.getByRole("tablist", { name: "Workflows" })).toHaveCount(0);
+  // a raw hook open leaves current null in the status, yet its canvas stays
+  await openFixture(page);
+  await canvasReady(page);
+  await createProjectInUi(page, "Another");
+  await openFixture(page);
+  await canvasReady(page);
+  await expect(page.locator(".workflow-canvas")).toBeVisible();
+});

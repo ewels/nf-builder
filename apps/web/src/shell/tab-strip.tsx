@@ -1,5 +1,5 @@
 import type { JSX, KeyboardEvent } from "react";
-import { useWorkspace } from "../workspace/workspace-store";
+import { useWorkspace } from "../canvas/canvas-store";
 
 export const workflowTabId = (id: string): string => `workflow-tab-${id}`;
 

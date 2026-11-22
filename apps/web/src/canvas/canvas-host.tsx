@@ -1,32 +1,29 @@
 import type { JSX } from "react";
 import { lazy, Suspense } from "react";
+import { CanvasPlaceholder } from "../project/project-status";
+import { useProjects } from "../project/project-store";
 import { workflowTabId } from "../shell/tab-strip";
-import { useWorkspace } from "../workspace/workspace-store";
 import { CanvasErrorBoundary } from "./canvas-error-boundary";
+import { useWorkspace } from "./canvas-store";
 
 // React Flow is in this chunk only (QA-01, ADR 0003).
 const WorkflowCanvas = lazy(() => import("./workflow-canvas"));
 
 export function CanvasHost(): JSX.Element {
   const summary = useWorkspace((s) => s.summary);
-  const opening = useWorkspace((s) => s.opening);
-  const error = useWorkspace((s) => s.error);
+  const projects = useProjects((s) => s.status);
   const activeTab = useWorkspace((s) => s.activeTab);
   const content = useWorkspace((s) => s.content);
   const portLabels = useWorkspace((s) => s.portLabels);
   const setPortLabels = useWorkspace((s) => s.setPortLabels);
-  if (summary === null && !opening && error === null)
+  if (summary === null)
     return (
       <div className="canvas-area">
-        <p className="muted">No project open</p>
+        <CanvasPlaceholder status={projects} />
       </div>
     );
   let body: JSX.Element;
-  if (summary === null)
-    body = (
-      <p className="muted">{error === null ? "Opening project…" : error}</p>
-    );
-  else if (content.status === "ready")
+  if (content.status === "ready")
     body = (
       <CanvasErrorBoundary>
         <Suspense fallback={<p className="muted">Loading canvas…</p>}>
@@ -43,7 +40,7 @@ export function CanvasHost(): JSX.Element {
     body = <p className="muted">{content.message}</p>;
   else if (content.status === "loading")
     body = <p className="muted">Loading workflow…</p>;
-  else body = <p className="muted">No workflow to show</p>;
+  else body = <p className="muted">No workflow open</p>;
   return (
     <div
       className="canvas-area"

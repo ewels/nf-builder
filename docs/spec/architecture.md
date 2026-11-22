@@ -11,7 +11,7 @@ files (IndexedDB) ──► engine worker: parse ─► AST ─► semantic mode
   text patches ◄── edit command ◄── UI (canvas, popup, forms, Code tab) ◄── React Flow / panes
 ```
 
-The main thread keeps only pack versions and palette search; parsing, modelling, projection, edits and diagnostics run in the engine worker behind Comlink (AR-04, ADR 0043).
+The main thread keeps only pack versions and palette search; parsing, modelling, projection, edits and diagnostics run in the engine worker behind Comlink (AR-04, ADR 0043). The worker also reads and writes the IndexedDB project store, so file text never sits on the main thread (ADR 0045).
 
 - The UI never edits text or AST directly. It sends edit commands and renders projections.
 - The engine runs in a Web Worker behind a Comlink API. The UI keeps a read-only copy of the latest projection and diagnostics.
@@ -24,7 +24,7 @@ The main thread keeps only pack versions and palette search; parsing, modelling,
 | AR-02 | The AST is our own typed tree built from the ANTLR parse tree. Every node has a source range. Comments are attached as leading, trailing or dangling comments, as nf-lang's `CommentAttacher` does (ADR 0027). |
 | AR-03 | The semantic model resolves includes across files, declarations by name, workflow bodies into statements, and statements into calls, chains, assignments and code nodes. Includes of registry modules resolve to `modules/<namespace>/<name>/` under the project root, or under the including script's directory when that lies in a `modules/` directory (nested vendoring, ADR 0034). |
 | AR-04 | Re-parsing is per file. A change to one file re-parses that file and recomputes the model for files that depend on it. |
-| AR-05 | Diagnostics come from the parser, the model, and pack lint rules. Each has a range, severity, message, and optional quick fix (an edit command). |
+| AR-05 | Diagnostics come from the parser, the model, and pack lint rules. Each has a range, severity, message, and optional quick fix: text edits that become a `ReplaceFileText` command when applied (ADR 0042). |
 
 ## Projection
 
@@ -58,7 +58,7 @@ interface LanguagePack {
   palette: PaletteDefinition;           // palette.json, ADR 0025
   loadCatalogue(): Promise<Catalogue>;  // generated, lazily loaded (ADR 0005, ADR 0028)
   scaffold: Scaffold;                   // new-process and include text (ADR 0039)
-  lints: LintRule[];
+  loadLints(): Promise<PackLints>;      // codes, rules and connection checks, lazily loaded (ADR 0042)
   templates: Template[];
   defaults: ProjectDefaults;
   upgradeFrom?: { from: string; steps: UpgradeStep[] };

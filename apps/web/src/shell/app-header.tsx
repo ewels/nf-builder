@@ -1,26 +1,47 @@
-import type { JSX } from "react";
+import type { JSX, ReactNode } from "react";
+import {
+  isFramed,
+  PersistenceNote,
+  StorageWarning,
+} from "../project/project-status";
+import type { StorageUsage } from "../project/storage-health";
 
 const APP_NAME = "nf-builder";
 
 interface AppHeaderProps {
   readonly languageVersions: readonly string[];
+  readonly projectControls: ReactNode;
+  readonly saveLabel: string;
+  readonly saveFailed: string | null;
+  readonly storageWarning: StorageUsage | null;
+  /** True when the browser refused persistent storage. */
+  readonly storageNote: boolean;
 }
 
-export function AppHeader({ languageVersions }: AppHeaderProps): JSX.Element {
+export function AppHeader({
+  languageVersions,
+  projectControls,
+  saveLabel,
+  saveFailed,
+  storageWarning,
+  storageNote,
+}: AppHeaderProps): JSX.Element {
   return (
     <header className="app-header">
       <h1 className="app-name">{APP_NAME}</h1>
-      <button
-        type="button"
-        className="header-button"
-        aria-haspopup="menu"
-        disabled
+      {projectControls}
+      <p
+        className={saveFailed === null ? "save-state" : "save-state is-failed"}
+        role="status"
+        title={saveFailed ?? undefined}
       >
-        No project
-      </button>
-      <p className="save-state" role="status">
-        Nothing to save
+        {saveLabel}
+        {saveFailed ? (
+          <span className="visually-hidden">: {saveFailed}</span>
+        ) : null}
       </p>
+      {storageWarning ? <StorageWarning usage={storageWarning} /> : null}
+      {storageNote ? <PersistenceNote framed={isFramed()} /> : null}
       <div className="header-actions">
         <button type="button" className="header-button" disabled>
           Templates

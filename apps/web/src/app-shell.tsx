@@ -1,14 +1,17 @@
 import { installedPackVersions } from "@nf-builder/engine";
 import type { JSX } from "react";
 import { CanvasHost } from "./canvas/canvas-host";
+import { type CanvasContent, useWorkspace } from "./canvas/canvas-store";
 import { COLLAPSED_WIDTH, useLayout } from "./layout/layout-store";
+import { ProjectControls } from "./project/project-controls";
+import { saveLabel } from "./project/project-status";
+import { useProjects } from "./project/project-store";
 import { AppHeader } from "./shell/app-header";
 import { ColumnSeparator } from "./shell/column-separator";
 import { LeftColumn } from "./shell/left-column";
 import { SideColumn } from "./shell/side-column";
 import { StatusBar } from "./shell/status-bar";
 import { TabStrip } from "./shell/tab-strip";
-import { type CanvasContent, useWorkspace } from "./workspace/workspace-store";
 
 const languageVersions = installedPackVersions();
 
@@ -31,10 +34,22 @@ export function AppShell(): JSX.Element {
   const leftWidth = left.collapsed ? COLLAPSED_WIDTH : left.width;
   const content = useWorkspace((s) => s.content);
   const counts = canvasCounts(content);
+  const projects = useProjects((s) => s.status);
+  const storageWarning = useProjects((s) => s.storageWarning);
+  const persisted = useProjects((s) => s.persisted);
   const rightWidth = right.collapsed ? COLLAPSED_WIDTH : right.width;
   return (
     <div className="app-shell">
-      <AppHeader languageVersions={languageVersions} />
+      <AppHeader
+        languageVersions={languageVersions}
+        projectControls={<ProjectControls />}
+        saveLabel={saveLabel(projects.current !== null, projects.save)}
+        saveFailed={
+          projects.save.status === "failed" ? (projects.save.error ?? "") : null
+        }
+        storageWarning={storageWarning}
+        storageNote={persisted === false}
+      />
       <div
         className="app-columns"
         style={{
