@@ -324,6 +324,8 @@ cases:
       - https://github.com/nf-core/rnaseq/blob/f24c6c0e9469d04975d87c3a8bf9020800978782/modules/nf-core/fastqc/main.nf#L19
       - https://github.com/nf-core/rnaseq/blob/f24c6c0e9469d04975d87c3a8bf9020800978782/modules/nf-core/multiqc/main.nf#L21
       - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/tutorials/static-types.mdx
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/reference/syntax.mdx
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/migrations/26-04.mdx
     lint: { expect: ok, clean: true }
     run:
       expect: ok
