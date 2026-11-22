@@ -4,12 +4,13 @@
 // - version.json carries a string commit and context.
 // The deployed check polls version.json until it shows the commit, then checks the served page and entry script.
 // Imports only node: built-ins and sibling scripts.
-import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { parseArgs } from "node:util";
 import { basePath } from "./base-path.ts";
 import {
   distExists,
+  htmlFiles,
   isMain,
   type Problem,
   reportProblems,
@@ -40,7 +41,9 @@ function decodeEntities(text: string): string {
           body[1]?.toLowerCase() === "x"
             ? Number.parseInt(body.slice(2), 16)
             : Number.parseInt(body.slice(1), 10);
-        return Number.isFinite(code) ? String.fromCodePoint(code) : whole;
+        return Number.isFinite(code) && code <= 0x10ffff
+          ? String.fromCodePoint(code)
+          : whole;
       }
       return ENTITIES[body.toLowerCase()] ?? whole;
     },
@@ -86,7 +89,13 @@ export function headPolicyProblems(html: string): string[] {
   const head = headOf(html);
   if (head === undefined) return ["the page has no <head>"];
   const problems: string[] = [];
-  const [first, second] = elementsIn(head);
+  // Anything but <html> before <head> (a <script>, say) would run or apply before the policy.
+  const before = html.slice(0, html.search(/<head(?:\s[^>]*)?>/i));
+  for (const e of elementsIn(before))
+    if (e.name !== "html")
+      problems.push(`<${e.name}> comes before <head>, so before the policy`);
+  const elements = elementsIn(head);
+  const [first, second] = elements;
   const isCsp = (e: Element | undefined): boolean =>
     e?.name === "meta" &&
     e.attrs["http-equiv"]?.toLowerCase() === "content-security-policy";
@@ -111,7 +120,7 @@ export function headPolicyProblems(html: string): string[] {
     problems.push(
       `the second element in <head> is not <meta name="referrer" content="${REFERRER_POLICY}">`,
     );
-  for (const [i, e] of elementsIn(head).entries()) {
+  for (const [i, e] of elements.entries()) {
     if (e.name !== "meta" || e.attrs["http-equiv"] === undefined) continue;
     if (i === 0 && isCsp(e)) continue;
     problems.push(
@@ -139,8 +148,7 @@ export function assetPathProblems(
     for (const name of ["src", "href"]) {
       const value = element.attrs[name];
       if (value === undefined || value === "") continue;
-      if (value.startsWith("#") || /^[a-z][a-z0-9+.-]*:/i.test(value)) continue;
-      if (value.startsWith("//")) continue;
+      if (/^(?:#|\/\/|[a-z][a-z0-9+.-]*:)/i.test(value)) continue;
       if (value.startsWith("./") || value.startsWith("../")) {
         problems.push(
           `${name}="${value}" is relative; use a path under ${base}`,
@@ -159,17 +167,6 @@ export function assetPathProblems(
   return problems;
 }
 
-function htmlFiles(dir: string, prefix = ""): string[] {
-  const found: string[] = [];
-  for (const entry of readdirSync(dir, { withFileTypes: true })) {
-    const rel = prefix === "" ? entry.name : `${prefix}/${entry.name}`;
-    if (entry.isDirectory())
-      found.push(...htmlFiles(join(dir, entry.name), rel));
-    else if (entry.name.endsWith(".html")) found.push(rel);
-  }
-  return found.sort();
-}
-
 export function checkSiteDir(
   dir: string,
   base: string,
@@ -185,42 +182,36 @@ export function checkSiteDir(
       (p) => existsSync(join(dir, p)),
     ))
       problems.push({ file: indexFile, message });
-  for (const rel of htmlFiles(dir)) {
-    const file = join(dir, rel);
+  for (const file of htmlFiles(dir)) {
     for (const message of headPolicyProblems(readFileSync(file, "utf8")))
       problems.push({ file, message });
   }
   const versionFile = join(dir, "version.json");
   if (!existsSync(versionFile))
     problems.push({ file: versionFile, message: "version.json not found" });
-  else {
-    let body: unknown;
+  else
     try {
-      body = JSON.parse(readFileSync(versionFile, "utf8"));
-    } catch {
-      problems.push({ file: versionFile, message: "not valid JSON" });
-    }
-    if (body !== undefined) {
-      const v = body as { commit?: unknown; context?: unknown } | null;
+      const v = JSON.parse(readFileSync(versionFile, "utf8")) as {
+        commit?: unknown;
+        context?: unknown;
+      } | null;
       if (typeof v?.commit !== "string" || typeof v.context !== "string")
         problems.push({
           file: versionFile,
           message: "version.json needs a string commit and a string context",
         });
+    } catch {
+      problems.push({ file: versionFile, message: "not valid JSON" });
     }
-  }
   return { ok: problems.length === 0, problems };
 }
 
-export type DeployedSiteOptions = {
+type DeployedSiteOptions = {
   commit: string;
   context?: string;
   timeoutMs: number;
   intervalMs: number;
   log?: (message: string) => void;
-  fetch?: typeof fetch;
-  sleep?: (ms: number) => Promise<void>;
-  now?: () => number;
 };
 
 const reason = (error: unknown): string =>
@@ -230,23 +221,19 @@ export async function checkDeployedSite(
   siteUrl: string,
   o: DeployedSiteOptions,
 ): Promise<{ ok: boolean; liveCommit: string | null; problems: string[] }> {
-  const doFetch = o.fetch ?? fetch;
-  const sleep =
-    o.sleep ?? ((ms: number) => new Promise<void>((r) => setTimeout(r, ms)));
-  const now = o.now ?? Date.now;
   const log = o.log ?? (() => {});
   const site = siteUrl.endsWith("/") ? siteUrl : `${siteUrl}/`;
   const base = new URL(site).pathname;
   const problems: string[] = [];
   const noStore = { headers: { "Cache-Control": "no-store" } };
 
-  const deadline = now() + o.timeoutMs;
+  const deadline = Date.now() + o.timeoutMs;
   let live: { commit: string; context: string | null } | null = null;
   let last = "no response";
   for (;;) {
     try {
-      const response = await doFetch(
-        `${site}version.json?ts=${now()}`,
+      const response = await fetch(
+        `${site}version.json?ts=${Date.now()}`,
         noStore,
       );
       if (response.status !== 200) last = `status ${response.status}`;
@@ -270,7 +257,7 @@ export async function checkDeployedSite(
     }
     log(`version.json: ${last}`);
     if (live?.commit === o.commit) break;
-    if (now() + o.intervalMs > deadline) {
+    if (Date.now() + o.intervalMs > deadline) {
       return {
         ok: false,
         liveCommit: live?.commit ?? null,
@@ -279,9 +266,8 @@ export async function checkDeployedSite(
         ],
       };
     }
-    await sleep(o.intervalMs);
+    await new Promise((r) => setTimeout(r, o.intervalMs));
   }
-  const liveCommit = live.commit;
   if (o.context !== undefined && live.context !== o.context)
     problems.push(
       `version.json context is "${live.context}", expected "${o.context}"`,
@@ -293,7 +279,7 @@ export async function checkDeployedSite(
     typeOk: (type: string) => boolean,
   ): Promise<string | null> => {
     try {
-      const response = await doFetch(url, noStore);
+      const response = await fetch(url, noStore);
       const type = response.headers.get("content-type") ?? "";
       const body = await response.text();
       if (response.status !== 200)
@@ -309,7 +295,7 @@ export async function checkDeployedSite(
     }
   };
 
-  const pageUrl = `${site}?ts=${now()}`;
+  const pageUrl = `${site}?ts=${Date.now()}`;
   const html = await get(pageUrl, "text/html", (t) =>
     t.startsWith("text/html"),
   );
@@ -327,7 +313,7 @@ export async function checkDeployedSite(
         t.includes("javascript"),
       );
   }
-  return { ok: problems.length === 0, liveCommit, problems };
+  return { ok: problems.length === 0, liveCommit: o.commit, problems };
 }
 
 async function main(argv: string[]): Promise<number> {
@@ -355,9 +341,7 @@ async function main(argv: string[]): Promise<number> {
       );
       return 2;
     }
-    try {
-      new URL(values.url);
-    } catch {
+    if (!URL.canParse(values.url)) {
       console.error(`--url is not a URL: ${values.url}`);
       return 2;
     }

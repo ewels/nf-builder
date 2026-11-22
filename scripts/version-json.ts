@@ -11,7 +11,7 @@ export function versionInfo(
   };
 }
 
-/** Emits /version.json so the deploy check can tell which commit is live. */
+/** Emits /version.json so the Pages `verify` job can tell which commit is live. */
 export function versionJson(env: Record<string, string | undefined>): Plugin {
   return {
     name: "nf-builder:version-json",

@@ -17,8 +17,9 @@ permissions:
   contents: read
 
 # A deploy is never cancelled half way: the next one queues behind it, so `verify` always finishes first.
+# A dry run from another branch has its own group, so it can never cancel a pending deploy from main.
 concurrency:
-  group: pages
+  group: ${{ github.ref == 'refs/heads/main' && 'pages' || format('pages-dry-run-{0}', github.ref) }}
   cancel-in-progress: false
 
 jobs:

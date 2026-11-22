@@ -1,6 +1,6 @@
-import { readdirSync, readFileSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { readFileSync, writeFileSync } from "node:fs";
 import type { Plugin } from "vite";
+import { htmlFiles } from "./check-common.ts";
 import { POLICY_META_TAGS } from "./security-policy.ts";
 
 /** Escapes as Vite does for attribute values (escape-html). */
@@ -34,16 +34,6 @@ export function prependPolicyMeta(html: string): string {
   if (/^\s*<meta\s+http-equiv="Content-Security-Policy"/i.test(html.slice(end)))
     return html;
   return html.slice(0, end) + meta + html.slice(end);
-}
-
-function htmlFiles(dir: string): string[] {
-  const found: string[] = [];
-  for (const entry of readdirSync(dir, { withFileTypes: true })) {
-    const path = join(dir, entry.name);
-    if (entry.isDirectory()) found.push(...htmlFiles(path));
-    else if (entry.name.endsWith(".html")) found.push(path);
-  }
-  return found;
 }
 
 /**

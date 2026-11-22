@@ -345,6 +345,9 @@ describe("CI workflows", () => {
 });
 
 describe("Pages workflow", () => {
+  // The GitHub Actions expression delimiters, built so they aren't a template-string lookalike in the source.
+  const OPEN = ["$", "{{"].join("");
+  const expr = (body: string): string => `${OPEN} ${body} }}`;
   const text = read(join(WORKFLOWS, "pages.yml"));
   type Step = {
     id?: string;
@@ -398,9 +401,11 @@ describe("Pages workflow", () => {
     );
   });
 
-  it("F-011 ADR-0040: concurrency group pages with cancel-in-progress false", () => {
+  it("F-011 ADR-0040: concurrency group pages on main (a separate group per dry-run branch) with cancel-in-progress false", () => {
     expect(workflow.concurrency).toEqual({
-      group: "pages",
+      group: expr(
+        "github.ref == 'refs/heads/main' && 'pages' || format('pages-dry-run-{0}', github.ref)",
+      ),
       "cancel-in-progress": false,
     });
   });
@@ -413,7 +418,7 @@ describe("Pages workflow", () => {
     });
     expect(deploy?.environment?.name).toBe("github-pages");
     expect(deploy?.environment?.url).toBe(
-      "${{ steps.deployment.outputs.page_url }}",
+      expr("steps.deployment.outputs.page_url"),
     );
     for (const [name, job] of Object.entries(workflow.jobs)) {
       expect(job.permissions?.contents, name).not.toBe("write");
@@ -442,7 +447,7 @@ describe("Pages workflow", () => {
     expect(pages.uses).toContain("actions/configure-pages@");
     for (const needle of ["pnpm build", "pnpm check:site"])
       expect(step(build, needle).env?.BASE_PATH, needle).toBe(
-        "${{ steps.pages.outputs.base_path }}",
+        expr("steps.pages.outputs.base_path"),
       );
     expect(step(build, "pnpm build").env?.SITE_CONTEXT).toBe("production");
     expect(index(build, "pages")).toBeLessThan(index(build, "pnpm build"));
@@ -475,7 +480,9 @@ describe("Pages workflow", () => {
       "persist-credentials": false,
     });
     expect(step(build, "pnpm build").env?.REGISTRY_SNAPSHOT_DIR).toBe(
-      "${{ steps.snapshot.outputs.present == 'true' && format('{0}/.cache/registry-snapshot', github.workspace) || '' }}",
+      expr(
+        "steps.snapshot.outputs.present == 'true' && format('{0}/.cache/registry-snapshot', github.workspace) || ''",
+      ),
     );
     const check = step(build, "pnpm check:registry apps/web/dist");
     expect(check.if).toBe("steps.snapshot.outputs.present == 'true'");
@@ -483,7 +490,7 @@ describe("Pages workflow", () => {
       index(build, "actions/upload-pages-artifact@"),
     );
     expect(build?.outputs?.["generated-at"]).toBe(
-      "${{ steps.stamp.outputs.generated-at }}",
+      expr("steps.stamp.outputs.generated-at"),
     );
   });
 
@@ -501,9 +508,9 @@ describe("Pages workflow", () => {
     expect(site.run).toContain('--url "$PAGE_URL"');
     expect(site.run).toContain('--commit "$GITHUB_SHA"');
     expect(site.run).toContain("--context production");
-    expect(site.env?.PAGE_URL).toBe("${{ needs.deploy.outputs.page-url }}");
+    expect(site.env?.PAGE_URL).toBe(expr("needs.deploy.outputs.page-url"));
     expect(deploy?.outputs?.["page-url"]).toBe(
-      "${{ steps.deployment.outputs.page_url }}",
+      expr("steps.deployment.outputs.page_url"),
     );
   });
 
@@ -515,17 +522,17 @@ describe("Pages workflow", () => {
     expect(registry.run).toContain('--url "$PAGE_URL"');
     expect(registry.run).toContain('--generated-at "$GENERATED_AT"');
     expect(registry.env?.GENERATED_AT).toBe(
-      "${{ needs.build.outputs.generated-at }}",
+      expr("needs.build.outputs.generated-at"),
     );
   });
 
-  it("F-011: no ${{ }} expression appears in a run: line of pages.yml, and every job sets timeout-minutes", () => {
+  it("F-011: no expression appears in a run: line of pages.yml, and every job sets timeout-minutes", () => {
     for (const job of Object.values(workflow.jobs)) {
       expect(job["timeout-minutes"]).toBeGreaterThan(0);
-      for (const s of job.steps) expect(s.run ?? "").not.toContain("${{");
+      for (const s of job.steps) expect(s.run ?? "").not.toContain(OPEN);
     }
     for (const line of text.split("\n"))
-      if (/^\s*(- )?run:/.test(line)) expect(line).not.toContain("${{");
+      if (/^\s*(- )?run:/.test(line)) expect(line).not.toContain(OPEN);
   });
 
   it("F-011 ADR-0041: no workflow names netlify.app, NETLIFY_BUILD_HOOK or REGISTRY_SNAPSHOT_TOKEN, and deploy-check.yml is gone", () => {

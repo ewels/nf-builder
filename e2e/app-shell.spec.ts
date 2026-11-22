@@ -73,7 +73,7 @@ test("F-002 step 1: pnpm dev serves the app and the header shows the app name", 
   ).toBeVisible();
 });
 
-test("F-002 step 2 ADR-0040: vite preview serves the build as GitHub Pages does: no security headers, a deep route is 404, and the entry script is under the base", async ({
+test("F-002 step 2 F-011 step 3 ADR-0040: vite preview serves the build as GitHub Pages does: no security headers, a deep route is 404, and the entry script is under the base", async ({
   request,
 }) => {
   const root = await request.get("./");

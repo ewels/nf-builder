@@ -31,7 +31,6 @@ export const DEPLOYED_SAMPLE: Sample = { modules: 20, plugins: 5 };
 /** `n` items spread evenly over `items`, always keeping the first and last; all of them when n >= items.length. */
 export function evenlySpaced<T>(items: readonly T[], n: number): T[] {
   if (n >= items.length) return [...items];
-  if (n <= 0) return [];
   if (n === 1) return items.slice(0, 1);
   const picked: T[] = [];
   for (let i = 0; i < n; i++)
@@ -164,8 +163,8 @@ type DeployedOptions = {
 };
 
 /**
- * Polls `<site>/registry/index.json` until it is JSON with this `generatedAt` (the SPA fallback answers a missing file with
- * HTML and status 200), then checks the served snapshot: the index, ports, and every module bundle and plugin file, or a `sample` of them.
+ * Polls `<site>/registry/index.json` until it is JSON with this `generatedAt` (a host with a fallback may answer a missing file
+ * with HTML and status 200), then checks the served snapshot: the index, ports, and every module bundle and plugin file, or a `sample` of them.
  * Every GET carries a `?ts=` query, because Pages caches responses for ten minutes.
  */
 export async function checkDeployedSnapshot(

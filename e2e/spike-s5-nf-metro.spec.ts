@@ -196,14 +196,14 @@ test.describe("F-010 spike S5: nf-metro under Pyodide", () => {
     const watch = await watchForCspViolations(page);
     const metrics = await loadMetrics(page);
     const expected = spikeS5Headers()[CSP] ?? "";
-    const netlify = SITE_POLICY_HEADERS[CSP] ?? "";
+    const site = SITE_POLICY_HEADERS[CSP] ?? "";
     expect(expected).toBe(
-      netlify.replace(
+      site.replace(
         "script-src 'self';",
         "script-src 'self' 'wasm-unsafe-eval';",
       ),
     );
-    expect(expected).not.toBe(netlify);
+    expect(expected).not.toBe(site);
     expect(cspProblems(expected)).toEqual([]);
 
     const worker = page.workers()[0];

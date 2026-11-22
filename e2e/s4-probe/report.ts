@@ -301,3 +301,11 @@ export function toMarkdown(run: ProbeRun): string {
   }
   return `${lines.join("\n")}\n`;
 }
+
+/** Removes the CSP <meta> and nothing else, so the deployed probe measures CORS, not our own policy (ADR 0023, 0040). */
+export function stripPolicyMeta(html: string): string {
+  return html.replace(
+    /<meta\s[^>]*\bhttp-equiv\s*=\s*["']?content-security-policy["']?[^>]*>/gi,
+    "",
+  );
+}

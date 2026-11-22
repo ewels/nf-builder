@@ -1,7 +1,6 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { stripPolicyMeta } from "../e2e/s4-probe/page.ts";
 import {
   classify,
   matchTemplate,
@@ -12,6 +11,7 @@ import {
   pickHeaders,
   probeSite,
   RECORDED_HEADERS,
+  stripPolicyMeta,
   toMarkdown,
 } from "../e2e/s4-probe/report.ts";
 import { S4_TARGETS } from "../e2e/s4-probe/targets.ts";

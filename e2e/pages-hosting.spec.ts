@@ -52,6 +52,7 @@ test("F-011 step 3 ADR-0040: the site is served under the base path: /version.js
   expect(root.status()).toBe(404);
   const version = await request.get("version.json");
   expect(version.status()).toBe(200);
+  // Preview-only: `vite preview` redirects / to the base; GitHub Pages does not.
   const redirected = await request.get(`${PREVIEW_ORIGIN}/`, {
     maxRedirects: 0,
   });

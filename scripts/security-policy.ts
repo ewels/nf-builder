@@ -32,7 +32,7 @@ export const META_IGNORED_DIRECTIVES: readonly string[] = [
   "sandbox",
 ];
 
-export type MetaTag = { readonly attrs: Readonly<Record<string, string>> };
+type MetaTag = { readonly attrs: Readonly<Record<string, string>> };
 
 /** The CSP element first, then the referrer element. */
 export const POLICY_META_TAGS: readonly MetaTag[] = [

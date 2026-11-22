@@ -150,6 +150,27 @@ describe("check:site static", () => {
   it("F-011 QA-30: headPolicyProblems accepts the policy with entity-escaped quotes", () => {
     expect(headPolicyProblems(GOOD)).toEqual([]);
   });
+
+  it("F-011 QA-30: headPolicyProblems does not throw on an out-of-range numeric entity, and rejects it as different content", () => {
+    const html = page(
+      `<meta http-equiv="Content-Security-Policy" content="default-src &#x110000; &#99999999999;">${REFERRER}${CHARSET}`,
+    );
+    expect(() => headPolicyProblems(html)).not.toThrow();
+    expect(headPolicyProblems(html).join("\n")).toContain("differs");
+  });
+
+  it("F-011 QA-30: headPolicyProblems fails when an element other than <html> comes before <head>", () => {
+    const stampedHead = `<head>${policyMetaHtml()}${CHARSET}</head>`;
+    expect(
+      headPolicyProblems(
+        `<!doctype html><!-- c --><html lang="en">${stampedHead}</html>`,
+      ),
+    ).toEqual([]);
+    const problems = headPolicyProblems(
+      `<!doctype html><script src="/x.js"></script><html>${stampedHead}</html>`,
+    );
+    expect(problems.join("\n")).toMatch(/<script> comes before <head>/);
+  });
 });
 
 type Served = { status?: number; type: string; body: string };

@@ -1,13 +1,7 @@
 import { createHash } from "node:crypto";
 import { appendFileSync, writeFileSync } from "node:fs";
 import { expect, type TestInfo, test } from "@playwright/test";
-import {
-  openProbe,
-  PROBE_PATH,
-  PROBE_TITLE,
-  runInPage,
-  stripPolicyMeta,
-} from "./page.ts";
+import { openProbe, PROBE_PATH, PROBE_TITLE, runInPage } from "./page.ts";
 import {
   type BrowserResult,
   classify,
@@ -16,6 +10,7 @@ import {
   type ProbeRecord,
   type ProbeRun,
   probeSite,
+  stripPolicyMeta,
   toMarkdown,
 } from "./report.ts";
 import { probeServer } from "./server.ts";
