@@ -245,5 +245,13 @@ export function createEngineService(
           diagnostics: open.state.model.diagnostics(),
         }),
       ),
+
+    readFile: (path) =>
+      serial(() => current?.state.model.file(path)?.source.text ?? null),
+
+    close: () =>
+      serial(() => {
+        current = null;
+      }),
   };
 }

@@ -23,6 +23,8 @@ export function connectEngine(
       race(remote.applyPatches(patches, revision)),
     project: (path, workflow) => race(remote.project(path, workflow)),
     diagnostics: () => race(remote.diagnostics()),
+    readFile: (path) => race(remote.readFile(path)),
+    close: () => race(remote.close()),
     dispose: () => remote[releaseProxy](),
   };
 }

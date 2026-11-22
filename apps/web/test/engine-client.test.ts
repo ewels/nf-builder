@@ -38,6 +38,17 @@ describe("F-113 engine client", () => {
     close();
   });
 
+  it("F-202 IO-01: the client forwards readFile and close", async () => {
+    const { engine, close } = connected();
+    expect(await engine.readFile("README.md")).toBeNull();
+    await engine.open({ version, files });
+    expect(await engine.readFile("README.md")).toBe("# hi\n");
+    await engine.close();
+    expect(await engine.readFile("README.md")).toBeNull();
+    expect(await engine.diagnostics()).toMatchObject({ code: "no-project" });
+    close();
+  });
+
   it("F-113: a service error rejects the client call with its message; a refusal crosses as data", async () => {
     const { engine, close } = connected();
     await expect(engine.open({ version: "0.0", files })).rejects.toThrow(
