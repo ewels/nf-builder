@@ -183,3 +183,23 @@ jobs:
           path: .cache/reports/
           retention-days: 14
           if-no-files-found: ignore
+
+  catalogue:
+    name: Catalogue regenerates without a diff (ADR 0005)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
+        with:
+          distribution: temurin
+          java-version: "21"
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .cache/language-server
+          # The jar is verified against the SHA-256 in upstream.json, so a stale entry fails loudly.
+          key: language-server-v1-${{ hashFiles('packages/lang-*/upstream.json') }}
+      - run: pnpm gen:catalogue 26.10 --check

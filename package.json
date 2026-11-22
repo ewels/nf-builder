@@ -25,6 +25,7 @@
     "check:hosts": "node scripts/check-hosts.ts",
     "corpus:fetch": "node tools/corpus/src/cli.ts",
     "gen:grammar": "node scripts/gen-grammar.ts",
+    "gen:catalogue": "node tools/spec-extract/src/cli.ts",
     "corpus:lint": "node tools/corpus/src/lint-cli.ts",
     "test:corpus": "vitest run --config vitest.corpus.config.ts"
   },
