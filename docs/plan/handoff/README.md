@@ -14,7 +14,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-106 typed projection | `feat/F-106`, in PR | Plan deleted in its PR. |
 | F-107 legacy projection | `feat/F-107` (stacked on F-106 and F-108), in PR | Plan deleted in its PR. |
 | F-108 code nodes | `feat/F-108` (stacked on F-106), in PR | Plan deleted in its PR. |
-| F-111 edit commands | not started | [plan](plan-F-111.md). Tasks 1–6 need only F-105; 7 onwards need F-106. |
+| F-111 edit commands | `feat/F-111` (stacked on F-106) | Tasks 1–3 building. [plan](plan-F-111.md). |
 | F-112 diagnostics | not started | [plan](plan-F-112.md). After F-106 (and F-111 for fixes). |
 | F-113 engine worker | not started | [plan](plan-F-113.md). After F-111. |
 | F-202 projects in IndexedDB | not started | [plan](plan-F-202.md). After F-113. |

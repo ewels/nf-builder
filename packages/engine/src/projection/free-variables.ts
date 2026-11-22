@@ -22,6 +22,7 @@ import {
   type VariableDeclaration,
 } from "@nf-builder/lang-core";
 import { setTarget } from "./legacy";
+import { propertyChain } from "./reads";
 
 export interface FreeRead {
   readonly name: string;
@@ -62,7 +63,7 @@ export function statementVariables(statement: Statement): StatementVariables {
   const isDeclared = (name: string): boolean =>
     isLocal(name) || declared.has(name);
   const declareLocal = (name: string): void => {
-    (scopes.at(-1) ?? declared).add(name);
+    scopes.at(-1)?.add(name);
   };
   const write = (name: string, range: Range, isDeclaration: boolean): void => {
     declared.add(name);
@@ -87,10 +88,12 @@ export function statementVariables(statement: Statement): StatementVariables {
 
   const visitClosure = (closure: Closure): void => {
     const names = new Set<string>();
-    if (closure.params === null) names.add("it");
+    // `{ -> it }` has an empty parameter list, and lint still treats `it` as the implicit parameter there
+    if (closure.params === null || closure.params.length === 0) names.add("it");
     else for (const p of closure.params) names.add(p.name.name);
     scopes.push(names);
     closures += 1;
+    // a parameter default is a read of the enclosing scope; lint does not report one, but it is a real dependency
     for (const p of closure.params ?? [])
       if (p.defaultValue !== null) visit(p.defaultValue);
     for (const s of closure.body) visit(s);
@@ -98,56 +101,30 @@ export function statementVariables(statement: Statement): StatementVariables {
     scopes.pop();
   };
 
-  /** The variable at the root of `a.b.c` and the names after it, when every step is a plain `.` or `?.` property. */
-  const chain = (
-    expression: Expression,
-  ): { name: string; range: Range; properties: string[] } | null => {
-    const properties: string[] = [];
-    let at = expression;
-    while (
-      at.kind === "Property" &&
-      at.property.kind === "Identifier" &&
-      at.navigation !== "*."
-    ) {
-      properties.unshift(at.property.name);
-      at = at.object;
-    }
-    return at.kind === "Variable"
-      ? { name: at.name, range: at.range, properties }
-      : null;
-  };
-
   const assign = (node: Assignment): void => {
     visit(node.value);
     const target = node.target;
     if (target.kind === "TupleTarget") {
-      for (const name of target.names) bind(name.name, name.range, false);
+      for (const name of target.names) bind(name.name, name.range);
     } else if (target.kind === "Variable") {
       if (node.operator !== "=") read(target.name, [], target.range, true);
-      bind(target.name, target.range, false);
+      bind(target.name, target.range);
     } else visit(target);
   };
 
   /** An assignment to a name: local inside closures and when already block-local; otherwise a workflow-scope write. */
-  const bind = (name: string, range: Range, isDeclaration: boolean): void => {
+  const bind = (name: string, range: Range): void => {
     if (closures > 0) {
       if (!isDeclared(name)) declareLocal(name);
-    } else if (!isLocal(name)) write(name, range, isDeclaration);
+    } else if (!isLocal(name)) write(name, range, false);
   };
 
   const declaration = (node: VariableDeclaration): void => {
     if (node.initializer !== null) visit(node.initializer);
     for (const t of node.targets) {
-      if (scopes.length === 0 && closures === 0)
-        write(t.name.name, t.name.range, true);
+      if (scopes.length === 0) write(t.name.name, t.name.range, true);
       else declareLocal(t.name.name);
     }
-  };
-
-  const catchClause = (node: CatchClause): void => {
-    scopes.push(new Set([node.variable.name]));
-    visit(node.body);
-    scopes.pop();
   };
 
   const visit = (node: AstNode): void => {
@@ -157,7 +134,7 @@ export function statementVariables(statement: Statement): StatementVariables {
         read(n.name, [], n.range);
         return;
       case "Property": {
-        const found = chain(n);
+        const found = propertyChain(n);
         if (found !== null) read(found.name, found.properties, found.range);
         else visit(n.object);
         return;
@@ -166,13 +143,13 @@ export function statementVariables(statement: Statement): StatementVariables {
         visitClosure(n);
         return;
       case "MethodCall": {
-        const target = setTarget(n)?.variable ?? null;
-        if (target !== null && n.receiver !== null) {
-          visit(n.receiver);
+        if (n.receiver !== null) visit(n.receiver);
+        const target =
+          n.receiver === null ? null : (setTarget(n)?.variable ?? null);
+        if (target !== null) {
           write(target.name, target.range, true);
           return;
         }
-        if (n.receiver !== null) visit(n.receiver);
         for (const arg of n.args) visit(arg);
         for (const c of n.closures) visitClosure(c);
         return;
@@ -189,7 +166,9 @@ export function statementVariables(statement: Statement): StatementVariables {
         assign(n);
         return;
       case "Catch":
-        catchClause(n);
+        scopes.push(new Set([n.variable.name]));
+        visit(n.body);
+        scopes.pop();
         return;
     }
     for (const child of childNodes(node)) visit(child);

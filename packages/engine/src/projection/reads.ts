@@ -26,13 +26,17 @@ export interface ReadOptions {
   readonly closures?: boolean;
 }
 
-/** The variable at the root of `a.b.c` and the names after it, when every step is a simple property; null otherwise. */
-function propertyChain(
+/** The variable at the root of `a.b.c` and the names after it, when every step is a simple `.` or `?.` property (a `*.` spread stops the chain); null otherwise. */
+export function propertyChain(
   expression: Expression,
 ): { name: string; range: Range; properties: string[] } | null {
   const properties: string[] = [];
   let at = expression;
-  while (at.kind === "Property" && at.property.kind === "Identifier") {
+  while (
+    at.kind === "Property" &&
+    at.property.kind === "Identifier" &&
+    at.navigation !== "*."
+  ) {
     properties.unshift(at.property.name);
     at = at.object;
   }

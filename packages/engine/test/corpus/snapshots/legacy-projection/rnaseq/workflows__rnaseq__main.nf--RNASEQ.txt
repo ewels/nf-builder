@@ -3,6 +3,7 @@ statements 184, modelled 165
 workflows/rnaseq/main.nf#RNASEQ/:params params "params" @74:1
   out aligner (aligner): -
   out input (input): -
+  out skip_alignment (skip_alignment): -
   out bowtie2_rrna_index (bowtie2_rrna_index): -
   out remove_ribo_rna (remove_ribo_rna): -
   out ribo_removal_tool (ribo_removal_tool): -
@@ -21,7 +22,6 @@ workflows/rnaseq/main.nf#RNASEQ/:params params "params" @74:1
   out save_merged_fastq (save_merged_fastq): -
   out stranded_threshold (stranded_threshold): -
   out unstranded_threshold (unstranded_threshold): -
-  out skip_alignment (skip_alignment): -
   out star_ignore_sjdbgtf (star_ignore_sjdbgtf): -
   out use_sentieon_star (use_sentieon_star): -
   out use_parabricks_star (use_parabricks_star): -
@@ -32,6 +32,7 @@ workflows/rnaseq/main.nf#RNASEQ/:params params "params" @74:1
   out umi_dedup_tool (umi_dedup_tool): -
   out umitools_dedup_stats (umitools_dedup_stats): -
   out umitools_dedup_primary_only (umitools_dedup_primary_only): -
+  out min_mapped_reads (min_mapped_reads): -
   out gtf_group_features (gtf_group_features): -
   out gtf_extra_attributes (gtf_extra_attributes): -
   out skip_quantification_merge (skip_quantification_merge): -
@@ -56,6 +57,8 @@ workflows/rnaseq/main.nf#RNASEQ/:params params "params" @74:1
   out multiqc_logo (multiqc_logo): -
   out multiqc_methods_description (multiqc_methods_description): -
   out save_align_intermeds (save_align_intermeds): -
+  out seq_platform (seq_platform): -
+  out seq_center (seq_center): -
 workflows/rnaseq/main.nf#RNASEQ/:take:ch_samplesheet take "ch_samplesheet" @77:5
   out out (out): -
 workflows/rnaseq/main.nf#RNASEQ/:take:ch_fasta_fai take "ch_fasta_fai" @78:5

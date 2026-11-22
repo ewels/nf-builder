@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { FOO, ids, into, node, projectMain } from "./util";
 
 const short = (id: string) => `main.nf#/${id}`;
+const k = short;
 
 describe("F-107 AR-14 .out", () => {
   it("F-107 AR-14: X.out.name and X.out[n] read that output of the reaching call of X; X.out reads all its outputs", async () => {
@@ -136,5 +137,18 @@ workflow {
 `,
     );
     expect(ids(typed)).toEqual([short("ch"), short(":code@1")]);
+  });
+
+  it("F-107 AR-14 F-108 LA-27: a code node that reads X.out.name is wired to that output of the reaching call", async () => {
+    const p = await projectMain(`${FOO}
+workflow {
+    ch = channel.of(1)
+    FOO(ch)
+    log.info("\${FOO.out.a}")
+}
+`);
+    const code = node(p, k(":code@1"));
+    expect(code.inputs.map((i) => i.id)).toEqual(["FOO.out.a"]);
+    expect(into(p, code.id, "FOO.out.a")).toEqual(["FOO@1[a]~"]);
   });
 });

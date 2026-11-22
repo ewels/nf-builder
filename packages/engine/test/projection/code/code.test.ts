@@ -79,6 +79,7 @@ describe("F-108 code nodes", () => {
         "a = 1",
         "a = a + 1",
         "b = ch",
+        // biome-ignore lint/suspicious/noTemplateCurlyInString: Nextflow source, not a template
         'log.info("${a} ${b} ${params.reads}")',
         "c = a",
       ].join("\n"),
@@ -193,5 +194,41 @@ describe("F-108 code nodes", () => {
     expect(into(p, "main.nf#W/suffix")).toEqual([
       "main.nf#W/prefix[prefix] -> prefix",
     ]);
+  });
+
+  it("F-108 LA-27: a params.x read only inside a closure gives exactly one input, from :params[x], and no params port", async () => {
+    const p = await project(
+      [
+        "scale = { v -> v * params.factor }",
+        "workflow.onComplete { log.info(params.outdir) }",
+      ].join("\n"),
+    );
+    const params = node(p, "main.nf#W/:params");
+    expect(ids(params.outputs)).toEqual(["factor", "outdir"]);
+    const scale = code(p, "main.nf#W/scale");
+    expect(ids(scale.inputs)).toEqual(["params.factor"]);
+    expect(into(p, scale.id)).toEqual([
+      "main.nf#W/:params[factor] -> params.factor",
+    ]);
+    const complete = code(p, "main.nf#W/:code@1");
+    expect(into(p, complete.id)).toEqual([
+      "main.nf#W/:params[outdir] -> params.outdir",
+    ]);
+    for (const n of p.nodes)
+      expect(ids(n.inputs), n.id).not.toContain("params");
+  });
+
+  it("F-108 LA-27: an input port is named for the variable read, even when the output port has the variable's name", async () => {
+    const p = await project(["x = [x: 1]", "y = x.x"].join("\n"));
+    expect(ids(code(p, "main.nf#W/y").inputs)).toEqual(["x"]);
+    expect(into(p, "main.nf#W/y")).toEqual(["main.nf#W/x[x] -> x"]);
+  });
+
+  it("F-108 AR-10 LA-27: a spread property is not a port name, so FOO(a*.name) reads a whole", async () => {
+    const p = await project(
+      ["a = [[name: 'n']]", "res = FOO(a*.name)", "b = a*.name"].join("\n"),
+    );
+    expect(into(p, "main.nf#W/res")).toEqual(["main.nf#W/a[a] -> x"]);
+    expect(into(p, "main.nf#W/b")).toEqual(["main.nf#W/a[a] -> a"]);
   });
 });

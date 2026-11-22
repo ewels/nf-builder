@@ -29,6 +29,7 @@ describe("F-108 AR-13 LA-27 free variables", () => {
       "params.x.y",
     ]);
     expect(reads("r = res.bam")).toEqual(["res.bam"]);
+    // biome-ignore lint/suspicious/noTemplateCurlyInString: Nextflow source, not a template
     expect(reads('r = "x ${a} y ${b.name}"')).toEqual(["a", "b.name"]);
     expect(reads("r = a ? b : (c ?: d)")).toEqual(["a", "b", "c", "d"]);
     expect(reads("r = obj?.p")).toEqual(["obj.p"]);
@@ -57,6 +58,7 @@ describe("F-108 AR-13 LA-27 free variables", () => {
   it("F-108 LA-27: closure parameters, implicit it, closure- and block-local defs and catch variables are not free", () => {
     expect(reads("r = c.collect { v -> v + k }")).toEqual(["c", "k"]);
     expect(reads("r = c.collect { it + k }")).toEqual(["c", "k"]);
+    expect(reads("r = c.collect { -> it + k }")).toEqual(["c", "k"]);
     expect(
       reads("r = c.collect { v -> v.collect { w -> w + v + k } }"),
     ).toEqual(["c", "k"]);

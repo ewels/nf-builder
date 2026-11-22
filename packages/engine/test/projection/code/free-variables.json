@@ -303,6 +303,16 @@
           "line": 202,
           "column": 30,
           "message": "`t36` is not defined"
+        },
+        {
+          "line": 207,
+          "column": 11,
+          "message": "`a37` is not defined"
+        },
+        {
+          "line": 207,
+          "column": 33,
+          "message": "`b37` is not defined"
         }
       ]
     }

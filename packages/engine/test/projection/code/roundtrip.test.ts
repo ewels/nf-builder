@@ -3,9 +3,10 @@ import type { ProjectFile } from "../../../src/model/project";
 import { equivalent } from "../../../src/source/equivalent";
 import { printSourceFile } from "../../../src/source/print";
 import { openFiles, projectorFor } from "../open";
+import { fixtureSets } from "../sets";
 import { shapes } from "../shape";
 import { type PerturbKind, perturbWhitespace } from "../whitespace";
-import { allSets } from "./fixtures";
+import { codeNodesSet } from "./fixtures";
 import { codeNodes, plain, statementOf, wrapped } from "./helpers";
 import { scriptParser } from "./statement";
 
@@ -14,7 +15,7 @@ describe("F-108 step 2 ADR-0004 code node text", async () => {
     plain: await scriptParser(),
     typed: await scriptParser(true),
   };
-  for (const set of allSets()) {
+  for (const set of [...fixtureSets(), codeNodesSet]) {
     const model = await openFiles(set.files);
     const projector = await projectorFor(model);
     const nodes = codeNodes(model, projector);
@@ -63,8 +64,7 @@ describe("F-108 step 2 ADR-0004 code node text", async () => {
 });
 
 describe("F-108 AR-11 code node identity", async () => {
-  const set = allSets().find((s) => s.name === "f108-code-nodes");
-  if (set === undefined) throw new Error("no f108 set");
+  const set = codeNodesSet;
   const model = await openFiles(set.files);
   const base = shapes(await projectorFor(model));
   const kinds: PerturbKind[] = ["indent", "blank", "trailing", "crlf", "all"];
