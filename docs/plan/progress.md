@@ -170,3 +170,14 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - QA-03 cold-start risk handed to F-113 (notes); the catalogue's 26.10.4 skew and docs gaps recorded in ADR 0005's spike result.
   - Hand-off plans folder removed now that all three hand-off features have merged.
 - Blockers: none.
+
+## 2026-11-22 · F-007 · Claude (autonomous)
+- Did: spike S3: `e2e/s3-spike/` runs the 26.10 language server jar under CheerpJ 5.0 in a Web Worker (local only); correct diagnostics; default cold start 13.4 s, preload variant 9.6 s, 323 MB, 0.9 s diagnostics; CheerpJ needs `'unsafe-eval'`. [Report](../research/2026-11-22-spike-s3-language-server-cheerpj.md).
+- State: passing.
+- Next: F-101 and F-109 building, then F-102 and F-103.
+- Decisions:
+  - Spike runs locally with its own header sets, no CI job, kept for re-runs ([ADR 0022](../adr/0022-s3-spike-local.md)).
+  - The language server isn't shipped in v0.1: the cold-start threshold is met only with preloading and a 0.4 s margin, and it needs `'unsafe-eval'` (QA-30), a CDN host and a licence decision ([ADR 0026](../adr/0026-no-language-server-in-v0-1.md), superseding ADR 0010's ship branch; its fallback stands).
+  - Q3 answered: not needed for v0.1 ([open-questions](open-questions.md)); `docs/licences.md` marks CheerpJ as spike-only.
+  - The known-error fixture is also an oracle case; the S1 oracle and docs tests now filter to `s1-` cases.
+- Blockers: none.
