@@ -29,6 +29,25 @@ export interface TemplatesView {
   reload(): void;
 }
 
+/** A loaded result, kept only while it is for the version and attempt now wanted; otherwise still loading. */
+export function currentState(
+  loaded:
+    | {
+        readonly version: string;
+        readonly attempt: number;
+        readonly result: TemplatesState;
+      }
+    | undefined,
+  version: string | undefined,
+  attempt: number,
+): TemplatesState {
+  return loaded !== undefined &&
+    loaded.version === version &&
+    loaded.attempt === attempt
+    ? loaded.result
+    : LOADING;
+}
+
 /**
  * Loads the template list for `version`; results for a version that is no longer current are ignored, and `reload`
  * starts a new attempt.
@@ -65,11 +84,5 @@ export function useTemplates(version: string | undefined): TemplatesView {
     };
   }, [version, attempt]);
   const reload = useCallback(() => setAttempt((n) => n + 1), []);
-  const state =
-    loaded !== undefined &&
-    loaded.version === version &&
-    loaded.attempt === attempt
-      ? loaded.result
-      : LOADING;
-  return { state, reload };
+  return { state: currentState(loaded, version, attempt), reload };
 }

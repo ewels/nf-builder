@@ -31,3 +31,19 @@ describe("F-203 templates request", () => {
     expect(templates).toHaveBeenCalledTimes(2);
   });
 });
+
+describe("F-203 the template list follows the chosen version", () => {
+  it("F-203: currentState keeps a result only for the version and attempt now wanted", async () => {
+    const { currentState } = await import("../src/project/templates");
+    const result = {
+      status: "ready" as const,
+      list: { version: "26.10", templates: [] } as never,
+    };
+    const loaded = { version: "26.10", attempt: 0, result };
+    expect(currentState(loaded, "26.10", 0)).toBe(result);
+    expect(currentState(loaded, "26.04", 0)).toEqual({ status: "loading" });
+    expect(currentState(loaded, "26.10", 1)).toEqual({ status: "loading" });
+    expect(currentState(loaded, undefined, 0)).toEqual({ status: "loading" });
+    expect(currentState(undefined, "26.10", 0)).toEqual({ status: "loading" });
+  });
+});

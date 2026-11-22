@@ -65,6 +65,18 @@ describe("F-203 new project dialog", () => {
     expect(html).toContain("Create");
   });
 
+  it("F-203 LA-01: the version the dialog has selected is what reaches the templates hook", () => {
+    const seen: string[] = [];
+    dialog({
+      languageVersions: ["26.04", "26.10"],
+      useTemplates: (version) => {
+        seen.push(version);
+        return { state: { status: "ready", list }, reload: () => undefined };
+      },
+    });
+    expect(seen).toEqual(["26.04"]);
+  });
+
   it("F-203 UX-60: From a template lists each template as a radio with its description, the first selected", () => {
     const html = dialog({ initialRoute: "template" });
     const group = html.slice(html.indexOf("Template</legend>"));
