@@ -810,7 +810,11 @@ function isStarter(text: string, start: number): boolean {
  * frame; S2 before a line that starts with a declaration keyword; S3 before an own-line unterminated block comment;
  * C1 (configs) before a line that starts with a word or a quote. Never when the line continues the statement.
  */
-export function prescan(text: string, grammar: Grammar): Prescan {
+export function prescan(
+  text: string,
+  grammar: Grammar,
+  resync = false,
+): Prescan {
   interface Pending {
     start: number;
     codeStart: number;
@@ -854,72 +858,85 @@ export function prescan(text: string, grammar: Grammar): Prescan {
     );
   };
 
-  const open = lex(text, grammar, grammar === "script", grammar === "script", {
-    token(kind, start, end, depthBefore, depthAfter) {
-      if (
-        depthBefore === 0 &&
-        !lineHasCode &&
-        kind !== Tok.Close &&
-        previous !== null &&
-        afterNewline > current.start &&
-        shouldCut(kind, start, previous)
-      )
-        cut(afterNewline);
-      if (current.codeStart < 0) {
-        current.codeStart = start;
-        current.leading = trivia.filter((r) => r.start >= current.start);
-      }
-      trivia = [];
-      lineHasCode = true;
-      afterNewline = -1;
-      previous =
-        kind === Tok.Semi
-          ? { kind, start, end, closedToZero: previous?.closedToZero ?? false }
-          : {
-              kind,
-              start,
-              end,
-              closedToZero:
-                kind === Tok.Close &&
-                text.charCodeAt(start) === RBRACE &&
-                depthBefore > 0 &&
-                depthAfter === 0,
-            };
+  const open = lex(
+    text,
+    grammar,
+    grammar === "script",
+    resync && grammar === "script",
+    {
+      token(kind, start, end, depthBefore, depthAfter) {
+        if (
+          depthBefore === 0 &&
+          !lineHasCode &&
+          kind !== Tok.Close &&
+          previous !== null &&
+          afterNewline > current.start &&
+          shouldCut(kind, start, previous)
+        )
+          cut(afterNewline);
+        if (current.codeStart < 0) {
+          current.codeStart = start;
+          current.leading = trivia.filter((r) => r.start >= current.start);
+        }
+        trivia = [];
+        lineHasCode = true;
+        afterNewline = -1;
+        previous =
+          kind === Tok.Semi
+            ? {
+                kind,
+                start,
+                end,
+                closedToZero: previous?.closedToZero ?? false,
+              }
+            : {
+                kind,
+                start,
+                end,
+                closedToZero:
+                  kind === Tok.Close &&
+                  text.charCodeAt(start) === RBRACE &&
+                  depthBefore > 0 &&
+                  depthAfter === 0,
+              };
+      },
+      stringEnd() {},
+      comment(kind, start, end, depth, unterminated, hasTerminator) {
+        const ownLine = !lineHasCode;
+        if (
+          unterminated &&
+          depth === 0 &&
+          ownLine &&
+          afterNewline > current.start &&
+          afterNewline <= start
+        )
+          cut(afterNewline);
+        // F-102's comments are the token text with trailing whitespace removed (comments.ts)
+        if (depth === 0)
+          trivia.push({
+            kind,
+            start,
+            end: start + text.slice(start, end).trimEnd().length,
+            ownLine,
+          });
+        if (hasTerminator) lineHasCode = false;
+      },
+      resync(at) {
+        const b =
+          afterNewline > current.start && afterNewline <= at
+            ? afterNewline
+            : at;
+        if (b > current.start) cut(b);
+        lineHasCode = false;
+        afterNewline = -1;
+        previous = null;
+      },
+      newline(end, lf) {
+        lineHasCode = false;
+        if (lf && afterNewline < 0) afterNewline = end;
+      },
     },
-    stringEnd() {},
-    comment(kind, start, end, depth, unterminated, hasTerminator) {
-      const ownLine = !lineHasCode;
-      if (
-        unterminated &&
-        depth === 0 &&
-        ownLine &&
-        afterNewline > current.start &&
-        afterNewline <= start
-      )
-        cut(afterNewline);
-      // F-102's comments are the token text with trailing whitespace removed (comments.ts)
-      if (depth === 0)
-        trivia.push({
-          kind,
-          start,
-          end: start + text.slice(start, end).trimEnd().length,
-          ownLine,
-        });
-      if (hasTerminator) lineHasCode = false;
-    },
-    resync(at) {
-      const b =
-        afterNewline > current.start && afterNewline <= at ? afterNewline : at;
-      if (b > current.start) cut(b);
-      lineHasCode = false;
-      afterNewline = -1;
-      previous = null;
-    },
-    newline(end, lf) {
-      lineHasCode = false;
-      if (lf && afterNewline < 0) afterNewline = end;
-    },
-  });
+  );
 
   done.push(current);
   const positions = new Positioner(text);

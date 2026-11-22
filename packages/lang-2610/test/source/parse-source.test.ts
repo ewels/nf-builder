@@ -143,6 +143,44 @@ describe("F-104 step 2 ADR-0004: the chunked path", () => {
     ]);
   });
 
+  it("F-104 step 2 ADR-0004: a valid declaration with declaration-like lines in a heredoc stays modelled next to a broken one", () => {
+    for (const line of ["process {", "output files are in results"]) {
+      const text = [
+        "process A {",
+        "    script:",
+        '    """',
+        "    cat <<EOF > test.config",
+        line,
+        "    cpus = 1",
+        "}",
+        "EOF",
+        '    """',
+        "}",
+        "",
+        "process B {",
+        "    x = = 1",
+        "}",
+        "",
+        "process C {",
+        "    script:",
+        "    'c'",
+        "}",
+        "",
+      ].join("\n");
+      const r = parseScriptSource(text);
+      expect(r.status, line).toBe("partial");
+      expect(
+        r.ast?.body.map((i) => [labelOf(i, text), i.kind]),
+        line,
+      ).toEqual([
+        ["process A", "Process"],
+        ["process B", "Unparsed"],
+        ["process C", "Process"],
+      ]);
+      expect(checkTiling(text, r.ast as never), line).toEqual([]);
+    }
+  });
+
   it("F-104 step 2 ADR-0004: a config with a #! line keeps the line as text and models the rest", () => {
     const text = "#!x\na = 1\nb = 2\n";
     const r = parseConfigSource(text);

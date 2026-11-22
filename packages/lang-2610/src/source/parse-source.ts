@@ -77,6 +77,19 @@ function failedChunk(
   return { unparsed, comments: rest, shebang };
 }
 
+/** A sub-chunk found in a chunk's slice, in file coordinates. */
+const inFile = (sub: Chunk, parent: Chunk): Chunk => ({
+  start: sub.start + parent.start,
+  end: sub.end + parent.start,
+  line: sub.line + parent.line - 1,
+  codeStart: sub.codeStart + parent.start,
+  head: sub.head,
+  leadingComments: shiftPositions(sub.leadingComments, {
+    offset: parent.start,
+    line: parent.line - 1,
+  }),
+});
+
 function parseChunks(
   text: string,
   grammar: Grammar,
@@ -87,7 +100,7 @@ function parseChunks(
   const items: (ScriptItem | ConfigItem)[] = [];
   const comments: Comment[] = [];
   const dangling: Comment[] = [];
-  for (const chunk of prescan(text, grammar).chunks) {
+  const handle = (chunk: Chunk, retry: boolean): void => {
     const slice = text.slice(chunk.start, chunk.end);
     const by = { offset: chunk.start, line: chunk.line - 1 };
     let result: ParseResult<Ast>;
@@ -114,16 +127,27 @@ function parseChunks(
           shebang ??= ast.shebang;
         }
         dangling.push(...(ast.danglingComments ?? []));
-        continue;
+        return;
       }
     } catch (error) {
       result = { ok: false, errors: [internalProblem(error)] };
+    }
+    // A chunk that does not parse may hold an unclosed bracket or string that swallowed later declarations: look for
+    // declaration keywords in column 1 inside it. Chunks that parsed are never split this way (a heredoc in a valid
+    // process may have such lines).
+    if (retry && grammar === "script") {
+      const subs = prescan(slice, grammar, true).chunks;
+      if (subs.length > 1) {
+        for (const sub of subs) handle(inFile(sub, chunk), false);
+        return;
+      }
     }
     const failed = failedChunk(text, chunk, shiftPositions(result.errors, by));
     if (failed.unparsed) items.push(failed.unparsed);
     comments.push(...failed.comments);
     shebang ??= failed.shebang;
-  }
+  };
+  for (const chunk of prescan(text, grammar).chunks) handle(chunk, true);
   const status = statusFor(items, true);
   if (status === "verbatim") return { status, ast: null, problems };
   const range = rangeOf(text, 0, text.length);

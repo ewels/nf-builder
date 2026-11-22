@@ -29,6 +29,13 @@ const heads = (text: string, grammar: Grammar = "script") =>
     c.head ? `${c.head.keyword} ${c.head.name ?? ""}`.trim() : null,
   );
 
+const chunkTextsResync = (text: string, grammar: Grammar = "script") =>
+  prescan(text, grammar, true).chunks.map((c) => text.slice(c.start, c.end));
+const headsResync = (text: string, grammar: Grammar = "script") =>
+  prescan(text, grammar, true).chunks.map((c) =>
+    c.head ? `${c.head.keyword} ${c.head.name ?? ""}`.trim() : null,
+  );
+
 function tiles(text: string, chunks: readonly Chunk[]): void {
   expect(chunks.length).toBeGreaterThan(0);
   let at = 0;
@@ -335,29 +342,31 @@ describe("F-104 step 2 ADR-0004: the pre-scanner splits a file into top-level ch
     expect(scan.open).toEqual(["{"]);
   });
 
-  it("F-104 step 2 ADR-0004: a declaration keyword in column 1 starts over whatever is still open", () => {
+  it("F-104 step 2 ADR-0004: a declaration keyword in column 1 starts over whatever is still open, when asked to", () => {
     // an unclosed brace in a middle include no longer swallows the later declarations
     const includes =
       "include { A } from './a'\ninclude { B from './b'\ninclude { C } from './c'\n\nworkflow {\n  A()\n}\n";
-    expect(heads(includes)).toEqual([
+    expect(headsResync(includes)).toEqual([
       "include",
       "include",
       "include",
       "workflow",
     ]);
-    expect(prescan(includes, "script").open).toEqual([]);
+    expect(prescan(includes, "script", true).open).toEqual([]);
     // a process missing its closing brace, then another process and a workflow
     const process =
       "process A {\n  script:\n  'x'\n}\n\nprocess B {\n  script:\n  'x'\n\nprocess C {\n  script:\n  'x'\n}\n\nworkflow {\n  C()\n}\n";
-    expect(heads(process)).toEqual([
+    expect(headsResync(process)).toEqual([
       "process A",
       "process B",
       "process C",
       "workflow",
     ]);
-    expect(chunkTexts(process)[1]).toBe("\nprocess B {\n  script:\n  'x'\n");
+    expect(chunkTextsResync(process)[1]).toBe(
+      "\nprocess B {\n  script:\n  'x'\n",
+    );
     const crlf = process.replaceAll("\n", "\r\n");
-    expect(heads(crlf)).toEqual([
+    expect(headsResync(crlf)).toEqual([
       "process A",
       "process B",
       "process C",
@@ -366,20 +375,22 @@ describe("F-104 step 2 ADR-0004: the pre-scanner splits a file into top-level ch
     // an unclosed triple-quoted string or interpolation too
     const triple =
       'process A {\n  script:\n  """\n  echo\n}\n\nprocess B {\n}\n';
-    expect(heads(triple)).toEqual(["process A", "process B"]);
+    expect(headsResync(triple)).toEqual(["process A", "process B"]);
     const tsq = "process A {\n  script:\n  '''\n  echo\n}\n\nworkflow {\n}\n";
-    expect(heads(tsq)).toEqual(["process A", "workflow"]);
+    expect(headsResync(tsq)).toEqual(["process A", "workflow"]);
     // biome-ignore lint/suspicious/noTemplateCurlyInString: Groovy source text, not a template
     const interpolation = 'x = "${ foo(\nprocess B {\n}\n';
-    expect(heads(interpolation)).toEqual([null, "process B"]);
+    expect(headsResync(interpolation)).toEqual([null, "process B"]);
     // an indented keyword inside a block does not cut, nor does one not followed by a name or a brace
     const indented = "process A {\n  script:\n  'x'\n\n  process B {\n";
-    expect(chunkTexts(indented)).toEqual([indented]);
+    expect(chunkTextsResync(indented)).toEqual([indented]);
     const bare = "workflow {\n  A()\nprocess:\n";
-    expect(chunkTexts(bare)).toEqual([bare]);
+    expect(chunkTextsResync(bare)).toEqual([bare]);
+    // without the option nothing starts over
+    expect(chunkTexts(includes)).toHaveLength(2);
     // configs are not affected
     const config = "process {\n  cpus = 1\nprocess x {\n";
-    expect(chunkTexts(config, "config")).toEqual([config]);
+    expect(chunkTextsResync(config, "config")).toEqual([config]);
   });
 
   it("F-104 step 2: a stray closing bracket at the top level is not code, in a script or a config", () => {
