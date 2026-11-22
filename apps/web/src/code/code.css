@@ -32,3 +32,8 @@
 .code-pane-body .muted {
   padding: var(--space-2) var(--space-3);
 }
+
+.code-editor-host {
+  position: absolute;
+  inset: 0;
+}

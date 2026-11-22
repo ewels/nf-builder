@@ -8,12 +8,13 @@ export const CONNECT_SRC_ALLOW_LIST: readonly string[] = [
 
 /**
  * QA-30, ADR 0040: ADR 0014's policy without frame-ancestors (a <meta> policy ignores it), on one line.
- * No inline scripts. Loosenings are recorded in the PR that needs them.
+ * No inline scripts. Inline styles are allowed because Monaco writes <style> elements and style attributes (F-208).
+ * Loosenings are recorded in the PR that needs them.
  */
 export const CONTENT_SECURITY_POLICY: string = [
   "default-src 'self'",
   "script-src 'self'",
-  "style-src 'self'",
+  "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob:",
   "font-src 'self' data:",
   `connect-src ${CONNECT_SRC_ALLOW_LIST.join(" ")}`,
@@ -62,6 +63,9 @@ const SCRIPT_DIRECTIVES = [
 const FORBIDDEN_SCRIPT_SOURCE =
   /^('(unsafe-inline|unsafe-eval|unsafe-hashes|nonce-.*|sha(256|384|512)-.*)'|data:|blob:|\*|[a-z][a-z0-9+.-]*:)$/;
 
+/** F-208: the only style sources, so that any further loosening is visible. */
+const STYLE_SOURCES: readonly string[] = ["'self'", "'unsafe-inline'"];
+
 /** Returns one readable problem per QA-30 breach; [] when the policy is acceptable. */
 export function cspProblems(policy: string): string[] {
   const problems: string[] = [];
@@ -87,6 +91,11 @@ export function cspProblems(policy: string): string[] {
       if (FORBIDDEN_SCRIPT_SOURCE.test(source))
         problems.push(`${name} allows ${source}`);
     }
+  }
+
+  for (const source of directives.get("style-src") ?? []) {
+    if (!STYLE_SOURCES.includes(source))
+      problems.push(`style-src allows ${source}`);
   }
 
   const connect = directives.get("connect-src");
