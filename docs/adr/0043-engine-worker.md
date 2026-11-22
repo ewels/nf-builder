@@ -5,7 +5,7 @@
 
 ## Context
 
-AR-04 says parsing, modelling, projection and edits run in a Web Worker. ADR 0003 names Comlink for the bridge. QA-03 requires that the UI stays responsive while sarek parses and models within 30 s on the CI reference profile (ADR 0029), and QA-04 sets a 100 ms p95 for an edit. The reference profile throttles the CPU 4× (QA-02), but Chromium's CPU throttling applies only to the page, not to workers. The parser and catalogues were loaded on the main thread by the palette, and QA-01 counts only initial JavaScript (ADR 0015). Research: the [F-113 plan](https://github.com/ewels/nf-builder/blob/fe8624e/docs/plan/handoff/plan-F-113.md).
+AR-04 says parsing, modelling, projection and edits run in a Web Worker. ADR 0003 names Comlink for the bridge. QA-03 requires that the UI stays responsive while sarek parses and models within 30 s on the CI reference profile (ADR 0029), and QA-04 sets a 100 ms p95 for an edit. The reference profile throttles the CPU 4× (QA-02), but Chromium's CPU throttling applies only to the page, not to workers. The palette loaded the catalogues on the main thread, and the parser sat in the main build as a lazy chunk; QA-01 counts only initial JavaScript (ADR 0015). Research: the [F-113 plan](https://github.com/ewels/nf-builder/blob/fe8624e/docs/plan/handoff/plan-F-113.md).
 
 ## Decision
 
@@ -34,10 +34,10 @@ AR-04 says parsing, modelling, projection and edits run in a Web Worker. ADR 000
   - the edit p95 is 271 ms, over QA-04's 100 ms.
 
   The edit p95 is dominated by re-projecting the 722-line workflow and by the double parse. F-702 owns both.
-- QA-02 and QA-03 now say that the profile throttles the page, not the worker.
+- This clarifies ADR 0029's "CI reference profile" for workers: the profile throttles the page, and the worker runs unthrottled because Chromium can't throttle it. QA-02 and QA-03 say so. The decision stands unless the maintainer reopens it.
 
 ## Alternatives
 
 - **A hand-written `postMessage` protocol:** more code than Comlink for the same result.
-- **Throttling the whole browser with a cgroup CPU quota:** at a real 4×, sarek would take about 60 s and fail ADR 0029's ceiling. That would need the maintainer's view.
+- **Throttling the whole browser with a cgroup CPU quota:** at a real 4×, sarek would take about 60 s and fail ADR 0029's ceiling.
 - **Counting worker chunks in QA-01:** they don't block first paint.
