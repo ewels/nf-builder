@@ -16,7 +16,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-108 code nodes | merged, PR #34 | |
 | F-111 edit commands | `feat/F-111`, in PR | Plan deleted in its PR. |
 | F-112 diagnostics | not started | [plan](plan-F-112.md). After F-106 (and F-111 for fixes). |
-| F-113 engine worker | not started | [plan](plan-F-113.md). After F-111. |
+| F-113 engine worker | `feat/F-113`, in PR | Plan deleted in its PR. |
 | F-202 projects in IndexedDB | not started | [plan](plan-F-202.md). After F-113. |
 | F-205 canvas | not started | [plan](plan-F-205.md). After F-113 (and F-106); parallel with F-202. |
 | F-501 registry snapshot | merged, PR #29, **not passing** | Passes once the Pages deploy serves `/registry/` and `verify` passes (ADR 0041, F-011). F-502 to F-506, F-702, F-704 and F-705 depend on it. |
@@ -74,7 +74,7 @@ Next free ADR number: 0042 (0038 is F-107's, 0039 F-111's, 0040 and 0041 F-011's
 - LA-33 amended: a missing argument is an error (nf-lang rejects it), an unused output a warning. LA-31 and a new LA-37 row as in point 7. `Port.argumentType` is added to F-106 (point 13).
 - Rules behind a lazy `LanguagePack.loadLints()`, one ADR at landing.
 
-### F-113 — [plan](plan-F-113.md)
+### F-113 (merged with its PR)
 - Accept every recommendation in section 6: Comlink 4.4.2 as a runtime dependency of `@nf-builder/web` (ADR 0003 names it); pack versions from a pack-free `version` export, palette through the worker; Comlink only in apps/web; the page throttled 4× with worker timings reported unthrottled (Chromium can't throttle workers), clarified in `quality.md`; F-113 reports QA-03 and QA-04, F-702 gates QA-03; diagnostics from `ProjectModel.diagnostics()` until F-112 wires its diagnoser; `window.nfBuilderEngine` test hook; no double-parse optimisation yet; loading progress shown by F-202; the worker manifest and the `check:hosts` amendment; a `bench` job in `ci.yml` and `pnpm bench`. One ADR at landing.
 
 ### F-202 — [plan](plan-F-202.md)
