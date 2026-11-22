@@ -32,6 +32,8 @@ function fixture(
   storage?: () => StorageManager | undefined,
 ) {
   const calls: string[] = [];
+  const shown: unknown[] = [];
+  const gone = { count: 0 };
   let push: (s: WorkspaceStatus) => void = () => undefined;
   const workspace = {
     watch: vi.fn(async (l: (s: WorkspaceStatus) => void) => {
@@ -45,7 +47,7 @@ function fixture(
     }),
     openProject: vi.fn(async (id: string) => {
       calls.push(`openProject:${id}`);
-      return {};
+      return { revision: 7 };
     }),
     renameProject: vi.fn(async () => meta("x")),
     deleteProject: vi.fn(async () => {
@@ -59,15 +61,59 @@ function fixture(
     },
     storage: storage ?? (() => undefined),
     languageVersion: "26.10",
+    canvas: {
+      show: async (summary) => {
+        shown.push(summary);
+      },
+      projectGone: () => {
+        gone.count++;
+      },
+    },
   };
   resetPersistenceRequest();
   return {
     calls,
+    shown,
+    gone,
     workspace,
     store: createProjectStore(deps),
     push: (s: WorkspaceStatus) => push(s),
   };
 }
+
+describe("F-202 F-205 project store and canvas", () => {
+  it("F-202 F-205 UX-20: every successful openProject (auto-reopen, create, open) shows the summary on the canvas", async () => {
+    const f = fixture(ready({ projects: [meta("recent")] }));
+    await f.store.getState().start();
+    await f.store.getState().create("New");
+    await f.store.getState().open("recent");
+    await settle();
+    expect(f.shown).toEqual([
+      { revision: 7 },
+      { revision: 7 },
+      { revision: 7 },
+    ]);
+  });
+
+  it("F-202 F-205 UX-20: a failed open shows nothing", async () => {
+    const f = fixture(ready());
+    (f.workspace.openProject as ReturnType<typeof vi.fn>).mockRejectedValue(
+      new Error("no"),
+    );
+    await expect(f.store.getState().open("x")).rejects.toThrow("no");
+    expect(f.shown).toEqual([]);
+  });
+
+  it("F-202 F-205 UX-20: a status with no current project resets the canvas; one with a current project does not", async () => {
+    const f = fixture(ready());
+    await f.store.getState().start();
+    const before = f.gone.count;
+    f.push(ready({ current: meta("a") }));
+    expect(f.gone.count).toBe(before);
+    f.push(ready({ current: null }));
+    expect(f.gone.count).toBe(before + 1);
+  });
+});
 
 describe("F-202 project store", () => {
   it("F-202 QA-03 ADR-0029: start requests the palette before reopening the most recently opened project", async () => {
@@ -85,6 +131,7 @@ describe("F-202 project store", () => {
       palette: () => new Promise(() => undefined),
       storage: () => undefined,
       languageVersion: "26.10",
+      canvas: { show: async () => undefined, projectGone: () => undefined },
     });
     await never.getState().start();
     expect(f.workspace.watch).toHaveBeenCalledTimes(1);

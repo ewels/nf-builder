@@ -130,11 +130,12 @@
 }
 
 .palette-item-label.is-code {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 12px;
 }
 
-.palette-glyph {
+.palette-glyph,
+.canvas-glyph {
   flex: none;
   display: inline-flex;
   align-items: center;
@@ -145,33 +146,38 @@
 }
 
 .tone-green {
-  color: #14532d;
-  background: #d6f0e0;
+  color: var(--tone-green-fg);
+  background: var(--tone-green-bg);
 }
 
 .tone-blue {
-  color: #1e3a8a;
-  background: #dbe6fb;
+  color: var(--tone-blue-fg);
+  background: var(--tone-blue-bg);
 }
 
 .tone-amber {
-  color: #78350f;
-  background: #fbe8c4;
+  color: var(--tone-amber-fg);
+  background: var(--tone-amber-bg);
 }
 
 .tone-purple {
-  color: #4c1d95;
-  background: #e8dcfa;
+  color: var(--tone-purple-fg);
+  background: var(--tone-purple-bg);
 }
 
 .tone-pink {
-  color: #831843;
-  background: #fadbe8;
+  color: var(--tone-pink-fg);
+  background: var(--tone-pink-bg);
 }
 
 .tone-grey {
-  color: #374151;
-  background: #e5e7eb;
+  color: var(--tone-grey-fg);
+  background: var(--tone-grey-bg);
+}
+
+.tone-red {
+  color: var(--tone-red-fg);
+  background: var(--tone-red-bg);
 }
 
 .badge-preview {

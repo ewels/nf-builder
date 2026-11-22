@@ -1,7 +1,7 @@
 import { installedPackVersions } from "@nf-builder/engine";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { AppShell } from "../src/app-shell";
+import { AppShell, canvasCounts } from "../src/app-shell";
 import { COLUMN_LIMITS } from "../src/layout/layout-store";
 
 describe("@nf-builder/web", () => {
@@ -91,5 +91,64 @@ describe("@nf-builder/web", () => {
     expect(html.indexOf("<footer")).toBeGreaterThan(
       html.lastIndexOf("</aside>"),
     );
+  });
+
+  it("F-205 F-201: with no project the shell renders the 'No project open' placeholder and no tabs", () => {
+    const html = renderToStaticMarkup(<AppShell />);
+    const main = /<main[\s\S]*<\/main>/.exec(html)?.[0] ?? "";
+    expect(main).toContain("No project open");
+    expect(main).toContain("No files open");
+    expect(main).not.toContain('role="tab"');
+    expect(main).not.toContain("tabpanel");
+  });
+
+  it("F-205 UX-03: the status bar counts the active canvas's nodes and channels", () => {
+    const range = {
+      start: 0,
+      end: 0,
+      line: 1,
+      column: 1,
+      endLine: 1,
+      endColumn: 1,
+    };
+    const node = (id: string) =>
+      ({
+        id,
+        kind: "params",
+        label: "params",
+        inputs: [],
+        outputs: [],
+        range,
+        guards: [],
+      }) as const;
+    const edge = {
+      id: "e",
+      from: { node: "a", port: "x" },
+      to: { node: "b", port: "y" },
+      type: { dataflow: "channel", element: null },
+      variable: null,
+      direct: true,
+    } as const;
+    const counts = canvasCounts({
+      status: "ready",
+      revision: 1,
+      projection: {
+        workflow: {
+          path: "main.nf",
+          name: null,
+          modelled: true,
+          typed: true,
+          range,
+        },
+        nodes: [node("a"), node("b"), node("c")],
+        edges: [edge, { ...edge, id: "f" }],
+        statements: [],
+      },
+    });
+    expect(counts).toEqual({ nodes: 3, channels: 2 });
+    expect(canvasCounts({ status: "empty" })).toEqual({
+      nodes: 0,
+      channels: 0,
+    });
   });
 });

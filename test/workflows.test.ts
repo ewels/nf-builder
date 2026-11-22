@@ -193,6 +193,18 @@ describe("CI workflows", () => {
     expect(job).toContain("timeout-minutes: 20");
   });
 
+  it("F-205 step 1 ADR-0011: the Chromium e2e leg restores the corpus before the tests", () => {
+    const job = jobOf("e2e");
+    const at = stepIndex(job);
+    const corpus = at("uses: ./.github/actions/corpus");
+    expect(corpus).toBeGreaterThanOrEqual(0);
+    expect(corpus).toBeLessThan(at("run: pnpm test:e2e"));
+    expect(corpus).toBeLessThan(at("run: pnpm smoke"));
+    expect(job.slice(job.indexOf("uses: ./.github/actions/corpus"))).toMatch(
+      /^[^\n]*\n\s+if: matrix\.browser == 'chromium'/,
+    );
+  });
+
   it("F-113 step 1 ADR-0015 ADR-0030: ci.yml has a bench job that restores the corpus, installs Chromium, runs pnpm bench and uploads the report", () => {
     const job = jobOf("bench");
     const at = stepIndex(job);

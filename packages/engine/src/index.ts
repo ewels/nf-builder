@@ -55,6 +55,16 @@ export type {
   WorkflowRef,
   WorkflowTarget,
 } from "@nf-builder/lang-core";
+export type {
+  CanvasAppearance,
+  CanvasEdgeView,
+  CanvasNodeView,
+  CanvasPortView,
+  CanvasView,
+  CanvasViewOptions,
+  EdgeDataflow,
+} from "./canvas";
+export { CANVAS_METRICS, canvasView } from "./canvas";
 export {
   compareDiagnostics,
   countDiagnostics,

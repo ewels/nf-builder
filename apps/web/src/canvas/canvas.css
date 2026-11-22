@@ -1,0 +1,197 @@
+.workflow-canvas {
+  position: absolute;
+  inset: 0;
+}
+
+.canvas-node {
+  position: relative;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 12px;
+}
+
+.canvas-node.is-pill {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  border-radius: 999px;
+  padding: 0 var(--space-3);
+}
+
+.canvas-node.is-process,
+.canvas-node.is-agent {
+  border-color: var(--tone-green-fg);
+}
+.canvas-node.is-module {
+  border-color: var(--tone-green-fg);
+  border-width: 2px;
+}
+.canvas-node.is-workflow {
+  border-color: var(--tone-blue-fg);
+  box-shadow: 4px 4px 0 var(--tone-blue-bg);
+}
+.canvas-node.is-chain {
+  border-color: var(--tone-amber-fg);
+  background: var(--tone-amber-bg);
+}
+.canvas-node.is-factory,
+.canvas-node.is-params {
+  border-color: var(--tone-purple-fg);
+}
+.canvas-node.is-output {
+  border-color: var(--tone-pink-fg);
+}
+.canvas-node.is-take,
+.canvas-node.is-emit,
+.canvas-node.is-unparsed,
+.canvas-node.is-code {
+  border-color: var(--tone-grey-fg);
+  background: var(--tone-grey-bg);
+}
+.canvas-node.is-unparsed {
+  border: 2px solid var(--color-error);
+}
+
+.canvas-node-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0 var(--space-3);
+  overflow: hidden;
+  border-radius: 7px 7px 0 0;
+}
+
+.canvas-node-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.canvas-node-title,
+.canvas-node-subtitle,
+.canvas-port {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.canvas-node-title {
+  font-weight: 600;
+}
+
+.canvas-node-title {
+  font-family: var(--font-mono);
+}
+
+.canvas-node-title.is-code,
+.canvas-node.is-pill .canvas-node-title {
+  font-weight: 400;
+}
+
+.canvas-node-subtitle {
+  color: var(--color-muted);
+}
+
+.canvas-node.is-unparsed .canvas-node-subtitle {
+  color: var(--color-error);
+  font-weight: 600;
+}
+
+.canvas-pill-prefix {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.canvas-badge {
+  position: absolute;
+  top: 0;
+  right: var(--space-3);
+  transform: translateY(-50%);
+  z-index: 1;
+  padding: 0 6px;
+  font-size: 10px;
+  line-height: 14px;
+  color: var(--tone-blue-fg);
+  background: var(--tone-blue-bg);
+  border: 1px solid var(--tone-blue-fg);
+  border-radius: 8px;
+}
+
+.canvas-ports {
+  display: flex;
+  flex-direction: column;
+}
+
+.canvas-port-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-2);
+  height: var(--port-row);
+  padding: 0 var(--space-3);
+  font-size: 11px;
+  line-height: 1;
+}
+
+.canvas-port {
+  min-width: 0;
+  color: var(--color-muted);
+}
+
+.canvas-port.is-output {
+  margin-left: auto;
+  text-align: right;
+}
+
+.canvas-node .react-flow__handle {
+  width: 8px;
+  height: 8px;
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-muted);
+}
+
+.canvas-node.is-compact .react-flow__handle {
+  width: 6px;
+  height: 6px;
+}
+
+.react-flow__edge-path {
+  stroke: var(--color-muted);
+  stroke-width: 1.5;
+}
+
+/* Dataflow reads from the stroke pattern, not the colour (QA-12); channel and unknown edges are solid. */
+.react-flow__edge-path.edge-value {
+  stroke-dasharray: 6 4;
+}
+.react-flow__edge-path.edge-plain {
+  stroke-dasharray: 1 4;
+  stroke-linecap: round;
+}
+.react-flow__edge-path.edge-unknown {
+  stroke: #8a93a6;
+  stroke-width: 1;
+}
+
+.react-flow__edge:hover .react-flow__edge-path {
+  stroke: var(--color-accent);
+  stroke-width: 2.5;
+}
+
+.edge-tooltip {
+  position: fixed;
+  z-index: 10;
+  max-width: 320px;
+  padding: var(--space-1) var(--space-2);
+  font-size: 12px;
+  color: var(--color-header-text);
+  background: var(--color-header);
+  border-radius: 6px;
+  pointer-events: none;
+}

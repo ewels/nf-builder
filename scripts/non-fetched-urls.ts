@@ -32,6 +32,30 @@ export const NON_FETCHED_URLS: readonly NonFetchedUrl[] = [
     reason: "XML namespace URI used by React DOM",
   },
   {
+    match: "exact",
+    url: "http://www.w3.org/1999/xhtml",
+    reason:
+      "XHTML namespace URI used by d3-selection in React Flow; an identifier, never fetched",
+  },
+  {
+    match: "exact",
+    url: "http://www.w3.org/2000/xmlns/",
+    reason:
+      "XMLNS namespace URI used by d3-selection in React Flow; an identifier, never fetched",
+  },
+  {
+    match: "exact",
+    url: "https://reactflow.dev?utm_source=attribution",
+    reason:
+      "The React Flow attribution link, shown on the canvas and opened by the user in a new tab; the app never fetches it",
+  },
+  {
+    match: "prefix",
+    url: "https://reactflow.dev/",
+    reason:
+      "Help links in React Flow's error messages; shown as text, never fetched",
+  },
+  {
     match: "prefix",
     url: "https://react.dev/errors/",
     reason:

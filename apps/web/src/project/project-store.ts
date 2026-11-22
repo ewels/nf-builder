@@ -1,9 +1,10 @@
 // The main-thread project store (F-202): it mirrors the workspace status pushed from the worker and runs the storage checks
 // of IO-03. Nothing starts at import. Storage trouble (no API, a refusal, an unreachable worker) shows up as state, never
 // as an exception, so the app also works in a cross-origin frame (ADR 0044).
-import { installedPackVersions } from "@nf-builder/engine";
+import { installedPackVersions, type ProjectSummary } from "@nf-builder/engine";
 import { useStore } from "zustand";
 import { createStore, type StoreApi } from "zustand/vanilla";
+import { canvasStore } from "../canvas/canvas-store";
 import { getEngine } from "../engine/engine-client";
 import { requestPaletteView } from "../palette/use-palette-view";
 import {
@@ -39,6 +40,11 @@ export interface ProjectStoreDeps {
   readonly palette: (version: string) => Promise<unknown>;
   readonly storage: () => StorageManager | undefined;
   readonly languageVersion: string | undefined;
+  /** The canvas (F-205): shown every project the worker opens, and told when the stored project is gone. */
+  readonly canvas: {
+    show(summary: ProjectSummary): Promise<void>;
+    projectGone(): void;
+  };
 }
 
 export function createProjectStore(
@@ -68,10 +74,17 @@ export function createProjectStore(
       const savedNow =
         get().status.save.status === "saving" && status.save.status === "saved";
       set({ status });
+      if (status.current === null) deps.canvas.projectGone();
       if (savedNow) {
         void askPersistence();
         void checkUsage();
       }
+    };
+
+    /** Opens a stored project in the worker, then shows it on the canvas. */
+    const openAndShow = async (id: string) => {
+      const summary = await deps.workspace().openProject(id);
+      void deps.canvas.show(summary).catch(() => undefined);
     };
 
     return {
@@ -90,7 +103,7 @@ export function createProjectStore(
           void checkUsage();
           const first = initial.projects[0];
           if (first && !initial.current && !initial.opening)
-            await workspace.openProject(first.id).catch(() => undefined); // the status carries `openError`
+            await openAndShow(first.id).catch(() => undefined); // the status carries `openError`
         } catch (error) {
           set({
             status: {
@@ -114,11 +127,11 @@ export function createProjectStore(
         });
         void askPersistence();
         void checkUsage();
-        await workspace.openProject(meta.id);
+        await openAndShow(meta.id);
       },
 
       async open(id) {
-        await deps.workspace().openProject(id);
+        await openAndShow(id);
       },
 
       async rename(id, name) {
@@ -142,6 +155,10 @@ function projectStore() {
     storage: () =>
       typeof navigator === "undefined" ? undefined : navigator.storage,
     languageVersion: installedPackVersions()[0],
+    canvas: {
+      show: (summary) => canvasStore.getState().show(summary),
+      projectGone: () => canvasStore.getState().projectGone(),
+    },
   });
   return store;
 }

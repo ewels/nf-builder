@@ -18,7 +18,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-112 diagnostics | merged, PR #40 | |
 | F-113 engine worker | merged, PR #39 | |
 | F-202 projects in IndexedDB | `feat/F-202`, in PR | Plan deleted in its PR. |
-| F-205 canvas | `feat/F-205` | Tasks 1–3 committed; task 4 building. [plan](plan-F-205.md). |
+| F-205 canvas | `feat/F-205`, in PR #41 | Plan deleted in its PR. |
 | F-203 new project dialog | not started | [plan](plan-F-203.md). After F-202 and F-205. |
 | F-206 details pane | not started | [plan](plan-F-206.md). After F-205. |
 | F-207 layout sidecar | not started | [plan](plan-F-207.md). After F-205 and F-202. |
@@ -31,7 +31,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 
 Branches are stacked: `feat/F-108` → `feat/F-107`; `feat/F-111` also merges F-107. Open PRs for F-108, F-107 and F-111 against `main` in that order (merge `main` into each first), each green before the next. Worktrees: `/home/user/wt-F-1xx`.
 
-Next free ADR number: 0046 (0045 is F-202's).
+Next free ADR number: 0047 (0046 is F-205's).
 
 ## Decisions already taken on the plans' open points
 
@@ -85,7 +85,7 @@ Next free ADR number: 0046 (0045 is F-202's).
 ### F-202 (merged with its PR)
 - Accept every recommendation in section 6: a hand-written IndexedDB wrapper instead of Dexie (amends one clause of ADR 0002); schema v1 (`projects`, `files` keyed by `[projectId, path]`, text only) with migrations; storage and autosave in the engine worker, `persist()`/`estimate()` on the main thread; `fake-indexeddb` 6.2.8 as a web dev dependency; the IO-01 and IO-03 readings (warning at 80%, step 3 simulates 85%); blank project has no files until F-203; step 1's content edit through `window.nfBuilderEngine` until F-208; `readFile`/`close` added to F-113's service (fold in if F-113 is still open); no new UX row for loading progress; a disclosure-button switcher with native dialogs; no multi-tab coordination; the F-201 header test update and baseline re-approval from CI. One ADR at landing.
 
-### F-205 — [plan](plan-F-205.md)
+### F-205 (merged with its PR)
 - Open point 1: option B. F-205 step 1 becomes "Open fixture projects covering every node kind and a corpus pipeline; visual snapshots per node kind match baselines"; F-203 step 1 gains "each template's canvas matches its approved visual baseline" and F-203 depends on F-205. The template check moves to F-203 rather than being dropped: an ADR and the `scope-change` label in F-205's PR.
 - Accept the other recommendations: `@xyflow/react` 13.0.2 pinned (12.12.1 fallback), a lazily loaded canvas, the interim layered layout until F-207 (ADR 0008's end state unchanged), view logic in the engine run on the main thread, the corpus restored in the Chromium e2e leg (ci.yml edit), `window.nfBuilderWorkspace`, plain edges dotted and unknown solid muted (UX-24), unresolved callees drawn as unparsed with "not found" (UX-22), badge when `callee.typed === true`, session-only port-labels toggle, visible attribution at bottom centre, selection highlight left to F-206, status-bar counts wired, `apps/web/src/workspace/` owned by whichever of F-202 and F-205 lands first.
 

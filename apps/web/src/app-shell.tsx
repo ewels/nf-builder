@@ -1,8 +1,10 @@
 import { installedPackVersions } from "@nf-builder/engine";
 import type { JSX } from "react";
+import { CanvasHost } from "./canvas/canvas-host";
+import { type CanvasContent, useWorkspace } from "./canvas/canvas-store";
 import { COLLAPSED_WIDTH, useLayout } from "./layout/layout-store";
 import { ProjectControls } from "./project/project-controls";
-import { CanvasPlaceholder, saveLabel } from "./project/project-status";
+import { saveLabel } from "./project/project-status";
 import { useProjects } from "./project/project-store";
 import { AppHeader } from "./shell/app-header";
 import { ColumnSeparator } from "./shell/column-separator";
@@ -13,10 +15,25 @@ import { TabStrip } from "./shell/tab-strip";
 
 const languageVersions = installedPackVersions();
 
+/** The status bar's counts: the nodes and channels of the active canvas (UX-03). */
+export function canvasCounts(content: CanvasContent): {
+  nodes: number;
+  channels: number;
+} {
+  return content.status === "ready"
+    ? {
+        nodes: content.projection.nodes.length,
+        channels: content.projection.edges.length,
+      }
+    : { nodes: 0, channels: 0 };
+}
+
 export function AppShell(): JSX.Element {
   const left = useLayout((s) => s.left);
   const right = useLayout((s) => s.right);
   const leftWidth = left.collapsed ? COLLAPSED_WIDTH : left.width;
+  const content = useWorkspace((s) => s.content);
+  const counts = canvasCounts(content);
   const projects = useProjects((s) => s.status);
   const storageWarning = useProjects((s) => s.storageWarning);
   const persisted = useProjects((s) => s.persisted);
@@ -45,9 +62,7 @@ export function AppShell(): JSX.Element {
         )}
         <main className="column column-centre" aria-label="Canvas and editor">
           <TabStrip />
-          <div className="canvas-area">
-            <CanvasPlaceholder status={projects} />
-          </div>
+          <CanvasHost />
         </main>
         {right.collapsed ? null : (
           <ColumnSeparator side="right" label="Resize details" />
@@ -63,8 +78,8 @@ export function AppShell(): JSX.Element {
       <StatusBar
         problems={0}
         suggestions={0}
-        nodes={0}
-        channels={0}
+        nodes={counts.nodes}
+        channels={counts.channels}
         languageVersion={languageVersions[0]}
       />
     </div>

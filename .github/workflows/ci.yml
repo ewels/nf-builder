@@ -55,6 +55,9 @@ jobs:
       - uses: ./.github/actions/setup
       - name: Install ${{ matrix.browser }}
         run: pnpm exec playwright install --with-deps "$PW_BROWSERS"
+      # The F-205 corpus-pipeline visual test opens rnaseq-nf-typed from .cache/corpus (ADR 0011).
+      - uses: ./.github/actions/corpus
+        if: matrix.browser == 'chromium'
       - name: pnpm smoke (F-004, under 60 s)
         if: matrix.browser == 'chromium'
         run: pnpm smoke
