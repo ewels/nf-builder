@@ -15,7 +15,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-107 legacy projection | merged, PR #36 | |
 | F-108 code nodes | merged, PR #34 | |
 | F-111 edit commands | merged, PR #38 | |
-| F-112 diagnostics | `feat/F-112` | Tasks 1–7 committed; task 8 (calls and types) building. [plan](plan-F-112.md). |
+| F-112 diagnostics | `feat/F-112`, in PR | Plan deleted in its PR. |
 | F-113 engine worker | `feat/F-113` | Task 1 building. [plan](plan-F-113.md). |
 | F-202 projects in IndexedDB | not started | [plan](plan-F-202.md). After F-113. |
 | F-205 canvas | not started | [plan](plan-F-205.md). After F-113 (and F-106); parallel with F-202. |
@@ -26,7 +26,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 
 Branches are stacked: `feat/F-108` → `feat/F-107`; `feat/F-111` also merges F-107. Open PRs for F-108, F-107 and F-111 against `main` in that order (merge `main` into each first), each green before the next. Worktrees: `/home/user/wt-F-1xx`.
 
-Next free ADR number: 0042 (0038 is F-107's, 0039 F-111's, 0040 and 0041 F-011's).
+Next free ADR number: 0043 (0038 is F-107's, 0039 F-111's, 0040 and 0041 F-011's, 0042 F-112's).
 
 ## Decisions already taken on the plans' open points
 
@@ -67,7 +67,7 @@ Next free ADR number: 0042 (0038 is F-107's, 0039 F-111's, 0040 and 0041 F-011's
 ### F-111 (merged with its PR)
 - Accept every recommendation in section 6: declaration-level reprint for workflow commands, identifier edits for renames, item-boundary include inserts; the command model of 2.2 (plain data, ids resolved at apply time, patches with inverses, `commit` separate); AR-24 read as "no problem the file didn't have"; our own LA-13 check (lint accepts positional mixing, upstream-bugs #20) with `ParseProblem.code` tags; `null` placeholders for missing positional inputs; variable introduction names; Connect moves a later source when safe; DeleteNode clears direct arguments; CreateProcess writes `modules/local/<lower>/main.nf` from `LanguagePack.scaffold`; the rename limits; `fast-check` 4.11.0 as an engine dev dependency (ADR 0011). One ADR at landing.
 
-### F-112 — [plan](plan-F-112.md)
+### F-112 (merged with its PR)
 - Accept the recommendations in section 6, except:
   - quick fixes carry text edits (`QuickFix { title, path, edits }`) and become F-111's `ReplaceFileText { path, text }` when applied (the plan's own fallback), so F-111's command shape is unchanged;
   - no new feature for full nf-lang name-resolution and type-check parity: the spec doesn't require it for v0.1, so the deferred checks (point 4's list) are recorded in F-112's notes and ADR.
