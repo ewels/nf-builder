@@ -1,5 +1,6 @@
 import type { Catalogue } from "./catalogue.ts";
 import type { PaletteDefinition } from "./palette.ts";
+import type { SourceParser } from "./source-file.ts";
 
 /** A language pack (ADR 0006). M1 features grow this towards the architecture.md sketch. */
 export interface LanguagePack {
@@ -8,6 +9,8 @@ export interface LanguagePack {
   readonly palette: PaletteDefinition;
   /** The generated catalogue, loaded on first call (a dynamic import, so it stays out of the initial bundle; ADR 0028). */
   loadCatalogue(): Promise<Catalogue>;
+  /** The parser with declaration-level fallback, loaded on first call (a dynamic import; ADR 0004, ADR 0027). */
+  loadParser(): Promise<SourceParser>;
 }
 
 export * from "./ast/index.ts";

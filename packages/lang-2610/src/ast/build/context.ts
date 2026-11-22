@@ -46,6 +46,14 @@ export class BuildContext {
     this.errors.push(problem(message, at));
   }
 
+  /**
+   * Collect an error about the whole script, not the node it is reported at (a duplicate params block, statements mixed
+   * with declarations): F-104 never isolates a declaration for it.
+   */
+  fileError(message: string, at: Range): void {
+    this.errors.push({ ...problem(message, at), scope: "file" });
+  }
+
   /** Fail the build with the pending number-format error, if there is one. */
   failOnNumberFormat(): void {
     if (this.numberFormatError)
