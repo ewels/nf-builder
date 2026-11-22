@@ -223,3 +223,10 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
 - Next: F-102, F-103, then F-104 and F-110.
 - Decisions: the maintainer's own (ADR 0029).
 - Blockers: none.
+
+## 2026-11-22 · scope · Claude with Phil Ewels
+- Did: at the maintainer's request, F-402 (private GitHub import) moved to milestone M8, deferred past v0.1; QA-02, QA-04 and QA-05 become reported measurements rather than CI gates; F-702's step updated ([ADR 0030](../adr/0030-trim-v0-1-scope-and-gates.md)).
+- State: no feature status changed.
+- Next: F-102, F-103, then F-104 and F-110.
+- Decisions: the maintainer's own (ADR 0030). Other simplifications offered (deferring docs publishing, the metro map, schema editors and registry extras; narrowing legacy editing, forms and diagnostics) were declined.
+- Blockers: none.
