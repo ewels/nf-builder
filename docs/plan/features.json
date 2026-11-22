@@ -437,7 +437,7 @@
         "Every message states what to do; mechanical cases carry a quick-fix command"
       ],
       "passes": false,
-      "notes": "From F-101: 8 ported AgentParserTest inputs (L485-L491, L518: agent output types, eval not defined) parse and are rejected only by name and type resolution (owner F-112 in packages/lang-2610/test/ported/cases.json). From F-102: AST-builder errors come with nf-lang wording in ScriptParseResult.errors (source builder or parser); warnings (ScriptAstBuilder.java #L597, #L619, #L634, #L695, #L824, #L836, #L977, #L1059) and resolver errors are F-112's. From F-103: selector placement, includeConfig placement and include resolution are resolver checks, not AST-builder errors (lint 26.10.7: a selector inside docker passes lint; includeConfig inside process gives 'Config includes are only allowed at the top-level or in a profile'); decimal number-format errors are not ported. From F-104: whole-script checks carry scope 'file' and never isolate a declaration; Unparsed.problems hold the chunk's own errors; source 'internal' marks caught exceptions and model-check failures. From F-105: Diagnostic (lang-core) with codes include-target, include-not-parsed and include-name at the include node; left to F-112: pipeline-include typing errors (ResolveIncludeVisitor L134-L137), alias rules (records and enums can't be aliased; workflow and params must be), duplicate names (scope keeps the first) and config include placement. From F-106: FlowType/TypeExpr on ports (declared) and edges (source type), and Port.argumentType for inline arguments (LA-29, LA-32). From F-108: free reads that resolve to nothing get no code-node port; F-112 can report them (statementVariables in packages/engine/src/projection/free-variables.ts). From F-107: legacy operators (LanguagePack.legacyOperators) are chain steps with known: false, candidates for LA-34 legacy-pattern suggestions; guards record the conditions dataflow branches depend on. From F-107: LA-14 tuple arity comes from the legacy declaration; flag `.out` read before the call it names. From F-107: typed workflows reject set and tap (26.10.7: \"Operator `set` is not supported in typed workflows -- use an assignment instead\"); the projection still models them, so report them as errors in typed scripts. From F-111: the pack tags nf-lang's mixing errors with ParseProblem.code mixed-definitions; a literal null argument is the placeholder for an unconnected input (LA-33). From F-111: report a process called twice in one workflow (lint 26.10.7 accepts it, the run fails, upstream bug 24); a `null` argument for a typed input that isn't nullable fails at run time, so report it as an unconnected input (LA-33)."
+      "notes": "From F-101: 8 ported AgentParserTest inputs (L485-L491, L518: agent output types, eval not defined) parse and are rejected only by name and type resolution (owner F-112 in packages/lang-2610/test/ported/cases.json). From F-102: AST-builder errors come with nf-lang wording in ScriptParseResult.errors (source builder or parser); warnings (ScriptAstBuilder.java #L597, #L619, #L634, #L695, #L824, #L836, #L977, #L1059) and resolver errors are F-112's. From F-103: selector placement, includeConfig placement and include resolution are resolver checks, not AST-builder errors (lint 26.10.7: a selector inside docker passes lint; includeConfig inside process gives 'Config includes are only allowed at the top-level or in a profile'); decimal number-format errors are not ported. From F-104: whole-script checks carry scope 'file' and never isolate a declaration; Unparsed.problems hold the chunk's own errors; source 'internal' marks caught exceptions and model-check failures. From F-105: Diagnostic (lang-core) with codes include-target, include-not-parsed and include-name at the include node; left to F-112: pipeline-include typing errors (ResolveIncludeVisitor L134-L137), alias rules (records and enums can't be aliased; workflow and params must be), duplicate names (scope keeps the first) and config include placement. From F-106: FlowType/TypeExpr on ports (declared) and edges (source type), and Port.argumentType for inline arguments (LA-29, LA-32). From F-108: free reads that resolve to nothing get no code-node port; F-112 can report them (statementVariables in packages/engine/src/projection/free-variables.ts). From F-107: legacy operators (LanguagePack.legacyOperators) are chain steps with known: false, candidates for LA-34 legacy-pattern suggestions; guards record the conditions dataflow branches depend on. From F-107: LA-14 tuple arity comes from the legacy declaration; flag `.out` read before the call it names. From F-107: typed workflows reject set and tap (26.10.7: \"Operator `set` is not supported in typed workflows -- use an assignment instead\"); the projection still models them, so report them as errors in typed scripts. From F-111: the pack tags nf-lang's mixing errors with ParseProblem.code mixed-definitions; a literal null argument is the placeholder for an unconnected input (LA-33). From F-111: report a process called twice in one workflow (lint 26.10.7 accepts it, the run fails, upstream bug 24); a `null` argument for a typed input that isn't nullable fails at run time, so report it as an unconnected input (LA-33). From F-113: the engine service takes diagnostics from ProjectModel.diagnostics(); wire createDiagnoser into packages/engine/src/service/service.ts when both are merged."
     },
     {
       "id": "F-113",
@@ -455,8 +455,8 @@
         "Benchmark job reports sarek parse time and edit p95 against budgets",
         "The main thread does no parsing (asserted in a Playwright performance trace)"
       ],
-      "passes": false,
-      "notes": "From F-201's plan: the shell reads installed pack versions through engine on the main thread; once a pack's entry holds the parser, move that list behind the worker so the parser stays out of the initial bundle (QA-01 check will catch it). From F-006: QA-03 risk. Sarek parses in 1.1 s warm but 15.9 s cold in Node (first-use DFA construction for real grammar ambiguities; upstream Java pays it too). Measure in the worker, then consider parsing open or changed files first, warming the parser at worker start, or caching parse results. 2026-11-22, maintainer (ADR 0029): QA-03 no longer asks for 3 s. The worker must keep the UI responsive and report loading progress; sarek must finish within 30 s on the CI reference profile. The earlier cold-start note no longer needs lazy parsing or caching. From F-104: LanguagePack.loadParser() is a dynamic import (parser and printer in one chunk); call it in the worker. A failing file is parsed at most twice (whole, then per chunk); the whole-corpus round trip takes about 31 s in Node. From F-105: ProjectModel is synchronous; setFile/deleteFile return the re-modelled paths; the trace hook counts parse and model work; openProject(version, files) loads the pack's parser. From F-106: createProjector(model, catalogue) is a snapshot of the model with its own memo; re-project the re-modelled files' workflows and their dependants' after a change; projections are plain data. From F-111: applyCommand is synchronous and pure; its cost is one projection, one reprint and one parse per changed file. commit re-parses through F-105; if QA-04 needs it, reuse the checked SourceFile. Run commands one at a time and drop a command built on an older projection (ids can be stale)."
+      "passes": true,
+      "notes": "From F-201's plan: the shell reads installed pack versions through engine on the main thread; once a pack's entry holds the parser, move that list behind the worker so the parser stays out of the initial bundle (QA-01 check will catch it). From F-006: QA-03 risk. Sarek parses in 1.1 s warm but 15.9 s cold in Node (first-use DFA construction for real grammar ambiguities; upstream Java pays it too). Measure in the worker, then consider parsing open or changed files first, warming the parser at worker start, or caching parse results. 2026-11-22, maintainer (ADR 0029): QA-03 no longer asks for 3 s. The worker must keep the UI responsive and report loading progress; sarek must finish within 30 s on the CI reference profile. The earlier cold-start note no longer needs lazy parsing or caching. From F-104: LanguagePack.loadParser() is a dynamic import (parser and printer in one chunk); call it in the worker. A failing file is parsed at most twice (whole, then per chunk); the whole-corpus round trip takes about 31 s in Node. From F-105: ProjectModel is synchronous; setFile/deleteFile return the re-modelled paths; the trace hook counts parse and model work; openProject(version, files) loads the pack's parser. From F-106: createProjector(model, catalogue) is a snapshot of the model with its own memo; re-project the re-modelled files' workflows and their dependants' after a change; projections are plain data. From F-111: applyCommand is synchronous and pure; its cost is one projection, one reprint and one parse per changed file. commit re-parses through F-105; if QA-04 needs it, reuse the checked SourceFile. Run commands one at a time and drop a command built on an older projection (ids can be stale). Verified 2026-11-22: step 1 by the CI `bench` job (`pnpm bench`, report in the job summary and the `engine-bench` artefact; local run: sarek cold open 18.6 s of 30 s, edit p95 271 ms of QA-04's 100 ms, reported not gated, ADR 0030) and e2e/engine-worker.spec.ts (@smoke open and edit with progress); step 2 by the Chromium performance trace in e2e/engine-worker.spec.ts (no parser samples or compiles on the main thread). Decisions in ADR 0043."
     },
     {
       "id": "F-201",
@@ -496,7 +496,7 @@
         "Simulated quota at 85% shows the warning"
       ],
       "passes": false,
-      "notes": ""
+      "notes": "From F-113: show loading progress from EngineApi.open's progress callback (phases and file counts); the main thread keeps only pack versions and palette search, everything else goes through getEngine(). From F-113 review: the settled F-202 decision adds readFile and close to F-113's EngineApi; F-113 merged without them, so F-202 adds them. Request the palette before open: the worker's queue is serial, so the palette would otherwise wait behind a long open (18 s on sarek)."
     },
     {
       "id": "F-203",
@@ -566,7 +566,7 @@
         "Hovering an edge shows its type"
       ],
       "passes": false,
-      "notes": "From F-106: node kinds call, chain, factory, take, emit, params, output, code; callee.status modelled/unparsed/unresolved and callee.typed for badges; FlowType.dataflow channel/value/plain on edges; node ids are the layout keys (ADR 0036). From F-108: code nodes have label (first line, 60 characters) and text (the exact statement) for UX-22 and UX-28. From F-107: nodes carry guards (branch and condition text) for nodes inside dataflow ifs and ternaries; chain steps with known: false are legacy operators. From F-107: a legacy port can have several edges into it (the union of reaching definitions after an if/else, ADR 0038)."
+      "notes": "From F-106: node kinds call, chain, factory, take, emit, params, output, code; callee.status modelled/unparsed/unresolved and callee.typed for badges; FlowType.dataflow channel/value/plain on edges; node ids are the layout keys (ADR 0036). From F-108: code nodes have label (first line, 60 characters) and text (the exact statement) for UX-22 and UX-28. From F-107: nodes carry guards (branch and condition text) for nodes inside dataflow ifs and ternaries; chain steps with known: false are legacy operators. From F-107: a legacy port can have several edges into it (the union of reaching definitions after an if/else, ADR 0038). From F-113: render from getEngine().project(path, workflow) and refresh on each change's revision."
     },
     {
       "id": "F-206",
@@ -625,7 +625,7 @@
         "Monaco is absent from the initial bundle (bundle report)"
       ],
       "passes": false,
-      "notes": "From F-111: show a ReplaceFileText refusal's problems as diagnostics."
+      "notes": "From F-111: show a ReplaceFileText refusal's problems as diagnostics. From F-113: edits go through getEngine().apply(command, revision); a refusal comes back in the ApplyOutcome as an EngineRefusal with the code and message."
     },
     {
       "id": "F-209",
@@ -642,7 +642,7 @@
         "Redo five times: back to the edited state"
       ],
       "passes": false,
-      "notes": "From F-111: keep the inverse lists from applyCommand; redo is the original patches."
+      "notes": "From F-111: keep the inverse lists from applyCommand; redo is the original patches. From F-113: undo applies the inverse returned by apply through getEngine().applyPatches(patches, revision); redo re-applies the original patches."
     },
     {
       "id": "F-210",
@@ -929,7 +929,7 @@
         "The report lists parse failures and legacy share"
       ],
       "passes": false,
-      "notes": ""
+      "notes": "From F-113: load an imported project with getEngine().open(request, onProgress) or getEngine().writeFiles(files)."
     },
     {
       "id": "F-402",
@@ -969,7 +969,7 @@
         "A zip exceeding the limits is refused with a clear message"
       ],
       "passes": false,
-      "notes": "From F-008 (S4): codeload.github.com only allows https://render.githubusercontent.com, so zip import is a file upload; no GitHub archive URL can be fetched in the browser."
+      "notes": "From F-008 (S4): codeload.github.com only allows https://render.githubusercontent.com, so zip import is a file upload; no GitHub archive URL can be fetched in the browser. From F-113: load an imported project with getEngine().open(request, onProgress) or getEngine().writeFiles(files)."
     },
     {
       "id": "F-404",
@@ -1327,7 +1327,7 @@
         "On `main`, CI fails when QA-01, QA-03 or QA-06 is exceeded, and its budget report shows the QA-02, QA-04 and QA-05 measurements"
       ],
       "passes": false,
-      "notes": "ADR 0015 excludes worker bundles from the QA-01 measurement until this feature; revisit that here. 2026-11-22, maintainer (ADR 0030): QA-02, QA-04 and QA-05 are reported, not gates."
+      "notes": "ADR 0015 excludes worker bundles from the QA-01 measurement until this feature; revisit that here. 2026-11-22, maintainer (ADR 0030): QA-02, QA-04 and QA-05 are reported, not gates. From F-113: the reference profile throttles the page 4x but Chromium can't throttle workers, so worker timings are unthrottled (ADR 0043 clarifies ADR 0029's profile this way; a cgroup CPU quota at a real 4x would put sarek near 60 s, over the 30 s ceiling). Gate QA-03 on the bench job's cold open (18.6 s locally). QA-04's edit p95 is 271 ms locally: re-projecting the 722-line SAREK workflow after each edit and the double parse (F-111's guard parse plus commit's setFile) dominate; reuse the checked SourceFile and project incrementally. Worker chunks are outside QA-01 (ADR 0015): engine.worker about 87 kB raw, parser 653 kB raw, catalogues about 105 kB raw each."
     },
     {
       "id": "F-703",

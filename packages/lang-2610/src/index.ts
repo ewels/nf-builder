@@ -8,9 +8,12 @@ import { legacyOperators } from "./legacy-operators.ts";
 import { palette } from "./palette.ts";
 import { scaffold } from "./scaffold.ts";
 
+/** The pack's version, exported on its own so the main thread can read it without the pack (F-113). */
+export const version = "26.10";
+
 // Import the catalogue JSON only dynamically here: it must stay lazy chunks that come straight from JSON (QA-01, ADR 0028).
 export const pack: LanguagePack = {
-  version: "26.10",
+  version,
   palette,
   includes,
   scaffold,

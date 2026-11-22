@@ -27,3 +27,4 @@ Every vendored file and runtime dependency with terms beyond a standard permissi
 | antlr4ng | ANTLR runtime for the generated parser (ADR 0020) | BSD-3-Clause | Runtime dependency of `@nf-builder/lang-2610`; a third-party notices page in the app is F-704's |
 | CheerpJ | Spike S3 only (`e2e/s3-spike/`, loaded from its CDN in local test runs); not shipped (ADR 0026) | Commercial; free for FOSS projects | Q3 answered: not needed for v0.1 |
 | Nextflow TextMate grammar (via Shiki) | Syntax highlighting in Monaco (ADR 0003) | Check during F-304 | |
+| Comlink 4.4.2 (GoogleChromeLabs/comlink) | Engine worker bridge in `@nf-builder/web` (F-113, ADR 0043) | Apache-2.0 | npm package licence |

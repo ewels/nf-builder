@@ -16,6 +16,12 @@ describe("LanguagePack", () => {
   });
 });
 
+describe("pack version export", () => {
+  it("F-113: the pack entry's version export equals pack.version", () => {
+    expect(entry.version).toBe(entry.pack.version);
+  });
+});
+
 describe("LanguagePack palette and catalogue", () => {
   it("F-204 ADR-0028 UX-12: the pack exposes its palette overlay and loads its catalogue on demand", async () => {
     expect(entry.pack.palette).toBe(palette);

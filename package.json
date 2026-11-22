@@ -24,6 +24,7 @@
     "check:features": "node scripts/check-features.ts",
     "check:budget": "node scripts/check-bundle-budget.ts",
     "check:hosts": "node scripts/check-hosts.ts",
+    "bench": "node scripts/run-playwright.ts --config e2e/bench.config.ts",
     "corpus:fetch": "node tools/corpus/src/cli.ts",
     "gen:grammar": "node scripts/gen-grammar.ts",
     "gen:catalogue": "node tools/spec-extract/src/cli.ts",
