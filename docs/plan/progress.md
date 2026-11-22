@@ -423,6 +423,27 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - `.github/workflows/ci.yml` gains a `bench` job, and the `pnpm bench` script is new.
   - First numbers (local): sarek cold open 18.6 s of 30 s; edit p95 271 ms of 100 ms. The cost of re-projection and the double parse is noted in F-702.
   - The bench includes FASTQC under an alias to measure AddCall, since SAREK already calls FASTQC (a process is called once per workflow).
+
+## 2026-11-22 · F-112 · Claude (autonomous)
+- Did:
+  - Pack lint rules behind a lazy `loadLints()`, and an engine diagnoser that combines parse problems, model diagnostics and the rules.
+  - 30 codes, each with lint-recorded fixtures; the 16 lint-origin codes match `nextflow lint` on the fixtures and the whole pinned corpus.
+  - nf-lang wording plus advice; text-edit quick fixes for four codes.
+  - The oracle and the corpus lint cache now record warnings.
+- State: passing.
+- Next: F-113, then F-202 and F-205.
+- Decisions:
+  - [ADR 0042](../adr/0042-diagnostics.md):
+    - rules live in the pack, lazily loaded;
+    - code origins (lint, paranoid, ours) with lint parity;
+    - message style;
+    - `QuickFix { title, path, edits }` sharing F-111's `TextEdit`;
+    - the v0.1 code set;
+    - name-resolution parity deferred, with no new feature.
+  - LA-33 amended: a missing argument (`call-arity`) or a `null` for a typed input that isn't nullable (`null-argument`, ours) is an error, an unused output a warning. LA-31 extended. New LA-37. AR-05 and the architecture sketch updated.
+  - `duplicate-call` (ours) covers upstream bug 24, on the same branch path only (sarek calls a process in two exclusive `if`s; ternaries and `&&`/`||` count as branches too).
+  - Paranoid checks are reported at the spec's severity.
+  - No new dependency; diagnostics are in memory.
 - Blockers: none new.
 
 

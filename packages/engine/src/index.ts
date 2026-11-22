@@ -12,6 +12,7 @@ export type {
   Dataflow,
   DeleteNode,
   Diagnostic,
+  DiagnosticCode,
   Disconnect,
   EditCommand,
   EmitNode,
@@ -22,9 +23,12 @@ export type {
   GraphNode,
   GraphNodeKind,
   IncludeTarget,
+  LintContext,
+  LintRule,
   NodeKey,
   NodeKeyLocal,
   OutputNode,
+  PackLints,
   PaletteCategoryId,
   PaletteIcon,
   PaletteView,
@@ -36,6 +40,7 @@ export type {
   Port,
   PortRef,
   Projection,
+  QuickFix,
   RefusalCode,
   RenameDeclaration,
   ReplaceFileText,
@@ -50,6 +55,16 @@ export type {
   WorkflowRef,
   WorkflowTarget,
 } from "@nf-builder/lang-core";
+export {
+  compareDiagnostics,
+  countDiagnostics,
+  createDiagnoser,
+  type Diagnoser,
+  type DiagnoserOptions,
+  type DiagnosticCounts,
+} from "./diagnostics/diagnose";
+export { loadLints } from "./diagnostics/lints";
+export { applyTextEdits } from "./diagnostics/text-edits";
 export {
   applyCommand,
   commit,

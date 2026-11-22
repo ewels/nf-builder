@@ -45,5 +45,6 @@ Process: [0001](0001-record-decisions-as-adrs.md). Template: [template.md](templ
 | [0039](0039-edit-commands.md) | Apply edits as text patches with inverses, reprinting whole declarations, behind AR-24 and LA-13 guards | Accepted (agent) |
 | [0040](0040-github-pages-hosting.md) | Host on GitHub Pages, with the security policy in meta elements | Accepted |
 | [0041](0041-registry-snapshot-deploy.md) | Deploy the registry snapshot with the site from Actions | Accepted (agent) |
+| [0042](0042-diagnostics.md) | Diagnose with pack lint rules that match nextflow lint, with advice and text-edit quick fixes | Accepted (agent) |
 | [0043](0043-engine-worker.md) | Run the engine in a module worker behind Comlink, and benchmark it in Chromium | Accepted (agent) |
 | [0044](0044-embeddable-in-frames.md) | Let the app load and work inside frames | Accepted |

@@ -15,6 +15,7 @@ import {
   AST_FIXTURES_FILE,
   CONFIG_AST_ERRORS_FILE,
   FREE_VARIABLE_PROBES_FILE,
+  LINT_FIXTURES_FILE,
   PROJECTION_FIXTURES_FILE,
 } from "../src/paths.ts";
 import { loadTreeManifest, runTree } from "../src/trees.ts";
@@ -139,6 +140,96 @@ describe("F-102 trees", () => {
         (r) => !r.matched,
       ),
     ).toBe(true);
+  });
+
+  it("F-112: recorded warnings are compared, and the tree's absolute path is stripped from messages", () => {
+    const pack = tmp();
+    mkdirSync(join(pack, "fixtures"), { recursive: true });
+    for (const f of ["a.nf", "b.nf"])
+      writeFileSync(join(pack, "fixtures", f), "");
+    const manifestFile = join(pack, "fixtures.json");
+    const warning = {
+      line: 3,
+      column: 1,
+      message: "Process `when` is deprecated",
+    };
+    writeFileSync(
+      manifestFile,
+      JSON.stringify({
+        fixtures: [
+          { file: "a.nf", lint: [], warnings: [warning] },
+          { file: "b.nf", lint: [] },
+        ],
+      }),
+    );
+    const manifest = loadTreeManifest(manifestFile, "lint-fixtures");
+    expect(manifest.files[0]?.warnings).toEqual([warning]);
+    expect(manifest.files[1]?.warnings).toBeUndefined();
+    const cache = tmp();
+    const tree = join(cache, "trees", "lint-fixtures");
+    const report =
+      (messages: string[]): Exec =>
+      () => ({
+        status: 0,
+        signal: null,
+        stdout: JSON.stringify(
+          {
+            errors: [],
+            warnings: [
+              ...messages.map((message) => ({
+                filename: "a.nf",
+                startLine: 3,
+                startColumn: 1,
+                message,
+              })),
+              // b.nf has an unrecorded warning list: its warnings are not compared
+              { filename: "b.nf", startLine: 1, startColumn: 1, message: "x" },
+            ],
+          },
+          null,
+          2,
+        ),
+        stderr: "",
+        durationMs: 1,
+      });
+    const ok = runTree(manifest, {
+      exec: report([`Process \`when\` is deprecated`]),
+      cacheDir: cache,
+    });
+    expect(ok.map((r) => [r.caseId, r.matched])).toEqual([
+      ["lint-fixtures:a.nf", true],
+      ["lint-fixtures:b.nf", true],
+    ]);
+    expect(ok[0]?.warnings).toEqual(["Process `when` is deprecated"]);
+    // an absolute path in a message is made relative to the tree
+    const stripped = runTree(
+      {
+        ...manifest,
+        files: [
+          {
+            file: "a.nf",
+            lint: [],
+            warnings: [{ ...warning, message: "see modules/x.nf" }],
+          },
+        ],
+      },
+      { exec: report([`see ${tree}/modules/x.nf`]), cacheDir: cache },
+    );
+    expect(stripped[0]?.matched).toBe(true);
+    const wrong = runTree(manifest, { exec: report([]), cacheDir: cache });
+    expect(wrong[0]?.matched).toBe(false);
+    expect(wrong[0]?.problems[0]).toContain("warnings");
+    const extra = runTree(manifest, {
+      exec: report(["Process `when` is deprecated", "Another"]),
+      cacheDir: cache,
+    });
+    expect(extra[0]?.matched).toBe(false);
+  });
+
+  it("F-112: a lint-fixtures tree is added to a plain run once the pack has its manifest", () => {
+    expect(LINT_FIXTURES_FILE).toMatch(
+      /packages\/lang-2610\/test\/lints\/fixtures\.json$/,
+    );
   });
 
   it("F-102 ADR-0019: the pack's fixtures.json and errors.json load, and every file they name exists", () => {

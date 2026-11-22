@@ -30,4 +30,6 @@ export const pack: LanguagePack = {
   },
   // Import the parser (and the printer with it) only dynamically here: it stays a lazy chunk (QA-01, ADR 0027).
   loadParser: async () => (await import("./source/index.ts")).parser,
+  // Import the lints only dynamically here: they stay a lazy chunk (QA-01, F-112).
+  loadLints: async () => (await import("./lints/index.ts")).lints,
 };
