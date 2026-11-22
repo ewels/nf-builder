@@ -14,7 +14,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-106 typed projection | not started | [plan](plan-F-106.md). Branch from `main` after F-105 merges. |
 | F-107 legacy projection | not started | [plan](plan-F-107.md). After F-106; parallel with F-108. |
 | F-108 code nodes | not started | [plan](plan-F-108.md). After F-106; parallel with F-107. |
-| F-501 registry snapshot | `feat/F-501` | Task 1 building. [plan](plan-F-501.md). Maintainer issue #27 (build hook) opened. |
+| F-501 registry snapshot | `feat/F-501`, in PR | Plan deleted in its PR. Maintainer issue #27 (build hook). |
 
 Next free ADR number: 0034.
 
@@ -53,7 +53,7 @@ Next free ADR number: 0034.
 ### F-108 — [plan](plan-F-108.md)
 - Accept every recommendation in section 6: closure reads are code-node inputs; mutations are reads only; conditional writes replace the binding; no port for `params` as a whole; keys from the first output; a lint-only free-variable oracle tree. One ADR for the LA-27 readings.
 
-### F-501 — [plan](plan-F-501.md)
+### F-501 (merged with its PR)
 - Accept every recommendation in section 6: an orphan `registry-snapshot` branch fetched by each Netlify build; ship without the build-hook secret and open a `maintainer` issue for it; split `index.json` (QA-06) and `ports.json`, with IO-31 read as the pair; `tools/registry-snapshot` may import lang-core and pack entries (amends ADR 0003); make lang-2610 erasable for plain Node; ports from registry metadata in `meta.yml` order; parser wins on kind and component; every bundle file; pinned dependency closure; plugin release admitted by the pinned Nextflow; the failure policy; a path-filtered PR dry run outside "CI green"; daily at 03:23 UTC; the fixture snapshot for e2e. ADR 0034.
 
 ## Process notes for the next session

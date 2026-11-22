@@ -1044,8 +1044,8 @@
         "Index size within QA-06",
         "Spot check: nf-core/fastqc ports match its meta.yml and it is marked legacy (as of 2026-11)"
       ],
-      "passes": false,
-      "notes": "From F-008 (S4): the snapshot is the browser's only registry source (registry.nextflow.io sends no CORS headers; bundle downloads redirect to public-cr-prod.seqera.io, also without CORS). Paths under /api/v1/, module names %2F-encoded; the list endpoint lacks port metadata, so fetch each module's release. See docs/research/2026-11-22-spike-s4-cors.md."
+      "passes": true,
+      "notes": "From F-008 (S4): the snapshot is the browser's only registry source (registry.nextflow.io sends no CORS headers; bundle downloads redirect to public-cr-prod.seqera.io, also without CORS). Paths under /api/v1/, module names %2F-encoded; the list endpoint lacks port metadata, so fetch each module's release. See docs/research/2026-11-22-spike-s4-cors.md. Verified 2026-11-22: step 1 by test/workflows.test.ts (daily schedule, dispatch, PR dry run; only the publish job writes, only to branch registry-snapshot), test/registry-snapshot-site.test.ts (Netlify builds fetch the branch into /registry/) and e2e/registry-snapshot.spec.ts (the built site serves the snapshot as JSON); the first run on main is recorded in progress.md. Step 2 by pnpm check:registry (QA-06 in scripts/budgets.json) in the workflow's build job, on the live data in the PR's dry run. Step 3 by tools/registry-snapshot/test/ports.test.ts and classify.test.ts on the recorded fastqc bundle, and the dry run's report line 'nf-core/fastqc: legacy process FASTQC'. ADR 0035."
     },
     {
       "id": "F-502",
@@ -1063,7 +1063,7 @@
         "With live access (if S4 allowed it): palette shows live"
       ],
       "passes": false,
-      "notes": "From F-008 (S4, 2026-11-22): the registry sends no CORS headers, so the live client can't work from the browser today; step 2 applies only if a re-run of the S4 probe (dispatch the S4 probe workflow) shows access. Delete the probe page and workflow here (ADR 0023)."
+      "notes": "From F-008 (S4, 2026-11-22): the registry sends no CORS headers, so the live client can't work from the browser today; step 2 applies only if a re-run of the S4 probe (dispatch the S4 probe workflow) shows access. Delete the probe page and workflow here (ADR 0023). From F-501: read /registry/index.json and check format === 1 and a JSON content type (the SPA fallback returns HTML 200 when it's missing); the age is generatedAt; ports are in /registry/ports.json; Playwright's preview serves the fixture snapshot from REGISTRY_SNAPSHOT_DIR (tools/registry-snapshot/test/fixtures/expected). Delete the S4 probe page and workflow here (ADR 0023)."
     },
     {
       "id": "F-503",
@@ -1082,7 +1082,7 @@
         "Scrolling the module list loads more without blocking input"
       ],
       "passes": false,
-      "notes": ""
+      "notes": "From F-501: namespace is the first segment of name; kind is process or workflow; typed is true, false or null (unknown); search over name, description and keywords; ports.json holds meta.yml ports per module."
     },
     {
       "id": "F-504",
@@ -1102,7 +1102,7 @@
         "Drop it again: the bundle is not duplicated"
       ],
       "passes": false,
-      "notes": "From F-005 (S1): typed workflows may call legacy registry modules across files with no warning; tuple inputs as tuple(...), outputs by assignment (LA-14). .module-info isn't written until its checksum algorithm is verified with the oracle (ADR 0009 spike result)."
+      "notes": "From F-005 (S1): typed workflows may call legacy registry modules across files with no warning; tuple inputs as tuple(...), outputs by assignment (LA-14). .module-info isn't written until its checksum algorithm is verified with the oracle (ADR 0009 spike result). From F-501: modules/<name>/<version>.json holds every file of the registry bundle (base64 for non-UTF-8), the include name (component), the pinned requires (each present as its own bundle) and the registry tar.gz checksum for .module-info."
     },
     {
       "id": "F-505",
@@ -1119,7 +1119,7 @@
         "Add nf-schema: `nextflow.config` gains the plugin line; its functions appear in the palette"
       ],
       "passes": false,
-      "notes": ""
+      "notes": "From F-501: plugins/<id>/<version>.json holds the description and definitions; the version is already chosen as the highest published release admitted by the pack's pinned Nextflow."
     },
     {
       "id": "F-506",
@@ -1137,7 +1137,7 @@
         "Make local copy: module moves to `modules/local/`, include updated, editing allowed"
       ],
       "passes": false,
-      "notes": ""
+      "notes": "From F-501: the index version is the module's latest release."
     },
     {
       "id": "F-601",
