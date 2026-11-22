@@ -7,6 +7,9 @@ on:
   pull_request:
   push:
     branches: [main]
+  # Dispatching by hand re-runs every job, including `catalogue` (F-109): it regenerates the catalogue, fails on a
+  # diff and uploads the regenerated files.
+  workflow_dispatch:
 
 permissions:
   contents: read

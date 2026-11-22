@@ -1,0 +1,317 @@
+{
+  "categories": [
+    {
+      "id": "processes",
+      "label": "Processes",
+      "icon": "process",
+      "items": [
+        {
+          "kind": "construct",
+          "id": "process",
+          "name": "processDef",
+          "label": "Process",
+          "description": "Run a script or command once per input, in its own work directory.",
+          "docs": "https://docs.seqera.io/nextflow/process"
+        },
+        {
+          "kind": "construct",
+          "id": "exec-process",
+          "name": "processDef",
+          "label": "Exec process",
+          "description": "Run Nextflow code natively as a process task, with no external script.",
+          "docs": "https://docs.seqera.io/nextflow/process#native-execution"
+        },
+        {
+          "kind": "construct",
+          "id": "agent",
+          "name": "agentDef",
+          "label": "Agent",
+          "description": "Run an agentic task by rendering a prompt, calling a language model and emitting the result.",
+          "icon": "agent",
+          "preview": true,
+          "docs": "https://docs.seqera.io/nextflow/agent"
+        }
+      ]
+    },
+    {
+      "id": "workflows",
+      "label": "Workflows",
+      "icon": "workflow",
+      "items": [
+        {
+          "kind": "construct",
+          "id": "workflow",
+          "name": "workflowDef",
+          "label": "Workflow",
+          "description": "Compose processes, workflows and operators into a dataflow.",
+          "docs": "https://docs.seqera.io/nextflow/workflow"
+        },
+        {
+          "kind": "construct",
+          "id": "include-pipeline",
+          "name": "includeDeclaration",
+          "label": "Include pipeline",
+          "description": "Include a whole pipeline (its params block, entry workflow and output block) as a named workflow.",
+          "icon": "include",
+          "docs": "https://docs.seqera.io/nextflow/workflow-typed#pipeline-composition"
+        }
+      ]
+    },
+    {
+      "id": "factories",
+      "label": "Channel factories",
+      "icon": "factory",
+      "items": [
+        {
+          "kind": "factory",
+          "name": "of"
+        },
+        {
+          "kind": "factory",
+          "name": "fromPath"
+        },
+        {
+          "kind": "factory",
+          "name": "fromList"
+        },
+        {
+          "kind": "factory",
+          "name": "value"
+        },
+        {
+          "kind": "factory",
+          "name": "empty"
+        },
+        {
+          "kind": "factory",
+          "name": "topic"
+        },
+        {
+          "kind": "factory",
+          "name": "interval"
+        },
+        {
+          "kind": "factory",
+          "name": "watchPath"
+        },
+        {
+          "kind": "factory",
+          "name": "fromLineage"
+        }
+      ]
+    },
+    {
+      "id": "operators",
+      "label": "Operators",
+      "icon": "operator",
+      "groups": [
+        {
+          "id": "transform",
+          "label": "Transform",
+          "items": [
+            {
+              "kind": "operator",
+              "name": "map"
+            },
+            {
+              "kind": "operator",
+              "name": "flatMap"
+            }
+          ]
+        },
+        {
+          "id": "filter",
+          "label": "Filter",
+          "items": [
+            {
+              "kind": "operator",
+              "name": "filter"
+            },
+            {
+              "kind": "operator",
+              "name": "unique"
+            },
+            {
+              "kind": "operator",
+              "name": "until"
+            }
+          ]
+        },
+        {
+          "id": "combine",
+          "label": "Combine",
+          "items": [
+            {
+              "kind": "operator",
+              "name": "combine"
+            },
+            {
+              "kind": "operator",
+              "name": "join"
+            },
+            {
+              "kind": "operator",
+              "name": "mix"
+            }
+          ]
+        },
+        {
+          "id": "reduce",
+          "label": "Reduce",
+          "items": [
+            {
+              "kind": "operator",
+              "name": "collect"
+            },
+            {
+              "kind": "operator",
+              "name": "groupBy"
+            },
+            {
+              "kind": "operator",
+              "name": "reduce"
+            }
+          ]
+        },
+        {
+          "id": "inspect",
+          "label": "Inspect",
+          "items": [
+            {
+              "kind": "operator",
+              "name": "view"
+            },
+            {
+              "kind": "operator",
+              "name": "subscribe"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "params-outputs",
+      "label": "Params & outputs",
+      "icon": "params",
+      "items": [
+        {
+          "kind": "construct",
+          "id": "params",
+          "name": "paramsDef",
+          "label": "Params",
+          "description": "Declare the pipeline parameters, with types and default values.",
+          "icon": "params",
+          "docs": "https://docs.seqera.io/nextflow/reference/syntax#params-block"
+        },
+        {
+          "kind": "construct",
+          "id": "output",
+          "name": "outputDef",
+          "label": "Output",
+          "description": "Declare the workflow outputs and where they are published.",
+          "icon": "output",
+          "docs": "https://docs.seqera.io/nextflow/reference/syntax#output-block"
+        }
+      ]
+    },
+    {
+      "id": "types-functions-includes",
+      "label": "Types, functions & includes",
+      "icon": "function",
+      "items": [
+        {
+          "kind": "construct",
+          "id": "record",
+          "name": "recordDef",
+          "label": "Record",
+          "description": "Define a record type with named, typed fields.",
+          "icon": "record",
+          "docs": "https://docs.seqera.io/nextflow/reference/syntax#record-type"
+        },
+        {
+          "kind": "construct",
+          "id": "enum",
+          "name": "enumDef",
+          "label": "Enum",
+          "description": "Define an enum type with a fixed set of values.",
+          "icon": "enum",
+          "docs": "https://docs.seqera.io/nextflow/reference/syntax#enum-type"
+        },
+        {
+          "kind": "construct",
+          "id": "function",
+          "name": "functionDef",
+          "label": "Function",
+          "description": "Define a function that can be called from the script.",
+          "icon": "function",
+          "docs": "https://docs.seqera.io/nextflow/reference/syntax#function"
+        },
+        {
+          "kind": "construct",
+          "id": "include",
+          "name": "includeDeclaration",
+          "label": "Include",
+          "description": "Include processes, workflows, functions or types from another script or module.",
+          "icon": "include",
+          "docs": "https://docs.seqera.io/nextflow/reference/syntax#include"
+        }
+      ]
+    },
+    {
+      "id": "plugins-config",
+      "label": "Plugins & config",
+      "icon": "config",
+      "items": [
+        {
+          "kind": "config",
+          "name": "plugins",
+          "icon": "plugin"
+        },
+        {
+          "kind": "config",
+          "name": "process"
+        },
+        {
+          "kind": "config",
+          "name": "profiles"
+        },
+        {
+          "kind": "config",
+          "name": "params"
+        },
+        {
+          "kind": "config",
+          "name": "env"
+        },
+        {
+          "kind": "config",
+          "name": "manifest"
+        },
+        {
+          "kind": "config",
+          "name": "executor"
+        },
+        {
+          "kind": "config",
+          "name": "docker"
+        },
+        {
+          "kind": "config",
+          "name": "singularity"
+        },
+        {
+          "kind": "config",
+          "name": "apptainer"
+        },
+        {
+          "kind": "config",
+          "name": "conda"
+        },
+        {
+          "kind": "config",
+          "name": "wave"
+        }
+      ]
+    }
+  ]
+}
