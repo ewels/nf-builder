@@ -215,14 +215,20 @@ test("F-202 ADR-0002 IO-01: the stored records match the recorded IndexedDB form
   ]);
   expect(projects[0]?.name).toBe("Format");
   // F-203: Start blank stores the blank template's files; the edit replaced README.md.
-  const files = db.stores.files?.records as Record<string, unknown>[];
-  expect(files.map((f) => f.path).sort()).toEqual(
-    templateFilesOnDisk("blank")
-      .map((f) => f.path)
-      .sort(),
+  const byPath = (a: { path: string }, b: { path: string }) =>
+    a.path < b.path ? -1 : a.path > b.path ? 1 : 0;
+  const files = ((db.stores.files?.records ?? []) as { path: string }[]).sort(
+    byPath,
   );
-  for (const f of files) expect(f.projectId).toBe(projects[0]?.id);
-  expect(files.find((f) => f.path === "README.md")?.text).toBe("y\n");
+  expect(files).toEqual(
+    templateFilesOnDisk("blank")
+      .map((f) => ({
+        projectId: projects[0]?.id,
+        path: f.path,
+        text: f.path === "README.md" ? "y\n" : f.text,
+      }))
+      .sort(byPath),
+  );
 });
 
 test("F-202 QA-10: focus returns to the switcher after Escape, Cancel, Create and choosing a project", async ({
