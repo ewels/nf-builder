@@ -316,16 +316,27 @@
       "file": "include-not-parsed/positive/broken.nf",
       "lint": [
         {
-          "line": 1,
+          "line": 6,
           "column": 1,
-          "message": "Groovy `import` declarations are not supported -- use fully-qualified name inline instead"
+          "message": "Unexpected end of file -- check for an unclosed brace, bracket, parenthesis, or string"
         }
       ],
       "warnings": []
     },
     {
       "file": "include-not-parsed/positive/main.nf",
-      "lint": [],
+      "lint": [
+        {
+          "line": 1,
+          "column": 1,
+          "message": "Module could not be parsed: 'include-not-parsed/positive/broken.nf'"
+        },
+        {
+          "line": 4,
+          "column": 5,
+          "message": "`hello` is not defined"
+        }
+      ],
       "warnings": []
     },
     {

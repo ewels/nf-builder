@@ -120,6 +120,8 @@ export const INCLUDE_ADVICE: Readonly<Record<string, string>> = {
   "include-target": "create the file, or correct the path in the include",
   "include-not-parsed": "fix the syntax errors in that file first",
   "include-name": "check the name, or define it in that file",
+  // engine-owned: an internal problem or a rule that threw (IO-14)
+  internal: "it is kept as written; edit it as text",
 };
 
 /** The message with advice appended, unless it already has a ` -- ` clause or the code takes no pack advice. */

@@ -85,5 +85,8 @@ describe("F-112 advice", () => {
     );
     expect(lints.advise("include-name", once)).toBe(once);
     expect(lints.advise("deprecated-when", "text")).toBe("text");
+    expect(lints.advise("internal", "Rule `x` failed: boom")).toBe(
+      "Rule `x` failed: boom -- it is kept as written; edit it as text",
+    );
   });
 });
