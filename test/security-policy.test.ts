@@ -126,4 +126,30 @@ describe("security policy", () => {
       "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self'";
     expect(cspProblems(policy)).toEqual([]);
   });
+
+  it.each(["style-src-elem", "style-src-attr"])(
+    "QA-30 F-208: cspProblems checks %s as it does style-src",
+    (directive) => {
+      const base = "default-src 'self'; script-src 'self'; connect-src 'self'";
+      for (const source of [
+        "https://fonts.example",
+        "'nonce-abc'",
+        "'sha256-abc'",
+        "data:",
+        "*",
+      ])
+        expect(cspProblems(`${base}; ${directive} 'self' ${source}`)).toContain(
+          `${directive} allows ${source}`,
+        );
+      expect(
+        cspProblems(`${base}; ${directive} 'self' 'unsafe-inline'`),
+      ).toEqual([]);
+    },
+  );
+
+  it("QA-30 F-208: cspProblems rejects a hash in style-src", () => {
+    const policy =
+      "default-src 'self'; script-src 'self'; style-src 'self' 'sha256-abc'; connect-src 'self'";
+    expect(cspProblems(policy)).toContain("style-src allows 'sha256-abc'");
+  });
 });

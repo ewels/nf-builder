@@ -63,6 +63,8 @@ const SCRIPT_DIRECTIVES = [
 const FORBIDDEN_SCRIPT_SOURCE =
   /^('(unsafe-inline|unsafe-eval|unsafe-hashes|nonce-.*|sha(256|384|512)-.*)'|data:|blob:|\*|[a-z][a-z0-9+.-]*:)$/;
 
+const STYLE_DIRECTIVES = ["style-src", "style-src-elem", "style-src-attr"];
+
 /** F-208: the only style sources, so that any further loosening is visible. */
 const STYLE_SOURCES: readonly string[] = ["'self'", "'unsafe-inline'"];
 
@@ -93,9 +95,11 @@ export function cspProblems(policy: string): string[] {
     }
   }
 
-  for (const source of directives.get("style-src") ?? []) {
-    if (!STYLE_SOURCES.includes(source))
-      problems.push(`style-src allows ${source}`);
+  for (const name of STYLE_DIRECTIVES) {
+    for (const source of directives.get(name) ?? []) {
+      if (!STYLE_SOURCES.includes(source))
+        problems.push(`${name} allows ${source}`);
+    }
   }
 
   const connect = directives.get("connect-src");
