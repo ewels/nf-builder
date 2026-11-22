@@ -19,7 +19,7 @@ export function showModalOnce(dialog: HTMLDialogElement | null): void {
 }
 
 /** Opens the dialog modally on mount. `run` closes it when the action succeeds, and otherwise shows the failure inline. */
-function useModal(onClose: () => void) {
+export function useModal(onClose: () => void) {
   const ref = useRef<HTMLDialogElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -39,12 +39,10 @@ function useModal(onClose: () => void) {
 }
 
 export function ProjectNameDialog({
-  mode,
   initialName,
   onSubmit,
   onClose,
 }: {
-  readonly mode: "create" | "rename";
   readonly initialName: string;
   readonly onSubmit: (name: string) => Promise<void>;
   readonly onClose: () => void;
@@ -52,7 +50,6 @@ export function ProjectNameDialog({
   const modal = useModal(onClose);
   const titleId = useId();
   const input = useRef<HTMLInputElement>(null);
-  const title = mode === "create" ? "New project" : "Rename project";
   useEffect(() => input.current?.select(), []);
 
   const submit = async (event: FormEvent) => {
@@ -73,7 +70,7 @@ export function ProjectNameDialog({
       onClose={onClose}
     >
       <form onSubmit={submit}>
-        <h2 id={titleId}>{title}</h2>
+        <h2 id={titleId}>Rename project</h2>
         <label className="dialog-field">
           <span>Name</span>
           <input
@@ -84,12 +81,6 @@ export function ProjectNameDialog({
             required
           />
         </label>
-        {mode === "create" ? (
-          <p className="muted">
-            Projects are stored in this browser only. Clearing site data deletes
-            them.
-          </p>
-        ) : null}
         {modal.error ? (
           <p className="dialog-error" role="alert">
             {modal.error}
@@ -100,7 +91,7 @@ export function ProjectNameDialog({
             Cancel
           </button>
           <button type="submit" className="primary" disabled={modal.busy}>
-            {mode === "create" ? "Create" : "Rename"}
+            Rename
           </button>
         </div>
       </form>

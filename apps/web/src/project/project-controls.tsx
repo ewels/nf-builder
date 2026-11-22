@@ -1,25 +1,45 @@
-// The connected project switcher and whichever dialog is open (F-202).
-import { type JSX, useEffect, useRef, useState } from "react";
-import { DEFAULT_PROJECT_NAME } from "../workspace/project-name";
+// The connected project switcher and whichever dialog is open (F-202, F-203). The dialog state is in the store, so the
+// header's Templates button opens the New project dialog too.
+import { installedPackVersions } from "@nf-builder/engine";
+import { type JSX, useEffect, useRef } from "react";
+import { NewProjectDialog } from "./new-project-dialog";
 import { DeleteProjectDialog, ProjectNameDialog } from "./project-dialogs";
 import { useProjects } from "./project-store";
 import { ProjectSwitcher } from "./project-switcher";
+import { useTemplates } from "./templates";
+
+const languageVersions = installedPackVersions();
 
 export function ProjectControls(): JSX.Element {
   const status = useProjects((s) => s.status);
+  const dialog = useProjects((s) => s.dialog);
   const create = useProjects((s) => s.create);
   const open = useProjects((s) => s.open);
   const rename = useProjects((s) => s.rename);
   const remove = useProjects((s) => s.remove);
-  const [dialog, setDialog] = useState<"create" | "rename" | "delete" | null>(
-    null,
+  const showDialog = useProjects((s) => s.showDialog);
+  const closeDialog = useProjects((s) => s.closeDialog);
+  const templates = useTemplates(
+    dialog?.kind === "new" ? languageVersions[0] : undefined,
   );
-  const close = () => setDialog(null);
-  // a dialog's own unmount can't restore focus, so put it back on the switcher once the dialog has gone (WCAG 2.4.3)
+  // a dialog's own unmount can't restore focus, so put it back on the control that opened it once the dialog has gone
+  // (WCAG 2.4.3): the switcher puts focus on its button before it acts, and the header's button is focused when clicked
   const button = useRef<HTMLButtonElement>(null);
+  const opener = useRef<HTMLElement | null>(null);
   const shown = useRef(false);
   useEffect(() => {
-    if (dialog === null && shown.current) button.current?.focus();
+    if (dialog !== null && !shown.current) {
+      opener.current =
+        document.activeElement instanceof HTMLElement
+          ? document.activeElement
+          : null;
+    } else if (dialog === null && shown.current) {
+      const target = opener.current?.isConnected
+        ? opener.current
+        : button.current;
+      target?.focus();
+      opener.current = null;
+    }
     shown.current = dialog !== null;
   }, [dialog]);
   const { current } = status;
@@ -31,31 +51,34 @@ export function ProjectControls(): JSX.Element {
         buttonRef={button}
         disabled={status.storage !== "ready"}
         onOpen={(id) => void open(id).catch(() => undefined)} // the status carries `openError`
-        onNew={() => setDialog("create")}
-        onRename={() => setDialog("rename")}
-        onDelete={() => setDialog("delete")}
+        onNew={() => showDialog({ kind: "new", route: "blank" })}
+        onRename={() => showDialog({ kind: "rename" })}
+        onDelete={() => showDialog({ kind: "delete" })}
       />
-      {dialog === "create" ? (
-        <ProjectNameDialog
-          mode="create"
-          initialName={DEFAULT_PROJECT_NAME}
-          onSubmit={create}
-          onClose={close}
+      {dialog?.kind === "new" ? (
+        <NewProjectDialog
+          languageVersions={languageVersions}
+          templates={templates}
+          projects={status.projects}
+          currentId={current?.id ?? null}
+          initialRoute={dialog.route}
+          onCreate={create}
+          onOpen={open}
+          onClose={closeDialog}
         />
       ) : null}
-      {dialog === "rename" && current ? (
+      {dialog?.kind === "rename" && current ? (
         <ProjectNameDialog
-          mode="rename"
           initialName={current.name}
           onSubmit={(name) => rename(current.id, name)}
-          onClose={close}
+          onClose={closeDialog}
         />
       ) : null}
-      {dialog === "delete" && current ? (
+      {dialog?.kind === "delete" && current ? (
         <DeleteProjectDialog
           project={current}
           onConfirm={() => remove(current.id)}
-          onClose={close}
+          onClose={closeDialog}
         />
       ) : null}
     </>

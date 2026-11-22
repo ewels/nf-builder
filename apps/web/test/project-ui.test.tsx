@@ -90,20 +90,16 @@ describe("F-202 project UI", () => {
     expect(empty).not.toMatch(/disabled=""[^>]*>New project…/);
   });
 
-  it("F-202 ADR-0002: the New project dialog says projects are stored in this browser only", () => {
+  it("F-202 ADR-0002: the Rename dialog is name-only; the Delete dialog names the project and says it can't be recovered", () => {
     const html = renderToStaticMarkup(
       <ProjectNameDialog
-        mode="create"
-        initialName="Untitled project"
+        initialName="Alpha"
         onSubmit={async () => undefined}
         onClose={noop}
       />,
     );
-    expect(html).toContain(
-      "Projects are stored in this browser only. Clearing site data deletes them.",
-    );
-    expect(html).toContain('value="Untitled project"');
-    expect(html).toContain("New project");
+    expect(html).toContain('value="Alpha"');
+    expect(html).toContain("Rename project");
     const del = renderToStaticMarkup(
       <DeleteProjectDialog
         project={meta("a", "Alpha")}
@@ -205,6 +201,7 @@ describe("F-202 project UI", () => {
         saveFailed="disk full"
         storageWarning={null}
         storageNote={false}
+        onTemplates={noop}
       />,
     );
     expect(html).toMatch(/class="visually-hidden"[^>]*>[^<]*disk full/);

@@ -4,6 +4,8 @@ import {
   type EditCommand,
   type EngineApi,
   installedPackVersions,
+  templateFiles,
+  templateList,
 } from "@nf-builder/engine";
 import { IDBFactory } from "fake-indexeddb";
 import { describe, expect, it } from "vitest";
@@ -276,6 +278,75 @@ describe("F-202 workspace", () => {
       }),
     ).rejects.toThrow(/0\.0/);
     expect(s.statuses.at(-1)?.projects).toHaveLength(1);
+  });
+
+  it("F-203 UX-60 LA-02: createProject with a template stores exactly its files and the chosen version", async () => {
+    const s = setup();
+    await s.watching;
+    const list = await templateList(version);
+    for (const t of list.templates) {
+      const meta = await s.workspace.createProject({
+        name: t.name,
+        languageVersion: version,
+        files: [],
+        template: t.id,
+        publishDocs: true,
+      });
+      expect(meta.languageVersion).toBe(version);
+      const stored = await (await s.reader()).readProject(meta.id);
+      expect(stored?.files).toEqual(await templateFiles(version, t.id));
+    }
+    expect(list.templates.length).toBeGreaterThan(0);
+  });
+
+  it("F-203 UX-60: Start blank stores the pack's blank template", async () => {
+    const s = setup();
+    await s.watching;
+    const { blank } = await templateList(version);
+    const meta = await s.workspace.createProject({
+      name: "B",
+      languageVersion: version,
+      files: [],
+      template: blank.id,
+    });
+    const stored = await (await s.reader()).readProject(meta.id);
+    expect(stored?.files).toEqual(await templateFiles(version, blank.id));
+    expect(stored?.files.map((f) => f.path)).toContain("main.nf");
+    await s.workspace.openProject(meta.id);
+    expect(await s.workspace.readFile("main.nf")).toContain(
+      "nextflow.enable.types = true",
+    );
+  });
+
+  it("F-203: createProject refuses an unknown template, and a template given with files", async () => {
+    const s = setup();
+    await s.watching;
+    await expect(
+      s.workspace.createProject({
+        name: "X",
+        languageVersion: version,
+        files: [],
+        template: "nope",
+      }),
+    ).rejects.toThrow(/nope/);
+    await expect(
+      s.workspace.createProject({
+        name: "X",
+        languageVersion: version,
+        files,
+        template: "blank",
+      }),
+    ).rejects.toThrow(/template.*files/i);
+    expect(s.statuses.at(-1)?.projects ?? []).toHaveLength(0);
+  });
+
+  it("F-203: templates passes straight through", async () => {
+    const s = setup();
+    await s.watching;
+    expect(await s.workspace.templates(version)).toEqual(
+      await templateList(version),
+    );
+    await expect(s.workspace.templates("0.0")).rejects.toThrow();
   });
 
   it("F-202: a raw open is unsaved: its changes are not stored and no project is current", async () => {

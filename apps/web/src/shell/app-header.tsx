@@ -16,6 +16,8 @@ interface AppHeaderProps {
   readonly storageWarning: StorageUsage | null;
   /** True when the browser refused persistent storage. */
   readonly storageNote: boolean;
+  /** Opens the New project dialog on From a template (UX-60). */
+  readonly onTemplates: () => void;
 }
 
 export function AppHeader({
@@ -25,6 +27,7 @@ export function AppHeader({
   saveFailed,
   storageWarning,
   storageNote,
+  onTemplates,
 }: AppHeaderProps): JSX.Element {
   return (
     <header className="app-header">
@@ -43,7 +46,7 @@ export function AppHeader({
       {storageWarning ? <StorageWarning usage={storageWarning} /> : null}
       {storageNote ? <PersistenceNote framed={isFramed()} /> : null}
       <div className="header-actions">
-        <button type="button" className="header-button" disabled>
+        <button type="button" className="header-button" onClick={onTemplates}>
           Templates
         </button>
         <button type="button" className="header-button" disabled>

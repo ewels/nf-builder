@@ -11,6 +11,7 @@ import {
   type WorkspaceApi,
   type WorkspaceStatus,
 } from "../workspace/types";
+import type { NewProjectRequest, NewProjectRoute } from "./new-project-dialog";
 import {
   nearQuota,
   requestPersistence,
@@ -18,7 +19,14 @@ import {
   storageUsage,
 } from "./storage-health";
 
+/** The dialog that is open, if any; it lives here so the header can open it (F-203). */
+export type ProjectDialog =
+  | { readonly kind: "new"; readonly route: NewProjectRoute }
+  | { readonly kind: "rename" }
+  | { readonly kind: "delete" };
+
 interface ProjectUiState {
+  readonly dialog: ProjectDialog | null;
   readonly status: WorkspaceStatus;
   /** Set while usage is at or above the warning fraction. */
   readonly storageWarning: StorageUsage | null;
@@ -28,7 +36,9 @@ interface ProjectUiState {
 
 interface ProjectActions {
   start(): Promise<void>;
-  create(name: string): Promise<void>;
+  create(request: NewProjectRequest): Promise<void>;
+  showDialog(dialog: ProjectDialog): void;
+  closeDialog(): void;
   open(id: string): Promise<void>;
   rename(id: string, name: string): Promise<void>;
   remove(id: string): Promise<void>;
@@ -75,6 +85,7 @@ export function createProjectStore(
     };
 
     return {
+      dialog: null,
       status: INITIAL_STATUS,
       storageWarning: null,
       persisted: null,
@@ -103,14 +114,22 @@ export function createProjectStore(
         }
       },
 
-      async create(name) {
-        if (deps.languageVersion === undefined)
-          throw new Error("No Nextflow version is installed.");
+      showDialog(dialog) {
+        set({ dialog });
+      },
+
+      closeDialog() {
+        set({ dialog: null });
+      },
+
+      async create(request) {
         const workspace = deps.workspace();
         const meta = await workspace.createProject({
-          name,
-          languageVersion: deps.languageVersion,
+          name: request.name,
+          languageVersion: request.languageVersion,
           files: [],
+          template: request.template,
+          publishDocs: request.publishDocs,
         });
         void askPersistence();
         void checkUsage();

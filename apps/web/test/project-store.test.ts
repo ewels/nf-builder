@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import type { NewProjectRequest } from "../src/project/new-project-dialog";
 import {
   createProjectStore,
   type ProjectStoreDeps,
@@ -23,6 +24,13 @@ const meta = (id: string, over: Partial<ProjectMeta> = {}): ProjectMeta => ({
 const ready = (over: Partial<WorkspaceStatus> = {}): WorkspaceStatus => ({
   ...INITIAL_STATUS,
   storage: "ready",
+  ...over,
+});
+const request = (name: string, over: Partial<NewProjectRequest> = {}) => ({
+  name,
+  languageVersion: "26.10",
+  template: "blank",
+  publishDocs: true,
   ...over,
 });
 const settle = () => new Promise((r) => setTimeout(r, 0));
@@ -108,16 +116,35 @@ describe("F-202 project store", () => {
     expect(f.store.getState().status.current?.id).toBe("a");
   });
 
-  it("F-202 UX-01 LA-01: create stores a project with no files in the first installed version, then opens it", async () => {
+  it("F-203 UX-60: create sends the template and Publish docs, then opens the new project", async () => {
     const f = fixture(ready());
     await f.store.getState().start();
-    await f.store.getState().create("RNA");
+    await f.store
+      .getState()
+      .create(request("RNA", { template: "hello-world", publishDocs: false }));
     expect(f.workspace.createProject).toHaveBeenCalledWith({
       name: "RNA",
       languageVersion: "26.10",
       files: [],
+      template: "hello-world",
+      publishDocs: false,
     });
     expect(f.calls.slice(-2)).toEqual(["createProject", "openProject:new"]);
+  });
+
+  it("F-203 UX-60: the dialog state lives in the store: showDialog opens it on a route and closeDialog clears it", () => {
+    const f = fixture(ready());
+    const { showDialog, closeDialog } = f.store.getState();
+    expect(f.store.getState().dialog).toBeNull();
+    showDialog({ kind: "new", route: "template" });
+    expect(f.store.getState().dialog).toEqual({
+      kind: "new",
+      route: "template",
+    });
+    showDialog({ kind: "rename" });
+    expect(f.store.getState().dialog).toEqual({ kind: "rename" });
+    closeDialog();
+    expect(f.store.getState().dialog).toBeNull();
   });
 
   it("F-202 IO-03: create requests persistence and checks the quota; each saved push and each delete checks it again", async () => {
@@ -137,7 +164,7 @@ describe("F-202 project store", () => {
     await settle();
     expect(estimate).toHaveBeenCalledTimes(1); // at start
     expect(persist).not.toHaveBeenCalled();
-    await f.store.getState().create("P");
+    await f.store.getState().create(request("P"));
     await settle();
     expect(persist).toHaveBeenCalledTimes(1);
     expect(estimate).toHaveBeenCalledTimes(2);
@@ -165,20 +192,20 @@ describe("F-202 project store", () => {
     } as unknown as StorageManager;
     const f = fixture(ready(), () => refusing);
     await f.store.getState().start();
-    await f.store.getState().create("P");
+    await f.store.getState().create(request("P"));
     await settle();
     expect(f.store.getState().storageWarning).toBeNull();
     expect(f.store.getState().persisted).toBe(false);
     // no storage manager at all, and a getter that throws
     const bare = fixture(ready(), () => undefined);
-    await bare.store.getState().create("P");
+    await bare.store.getState().create(request("P"));
     await settle();
     expect(bare.store.getState().storageWarning).toBeNull();
     expect(bare.store.getState().persisted).toBeNull();
     const throwing = fixture(ready(), () => {
       throw new Error("SecurityError");
     });
-    await throwing.store.getState().create("P");
+    await throwing.store.getState().create(request("P"));
     await settle();
     expect(throwing.store.getState().storageWarning).toBeNull();
   });

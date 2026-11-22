@@ -8,6 +8,7 @@ import {
   installedPackVersions,
   type ProjectChange,
   type ProjectSummary,
+  templateFiles,
 } from "@nf-builder/engine";
 import { createAutosaver, type Timer } from "./autosave";
 import type { ProjectDb } from "./project-db";
@@ -150,6 +151,12 @@ export function createWorkspace(options: WorkspaceOptions): WorkspaceApi {
           throw new Error("A project name needs 1 to 100 characters.");
         if (!installedPackVersions().includes(input.languageVersion))
           throw new Error(`No language pack for ${input.languageVersion}.`);
+        if (input.template !== undefined && input.files.length > 0)
+          throw new Error("A template can't be combined with files.");
+        const files =
+          input.template === undefined
+            ? input.files
+            : await templateFiles(input.languageVersion, input.template);
         const time = now();
         const meta: ProjectMeta = {
           id: newId(),
@@ -159,7 +166,7 @@ export function createWorkspace(options: WorkspaceOptions): WorkspaceApi {
           updatedAt: time,
           openedAt: time,
         };
-        await store.createProject(meta, input.files);
+        await store.createProject(meta, files);
         await refresh();
         return meta;
       }),
