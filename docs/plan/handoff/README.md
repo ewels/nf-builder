@@ -24,7 +24,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-207 layout sidecar | not started | [plan](plan-F-207.md). After F-205 and F-202. |
 | F-208 view modes and Code | `feat/F-208` (`/home/user/wt-F-208`) | Tasks 1–2 building. [plan](plan-F-208.md). |
 | F-209 undo and redo | not started | [plan](plan-F-209.md). After F-202, F-205 and F-208. |
-| F-501 registry snapshot | merged, PR #29, **not passing** | Live `/registry/` passes a sampled check; waiting for the dispatched snapshot run's `workflow_run` deploy and `verify`, then flip in a PR. |
+| F-501 registry snapshot | merged, PR #29; passing | Confirmed on live data after the snapshot-triggered Pages deploy. |
 | F-011 GitHub Pages hosting | merged, PR #37 | Live at https://ewels.github.io/nf-builder/; first `verify` passed. |
 
 ## Merge order

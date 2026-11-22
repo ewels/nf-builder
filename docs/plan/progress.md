@@ -528,6 +528,12 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - A licences row for the corpus-derived baselines.
 - Blockers: none.
 
+## 2026-11-22 · F-501 · Claude (autonomous)
+- Did: confirmed the registry snapshot on live data. The dispatched snapshot run published to `registry-snapshot`, and the Pages deploy it triggered passed `verify` against the live `/registry/`.
+- State: passing.
+- Next: F-203, F-206 and F-208 in flight.
+- Decisions: none.
+
 ## 2026-11-22 · F-203 · Claude (autonomous)
 - Did:
   - Three pack-owned templates (Start blank, Hello world, Samplesheet to MultiQC), bundled by `pnpm gen:templates` into a lazily loaded `templates.json`. Each is an oracle case run in place and lint-clean.
