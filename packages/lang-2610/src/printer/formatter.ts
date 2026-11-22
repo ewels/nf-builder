@@ -680,8 +680,13 @@ export class Formatter {
     const items = this.argItems(call);
     if (items.length > 0) {
       const wrap = this.hasCommentsIn(call, items);
-      if (wrap) this.incIndent();
-      else this.append(" ");
+      // Known difference `directive-comment` (plan F-110 4.6): upstream (L551-L569) wraps the arguments of a directive
+      // that has comments without parentheses, so `memory(\n // c\n 2.GB\n)` prints as `memory`, the comment and
+      // `2.GB`, which is not a directive any more. The wrapped arguments keep their parentheses.
+      if (wrap) {
+        this.append("(");
+        this.incIndent();
+      } else this.append(" ");
       const start = this.buffer.length;
       this.arguments(items, wrap);
       // `name [...]` would be parsed as an index expression
@@ -693,6 +698,7 @@ export class Formatter {
         this.appendDanglingComments(call);
         this.decIndent();
         this.appendIndent();
+        this.append(")");
       }
     }
     this.endStatement(sid);

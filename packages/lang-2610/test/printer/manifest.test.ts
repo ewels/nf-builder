@@ -50,7 +50,7 @@ describe("printer fixture manifest", () => {
     it(`F-110 ADR-0019: the ${tree.name} tree lists every script of its input, and each has a formatted golden`, () => {
       if (tree.input === null) return;
       const scripts = walk(dir(tree, "input")).filter((p) => p.endsWith(".nf"));
-      expect(printable.map((f) => f.path).sort()).toEqual(scripts);
+      expect(printable.map((f) => f.path).sort()).toEqual([...scripts].sort());
       expect(
         walk(dir(tree, "formatted")).filter((p) => p.endsWith(".nf")),
       ).toEqual(scripts);
@@ -86,6 +86,7 @@ describe("printer fixture manifest", () => {
     expect(Object.keys(manifest.knownDifferences).sort()).toEqual([
       "call-wrap",
       "catch-package",
+      "directive-comment",
       "named-args-comma",
       "type-rename",
     ]);
