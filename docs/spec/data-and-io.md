@@ -4,9 +4,9 @@
 
 | ID | Requirement |
 |---|---|
-| IO-01 | Projects persist in IndexedDB (ADR 0002). Autosave runs 500 ms after each applied command. The header shows saved, saving or failed. |
+| IO-01 | Projects persist in IndexedDB (ADR 0002, ADR 0045: schema v1, written from the engine worker). Autosave runs 500 ms after each applied command. The header shows saved, saving or failed. |
 | IO-02 | Layout lives in `.nf-builder/layout.json` inside the project (ADR 0008). |
-| IO-03 | The app requests persistent storage on first save and warns at 80% of quota. |
+| IO-03 | The app requests persistent storage on first save and warns at 80% of quota. Where persistence is refused (for example in an embedded frame) it says so quietly (ADR 0045). |
 | IO-04 | "Export all projects" downloads one zip of every project as a backup. "Import" accepts that zip back. |
 
 ## Import

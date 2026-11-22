@@ -11,7 +11,7 @@ files (IndexedDB) ──► engine worker: parse ─► AST ─► semantic mode
   text patches ◄── edit command ◄── UI (canvas, popup, forms, Code tab) ◄── React Flow / panes
 ```
 
-The main thread keeps only pack versions and palette search; parsing, modelling, projection, edits and diagnostics run in the engine worker behind Comlink (AR-04, ADR 0043).
+The main thread keeps only pack versions and palette search; parsing, modelling, projection, edits and diagnostics run in the engine worker behind Comlink (AR-04, ADR 0043). The worker also reads and writes the IndexedDB project store, so file text never sits on the main thread (ADR 0045).
 
 - The UI never edits text or AST directly. It sends edit commands and renders projections.
 - The engine runs in a Web Worker behind a Comlink API. The UI keeps a read-only copy of the latest projection and diagnostics.

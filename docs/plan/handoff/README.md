@@ -17,7 +17,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-111 edit commands | merged, PR #38 | |
 | F-112 diagnostics | merged, PR #40 | |
 | F-113 engine worker | merged, PR #39 | |
-| F-202 projects in IndexedDB | `feat/F-202` | Tasks 1–5 committed; task 6 building. [plan](plan-F-202.md). |
+| F-202 projects in IndexedDB | `feat/F-202`, in PR | Plan deleted in its PR. |
 | F-205 canvas | `feat/F-205` | Tasks 1–3 committed; task 4 building. [plan](plan-F-205.md). |
 | F-203 new project dialog | not started | [plan](plan-F-203.md). After F-202 and F-205. |
 | F-206 details pane | not started | [plan](plan-F-206.md). After F-205. |
@@ -31,7 +31,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 
 Branches are stacked: `feat/F-108` → `feat/F-107`; `feat/F-111` also merges F-107. Open PRs for F-108, F-107 and F-111 against `main` in that order (merge `main` into each first), each green before the next. Worktrees: `/home/user/wt-F-1xx`.
 
-Next free ADR number: 0045 (0042 is F-112's, 0044 F-011's).
+Next free ADR number: 0046 (0045 is F-202's).
 
 ## Decisions already taken on the plans' open points
 
@@ -82,7 +82,7 @@ Next free ADR number: 0045 (0042 is F-112's, 0044 F-011's).
 ### F-113 (merged with its PR)
 - Accept every recommendation in section 6: Comlink 4.4.2 as a runtime dependency of `@nf-builder/web` (ADR 0003 names it); pack versions from a pack-free `version` export, palette through the worker; Comlink only in apps/web; the page throttled 4× with worker timings reported unthrottled (Chromium can't throttle workers), clarified in `quality.md`; F-113 reports QA-03 and QA-04, F-702 gates QA-03; diagnostics from `ProjectModel.diagnostics()` until F-112 wires its diagnoser; `window.nfBuilderEngine` test hook; no double-parse optimisation yet; loading progress shown by F-202; the worker manifest and the `check:hosts` amendment; a `bench` job in `ci.yml` and `pnpm bench`. One ADR at landing.
 
-### F-202 — [plan](plan-F-202.md)
+### F-202 (merged with its PR)
 - Accept every recommendation in section 6: a hand-written IndexedDB wrapper instead of Dexie (amends one clause of ADR 0002); schema v1 (`projects`, `files` keyed by `[projectId, path]`, text only) with migrations; storage and autosave in the engine worker, `persist()`/`estimate()` on the main thread; `fake-indexeddb` 6.2.8 as a web dev dependency; the IO-01 and IO-03 readings (warning at 80%, step 3 simulates 85%); blank project has no files until F-203; step 1's content edit through `window.nfBuilderEngine` until F-208; `readFile`/`close` added to F-113's service (fold in if F-113 is still open); no new UX row for loading progress; a disclosure-button switcher with native dialogs; no multi-tab coordination; the F-201 header test update and baseline re-approval from CI. One ADR at landing.
 
 ### F-205 — [plan](plan-F-205.md)

@@ -1,6 +1,9 @@
 import { installedPackVersions } from "@nf-builder/engine";
 import type { JSX } from "react";
 import { COLLAPSED_WIDTH, useLayout } from "./layout/layout-store";
+import { ProjectControls } from "./project/project-controls";
+import { CanvasPlaceholder, saveLabel } from "./project/project-status";
+import { useProjects } from "./project/project-store";
 import { AppHeader } from "./shell/app-header";
 import { ColumnSeparator } from "./shell/column-separator";
 import { LeftColumn } from "./shell/left-column";
@@ -14,10 +17,22 @@ export function AppShell(): JSX.Element {
   const left = useLayout((s) => s.left);
   const right = useLayout((s) => s.right);
   const leftWidth = left.collapsed ? COLLAPSED_WIDTH : left.width;
+  const projects = useProjects((s) => s.status);
+  const storageWarning = useProjects((s) => s.storageWarning);
+  const persisted = useProjects((s) => s.persisted);
   const rightWidth = right.collapsed ? COLLAPSED_WIDTH : right.width;
   return (
     <div className="app-shell">
-      <AppHeader languageVersions={languageVersions} />
+      <AppHeader
+        languageVersions={languageVersions}
+        projectControls={<ProjectControls />}
+        saveLabel={saveLabel(projects.current !== null, projects.save)}
+        saveFailed={
+          projects.save.status === "failed" ? (projects.save.error ?? "") : null
+        }
+        storageWarning={storageWarning}
+        storageNote={persisted === false}
+      />
       <div
         className="app-columns"
         style={{
@@ -31,7 +46,7 @@ export function AppShell(): JSX.Element {
         <main className="column column-centre" aria-label="Canvas and editor">
           <TabStrip />
           <div className="canvas-area">
-            <p className="muted">No project open</p>
+            <CanvasPlaceholder status={projects} />
           </div>
         </main>
         {right.collapsed ? null : (

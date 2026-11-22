@@ -307,4 +307,45 @@ describe("F-113 engine service", () => {
     const next = ok(await service.apply(addB, summary.revision + 1));
     expect(next.revision).toBe(summary.revision + 2);
   });
+  it("F-202 IO-01: readFile returns the current text after writeFiles and apply, and null for a missing path or with no project", async () => {
+    const empty = createEngineService();
+    expect(await empty.readFile("README.md")).toBeNull();
+    const { service } = await opened();
+    expect(await service.readFile("README.md")).toBe("# hello\n");
+    expect(await service.readFile("nope.nf")).toBeNull();
+    ok(await service.writeFiles([{ path: "README.md", text: "two\n" }]));
+    expect(await service.readFile("README.md")).toBe("two\n");
+    ok(await service.apply(replaceA(proc("Z")), 2));
+    expect(await service.readFile("a.nf")).toBe(proc("Z"));
+    ok(await service.writeFiles([{ path: "README.md", text: null }]));
+    expect(await service.readFile("README.md")).toBeNull();
+  });
+
+  it("F-202: readFile runs in the serial queue, after earlier calls", async () => {
+    const { service } = await opened();
+    const writing = service.writeFiles([{ path: "README.md", text: "late\n" }]);
+    const reading = service.readFile("README.md");
+    await writing;
+    expect(await reading).toBe("late\n");
+  });
+
+  it("F-202: close drops the open project; later calls answer no-project", async () => {
+    const { service } = await opened();
+    await service.close();
+    expect(await service.readFile("README.md")).toBeNull();
+    for (const r of [
+      await service.apply(addB, 1),
+      await service.writeFiles([]),
+      await service.project("main.nf", null),
+      await service.diagnostics(),
+    ])
+      expect(r).toMatchObject({
+        ok: false,
+        code: "no-project",
+        revision: null,
+      });
+    await service.close();
+    const summary = await service.open({ version, files });
+    expect(summary.revision).toBeGreaterThan(1);
+  });
 });

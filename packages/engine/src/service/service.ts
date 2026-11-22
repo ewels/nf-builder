@@ -277,5 +277,13 @@ export function createEngineService(
           diagnostics: diagnoserOf(open).all(),
         }),
       ),
+
+    readFile: (path) =>
+      serial(() => current?.state.model.file(path)?.source.text ?? null),
+
+    close: () =>
+      serial(() => {
+        current = null;
+      }),
   };
 }

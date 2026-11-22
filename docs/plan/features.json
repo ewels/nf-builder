@@ -521,8 +521,8 @@
         "Header shows saving then saved",
         "Simulated quota at 85% shows the warning"
       ],
-      "passes": false,
-      "notes": "From F-113: show loading progress from EngineApi.open's progress callback (phases and file counts); the main thread keeps only pack versions and palette search, everything else goes through getEngine(). From F-113 review: the settled F-202 decision adds readFile and close to F-113's EngineApi; F-113 merged without them, so F-202 adds them. Request the palette before open: the worker's queue is serial, so the palette would otherwise wait behind a long open (18 s on sarek). From F-011 (ADR 0044): the app may run in a cross-origin iframe, where storage is partitioned (a separate project list) and navigator.storage.persist() may be refused; show that in the storage notice rather than failing."
+      "passes": true,
+      "notes": "From F-113: show loading progress from EngineApi.open's progress callback (phases and file counts); the main thread keeps only pack versions and palette search, everything else goes through getEngine(). From F-113 review: the settled F-202 decision adds readFile and close to F-113's EngineApi; F-113 merged without them, so F-202 adds them. Request the palette before open: the worker's queue is serial, so the palette would otherwise wait behind a long open (18 s on sarek). From F-011 (ADR 0044): the app may run in a cross-origin iframe, where storage is partitioned (a separate project list) and navigator.storage.persist() may be refused; show that in the storage notice rather than failing. Verified 2026-11-22: steps 1 to 3 by e2e/projects.spec.ts (step 1 @smoke: create, edit through window.nfBuilderEngine until F-208, reload; step 2 saving then saved; step 3 the 80% warning with an 85% stub), plus unit tests for the IndexedDB layer, autosave, workspace and store; also inside a cross-origin iframe (ADR 0044). The F-201 UX-01 test now expects an enabled project switcher, and the app-shell baseline is re-approved from CI. Decisions in ADR 0045."
     },
     {
       "id": "F-203",
@@ -546,7 +546,7 @@
         "Every template has doc comments on all processes and workflows, and schema descriptions for all parameters (no documentation suggestions)"
       ],
       "passes": false,
-      "notes": "Template list depends on open question Q6."
+      "notes": "Template list depends on open question Q6. From F-202: createProject({name, languageVersion, files}) replaces the name-only New project dialog's create; Start blank currently stores no files."
     },
     {
       "id": "F-204",
@@ -631,7 +631,7 @@
         "Rename a process through the app: its position is kept"
       ],
       "passes": false,
-      "notes": "From F-111: node ids can change after variable introduction, a statement move or a rename; diff the projections to carry layout keys (ADR 0008)."
+      "notes": "From F-111: node ids can change after variable introduction, a statement move or a rename; diff the projections to carry layout keys (ADR 0008). From F-202: .nf-builder/layout.json written through the workspace is autosaved like any file."
     },
     {
       "id": "F-208",
@@ -651,7 +651,7 @@
         "Monaco is absent from the initial bundle (bundle report)"
       ],
       "passes": false,
-      "notes": "From F-111: show a ReplaceFileText refusal's problems as diagnostics. From F-113: edits go through getEngine().apply(command, revision); a refusal comes back in the ApplyOutcome as an EngineRefusal with the code and message."
+      "notes": "From F-111: show a ReplaceFileText refusal's problems as diagnostics. From F-113: edits go through getEngine().apply(command, revision); a refusal comes back in the ApplyOutcome as an EngineRefusal with the code and message. From F-202: readFile(path) gives the current text; a code edit is autosaved through apply."
     },
     {
       "id": "F-209",
@@ -688,7 +688,7 @@
         "A registry module folder shows the `registry` tag and a file with a syntax error shows an error badge"
       ],
       "passes": false,
-      "notes": "Added 2026-11-22 (F-204 PR, scope-change; Q16): UX-16 had no owning feature; F-301 step 1 relies on the Files view. Dropping a zip reuses F-403's zip import. From F-111: there is no create, delete or rename file command yet."
+      "notes": "Added 2026-11-22 (F-204 PR, scope-change; Q16): UX-16 had no owning feature; F-301 step 1 relies on the Files view. Dropping a zip reuses F-403's zip import. From F-111: there is no create, delete or rename file command yet. From F-202: IndexedDB schema v1 stores text only; binary files need a schema version bump (ADR 0045)."
     },
     {
       "id": "F-301",
@@ -955,7 +955,7 @@
         "The report lists parse failures and legacy share"
       ],
       "passes": false,
-      "notes": "From F-113: load an imported project with getEngine().open(request, onProgress) or getEngine().writeFiles(files)."
+      "notes": "From F-113: load an imported project with getEngine().open(request, onProgress) or getEngine().writeFiles(files). From F-202: IndexedDB schema v1 stores text only; binary imports need a schema version bump (ADR 0045)."
     },
     {
       "id": "F-402",
@@ -995,7 +995,7 @@
         "A zip exceeding the limits is refused with a clear message"
       ],
       "passes": false,
-      "notes": "From F-008 (S4): codeload.github.com only allows https://render.githubusercontent.com, so zip import is a file upload; no GitHub archive URL can be fetched in the browser. From F-113: load an imported project with getEngine().open(request, onProgress) or getEngine().writeFiles(files)."
+      "notes": "From F-008 (S4): codeload.github.com only allows https://render.githubusercontent.com, so zip import is a file upload; no GitHub archive URL can be fetched in the browser. From F-113: load an imported project with getEngine().open(request, onProgress) or getEngine().writeFiles(files). From F-202: IndexedDB schema v1 stores text only; binary files in a zip need a schema version bump (ADR 0045)."
     },
     {
       "id": "F-404",
@@ -1050,7 +1050,7 @@
         "Export all, clear storage, import the backup: every project restored with layout"
       ],
       "passes": false,
-      "notes": ""
+      "notes": "From F-202: the backup format is its own and reads through the workspace; it is also the way to move projects to another origin (ADR 0045)."
     },
     {
       "id": "F-501",
@@ -1369,7 +1369,7 @@
         "At 390 px wide: canvas and details visible, no editing controls, note shown"
       ],
       "passes": false,
-      "notes": ""
+      "notes": "From F-202: tabs don't coordinate writes (last write wins per file); consider Web Locks if needed."
     },
     {
       "id": "F-704",

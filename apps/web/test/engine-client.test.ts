@@ -1,7 +1,12 @@
+import "fake-indexeddb/auto";
 import { createEngineService, type LoadProgress } from "@nf-builder/engine";
+import { IDBFactory } from "fake-indexeddb";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { connectEngine, getEngine } from "../src/engine/engine-client";
 import { exposeEngine } from "../src/engine/expose";
+import { openProjectDb } from "../src/workspace/project-db";
+import type { WorkspaceStatus } from "../src/workspace/types";
+import { createWorkspace } from "../src/workspace/workspace";
 
 const files = [
   { path: "main.nf", text: "workflow {\n}\n" },
@@ -11,7 +16,14 @@ const version = "26.10";
 
 function connected() {
   const { port1, port2 } = new MessageChannel();
-  exposeEngine(createEngineService(), port1);
+  const factory = new IDBFactory();
+  exposeEngine(
+    createWorkspace({
+      engine: createEngineService(),
+      openDb: (onClosed) => openProjectDb(factory, onClosed),
+    }),
+    port1,
+  );
   const engine = connectEngine(port2);
   return {
     engine,
@@ -35,6 +47,39 @@ describe("F-113 engine client", () => {
     await new Promise((r) => setTimeout(r, 50));
     expect(events[0]?.phase).toBe("loading");
     expect(events.filter((e) => e.phase === "parsing")).toHaveLength(2);
+    close();
+  });
+
+  it("F-202 IO-01: the client forwards readFile and close", async () => {
+    const { engine, close } = connected();
+    expect(await engine.readFile("README.md")).toBeNull();
+    await engine.open({ version, files });
+    expect(await engine.readFile("README.md")).toBe("# hi\n");
+    await engine.close();
+    expect(await engine.readFile("README.md")).toBeNull();
+    expect(await engine.diagnostics()).toMatchObject({ code: "no-project" });
+    close();
+  });
+
+  it("F-202 ADR-0003: watch receives status pushes across Comlink; a second watch releases the first listener", async () => {
+    const { engine, close } = connected();
+    const first: WorkspaceStatus[] = [];
+    const second: WorkspaceStatus[] = [];
+    const initial = await engine.watch((s) => void first.push(s));
+    expect(initial.storage).toBe("ready");
+    const meta = await engine.createProject({
+      name: "P",
+      languageVersion: version,
+      files,
+    });
+    await new Promise((r) => setTimeout(r, 50));
+    expect(first.at(-1)?.projects.map((p) => p.id)).toEqual([meta.id]);
+    const seen = first.length;
+    await engine.watch((s) => void second.push(s));
+    await engine.renameProject(meta.id, "Renamed");
+    await new Promise((r) => setTimeout(r, 50));
+    expect(first).toHaveLength(seen);
+    expect(second.at(-1)?.projects[0]?.name).toBe("Renamed");
     close();
   });
 

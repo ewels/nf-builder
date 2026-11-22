@@ -486,3 +486,23 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - The maintainer asked for the app to work inside iframes, so F-011 dropped its frame guard before merging ([ADR 0044](../adr/0044-embeddable-in-frames.md)).
 - Next: F-202 and F-205 are building; F-203 and F-209 are being planned; F-501 flips after the snapshot-triggered `verify`.
 - Blockers: none. #35 asks whether to use a custom domain (before F-202 ships) and to update the repository homepage.
+
+## 2026-11-22 · F-202 · Claude (autonomous)
+- Did:
+  - Projects in IndexedDB, written from the engine worker: a hand-written wrapper (schema v1, migrations, version handling), a debounced autosaver, and a workspace that wraps the engine service.
+  - On the main thread: a store with persistent-storage and quota checks, plus the header project switcher with dialogs, save state, the quota warning, and a note when persistence is refused or the app is embedded.
+  - End-to-end tests cover create, edit, reload, saving then saved, the warning, and a cross-origin iframe.
+- State: passing once CI is green with the re-approved app-shell baseline.
+- Next: F-205, then F-203 (templates) and F-206 to F-209.
+- Decisions:
+  - [ADR 0045](../adr/0045-projects-in-indexeddb.md):
+    - no Dexie (amends ADR 0002);
+    - schema v1 and migrations;
+    - storage in the worker, with `readFile` and `close` added to the engine API (amends ADR 0043);
+    - the IO-01 and IO-03 readings;
+    - several tabs: the last write wins;
+    - the shared `ewels.github.io` origin, since the maintainer chose no custom domain (#35).
+  - `fake-indexeddb` 6.2.8 is a web dev dependency for tests.
+  - Project ids fall back to `getRandomValues` where `crypto.randomUUID` is missing, as it is in a frame inside an insecure page.
+  - The F-201 UX-01 test now expects an enabled project switcher. This is a behaviour change, not a weakened test, and the app-shell baseline is re-approved from CI (ADR 0021).
+- Blockers: none.
