@@ -17,12 +17,12 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-111 edit commands | merged, PR #38 | |
 | F-112 diagnostics | merged, PR #40 | |
 | F-113 engine worker | merged, PR #39 | |
-| F-202 projects in IndexedDB | `feat/F-202`, in PR | Plan deleted in its PR. |
-| F-205 canvas | `feat/F-205`, in PR #41 | Plan deleted in its PR. |
-| F-203 new project dialog | not started | [plan](plan-F-203.md). After F-202 and F-205. |
-| F-206 details pane | not started | [plan](plan-F-206.md). After F-205. |
+| F-202 projects in IndexedDB | merged, PR #42 | |
+| F-205 canvas | merged, PR #41 | |
+| F-203 new project dialog | `feat/F-203` (`/home/user/wt-F-203`) | Tasks 1–5 committed (oracle keys, three templates, engine `templates`); tasks 6–7 building; merge `main` (F-205) before task 8. [plan](plan-F-203.md). |
+| F-206 details pane | `feat/F-206` (`/home/user/wt-F-206`) | Tasks 1–2 building; task 0 done by F-112. [plan](plan-F-206.md). |
 | F-207 layout sidecar | not started | [plan](plan-F-207.md). After F-205 and F-202. |
-| F-208 view modes and Code | not started | [plan](plan-F-208.md). After F-205. |
+| F-208 view modes and Code | `feat/F-208` (`/home/user/wt-F-208`) | Tasks 1–2 building. [plan](plan-F-208.md). |
 | F-209 undo and redo | not started | [plan](plan-F-209.md). After F-202, F-205 and F-208. |
 | F-501 registry snapshot | merged, PR #29, **not passing** | Live `/registry/` passes a sampled check; waiting for the dispatched snapshot run's `workflow_run` deploy and `verify`, then flip in a PR. |
 | F-011 GitHub Pages hosting | merged, PR #37 | Live at https://ewels.github.io/nf-builder/; first `verify` passed. |
@@ -93,6 +93,10 @@ Next free ADR number: 0047 (0046 is F-205's).
 - Accept every recommendation in section 6: an orphan `registry-snapshot` branch fetched by each Netlify build; ship without the build-hook secret and open a `maintainer` issue for it; split `index.json` (QA-06) and `ports.json`, with IO-31 read as the pair; `tools/registry-snapshot` may import lang-core and pack entries (amends ADR 0003); make lang-2610 erasable for plain Node; ports from registry metadata in `meta.yml` order; parser wins on kind and component; every bundle file; pinned dependency closure; plugin release admitted by the pinned Nextflow; the failure policy; a path-filtered PR dry run outside "CI green"; daily at 03:23 UTC; the fixture snapshot for e2e. ADR 0035 (F-105 takes 0034).
 
 ## Process notes for the next session
+
+- Plans written before F-202 and F-205 merged name `apps/web/src/workspace/workspace-store.ts`; the canvas store is now `apps/web/src/canvas/canvas-store.ts` (`useWorkspace`, `show`, `changed`), and `apps/web/src/workspace/` is F-202's worker-side code.
+- Visual baselines: download the `playwright-chromium` artefact through `api.github.com/repos/ewels/nf-builder/actions/runs/<id>/artifacts`, view each `-actual.png`, copy to `e2e/__screenshots__/<spec>/<name>-chromium-linux.png` (ADR 0021).
+- Several worktrees share e2e ports 4173 and 5173; builders wait rather than kill servers.
 
 - Docs-only changes go straight to `main` after `pnpm check` (ADR 0031); everything else through a PR.
 - Wait for CI by polling the public check-runs API rather than subscribing to PRs (Netlify bot comments are noisy).
