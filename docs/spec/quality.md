@@ -35,7 +35,7 @@ CI measures these. A breach fails the build unless the PR raises the budget with
 
 | ID | Requirement |
 |---|---|
-| QA-30 | Strict Content Security Policy, in a `<meta http-equiv>` element at the start of every page's `<head>` (GitHub Pages sends no custom headers, ADR 0040): no inline scripts, `connect-src` limited to the ADR 0002 allow-list. The policy governs the document only: Web Workers make no cross-origin requests (the document fetches and passes them data), and IO-41 scans every bundle. `frame-ancestors`, X-Frame-Options, nosniff, COOP, CORP and Permissions-Policy are unavailable; instead the app doesn't start inside a frame and shows a short message with an "Open in a new tab" link. |
+| QA-30 | Strict Content Security Policy, in a `<meta http-equiv>` element at the start of every page's `<head>` (GitHub Pages sends no custom headers, ADR 0040): no inline scripts, `connect-src` limited to the ADR 0002 allow-list. The policy governs the document only: Web Workers make no cross-origin requests (the document fetches and passes them data), and IO-41 scans every bundle. `frame-ancestors`, X-Frame-Options, nosniff, COOP, CORP and Permissions-Policy are unavailable. The app loads and works inside frames, including cross-origin iframes (ADR 0044). |
 | QA-31 | Markdown previews are sanitised. Imported files are never executed. |
 | QA-32 | Zip import enforces the IO-12 limits. |
 | QA-33 | Tokens never appear in logs, exports or error reports. |

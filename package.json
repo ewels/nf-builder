@@ -23,6 +23,7 @@
     "check:adr": "node scripts/check-adrs.ts",
     "check:features": "node scripts/check-features.ts",
     "check:budget": "node scripts/check-bundle-budget.ts",
+    "check:site": "node scripts/check-site.ts",
     "check:hosts": "node scripts/check-hosts.ts",
     "bench": "node scripts/run-playwright.ts --config e2e/bench.config.ts",
     "corpus:fetch": "node tools/corpus/src/cli.ts",

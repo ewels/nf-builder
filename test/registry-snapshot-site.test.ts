@@ -47,7 +47,7 @@ const git = (cwd: string, ...args: string[]): void => {
 
 /**
  * A local repository: `main` always; a `registry-snapshot` branch holding registry/** ("snapshot"), only a
- * netlify.toml ("empty"), or none (false).
+ * placeholder file ("empty"), or none (false).
  */
 function repo(branch: "snapshot" | "empty" | false): string {
   const dir = tmp();
@@ -62,7 +62,7 @@ function repo(branch: "snapshot" | "empty" | false): string {
       cpSync(join(golden, "registry"), join(dir, "registry"), {
         recursive: true,
       });
-    writeFileSync(join(dir, "netlify.toml"), '[build]\nignore = "exit 0"\n');
+    writeFileSync(join(dir, "placeholder.txt"), "no registry here\n");
     git(dir, "add", ".");
     git(dir, "commit", "-q", "-m", "snapshot");
     git(dir, "checkout", "-q", "main");
@@ -117,10 +117,9 @@ async function build(
 }
 
 describe("F-501 registry snapshot site plugin", () => {
-  it("F-501 step 1 IO-31: on Netlify the build fetches the registry-snapshot branch and emits registry/**", async () => {
+  it("F-501 step 1 IO-31: with REGISTRY_SNAPSHOT_REPO the build fetches the registry-snapshot branch and emits registry/**", async () => {
     const { emitted, warnings } = await build({
-      NETLIFY: "true",
-      REPOSITORY_URL: repo("snapshot"),
+      REGISTRY_SNAPSHOT_REPO: repo("snapshot"),
     });
     expect(warnings).toEqual([]);
     const names = emitted.map((f) => f.fileName);
@@ -129,7 +128,7 @@ describe("F-501 registry snapshot site plugin", () => {
     expect(names).toContain(
       "registry/modules/nf-core/fastqc/0.0.0-6d1763b.json",
     );
-    // Only registry/**: the branch's netlify.toml and git metadata stay out.
+    // Only registry/**: the branch's other files and git metadata stay out.
     expect(names.every((n) => n.startsWith("registry/"))).toBe(true);
     const index = emitted.find((f) => f.fileName === "registry/index.json");
     expect(
@@ -139,8 +138,7 @@ describe("F-501 registry snapshot site plugin", () => {
 
   it("F-501 step 1: a missing branch warns and emits nothing", async () => {
     const { emitted, warnings } = await build({
-      NETLIFY: "true",
-      REPOSITORY_URL: repo(false),
+      REGISTRY_SNAPSHOT_REPO: repo(false),
     });
     expect(emitted).toEqual([]);
     expect(warnings.join()).toMatch(/registry-snapshot/);
@@ -152,65 +150,47 @@ describe("F-501 registry snapshot site plugin", () => {
     });
   });
 
-  it("F-501 step 1: a repository that can't be read (a private one without a token) warns that the snapshot is unavailable and the build still succeeds", async () => {
+  it("F-501 step 1: a repository that can't be read warns that the snapshot is unavailable and the build still succeeds", async () => {
     const log = gitLog();
     const { emitted, warnings } = await build({
-      NETLIFY: "true",
-      REPOSITORY_URL: pathToFileURL(join(tmp(), "no-such-repo")).href,
+      REGISTRY_SNAPSHOT_REPO: pathToFileURL(join(tmp(), "no-such-repo")).href,
     });
     expect(emitted).toEqual([]);
     expect(warnings.join()).toMatch(/unavailable/);
     expect(warnings.join()).toMatch(/without \/registry\//);
-    // Git never prompts for a username, and no token means no auth header.
+    // Git never prompts for a username, and there is no auth header.
     const calls = readFileSync(log, "utf8");
     expect(calls).toContain("env:prompt=0");
     expect(calls).not.toContain("extraheader");
   });
 
-  it("F-501 step 1: REGISTRY_SNAPSHOT_TOKEN reaches git as a basic-auth header in the environment, never in argv or the URL", async () => {
+  it("F-501 step 1 ADR-0041: branch mode reads anonymously: git gets no Authorization header, the URL carries no credentials, and git never prompts", async () => {
     const url = repo("snapshot");
     const log = gitLog();
     await build({
-      NETLIFY: "true",
-      REPOSITORY_URL: url,
+      REGISTRY_SNAPSHOT_REPO: url,
       REGISTRY_SNAPSHOT_TOKEN: "s3cret",
     });
-    const calls = readFileSync(log, "utf8").split("\n");
-    const base64 = Buffer.from("x-access-token:s3cret").toString("base64");
-    const env = calls.filter((l) => l.startsWith("env:config="));
-    const args = calls.filter((l) => l.startsWith("arg:"));
-    expect(env.length).toBeGreaterThanOrEqual(2);
-    for (const line of env)
-      expect(line).toBe(
-        `env:config=http.extraheader|AUTHORIZATION: basic ${base64}`,
-      );
-    expect(args.length).toBeGreaterThan(0);
-    for (const line of args) {
-      expect(line).not.toContain("s3cret");
-      expect(line).not.toContain(base64);
-      expect(line).not.toContain("extraheader");
-    }
+    const calls = readFileSync(log, "utf8");
     expect(calls).toContain("env:prompt=0");
+    expect(calls).not.toMatch(/extraheader|authorization/i);
+    expect(calls).not.toContain("s3cret");
+    for (const line of calls.split("\n").filter((l) => l.startsWith("arg:")))
+      expect(line).not.toMatch(/@/);
   });
 
-  it("F-501 step 1: when the clone fails after a successful ls-remote the error names the exit code and one line of stderr, never the token, its base64 or the command line", async () => {
+  it("F-501 step 1: when the clone fails after a successful ls-remote the error names the exit code and one line of stderr, never the command line", async () => {
     gitLog();
     process.env.NF_FAIL_CLONE = "1";
     try {
       const failure = await build({
-        NETLIFY: "true",
-        REPOSITORY_URL: repo("snapshot"),
-        REGISTRY_SNAPSHOT_TOKEN: "s3cret",
+        REGISTRY_SNAPSHOT_REPO: repo("snapshot"),
       }).catch((error: unknown) => error as Error);
       expect(failure).toBeInstanceOf(Error);
       const text = `${(failure as Error).message}\n${(failure as Error).stack}`;
       expect(text).toContain("exit 128");
       expect(text).toContain("simulated clone failure");
       expect(text).not.toContain("second line");
-      expect(text).not.toContain("s3cret");
-      expect(text).not.toContain(
-        Buffer.from("x-access-token:s3cret").toString("base64"),
-      );
       expect(text).not.toContain("Command failed");
     } finally {
       delete process.env.NF_FAIL_CLONE;
@@ -221,14 +201,13 @@ describe("F-501 registry snapshot site plugin", () => {
     const scratch = tmp();
     process.env.TMPDIR = scratch;
     await expect(
-      build({ NETLIFY: "true", REPOSITORY_URL: repo("empty") }),
+      build({ REGISTRY_SNAPSHOT_REPO: repo("empty") }),
     ).rejects.toThrow();
-    await build({ NETLIFY: "true", REPOSITORY_URL: repo(false) });
+    await build({ REGISTRY_SNAPSHOT_REPO: repo(false) });
     await build({
-      NETLIFY: "true",
-      REPOSITORY_URL: pathToFileURL(join(scratch, "no-such-repo")).href,
+      REGISTRY_SNAPSHOT_REPO: pathToFileURL(join(scratch, "no-such-repo")).href,
     });
-    await build({ NETLIFY: "true", REPOSITORY_URL: repo("snapshot") });
+    await build({ REGISTRY_SNAPSHOT_REPO: repo("snapshot") });
     expect(
       readdirSync(scratch).filter((n) => n.startsWith("nf-registry-snapshot-")),
     ).toEqual([]);
@@ -237,8 +216,7 @@ describe("F-501 registry snapshot site plugin", () => {
   it("F-501: REGISTRY_SNAPSHOT_DIR wins; with neither variable nothing is emitted", async () => {
     const fromDir = await build({
       REGISTRY_SNAPSHOT_DIR: golden,
-      NETLIFY: "true",
-      REPOSITORY_URL: repo(false),
+      REGISTRY_SNAPSHOT_REPO: repo(false),
     });
     expect(fromDir.warnings).toEqual([]);
     expect(fromDir.emitted.map((f) => f.fileName)).toContain(
@@ -247,27 +225,36 @@ describe("F-501 registry snapshot site plugin", () => {
     expect(fromDir.emitted.length).toBeGreaterThan(5);
 
     expect(await build({})).toEqual({ emitted: [], warnings: [] });
-    expect(await build({ REPOSITORY_URL: repo("snapshot") })).toEqual({
+    expect(
+      await build({
+        NETLIFY: "true",
+        REPOSITORY_URL: repo("snapshot"),
+        REGISTRY_SNAPSHOT_TOKEN: "t",
+      }),
+    ).toEqual({
       emitted: [],
       warnings: [],
     });
   });
 
-  it("F-501: snapshotSource reads the environment and turns Netlify's SSH repository URL into https", () => {
+  it("F-501 ADR-0041: snapshotSource takes REGISTRY_SNAPSHOT_REPO, rewrites an SSH URL to https, and ignores NETLIFY, REPOSITORY_URL and REGISTRY_SNAPSHOT_TOKEN", () => {
     expect(snapshotSource({ REGISTRY_SNAPSHOT_DIR: "/x" })).toEqual({
       kind: "dir",
       dir: "/x",
     });
     expect(
-      snapshotSource({
-        NETLIFY: "true",
-        REPOSITORY_URL: "git@github.com:owner/repo",
-      }),
+      snapshotSource({ REGISTRY_SNAPSHOT_REPO: "git@github.com:owner/repo" }),
     ).toEqual({
       kind: "branch",
       url: "https://github.com/owner/repo.git",
       branch: "registry-snapshot",
-      token: undefined,
+    });
+    expect(
+      snapshotSource({ REGISTRY_SNAPSHOT_REPO: "https://github.com/o/r" }),
+    ).toEqual({
+      kind: "branch",
+      url: "https://github.com/o/r",
+      branch: "registry-snapshot",
     });
     expect(
       snapshotSource({
@@ -275,8 +262,7 @@ describe("F-501 registry snapshot site plugin", () => {
         REPOSITORY_URL: "https://github.com/o/r",
         REGISTRY_SNAPSHOT_TOKEN: "t",
       }),
-    ).toMatchObject({ url: "https://github.com/o/r", token: "t" });
-    expect(snapshotSource({ NETLIFY: "true" })).toEqual({ kind: "none" });
+    ).toEqual({ kind: "none" });
     expect(snapshotSource({})).toEqual({ kind: "none" });
   });
 });

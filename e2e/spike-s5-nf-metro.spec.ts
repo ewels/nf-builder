@@ -4,9 +4,8 @@ import { gzipSync } from "node:zlib";
 import { expect, type Page, test } from "@playwright/test";
 import {
   cspProblems,
-  readNetlifyConfig,
-  siteHeaders,
-} from "../scripts/netlify-config.ts";
+  SITE_POLICY_HEADERS,
+} from "../scripts/security-policy.ts";
 import { spikeS5Headers } from "../spikes/s5-nf-metro/headers.ts";
 import { SPIKE_S5_CACHE } from "../spikes/s5-nf-metro/prepare.ts";
 import { SPIKE_S5_URL, startSpikeS5 } from "../spikes/s5-nf-metro/serve.ts";
@@ -189,7 +188,7 @@ test.describe("F-010 spike S5: nf-metro under Pyodide", () => {
     );
   });
 
-  test("F-010 QA-30 ADR-0014 ADR-0002: the spike page and its worker are served with the netlify.toml CSP plus only 'wasm-unsafe-eval', and nothing violates it", async ({
+  test("F-010 QA-30 ADR-0014 ADR-0002: the spike page and its worker are served with the site policy (SITE_POLICY_HEADERS) plus only 'wasm-unsafe-eval', and nothing violates it", async ({
     page,
     request,
   }) => {
@@ -197,14 +196,14 @@ test.describe("F-010 spike S5: nf-metro under Pyodide", () => {
     const watch = await watchForCspViolations(page);
     const metrics = await loadMetrics(page);
     const expected = spikeS5Headers()[CSP] ?? "";
-    const netlify = siteHeaders(readNetlifyConfig())[CSP] ?? "";
+    const site = SITE_POLICY_HEADERS[CSP] ?? "";
     expect(expected).toBe(
-      netlify.replace(
+      site.replace(
         "script-src 'self';",
         "script-src 'self' 'wasm-unsafe-eval';",
       ),
     );
-    expect(expected).not.toBe(netlify);
+    expect(expected).not.toBe(site);
     expect(cspProblems(expected)).toEqual([]);
 
     const worker = page.workers()[0];

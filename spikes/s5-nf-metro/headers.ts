@@ -1,8 +1,8 @@
-// The response headers of the spike's `vite preview` (ADR 0024): netlify.toml's header set, plus one CSP token.
+// The response headers of the spike's `vite preview` (ADR 0024): the site policy headers (SITE_POLICY_HEADERS), plus one CSP token.
 import {
-  readNetlifyConfig,
-  siteHeaders,
-} from "../../scripts/netlify-config.ts";
+  CONTENT_SECURITY_POLICY,
+  SITE_POLICY_HEADERS,
+} from "../../scripts/security-policy.ts";
 
 export const WASM_UNSAFE_EVAL = "'wasm-unsafe-eval'";
 
@@ -19,13 +19,15 @@ export function addToScriptSrc(policy: string, source: string): string {
   return directives.join("; ");
 }
 
-/** netlify.toml's "/*" headers. In "spike" mode (the default) script-src also gets 'wasm-unsafe-eval' (ADR 0014). */
+/** The site policy headers. In "spike" mode (the default) script-src also gets 'wasm-unsafe-eval' (ADR 0014). */
 export function spikeS5Headers(
   mode: "spike" | "production" = "spike",
 ): Record<string, string> {
-  const headers = siteHeaders(readNetlifyConfig());
-  const csp = headers["Content-Security-Policy"];
-  if (mode === "spike" && csp !== undefined)
-    headers["Content-Security-Policy"] = addToScriptSrc(csp, WASM_UNSAFE_EVAL);
+  const headers = { ...SITE_POLICY_HEADERS };
+  if (mode === "spike")
+    headers["Content-Security-Policy"] = addToScriptSrc(
+      CONTENT_SECURITY_POLICY,
+      WASM_UNSAFE_EVAL,
+    );
   return headers;
 }

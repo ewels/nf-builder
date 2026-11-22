@@ -6,6 +6,7 @@ import {
   type Manifest,
 } from "../scripts/check-bundle-budget.ts";
 import { WEB_DIST } from "../scripts/check-common.ts";
+import { E2E_BASE_PATH } from "./urls.ts";
 
 // A message of the parser's DescriptiveErrorStrategy: only the parser chunk holds it.
 const PARSER_MARKER =
@@ -20,7 +21,7 @@ test("F-104 F-110 QA-01 ADR-0027: the parser loads in a lazy chunk, outside the 
     readFileSync(join(WEB_DIST, ".vite/manifest.json"), "utf8"),
   ) as Manifest;
   const html = readFileSync(join(WEB_DIST, "index.html"), "utf8");
-  const initial = initialJsFiles(manifest, html);
+  const initial = initialJsFiles(manifest, html, E2E_BASE_PATH);
   expect(initial.length).toBeGreaterThan(0);
   for (const file of initial) {
     const code = readFileSync(join(WEB_DIST, file), "utf8");

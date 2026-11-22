@@ -87,7 +87,7 @@ Planner output, 2026-11-22. I changed nothing in the repo: `/home/user/wt-main` 
 | `@xyflow/react` | 13.0.2, MIT, latest; 13.0.0 shipped 2026-11-16 and 13.0.2 on 2026-11-17. The last v12 is 12.12.1 (2026-11-02). |
 | v13 transitive dependencies | `@xyflow/system` 1.0.0 (MIT), `classcat` (MIT), `react-compiler-runtime` 1.0.0 (MIT), d3 color/dispatch/drag/interpolate/selection/timer/transition/zoom (ISC), `d3-ease` (BSD-3-Clause). Zustand 5.1.0 is **shared** with ours; v12 would add Zustand 4. `pnpm audit --audit-level high`: no findings. |
 | Bundle, canvas behind `React.lazy` | initial JS unchanged at **77.5 kB gz**. Lazy chunk: **v13 247 kB raw / 83.5 kB gz** (React Compiler output); v12 184 kB / 58.7 kB gz. CSS chunk 11.7 kB / 2.2 kB gz. |
-| Production CSP (`vite preview` with the netlify.toml headers) | 0 violations, 0 console errors, no `<style>` elements; React Flow CSS arrives as a `<link>`. |
+| Production CSP (`vite preview` of the build with the meta policy, ADR 0040) | 0 violations, 0 console errors, no `<style>` elements; React Flow CSS arrives as a `<link>`. |
 | `pnpm check:hosts` on that build | **fails on 4 URLs** in the lazy chunk: `http://www.w3.org/1999/xhtml` and `http://www.w3.org/2000/xmlns/` (d3 namespaces), `https://reactflow.dev?utm_source=attribution` (the attribution link), and `https://reactflow.dev/` (error help links). They need `scripts/non-fetched-urls.ts` entries. |
 | Default a11y strings | Title case ("Zoom In", "Fit View", "Mini Map", "Control Panel"); node and edge descriptions mention "Press delete to remove it". Override them with `ariaLabelConfig`. |
 | v13 colour mode | follows `prefers-color-scheme` by default. Use `forceColorMode="light"`, since the app has no dark tokens. |

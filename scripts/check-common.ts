@@ -74,6 +74,14 @@ export function distExists(dist: string): boolean {
   return false;
 }
 
+/** Every `.html` file under `dir`, as sorted absolute paths. */
+export function htmlFiles(dir: string): string[] {
+  return readdirSync(dir, { recursive: true, withFileTypes: true })
+    .filter((e) => !e.isDirectory() && e.name.endsWith(".html"))
+    .map((e) => join(e.parentPath, e.name))
+    .sort();
+}
+
 /** True when this module is the script node was started with. */
 export function isMain(meta: ImportMeta): boolean {
   try {

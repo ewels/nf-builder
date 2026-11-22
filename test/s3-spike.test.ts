@@ -52,9 +52,8 @@ import {
 import { REPO_ROOT } from "../scripts/check-common.ts";
 import {
   cspProblems,
-  readNetlifyConfig,
-  siteHeaders,
-} from "../scripts/netlify-config.ts";
+  SITE_POLICY_HEADERS,
+} from "../scripts/security-policy.ts";
 
 const SPIKE_DIR = join(REPO_ROOT, "e2e/s3-spike");
 const CASE_FILE = join(
@@ -613,7 +612,7 @@ function directives(policy: string): Map<string, string[]> {
 }
 
 describe("S3 spike: headers", () => {
-  const production = siteHeaders(readNetlifyConfig());
+  const production = SITE_POLICY_HEADERS;
   const prodCsp = production["Content-Security-Policy"] ?? "";
 
   function diff(kind: "cheerpj" | "qa30") {
@@ -630,7 +629,7 @@ describe("S3 spike: headers", () => {
     return changes;
   }
 
-  it("ADR-0022: the spike CSP is netlify.toml's policy plus the CheerpJ CDN in script-src and connect-src and 'unsafe-eval' in script-src, and nothing else", () => {
+  it("ADR-0022: the spike CSP is the site policy (`SITE_POLICY_HEADERS`) plus the CheerpJ CDN in script-src and connect-src and 'unsafe-eval' in script-src, and nothing else", () => {
     expect(diff("cheerpj")).toEqual({
       "script-src": [CDN, "'unsafe-eval'"],
       "connect-src": [CDN],
@@ -653,7 +652,7 @@ describe("S3 spike: headers", () => {
     ]);
   });
 
-  it("ADR-0022: spikeHeaders keeps every other netlify.toml header unchanged", () => {
+  it("ADR-0022: spikeHeaders keeps every other site policy header unchanged", () => {
     for (const kind of ["cheerpj", "qa30"] as const) {
       const headers = spikeHeaders(kind);
       expect(headers["Content-Security-Policy"]).toBe(spikeCsp(kind, prodCsp));

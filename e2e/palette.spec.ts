@@ -8,6 +8,7 @@ import {
 import { packFor, WEB_DIST } from "../scripts/check-common.ts";
 import { SMOKE_TAG } from "./browsers.ts";
 import { watchForCspViolations } from "./csp.ts";
+import { E2E_BASE_PATH } from "./urls.ts";
 
 const CATEGORIES = [
   "Processes",
@@ -28,7 +29,7 @@ const search = (page: Page) =>
   palette(page).getByRole("searchbox", { name: "Search components" });
 
 async function open(page: Page) {
-  await page.goto("/");
+  await page.goto("./");
   await category(page, "Processes").waitFor();
 }
 async function panelOf(page: Page, label: string) {
@@ -274,7 +275,7 @@ test("F-204 QA-01 QA-30 ADR-0028: the catalogue loads lazily, outside the initia
     readFileSync(join(WEB_DIST, ".vite/manifest.json"), "utf8"),
   ) as Manifest;
   const html = readFileSync(join(WEB_DIST, "index.html"), "utf8");
-  const initial = initialJsFiles(manifest, html);
+  const initial = initialJsFiles(manifest, html, E2E_BASE_PATH);
   expect(initial.length).toBeGreaterThan(0);
   for (const file of initial)
     expect(readFileSync(join(WEB_DIST, file), "utf8"), file).not.toContain(sha);

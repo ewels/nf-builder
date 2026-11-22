@@ -1,3 +1,4 @@
+import { PRODUCTION_URL } from "../urls.ts";
 import type { ProbeTarget } from "./targets.ts";
 
 export type TargetInput = { id: string; url: string };
@@ -73,18 +74,21 @@ export type ProbeRun = {
   records: ProbeRecord[];
 };
 
-const USAGE =
-  "S4_PROBE_URL must be https://nf-builder.netlify.app, https://<label>--nf-builder.netlify.app (a deploy preview) or http://localhost:<port>";
+const USAGE = `S4_PROBE_URL must be ${PRODUCTION_URL} or http://localhost:<port>/<path>/ (a local preview under its base path)`;
 
-/** S4_PROBE_URL to an origin; throws a usage message for anything else. */
-export function probeOrigin(value: string | undefined): string {
-  const match = value
-    ?.trim()
-    .match(
-      /^(https:\/\/(?:[a-z0-9-]+--)?nf-builder\.netlify\.app|http:\/\/localhost:\d+)\/?$/,
-    );
-  if (!match?.[1]) throw new Error(`${USAGE} (got ${JSON.stringify(value)})`);
-  return match[1];
+/** S4_PROBE_URL to the site's base URL (with a trailing slash) and origin; throws a usage message for anything else. */
+export function probeSite(value: string | undefined): {
+  url: string;
+  origin: string;
+} {
+  const text = value?.trim() ?? "";
+  const url = text.endsWith("/") ? text : `${text}/`;
+  if (
+    url === PRODUCTION_URL ||
+    /^http:\/\/localhost:\d+\/(?:[\w.-]+\/)+$/.test(url)
+  )
+    return { url, origin: new URL(url).origin };
+  throw new Error(`${USAGE} (got ${JSON.stringify(value)})`);
 }
 
 /** Origin header for the next hop after a redirect (Fetch "tainted origin"). */
@@ -296,4 +300,12 @@ export function toMarkdown(run: ProbeRun): string {
     );
   }
   return `${lines.join("\n")}\n`;
+}
+
+/** Removes the CSP <meta> and nothing else, so the deployed probe measures CORS, not our own policy (ADR 0023, 0040). */
+export function stripPolicyMeta(html: string): string {
+  return html.replace(
+    /<meta\s[^>]*\bhttp-equiv\s*=\s*["']?content-security-policy["']?[^>]*>/gi,
+    "",
+  );
 }
