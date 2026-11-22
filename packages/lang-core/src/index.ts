@@ -42,6 +42,13 @@ export type {
   PaletteViewGroup,
   PaletteViewItem,
 } from "./palette.ts";
+export {
+  PrintError,
+  type PrintOptions,
+  type PrintResult,
+  type ScriptPrinter,
+  type SourceLayout,
+} from "./printer.ts";
 export type {
   ConfigSourceFile,
   ConfigSourceParse,

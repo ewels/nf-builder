@@ -271,3 +271,15 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - Selector and include placement and include resolution are resolver checks for F-105 and F-112 (notes).
   - `docs/licences.md`: `ConfigAstBuilder` joins the ported AST row; corpus-derived snapshot row. No new dependency.
 - Blockers: none.
+
+## 2026-11-22 · F-110 · Claude (autonomous)
+- Did: a line-by-line port of nf-lang 26.10.7's formatter (`packages/lang-2610/src/printer/`, off the pack entry): `printScript`, `printDeclaration` and `createLayout` for every declaration kind, typed and legacy, plus feature flags, enums and agents; the 81 non-Harshil `ScriptFormatterTest` cases; synthesised and edited trees with a fresh layout; the oracle formats the printer fixtures with `nextflow lint -format` and checks fixed points; 335 of 342 corpus scripts print exactly as `lint -format` does.
+- State: passing.
+- Next: F-104 (after F-103 merges), then F-105.
+- Decisions:
+  - Parity with `lint -format` except five upstream bugs where its output fails lint, changes meaning or isn't stable (`type-rename`, `catch-package`, `call-wrap`, `named-args-comma`, `directive-comment`); `NO_RANGE` for nodes an edit creates (amends ADR 0027); fresh blank-line layout; the oracle's format and fixed-point checks ([ADR 0032](../adr/0032-printer-known-differences.md)).
+  - LA-45 clarified: new and edited declarations are formatted, untouched ones keep their text; the known differences are named (ADR 0032).
+  - Default formatter options only; legacy printing ported too; statement-level printing left to F-111 (notes).
+  - The upstream bugs are in `docs/research/upstream-bugs.md` for the maintainer to file.
+  - `formatted*/` goldens are generated files (`pnpm oracle --write-format`, AGENTS.md); `docs/licences.md` rows for the ported formatter and its tests. No new dependency, no workflow edit.
+- Blockers: none.

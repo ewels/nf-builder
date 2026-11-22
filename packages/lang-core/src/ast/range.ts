@@ -42,3 +42,18 @@ export interface NodeBase<K extends string> extends CommentSlots {
   readonly kind: K;
   readonly range: Range;
 }
+
+/** The range of a node an edit created, until the file is re-parsed. It slices nothing; the printer gives such nodes no blank lines and no source-driven wrapping (nf-lang: line -1). */
+export const NO_RANGE: Range = {
+  start: -1,
+  end: -1,
+  line: -1,
+  column: -1,
+  endLine: -1,
+  endColumn: -1,
+};
+
+/** nf-lang `Comment.hasPosition`: line > 0. */
+export function hasPosition(range: Range): boolean {
+  return range.line > 0;
+}

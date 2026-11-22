@@ -267,7 +267,7 @@
         "Malformed fixtures: the bad declaration is isolated, the rest of the file is modelled"
       ],
       "passes": false,
-      "notes": "From F-102: parseScriptAst (lang-2610, internal) returns ScriptParseResult; declarations with builder errors are listed in errors by range; section-order.nf gives an InvalidDeclaration. Add LanguagePack.loadParser and SourceFile (AR-01) here. From F-103: parseConfigAst (packages/lang-2610/src/ast/config/parse.ts, internal) gives top-level ConfigAssign/ConfigBlock/ConfigInclude/ConfigApplyBlock statements with ranges (fixtures.yaml names: assign <path>, block <name>), ConfigInvalid (statement omitted after a fatal error) and ConfigIncomplete kept, and every comment attached once with the root list in order."
+      "notes": "From F-102: parseScriptAst (lang-2610, internal) returns ScriptParseResult; declarations with builder errors are listed in errors by range; section-order.nf gives an InvalidDeclaration. Add LanguagePack.loadParser and SourceFile (AR-01) here. From F-103: parseConfigAst (packages/lang-2610/src/ast/config/parse.ts, internal) gives top-level ConfigAssign/ConfigBlock/ConfigInclude/ConfigApplyBlock statements with ranges (fixtures.yaml names: assign <path>, block <name>), ConfigInvalid (statement omitted after a fatal error) and ConfigIncomplete kept, and every comment attached once with the root list in order. From F-110: printScript, printDeclaration and createLayout live in packages/lang-2610/src/printer/ (not on the pack entry); wire one lazy loader that carries both the parser and the printer."
     },
     {
       "id": "F-105",
@@ -385,8 +385,8 @@
         "Oracle job formats every printer fixture with Nextflow 26.10 and finds no difference",
         "Printed fixtures pass `nextflow lint` with no errors"
       ],
-      "passes": false,
-      "notes": "From F-005 (S1): in typed code the printer emits a legacy tuple input as tuple(a, b, ...), one argument per declared component; a mixed list literal fails nextflow lint (LA-14). From F-102: comments are attached by a port of nf-lang 26.10.7's CommentAttacher, checked against it on the fixtures and the corpus. The AST keeps quote style, verbatim numbers, trailing commas, Parenthesized, labels and elseRange for the formatter."
+      "passes": true,
+      "notes": "From F-005 (S1): in typed code the printer emits a legacy tuple input as tuple(a, b, ...), one argument per declared component; a mixed list literal fails nextflow lint (LA-14). From F-102: comments are attached by a port of nf-lang 26.10.7's CommentAttacher, checked against it on the fixtures and the corpus. The AST keeps quote style, verbatim numbers, trailing commas, Parenthesized, labels and elseRange for the formatter. Verified 2026-11-22. Step 1: the CI oracle's printer:printer and printer:ast format rows (nextflow lint -format on packages/lang-2610/test/printer/fixtures.json: the printer tree plus F-102's AST tree) match the committed goldens, and test/printer/fixtures.test.ts proves the printer reproduces them byte for byte; the 81 non-Harshil ScriptFormatterTest cases pass. Step 2: the fixed-point rows report no lint errors on every printed file, including synthesised and edited trees, and no change apart from the known differences, which Nextflow rewrites by design. Corpus: print.corpus.ts (CI corpus-parse) prints 335 of 342 corpus scripts as lint -format does; the other 7 are known differences. Known differences (ADR 0032): type-rename, catch-package, call-wrap, named-args-comma, directive-comment. LA-14: la14/ and synth/la14/ fixtures. Prints every declaration kind, typed and legacy, plus feature flags, enums and agents. No Playwright test (no UI, Q13): evidence is PR #25 and its CI oracle and corpus-parse jobs."
     },
     {
       "id": "F-111",
@@ -411,7 +411,7 @@
         "An edit that would mix typed and legacy definitions in one script is refused with a message"
       ],
       "passes": false,
-      "notes": ""
+      "notes": "From F-110: nodes an edit creates carry NO_RANGE and get the fresh layout (ADR 0032); synthesised triple-quoted strings carry their final indentation and StringLiteral.text must be set. Never write a print whose missingComments is non-empty. printDeclaration reprints and normalises the whole declaration (println 'x' becomes println('x')); decide whether AddCall needs statement-level printing (AR-22)."
     },
     {
       "id": "F-112",

@@ -35,3 +35,4 @@ Process: [0001](0001-record-decisions-as-adrs.md). Template: [template.md](templ
 | [0029](0029-relax-qa-03.md) | Let opening a large project take longer, as long as the app stays responsive | Accepted |
 | [0030](0030-trim-v0-1-scope-and-gates.md) | Defer private GitHub import and report the timing budgets instead of gating them | Accepted |
 | [0031](0031-docs-only-changes-to-main.md) | Push docs-only changes straight to main | Accepted |
+| [0032](0032-printer-known-differences.md) | Print as `nextflow lint -format` does, except where its output is broken | Accepted (agent) |

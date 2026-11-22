@@ -1,0 +1,22 @@
+def v
+def list = ['a']
+def map = [:]
+def x = 1
+def y = 2
+v = 42
+list[0] = 'first'
+map.key = 'value'
+(x, y) = tuple(1, 2)
+x += 1
+x -= 1
+x *= 2
+x /= 2
+x %= 3
+x **= 2
+x &= 1
+x |= 2
+x ^= 3
+x <<= 1
+x >>= 1
+x >>>= 1
+v ?= 0

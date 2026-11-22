@@ -1,3 +1,5 @@
 packages/lang-2610/test/ported/cases/** -text
+packages/lang-2610/test/printer/** -text
+packages/lang-2610/test/ported/formatter/cases/** -text
 packages/lang-2610/test/corpus/snapshots/** -text
 packages/lang-2610/test/config-ast/snapshots/** -text
