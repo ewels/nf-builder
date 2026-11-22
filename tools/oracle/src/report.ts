@@ -1,7 +1,12 @@
 import { readFileSync } from "node:fs";
 import { relative } from "node:path";
 import { stripAnsi } from "./check.ts";
-import { AST_ERRORS_FILE, AST_FIXTURES_FILE, FIXTURES_FILE } from "./paths.ts";
+import {
+  AST_ERRORS_FILE,
+  AST_FIXTURES_FILE,
+  CONFIG_AST_ERRORS_FILE,
+  FIXTURES_FILE,
+} from "./paths.ts";
 import type { OracleRun } from "./run.ts";
 
 const escapeData = (value: string): string =>
@@ -62,7 +67,9 @@ const sourceOf = (caseId: string, manifest: string): string =>
       ? AST_FIXTURES_FILE
       : caseId.startsWith("ast-errors:")
         ? AST_ERRORS_FILE
-        : manifest;
+        : caseId.startsWith("config-ast-errors:")
+          ? CONFIG_AST_ERRORS_FILE
+          : manifest;
 
 /** One `::error` annotation per mismatched check, pointing at the file that records what was expected. */
 export function annotations(run: OracleRun, repoRoot: string): string[] {

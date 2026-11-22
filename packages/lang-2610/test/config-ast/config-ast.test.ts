@@ -70,8 +70,7 @@ describe("F-103 AR-01: parseConfigAst returns the AST, the errors and the commen
   });
 
   it("F-103 AR-01: strings that look like comments are not comments", () => {
-    const text =
-      'params.pattern = "${params.dir}/*.vcf.gz"\nparams.url = "${params.host}//path"\n';
+    const text = `params.pattern = "\${params.dir}/*.vcf.gz"\nparams.url = "\${params.host}//path"\n`;
     expect(build(text).ast.comments).toEqual([]);
   });
 });
@@ -181,7 +180,7 @@ describe("F-103 FI-05: includeConfig", () => {
     const text = [
       "includeConfig 'conf/base.config'",
       "includeConfig params.big ? 'conf/a.config' : 'conf/b.config'",
-      'includeConfig "${projectDir}/conf/c.config"',
+      `includeConfig "\${projectDir}/conf/c.config"`,
       "",
     ].join("\n");
     const { ast, errors } = build(text);

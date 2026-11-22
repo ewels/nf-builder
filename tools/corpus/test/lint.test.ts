@@ -11,6 +11,7 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import {
+  hasFormat,
   isCached,
   type LintResult,
   lintDir,
@@ -110,6 +111,19 @@ describe("corpus lint", () => {
     expect(isCached(file, result.sha, "26.10.8")).toBe(false);
     writeFileSync(file, "{broken");
     expect(isCached(file, result.sha, "26.10.7")).toBe(false);
+  });
+
+  it("F-103 AR-02: a cached comment dump is reused only when it has the current format", () => {
+    const file = join(temp(), "comments.json");
+    expect(hasFormat(file)).toBe(false);
+    writeFileSync(file, JSON.stringify({ format: 1, files: [] }));
+    expect(hasFormat(file)).toBe(false);
+    writeFileSync(file, JSON.stringify({ files: [] }));
+    expect(hasFormat(file)).toBe(false);
+    writeFileSync(file, "{broken");
+    expect(hasFormat(file)).toBe(false);
+    writeFileSync(file, JSON.stringify({ format: 2, files: [] }));
+    expect(hasFormat(file)).toBe(true);
   });
 
   it("F-006: the launcher is the flag, else NXF_LAUNCHER, else the pinned dist read from upstream.json", () => {

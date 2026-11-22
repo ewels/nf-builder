@@ -104,7 +104,7 @@ export function attachComments(
 /**
  * Attach the comments of a config file (upstream's `CommentAttacher` on a `ConfigNode`). The containers are the blocks
  * and selectors, and the `plugins` apply block; values and `includeConfig` sources go through the shared expression
- * walker. An incomplete or invalid statement is dropped upstream, so it carries no comment here either.
+ * walker. An incomplete or invalid statement takes no comments here: upstream's attacher would add the incomplete one, but it never runs, because `buildAST` throws on the collected errors.
  */
 export function attachConfigComments(
   config: ConfigAst,

@@ -100,11 +100,6 @@ const PARAMETERS = new Set([
   "TupleInput",
 ]);
 
-/**
- * Whether our node is nf-lang's anchor: the same kind family at the same start and end (a block, by its first item).
- * `allowLabelStart`: a statement with labels starts at its first label in our tree (ADR 0027), so its start column may
- * differ from nf-lang's; the line and the end must still match.
- */
 /** nf-lang's config node classes and the kinds of our config nodes that stand for them. */
 const CONFIG_ANCHORS: Record<string, readonly string[]> = {
   ConfigNode: ["ConfigFile"],
@@ -115,6 +110,11 @@ const CONFIG_ANCHORS: Record<string, readonly string[]> = {
   ConfigIncludeNode: ["ConfigInclude"],
 };
 
+/**
+ * Whether our node is nf-lang's anchor: the same kind family at the same start and end (a block, by its first item).
+ * `allowLabelStart`: a statement with labels starts at its first label in our tree (ADR 0027), so its start column may
+ * differ from nf-lang's; the line and the end must still match.
+ */
 export function anchors(
   row: Row,
   node: AstNode & Record<string, unknown>,

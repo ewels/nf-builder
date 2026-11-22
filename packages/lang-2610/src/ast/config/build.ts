@@ -13,7 +13,6 @@ import type {
   ConfigSelector,
   ConfigStatement,
   Identifier,
-  Statement,
 } from "@nf-builder/lang-core";
 import {
   type CompilationUnitContext,
@@ -49,7 +48,7 @@ import type {
   StatementContext,
   StringLiteralContext,
 } from "../../generated/ScriptParser.ts";
-import type { BuildContext } from "../build/context.ts";
+import { type BuildContext, FatalBuildError } from "../build/context.ts";
 import { argumentList, expression } from "../build/expressions.ts";
 import { stringLiteral } from "../build/literals.ts";
 import { statement } from "../build/statements.ts";
@@ -158,7 +157,11 @@ function configIncomplete(
   return result;
 }
 
-/** An if, try or `def`: reported, and kept (upstream drops it). */
+/**
+ * An if, try or `def`: reported, and kept (upstream drops it). Upstream's `invalidStatement` reports only its one message
+ * and never builds the statement, so nothing inside it is checked: the kept statement is built, then the errors and the
+ * held number-format error that building collected are taken back. A fatal error inside leaves no statement.
+ */
 function configInvalid(
   ctx: InvalidStatementContext,
   cx: BuildContext,
@@ -180,14 +183,24 @@ function configInvalid(
       ? { tryCatchStatement: () => ctx.tryCatchStatement() }
       : { variableDeclaration: () => ctx.variableDeclaration() };
   const view = { start: ctx.start, stop: ctx.stop, ...only };
-  return {
-    kind: "ConfigInvalid",
-    statement: statement(
-      view as unknown as StatementContext,
-      cx,
-    ) as ConfigInvalid["statement"],
-    range,
-  };
+  const errorCount = cx.errors.length;
+  const held = cx.numberFormatError;
+  try {
+    return {
+      kind: "ConfigInvalid",
+      statement: statement(
+        view as unknown as StatementContext,
+        cx,
+      ) as ConfigInvalid["statement"],
+      range,
+    };
+  } catch (error) {
+    if (!(error instanceof FatalBuildError)) throw error;
+    return { kind: "ConfigInvalid", range };
+  } finally {
+    cx.errors.length = errorCount;
+    cx.numberFormatError = held;
+  }
 }
 
 function configBlock(ctx: ConfigBlockContext, cx: BuildContext): ConfigBlock {
@@ -273,5 +286,3 @@ export function buildConfig(
     range: cx.index.range(0, cx.index.size),
   };
 }
-
-export type { Statement };

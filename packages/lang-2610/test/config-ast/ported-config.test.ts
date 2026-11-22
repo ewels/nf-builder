@@ -11,11 +11,12 @@ type PortedCase = {
   lint: { line: number; column: number; message: string }[];
 };
 const ported = join(import.meta.dirname, "../ported");
-const cases = (
+const all = (
   JSON.parse(readFileSync(join(ported, "cases.json"), "utf8")) as {
     cases: PortedCase[];
   }
-).cases.filter((c) => c.owner === "F-103");
+).cases;
+const cases = all.filter((c) => c.owner === "F-103");
 
 // [id, start, end] of the invalid statement or escape, from nextflow lint 26.10.7 and nf-lang's ranges
 const RANGES: Record<string, string> = {
@@ -27,6 +28,15 @@ const RANGES: Record<string, string> = {
   "ConfigAstBuilderTest-L163": "1:14-1:16",
   "ConfigAstBuilderTest-L175": "1:28-1:30",
 };
+
+// the cases whose statement is an if, try or `def`, which the AST keeps as ConfigInvalid
+const INVALID_STATEMENTS = new Set([
+  "ConfigAstBuilderTest-L059",
+  "ConfigAstBuilderTest-L076",
+  "ConfigAstBuilderTest-L097",
+  "ConfigAstBuilderTest-L113",
+  "ConfigAstBuilderTest-L129",
+]);
 
 describe("F-103 FI-01: the config builder reproduces the ported ConfigAstBuilderTest errors", () => {
   it("F-103: exactly the seven ConfigAstBuilderTest inputs are owned by F-103", () => {
@@ -49,13 +59,42 @@ describe("F-103 FI-01: the config builder reproduces the ported ConfigAstBuilder
         RANGES[c.id],
       );
       // the invalid statements are kept in the AST
-      if (
-        result.ok &&
-        c.id <= "ConfigAstBuilderTest-L129" &&
-        c.id !== "ConfigAstBuilderTest-L076"
-      ) {
-        expect(JSON.stringify(result.ast)).toContain('"ConfigInvalid"');
-      }
+      if (INVALID_STATEMENTS.has(c.id))
+        expect(JSON.stringify(result.ok && result.ast)).toContain(
+          '"ConfigInvalid"',
+        );
+    });
+  }
+});
+
+describe("F-103 FI-01: the ported ConfigAstBuilderTest cases F-103 does not own", () => {
+  const other = (id: string): PortedCase => {
+    const found = all.find((c) => c.id === id);
+    if (!found) throw new Error(`no ported case ${id}`);
+    return found;
+  };
+
+  it("F-103 FI-01: ConfigAstBuilderTest-L188 (octal escape \\101) builds with no errors", () => {
+    const c = other("ConfigAstBuilderTest-L188");
+    expect(c.lint).toEqual([]);
+    const result = parseConfigAst(readFileSync(join(ported, c.file), "utf8"));
+    expect(result.ok).toBe(true);
+    expect(result.errors).toEqual([]);
+  });
+
+  for (const id of ["ConfigAstBuilderTest-L044", "ConfigAstBuilderTest-L143"]) {
+    it(`F-103 FI-01: ${id} stops at the recorded parser error`, () => {
+      const c = other(id);
+      const result = parseConfigAst(readFileSync(join(ported, c.file), "utf8"));
+      expect(result.ok).toBe(false);
+      expect(
+        result.errors.map((e) => ({
+          source: e.source,
+          line: e.line,
+          column: e.column,
+          message: e.message,
+        })),
+      ).toEqual(c.lint.map((e) => ({ source: "parser", ...e })));
     });
   }
 });

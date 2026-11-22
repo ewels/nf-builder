@@ -3,95 +3,58 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { parseConfigAst } from "../../src/ast/index.ts";
 
-const dir = join(
-  import.meta.dirname,
-  "../../../../tools/oracle/cases/config-ast-errors",
+const pack = import.meta.dirname;
+
+type Recorded = {
+  cases: {
+    file: string;
+    lint: { line: number; column: number; message: string }[];
+  }[];
+};
+// `nextflow lint -o json` 26.10.7 (NXF_SYNTAX_PARSER=v2, offline), 2026-11-22, on the tree errors/: the same file the
+// oracle reads (`pnpm oracle` checks it in CI, positions included). A fatal builder error ends the build and the
+// number-format error comes last, as in lint.
+const recorded: Recorded = JSON.parse(
+  readFileSync(join(pack, "errors.json"), "utf8"),
 );
 
-// `nextflow lint -o json` 26.10.7 (NXF_SYNTAX_PARSER=v2, offline), 2026-11-22, on each file of the oracle case
-// config-ast-errors; `pnpm oracle --case config-ast-errors` checks the messages in CI. Each row: line, column, message.
-const lint: Record<string, [number, number, string][]> = {
-  "p01-apply-not-plugins.config": [
-    [1, 1, "Config settings must be assigned with an equals sign (`=`)"],
-  ],
-  "p02-incomplete.config": [[1, 1, "Incomplete statement"]],
-  "p03-incomplete-in-block.config": [[2, 5, "Incomplete statement"]],
-  "p04-incomplete-dot.config": [[1, 1, "Incomplete statement"]],
-  "p06-invalid-assign-target.config": [
-    [
-      1,
-      22,
-      "Invalid assignment target -- must be a variable, index, or property expression",
-    ],
-  ],
-  "p07-empty-list-comma.config": [
-    [1, 13, "Empty list literal should not contain any comma(,)"],
-  ],
-  "p09-nested-paren.config": [
-    [
-      1,
-      22,
-      "Nested parenthesis is not allowed in multiple assignment, e.g. ((a)) = b",
-    ],
-  ],
-  "p10-number-format.config": [
-    [
-      1,
-      12,
-      "Number of value 99999999999 does not fit in the range of int, but int was enforced.",
-    ],
-  ],
-  "p17-two-escapes.config": [
-    [1, 14, "Invalid escape sequence: '\\q'"],
-    [1, 23, "Invalid escape sequence: '\\.'"],
-  ],
-  "p18-two-invalid.config": [
-    [1, 1, "If statements cannot be mixed with config statements"],
-    [2, 1, "Variable declarations cannot be mixed with config statements"],
-  ],
-  // a fatal error ends the build: the second `[,]` is not reported
-  "p19-two-fatal.config": [
-    [
-      1,
-      22,
-      "Invalid assignment target -- must be a variable, index, or property expression",
-    ],
-  ],
-  // the number-format error is held to the end and comes out after the escape error's line
-  "q01-numfmt-then-escape.config": [
-    [
-      1,
-      12,
-      "Number of value 99999999999 does not fit in the range of int, but int was enforced.",
-    ],
-    [2, 14, "Invalid escape sequence: '\\q'"],
-  ],
-  // names in paths, blocks and selectors are not checked for escapes; only the value on line 5 is
-  "q03-escapes-in-names.config": [[5, 7, "Invalid escape sequence: '\\q'"]],
-  // an escape before a fatal error is reported, one after it is not
-  "q02-escape-fatal-escape.config": [
-    [1, 14, "Invalid escape sequence: '\\q'"],
-    [
-      2,
-      22,
-      "Invalid assignment target -- must be a variable, index, or property expression",
-    ],
-  ],
-};
-
 describe("F-103 FI-01: the config builder reports nextflow lint 26.10.7's errors", () => {
-  for (const [file, expected] of Object.entries(lint)) {
-    it(`F-103 FI-01 LA-30: ${file} reports ${expected.map((e) => `${e[0]}:${e[1]}`).join(", ")}`, () => {
-      const result = parseConfigAst(readFileSync(join(dir, file), "utf8"));
-      expect(result.errors.map((e) => [e.line, e.column, e.message])).toEqual(
-        expected,
-      );
+  for (const { file, lint } of recorded.cases) {
+    it(`F-103 FI-01 LA-30: ${file} reports ${lint.map((e) => `${e.line}:${e.column}`).join(", ")}`, () => {
+      const result = parseConfigAst(readFileSync(join(pack, file), "utf8"));
+      const errors = result.errors.map((e) => ({
+        line: e.line,
+        column: e.column,
+        message: e.message,
+      }));
+      expect(errors).toEqual(lint);
       expect(result.errors.every((e) => e.source === "builder")).toBe(true);
     });
   }
 
-  it("F-103 FI-01: every file of the oracle case is covered here", () => {
-    expect(readdirSync(dir).sort()).toEqual(Object.keys(lint).sort());
+  it("F-103 FI-01: every file in errors/ is recorded", () => {
+    expect(readdirSync(join(pack, "errors")).sort()).toEqual(
+      recorded.cases.map((c) => c.file.replace("errors/", "")).sort(),
+    );
+  });
+
+  it("F-103 FI-01: an invalid statement is reported alone and its inside is not checked, but a closure body is", () => {
+    const run = (name: string) =>
+      parseConfigAst(readFileSync(join(pack, "errors", name), "utf8"));
+    // upstream never builds the statement, so a fatal `[,]` inside a `def` leaves it without one, and the build goes on
+    const kept = run("r02-def-list-comma-then-escape.config");
+    expect(kept.ok).toBe(true);
+    expect(kept.ok && kept.ast.statements.map((s) => s.kind)).toEqual([
+      "ConfigInvalid",
+      "ConfigAssign",
+    ]);
+    expect(kept.ok && kept.ast.statements.map((s) => "statement" in s)).toEqual(
+      [false, false],
+    );
+    expect(
+      run("r01-if-escape-not-checked.config").errors.map((e) => e.message),
+    ).toEqual(["If statements cannot be mixed with config statements"]);
+    expect(run("r06-closure-body-checked.config").ok).toBe(false);
   });
 
   it("F-103 FI-01: integer literals follow Groovy's int and long ranges", () => {
@@ -120,7 +83,7 @@ describe("F-103 FI-01: the config builder reports nextflow lint 26.10.7's errors
     expect(errors("x = 'a\\uZZZZ'")).toEqual([
       "Invalid escape sequence: '\\u'",
     ]);
-    expect(errors('x = "a ${y}\\q"')).toEqual([
+    expect(errors(`x = "a \${y}\\q"`)).toEqual([
       "Invalid escape sequence: '\\q'",
     ]);
   });

@@ -18,6 +18,7 @@ import {
 import {
   AST_ERRORS_FILE,
   AST_FIXTURES_FILE,
+  CONFIG_AST_ERRORS_FILE,
   DEFAULT_MANIFEST,
   FIXTURES_FILE,
   ORACLE_CACHE,
@@ -86,6 +87,7 @@ export function main(argv: readonly string[], deps: OracleDeps = {}): number {
         ? [
             loadTreeManifest(AST_FIXTURES_FILE, "ast-fixtures"),
             loadTreeManifest(AST_ERRORS_FILE, "ast-errors"),
+            loadTreeManifest(CONFIG_AST_ERRORS_FILE, "config-ast-errors"),
           ]
         : []);
   } catch (error) {

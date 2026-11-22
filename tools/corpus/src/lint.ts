@@ -226,7 +226,7 @@ export function lintDir(
 }
 
 /** Whether a cached comment dump has the current format (see `CommentDumpResult`). */
-function hasFormat(file: string): boolean {
+export function hasFormat(file: string): boolean {
   try {
     const cached: unknown = JSON.parse(readFileSync(file, "utf8"));
     return isRecord(cached) && cached.format === 2;

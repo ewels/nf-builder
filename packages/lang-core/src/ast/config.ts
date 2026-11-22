@@ -50,9 +50,12 @@ export interface ConfigIncomplete extends NodeBase<"ConfigIncomplete"> {
   readonly path: readonly ConfigName[];
   readonly trailingDot: boolean;
 }
-/** An if, try or `def` among config statements. nf-lang reports and drops it; we keep it (ADR 0004). */
+/**
+ * An if, try or `def` among config statements. nf-lang reports and drops it; we keep it (ADR 0004). `statement` is
+ * absent when building it hit a fatal error (nf-lang never builds it, so such an error is not a config error).
+ */
 export interface ConfigInvalid extends NodeBase<"ConfigInvalid"> {
-  readonly statement: IfStatement | TryCatch | VariableDeclaration;
+  readonly statement?: IfStatement | TryCatch | VariableDeclaration;
 }
 export type ConfigStatement =
   | ConfigAssign

@@ -1,0 +1,520 @@
+{
+  "about": "nf-lang 26.10.7 comment attachments for the config-constructs fixtures: ConfigAstBuilder and CommentAttacher, the oracle for comments-upstream.test.ts. Produced with: java -cp .cache/nextflow/26.10.7/nextflow-26.10.7-dist tools/corpus/src/CommentDump.java tools/oracle/cases/config-constructs",
+  "files": [
+    {
+      "file": "assignments.config",
+      "comments": [
+        {
+          "line": 1,
+          "column": 1,
+          "text": "// F-103 fixture. Source: nextflow-io/nextflow v26.10.7 docs/config.mdx#L29-L45, plus quoted and built-in-type names",
+          "slot": "leading",
+          "node": {
+            "class": "ConfigAssignNode",
+            "line": 3,
+            "column": 1,
+            "endLine": 3,
+            "endColumn": 17
+          }
+        },
+        {
+          "line": 2,
+          "column": 1,
+          "text": "// (ConfigParser.g4 configPrimary).",
+          "slot": "leading",
+          "node": {
+            "class": "ConfigAssignNode",
+            "line": 3,
+            "column": 1,
+            "endLine": 3,
+            "endColumn": 17
+          }
+        }
+      ]
+    },
+    {
+      "file": "blocks.config",
+      "comments": [
+        {
+          "line": 1,
+          "column": 1,
+          "text": "// F-103 fixture. Source: nextflow-io/nextflow v26.10.7 docs/config.mdx#L47-L77.",
+          "slot": "leading",
+          "node": {
+            "class": "ConfigAssignNode",
+            "line": 3,
+            "column": 1,
+            "endLine": 3,
+            "endColumn": 22
+          }
+        },
+        {
+          "line": 2,
+          "column": 1,
+          "text": "// dot syntax",
+          "slot": "leading",
+          "node": {
+            "class": "ConfigAssignNode",
+            "line": 3,
+            "column": 1,
+            "endLine": 3,
+            "endColumn": 22
+          }
+        },
+        {
+          "line": 6,
+          "column": 1,
+          "text": "// block syntax",
+          "slot": "leading",
+          "node": {
+            "class": "ConfigBlockNode",
+            "line": 7,
+            "column": 1,
+            "endLine": 10,
+            "endColumn": 2
+          }
+        }
+      ]
+    },
+    {
+      "file": "comments.config",
+      "comments": [
+        {
+          "line": 1,
+          "column": 1,
+          "text": "// F-103 fixture. Source: nextflow-io/nextflow v26.10.7 modules/nf-lang/src/test/groovy/nextflow/config/formatter/ConfigFormatterTest.groovy#L102-L141,",
+          "slot": "leading",
+          "node": {
+            "class": "ConfigBlockNode",
+            "line": 4,
+            "column": 1,
+            "endLine": 7,
+            "endColumn": 2
+          }
+        },
+        {
+          "line": 2,
+          "column": 1,
+          "text": "// plus comments inside lists, maps and closures.",
+          "slot": "leading",
+          "node": {
+            "class": "ConfigBlockNode",
+            "line": 4,
+            "column": 1,
+            "endLine": 7,
+            "endColumn": 2
+          }
+        },
+        {
+          "line": 3,
+          "column": 1,
+          "text": "// about the process scope",
+          "slot": "leading",
+          "node": {
+            "class": "ConfigBlockNode",
+            "line": 4,
+            "column": 1,
+            "endLine": 7,
+            "endColumn": 2
+          }
+        },
+        {
+          "line": 5,
+          "column": 14,
+          "text": "// how many",
+          "slot": "trailing",
+          "node": {
+            "class": "ConfigAssignNode",
+            "line": 5,
+            "column": 5,
+            "endLine": 5,
+            "endColumn": 13
+          }
+        },
+        {
+          "line": 6,
+          "column": 5,
+          "text": "// dangling",
+          "slot": "dangling",
+          "node": {
+            "class": "ConfigBlockNode",
+            "line": 4,
+            "column": 1,
+            "endLine": 7,
+            "endColumn": 2
+          }
+        },
+        {
+          "line": 9,
+          "column": 1,
+          "text": "// about the plugins",
+          "slot": "leading",
+          "node": {
+            "class": "ConfigApplyBlockNode",
+            "line": 10,
+            "column": 1,
+            "endLine": 13,
+            "endColumn": 2
+          }
+        },
+        {
+          "line": 11,
+          "column": 19,
+          "text": "// a plugin",
+          "slot": "trailing",
+          "node": {
+            "class": "ConfigApplyNode",
+            "line": 11,
+            "column": 5,
+            "endLine": 11,
+            "endColumn": 18
+          }
+        },
+        {
+          "line": 12,
+          "column": 5,
+          "text": "// dangling",
+          "slot": "dangling",
+          "node": {
+            "class": "ConfigApplyBlockNode",
+            "line": 10,
+            "column": 1,
+            "endLine": 13,
+            "endColumn": 2
+          }
+        },
+        {
+          "line": 15,
+          "column": 1,
+          "text": "/* a block comment\n   over two lines */",
+          "slot": "leading",
+          "node": {
+            "class": "ConfigIncludeNode",
+            "line": 17,
+            "column": 1,
+            "endLine": 17,
+            "endColumn": 29
+          }
+        },
+        {
+          "line": 17,
+          "column": 30,
+          "text": "// over here",
+          "slot": "trailing",
+          "node": {
+            "class": "ConfigIncludeNode",
+            "line": 17,
+            "column": 1,
+            "endLine": 17,
+            "endColumn": 29
+          }
+        },
+        {
+          "line": 23,
+          "column": 13,
+          "text": "// the shell",
+          "slot": "trailing",
+          "node": {
+            "class": "ConstantExpression",
+            "line": 23,
+            "column": 5,
+            "endLine": 23,
+            "endColumn": 11
+          }
+        },
+        {
+          "line": 25,
+          "column": 5,
+          "text": "/* last */",
+          "slot": "leading",
+          "node": {
+            "class": "ConstantExpression",
+            "line": 25,
+            "column": 16,
+            "endLine": 25,
+            "endColumn": 20
+          }
+        },
+        {
+          "line": 28,
+          "column": 5,
+          "text": "// the first",
+          "slot": "leading",
+          "node": {
+            "class": "MapEntryExpression",
+            "line": 29,
+            "column": 5,
+            "endLine": 29,
+            "endColumn": 9
+          }
+        },
+        {
+          "line": 30,
+          "column": 10,
+          "text": "// the second",
+          "slot": "trailing",
+          "node": {
+            "class": "MapEntryExpression",
+            "line": 30,
+            "column": 5,
+            "endLine": 30,
+            "endColumn": 9
+          }
+        },
+        {
+          "line": 33,
+          "column": 5,
+          "text": "// before the if",
+          "slot": "leading",
+          "node": {
+            "class": "IfStatement",
+            "line": 34,
+            "column": 5,
+            "endLine": 40,
+            "endColumn": 6
+          }
+        },
+        {
+          "line": 37,
+          "column": 5,
+          "text": "// between",
+          "slot": "leading",
+          "node": {
+            "class": "BlockStatement",
+            "line": 39,
+            "column": 9,
+            "endLine": 40,
+            "endColumn": 1
+          }
+        },
+        {
+          "line": 42,
+          "column": 1,
+          "text": "// trailing comment at the end of the file",
+          "slot": "dangling",
+          "node": {
+            "class": "ConfigNode",
+            "line": -1,
+            "column": -1,
+            "endLine": -1,
+            "endColumn": -1
+          }
+        }
+      ]
+    },
+    {
+      "file": "conf/test.config",
+      "comments": [
+        {
+          "line": 1,
+          "column": 1,
+          "text": "// F-103 fixture: an include target.",
+          "slot": "leading",
+          "node": {
+            "class": "ConfigAssignNode",
+            "line": 2,
+            "column": 1,
+            "endLine": 2,
+            "endColumn": 37
+          }
+        }
+      ]
+    },
+    {
+      "file": "includes.config",
+      "comments": [
+        {
+          "line": 1,
+          "column": 1,
+          "text": "// F-103 fixture. Source: nextflow-io/nextflow v26.10.7 docs/config.mdx#L79-L95, with a ternary and a GString source.",
+          "slot": "leading",
+          "node": {
+            "class": "ConfigAssignNode",
+            "line": 2,
+            "column": 1,
+            "endLine": 2,
+            "endColumn": 25
+          }
+        }
+      ]
+    },
+    {
+      "file": "other.config",
+      "comments": [
+        {
+          "line": 1,
+          "column": 1,
+          "text": "// F-103 fixture: an include target.",
+          "slot": "leading",
+          "node": {
+            "class": "ConfigAssignNode",
+            "line": 2,
+            "column": 1,
+            "endLine": 2,
+            "endColumn": 33
+          }
+        }
+      ]
+    },
+    {
+      "file": "path/extra.config",
+      "comments": [
+        {
+          "line": 1,
+          "column": 1,
+          "text": "// F-103 fixture: an include target.",
+          "slot": "leading",
+          "node": {
+            "class": "ConfigAssignNode",
+            "line": 2,
+            "column": 1,
+            "endLine": 2,
+            "endColumn": 38
+          }
+        }
+      ]
+    },
+    {
+      "file": "plugins.config",
+      "comments": [
+        {
+          "line": 1,
+          "column": 1,
+          "text": "// F-103 fixture. Source: nextflow-io/nextflow v26.10.7 modules/nextflow/src/test/groovy/nextflow/config/ConfigParserV2Test.groovy#L60-L82.",
+          "slot": "leading",
+          "node": {
+            "class": "ConfigApplyBlockNode",
+            "line": 2,
+            "column": 1,
+            "endLine": 6,
+            "endColumn": 2
+          }
+        }
+      ]
+    },
+    {
+      "file": "process-ext.config",
+      "comments": [
+        {
+          "line": 1,
+          "column": 1,
+          "text": "// F-103 fixture. Source: nextflow-io/nextflow v26.10.7 docs/config.mdx#L287-L317, plus the nf-core `publishDir` and",
+          "slot": "leading",
+          "node": {
+            "class": "ConfigBlockNode",
+            "line": 3,
+            "column": 1,
+            "endLine": 16,
+            "endColumn": 2
+          }
+        },
+        {
+          "line": 2,
+          "column": 1,
+          "text": "// `ext.args` shapes (closures, maps, `when`).",
+          "slot": "leading",
+          "node": {
+            "class": "ConfigBlockNode",
+            "line": 3,
+            "column": 1,
+            "endLine": 16,
+            "endColumn": 2
+          }
+        }
+      ]
+    },
+    {
+      "file": "profiles.config",
+      "comments": [
+        {
+          "line": 1,
+          "column": 1,
+          "text": "// F-103 fixture. Source: nextflow-io/nextflow v26.10.7 docs/config.mdx#L319-L357 and #L158-L167, with an include in a",
+          "slot": "leading",
+          "node": {
+            "class": "ConfigBlockNode",
+            "line": 3,
+            "column": 1,
+            "endLine": 24,
+            "endColumn": 2
+          }
+        },
+        {
+          "line": 2,
+          "column": 1,
+          "text": "// profile and mixed dot and block syntax.",
+          "slot": "leading",
+          "node": {
+            "class": "ConfigBlockNode",
+            "line": 3,
+            "column": 1,
+            "endLine": 24,
+            "endColumn": 2
+          }
+        }
+      ]
+    },
+    {
+      "file": "selectors.config",
+      "comments": [
+        {
+          "line": 1,
+          "column": 1,
+          "text": "// F-103 fixture. Source: nextflow-io/nextflow v26.10.7 docs/config.mdx#L185-L286, plus `agent` selectors and an unknown",
+          "slot": "leading",
+          "node": {
+            "class": "ConfigBlockNode",
+            "line": 3,
+            "column": 1,
+            "endLine": 21,
+            "endColumn": 2
+          }
+        },
+        {
+          "line": 2,
+          "column": 1,
+          "text": "// selector kind (ConfigParser.g4 configSelector accepts any identifier).",
+          "slot": "leading",
+          "node": {
+            "class": "ConfigBlockNode",
+            "line": 3,
+            "column": 1,
+            "endLine": 21,
+            "endColumn": 2
+          }
+        }
+      ]
+    },
+    {
+      "file": "values.config",
+      "comments": [
+        {
+          "line": 1,
+          "column": 1,
+          "text": "// F-103 fixture. Expression and statement kinds from nextflow-io/nextflow v26.10.7 docs/reference/syntax.mdx, as",
+          "slot": "leading",
+          "node": {
+            "class": "ConfigAssignNode",
+            "line": 3,
+            "column": 1,
+            "endLine": 3,
+            "endColumn": 44
+          }
+        },
+        {
+          "line": 2,
+          "column": 1,
+          "text": "// config values and closure bodies.",
+          "slot": "leading",
+          "node": {
+            "class": "ConfigAssignNode",
+            "line": 3,
+            "column": 1,
+            "endLine": 3,
+            "endColumn": 44
+          }
+        }
+      ]
+    }
+  ]
+}

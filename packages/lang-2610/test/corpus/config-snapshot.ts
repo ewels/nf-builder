@@ -39,7 +39,7 @@ function summary(s: ConfigStatement | ConfigApply): string {
     case "ConfigIncomplete":
       return `${pathText(s.path)}${s.trailingDot ? "." : ""}`;
     case "ConfigInvalid":
-      return s.statement.kind;
+      return s.statement?.kind ?? "(none)";
   }
 }
 
