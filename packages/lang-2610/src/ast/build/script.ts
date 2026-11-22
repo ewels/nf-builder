@@ -112,7 +112,8 @@ export function buildScript(
       continue;
     }
     const { rejected, error } = reparseDeclaration(ctx, cx.tokens);
-    if (error) cx.errors.push(error);
+    // Upstream collects this error as a builder error and the module still counts as parsed (F-105).
+    if (error) cx.errors.push({ ...error, source: "builder" });
     else if (!rejected)
       cx.error(
         `Invalid ${keyword} definition -- check for missing or out-of-order section labels`,

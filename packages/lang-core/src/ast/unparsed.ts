@@ -20,4 +20,10 @@ export interface Unparsed extends NodeBase<"Unparsed"> {
   readonly head: DeclarationHead | null;
   /** Why: the chunk's parse errors, or the builder errors inside the item. */
   readonly problems: readonly ParseProblem[];
+  /**
+   * Set when the AST builder turned a top-level call named like a declaration (`process`, `workflow`, ...) into an
+   * `InvalidDeclaration`, as nf-lang does for a declaration with out-of-order sections. Includes of its name are errors
+   * upstream, though the item still binds by its head (ADR 0004). Absent otherwise.
+   */
+  readonly invalidDeclaration?: true;
 }

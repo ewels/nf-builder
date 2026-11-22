@@ -296,6 +296,17 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - Flaky F-102 comment tests under load get explicit 30 s timeouts (no assertion changed).
 - Blockers: none.
 
+## 2026-11-22 · F-105 · Claude (autonomous)
+- Did: the semantic model. nf-lang 26.10.7's include rules in the pack (`src/includes/`, `LanguagePack.includes`): relative paths, registry names with nested vendoring, plugins, config includes; entries bind to declarations (including `Unparsed` heads); `Diagnostic` in lang-core; the engine's `ProjectModel` re-models a changed file and its direct dependants, with a trace hook. Every corpus include resolves with no diagnostics, as lint; oracle cases tie the messages to lint.
+- State: passing.
+- Next: F-106, with F-501 in review; F-111 and F-112 are planned.
+- Decisions:
+  - Include rules in the pack, upstream registry fidelity (nested vendoring, `meta.yml` required) with the AR-03 clarification, diagnostics and their codes, "could not be parsed" only when the grammar fails, direct dependants only, the F-112 leftovers ([ADR 0034](../adr/0034-include-resolution-and-incremental-model.md); architecture sketch gains `includes`).
+  - Errors the AST builder's reparse finds are builder errors (`source: "builder"`), as upstream collects them, so a target with only builder errors still resolves.
+  - Our own messages where lint aborts or downloads (upstream-bugs 12, 13, 15).
+  - The model is in memory only; `yaml` as an engine dev dependency; no new runtime dependency.
+- Blockers: none.
+
 ## 2026-11-22 · F-501 · Claude (autonomous)
 - Did: `tools/registry-snapshot` builds the registry snapshot from registry.nextflow.io (module index, `meta.yml` ports, per-release bundles with every file, pinned dependency closure, plugin index and specs), classifying typed and legacy modules with the 26.10 pack's parser; `pnpm check:registry` checks QA-06 and integrity; the `Registry snapshot` workflow builds daily and publishes to the `registry-snapshot` branch; Netlify builds copy it to `/registry/`.
 - State: built, not passing: blocked on #31 (the repository is private, so Netlify builds can't read the snapshot branch; they warn and serve no snapshot).

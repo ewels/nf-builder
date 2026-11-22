@@ -30,6 +30,7 @@ To reproduce with the pinned dist: `NXF_OFFLINE=true .cache/nextflow/26.10.7/nex
 | 18 | Nextflow registry | Module metadata lists outputs in a different order from `meta.yml` and `main.nf` | F-501 plan | no |
 | 19 | Nextflow registry | `nf-core/fasta_clean_faidx` is listed as a process but declares a workflow; `nextflow-io/hello` has no `componentName` | F-501 plan | no |
 | 20 | nf-lang lint | A legacy process before `nextflow.enable.types = true` and a typed one after it in the same script pass lint and run, although the docs say a script can't mix them | F-111 plan | no |
+| 21 | Nextflow registry | The download endpoint for `nf-core/cooler/digest` 0.0.0-6d1763b returns HTTP 401 | F-501 live build | no |
 
 ## Details
 
@@ -309,3 +310,9 @@ workflow {
 - **Expected:** the static-types docs (`docs/static-typing.mdx` L50 at the pinned commit) say a script can't mix typed and legacy definitions, so lint should report the legacy process here, or the docs should describe the positional rule.
 - **nf-builder:** refuses edits that would mix the two in one script (LA-13, F-111), and keeps scripts that are already mixed editable.
 - **Reproducer:** the oracle case `f111-mixed-after-flag` (added with F-111) records this file.
+
+### 21. A registry bundle that can't be downloaded
+
+- **What happens:** on 2026-11-22, `GET https://registry.nextflow.io/api/v1/modules/nf-core%2Fcooler%2Fdigest/0.0.0-6d1763b/download` returned HTTP 401, while the module's details endpoint and every other module's download worked anonymously.
+- **Expected:** a redirect to the bundle, as for the other 2,320 modules.
+- **nf-builder:** the snapshot build reports it and leaves the module out (F-501).
