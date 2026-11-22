@@ -19,6 +19,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-113 engine worker | `feat/F-113`, in PR | Plan deleted in its PR. |
 | F-202 projects in IndexedDB | not started | [plan](plan-F-202.md). After F-113. |
 | F-205 canvas | not started | [plan](plan-F-205.md). After F-113 (and F-106); parallel with F-202. |
+| F-206 details pane | not started | [plan](plan-F-206.md). After F-205. |
 | F-501 registry snapshot | merged, PR #29, **not passing** | Passes once the Pages deploy serves `/registry/` and `verify` passes (ADR 0041, F-011). F-502 to F-506, F-702, F-704 and F-705 depend on it. |
 | F-011 GitHub Pages hosting | `feat/F-011`, PR #37 | Reviewed, CI green; merge once Pages is enabled (#35), after merging `main`. |
 
@@ -110,3 +111,16 @@ Next free ADR number: 0044 (0040 and 0041 are F-011's, 0042 F-112's, 0043 F-113'
   - `passes` is set in the PR, and F-501 flips in a follow-up after a snapshot-triggered `verify` passes.
 - `smol-toml` stays (section 6).
 - The plan's mention of #33 is stale: Actions runs again.
+
+### F-206 — [plan](plan-F-206.md)
+- Accept every recommendation in section 6:
+  - Edit and Code are shown disabled while a node is selected;
+  - every directive is shown in source order;
+  - the 8-line preview;
+  - the doc-comment summary;
+  - containment scopes, with "No problems found";
+  - Parameters and Outputs in the entry summary;
+  - projection parts on the main thread, with `EngineApi.details` in the worker;
+  - single selection, with edges not selectable;
+  - the plan's wording.
+- Task 0, wiring the diagnoser into the service, is done in F-112's PR, since F-112 merges after F-113.
