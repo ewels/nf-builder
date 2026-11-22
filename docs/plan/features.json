@@ -207,8 +207,8 @@
         "`pnpm gen:grammar 26.10` regenerates byte-identical output",
         "Generated files carry a do-not-edit header naming the upstream commit"
       ],
-      "passes": false,
-      "notes": "From F-006: steps 2 and 3 are delivered (generated parser with do-not-edit headers, pnpm gen:grammar --check). nf-lang has no lexer tests, so step 1's ported cases are the parse cases of ScriptAstBuilderTest and ConfigAstBuilderTest (record in open-questions.md when this lands)."
+      "passes": true,
+      "notes": "From F-006: steps 2 and 3 are delivered (generated parser with do-not-edit headers, pnpm gen:grammar --check). nf-lang has no lexer tests, so step 1's ported cases are the parse cases of ScriptAstBuilderTest and ConfigAstBuilderTest (record in open-questions.md when this lands). Verified 2026-11-22: step 1 by pnpm --filter @nf-builder/lang-2610 test, including 94 tests over the 90 parse-level inputs ported from nf-lang v26.10.7 ScriptAstBuilderTest, ConfigAstBuilderTest and AgentParserTest (Q14; packages/lang-2610/test/ported/); steps 2 and 3 by test/gen-grammar.test.ts (since F-006). Parse errors now carry nf-lang's DescriptiveErrorStrategy messages and ranges. The ported inputs' recorded lint results are checked for consistency, not re-run by the oracle (AGENTS.md exception)."
     },
     {
       "id": "F-102",
@@ -227,7 +227,7 @@
         "Every AST node's range slices back to its exact source text"
       ],
       "passes": false,
-      "notes": ""
+      "notes": "From F-101: 31 ported inputs parse at grammar level and must be rejected by the AST builder here (packages/lang-2610/test/ported/cases.json, owner F-102): 4 reparse cases (ScriptAstBuilderTest L194, L209, L224, AgentParserTest L168; ScriptAstBuilder.java#L251-L320, also needed by F-104's section-order fixture) and 27 AST-builder errors (ScriptAstBuilderTest L245-L700 and the escape cases L744-L852, AgentParserTest L403)."
     },
     {
       "id": "F-103",
@@ -246,7 +246,7 @@
         "Ranges slice back to exact source"
       ],
       "passes": false,
-      "notes": ""
+      "notes": "From F-101: 7 ported ConfigAstBuilderTest inputs (L059, L076, L097, L113, L129, L163, L175) parse at grammar level and must be rejected by the config AST builder here (owner F-103 in packages/lang-2610/test/ported/cases.json)."
     },
     {
       "id": "F-104",
@@ -437,7 +437,7 @@
         "Every message states what to do; mechanical cases carry a quick-fix command"
       ],
       "passes": false,
-      "notes": ""
+      "notes": "From F-101: 8 ported AgentParserTest inputs (L485-L491, L518: agent output types, eval not defined) parse and are rejected only by name and type resolution (owner F-112 in packages/lang-2610/test/ported/cases.json)."
     },
     {
       "id": "F-113",

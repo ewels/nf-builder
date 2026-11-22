@@ -170,3 +170,14 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - QA-03 cold-start risk handed to F-113 (notes); the catalogue's 26.10.4 skew and docs gaps recorded in ADR 0005's spike result.
   - Hand-off plans folder removed now that all three hand-off features have merged.
 - Blockers: none.
+
+## 2026-11-22 · F-101 · Claude (autonomous)
+- Did: ported nf-lang's `DescriptiveErrorStrategy` (parse errors get upstream's messages and ranges) and the 90 parse-level inputs of `ScriptAstBuilderTest`, `ConfigAstBuilderTest` and `AgentParserTest` as 94 tests; steps 2 and 3 were delivered by F-006.
+- State: passing.
+- Next: F-109 in review, F-007 in review, then F-102 and F-103.
+- Decisions:
+  - Q14 answered: the ported "lexer cases" are those parse-level inputs; the 46 the grammar accepts are owned by F-102, F-103 and F-112 (notes).
+  - AGENTS.md: the ported inputs are exempt from "must pass the oracle"; their lint results are recorded and checked for consistency, not re-run (an oracle re-check was more than this feature needed).
+  - `docs/licences.md`: the upstream test inputs (Apache-2.0).
+  - `.gitattributes`: the ported inputs are byte-exact (`-text`).
+- Blockers: none.
