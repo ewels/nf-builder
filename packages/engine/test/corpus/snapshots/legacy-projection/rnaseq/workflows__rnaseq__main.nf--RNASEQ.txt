@@ -1,0 +1,2037 @@
+workflow workflows/rnaseq/main.nf#RNASEQ legacy
+statements 184, modelled 165
+workflows/rnaseq/main.nf#RNASEQ/:params params "params" @74:1
+  out aligner (aligner): -
+  out input (input): -
+  out skip_alignment (skip_alignment): -
+  out bowtie2_rrna_index (bowtie2_rrna_index): -
+  out remove_ribo_rna (remove_ribo_rna): -
+  out ribo_removal_tool (ribo_removal_tool): -
+  out skip_bbsplit (skip_bbsplit): -
+  out fasta (fasta): -
+  out skip_fastqc (skip_fastqc): -
+  out skip_qc (skip_qc): -
+  out skip_trimming (skip_trimming): -
+  out skip_umi_extract (skip_umi_extract): -
+  out skip_linting (skip_linting): -
+  out trimmer (trimmer): -
+  out min_trimmed_reads (min_trimmed_reads): -
+  out save_trimmed (save_trimmed): -
+  out with_umi (with_umi): -
+  out umi_discard_read (umi_discard_read): -
+  out save_merged_fastq (save_merged_fastq): -
+  out stranded_threshold (stranded_threshold): -
+  out unstranded_threshold (unstranded_threshold): -
+  out star_ignore_sjdbgtf (star_ignore_sjdbgtf): -
+  out use_sentieon_star (use_sentieon_star): -
+  out use_parabricks_star (use_parabricks_star): -
+  out skip_markduplicates (skip_markduplicates): -
+  out save_unaligned (save_unaligned): -
+  out contaminant_screening (contaminant_screening): -
+  out contaminant_screening_input (contaminant_screening_input): -
+  out umi_dedup_tool (umi_dedup_tool): -
+  out umitools_dedup_stats (umitools_dedup_stats): -
+  out umitools_dedup_primary_only (umitools_dedup_primary_only): -
+  out min_mapped_reads (min_mapped_reads): -
+  out gtf_group_features (gtf_group_features): -
+  out gtf_extra_attributes (gtf_extra_attributes): -
+  out skip_quantification_merge (skip_quantification_merge): -
+  out skip_deseq2_qc (skip_deseq2_qc): -
+  out kallisto_quant_fraglen (kallisto_quant_fraglen): -
+  out kallisto_quant_fraglen_sd (kallisto_quant_fraglen_sd): -
+  out skip_stringtie (skip_stringtie): -
+  out stringtie_ignore_gtf (stringtie_ignore_gtf): -
+  out gencode (gencode): -
+  out featurecounts_group_type (featurecounts_group_type): -
+  out use_rustqc (use_rustqc): -
+  out skip_bigwig (skip_bigwig): -
+  out save_kraken_assignments (save_kraken_assignments): -
+  out save_kraken_unassigned (save_kraken_unassigned): -
+  out sylph_db (sylph_db): -
+  out sylph_taxonomy (sylph_taxonomy): -
+  out skip_pseudo_alignment (skip_pseudo_alignment): -
+  out pseudo_aligner (pseudo_aligner): -
+  out outdir (outdir): -
+  out skip_multiqc (skip_multiqc): -
+  out multiqc_config (multiqc_config): -
+  out multiqc_logo (multiqc_logo): -
+  out multiqc_methods_description (multiqc_methods_description): -
+  out save_align_intermeds (save_align_intermeds): -
+  out seq_platform (seq_platform): -
+  out seq_center (seq_center): -
+workflows/rnaseq/main.nf#RNASEQ/:take:ch_samplesheet take "ch_samplesheet" @77:5
+  out out (out): -
+workflows/rnaseq/main.nf#RNASEQ/:take:ch_fasta_fai take "ch_fasta_fai" @78:5
+  out out (out): -
+workflows/rnaseq/main.nf#RNASEQ/:take:ch_gtf take "ch_gtf" @79:5
+  out out (out): -
+workflows/rnaseq/main.nf#RNASEQ/:take:ch_chrom_sizes take "ch_chrom_sizes" @80:5
+  out out (out): -
+workflows/rnaseq/main.nf#RNASEQ/:take:ch_gene_bed take "ch_gene_bed" @81:5
+  out out (out): -
+workflows/rnaseq/main.nf#RNASEQ/:take:ch_transcript_fasta take "ch_transcript_fasta" @82:5
+  out out (out): -
+workflows/rnaseq/main.nf#RNASEQ/:take:ch_star_index take "ch_star_index" @83:5
+  out out (out): -
+workflows/rnaseq/main.nf#RNASEQ/:take:ch_rsem_index take "ch_rsem_index" @84:5
+  out out (out): -
+workflows/rnaseq/main.nf#RNASEQ/:take:ch_hisat2_index take "ch_hisat2_index" @85:5
+  out out (out): -
+workflows/rnaseq/main.nf#RNASEQ/:take:ch_bowtie2_index take "ch_bowtie2_index" @86:5
+  out out (out): -
+workflows/rnaseq/main.nf#RNASEQ/:take:ch_salmon_index take "ch_salmon_index" @87:5
+  out out (out): -
+workflows/rnaseq/main.nf#RNASEQ/:take:ch_kallisto_index take "ch_kallisto_index" @88:5
+  out out (out): -
+workflows/rnaseq/main.nf#RNASEQ/:take:ch_bbsplit_index take "ch_bbsplit_index" @89:5
+  out out (out): -
+workflows/rnaseq/main.nf#RNASEQ/:take:ch_ribo_db take "ch_ribo_db" @90:5
+  out out (out): -
+workflows/rnaseq/main.nf#RNASEQ/:take:ch_sortmerna_index take "ch_sortmerna_index" @91:5
+  out out (out): -
+workflows/rnaseq/main.nf#RNASEQ/:take:ch_bowtie2_rrna_index take "ch_bowtie2_rrna_index" @92:5
+  out out (out): -
+workflows/rnaseq/main.nf#RNASEQ/:take:ch_splicesites take "ch_splicesites" @93:5
+  out out (out): -
+workflows/rnaseq/main.nf#RNASEQ/:take:ch_kraken_db take "ch_kraken_db" @94:5
+  out out (out): -
+workflows/rnaseq/main.nf#RNASEQ/:take:qc_tools take "qc_tools" @95:5
+  out out (out): -
+workflows/rnaseq/main.nf#RNASEQ/:take:fail_on_low_trimmed_reads take "fail_on_low_trimmed_reads" @96:5
+  out out (out): -
+workflows/rnaseq/main.nf#RNASEQ/:take:fail_on_low_mapped_reads take "fail_on_low_mapped_reads" @97:5
+  out out (out): -
+workflows/rnaseq/main.nf#RNASEQ/:take:fail_on_undetermined_strandedness take "fail_on_undetermined_strandedness" @98:5
+  out out (out): -
+workflows/rnaseq/main.nf#RNASEQ/ch_pca_header_multiqc code "def ch_pca_header_multiqc        = file("$projectDir/assets…" @103:5
+  out ch_pca_header_multiqc (ch_pca_header_multiqc): Path
+workflows/rnaseq/main.nf#RNASEQ/sample_status_header_multiqc code "def sample_status_header_multiqc = file("$projectDir/assets…" @104:5
+  out sample_status_header_multiqc (sample_status_header_multiqc): Path
+workflows/rnaseq/main.nf#RNASEQ/ch_clustering_header_multiqc code "def ch_clustering_header_multiqc = file("$projectDir/assets…" @105:5
+  out ch_clustering_header_multiqc (ch_clustering_header_multiqc): Path
+workflows/rnaseq/main.nf#RNASEQ/ch_biotypes_header_multiqc code "def ch_biotypes_header_multiqc   = file("$projectDir/assets…" @106:5
+  out ch_biotypes_header_multiqc (ch_biotypes_header_multiqc): Path
+workflows/rnaseq/main.nf#RNASEQ/aligner_display_name code "def aligner_display_name = [" @111:5
+  in params.aligner (params.aligner): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[aligner] ? via params.aligner indirect
+  out aligner_display_name (aligner_display_name): -
+workflows/rnaseq/main.nf#RNASEQ/ch_fasta chain ".map.first" steps=map,first @118:31
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:take:ch_fasta_fai[out] ? via ch_fasta_fai
+  out out (out): Value<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_transcript_fasta_fai chain ".map" steps=map @119:31
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:take:ch_transcript_fasta[out] ? via ch_transcript_fasta
+  out out (out): ?
+workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files factory "channel.empty" factory=channel.empty @121:24
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_trim_status factory "channel.empty" factory=channel.empty @122:22
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_map_status factory "channel.empty" factory=channel.empty @123:21
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_strand_status factory "channel.empty" factory=channel.empty @124:24
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_percent_mapped factory "channel.empty" factory=channel.empty @125:25
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_unaligned_sequences factory "channel.empty" factory=channel.empty @126:30
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_failed_checks factory "channel.empty" factory=channel.empty @128:24
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle factory "channel.empty" factory=channel.empty @136:32
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/collapseAgg code "def collapseAgg = { row -> [row[0].id, row.drop(1).findAll …" @137:5
+  out collapseAgg (collapseAgg): -
+workflows/rnaseq/main.nf#RNASEQ/channel.fromList@1 factory "channel.fromList" factory=channel.fromList @142:5
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_input_branched chain ".map.groupTuple.map.branch" steps=map,groupTuple,map,branch @142:5
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/channel.fromList@1[out] Channel<?>
+  out out (out): Record
+workflows/rnaseq/main.nf#RNASEQ/ch_fastq code "ch_fastq = ch_input_branched.fastq" @168:5
+  in ch_input_branched (ch_input_branched): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_input_branched[out] Record via ch_input_branched indirect
+  out ch_fastq (ch_fastq): -
+workflows/rnaseq/main.nf#RNASEQ/ch_genome_bam chain ".map.distinct" steps=map,distinct @169:21
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_input_branched[out] Record via ch_input_branched indirect
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_transcriptome_bam chain ".map.distinct" steps=map,distinct @170:28
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_input_branched[out] Record via ch_input_branched indirect
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_percent_mapped~2 chain ".filter.map" steps=filter,map @174:25
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_input_branched[out] Record via ch_input_branched indirect
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/SAMTOOLS_INDEX@1 call "SAMTOOLS_INDEX" callee=SAMTOOLS_INDEX:process:modelled:legacy @179:5
+  in $1 (tuple(meta, input)): Tuple
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_genome_bam[out] Channel<?> via ch_genome_bam
+  out index (index): Channel<Tuple>
+  out versions_samtools (versions_samtools): Channel<Tuple>
+workflows/rnaseq/main.nf#RNASEQ/make_bowtie2_index code "def make_bowtie2_index = !params.bowtie2_rrna_index && para…" @189:5
+  in params.bowtie2_rrna_index (params.bowtie2_rrna_index): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[bowtie2_rrna_index] ? via params.bowtie2_rrna_index indirect
+  in params.remove_ribo_rna (params.remove_ribo_rna): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[remove_ribo_rna] ? via params.remove_ribo_rna indirect
+  in params.ribo_removal_tool (params.ribo_removal_tool): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[ribo_removal_tool] ? via params.ribo_removal_tool indirect
+  out make_bowtie2_index (make_bowtie2_index): -
+workflows/rnaseq/main.nf#RNASEQ/.map@1 chain ".map.first" steps=map,first @196:9
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:take:ch_salmon_index[out] ? via ch_salmon_index
+  out out (out): Value<?>
+workflows/rnaseq/main.nf#RNASEQ/FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS@1 call "FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS" callee=FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS:workflow:modelled:legacy @191:5
+  in ch_reads (ch_reads): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_fastq[ch_fastq] ? via ch_fastq
+  in ch_fasta (ch_fasta): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_fasta[out] Value<?> via ch_fasta
+  in ch_transcript_fasta (ch_transcript_fasta): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:take:ch_transcript_fasta[out] ? via ch_transcript_fasta
+  in ch_gtf (ch_gtf): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:take:ch_gtf[out] ? via ch_gtf
+  in ch_salmon_index (ch_salmon_index): -
+    <- workflows/rnaseq/main.nf#RNASEQ/.map@1[out] Value<?>
+  in ch_sortmerna_index (ch_sortmerna_index): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:take:ch_sortmerna_index[out] ? via ch_sortmerna_index
+  in ch_bowtie2_index (ch_bowtie2_index): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:take:ch_bowtie2_rrna_index[out] ? via ch_bowtie2_rrna_index
+  in ch_bbsplit_index (ch_bbsplit_index): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:take:ch_bbsplit_index[out] ? via ch_bbsplit_index
+  in ch_rrna_fastas (ch_rrna_fastas): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:take:ch_ribo_db[out] ? via ch_ribo_db
+  in skip_bbsplit (skip_bbsplit): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[skip_bbsplit] ? via params.skip_bbsplit indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[fasta] ? via params.fasta indirect
+  in skip_fastqc (skip_fastqc): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[skip_fastqc] ? via params.skip_fastqc indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[skip_qc] ? via params.skip_qc indirect
+  in skip_trimming (skip_trimming): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[skip_trimming] ? via params.skip_trimming
+  in skip_umi_extract (skip_umi_extract): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[skip_umi_extract] ? via params.skip_umi_extract
+  in skip_linting (skip_linting): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[skip_linting] ? via params.skip_linting
+  in make_salmon_index (make_salmon_index): -
+    = false : Boolean
+  in make_sortmerna_index (make_sortmerna_index): -
+    = false : Boolean
+  in make_bowtie2_index (make_bowtie2_index): -
+    <- workflows/rnaseq/main.nf#RNASEQ/make_bowtie2_index[make_bowtie2_index] ? via make_bowtie2_index
+  in trimmer (trimmer): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[trimmer] ? via params.trimmer
+  in min_trimmed_reads (min_trimmed_reads): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[min_trimmed_reads] ? via params.min_trimmed_reads
+  in save_trimmed (save_trimmed): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[save_trimmed] ? via params.save_trimmed
+  in fastp_merge (fastp_merge): -
+    = false : Boolean
+  in remove_ribo_rna (remove_ribo_rna): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[remove_ribo_rna] ? via params.remove_ribo_rna
+  in ribo_removal_tool (ribo_removal_tool): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[ribo_removal_tool] ? via params.ribo_removal_tool
+  in with_umi (with_umi): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[with_umi] ? via params.with_umi
+  in umi_discard_read (umi_discard_read): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[umi_discard_read] ? via params.umi_discard_read
+  in save_merged_fastq (save_merged_fastq): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[save_merged_fastq] ? via params.save_merged_fastq
+  in stranded_threshold (stranded_threshold): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[stranded_threshold] ? via params.stranded_threshold
+  in unstranded_threshold (unstranded_threshold): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[unstranded_threshold] ? via params.unstranded_threshold
+  out reads (reads): Channel<?>
+  out reads_cat (reads_cat): ?
+  out reads_trimmed (reads_trimmed): ?
+  out trim_read_count (trim_read_count): ?
+  out trim_reads_merged (trim_reads_merged): ?
+  out multiqc_files (multiqc_files): Channel<?>
+  out lint_log_raw (lint_log_raw): ?
+  out lint_log_trimmed (lint_log_trimmed): ?
+  out lint_log_bbsplit (lint_log_bbsplit): ?
+  out lint_log_ribo (lint_log_ribo): ?
+  out fastqc_raw_html (fastqc_raw_html): ?
+  out fastqc_raw_zip (fastqc_raw_zip): ?
+  out fastqc_trim_html (fastqc_trim_html): ?
+  out fastqc_trim_zip (fastqc_trim_zip): ?
+  out trim_html (trim_html): ?
+  out trim_zip (trim_zip): Channel<?>
+  out trim_log (trim_log): ?
+  out trim_json (trim_json): ?
+  out trim_unpaired (trim_unpaired): ?
+  out umi_log (umi_log): ?
+  out umi_reads (umi_reads): ?
+  out bbsplit_stats (bbsplit_stats): ?
+  out sortmerna_log (sortmerna_log): ?
+  out ribodetector_log (ribodetector_log): ?
+  out seqkit_stats (seqkit_stats): ?
+  out bowtie2_log (bowtie2_log): ?
+  out bowtie2_index (bowtie2_index): ?
+  out fastqc_filtered_html (fastqc_filtered_html): ?
+  out fastqc_filtered_zip (fastqc_filtered_zip): ?
+  out seqkit_prefixed (seqkit_prefixed): ?
+  out seqkit_converted (seqkit_converted): ?
+  out per_sample_mqc_bundle (per_sample_mqc_bundle): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~2 chain ".mix" steps=mix @222:41
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files[out] Channel<?> via ch_multiqc_files
+  in 1:1 (mix(other)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS@1[multiqc_files] Channel<?> via FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS.out.multiqc_files
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_failed_on_undetermined_strandedness chain ".filter.map" steps=filter,map @224:46
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS@1[reads] Channel<?> via ch_strand_inferred_filtered_fastq
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_failed_checks~2 chain ".mix" steps=mix @227:24
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_failed_checks[out] Channel<?> via ch_failed_checks
+  in 1:1 (mix(other)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_failed_on_undetermined_strandedness[out] Channel<?> via ch_failed_on_undetermined_strandedness
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_strand_inferred_filtered_fastq chain ".filter" steps=filter @228:41
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS@1[reads] Channel<?> via ch_strand_inferred_filtered_fastq
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_trim_status~2 chain ".map" steps=map @234:22
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS@1[trim_read_count] ? via ch_trim_read_count
+  out out (out): ?
+workflows/rnaseq/main.nf#RNASEQ/ch_failed_on_low_trimmed_reads chain ".filter.map" steps=filter,map @240:38
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS@1[trim_read_count] ? via ch_trim_read_count
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_failed_checks~3 chain ".mix" steps=mix @243:24
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_failed_checks~2[out] Channel<?> via ch_failed_checks
+  in 1:1 (mix(other)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_failed_on_low_trimmed_reads[out] Channel<?> via ch_failed_on_low_trimmed_reads
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/.map@2 chain ".map" steps=map @249:14
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_input_branched[out] Record via ch_input_branched indirect
+  out out (out): ?
+workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~2 chain ".map.mix" steps=map,mix @248:32
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_fastq[ch_fastq] ? via ch_fastq
+  in 2:1 (mix(other)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/.map@2[out] ?
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_fastq_qc_bundle chain ".map" steps=map @257:26
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS@1[per_sample_mqc_bundle] Channel<?> via FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS.out.per_sample_mqc_bundle
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~3 chain ".join" steps=join @259:32
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~2[out] Channel<?> via ch_mqc_per_sample_bundle
+  in 1:1 (join(right)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_fastq_qc_bundle[out] Channel<?> via ch_fastq_qc_bundle
+  out out (out): Channel<Record>
+workflows/rnaseq/main.nf#RNASEQ/ch_star_log factory "channel.empty" factory=channel.empty @265:30
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/.map@3 chain ".map" steps=map @270:13
+  guards then of !params.skip_alignment && (params.aligner == 'star_salmon' || params.aligner == 'star_rsem')
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:take:ch_star_index[out] ? via ch_star_index
+  out out (out): ?
+workflows/rnaseq/main.nf#RNASEQ/.map@4 chain ".map" steps=map @271:13
+  guards then of !params.skip_alignment && (params.aligner == 'star_salmon' || params.aligner == 'star_rsem')
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:take:ch_gtf[out] ? via ch_gtf
+  out out (out): ?
+workflows/rnaseq/main.nf#RNASEQ/ALIGN_STAR@1 call "ALIGN_STAR" callee=ALIGN_STAR:workflow:modelled:legacy @268:9
+  guards then of !params.skip_alignment && (params.aligner == 'star_salmon' || params.aligner == 'star_rsem')
+  in reads (reads): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_strand_inferred_filtered_fastq[out] Channel<?> via ch_strand_inferred_filtered_fastq
+  in index (index): -
+    <- workflows/rnaseq/main.nf#RNASEQ/.map@3[out] ?
+  in gtf (gtf): -
+    <- workflows/rnaseq/main.nf#RNASEQ/.map@4[out] ?
+  in star_ignore_sjdbgtf (star_ignore_sjdbgtf): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[star_ignore_sjdbgtf] ? via params.star_ignore_sjdbgtf
+  in fasta_fai (fasta_fai): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:take:ch_fasta_fai[out] ? via ch_fasta_fai
+  in use_sentieon_star (use_sentieon_star): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[use_sentieon_star] ? via params.use_sentieon_star
+  in use_parabricks_star (use_parabricks_star): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[use_parabricks_star] ? via params.use_parabricks_star
+  in skip_markduplicates (skip_markduplicates): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[skip_markduplicates] ? via params.skip_markduplicates
+  out orig_bam (orig_bam): ?
+  out log_final (log_final): ?
+  out log_out (log_out): ?
+  out log_progress (log_progress): ?
+  out bam_sorted (bam_sorted): ?
+  out bam_transcript (bam_transcript): ?
+  out fastq (fastq): ?
+  out tab (tab): ?
+  out bam (bam): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out stats (stats): Channel<Tuple>
+  out flagstat (flagstat): Channel<Tuple>
+  out idxstats (idxstats): Channel<Tuple>
+  out percent_mapped (percent_mapped): ?
+workflows/rnaseq/main.nf#RNASEQ/ch_genome_bam~2 chain ".mix" steps=mix @279:44
+  guards then of !params.skip_alignment && (params.aligner == 'star_salmon' || params.aligner == 'star_rsem')
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_genome_bam[out] Channel<?> via ch_genome_bam
+  in 1:1 (mix(other)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ALIGN_STAR@1[bam] Channel<Tuple> via ALIGN_STAR.out.bam
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_genome_bam_index chain ".mix" steps=mix @280:44
+  guards then of !params.skip_alignment && (params.aligner == 'star_salmon' || params.aligner == 'star_rsem')
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/SAMTOOLS_INDEX@1[index] Channel<Tuple> via ch_genome_bam_index
+  in 1:1 (mix(other)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ALIGN_STAR@1[index] Channel<Tuple> via ALIGN_STAR.out.index
+  out out (out): Channel<Tuple>
+workflows/rnaseq/main.nf#RNASEQ/ch_transcriptome_bam~2 chain ".mix" steps=mix @281:44
+  guards then of !params.skip_alignment && (params.aligner == 'star_salmon' || params.aligner == 'star_rsem')
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_transcriptome_bam[out] Channel<?> via ch_transcriptome_bam
+  in 1:1 (mix(other)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ALIGN_STAR@1[bam_transcript] ? via ALIGN_STAR.out.bam_transcript
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_percent_mapped~3 chain ".mix" steps=mix @282:44
+  guards then of !params.skip_alignment && (params.aligner == 'star_salmon' || params.aligner == 'star_rsem')
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_percent_mapped~2[out] Channel<?> via ch_percent_mapped
+  in 1:1 (mix(other)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ALIGN_STAR@1[percent_mapped] ? via ALIGN_STAR.out.percent_mapped
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_unprocessed_bams chain ".join" steps=join @283:44
+  guards then of !params.skip_alignment && (params.aligner == 'star_salmon' || params.aligner == 'star_rsem')
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_genome_bam~2[out] Channel<?> via ch_genome_bam
+  in 1:1 (join(1)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_transcriptome_bam~2[out] Channel<?> via ch_transcriptome_bam
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~3 chain ".mix" steps=mix @286:44
+  guards then of !params.skip_alignment && (params.aligner == 'star_salmon' || params.aligner == 'star_rsem')
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~2[out] Channel<?> via ch_multiqc_files
+  in 1:1 (mix(other)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ALIGN_STAR@1[log_final] ? via ch_star_log
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/.map@5 chain ".map" steps=map @288:19
+  guards then of !params.skip_alignment && (params.aligner == 'star_salmon' || params.aligner == 'star_rsem')
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ALIGN_STAR@1[log_final] ? via ch_star_log
+  out out (out): ?
+workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~4 chain ".join" steps=join @287:44
+  guards then of !params.skip_alignment && (params.aligner == 'star_salmon' || params.aligner == 'star_rsem')
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~3[out] Channel<Record> via ch_mqc_per_sample_bundle
+  in 1:1 (join(right)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/.map@5[out] ?
+  out out (out): Channel<Record>
+workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~4 chain ".mix.mix.mix" steps=mix,mix,mix @298:32
+  guards then of !params.skip_alignment && (params.aligner == 'star_salmon' || params.aligner == 'star_rsem'); then of !params.with_umi && (params.skip_markduplicates || params.use_parabricks_star)
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~3[out] Channel<?> via ch_multiqc_files
+  in 1:1 (mix(other)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ALIGN_STAR@1[stats] Channel<Tuple> via ALIGN_STAR.out.stats
+  in 2:1 (mix(other)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ALIGN_STAR@1[flagstat] Channel<Tuple> via ALIGN_STAR.out.flagstat
+  in 3:1 (mix(other)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ALIGN_STAR@1[idxstats] Channel<Tuple> via ALIGN_STAR.out.idxstats
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_star_stats_bundle chain ".join.join.map" steps=join,join,map @302:36
+  guards then of !params.skip_alignment && (params.aligner == 'star_salmon' || params.aligner == 'star_rsem'); then of !params.with_umi && (params.skip_markduplicates || params.use_parabricks_star)
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ALIGN_STAR@1[stats] Channel<Tuple> via ALIGN_STAR.out.stats
+  in 1:1 (join(1)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ALIGN_STAR@1[flagstat] Channel<Tuple> via ALIGN_STAR.out.flagstat
+  in 2:1 (join(1)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ALIGN_STAR@1[idxstats] Channel<Tuple> via ALIGN_STAR.out.idxstats
+  in 3:1 (map(transform)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/collapseAgg[collapseAgg] ? via collapseAgg
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~5 chain ".join" steps=join @306:40
+  guards then of !params.skip_alignment && (params.aligner == 'star_salmon' || params.aligner == 'star_rsem'); then of !params.with_umi && (params.skip_markduplicates || params.use_parabricks_star)
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~4[out] Channel<Record> via ch_mqc_per_sample_bundle
+  in 1:1 (join(right)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_star_stats_bundle[out] Channel<?> via ch_star_stats_bundle
+  out out (out): Channel<Record>
+workflows/rnaseq/main.nf#RNASEQ/ch_bowtie2_log factory "channel.empty" factory=channel.empty @314:22
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ALIGN_BOWTIE2@1 call "ALIGN_BOWTIE2" callee=ALIGN_BOWTIE2:workflow:modelled:legacy @317:9
+  guards then of !params.skip_alignment && params.aligner == 'bowtie2_salmon'
+  in reads (reads): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_strand_inferred_filtered_fastq[out] Channel<?> via ch_strand_inferred_filtered_fastq
+  in index (index): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:take:ch_bowtie2_index[out] ? via ch_bowtie2_index
+  in fasta_fai (fasta_fai): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:take:ch_fasta_fai[out] ? via ch_fasta_fai
+  out orig_bam (orig_bam): Channel<Tuple>
+  out log_final (log_final): Channel<Tuple>
+  out bam (bam): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out stats (stats): Channel<Tuple>
+  out flagstat (flagstat): Channel<Tuple>
+  out idxstats (idxstats): Channel<Tuple>
+  out percent_mapped (percent_mapped): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_genome_bam~3 chain ".mix" steps=mix @325:44
+  guards then of !params.skip_alignment && params.aligner == 'bowtie2_salmon'
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_genome_bam[out] Channel<?> via ch_genome_bam indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_genome_bam~2[out] Channel<?> via ch_genome_bam indirect
+  in 1:1 (mix(other)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ALIGN_BOWTIE2@1[bam] Channel<Tuple> via ALIGN_BOWTIE2.out.bam
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_genome_bam_index~2 chain ".mix" steps=mix @326:44
+  guards then of !params.skip_alignment && params.aligner == 'bowtie2_salmon'
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/SAMTOOLS_INDEX@1[index] Channel<Tuple> via ch_genome_bam_index indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_genome_bam_index[out] Channel<Tuple> via ch_genome_bam_index indirect
+  in 1:1 (mix(other)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ALIGN_BOWTIE2@1[index] Channel<Tuple> via ALIGN_BOWTIE2.out.index
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_transcriptome_bam~3 chain ".mix" steps=mix @327:44
+  guards then of !params.skip_alignment && params.aligner == 'bowtie2_salmon'
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_transcriptome_bam[out] Channel<?> via ch_transcriptome_bam indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_transcriptome_bam~2[out] Channel<?> via ch_transcriptome_bam indirect
+  in 1:1 (mix(other)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ALIGN_BOWTIE2@1[orig_bam] Channel<Tuple> via ALIGN_BOWTIE2.out.orig_bam
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_percent_mapped~4 chain ".mix" steps=mix @328:44
+  guards then of !params.skip_alignment && params.aligner == 'bowtie2_salmon'
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_percent_mapped~2[out] Channel<?> via ch_percent_mapped indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_percent_mapped~3[out] Channel<?> via ch_percent_mapped indirect
+  in 1:1 (mix(other)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ALIGN_BOWTIE2@1[percent_mapped] Channel<?> via ALIGN_BOWTIE2.out.percent_mapped
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_unprocessed_bams~2 chain ".map" steps=map @329:44
+  guards then of !params.skip_alignment && params.aligner == 'bowtie2_salmon'
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_genome_bam~3[out] Channel<?> via ch_genome_bam
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~5 chain ".mix" steps=mix @331:44
+  guards then of !params.skip_alignment && params.aligner == 'bowtie2_salmon'
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~2[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~3[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~4[out] Channel<?> via ch_multiqc_files indirect
+  in 1:1 (mix(other)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ALIGN_BOWTIE2@1[log_final] Channel<Tuple> via ch_bowtie2_log
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/.map@6 chain ".map" steps=map @333:19
+  guards then of !params.skip_alignment && params.aligner == 'bowtie2_salmon'
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ALIGN_BOWTIE2@1[log_final] Channel<Tuple> via ch_bowtie2_log
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~6 chain ".join" steps=join @332:44
+  guards then of !params.skip_alignment && params.aligner == 'bowtie2_salmon'
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~3[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~4[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~5[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+  in 1:1 (join(right)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/.map@6[out] Channel<?>
+  out out (out): Channel<Record>
+workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~6 chain ".mix.mix.mix" steps=mix,mix,mix @336:32
+  guards then of !params.skip_alignment && params.aligner == 'bowtie2_salmon'; then of !params.with_umi && params.skip_markduplicates
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~5[out] Channel<?> via ch_multiqc_files
+  in 1:1 (mix(other)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ALIGN_BOWTIE2@1[stats] Channel<Tuple> via ALIGN_BOWTIE2.out.stats
+  in 2:1 (mix(other)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ALIGN_BOWTIE2@1[flagstat] Channel<Tuple> via ALIGN_BOWTIE2.out.flagstat
+  in 3:1 (mix(other)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ALIGN_BOWTIE2@1[idxstats] Channel<Tuple> via ALIGN_BOWTIE2.out.idxstats
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_bowtie2_stats_bundle chain ".join.join.map" steps=join,join,map @340:39
+  guards then of !params.skip_alignment && params.aligner == 'bowtie2_salmon'; then of !params.with_umi && params.skip_markduplicates
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ALIGN_BOWTIE2@1[stats] Channel<Tuple> via ALIGN_BOWTIE2.out.stats
+  in 1:1 (join(1)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ALIGN_BOWTIE2@1[flagstat] Channel<Tuple> via ALIGN_BOWTIE2.out.flagstat
+  in 2:1 (join(1)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ALIGN_BOWTIE2@1[idxstats] Channel<Tuple> via ALIGN_BOWTIE2.out.idxstats
+  in 3:1 (map(transform)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/collapseAgg[collapseAgg] ? via collapseAgg
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~7 chain ".join" steps=join @344:40
+  guards then of !params.skip_alignment && params.aligner == 'bowtie2_salmon'; then of !params.with_umi && params.skip_markduplicates
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~6[out] Channel<Record> via ch_mqc_per_sample_bundle
+  in 1:1 (join(right)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_bowtie2_stats_bundle[out] Channel<?> via ch_bowtie2_stats_bundle
+  out out (out): Channel<Record>
+workflows/rnaseq/main.nf#RNASEQ/.map@7 chain ".map" steps=map @355:13
+  guards then of !params.skip_alignment && params.aligner == 'hisat2'
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:take:ch_hisat2_index[out] ? via ch_hisat2_index
+  out out (out): ?
+workflows/rnaseq/main.nf#RNASEQ/.map@8 chain ".map" steps=map @356:13
+  guards then of !params.skip_alignment && params.aligner == 'hisat2'
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:take:ch_splicesites[out] ? via ch_splicesites
+  out out (out): ?
+workflows/rnaseq/main.nf#RNASEQ/FASTQ_ALIGN_HISAT2@1 call "FASTQ_ALIGN_HISAT2" callee=FASTQ_ALIGN_HISAT2:workflow:modelled:legacy @353:9
+  guards then of !params.skip_alignment && params.aligner == 'hisat2'
+  in reads (reads): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_strand_inferred_filtered_fastq[out] Channel<?> via ch_strand_inferred_filtered_fastq
+  in index (index): -
+    <- workflows/rnaseq/main.nf#RNASEQ/.map@7[out] ?
+  in splicesites (splicesites): -
+    <- workflows/rnaseq/main.nf#RNASEQ/.map@8[out] ?
+  in ch_fasta_fai (ch_fasta_fai): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:take:ch_fasta_fai[out] ? via ch_fasta_fai
+  in save_unaligned (save_unaligned): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[save_unaligned] ? via params.save_unaligned indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[contaminant_screening] ? via params.contaminant_screening indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[contaminant_screening_input] ? via params.contaminant_screening_input indirect
+  out orig_bam (orig_bam): Channel<Tuple>
+  out summary (summary): Channel<Tuple>
+  out fastq (fastq): Channel<Tuple>
+  out bam (bam): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out stats (stats): Channel<Tuple>
+  out flagstat (flagstat): Channel<Tuple>
+  out idxstats (idxstats): Channel<Tuple>
+workflows/rnaseq/main.nf#RNASEQ/ch_genome_bam~4 chain ".mix" steps=mix @360:34
+  guards then of !params.skip_alignment && params.aligner == 'hisat2'
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_genome_bam[out] Channel<?> via ch_genome_bam indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_genome_bam~2[out] Channel<?> via ch_genome_bam indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_genome_bam~3[out] Channel<?> via ch_genome_bam indirect
+  in 1:1 (mix(other)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/FASTQ_ALIGN_HISAT2@1[bam] Channel<Tuple> via FASTQ_ALIGN_HISAT2.out.bam
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_genome_bam_index~3 chain ".mix" steps=mix @361:34
+  guards then of !params.skip_alignment && params.aligner == 'hisat2'
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/SAMTOOLS_INDEX@1[index] Channel<Tuple> via ch_genome_bam_index indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_genome_bam_index[out] Channel<Tuple> via ch_genome_bam_index indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_genome_bam_index~2[out] Channel<?> via ch_genome_bam_index indirect
+  in 1:1 (mix(other)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/FASTQ_ALIGN_HISAT2@1[index] Channel<Tuple> via FASTQ_ALIGN_HISAT2.out.index
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_unprocessed_bams~3 chain ".map" steps=map @362:34
+  guards then of !params.skip_alignment && params.aligner == 'hisat2'
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_genome_bam~4[out] Channel<?> via ch_genome_bam
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/.map@9 chain ".map" steps=map @364:56
+  guards then of !params.skip_alignment && params.aligner == 'hisat2'
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/FASTQ_ALIGN_HISAT2@1[summary] Channel<Tuple> via FASTQ_ALIGN_HISAT2.out.summary
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_percent_mapped~5 chain ".mix" steps=mix @364:34
+  guards then of !params.skip_alignment && params.aligner == 'hisat2'
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_percent_mapped~2[out] Channel<?> via ch_percent_mapped indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_percent_mapped~3[out] Channel<?> via ch_percent_mapped indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_percent_mapped~4[out] Channel<?> via ch_percent_mapped indirect
+  in 1:1 (mix(other)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/.map@9[out] Channel<?>
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~7 chain ".mix" steps=mix @365:28
+  guards then of !params.skip_alignment && params.aligner == 'hisat2'
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~2[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~3[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~4[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~5[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~6[out] Channel<?> via ch_multiqc_files indirect
+  in 1:1 (mix(other)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/FASTQ_ALIGN_HISAT2@1[summary] Channel<Tuple> via FASTQ_ALIGN_HISAT2.out.summary
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/.map@10 chain ".map" steps=map @367:19
+  guards then of !params.skip_alignment && params.aligner == 'hisat2'
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/FASTQ_ALIGN_HISAT2@1[summary] Channel<Tuple> via FASTQ_ALIGN_HISAT2.out.summary
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~8 chain ".join" steps=join @366:36
+  guards then of !params.skip_alignment && params.aligner == 'hisat2'
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~3[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~4[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~5[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~6[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~7[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+  in 1:1 (join(right)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/.map@10[out] Channel<?>
+  out out (out): Channel<Record>
+workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~8 chain ".mix.mix.mix" steps=mix,mix,mix @374:32
+  guards then of !params.skip_alignment && params.aligner == 'hisat2'; then of !params.with_umi && params.skip_markduplicates
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~7[out] Channel<?> via ch_multiqc_files
+  in 1:1 (mix(other)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/FASTQ_ALIGN_HISAT2@1[stats] Channel<Tuple> via FASTQ_ALIGN_HISAT2.out.stats
+  in 2:1 (mix(other)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/FASTQ_ALIGN_HISAT2@1[flagstat] Channel<Tuple> via FASTQ_ALIGN_HISAT2.out.flagstat
+  in 3:1 (mix(other)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/FASTQ_ALIGN_HISAT2@1[idxstats] Channel<Tuple> via FASTQ_ALIGN_HISAT2.out.idxstats
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_hisat2_stats_bundle chain ".join.join.map" steps=join,join,map @378:38
+  guards then of !params.skip_alignment && params.aligner == 'hisat2'; then of !params.with_umi && params.skip_markduplicates
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/FASTQ_ALIGN_HISAT2@1[stats] Channel<Tuple> via FASTQ_ALIGN_HISAT2.out.stats
+  in 1:1 (join(1)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/FASTQ_ALIGN_HISAT2@1[flagstat] Channel<Tuple> via FASTQ_ALIGN_HISAT2.out.flagstat
+  in 2:1 (join(1)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/FASTQ_ALIGN_HISAT2@1[idxstats] Channel<Tuple> via FASTQ_ALIGN_HISAT2.out.idxstats
+  in 3:1 (map(transform)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/collapseAgg[collapseAgg] ? via collapseAgg
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~9 chain ".join" steps=join @382:40
+  guards then of !params.skip_alignment && params.aligner == 'hisat2'; then of !params.with_umi && params.skip_markduplicates
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~8[out] Channel<Record> via ch_mqc_per_sample_bundle
+  in 1:1 (join(right)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_hisat2_stats_bundle[out] Channel<?> via ch_hisat2_stats_bundle
+  out out (out): Channel<Record>
+workflows/rnaseq/main.nf#RNASEQ/.join@1 chain ".join" steps=join @393:13
+  guards then of !params.skip_alignment && params.with_umi
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_genome_bam[out] Channel<?> via ch_genome_bam indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_genome_bam~2[out] Channel<?> via ch_genome_bam indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_genome_bam~3[out] Channel<?> via ch_genome_bam indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_genome_bam~4[out] Channel<?> via ch_genome_bam indirect
+  in 1:1 (join(right)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/SAMTOOLS_INDEX@1[index] Channel<Tuple> via ch_genome_bam_index indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_genome_bam_index[out] Channel<Tuple> via ch_genome_bam_index indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_genome_bam_index~2[out] Channel<?> via ch_genome_bam_index indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_genome_bam_index~3[out] Channel<?> via ch_genome_bam_index indirect
+  out out (out): Channel<Record>
+workflows/rnaseq/main.nf#RNASEQ/BAM_DEDUP_UMI@1 call "BAM_DEDUP_UMI" callee=BAM_DEDUP_UMI:workflow:modelled:legacy @392:9
+  guards then of !params.skip_alignment && params.with_umi
+  in ch_genome_bam (ch_genome_bam): -
+    <- workflows/rnaseq/main.nf#RNASEQ/.join@1[out] Channel<Record>
+  in ch_fasta_fai (ch_fasta_fai): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:take:ch_fasta_fai[out] ? via ch_fasta_fai
+  in umi_dedup_tool (umi_dedup_tool): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[umi_dedup_tool] ? via params.umi_dedup_tool
+  in umitools_dedup_stats (umitools_dedup_stats): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[umitools_dedup_stats] ? via params.umitools_dedup_stats
+  in ch_transcriptome_bam (ch_transcriptome_bam): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_transcriptome_bam[out] Channel<?> via ch_transcriptome_bam indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_transcriptome_bam~2[out] Channel<?> via ch_transcriptome_bam indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_transcriptome_bam~3[out] Channel<?> via ch_transcriptome_bam indirect
+  in ch_transcript_fasta_fai (ch_transcript_fasta_fai): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_transcript_fasta_fai[out] ? via ch_transcript_fasta_fai
+  in umitools_dedup_primary_only (umitools_dedup_primary_only): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[umitools_dedup_primary_only] ? via params.umitools_dedup_primary_only
+  out bam (bam): ?
+  out index (index): ?
+  out genomic_dedup_log (genomic_dedup_log): ?
+  out transcriptomic_dedup_log (transcriptomic_dedup_log): ?
+  out prepare_for_rsem_log (prepare_for_rsem_log): Channel<Tuple>
+  out stats (stats): Channel<?>
+  out flagstat (flagstat): Channel<?>
+  out idxstats (idxstats): Channel<?>
+  out genome_stats (genome_stats): ?
+  out genome_flagstat (genome_flagstat): ?
+  out genome_idxstats (genome_idxstats): ?
+  out tsv_edit_distance (tsv_edit_distance): ?
+  out tsv_per_umi (tsv_per_umi): ?
+  out tsv_umi_per_position (tsv_umi_per_position): ?
+  out multiqc_files (multiqc_files): Channel<?>
+  out transcriptome_bam (transcriptome_bam): Channel<?>
+  out transcriptome_dedup_bam (transcriptome_dedup_bam): ?
+  out transcriptome_sorted_bam (transcriptome_sorted_bam): Channel<Tuple>
+  out transcriptome_sorted_bam_index (transcriptome_sorted_bam_index): ?
+  out transcriptome_filtered_bam (transcriptome_filtered_bam): Channel<Tuple>
+  out per_sample_mqc_bundle (per_sample_mqc_bundle): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~9 chain ".mix" steps=mix @406:28
+  guards then of !params.skip_alignment && params.with_umi
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~2[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~3[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~4[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~5[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~6[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~7[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~8[out] Channel<?> via ch_multiqc_files indirect
+  in 1:1 (mix(other)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/BAM_DEDUP_UMI@1[multiqc_files] Channel<?> via BAM_DEDUP_UMI.out.multiqc_files
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_bam_dedup_umi_bundle chain ".map" steps=map @408:35
+  guards then of !params.skip_alignment && params.with_umi
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/BAM_DEDUP_UMI@1[per_sample_mqc_bundle] Channel<?> via BAM_DEDUP_UMI.out.per_sample_mqc_bundle
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~10 chain ".join" steps=join @410:36
+  guards then of !params.skip_alignment && params.with_umi
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~3[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~4[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~5[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~6[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~7[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~8[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~9[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+  in 1:1 (join(right)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_bam_dedup_umi_bundle[out] Channel<?> via ch_bam_dedup_umi_bundle
+  out out (out): Channel<Record>
+workflows/rnaseq/main.nf#RNASEQ/ch_genome_bam_bai_mapping chain ".join.join.map.multiMap" steps=join,join,map,multiMap @417:33
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_genome_bam[out] Channel<?> via ch_genome_bam indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_genome_bam~2[out] Channel<?> via ch_genome_bam indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_genome_bam~3[out] Channel<?> via ch_genome_bam indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_genome_bam~4[out] Channel<?> via ch_genome_bam indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/BAM_DEDUP_UMI@1[bam] ? via ch_genome_bam indirect
+  in 1:1 (join(1)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/SAMTOOLS_INDEX@1[index] Channel<Tuple> via ch_genome_bam_index indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_genome_bam_index[out] Channel<Tuple> via ch_genome_bam_index indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_genome_bam_index~2[out] Channel<?> via ch_genome_bam_index indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_genome_bam_index~3[out] Channel<?> via ch_genome_bam_index indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/BAM_DEDUP_UMI@1[index] ? via ch_genome_bam_index indirect
+  in 2:1 (join(right)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_percent_mapped~2[out] Channel<?> via ch_percent_mapped indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_percent_mapped~3[out] Channel<?> via ch_percent_mapped indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_percent_mapped~4[out] Channel<?> via ch_percent_mapped indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_percent_mapped~5[out] Channel<?> via ch_percent_mapped indirect
+  out out (out): Record
+workflows/rnaseq/main.nf#RNASEQ/ch_percent_mapped~6 code "ch_percent_mapped = ch_genome_bam_bai_mapping.percent_mapped" @433:5
+  in ch_genome_bam_bai_mapping (ch_genome_bam_bai_mapping): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_genome_bam_bai_mapping[out] Record via ch_genome_bam_bai_mapping indirect
+  out ch_percent_mapped (ch_percent_mapped): -
+workflows/rnaseq/main.nf#RNASEQ/ch_map_status~2 chain ".filter" steps=filter @437:21
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_genome_bam_bai_mapping[out] Record via ch_genome_bam_bai_mapping indirect
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_failed_on_low_mapped_reads chain ".filter.map" steps=filter,map @440:37
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_genome_bam_bai_mapping[out] Record via ch_genome_bam_bai_mapping indirect
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_failed_checks~4 chain ".mix" steps=mix @443:24
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_failed_checks~3[out] Channel<?> via ch_failed_checks
+  in 1:1 (mix(other)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_failed_on_low_mapped_reads[out] Channel<?> via ch_failed_on_low_mapped_reads
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/map_filtered_genome_bam_bai chain ".filter.multiMap" steps=filter,multiMap @447:35
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_genome_bam_bai_mapping[out] Record via ch_genome_bam_bai_mapping indirect
+  out out (out): Record
+workflows/rnaseq/main.nf#RNASEQ/ch_genome_bam~5 code "ch_genome_bam = map_filtered_genome_bam_bai.bam" @454:5
+  in map_filtered_genome_bam_bai (map_filtered_genome_bam_bai): -
+    <- workflows/rnaseq/main.nf#RNASEQ/map_filtered_genome_bam_bai[out] Record via map_filtered_genome_bam_bai indirect
+  out ch_genome_bam (ch_genome_bam): -
+workflows/rnaseq/main.nf#RNASEQ/ch_genome_bam_index~4 code "ch_genome_bam_index = map_filtered_genome_bam_bai.index" @455:5
+  in map_filtered_genome_bam_bai (map_filtered_genome_bam_bai): -
+    <- workflows/rnaseq/main.nf#RNASEQ/map_filtered_genome_bam_bai[out] Record via map_filtered_genome_bam_bai indirect
+  out ch_genome_bam_index (ch_genome_bam_index): -
+workflows/rnaseq/main.nf#RNASEQ/ch_transcriptome_bam~4 chain ".map.join.filter.map" steps=map,join,filter,map @463:28
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_transcriptome_bam[out] Channel<?> via ch_transcriptome_bam indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_transcriptome_bam~2[out] Channel<?> via ch_transcriptome_bam indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_transcriptome_bam~3[out] Channel<?> via ch_transcriptome_bam indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/BAM_DEDUP_UMI@1[transcriptome_bam] Channel<?> via ch_transcriptome_bam indirect
+  in 2:1 (join(right)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_genome_bam_bai_mapping[out] Record via ch_genome_bam_bai_mapping indirect
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/.map@11 chain ".map" steps=map @479:13
+  guards then of params.aligner == 'star_rsem'
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:take:ch_samplesheet[out] ? via ch_samplesheet
+  out out (out): ?
+workflows/rnaseq/main.nf#RNASEQ/QUANTIFY_RSEM@1 call "QUANTIFY_RSEM" callee=QUANTIFY_RSEM:workflow:modelled:legacy @478:9
+  guards then of params.aligner == 'star_rsem'
+  in samplesheet (samplesheet): -
+    <- workflows/rnaseq/main.nf#RNASEQ/.map@11[out] ?
+  in reads (reads): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_transcriptome_bam~4[out] Channel<?> via ch_transcriptome_bam
+  in index (index): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:take:ch_rsem_index[out] ? via ch_rsem_index
+  in gtf (gtf): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:take:ch_gtf[out] ? via ch_gtf
+  in gtf_id_attribute (gtf_id_attribute): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[gtf_group_features] ? via params.gtf_group_features
+  in gtf_extra_attribute (gtf_extra_attribute): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[gtf_extra_attributes] ? via params.gtf_extra_attributes
+  in use_sentieon_star (use_sentieon_star): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[use_sentieon_star] ? via params.use_sentieon_star
+  in skip_merge (skip_merge): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[skip_quantification_merge] ? via params.skip_quantification_merge
+  out raw_counts_gene (raw_counts_gene): ?
+  out raw_counts_transcript (raw_counts_transcript): ?
+  out stat (stat): ?
+  out logs (logs): ?
+  out merged_counts_gene (merged_counts_gene): ?
+  out merged_tpm_gene (merged_tpm_gene): ?
+  out merged_counts_transcript (merged_counts_transcript): ?
+  out merged_tpm_transcript (merged_tpm_transcript): ?
+  out merged_genes_long (merged_genes_long): ?
+  out merged_isoforms_long (merged_isoforms_long): ?
+  out tpm_gene (tpm_gene): Channel<Tuple>
+  out counts_gene (counts_gene): Channel<Tuple>
+  out counts_gene_length_scaled (counts_gene_length_scaled): Channel<Tuple>
+  out counts_gene_scaled (counts_gene_scaled): Channel<Tuple>
+  out lengths_gene (lengths_gene): Channel<Tuple>
+  out tpm_transcript (tpm_transcript): Channel<Tuple>
+  out counts_transcript (counts_transcript): Channel<Tuple>
+  out lengths_transcript (lengths_transcript): Channel<Tuple>
+  out merged_gene_rds_unified (merged_gene_rds_unified): ?
+  out merged_transcript_rds_unified (merged_transcript_rds_unified): ?
+  out tx2gene (tx2gene): Channel<Tuple>
+workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~10 chain ".mix" steps=mix @488:28
+  guards then of params.aligner == 'star_rsem'
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~2[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~3[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~4[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~5[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~6[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~7[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~8[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~9[out] Channel<?> via ch_multiqc_files indirect
+  in 1:1 (mix(other)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/QUANTIFY_RSEM@1[stat] ? via QUANTIFY_RSEM.out.stat
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/.map@12 chain ".map" steps=map @490:19
+  guards then of params.aligner == 'star_rsem'
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/QUANTIFY_RSEM@1[stat] ? via QUANTIFY_RSEM.out.stat
+  out out (out): ?
+workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~11 chain ".join" steps=join @489:36
+  guards then of params.aligner == 'star_rsem'
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~3[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~4[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~5[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~6[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~7[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~8[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~9[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~10[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+  in 1:1 (join(right)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/.map@12[out] ?
+  out out (out): Channel<Record>
+workflows/rnaseq/main.nf#RNASEQ/.map@13 chain ".map" steps=map @494:17
+  guards then of params.aligner == 'star_rsem'; then of !params.skip_qc && !params.skip_deseq2_qc && !params.skip_quantification_merge
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/QUANTIFY_RSEM@1[counts_gene_length_scaled] Channel<Tuple> via QUANTIFY_RSEM.out.counts_gene_length_scaled
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/DESEQ2_QC_RSEM@1 call "DESEQ2_QC_RSEM" callee=DESEQ2_QC_RSEM:process:modelled:legacy @493:13
+  guards then of params.aligner == 'star_rsem'; then of !params.skip_qc && !params.skip_deseq2_qc && !params.skip_quantification_merge
+  in counts (counts): Path
+    <- workflows/rnaseq/main.nf#RNASEQ/.map@13[out] Channel<?>
+  in pca_header_multiqc (pca_header_multiqc): Path
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_pca_header_multiqc[ch_pca_header_multiqc] Path via ch_pca_header_multiqc
+  in clustering_header_multiqc (clustering_header_multiqc): Path
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_clustering_header_multiqc[ch_clustering_header_multiqc] Path via ch_clustering_header_multiqc
+  out pdf (pdf): Channel<Path>
+  out rdata (rdata): Channel<Path>
+  out pca_txt (pca_txt): Channel<Path>
+  out pca_multiqc (pca_multiqc): Channel<Path>
+  out dists_txt (dists_txt): Channel<Path>
+  out dists_multiqc (dists_multiqc): Channel<Path>
+  out log (log): Channel<Path>
+  out size_factors (size_factors): Channel<Path>
+  out versions_r_base (versions_r_base): Channel<Tuple>
+  out versions_deseq2 (versions_deseq2): Channel<Tuple>
+workflows/rnaseq/main.nf#RNASEQ/.collect@1 chain ".collect.map" steps=collect,map @498:53
+  guards then of params.aligner == 'star_rsem'; then of !params.skip_qc && !params.skip_deseq2_qc && !params.skip_quantification_merge
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/DESEQ2_QC_RSEM@1[pca_multiqc] Channel<Path> via DESEQ2_QC_RSEM.out.pca_multiqc
+  out out (out): Value<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~11 chain ".mix" steps=mix @498:32
+  guards then of params.aligner == 'star_rsem'; then of !params.skip_qc && !params.skip_deseq2_qc && !params.skip_quantification_merge
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~10[out] Channel<?> via ch_multiqc_files
+  in 1:1 (mix(other)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/.collect@1[out] Value<?>
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/.collect@2 chain ".collect.map" steps=collect,map @499:53
+  guards then of params.aligner == 'star_rsem'; then of !params.skip_qc && !params.skip_deseq2_qc && !params.skip_quantification_merge
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/DESEQ2_QC_RSEM@1[dists_multiqc] Channel<Path> via DESEQ2_QC_RSEM.out.dists_multiqc
+  out out (out): Value<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~12 chain ".mix" steps=mix @499:32
+  guards then of params.aligner == 'star_rsem'; then of !params.skip_qc && !params.skip_deseq2_qc && !params.skip_quantification_merge
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~11[out] Channel<?> via ch_multiqc_files
+  in 1:1 (mix(other)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/.collect@2[out] Value<?>
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/.map@14 chain ".map" steps=map @508:13
+  guards else of params.aligner == 'star_rsem'; then of params.aligner in ['star_salmon', 'bowtie2_salmon']
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:take:ch_samplesheet[out] ? via ch_samplesheet
+  out out (out): ?
+workflows/rnaseq/main.nf#RNASEQ/channel.value@1 factory "channel.value" factory=channel.value @510:13
+  guards else of params.aligner == 'star_rsem'; then of params.aligner in ['star_salmon', 'bowtie2_salmon']
+  out out (out): Value<List>
+workflows/rnaseq/main.nf#RNASEQ/QUANTIFY_BAM_SALMON@1 call "QUANTIFY_BAM_SALMON" callee=QUANTIFY_BAM_SALMON:workflow:modelled:legacy @507:9
+  guards else of params.aligner == 'star_rsem'; then of params.aligner in ['star_salmon', 'bowtie2_salmon']
+  in samplesheet (samplesheet): -
+    <- workflows/rnaseq/main.nf#RNASEQ/.map@14[out] ?
+  in reads (reads): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_transcriptome_bam~4[out] Channel<?> via ch_transcriptome_bam
+  in index (index): -
+    <- workflows/rnaseq/main.nf#RNASEQ/channel.value@1[out] Value<List>
+  in transcript_fasta (transcript_fasta): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:take:ch_transcript_fasta[out] ? via ch_transcript_fasta
+  in gtf (gtf): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:take:ch_gtf[out] ? via ch_gtf
+  in gtf_id_attribute (gtf_id_attribute): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[gtf_group_features] ? via params.gtf_group_features
+  in gtf_extra_attribute (gtf_extra_attribute): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[gtf_extra_attributes] ? via params.gtf_extra_attributes
+  in pseudo_aligner (pseudo_aligner): -
+    = 'salmon' : String
+  in kallisto_quant_fraglen (kallisto_quant_fraglen): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[kallisto_quant_fraglen] ? via params.kallisto_quant_fraglen
+  in kallisto_quant_fraglen_sd (kallisto_quant_fraglen_sd): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[kallisto_quant_fraglen_sd] ? via params.kallisto_quant_fraglen_sd
+  in skip_merge (skip_merge): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[skip_quantification_merge] ? via params.skip_quantification_merge
+  out results (results): ?
+  out multiqc (multiqc): ?
+  out tx2gene (tx2gene): Channel<Tuple>
+  out tx2gene_augmented (tx2gene_augmented): Channel<Tuple>
+  out tpm_gene (tpm_gene): Channel<Tuple>
+  out counts_gene (counts_gene): Channel<Tuple>
+  out lengths_gene (lengths_gene): Channel<Tuple>
+  out counts_gene_length_scaled (counts_gene_length_scaled): Channel<Tuple>
+  out counts_gene_scaled (counts_gene_scaled): Channel<Tuple>
+  out tpm_transcript (tpm_transcript): Channel<Tuple>
+  out counts_transcript (counts_transcript): Channel<Tuple>
+  out lengths_transcript (lengths_transcript): Channel<Tuple>
+  out merged_gene_rds_unified (merged_gene_rds_unified): ?
+  out merged_transcript_rds_unified (merged_transcript_rds_unified): ?
+workflows/rnaseq/main.nf#RNASEQ/.map@15 chain ".map" steps=map @522:17
+  guards else of params.aligner == 'star_rsem'; then of params.aligner in ['star_salmon', 'bowtie2_salmon']; then of !params.skip_qc && !params.skip_deseq2_qc && !params.skip_quantification_merge
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/QUANTIFY_BAM_SALMON@1[counts_gene_length_scaled] Channel<Tuple> via QUANTIFY_BAM_SALMON.out.counts_gene_length_scaled
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/DESEQ2_QC_BAM_SALMON@1 call "DESEQ2_QC_BAM_SALMON" callee=DESEQ2_QC_BAM_SALMON:process:modelled:legacy @521:13
+  guards else of params.aligner == 'star_rsem'; then of params.aligner in ['star_salmon', 'bowtie2_salmon']; then of !params.skip_qc && !params.skip_deseq2_qc && !params.skip_quantification_merge
+  in counts (counts): Path
+    <- workflows/rnaseq/main.nf#RNASEQ/.map@15[out] Channel<?>
+  in pca_header_multiqc (pca_header_multiqc): Path
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_pca_header_multiqc[ch_pca_header_multiqc] Path via ch_pca_header_multiqc
+  in clustering_header_multiqc (clustering_header_multiqc): Path
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_clustering_header_multiqc[ch_clustering_header_multiqc] Path via ch_clustering_header_multiqc
+  out pdf (pdf): Channel<Path>
+  out rdata (rdata): Channel<Path>
+  out pca_txt (pca_txt): Channel<Path>
+  out pca_multiqc (pca_multiqc): Channel<Path>
+  out dists_txt (dists_txt): Channel<Path>
+  out dists_multiqc (dists_multiqc): Channel<Path>
+  out log (log): Channel<Path>
+  out size_factors (size_factors): Channel<Path>
+  out versions_r_base (versions_r_base): Channel<Tuple>
+  out versions_deseq2 (versions_deseq2): Channel<Tuple>
+workflows/rnaseq/main.nf#RNASEQ/.collect@3 chain ".collect.map" steps=collect,map @526:53
+  guards else of params.aligner == 'star_rsem'; then of params.aligner in ['star_salmon', 'bowtie2_salmon']; then of !params.skip_qc && !params.skip_deseq2_qc && !params.skip_quantification_merge
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/DESEQ2_QC_BAM_SALMON@1[pca_multiqc] Channel<Path> via DESEQ2_QC_BAM_SALMON.out.pca_multiqc
+  out out (out): Value<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~13 chain ".mix" steps=mix @526:32
+  guards else of params.aligner == 'star_rsem'; then of params.aligner in ['star_salmon', 'bowtie2_salmon']; then of !params.skip_qc && !params.skip_deseq2_qc && !params.skip_quantification_merge
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~2[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~3[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~4[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~5[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~6[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~7[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~8[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~9[out] Channel<?> via ch_multiqc_files indirect
+  in 1:1 (mix(other)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/.collect@3[out] Value<?>
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/.collect@4 chain ".collect.map" steps=collect,map @527:53
+  guards else of params.aligner == 'star_rsem'; then of params.aligner in ['star_salmon', 'bowtie2_salmon']; then of !params.skip_qc && !params.skip_deseq2_qc && !params.skip_quantification_merge
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/DESEQ2_QC_BAM_SALMON@1[dists_multiqc] Channel<Path> via DESEQ2_QC_BAM_SALMON.out.dists_multiqc
+  out out (out): Value<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~14 chain ".mix" steps=mix @527:32
+  guards else of params.aligner == 'star_rsem'; then of params.aligner in ['star_salmon', 'bowtie2_salmon']; then of !params.skip_qc && !params.skip_deseq2_qc && !params.skip_quantification_merge
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~13[out] Channel<?> via ch_multiqc_files
+  in 1:1 (mix(other)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/.collect@4[out] Value<?>
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/markdups_done code "def markdups_done = !params.skip_markduplicates && params.u…" @536:5
+  in params.skip_markduplicates (params.skip_markduplicates): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[skip_markduplicates] ? via params.skip_markduplicates indirect
+  in params.use_parabricks_star (params.use_parabricks_star): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[use_parabricks_star] ? via params.use_parabricks_star indirect
+  out markdups_done (markdups_done): -
+workflows/rnaseq/main.nf#RNASEQ/BAM_MARKDUPLICATES_PICARD@1 call "BAM_MARKDUPLICATES_PICARD" callee=BAM_MARKDUPLICATES_PICARD:workflow:modelled:legacy @538:9
+  guards then of !params.skip_markduplicates && !params.with_umi && !markdups_done
+  in ch_reads (ch_reads): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_genome_bam~5[ch_genome_bam] ? via ch_genome_bam
+  in ch_fasta_fai (ch_fasta_fai): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:take:ch_fasta_fai[out] ? via ch_fasta_fai
+  out bam (bam): Channel<Tuple>
+  out cram (cram): Channel<Tuple>
+  out metrics (metrics): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out stats (stats): Channel<Tuple>
+  out flagstat (flagstat): Channel<Tuple>
+  out idxstats (idxstats): Channel<Tuple>
+  out per_sample_mqc_bundle (per_sample_mqc_bundle): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~15 chain ".mix" steps=mix @544:28
+  guards then of !params.skip_markduplicates && !params.with_umi && !markdups_done
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~2[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~3[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~4[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~5[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~6[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~7[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~8[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~9[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~10[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~12[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~14[out] Channel<?> via ch_multiqc_files indirect
+  in 1:1 (mix(other)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/BAM_MARKDUPLICATES_PICARD@1[stats] Channel<Tuple> via BAM_MARKDUPLICATES_PICARD.out.stats
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~16 chain ".mix" steps=mix @545:28
+  guards then of !params.skip_markduplicates && !params.with_umi && !markdups_done
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~15[out] Channel<?> via ch_multiqc_files
+  in 1:1 (mix(other)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/BAM_MARKDUPLICATES_PICARD@1[flagstat] Channel<Tuple> via BAM_MARKDUPLICATES_PICARD.out.flagstat
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~17 chain ".mix" steps=mix @546:28
+  guards then of !params.skip_markduplicates && !params.with_umi && !markdups_done
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~16[out] Channel<?> via ch_multiqc_files
+  in 1:1 (mix(other)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/BAM_MARKDUPLICATES_PICARD@1[idxstats] Channel<Tuple> via BAM_MARKDUPLICATES_PICARD.out.idxstats
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~18 chain ".mix" steps=mix @547:28
+  guards then of !params.skip_markduplicates && !params.with_umi && !markdups_done
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~17[out] Channel<?> via ch_multiqc_files
+  in 1:1 (mix(other)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/BAM_MARKDUPLICATES_PICARD@1[metrics] Channel<Tuple> via BAM_MARKDUPLICATES_PICARD.out.metrics
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_markdup_bundle chain ".map" steps=map @548:29
+  guards then of !params.skip_markduplicates && !params.with_umi && !markdups_done
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/BAM_MARKDUPLICATES_PICARD@1[per_sample_mqc_bundle] Channel<?> via BAM_MARKDUPLICATES_PICARD.out.per_sample_mqc_bundle
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~12 chain ".join" steps=join @550:36
+  guards then of !params.skip_markduplicates && !params.with_umi && !markdups_done
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~3[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~4[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~5[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~6[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~7[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~8[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~9[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~10[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~11[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+  in 1:1 (join(right)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_markdup_bundle[out] Channel<?> via ch_markdup_bundle
+  out out (out): Channel<Record>
+workflows/rnaseq/main.nf#RNASEQ/.map@16 chain ".map" steps=map @560:17
+  guards then of !params.skip_stringtie; then of params.stringtie_ignore_gtf
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_genome_bam~5[ch_genome_bam] ? via ch_genome_bam indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/BAM_MARKDUPLICATES_PICARD@1[bam] Channel<Tuple> via ch_genome_bam indirect
+  out out (out): ?
+workflows/rnaseq/main.nf#RNASEQ/channel.value@2 factory "channel.value" factory=channel.value @561:17
+  guards then of !params.skip_stringtie; then of params.stringtie_ignore_gtf
+  out out (out): Value<List>
+workflows/rnaseq/main.nf#RNASEQ/.map@17 chain ".map" steps=map @562:17
+  guards then of !params.skip_stringtie; then of params.stringtie_ignore_gtf
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:take:ch_gtf[out] ? via ch_gtf
+  out out (out): ?
+workflows/rnaseq/main.nf#RNASEQ/BAM_STRINGTIE_MERGE@1 call "BAM_STRINGTIE_MERGE" callee=BAM_STRINGTIE_MERGE:workflow:modelled:legacy @559:13
+  guards then of !params.skip_stringtie; then of params.stringtie_ignore_gtf
+  in ch_bams (ch_bams): -
+    <- workflows/rnaseq/main.nf#RNASEQ/.map@16[out] ?
+  in ch_mode (ch_mode): -
+    <- workflows/rnaseq/main.nf#RNASEQ/channel.value@2[out] Value<List>
+  in ch_chrgtf (ch_chrgtf): -
+    <- workflows/rnaseq/main.nf#RNASEQ/.map@17[out] ?
+  out stringtie_gtf (stringtie_gtf): Channel<Tuple>
+workflows/rnaseq/main.nf#RNASEQ/ch_stringtie_gtf chain ".map" steps=map @564:32
+  guards then of !params.skip_stringtie; then of params.stringtie_ignore_gtf
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/BAM_STRINGTIE_MERGE@1[stringtie_gtf] Channel<Tuple> via BAM_STRINGTIE_MERGE.out.stringtie_gtf
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/.map@18 chain ".map" steps=map @569:13
+  guards then of !params.skip_stringtie
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_genome_bam~5[ch_genome_bam] ? via ch_genome_bam indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/BAM_MARKDUPLICATES_PICARD@1[bam] Channel<Tuple> via ch_genome_bam indirect
+  out out (out): ?
+workflows/rnaseq/main.nf#RNASEQ/channel.value@3 factory "channel.value" factory=channel.value @570:13
+  guards then of !params.skip_stringtie
+  out out (out): Value<String>
+workflows/rnaseq/main.nf#RNASEQ/STRINGTIE_STRINGTIE@1 call "STRINGTIE_STRINGTIE" callee=STRINGTIE_STRINGTIE:process:modelled:legacy @568:9
+  guards then of !params.skip_stringtie
+  in $1 (tuple(meta, srbam, lrbam)): Tuple
+    <- workflows/rnaseq/main.nf#RNASEQ/.map@18[out] ?
+  in mode (mode): -
+    <- workflows/rnaseq/main.nf#RNASEQ/channel.value@3[out] Value<String>
+  in annotation_gtf (annotation_gtf): Path
+    <- workflows/rnaseq/main.nf#RNASEQ/:take:ch_gtf[out] ? via ch_stringtie_gtf indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_stringtie_gtf[out] Channel<?> via ch_stringtie_gtf indirect
+  out transcript_gtf (transcript_gtf): Channel<Tuple>
+  out abundance (abundance): Channel<Tuple>
+  out coverage_gtf (coverage_gtf): Channel<Tuple>
+  out ballgown (ballgown): Channel<Tuple>
+  out versions_stringtie (versions_stringtie): Channel<Tuple>
+workflows/rnaseq/main.nf#RNASEQ/rseqc_modules code "def rseqc_modules = qc_tools.findAll { tool -> tool.startsW…" @579:5
+  in qc_tools (qc_tools): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:take:qc_tools[out] ? via qc_tools indirect
+  out rseqc_modules (rseqc_modules): -
+workflows/rnaseq/main.nf#RNASEQ/ch_inferexperiment_txt factory "channel.empty" factory=channel.empty @581:30
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/.join@2 chain ".join" steps=join @589:17
+  guards then of !params.skip_qc; then of params.use_rustqc
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_genome_bam~5[ch_genome_bam] ? via ch_genome_bam indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/BAM_MARKDUPLICATES_PICARD@1[bam] Channel<Tuple> via ch_genome_bam indirect
+  in 1:1 (join(right)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_genome_bam_index~4[ch_genome_bam_index] ? via ch_genome_bam_index indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/BAM_MARKDUPLICATES_PICARD@1[index] Channel<Tuple> via ch_genome_bam_index indirect
+  out out (out): Channel<Record>
+workflows/rnaseq/main.nf#RNASEQ/.map@19 chain ".map" steps=map @590:17
+  guards then of !params.skip_qc; then of params.use_rustqc
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:take:ch_gtf[out] ? via ch_gtf
+  out out (out): ?
+workflows/rnaseq/main.nf#RNASEQ/RUSTQC@1 call "RUSTQC" callee=RUSTQC:process:modelled:legacy @588:13
+  guards then of !params.skip_qc; then of params.use_rustqc
+  in $1 (tuple(meta, bam, bai)): Tuple
+    <- workflows/rnaseq/main.nf#RNASEQ/.join@2[out] Channel<Record>
+  in $2 (tuple(meta2, gtf)): Tuple
+    <- workflows/rnaseq/main.nf#RNASEQ/.map@19[out] ?
+  out dupradar (dupradar): Channel<Tuple>
+  out featurecounts (featurecounts): Channel<Tuple>
+  out preseq (preseq): Channel<Tuple>
+  out samtools (samtools): Channel<Tuple>
+  out rseqc (rseqc): Channel<Tuple>
+  out qualimap (qualimap): Channel<Tuple>
+  out versions_rustqc (versions_rustqc): Channel<Tuple>
+workflows/rnaseq/main.nf#RNASEQ/mqcKeep code "def mqcKeep = { f ->" @596:13
+  guards then of !params.skip_qc; then of params.use_rustqc
+  out mqcKeep (mqcKeep): -
+workflows/rnaseq/main.nf#RNASEQ/mqcFilter code "def mqcFilter = { meta, files -> [meta, (files instanceof L…" @600:13
+  guards then of !params.skip_qc; then of params.use_rustqc
+  in mqcKeep (mqcKeep): -
+    <- workflows/rnaseq/main.nf#RNASEQ/mqcKeep[mqcKeep] ? via mqcKeep indirect
+  out mqcFilter (mqcFilter): -
+workflows/rnaseq/main.nf#RNASEQ/ch_rustqc_dupradar chain ".map" steps=map @602:34
+  guards then of !params.skip_qc; then of params.use_rustqc
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/RUSTQC@1[dupradar] Channel<Tuple> via RUSTQC.out.dupradar
+  in 1:1 (map(transform)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/mqcFilter[mqcFilter] ? via mqcFilter
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_rustqc_feature chain ".map" steps=map @603:34
+  guards then of !params.skip_qc; then of params.use_rustqc
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/RUSTQC@1[featurecounts] Channel<Tuple> via RUSTQC.out.featurecounts
+  in 1:1 (map(transform)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/mqcFilter[mqcFilter] ? via mqcFilter
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_rustqc_preseq chain ".map" steps=map @604:34
+  guards then of !params.skip_qc; then of params.use_rustqc
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/RUSTQC@1[preseq] Channel<Tuple> via RUSTQC.out.preseq
+  in 1:1 (map(transform)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/mqcFilter[mqcFilter] ? via mqcFilter
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_rustqc_samtools chain ".map" steps=map @605:34
+  guards then of !params.skip_qc; then of params.use_rustqc
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/RUSTQC@1[samtools] Channel<Tuple> via RUSTQC.out.samtools
+  in 1:1 (map(transform)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/mqcFilter[mqcFilter] ? via mqcFilter
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_rustqc_rseqc chain ".map" steps=map @606:34
+  guards then of !params.skip_qc; then of params.use_rustqc
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/RUSTQC@1[rseqc] Channel<Tuple> via RUSTQC.out.rseqc
+  in 1:1 (map(transform)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/mqcFilter[mqcFilter] ? via mqcFilter
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_rustqc_qualimap chain ".map" steps=map @607:34
+  guards then of !params.skip_qc; then of params.use_rustqc
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/RUSTQC@1[qualimap] Channel<Tuple> via RUSTQC.out.qualimap
+  in 1:1 (map(transform)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/mqcFilter[mqcFilter] ? via mqcFilter
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/.mix@1 chain ".mix.mix.mix.mix.mix.flatMap" steps=mix,mix,mix,mix,mix,flatMap @610:17
+  guards then of !params.skip_qc; then of params.use_rustqc
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_rustqc_dupradar[out] Channel<?> via ch_rustqc_dupradar
+  in 1:1 (mix(other)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_rustqc_feature[out] Channel<?> via ch_rustqc_feature
+  in 2:1 (mix(other)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_rustqc_preseq[out] Channel<?> via ch_rustqc_preseq
+  in 3:1 (mix(other)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_rustqc_samtools[out] Channel<?> via ch_rustqc_samtools
+  in 4:1 (mix(other)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_rustqc_rseqc[out] Channel<?> via ch_rustqc_rseqc
+  in 5:1 (mix(other)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_rustqc_qualimap[out] Channel<?> via ch_rustqc_qualimap
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~19 chain ".mix" steps=mix @609:32
+  guards then of !params.skip_qc; then of params.use_rustqc
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~2[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~3[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~4[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~5[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~6[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~7[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~8[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~9[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~10[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~12[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~14[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~18[out] Channel<?> via ch_multiqc_files indirect
+  in 1:1 (mix(other)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/.mix@1[out] Channel<?>
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_rustqc_bundle chain ".join.join.join.join.join.map" steps=join,join,join,join,join,map @619:32
+  guards then of !params.skip_qc; then of params.use_rustqc
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_rustqc_dupradar[out] Channel<?> via ch_rustqc_dupradar
+  in 1:1 (join(right)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_rustqc_feature[out] Channel<?> via ch_rustqc_feature
+  in 2:1 (join(right)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_rustqc_preseq[out] Channel<?> via ch_rustqc_preseq
+  in 3:1 (join(right)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_rustqc_samtools[out] Channel<?> via ch_rustqc_samtools
+  in 4:1 (join(right)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_rustqc_rseqc[out] Channel<?> via ch_rustqc_rseqc
+  in 5:1 (join(right)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_rustqc_qualimap[out] Channel<?> via ch_rustqc_qualimap
+  in 6:1 (map(transform)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/collapseAgg[collapseAgg] ? via collapseAgg
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~13 chain ".join" steps=join @626:40
+  guards then of !params.skip_qc; then of params.use_rustqc
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~3[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~4[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~5[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~6[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~7[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~8[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~9[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~10[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~11[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~12[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+  in 1:1 (join(right)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_rustqc_bundle[out] Channel<?> via ch_rustqc_bundle
+  out out (out): Channel<Record>
+workflows/rnaseq/main.nf#RNASEQ/ch_inferexperiment_txt~2 chain ".map.filter" steps=map,filter @630:38
+  guards then of !params.skip_qc; then of params.use_rustqc
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/RUSTQC@1[rseqc] Channel<Tuple> via RUSTQC.out.rseqc
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/.join@3 chain ".join" steps=join @641:17
+  guards then of !params.skip_qc; else of params.use_rustqc
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_genome_bam~5[ch_genome_bam] ? via ch_genome_bam indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/BAM_MARKDUPLICATES_PICARD@1[bam] Channel<Tuple> via ch_genome_bam indirect
+  in 1:1 (join(right)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_genome_bam_index~4[ch_genome_bam_index] ? via ch_genome_bam_index indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/BAM_MARKDUPLICATES_PICARD@1[index] Channel<Tuple> via ch_genome_bam_index indirect
+  out out (out): Channel<Record>
+workflows/rnaseq/main.nf#RNASEQ/.map@20 chain ".map" steps=map @642:17
+  guards then of !params.skip_qc; else of params.use_rustqc
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:take:ch_gtf[out] ? via ch_gtf
+  out out (out): ?
+workflows/rnaseq/main.nf#RNASEQ/channel.value@4 factory "channel.value" factory=channel.value @645:17
+  guards then of !params.skip_qc; else of params.use_rustqc
+  out out (out): Value<List>
+workflows/rnaseq/main.nf#RNASEQ/BAM_QC_RNASEQ@1 call "BAM_QC_RNASEQ" callee=BAM_QC_RNASEQ:workflow:modelled:legacy @640:13
+  guards then of !params.skip_qc; else of params.use_rustqc
+  in ch_bam_bai (ch_bam_bai): -
+    <- workflows/rnaseq/main.nf#RNASEQ/.join@3[out] Channel<Record>
+  in ch_gtf (ch_gtf): -
+    <- workflows/rnaseq/main.nf#RNASEQ/.map@20[out] ?
+  in ch_gene_bed (ch_gene_bed): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:take:ch_gene_bed[out] ? via ch_gene_bed
+  in ch_fasta_fai (ch_fasta_fai): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:take:ch_fasta_fai[out] ? via ch_fasta_fai
+  in ch_biotypes_header (ch_biotypes_header): -
+    <- workflows/rnaseq/main.nf#RNASEQ/channel.value@4[out] Value<List>
+  in tools (tools): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:take:qc_tools[out] ? via qc_tools
+  in biotype (biotype): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[featurecounts_group_type] ? via biotype
+  out multiqc_files (multiqc_files): Channel<?>
+  out preseq_lc_extrap (preseq_lc_extrap): Channel<Tuple>
+  out preseq_log (preseq_log): Channel<Tuple>
+  out featurecounts_counts (featurecounts_counts): Channel<Tuple>
+  out featurecounts_summary (featurecounts_summary): Channel<Tuple>
+  out biotype_tsv (biotype_tsv): Channel<Tuple>
+  out biotype_rrna (biotype_rrna): Channel<Tuple>
+  out qualimap_results (qualimap_results): Channel<Tuple>
+  out dupradar_scatter2d (dupradar_scatter2d): Channel<Tuple>
+  out dupradar_boxplot (dupradar_boxplot): Channel<Tuple>
+  out dupradar_hist (dupradar_hist): Channel<Tuple>
+  out dupradar_dupmatrix (dupradar_dupmatrix): Channel<Tuple>
+  out dupradar_intercept_slope (dupradar_intercept_slope): Channel<Tuple>
+  out dupradar_multiqc (dupradar_multiqc): Channel<Tuple>
+  out inferexperiment_txt (inferexperiment_txt): ?
+  out bamstat_txt (bamstat_txt): ?
+  out innerdistance_all (innerdistance_all): ?
+  out innerdistance_distance (innerdistance_distance): ?
+  out innerdistance_freq (innerdistance_freq): ?
+  out innerdistance_mean (innerdistance_mean): ?
+  out innerdistance_pdf (innerdistance_pdf): ?
+  out innerdistance_rscript (innerdistance_rscript): ?
+  out junctionannotation_all (junctionannotation_all): ?
+  out junctionannotation_bed (junctionannotation_bed): ?
+  out junctionannotation_interact_bed (junctionannotation_interact_bed): ?
+  out junctionannotation_xls (junctionannotation_xls): ?
+  out junctionannotation_pdf (junctionannotation_pdf): ?
+  out junctionannotation_events_pdf (junctionannotation_events_pdf): ?
+  out junctionannotation_rscript (junctionannotation_rscript): ?
+  out junctionannotation_log (junctionannotation_log): ?
+  out junctionsaturation_all (junctionsaturation_all): ?
+  out junctionsaturation_pdf (junctionsaturation_pdf): ?
+  out junctionsaturation_rscript (junctionsaturation_rscript): ?
+  out readdistribution_txt (readdistribution_txt): ?
+  out readduplication_all (readduplication_all): ?
+  out readduplication_seq_xls (readduplication_seq_xls): ?
+  out readduplication_pos_xls (readduplication_pos_xls): ?
+  out readduplication_pdf (readduplication_pdf): ?
+  out readduplication_rscript (readduplication_rscript): ?
+  out tin_txt (tin_txt): ?
+  out per_sample_mqc_bundle (per_sample_mqc_bundle): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~20 chain ".mix" steps=mix @649:32
+  guards then of !params.skip_qc; else of params.use_rustqc
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~2[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~3[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~4[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~5[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~6[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~7[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~8[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~9[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~10[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~12[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~14[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~18[out] Channel<?> via ch_multiqc_files indirect
+  in 1:1 (mix(other)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/BAM_QC_RNASEQ@1[multiqc_files] Channel<?> via BAM_QC_RNASEQ.out.multiqc_files
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_bam_qc_rnaseq_bundle chain ".map" steps=map @652:39
+  guards then of !params.skip_qc; else of params.use_rustqc
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/BAM_QC_RNASEQ@1[per_sample_mqc_bundle] Channel<?> via BAM_QC_RNASEQ.out.per_sample_mqc_bundle
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~14 chain ".join" steps=join @654:40
+  guards then of !params.skip_qc; else of params.use_rustqc
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~3[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~4[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~5[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~6[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~7[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~8[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~9[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~10[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~11[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~12[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+  in 1:1 (join(right)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_bam_qc_rnaseq_bundle[out] Channel<?> via ch_bam_qc_rnaseq_bundle
+  out out (out): Channel<Record>
+workflows/rnaseq/main.nf#RNASEQ/SAMPLE_CHECK_FAILED@1 call "SAMPLE_CHECK_FAILED" callee=SAMPLE_CHECK_FAILED:process:modelled:legacy @662:5
+  in $1 (tuple(id, message)): Tuple
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_failed_checks~4[out] Channel<?> via ch_failed_checks
+workflows/rnaseq/main.nf#RNASEQ/run_infer_experiment code "def run_infer_experiment = !params.skip_qc && (params.use_r…" @672:5
+  in params.skip_qc (params.skip_qc): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[skip_qc] ? via params.skip_qc indirect
+  in params.use_rustqc (params.use_rustqc): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[use_rustqc] ? via params.use_rustqc indirect
+  in rseqc_modules (rseqc_modules): -
+    <- workflows/rnaseq/main.nf#RNASEQ/rseqc_modules[rseqc_modules] ? via rseqc_modules indirect
+  out run_infer_experiment (run_infer_experiment): -
+workflows/rnaseq/main.nf#RNASEQ/ch_strand_data factory "channel.empty" factory=channel.empty @673:22
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_strand_data~2 chain ".map" steps=map @675:26
+  guards then of run_infer_experiment
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_inferexperiment_txt[out] Channel<?> via ch_inferexperiment_txt indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_inferexperiment_txt~2[out] Channel<?> via ch_inferexperiment_txt indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/BAM_QC_RNASEQ@1[inferexperiment_txt] ? via ch_inferexperiment_txt indirect
+  out out (out): ?
+workflows/rnaseq/main.nf#RNASEQ/ch_strand_status~2 chain ".map" steps=map @678:28
+  guards then of run_infer_experiment
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_strand_data~2[out] ? via ch_strand_data
+  out out (out): ?
+workflows/rnaseq/main.nf#RNASEQ/ch_strand_data~3 chain ".filter.map" steps=filter,map @681:26
+  guards else of run_infer_experiment
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_strand_inferred_filtered_fastq[out] Channel<?> via ch_strand_inferred_filtered_fastq
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_genomecov_input chain ".map" steps=map @692:30
+  guards then of !params.skip_bigwig
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_genome_bam~5[ch_genome_bam] ? via ch_genome_bam indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/BAM_MARKDUPLICATES_PICARD@1[bam] Channel<Tuple> via ch_genome_bam indirect
+  out out (out): ?
+workflows/rnaseq/main.nf#RNASEQ/ch_genomecov_input_stranded chain ".filter" steps=filter @694:39
+  guards then of !params.skip_bigwig
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_genomecov_input[out] ? via ch_genomecov_input
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/BEDTOOLS_GENOMECOV_FW@1 call "BEDTOOLS_GENOMECOV_FW" callee=BEDTOOLS_GENOMECOV_FW:process:modelled:legacy @696:9
+  guards then of !params.skip_bigwig
+  in $1 (tuple(meta, intervals, scale)): Tuple
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_genomecov_input_stranded[out] Channel<?> via ch_genomecov_input_stranded
+  in sizes (sizes): Path
+    = [] : List
+  in extension (extension): -
+    = 'bedGraph' : String
+  in sort (sort): -
+    = true : Boolean
+  out genomecov (genomecov): Channel<Tuple>
+  out versions_bedtools (versions_bedtools): Channel<Tuple>
+workflows/rnaseq/main.nf#RNASEQ/BEDTOOLS_GENOMECOV_REV@1 call "BEDTOOLS_GENOMECOV_REV" callee=BEDTOOLS_GENOMECOV_REV:process:modelled:legacy @702:9
+  guards then of !params.skip_bigwig
+  in $1 (tuple(meta, intervals, scale)): Tuple
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_genomecov_input_stranded[out] Channel<?> via ch_genomecov_input_stranded
+  in sizes (sizes): Path
+    = [] : List
+  in extension (extension): -
+    = 'bedGraph' : String
+  in sort (sort): -
+    = true : Boolean
+  out genomecov (genomecov): Channel<Tuple>
+  out versions_bedtools (versions_bedtools): Channel<Tuple>
+workflows/rnaseq/main.nf#RNASEQ/BEDTOOLS_GENOMECOV_COMBINED@1 call "BEDTOOLS_GENOMECOV_COMBINED" callee=BEDTOOLS_GENOMECOV_COMBINED:process:modelled:legacy @708:9
+  guards then of !params.skip_bigwig
+  in $1 (tuple(meta, intervals, scale)): Tuple
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_genomecov_input[out] ? via ch_genomecov_input
+  in sizes (sizes): Path
+    = [] : List
+  in extension (extension): -
+    = 'bedGraph' : String
+  in sort (sort): -
+    = true : Boolean
+  out genomecov (genomecov): Channel<Tuple>
+  out versions_bedtools (versions_bedtools): Channel<Tuple>
+workflows/rnaseq/main.nf#RNASEQ/BEDGRAPH_BEDCLIP_BEDGRAPHTOBIGWIG_FORWARD@1 call "BEDGRAPH_BEDCLIP_BEDGRAPHTOBIGWIG_FORWARD" callee=BEDGRAPH_BEDCLIP_BEDGRAPHTOBIGWIG_FORWARD:workflow:modelled:legacy @718:9
+  guards then of !params.skip_bigwig
+  in bedgraph (bedgraph): -
+    <- workflows/rnaseq/main.nf#RNASEQ/BEDTOOLS_GENOMECOV_FW@1[genomecov] Channel<Tuple> via BEDTOOLS_GENOMECOV_FW.out.genomecov
+  in sizes (sizes): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:take:ch_chrom_sizes[out] ? via ch_chrom_sizes
+  out bigwig (bigwig): Channel<Tuple>
+  out bedgraph (bedgraph): Channel<Tuple>
+workflows/rnaseq/main.nf#RNASEQ/BEDGRAPH_BEDCLIP_BEDGRAPHTOBIGWIG_REVERSE@1 call "BEDGRAPH_BEDCLIP_BEDGRAPHTOBIGWIG_REVERSE" callee=BEDGRAPH_BEDCLIP_BEDGRAPHTOBIGWIG_REVERSE:workflow:modelled:legacy @723:9
+  guards then of !params.skip_bigwig
+  in bedgraph (bedgraph): -
+    <- workflows/rnaseq/main.nf#RNASEQ/BEDTOOLS_GENOMECOV_REV@1[genomecov] Channel<Tuple> via BEDTOOLS_GENOMECOV_REV.out.genomecov
+  in sizes (sizes): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:take:ch_chrom_sizes[out] ? via ch_chrom_sizes
+  out bigwig (bigwig): Channel<Tuple>
+  out bedgraph (bedgraph): Channel<Tuple>
+workflows/rnaseq/main.nf#RNASEQ/BEDGRAPH_BEDCLIP_BEDGRAPHTOBIGWIG_COMBINED@1 call "BEDGRAPH_BEDCLIP_BEDGRAPHTOBIGWIG_COMBINED" callee=BEDGRAPH_BEDCLIP_BEDGRAPHTOBIGWIG_COMBINED:workflow:modelled:legacy @728:9
+  guards then of !params.skip_bigwig
+  in bedgraph (bedgraph): -
+    <- workflows/rnaseq/main.nf#RNASEQ/BEDTOOLS_GENOMECOV_COMBINED@1[genomecov] Channel<Tuple> via BEDTOOLS_GENOMECOV_COMBINED.out.genomecov
+  in sizes (sizes): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:take:ch_chrom_sizes[out] ? via ch_chrom_sizes
+  out bigwig (bigwig): Channel<Tuple>
+  out bedgraph (bedgraph): Channel<Tuple>
+workflows/rnaseq/main.nf#RNASEQ/ch_contaminant_sequences code "def ch_contaminant_sequences = params.contaminant_screening…" @738:9
+  guards then of !params.skip_qc
+  in params.contaminant_screening_input (params.contaminant_screening_input): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[contaminant_screening_input] ? via params.contaminant_screening_input indirect
+  in ch_strand_inferred_filtered_fastq (ch_strand_inferred_filtered_fastq): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_strand_inferred_filtered_fastq[out] Channel<?> via ch_strand_inferred_filtered_fastq indirect
+  in ch_reads_trimmed (ch_reads_trimmed): -
+    <- workflows/rnaseq/main.nf#RNASEQ/FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS@1[reads_trimmed] ? via ch_reads_trimmed indirect
+  in ch_reads_cat (ch_reads_cat): -
+    <- workflows/rnaseq/main.nf#RNASEQ/FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS@1[reads_cat] ? via ch_reads_cat indirect
+  in ch_unaligned_sequences (ch_unaligned_sequences): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_unaligned_sequences[out] Channel<?> via ch_unaligned_sequences indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ALIGN_STAR@1[fastq] ? via ch_unaligned_sequences indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/FASTQ_ALIGN_HISAT2@1[fastq] Channel<Tuple> via ch_unaligned_sequences indirect
+  out ch_contaminant_sequences (ch_contaminant_sequences): -
+workflows/rnaseq/main.nf#RNASEQ/KRAKEN2@1 call "KRAKEN2" callee=KRAKEN2:process:modelled:legacy @747:13
+  guards then of !params.skip_qc; then of params.contaminant_screening in ['kraken2', 'kraken2_bracken']
+  in $1 (tuple(meta, reads)): Tuple
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_contaminant_sequences[ch_contaminant_sequences] ? via ch_contaminant_sequences
+  in db (db): Path
+    <- workflows/rnaseq/main.nf#RNASEQ/:take:ch_kraken_db[out] ? via ch_kraken_db
+  in save_output_fastqs (save_output_fastqs): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[save_kraken_assignments] ? via params.save_kraken_assignments
+  in save_reads_assignment (save_reads_assignment): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[save_kraken_unassigned] ? via params.save_kraken_unassigned
+  out classified_reads_fastq (classified_reads_fastq): Channel<Tuple>
+  out unclassified_reads_fastq (unclassified_reads_fastq): Channel<Tuple>
+  out classified_reads_assignment (classified_reads_assignment): Channel<Tuple>
+  out report (report): Channel<Tuple>
+  out versions_kraken2 (versions_kraken2): Channel<Tuple>
+  out versions_pigz (versions_pigz): Channel<Tuple>
+workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~21 chain ".mix" steps=mix @756:36
+  guards then of !params.skip_qc; then of params.contaminant_screening in ['kraken2', 'kraken2_bracken']; then of params.contaminant_screening == 'kraken2'
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~2[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~3[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~4[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~5[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~6[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~7[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~8[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~9[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~10[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~12[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~14[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~18[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~19[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~20[out] Channel<?> via ch_multiqc_files indirect
+  in 1:1 (mix(other)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/KRAKEN2@1[report] Channel<Tuple> via KRAKEN2.out.report
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/.map@21 chain ".map" steps=map @758:27
+  guards then of !params.skip_qc; then of params.contaminant_screening in ['kraken2', 'kraken2_bracken']; then of params.contaminant_screening == 'kraken2'
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/KRAKEN2@1[report] Channel<Tuple> via KRAKEN2.out.report
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~15 chain ".join" steps=join @757:44
+  guards then of !params.skip_qc; then of params.contaminant_screening in ['kraken2', 'kraken2_bracken']; then of params.contaminant_screening == 'kraken2'
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~3[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~4[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~5[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~6[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~7[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~8[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~9[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~10[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~11[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~12[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~13[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~14[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+  in 1:1 (join(right)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/.map@21[out] Channel<?>
+  out out (out): Channel<Record>
+workflows/rnaseq/main.nf#RNASEQ/BRACKEN@1 call "BRACKEN" callee=BRACKEN:process:modelled:legacy @760:17
+  guards then of !params.skip_qc; then of params.contaminant_screening in ['kraken2', 'kraken2_bracken']; else of params.contaminant_screening == 'kraken2'; then of params.contaminant_screening == 'kraken2_bracken'
+  in $1 (tuple(meta, kraken_report)): Tuple
+    <- workflows/rnaseq/main.nf#RNASEQ/KRAKEN2@1[report] Channel<Tuple> via ch_kraken_reports
+  in database (database): Path
+    <- workflows/rnaseq/main.nf#RNASEQ/:take:ch_kraken_db[out] ? via ch_kraken_db
+  out reports (reports): Channel<Tuple>
+  out txt (txt): Channel<Tuple>
+  out versions_bracken (versions_bracken): Channel<Tuple>
+workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~22 chain ".mix" steps=mix @764:36
+  guards then of !params.skip_qc; then of params.contaminant_screening in ['kraken2', 'kraken2_bracken']; else of params.contaminant_screening == 'kraken2'; then of params.contaminant_screening == 'kraken2_bracken'
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~2[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~3[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~4[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~5[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~6[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~7[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~8[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~9[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~10[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~12[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~14[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~18[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~19[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~20[out] Channel<?> via ch_multiqc_files indirect
+  in 1:1 (mix(other)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/BRACKEN@1[txt] Channel<Tuple> via BRACKEN.out.txt
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/.map@22 chain ".map" steps=map @766:27
+  guards then of !params.skip_qc; then of params.contaminant_screening in ['kraken2', 'kraken2_bracken']; else of params.contaminant_screening == 'kraken2'; then of params.contaminant_screening == 'kraken2_bracken'
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/BRACKEN@1[txt] Channel<Tuple> via BRACKEN.out.txt
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~16 chain ".join" steps=join @765:44
+  guards then of !params.skip_qc; then of params.contaminant_screening in ['kraken2', 'kraken2_bracken']; else of params.contaminant_screening == 'kraken2'; then of params.contaminant_screening == 'kraken2_bracken'
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~3[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~4[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~5[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~6[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~7[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~8[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~9[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~10[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~11[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~12[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~13[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~14[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+  in 1:1 (join(right)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/.map@22[out] Channel<?>
+  out out (out): Channel<Record>
+workflows/rnaseq/main.nf#RNASEQ/sylph_databases code "def sylph_databases = params.sylph_db ? params.sylph_db.spl…" @769:13
+  guards then of !params.skip_qc; else of params.contaminant_screening in ['kraken2', 'kraken2_bracken']; then of params.contaminant_screening == 'sylph'
+  in params.sylph_db (params.sylph_db): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[sylph_db] ? via params.sylph_db indirect
+  out sylph_databases (sylph_databases): -
+workflows/rnaseq/main.nf#RNASEQ/ch_sylph_databases factory "channel.value" factory=channel.value @770:34
+  guards then of !params.skip_qc; else of params.contaminant_screening in ['kraken2', 'kraken2_bracken']; then of params.contaminant_screening == 'sylph'
+  out out (out): Value<?>
+workflows/rnaseq/main.nf#RNASEQ/SYLPH_PROFILE@1 call "SYLPH_PROFILE" callee=SYLPH_PROFILE:process:modelled:legacy @771:13
+  guards then of !params.skip_qc; else of params.contaminant_screening in ['kraken2', 'kraken2_bracken']; then of params.contaminant_screening == 'sylph'
+  in $1 (tuple(meta, reads)): Tuple
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_contaminant_sequences[ch_contaminant_sequences] ? via ch_contaminant_sequences
+  in database (database): Path
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_sylph_databases[out] Value<?> via ch_sylph_databases
+  out profile_out (profile_out): Channel<Tuple>
+  out versions_sylph (versions_sylph): Channel<Tuple>
+workflows/rnaseq/main.nf#RNASEQ/ch_sylph_profile chain ".filter" steps=filter @775:32
+  guards then of !params.skip_qc; else of params.contaminant_screening in ['kraken2', 'kraken2_bracken']; then of params.contaminant_screening == 'sylph'
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/SYLPH_PROFILE@1[profile_out] Channel<Tuple> via SYLPH_PROFILE.out.profile_out
+  out out (out): Channel<Tuple>
+workflows/rnaseq/main.nf#RNASEQ/sylph_taxonomies code "def sylph_taxonomies = params.sylph_taxonomy ? params.sylph…" @777:13
+  guards then of !params.skip_qc; else of params.contaminant_screening in ['kraken2', 'kraken2_bracken']; then of params.contaminant_screening == 'sylph'
+  in params.sylph_taxonomy (params.sylph_taxonomy): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[sylph_taxonomy] ? via params.sylph_taxonomy indirect
+  out sylph_taxonomies (sylph_taxonomies): -
+workflows/rnaseq/main.nf#RNASEQ/ch_sylph_taxonomies factory "channel.value" factory=channel.value @778:35
+  guards then of !params.skip_qc; else of params.contaminant_screening in ['kraken2', 'kraken2_bracken']; then of params.contaminant_screening == 'sylph'
+  out out (out): Value<?>
+workflows/rnaseq/main.nf#RNASEQ/SYLPHTAX_TAXPROF@1 call "SYLPHTAX_TAXPROF" callee=SYLPHTAX_TAXPROF:process:modelled:legacy @779:13
+  guards then of !params.skip_qc; else of params.contaminant_screening in ['kraken2', 'kraken2_bracken']; then of params.contaminant_screening == 'sylph'
+  in $1 (tuple(meta, sylph_results)): Tuple
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_sylph_profile[out] Channel<Tuple> via ch_sylph_profile
+  in taxonomy (taxonomy): Path
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_sylph_taxonomies[out] Value<?> via ch_sylph_taxonomies
+  out taxprof_output (taxprof_output): Channel<Tuple>
+  out versions_sylphtax (versions_sylphtax): Channel<Tuple>
+workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~23 chain ".mix" steps=mix @783:32
+  guards then of !params.skip_qc; else of params.contaminant_screening in ['kraken2', 'kraken2_bracken']; then of params.contaminant_screening == 'sylph'
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~2[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~3[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~4[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~5[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~6[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~7[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~8[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~9[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~10[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~12[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~14[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~18[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~19[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~20[out] Channel<?> via ch_multiqc_files indirect
+  in 1:1 (mix(other)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/SYLPHTAX_TAXPROF@1[taxprof_output] Channel<Tuple> via SYLPHTAX_TAXPROF.out.taxprof_output
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/.map@23 chain ".map" steps=map @785:23
+  guards then of !params.skip_qc; else of params.contaminant_screening in ['kraken2', 'kraken2_bracken']; then of params.contaminant_screening == 'sylph'
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/SYLPHTAX_TAXPROF@1[taxprof_output] Channel<Tuple> via SYLPHTAX_TAXPROF.out.taxprof_output
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~17 chain ".join" steps=join @784:40
+  guards then of !params.skip_qc; else of params.contaminant_screening in ['kraken2', 'kraken2_bracken']; then of params.contaminant_screening == 'sylph'
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~3[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~4[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~5[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~6[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~7[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~8[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~9[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~10[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~11[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~12[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~13[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~14[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+  in 1:1 (join(right)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/.map@23[out] Channel<?>
+  out out (out): Channel<Record>
+workflows/rnaseq/main.nf#RNASEQ/.map@24 chain ".map" steps=map @801:13
+  guards then of !params.skip_pseudo_alignment && params.pseudo_aligner
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:take:ch_samplesheet[out] ? via ch_samplesheet
+  out out (out): ?
+workflows/rnaseq/main.nf#RNASEQ/channel.value@5 factory "channel.value" factory=channel.value @804:13
+  guards then of !params.skip_pseudo_alignment && params.pseudo_aligner
+  out out (out): Value<?>
+workflows/rnaseq/main.nf#RNASEQ/QUANTIFY_PSEUDO_ALIGNMENT@1 call "QUANTIFY_PSEUDO_ALIGNMENT" callee=QUANTIFY_PSEUDO_ALIGNMENT:workflow:modelled:legacy @800:9
+  guards then of !params.skip_pseudo_alignment && params.pseudo_aligner
+  in samplesheet (samplesheet): -
+    <- workflows/rnaseq/main.nf#RNASEQ/.map@24[out] ?
+  in reads (reads): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_strand_inferred_filtered_fastq[out] Channel<?> via ch_strand_inferred_filtered_fastq
+  in index (index): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:take:ch_salmon_index[out] ? via ch_pseudo_index indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/:take:ch_kallisto_index[out] ? via ch_pseudo_index indirect
+  in transcript_fasta (transcript_fasta): -
+    <- workflows/rnaseq/main.nf#RNASEQ/channel.value@5[out] Value<?>
+  in gtf (gtf): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:take:ch_gtf[out] ? via ch_gtf
+  in gtf_id_attribute (gtf_id_attribute): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[gtf_group_features] ? via params.gtf_group_features
+  in gtf_extra_attribute (gtf_extra_attribute): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[gtf_extra_attributes] ? via params.gtf_extra_attributes
+  in pseudo_aligner (pseudo_aligner): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[pseudo_aligner] ? via params.pseudo_aligner
+  in kallisto_quant_fraglen (kallisto_quant_fraglen): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[kallisto_quant_fraglen] ? via params.kallisto_quant_fraglen
+  in kallisto_quant_fraglen_sd (kallisto_quant_fraglen_sd): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[kallisto_quant_fraglen_sd] ? via params.kallisto_quant_fraglen_sd
+  in skip_merge (skip_merge): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[skip_quantification_merge] ? via params.skip_quantification_merge
+  out results (results): ?
+  out multiqc (multiqc): ?
+  out tx2gene (tx2gene): Channel<Tuple>
+  out tx2gene_augmented (tx2gene_augmented): Channel<Tuple>
+  out tpm_gene (tpm_gene): Channel<Tuple>
+  out counts_gene (counts_gene): Channel<Tuple>
+  out lengths_gene (lengths_gene): Channel<Tuple>
+  out counts_gene_length_scaled (counts_gene_length_scaled): Channel<Tuple>
+  out counts_gene_scaled (counts_gene_scaled): Channel<Tuple>
+  out tpm_transcript (tpm_transcript): Channel<Tuple>
+  out counts_transcript (counts_transcript): Channel<Tuple>
+  out lengths_transcript (lengths_transcript): Channel<Tuple>
+  out merged_gene_rds_unified (merged_gene_rds_unified): ?
+  out merged_transcript_rds_unified (merged_transcript_rds_unified): ?
+workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~24 chain ".mix" steps=mix @814:28
+  guards then of !params.skip_pseudo_alignment && params.pseudo_aligner
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~2[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~3[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~4[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~5[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~6[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~7[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~8[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~9[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~10[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~12[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~14[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~18[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~19[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~20[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~21[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~22[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~23[out] Channel<?> via ch_multiqc_files indirect
+  in 1:1 (mix(other)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/QUANTIFY_PSEUDO_ALIGNMENT@1[multiqc] ? via QUANTIFY_PSEUDO_ALIGNMENT.out.multiqc
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/.map@25 chain ".map" steps=map @816:19
+  guards then of !params.skip_pseudo_alignment && params.pseudo_aligner
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/QUANTIFY_PSEUDO_ALIGNMENT@1[multiqc] ? via QUANTIFY_PSEUDO_ALIGNMENT.out.multiqc
+  out out (out): ?
+workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~18 chain ".join" steps=join @815:36
+  guards then of !params.skip_pseudo_alignment && params.pseudo_aligner
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~3[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~4[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~5[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~6[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~7[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~8[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~9[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~10[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~11[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~12[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~13[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~14[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~15[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~16[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~17[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+  in 1:1 (join(right)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/.map@25[out] ?
+  out out (out): Channel<Record>
+workflows/rnaseq/main.nf#RNASEQ/.map@26 chain ".map" steps=map @820:17
+  guards then of !params.skip_pseudo_alignment && params.pseudo_aligner; then of !params.skip_qc && !params.skip_deseq2_qc && !params.skip_quantification_merge
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/QUANTIFY_PSEUDO_ALIGNMENT@1[counts_gene_length_scaled] Channel<Tuple> via ch_counts_gene_length_scaled
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/DESEQ2_QC_PSEUDO@1 call "DESEQ2_QC_PSEUDO" callee=DESEQ2_QC_PSEUDO:process:modelled:legacy @819:13
+  guards then of !params.skip_pseudo_alignment && params.pseudo_aligner; then of !params.skip_qc && !params.skip_deseq2_qc && !params.skip_quantification_merge
+  in counts (counts): Path
+    <- workflows/rnaseq/main.nf#RNASEQ/.map@26[out] Channel<?>
+  in pca_header_multiqc (pca_header_multiqc): Path
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_pca_header_multiqc[ch_pca_header_multiqc] Path via ch_pca_header_multiqc
+  in clustering_header_multiqc (clustering_header_multiqc): Path
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_clustering_header_multiqc[ch_clustering_header_multiqc] Path via ch_clustering_header_multiqc
+  out pdf (pdf): Channel<Path>
+  out rdata (rdata): Channel<Path>
+  out pca_txt (pca_txt): Channel<Path>
+  out pca_multiqc (pca_multiqc): Channel<Path>
+  out dists_txt (dists_txt): Channel<Path>
+  out dists_multiqc (dists_multiqc): Channel<Path>
+  out log (log): Channel<Path>
+  out size_factors (size_factors): Channel<Path>
+  out versions_r_base (versions_r_base): Channel<Tuple>
+  out versions_deseq2 (versions_deseq2): Channel<Tuple>
+workflows/rnaseq/main.nf#RNASEQ/.collect@5 chain ".collect.map" steps=collect,map @824:53
+  guards then of !params.skip_pseudo_alignment && params.pseudo_aligner; then of !params.skip_qc && !params.skip_deseq2_qc && !params.skip_quantification_merge
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/DESEQ2_QC_PSEUDO@1[pca_multiqc] Channel<Path> via DESEQ2_QC_PSEUDO.out.pca_multiqc
+  out out (out): Value<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~25 chain ".mix" steps=mix @824:32
+  guards then of !params.skip_pseudo_alignment && params.pseudo_aligner; then of !params.skip_qc && !params.skip_deseq2_qc && !params.skip_quantification_merge
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~24[out] Channel<?> via ch_multiqc_files
+  in 1:1 (mix(other)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/.collect@5[out] Value<?>
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/.collect@6 chain ".collect.map" steps=collect,map @825:53
+  guards then of !params.skip_pseudo_alignment && params.pseudo_aligner; then of !params.skip_qc && !params.skip_deseq2_qc && !params.skip_quantification_merge
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/DESEQ2_QC_PSEUDO@1[dists_multiqc] Channel<Path> via DESEQ2_QC_PSEUDO.out.dists_multiqc
+  out out (out): Value<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~26 chain ".mix" steps=mix @825:32
+  guards then of !params.skip_pseudo_alignment && params.pseudo_aligner; then of !params.skip_qc && !params.skip_deseq2_qc && !params.skip_quantification_merge
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~25[out] Channel<?> via ch_multiqc_files
+  in 1:1 (mix(other)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/.collect@6[out] Value<?>
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/channel.topic@1 factory "channel.topic" factory=channel.topic @832:28
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/ch_collated_versions chain ".map.toList.map.collectFile" steps=map,toList,map,collectFile @832:28
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/channel.topic@1[out] Channel<?>
+  in 4:1 (collectFile(1)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[outdir] ? via params.outdir indirect
+  out out (out): ?
+workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_report factory "channel.empty" factory=channel.empty @842:25
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/MULTIQC_RNASEQ@1 call "MULTIQC_RNASEQ" callee=MULTIQC_RNASEQ:workflow:modelled:legacy @845:9
+  guards then of !params.skip_multiqc
+  in ch_multiqc_files (ch_multiqc_files): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~2[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~3[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~4[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~5[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~6[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~7[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~8[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~9[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~10[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~12[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~14[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~18[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~19[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~20[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~21[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~22[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~23[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~24[out] Channel<?> via ch_multiqc_files indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_files~26[out] Channel<?> via ch_multiqc_files indirect
+  in ch_per_sample_bundle_raw (ch_per_sample_bundle_raw): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~3[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~4[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~5[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~6[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~7[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~8[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~9[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~10[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~11[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~12[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~13[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~14[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~15[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~16[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~17[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_mqc_per_sample_bundle~18[out] Channel<Record> via ch_mqc_per_sample_bundle indirect
+  in ch_strand_data (ch_strand_data): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_strand_data~2[out] ? via ch_strand_data indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_strand_data~3[out] Channel<?> via ch_strand_data indirect
+  in ch_trim_read_count (ch_trim_read_count): -
+    <- workflows/rnaseq/main.nf#RNASEQ/FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS@1[trim_read_count] ? via ch_trim_read_count
+  in ch_percent_mapped_pass (ch_percent_mapped_pass): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_genome_bam_bai_mapping[out] Record via ch_genome_bam_bai_mapping indirect
+  in aligner_display_name (aligner_display_name): -
+    <- workflows/rnaseq/main.nf#RNASEQ/aligner_display_name[aligner_display_name] ? via aligner_display_name
+  in ch_fastq (ch_fastq): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_fastq[ch_fastq] ? via ch_fastq
+  in ch_collated_versions (ch_collated_versions): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_collated_versions[out] ? via ch_collated_versions
+  in samplesheet_path (samplesheet_path): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[input] ? via params.input
+  in samplesheet_schema (samplesheet_schema): -
+    = "${projectDir}/assets/schema_input.json" : String
+  in mqc_default_config (mqc_default_config): -
+    = file("$projectDir/assets/multiqc_config.yml", checkIfExists: true) : Path
+  in mqc_custom_config (mqc_custom_config): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[multiqc_config] ? via params.multiqc_config indirect
+  in mqc_logo (mqc_logo): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[multiqc_logo] ? via params.multiqc_logo indirect
+  in methods_description_yml (methods_description_yml): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[multiqc_methods_description] ? via params.multiqc_methods_description indirect
+  in strand_summary_asset (strand_summary_asset): -
+    = file("$projectDir/assets/strand_check_summary.yaml",     checkIfExists: true) : Path
+  in strand_composition_asset (strand_composition_asset): -
+    = file("$projectDir/assets/strand_check_composition.yaml", checkIfExists: true) : Path
+  in sample_status_header (sample_status_header): -
+    <- workflows/rnaseq/main.nf#RNASEQ/sample_status_header_multiqc[sample_status_header_multiqc] Path via sample_status_header_multiqc
+  in min_trimmed_reads (min_trimmed_reads): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[min_trimmed_reads] ? via params.min_trimmed_reads
+  in skip_quantification_merge (skip_quantification_merge): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[skip_quantification_merge] ? via params.skip_quantification_merge
+  out report (report): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/.map@27 chain ".map" steps=map @878:19
+  guards then of !params.skip_alignment && params.save_align_intermeds
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_unprocessed_bams[out] Channel<?> via ch_unprocessed_bams indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_unprocessed_bams~2[out] Channel<?> via ch_unprocessed_bams indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_unprocessed_bams~3[out] Channel<?> via ch_unprocessed_bams indirect
+  out out (out): ?
+workflows/rnaseq/main.nf#RNASEQ/.map@28 chain ".map.join.join.transpose.map.collectFile" steps=map,join,join,transpose,map,collectFile @877:9
+  guards then of !params.skip_alignment && params.save_align_intermeds
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_fastq[ch_fastq] ? via ch_fastq
+  in 2:1 (join(1)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/.map@27[out] ?
+  in 3:1 (join(1)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_percent_mapped~6[ch_percent_mapped] ? via ch_percent_mapped
+  in 6:2 (collectFile(opts)): -
+    <- workflows/rnaseq/main.nf#RNASEQ/:params[outdir] ? via params.outdir indirect
+  out out (out): Channel<?>
+workflows/rnaseq/main.nf#RNASEQ/:emit:trim_status emit "trim_status" @910:5
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_trim_status~2[out] ? via ch_trim_status
+workflows/rnaseq/main.nf#RNASEQ/:emit:map_status emit "map_status" @911:5
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_map_status~2[out] Channel<?> via ch_map_status
+workflows/rnaseq/main.nf#RNASEQ/:emit:strand_status emit "strand_status" @912:5
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_strand_status[out] Channel<?> via ch_strand_status indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_strand_status~2[out] ? via ch_strand_status indirect
+workflows/rnaseq/main.nf#RNASEQ/:emit:multiqc_report emit "multiqc_report" @913:5
+  in in (in): -
+    <- workflows/rnaseq/main.nf#RNASEQ/ch_multiqc_report[out] Channel<?> via ch_multiqc_report indirect
+    <- workflows/rnaseq/main.nf#RNASEQ/MULTIQC_RNASEQ@1[report] Channel<?> via ch_multiqc_report indirect
+bound @107:5 ch_transcript_fasta_placeholder
+bound @182:5 ch_genome_bam_index
+bound @223:5 ch_strand_inferred_filtered_fastq
+bound @230:5 ch_reads_cat
+bound @231:5 ch_reads_trimmed
+bound @232:5 ch_trim_read_count
+bound @284:9 ch_star_log
+bound @285:9 ch_unaligned_sequences
+bound @330:9 ch_bowtie2_log
+bound @363:9 ch_unaligned_sequences
+bound @402:9 ch_genome_bam
+bound @403:9 ch_transcriptome_bam
+bound @404:9 ch_genome_bam_index
+bound @542:9 ch_genome_bam
+bound @543:9 ch_genome_bam_index
+bound @566:13 ch_stringtie_gtf
+bound @578:5 biotype
+bound @650:13 ch_inferexperiment_txt
+bound @753:13 ch_kraken_reports
+bound @795:13 ch_pseudo_index
+bound @797:13 ch_pseudo_index
+bound @813:9 ch_counts_gene_length_scaled
+bound @868:9 ch_multiqc_report

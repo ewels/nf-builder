@@ -1,0 +1,189 @@
+workflow subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER legacy
+statements 23, modelled 20
+subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/:take:cram take "cram" @13:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/:take:fasta take "fasta" @14:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/:take:fasta_fai take "fasta_fai" @15:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/:take:dict take "dict" @16:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/:take:dbsnp take "dbsnp" @17:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/:take:dbsnp_tbi take "dbsnp_tbi" @18:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/:take:intervals take "intervals" @19:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/:take:joint_germline take "joint_germline" @20:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/:take:sentieon_haplotyper_emit_mode take "sentieon_haplotyper_emit_mode" @21:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/gvcf factory "channel.empty" factory=channel.empty @24:26
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/vcf factory "channel.empty" factory=channel.empty @25:26
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/genotype_intervals factory "channel.empty" factory=channel.empty @26:26
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/cram_intervals_for_sentieon chain ".combine.map" steps=combine,map @29:35
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/:take:cram[out] ? via cram
+  in 1:1 (combine(right)): -
+    <- subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/:take:intervals[out] ? via intervals
+  out out (out): ?
+subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/emit_mode_items code "emit_mode_items = sentieon_haplotyper_emit_mode.split(',').…" @42:5
+  in sentieon_haplotyper_emit_mode (sentieon_haplotyper_emit_mode): -
+    <- subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/:take:sentieon_haplotyper_emit_mode[out] ? via sentieon_haplotyper_emit_mode indirect
+  out emit_mode_items (emit_mode_items): -
+subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/lst code "lst = emit_mode_items - 'gvcf'" @43:5
+  in emit_mode_items (emit_mode_items): -
+    <- subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/emit_mode_items[emit_mode_items] ? via emit_mode_items indirect
+  out lst (lst): -
+subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/emit_vcf code "emit_vcf = lst.size() > 0 ? lst[0] : ''" @44:5
+  in lst (lst): -
+    <- subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/lst[lst] ? via lst indirect
+  out emit_vcf (emit_vcf): -
+subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/.map@1 chain ".map" steps=map @47:9
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/cram_intervals_for_sentieon[out] ? via cram_intervals_for_sentieon
+  out out (out): ?
+subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/.map@2 chain ".map" steps=map @50:9
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/:take:dbsnp[out] ? via dbsnp
+  out out (out): ?
+subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/.map@3 chain ".map" steps=map @51:9
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/:take:dbsnp_tbi[out] ? via dbsnp_tbi
+  out out (out): ?
+subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/SENTIEON_HAPLOTYPER@1 call "SENTIEON_HAPLOTYPER" callee=SENTIEON_HAPLOTYPER:process:modelled:legacy @46:5
+  in $1 (tuple(meta, input, input_index, intervals, recal_table)): Tuple
+    <- subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/.map@1[out] ?
+  in $2 (tuple(meta2, fasta)): Tuple
+    <- subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/:take:fasta[out] ? via fasta
+  in $3 (tuple(meta3, fai)): Tuple
+    <- subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/:take:fasta_fai[out] ? via fasta_fai
+  in $4 (tuple(meta4, dbsnp)): Tuple
+    <- subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/.map@2[out] ?
+  in $5 (tuple(meta5, dbsnp_tbi)): Tuple
+    <- subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/.map@3[out] ?
+  in emit_vcf (emit_vcf): -
+    <- subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/emit_vcf[emit_vcf] ? via emit_vcf
+  in emit_gvcf (emit_gvcf): -
+    <- subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/emit_mode_items[emit_mode_items] ? via emit_mode_items indirect
+  out vcf (vcf): Channel<Tuple>
+  out vcf_tbi (vcf_tbi): Channel<Tuple>
+  out gvcf (gvcf): Channel<Tuple>
+  out gvcf_tbi (gvcf_tbi): Channel<Tuple>
+  out versions_sentieon (versions_sentieon): Channel<Tuple>
+subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/genotype_intervals~2 chain ".join.join.map" steps=join,join,map @56:30
+  guards then of joint_germline
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/SENTIEON_HAPLOTYPER@1[gvcf] Channel<Tuple> via SENTIEON_HAPLOTYPER.out.gvcf
+  in 1:1 (join(right)): -
+    <- subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/SENTIEON_HAPLOTYPER@1[gvcf_tbi] Channel<Tuple> via SENTIEON_HAPLOTYPER.out.gvcf_tbi
+  in 2:1 (join(right)): -
+    <- subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/cram_intervals_for_sentieon[out] ? via cram_intervals_for_sentieon
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/haplotyper_vcf_branch chain ".map.branch" steps=map,branch @65:29
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/SENTIEON_HAPLOTYPER@1[vcf] Channel<Tuple> via SENTIEON_HAPLOTYPER.out.vcf
+  out out (out): Record
+subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/haplotyper_vcf_tbi_branch chain ".map.branch" steps=map,branch @73:33
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/SENTIEON_HAPLOTYPER@1[vcf_tbi] Channel<Tuple> via SENTIEON_HAPLOTYPER.out.vcf_tbi
+  out out (out): Record
+subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/haplotyper_gvcf_branch chain ".map.branch" steps=map,branch @81:30
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/SENTIEON_HAPLOTYPER@1[gvcf] Channel<Tuple> via SENTIEON_HAPLOTYPER.out.gvcf
+  out out (out): Record
+subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/haplotyper_gvcf_tbi_branch chain ".map.branch" steps=map,branch @89:34
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/SENTIEON_HAPLOTYPER@1[gvcf_tbi] Channel<Tuple> via SENTIEON_HAPLOTYPER.out.gvcf_tbi
+  out out (out): Record
+subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/vcfs_for_merging chain ".map.groupTuple" steps=map,groupTuple @103:24
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/haplotyper_vcf_branch[out] Record via haplotyper_vcf_branch indirect
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/MERGE_SENTIEON_HAPLOTYPER_VCFS@1 call "MERGE_SENTIEON_HAPLOTYPER_VCFS" callee=MERGE_SENTIEON_HAPLOTYPER_VCFS:process:modelled:legacy @109:5
+  in $1 (tuple(meta, vcf)): Tuple
+    <- subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/vcfs_for_merging[out] Channel<?> via vcfs_for_merging
+  in $2 (tuple(meta2, dict)): Tuple
+    <- subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/:take:dict[out] ? via dict
+  out vcf (vcf): Channel<Tuple>
+  out tbi (tbi): Channel<Tuple>
+  out versions_gatk4 (versions_gatk4): Channel<Tuple>
+subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/channel.empty@1 factory "channel.empty" factory=channel.empty @111:22
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/haplotyper_vcf chain ".mix" steps=mix @111:22
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/channel.empty@1[out] Channel<?>
+  in 1:1 (mix(1)): -
+    <- subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/MERGE_SENTIEON_HAPLOTYPER_VCFS@1[vcf] Channel<Tuple> via MERGE_SENTIEON_HAPLOTYPER_VCFS.out.vcf
+  in 1:2 (mix(2)): -
+    <- subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/haplotyper_vcf_branch[out] Record via haplotyper_vcf_branch indirect
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/channel.empty@2 factory "channel.empty" factory=channel.empty @115:22
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/haplotyper_tbi chain ".mix" steps=mix @115:22
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/channel.empty@2[out] Channel<?>
+  in 1:1 (mix(1)): -
+    <- subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/MERGE_SENTIEON_HAPLOTYPER_VCFS@1[tbi] Channel<Tuple> via MERGE_SENTIEON_HAPLOTYPER_VCFS.out.tbi
+  in 1:2 (mix(2)): -
+    <- subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/haplotyper_vcf_tbi_branch[out] Record via haplotyper_vcf_tbi_branch indirect
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/vcf~2 chain ".map" steps=map @120:11
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/haplotyper_vcf[out] Channel<?> via haplotyper_vcf
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/vcf_tbi chain ".map" steps=map @121:15
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/haplotyper_tbi[out] Channel<?> via haplotyper_tbi
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/gvcfs_for_merging chain ".map.groupTuple" steps=map,groupTuple @125:25
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/haplotyper_gvcf_branch[out] Record via haplotyper_gvcf_branch indirect
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/MERGE_SENTIEON_HAPLOTYPER_GVCFS@1 call "MERGE_SENTIEON_HAPLOTYPER_GVCFS" callee=MERGE_SENTIEON_HAPLOTYPER_GVCFS:process:modelled:legacy @129:5
+  in $1 (tuple(meta, vcf)): Tuple
+    <- subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/gvcfs_for_merging[out] Channel<?> via gvcfs_for_merging
+  in $2 (tuple(meta2, dict)): Tuple
+    <- subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/:take:dict[out] ? via dict
+  out vcf (vcf): Channel<Tuple>
+  out tbi (tbi): Channel<Tuple>
+  out versions_gatk4 (versions_gatk4): Channel<Tuple>
+subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/channel.empty@3 factory "channel.empty" factory=channel.empty @131:12
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/gvcf~2 chain ".mix" steps=mix @131:12
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/channel.empty@3[out] Channel<?>
+  in 1:1 (mix(1)): -
+    <- subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/MERGE_SENTIEON_HAPLOTYPER_GVCFS@1[vcf] Channel<Tuple> via MERGE_SENTIEON_HAPLOTYPER_GVCFS.out.vcf
+  in 1:2 (mix(2)): -
+    <- subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/haplotyper_gvcf_branch[out] Record via haplotyper_gvcf_branch indirect
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/channel.empty@4 factory "channel.empty" factory=channel.empty @135:16
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/gvcf_tbi chain ".mix" steps=mix @135:16
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/channel.empty@4[out] Channel<?>
+  in 1:1 (mix(1)): -
+    <- subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/MERGE_SENTIEON_HAPLOTYPER_GVCFS@1[tbi] Channel<Tuple> via MERGE_SENTIEON_HAPLOTYPER_GVCFS.out.tbi
+  in 1:2 (mix(2)): -
+    <- subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/haplotyper_gvcf_tbi_branch[out] Record via haplotyper_gvcf_tbi_branch indirect
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/:emit:vcf emit "vcf" @141:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/vcf~2[out] Channel<?> via vcf
+subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/:emit:vcf_tbi emit "vcf_tbi" @142:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/vcf_tbi[out] Channel<?> via vcf_tbi
+subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/:emit:gvcf emit "gvcf" @143:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/gvcf~2[out] Channel<?> via gvcf
+subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/:emit:gvcf_tbi emit "gvcf_tbi" @144:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/gvcf_tbi[out] Channel<?> via gvcf_tbi
+subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/:emit:genotype_intervals emit "genotype_intervals" @145:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/genotype_intervals[out] Channel<?> via genotype_intervals indirect
+    <- subworkflows/local/bam_variant_calling_sentieon_haplotyper/main.nf#BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER/genotype_intervals~2[out] Channel<?> via genotype_intervals indirect

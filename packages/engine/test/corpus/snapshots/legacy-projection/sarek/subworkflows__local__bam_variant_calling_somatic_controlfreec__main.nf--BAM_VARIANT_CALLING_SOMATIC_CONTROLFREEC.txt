@@ -1,0 +1,91 @@
+workflow subworkflows/local/bam_variant_calling_somatic_controlfreec/main.nf#BAM_VARIANT_CALLING_SOMATIC_CONTROLFREEC legacy
+statements 8, modelled 8
+subworkflows/local/bam_variant_calling_somatic_controlfreec/main.nf#BAM_VARIANT_CALLING_SOMATIC_CONTROLFREEC/:take:controlfreec_input take "controlfreec_input" @15:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_controlfreec/main.nf#BAM_VARIANT_CALLING_SOMATIC_CONTROLFREEC/:take:fasta take "fasta" @16:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_controlfreec/main.nf#BAM_VARIANT_CALLING_SOMATIC_CONTROLFREEC/:take:fasta_fai take "fasta_fai" @17:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_controlfreec/main.nf#BAM_VARIANT_CALLING_SOMATIC_CONTROLFREEC/:take:dbsnp take "dbsnp" @18:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_controlfreec/main.nf#BAM_VARIANT_CALLING_SOMATIC_CONTROLFREEC/:take:dbsnp_tbi take "dbsnp_tbi" @19:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_controlfreec/main.nf#BAM_VARIANT_CALLING_SOMATIC_CONTROLFREEC/:take:chr_files take "chr_files" @20:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_controlfreec/main.nf#BAM_VARIANT_CALLING_SOMATIC_CONTROLFREEC/:take:mappability take "mappability" @21:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_controlfreec/main.nf#BAM_VARIANT_CALLING_SOMATIC_CONTROLFREEC/:take:intervals_bed take "intervals_bed" @22:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_controlfreec/main.nf#BAM_VARIANT_CALLING_SOMATIC_CONTROLFREEC/FREEC_SOMATIC@1 call "FREEC_SOMATIC" callee=FREEC_SOMATIC:process:modelled:legacy @26:5
+  in $1 (tuple(meta, mpileup_normal, mpileup_tumor, cpn_normal, cpn_tumor, minipileup_normal, minipileup_tumor)): Tuple
+    <- subworkflows/local/bam_variant_calling_somatic_controlfreec/main.nf#BAM_VARIANT_CALLING_SOMATIC_CONTROLFREEC/:take:controlfreec_input[out] ? via controlfreec_input
+  in fasta (fasta): Path
+    <- subworkflows/local/bam_variant_calling_somatic_controlfreec/main.nf#BAM_VARIANT_CALLING_SOMATIC_CONTROLFREEC/:take:fasta[out] ? via fasta
+  in fai (fai): Path
+    <- subworkflows/local/bam_variant_calling_somatic_controlfreec/main.nf#BAM_VARIANT_CALLING_SOMATIC_CONTROLFREEC/:take:fasta_fai[out] ? via fasta_fai
+  in snp_position (snp_position): Path
+    = [] : List
+  in known_snps (known_snps): Path
+    <- subworkflows/local/bam_variant_calling_somatic_controlfreec/main.nf#BAM_VARIANT_CALLING_SOMATIC_CONTROLFREEC/:take:dbsnp[out] ? via dbsnp
+  in known_snps_tbi (known_snps_tbi): Path
+    <- subworkflows/local/bam_variant_calling_somatic_controlfreec/main.nf#BAM_VARIANT_CALLING_SOMATIC_CONTROLFREEC/:take:dbsnp_tbi[out] ? via dbsnp_tbi
+  in chr_directory (chr_directory): Path
+    <- subworkflows/local/bam_variant_calling_somatic_controlfreec/main.nf#BAM_VARIANT_CALLING_SOMATIC_CONTROLFREEC/:take:chr_files[out] ? via chr_files
+  in mappability (mappability): Path
+    <- subworkflows/local/bam_variant_calling_somatic_controlfreec/main.nf#BAM_VARIANT_CALLING_SOMATIC_CONTROLFREEC/:take:mappability[out] ? via mappability
+  in target_bed (target_bed): Path
+    <- subworkflows/local/bam_variant_calling_somatic_controlfreec/main.nf#BAM_VARIANT_CALLING_SOMATIC_CONTROLFREEC/:take:intervals_bed[out] ? via intervals_bed
+  in gccontent_profile (gccontent_profile): Path
+    = [] : List
+  out bedgraph (bedgraph): Channel<Tuple>
+  out control_cpn (control_cpn): Channel<Tuple>
+  out sample_cpn (sample_cpn): Channel<Tuple>
+  out gcprofile_cpn (gcprofile_cpn): Channel<Tuple>
+  out BAF (BAF): Channel<Tuple>
+  out CNV (CNV): Channel<Tuple>
+  out info (info): Channel<Tuple>
+  out ratio (ratio): Channel<Tuple>
+  out config (config): Channel<Tuple>
+  out versions_controlfreec (versions_controlfreec): Channel<Tuple>
+subworkflows/local/bam_variant_calling_somatic_controlfreec/main.nf#BAM_VARIANT_CALLING_SOMATIC_CONTROLFREEC/cnv_files chain ".map" steps=map @30:17
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_controlfreec/main.nf#BAM_VARIANT_CALLING_SOMATIC_CONTROLFREEC/FREEC_SOMATIC@1[CNV] Channel<Tuple> via FREEC_SOMATIC.out.CNV
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_somatic_controlfreec/main.nf#BAM_VARIANT_CALLING_SOMATIC_CONTROLFREEC/ratio_files chain ".map" steps=map @39:19
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_controlfreec/main.nf#BAM_VARIANT_CALLING_SOMATIC_CONTROLFREEC/FREEC_SOMATIC@1[ratio] Channel<Tuple> via FREEC_SOMATIC.out.ratio
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_somatic_controlfreec/main.nf#BAM_VARIANT_CALLING_SOMATIC_CONTROLFREEC/assess_significance_input chain ".join" steps=join @49:33
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_controlfreec/main.nf#BAM_VARIANT_CALLING_SOMATIC_CONTROLFREEC/cnv_files[out] Channel<?> via cnv_files
+  in 1:1 (join(right)): -
+    <- subworkflows/local/bam_variant_calling_somatic_controlfreec/main.nf#BAM_VARIANT_CALLING_SOMATIC_CONTROLFREEC/ratio_files[out] Channel<?> via ratio_files
+  out out (out): Channel<Record>
+subworkflows/local/bam_variant_calling_somatic_controlfreec/main.nf#BAM_VARIANT_CALLING_SOMATIC_CONTROLFREEC/ASSESS_SIGNIFICANCE@1 call "ASSESS_SIGNIFICANCE" callee=ASSESS_SIGNIFICANCE:process:modelled:legacy @51:5
+  in $1 (tuple(meta, cnvs, ratio)): Tuple
+    <- subworkflows/local/bam_variant_calling_somatic_controlfreec/main.nf#BAM_VARIANT_CALLING_SOMATIC_CONTROLFREEC/assess_significance_input[out] Channel<Record> via assess_significance_input
+  out p_value_txt (p_value_txt): Channel<Tuple>
+  out versions_controlfreec (versions_controlfreec): Channel<Tuple>
+subworkflows/local/bam_variant_calling_somatic_controlfreec/main.nf#BAM_VARIANT_CALLING_SOMATIC_CONTROLFREEC/FREEC2BED@1 call "FREEC2BED" callee=FREEC2BED:process:modelled:legacy @52:5
+  in $1 (tuple(meta, ratio)): Tuple
+    <- subworkflows/local/bam_variant_calling_somatic_controlfreec/main.nf#BAM_VARIANT_CALLING_SOMATIC_CONTROLFREEC/FREEC_SOMATIC@1[ratio] Channel<Tuple> via FREEC_SOMATIC.out.ratio
+  out bed (bed): Channel<Tuple>
+  out versions_controlfreec (versions_controlfreec): Channel<Tuple>
+subworkflows/local/bam_variant_calling_somatic_controlfreec/main.nf#BAM_VARIANT_CALLING_SOMATIC_CONTROLFREEC/FREEC2CIRCOS@1 call "FREEC2CIRCOS" callee=FREEC2CIRCOS:process:modelled:legacy @53:5
+  in $1 (tuple(meta, ratio)): Tuple
+    <- subworkflows/local/bam_variant_calling_somatic_controlfreec/main.nf#BAM_VARIANT_CALLING_SOMATIC_CONTROLFREEC/FREEC_SOMATIC@1[ratio] Channel<Tuple> via FREEC_SOMATIC.out.ratio
+  out circos (circos): Channel<Tuple>
+  out versions_controlfreec (versions_controlfreec): Channel<Tuple>
+subworkflows/local/bam_variant_calling_somatic_controlfreec/main.nf#BAM_VARIANT_CALLING_SOMATIC_CONTROLFREEC/.join@1 chain ".join" steps=join @54:16
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_controlfreec/main.nf#BAM_VARIANT_CALLING_SOMATIC_CONTROLFREEC/FREEC_SOMATIC@1[ratio] Channel<Tuple> via FREEC_SOMATIC.out.ratio
+  in 1:1 (join(right)): -
+    <- subworkflows/local/bam_variant_calling_somatic_controlfreec/main.nf#BAM_VARIANT_CALLING_SOMATIC_CONTROLFREEC/FREEC_SOMATIC@1[BAF] Channel<Tuple> via FREEC_SOMATIC.out.BAF
+  out out (out): Channel<Record>
+subworkflows/local/bam_variant_calling_somatic_controlfreec/main.nf#BAM_VARIANT_CALLING_SOMATIC_CONTROLFREEC/MAKEGRAPH2@1 call "MAKEGRAPH2" callee=MAKEGRAPH2:process:modelled:legacy @54:5
+  in $1 (tuple(meta, ratio, baf)): Tuple
+    <- subworkflows/local/bam_variant_calling_somatic_controlfreec/main.nf#BAM_VARIANT_CALLING_SOMATIC_CONTROLFREEC/.join@1[out] Channel<Record>
+  out png_baf (png_baf): Channel<Tuple>
+  out png_ratio_log2 (png_ratio_log2): Channel<Tuple>
+  out png_ratio (png_ratio): Channel<Tuple>
+  out versions_controlfreec (versions_controlfreec): Channel<Tuple>

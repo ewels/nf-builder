@@ -7,6 +7,7 @@ import type {
   CatalogueEntry,
   Dataflow,
   FlowType,
+  LegacyOperator,
   OperatorEntry,
   ScriptCatalogue,
   Signature,
@@ -46,6 +47,10 @@ export interface DataflowLibrary {
   functionType(name: string): TypeExpr | null;
   /** `stdout`, `env` and `eval` in a typed output. */
   typedOutputType(name: string): TypeExpr | null;
+  /** A legacy-only operator from the pack (F-107): `first`, `concat`, `set`... */
+  isLegacyOperator(name: string): boolean;
+  /** The documented result kind of a legacy-only operator; null for any other name. */
+  legacyResult(name: string): LegacyOperator["result"] | null;
 }
 
 const isGeneric = (name: string): boolean => /^[A-Z]$/.test(name);
@@ -154,7 +159,10 @@ function factoryArgumentTypes(
   return found;
 }
 
-function makeLibrary(catalogue: ScriptCatalogue): DataflowLibrary {
+function makeLibrary(
+  catalogue: ScriptCatalogue,
+  legacy: readonly LegacyOperator[],
+): DataflowLibrary {
   const byName = (entries: readonly CatalogueEntry[]) =>
     new Map(entries.map((e) => [e.name, e]));
   const channel = new Map<string, OperatorEntry[]>();
@@ -166,6 +174,7 @@ function makeLibrary(catalogue: ScriptCatalogue): DataflowLibrary {
   const factories = byName(catalogue.factories);
   const functions = byName(catalogue.functions);
   const typedOutputs = byName(catalogue.processSections.typedOutputs);
+  const legacyByName = new Map(legacy.map((o) => [o.name, o.result]));
   // a plain or unknown receiver takes operators of either type
   const operatorsFor = (
     name: string,
@@ -178,7 +187,8 @@ function makeLibrary(catalogue: ScriptCatalogue): DataflowLibrary {
     isFactory: (namespace, name) =>
       (namespace === "channel" || namespace === "Channel") &&
       factories.has(name),
-    isOperator: (name, receiver) => operatorsFor(name, receiver).length > 0,
+    isOperator: (name, receiver) =>
+      legacyByName.has(name) || operatorsFor(name, receiver).length > 0,
     factoryType(name, args, named) {
       const entry = factories.get(name);
       if (entry === undefined) return UNKNOWN;
@@ -204,11 +214,21 @@ function makeLibrary(catalogue: ScriptCatalogue): DataflowLibrary {
       ) as FlowType;
     },
     operatorType(name, receiver, args) {
-      const candidates = operatorCandidates(
-        operatorsFor(name, receiver.dataflow),
-        args,
+      const entries = operatorsFor(name, receiver.dataflow);
+      const candidates = operatorCandidates(entries, args);
+      if (candidates.length > 0)
+        return merge(
+          candidates.map((s) => flowOf(s.returns, receiver.element)),
+        );
+      // no overload fits the argument count: keep the kind all of them share (legacy calls may pass other arguments)
+      const kinds = merge(
+        entries
+          .flatMap((e) => e.signatures)
+          .map((s) => flowOf(s.returns, null)),
       );
-      return merge(candidates.map((s) => flowOf(s.returns, receiver.element)));
+      return kinds === "void" || kinds.dataflow === null
+        ? kinds
+        : wrapFlow(kinds.dataflow, null);
     },
     parameterNames(name, receiver, args) {
       const [first] = operatorCandidates(
@@ -219,16 +239,31 @@ function makeLibrary(catalogue: ScriptCatalogue): DataflowLibrary {
     },
     functionType: (name) => returnOf(functions.get(name)),
     typedOutputType: (name) => returnOf(typedOutputs.get(name)),
+    isLegacyOperator: (name) => legacyByName.has(name),
+    legacyResult: (name) => legacyByName.get(name) ?? null,
   };
 }
 
-const libraries = new WeakMap<ScriptCatalogue, DataflowLibrary>();
+const libraries = new WeakMap<
+  ScriptCatalogue,
+  WeakMap<readonly LegacyOperator[], DataflowLibrary>
+>();
+const noLegacy: readonly LegacyOperator[] = [];
 
-export function dataflowLibrary(catalogue: ScriptCatalogue): DataflowLibrary {
-  let library = libraries.get(catalogue);
+/** The library for a catalogue and the pack's legacy operators, memoised per pair. */
+export function dataflowLibrary(
+  catalogue: ScriptCatalogue,
+  legacy: readonly LegacyOperator[] = noLegacy,
+): DataflowLibrary {
+  let byLegacy = libraries.get(catalogue);
+  if (byLegacy === undefined) {
+    byLegacy = new WeakMap();
+    libraries.set(catalogue, byLegacy);
+  }
+  let library = byLegacy.get(legacy);
   if (library === undefined) {
-    library = makeLibrary(catalogue);
-    libraries.set(catalogue, library);
+    library = makeLibrary(catalogue, legacy);
+    byLegacy.set(legacy, library);
   }
   return library;
 }

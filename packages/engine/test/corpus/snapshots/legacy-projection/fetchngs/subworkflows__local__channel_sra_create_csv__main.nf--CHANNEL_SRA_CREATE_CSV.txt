@@ -1,0 +1,30 @@
+workflow subworkflows/local/channel_sra_create_csv/main.nf#CHANNEL_SRA_CREATE_CSV legacy
+statements 2, modelled 2
+subworkflows/local/channel_sra_create_csv/main.nf#CHANNEL_SRA_CREATE_CSV/:take:ch_sra_metadata take "ch_sra_metadata" @3:5
+  out out (out): -
+subworkflows/local/channel_sra_create_csv/main.nf#CHANNEL_SRA_CREATE_CSV/:take:pipeline take "pipeline" @4:5
+  out out (out): -
+subworkflows/local/channel_sra_create_csv/main.nf#CHANNEL_SRA_CREATE_CSV/:take:strandedness take "strandedness" @5:5
+  out out (out): -
+subworkflows/local/channel_sra_create_csv/main.nf#CHANNEL_SRA_CREATE_CSV/:take:mapping_fields take "mapping_fields" @6:5
+  out out (out): -
+subworkflows/local/channel_sra_create_csv/main.nf#CHANNEL_SRA_CREATE_CSV/:take:outdir take "outdir" @7:5
+  out out (out): -
+subworkflows/local/channel_sra_create_csv/main.nf#CHANNEL_SRA_CREATE_CSV/ch_samplesheet chain ".map.collectFile.map.collectFile" steps=map,collectFile,map,collectFile @11:22
+  in in (in): -
+    <- subworkflows/local/channel_sra_create_csv/main.nf#CHANNEL_SRA_CREATE_CSV/:take:ch_sra_metadata[out] ? via ch_sra_metadata
+  in 4:2 (collectFile(opts)): -
+    <- subworkflows/local/channel_sra_create_csv/main.nf#CHANNEL_SRA_CREATE_CSV/:take:outdir[out] ? via outdir indirect
+  out out (out): Channel<?>
+subworkflows/local/channel_sra_create_csv/main.nf#CHANNEL_SRA_CREATE_CSV/ch_mappings chain ".map.collectFile.map.collectFile" steps=map,collectFile,map,collectFile @23:19
+  in in (in): -
+    <- subworkflows/local/channel_sra_create_csv/main.nf#CHANNEL_SRA_CREATE_CSV/:take:ch_sra_metadata[out] ? via ch_sra_metadata
+  in 4:2 (collectFile(opts)): -
+    <- subworkflows/local/channel_sra_create_csv/main.nf#CHANNEL_SRA_CREATE_CSV/:take:outdir[out] ? via outdir indirect
+  out out (out): Channel<?>
+subworkflows/local/channel_sra_create_csv/main.nf#CHANNEL_SRA_CREATE_CSV/:emit:samplesheet emit "samplesheet" @41:5
+  in in (in): -
+    <- subworkflows/local/channel_sra_create_csv/main.nf#CHANNEL_SRA_CREATE_CSV/ch_samplesheet[out] Channel<?> via ch_samplesheet
+subworkflows/local/channel_sra_create_csv/main.nf#CHANNEL_SRA_CREATE_CSV/:emit:mappings emit "mappings" @42:5
+  in in (in): -
+    <- subworkflows/local/channel_sra_create_csv/main.nf#CHANNEL_SRA_CREATE_CSV/ch_mappings[out] Channel<?> via ch_mappings

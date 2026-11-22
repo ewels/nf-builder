@@ -1,0 +1,76 @@
+workflow subworkflows/local/bam_applybqsr_spark/main.nf#BAM_APPLYBQSR_SPARK legacy
+statements 7, modelled 7
+subworkflows/local/bam_applybqsr_spark/main.nf#BAM_APPLYBQSR_SPARK/:take:cram take "cram" @13:5
+  out out (out): -
+subworkflows/local/bam_applybqsr_spark/main.nf#BAM_APPLYBQSR_SPARK/:take:dict take "dict" @14:5
+  out out (out): -
+subworkflows/local/bam_applybqsr_spark/main.nf#BAM_APPLYBQSR_SPARK/:take:fasta take "fasta" @15:5
+  out out (out): -
+subworkflows/local/bam_applybqsr_spark/main.nf#BAM_APPLYBQSR_SPARK/:take:fasta_fai take "fasta_fai" @16:5
+  out out (out): -
+subworkflows/local/bam_applybqsr_spark/main.nf#BAM_APPLYBQSR_SPARK/:take:intervals take "intervals" @17:5
+  out out (out): -
+subworkflows/local/bam_applybqsr_spark/main.nf#BAM_APPLYBQSR_SPARK/:take:save_output_as_bam take "save_output_as_bam" @18:5
+  out out (out): -
+subworkflows/local/bam_applybqsr_spark/main.nf#BAM_APPLYBQSR_SPARK/cram_intervals chain ".combine.map" steps=combine,map @24:22
+  in in (in): -
+    <- subworkflows/local/bam_applybqsr_spark/main.nf#BAM_APPLYBQSR_SPARK/:take:cram[out] ? via cram
+  in 1:1 (combine(right)): -
+    <- subworkflows/local/bam_applybqsr_spark/main.nf#BAM_APPLYBQSR_SPARK/:take:intervals[out] ? via intervals
+  out out (out): ?
+subworkflows/local/bam_applybqsr_spark/main.nf#BAM_APPLYBQSR_SPARK/.map@1 chain ".map" steps=map @31:9
+  in in (in): -
+    <- subworkflows/local/bam_applybqsr_spark/main.nf#BAM_APPLYBQSR_SPARK/:take:fasta[out] ? via fasta
+  out out (out): ?
+subworkflows/local/bam_applybqsr_spark/main.nf#BAM_APPLYBQSR_SPARK/.map@2 chain ".map" steps=map @32:9
+  in in (in): -
+    <- subworkflows/local/bam_applybqsr_spark/main.nf#BAM_APPLYBQSR_SPARK/:take:fasta_fai[out] ? via fasta_fai
+  out out (out): ?
+subworkflows/local/bam_applybqsr_spark/main.nf#BAM_APPLYBQSR_SPARK/.map@3 chain ".map" steps=map @33:9
+  in in (in): -
+    <- subworkflows/local/bam_applybqsr_spark/main.nf#BAM_APPLYBQSR_SPARK/:take:dict[out] ? via dict
+  out out (out): ?
+subworkflows/local/bam_applybqsr_spark/main.nf#BAM_APPLYBQSR_SPARK/GATK4SPARK_APPLYBQSR@1 call "GATK4SPARK_APPLYBQSR" callee=GATK4SPARK_APPLYBQSR:process:modelled:legacy @29:5
+  in $1 (tuple(meta, input, input_index, bqsr_table, intervals)): Tuple
+    <- subworkflows/local/bam_applybqsr_spark/main.nf#BAM_APPLYBQSR_SPARK/cram_intervals[out] ? via cram_intervals
+  in fasta (fasta): Path
+    <- subworkflows/local/bam_applybqsr_spark/main.nf#BAM_APPLYBQSR_SPARK/.map@1[out] ?
+  in fai (fai): Path
+    <- subworkflows/local/bam_applybqsr_spark/main.nf#BAM_APPLYBQSR_SPARK/.map@2[out] ?
+  in dict (dict): Path
+    <- subworkflows/local/bam_applybqsr_spark/main.nf#BAM_APPLYBQSR_SPARK/.map@3[out] ?
+  in output_suffix (output_suffix): -
+    <- subworkflows/local/bam_applybqsr_spark/main.nf#BAM_APPLYBQSR_SPARK/:take:save_output_as_bam[out] ? via save_output_as_bam indirect
+  out bam (bam): Channel<Tuple>
+  out bai (bai): Channel<Tuple>
+  out cram (cram): Channel<Tuple>
+  out versions_gatk4 (versions_gatk4): Channel<Tuple>
+subworkflows/local/bam_applybqsr_spark/main.nf#BAM_APPLYBQSR_SPARK/bam_to_merge chain ".map.groupTuple" steps=map,groupTuple @38:20
+  in in (in): -
+    <- subworkflows/local/bam_applybqsr_spark/main.nf#BAM_APPLYBQSR_SPARK/GATK4SPARK_APPLYBQSR@1[bam] Channel<Tuple> via GATK4SPARK_APPLYBQSR.out.bam
+  out out (out): Channel<?>
+subworkflows/local/bam_applybqsr_spark/main.nf#BAM_APPLYBQSR_SPARK/BAM_MERGE_INDEX_SAMTOOLS@1 call "BAM_MERGE_INDEX_SAMTOOLS" callee=BAM_MERGE_INDEX_SAMTOOLS:workflow:modelled:legacy @42:5
+  in bam (bam): -
+    <- subworkflows/local/bam_applybqsr_spark/main.nf#BAM_APPLYBQSR_SPARK/bam_to_merge[out] Channel<?> via bam_to_merge
+  out bam_bai (bam_bai): Channel<Record>
+subworkflows/local/bam_applybqsr_spark/main.nf#BAM_APPLYBQSR_SPARK/cram_to_merge chain ".map.groupTuple" steps=map,groupTuple @45:21
+  in in (in): -
+    <- subworkflows/local/bam_applybqsr_spark/main.nf#BAM_APPLYBQSR_SPARK/GATK4SPARK_APPLYBQSR@1[cram] Channel<Tuple> via GATK4SPARK_APPLYBQSR.out.cram
+  out out (out): Channel<?>
+subworkflows/local/bam_applybqsr_spark/main.nf#BAM_APPLYBQSR_SPARK/CRAM_MERGE_INDEX_SAMTOOLS@1 call "CRAM_MERGE_INDEX_SAMTOOLS" callee=CRAM_MERGE_INDEX_SAMTOOLS:workflow:modelled:legacy @47:5
+  in cram (cram): -
+    <- subworkflows/local/bam_applybqsr_spark/main.nf#BAM_APPLYBQSR_SPARK/cram_to_merge[out] Channel<?> via cram_to_merge
+  in fasta (fasta): -
+    <- subworkflows/local/bam_applybqsr_spark/main.nf#BAM_APPLYBQSR_SPARK/:take:fasta[out] ? via fasta
+  in fasta_fai (fasta_fai): -
+    <- subworkflows/local/bam_applybqsr_spark/main.nf#BAM_APPLYBQSR_SPARK/:take:fasta_fai[out] ? via fasta_fai
+  out cram_crai (cram_crai): Channel<Record>
+subworkflows/local/bam_applybqsr_spark/main.nf#BAM_APPLYBQSR_SPARK/recal_out chain ".mix.map" steps=mix,map @54:17
+  in in (in): -
+    <- subworkflows/local/bam_applybqsr_spark/main.nf#BAM_APPLYBQSR_SPARK/BAM_MERGE_INDEX_SAMTOOLS@1[bam_bai] Channel<Record> via BAM_MERGE_INDEX_SAMTOOLS.out.bam_bai
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/bam_applybqsr_spark/main.nf#BAM_APPLYBQSR_SPARK/CRAM_MERGE_INDEX_SAMTOOLS@1[cram_crai] Channel<Record> via CRAM_MERGE_INDEX_SAMTOOLS.out.cram_crai
+  out out (out): Channel<?>
+subworkflows/local/bam_applybqsr_spark/main.nf#BAM_APPLYBQSR_SPARK/:emit:alignment emit "alignment" @59:5
+  in in (in): -
+    <- subworkflows/local/bam_applybqsr_spark/main.nf#BAM_APPLYBQSR_SPARK/recal_out[out] Channel<?> via recal_out

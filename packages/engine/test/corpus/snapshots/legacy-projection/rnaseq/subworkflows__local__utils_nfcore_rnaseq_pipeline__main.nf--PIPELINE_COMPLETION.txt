@@ -1,0 +1,66 @@
+workflow subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_COMPLETION legacy
+statements 10, modelled 4
+subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_COMPLETION/:take:email take "email" @120:5
+  out out (out): -
+subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_COMPLETION/:take:email_on_fail take "email_on_fail" @121:5
+  out out (out): -
+subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_COMPLETION/:take:plaintext_email take "plaintext_email" @122:5
+  out out (out): -
+subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_COMPLETION/:take:outdir take "outdir" @123:5
+  out out (out): -
+subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_COMPLETION/:take:monochrome_logs take "monochrome_logs" @124:5
+  out out (out): -
+subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_COMPLETION/:take:multiqc_report take "multiqc_report" @125:5
+  out out (out): -
+subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_COMPLETION/:take:trim_status take "trim_status" @126:5
+  out out (out): -
+subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_COMPLETION/:take:map_status take "map_status" @127:5
+  out out (out): -
+subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_COMPLETION/:take:strand_status take "strand_status" @128:5
+  out out (out): -
+subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_COMPLETION/pass_mapped_reads code "def pass_mapped_reads  = [:]" @131:5
+  out pass_mapped_reads (pass_mapped_reads): Map
+subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_COMPLETION/pass_trimmed_reads code "def pass_trimmed_reads = [:]" @132:5
+  out pass_trimmed_reads (pass_trimmed_reads): Map
+subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_COMPLETION/pass_strand_check code "def pass_strand_check  = [:]" @133:5
+  out pass_strand_check (pass_strand_check): Map
+subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_COMPLETION/summary_params code "summary_params = paramsSummaryMap(workflow, parameters_sche…" @135:5
+  out summary_params (summary_params): -
+subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_COMPLETION/multiqc_reports chain ".toList" steps=toList @136:27
+  in in (in): -
+    <- subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_COMPLETION/:take:multiqc_report[out] ? via multiqc_report
+  out out (out): Value<?>
+subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_COMPLETION/.map@1 chain ".map" steps=map @138:5
+  in in (in): -
+    <- subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_COMPLETION/:take:trim_status[out] ? via trim_status
+  out out (out): ?
+subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_COMPLETION/.map@2 chain ".map" steps=map @143:5
+  in in (in): -
+    <- subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_COMPLETION/:take:map_status[out] ? via map_status
+  out out (out): ?
+subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_COMPLETION/.map@3 chain ".map" steps=map @148:5
+  in in (in): -
+    <- subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_COMPLETION/:take:strand_status[out] ? via strand_status
+  out out (out): ?
+subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_COMPLETION/:code@1 code "workflow.onComplete {" @156:5
+  in plaintext_email (plaintext_email): -
+    <- subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_COMPLETION/:take:plaintext_email[out] ? via plaintext_email indirect
+  in monochrome_logs (monochrome_logs): -
+    <- subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_COMPLETION/:take:monochrome_logs[out] ? via monochrome_logs indirect
+  in email (email): -
+    <- subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_COMPLETION/:take:email[out] ? via email indirect
+  in email_on_fail (email_on_fail): -
+    <- subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_COMPLETION/:take:email_on_fail[out] ? via email_on_fail indirect
+  in summary_params (summary_params): -
+    <- subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_COMPLETION/summary_params[summary_params] ? via summary_params indirect
+  in outdir (outdir): -
+    <- subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_COMPLETION/:take:outdir[out] ? via outdir indirect
+  in multiqc_reports (multiqc_reports): -
+    <- subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_COMPLETION/multiqc_reports[out] Value<?> via multiqc_reports indirect
+  in pass_mapped_reads (pass_mapped_reads): -
+    <- subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_COMPLETION/pass_mapped_reads[pass_mapped_reads] Map via pass_mapped_reads indirect
+  in pass_trimmed_reads (pass_trimmed_reads): -
+    <- subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_COMPLETION/pass_trimmed_reads[pass_trimmed_reads] Map via pass_trimmed_reads indirect
+  in pass_strand_check (pass_strand_check): -
+    <- subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_COMPLETION/pass_strand_check[pass_strand_check] Map via pass_strand_check indirect
+subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_COMPLETION/:code@2 code "workflow.onError {" @176:5

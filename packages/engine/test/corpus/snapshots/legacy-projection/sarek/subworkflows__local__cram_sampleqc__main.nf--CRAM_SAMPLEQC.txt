@@ -1,0 +1,79 @@
+workflow subworkflows/local/cram_sampleqc/main.nf#CRAM_SAMPLEQC legacy
+statements 4, modelled 4
+subworkflows/local/cram_sampleqc/main.nf#CRAM_SAMPLEQC/:take:cram take "cram" @6:5
+  out out (out): -
+subworkflows/local/cram_sampleqc/main.nf#CRAM_SAMPLEQC/:take:ngscheckmate_bed take "ngscheckmate_bed" @7:5
+  out out (out): -
+subworkflows/local/cram_sampleqc/main.nf#CRAM_SAMPLEQC/:take:fasta_fai take "fasta_fai" @8:5
+  out out (out): -
+subworkflows/local/cram_sampleqc/main.nf#CRAM_SAMPLEQC/:take:skip_baserecalibration take "skip_baserecalibration" @9:5
+  out out (out): -
+subworkflows/local/cram_sampleqc/main.nf#CRAM_SAMPLEQC/:take:intervals_for_preprocessing take "intervals_for_preprocessing" @10:5
+  out out (out): -
+subworkflows/local/cram_sampleqc/main.nf#CRAM_SAMPLEQC/reports factory "channel.empty" factory=channel.empty @13:15
+  out out (out): Channel<?>
+subworkflows/local/cram_sampleqc/main.nf#CRAM_SAMPLEQC/.map@1 chain ".map" steps=map @19:13
+  guards then of !skip_baserecalibration
+  in in (in): -
+    <- subworkflows/local/cram_sampleqc/main.nf#CRAM_SAMPLEQC/:take:fasta_fai[out] ? via fasta_fai
+  out out (out): ?
+subworkflows/local/cram_sampleqc/main.nf#CRAM_SAMPLEQC/.map@2 chain ".map" steps=map @20:13
+  guards then of !skip_baserecalibration
+  in in (in): -
+    <- subworkflows/local/cram_sampleqc/main.nf#CRAM_SAMPLEQC/:take:fasta_fai[out] ? via fasta_fai
+  out out (out): ?
+subworkflows/local/cram_sampleqc/main.nf#CRAM_SAMPLEQC/CRAM_QC_RECAL@1 call "CRAM_QC_RECAL" callee=CRAM_QC_RECAL:workflow:modelled:legacy @17:9
+  guards then of !skip_baserecalibration
+  in cram (cram): -
+    <- subworkflows/local/cram_sampleqc/main.nf#CRAM_SAMPLEQC/:take:cram[out] ? via cram
+  in fasta (fasta): -
+    <- subworkflows/local/cram_sampleqc/main.nf#CRAM_SAMPLEQC/.map@1[out] ?
+  in fasta_fai (fasta_fai): -
+    <- subworkflows/local/cram_sampleqc/main.nf#CRAM_SAMPLEQC/.map@2[out] ?
+  in intervals (intervals): -
+    <- subworkflows/local/cram_sampleqc/main.nf#CRAM_SAMPLEQC/:take:intervals_for_preprocessing[out] ? via intervals_for_preprocessing
+  out reports (reports): Channel<?>
+subworkflows/local/cram_sampleqc/main.nf#CRAM_SAMPLEQC/reports~2 chain ".collect" steps=collect @25:19
+  guards then of !skip_baserecalibration
+  in in (in): -
+    <- subworkflows/local/cram_sampleqc/main.nf#CRAM_SAMPLEQC/CRAM_QC_RECAL@1[reports] Channel<?> via CRAM_QC_RECAL.out.reports
+  out out (out): Value<?>
+subworkflows/local/cram_sampleqc/main.nf#CRAM_SAMPLEQC/.map@3 chain ".map" steps=map @28:22
+  in in (in): -
+    <- subworkflows/local/cram_sampleqc/main.nf#CRAM_SAMPLEQC/:take:cram[out] ? via cram
+  out out (out): ?
+subworkflows/local/cram_sampleqc/main.nf#CRAM_SAMPLEQC/.map@4 chain ".map" steps=map @28:72
+  in in (in): -
+    <- subworkflows/local/cram_sampleqc/main.nf#CRAM_SAMPLEQC/:take:ngscheckmate_bed[out] ? via ngscheckmate_bed
+  out out (out): ?
+subworkflows/local/cram_sampleqc/main.nf#CRAM_SAMPLEQC/BAM_NGSCHECKMATE@1 call "BAM_NGSCHECKMATE" callee=BAM_NGSCHECKMATE:workflow:modelled:legacy @28:5
+  in ch_input (ch_input): -
+    <- subworkflows/local/cram_sampleqc/main.nf#CRAM_SAMPLEQC/.map@3[out] ?
+  in ch_snp_bed (ch_snp_bed): -
+    <- subworkflows/local/cram_sampleqc/main.nf#CRAM_SAMPLEQC/.map@4[out] ?
+  in ch_fasta (ch_fasta): -
+    <- subworkflows/local/cram_sampleqc/main.nf#CRAM_SAMPLEQC/:take:fasta_fai[out] ? via fasta_fai
+  out corr_matrix (corr_matrix): Channel<Tuple>
+  out matched (matched): Channel<Tuple>
+  out all (all): Channel<Tuple>
+  out vcf (vcf): Channel<Tuple>
+  out pdf (pdf): Channel<Tuple>
+subworkflows/local/cram_sampleqc/main.nf#CRAM_SAMPLEQC/:emit:corr_matrix emit "corr_matrix" @31:5
+  in in (in): -
+    <- subworkflows/local/cram_sampleqc/main.nf#CRAM_SAMPLEQC/BAM_NGSCHECKMATE@1[corr_matrix] Channel<Tuple> via BAM_NGSCHECKMATE.out.corr_matrix
+subworkflows/local/cram_sampleqc/main.nf#CRAM_SAMPLEQC/:emit:matched emit "matched" @32:5
+  in in (in): -
+    <- subworkflows/local/cram_sampleqc/main.nf#CRAM_SAMPLEQC/BAM_NGSCHECKMATE@1[matched] Channel<Tuple> via BAM_NGSCHECKMATE.out.matched
+subworkflows/local/cram_sampleqc/main.nf#CRAM_SAMPLEQC/:emit:all emit "all" @33:5
+  in in (in): -
+    <- subworkflows/local/cram_sampleqc/main.nf#CRAM_SAMPLEQC/BAM_NGSCHECKMATE@1[all] Channel<Tuple> via BAM_NGSCHECKMATE.out.all
+subworkflows/local/cram_sampleqc/main.nf#CRAM_SAMPLEQC/:emit:vcf emit "vcf" @34:5
+  in in (in): -
+    <- subworkflows/local/cram_sampleqc/main.nf#CRAM_SAMPLEQC/BAM_NGSCHECKMATE@1[vcf] Channel<Tuple> via BAM_NGSCHECKMATE.out.vcf
+subworkflows/local/cram_sampleqc/main.nf#CRAM_SAMPLEQC/:emit:pdf emit "pdf" @35:5
+  in in (in): -
+    <- subworkflows/local/cram_sampleqc/main.nf#CRAM_SAMPLEQC/BAM_NGSCHECKMATE@1[pdf] Channel<Tuple> via BAM_NGSCHECKMATE.out.pdf
+subworkflows/local/cram_sampleqc/main.nf#CRAM_SAMPLEQC/:emit:reports emit "reports" @36:5
+  in in (in): -
+    <- subworkflows/local/cram_sampleqc/main.nf#CRAM_SAMPLEQC/reports[out] Channel<?> via reports indirect
+    <- subworkflows/local/cram_sampleqc/main.nf#CRAM_SAMPLEQC/reports~2[out] Value<?> via reports indirect

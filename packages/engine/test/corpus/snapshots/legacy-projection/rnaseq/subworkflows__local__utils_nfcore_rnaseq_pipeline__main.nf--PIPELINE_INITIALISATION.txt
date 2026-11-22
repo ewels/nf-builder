@@ -1,0 +1,73 @@
+workflow subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_INITIALISATION legacy
+statements 16, modelled 0
+subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_INITIALISATION/:take:version take "version" @31:5
+  out out (out): -
+subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_INITIALISATION/:take:validate_params take "validate_params" @32:5
+  out out (out): -
+subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_INITIALISATION/:take:monochrome_logs take "monochrome_logs" @33:5
+  out out (out): -
+subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_INITIALISATION/:take:nextflow_cli_args take "nextflow_cli_args" @34:5
+  out out (out): -
+subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_INITIALISATION/:take:outdir take "outdir" @35:5
+  out out (out): -
+subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_INITIALISATION/:take:_input take "_input" @36:5
+  out out (out): -
+subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_INITIALISATION/:take:help take "help" @37:5
+  out out (out): -
+subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_INITIALISATION/:take:help_full take "help_full" @38:5
+  out out (out): -
+subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_INITIALISATION/:take:show_hidden take "show_hidden" @39:5
+  out out (out): -
+subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_INITIALISATION/:code@1 code "if (version) {" @46:5
+  in version (version): -
+    <- subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_INITIALISATION/:take:version[out] ? via version indirect
+subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_INITIALISATION/:code@2 code "if (outdir) {" @50:5
+  in outdir (outdir): -
+    <- subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_INITIALISATION/:take:outdir[out] ? via outdir indirect
+subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_INITIALISATION/:code@3 code "if (workflow.profile.tokenize(',').intersect(['conda', 'mam…" @53:5
+subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_INITIALISATION/colors code "def colors = logColours(monochrome_logs)" @60:5
+  in monochrome_logs (monochrome_logs): -
+    <- subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_INITIALISATION/:take:monochrome_logs[out] ? via monochrome_logs indirect
+  out colors (colors): -
+subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_INITIALISATION/before_text code "def before_text = """" @61:5
+  in colors (colors): -
+    <- subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_INITIALISATION/colors[colors] ? via colors indirect
+  out before_text (before_text): String
+subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_INITIALISATION/after_text code "def after_text = """${workflow.manifest.doi ? "\n* The pipe…" @71:5
+  out after_text (after_text): String
+subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_INITIALISATION/before_text~2 code "if (monochrome_logs) {" @78:5
+  in monochrome_logs (monochrome_logs): -
+    <- subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_INITIALISATION/:take:monochrome_logs[out] ? via monochrome_logs indirect
+  in before_text (before_text): -
+    <- subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_INITIALISATION/before_text[before_text] String via before_text indirect
+  out before_text (before_text): -
+subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_INITIALISATION/command code "command = "nextflow run ${workflow.manifest.name} -profile …" @82:5
+  out command (command): String
+subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_INITIALISATION/:code@4 code "if (help || help_full) {" @84:5
+  in help (help): -
+    <- subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_INITIALISATION/:take:help[out] ? via help indirect
+  in help_full (help_full): -
+    <- subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_INITIALISATION/:take:help_full[out] ? via help_full indirect
+  in before_text (before_text): -
+    <- subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_INITIALISATION/before_text~2[before_text] ? via before_text indirect
+  in after_text (after_text): -
+    <- subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_INITIALISATION/after_text[after_text] String via after_text indirect
+  in command (command): -
+    <- subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_INITIALISATION/command[command] String via command indirect
+  in show_hidden (show_hidden): -
+    <- subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_INITIALISATION/:take:show_hidden[out] ? via show_hidden indirect
+subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_INITIALISATION/:code@5 code "log.info before_text" @92:5
+  in before_text (before_text): -
+    <- subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_INITIALISATION/before_text~2[before_text] ? via before_text indirect
+subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_INITIALISATION/:code@6 code "log.info paramsSummaryLog(workflow)" @93:5
+subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_INITIALISATION/:code@7 code "log.info after_text" @94:5
+  in after_text (after_text): -
+    <- subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_INITIALISATION/after_text[after_text] String via after_text indirect
+subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_INITIALISATION/:code@8 code "if (validate_params) {" @95:5
+  in validate_params (validate_params): -
+    <- subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_INITIALISATION/:take:validate_params[out] ? via validate_params indirect
+subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_INITIALISATION/:code@9 code "checkConfigProvided()" @102:5
+subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_INITIALISATION/:code@10 code "checkProfileProvided(nextflow_cli_args)" @103:5
+  in nextflow_cli_args (nextflow_cli_args): -
+    <- subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_INITIALISATION/:take:nextflow_cli_args[out] ? via nextflow_cli_args indirect
+subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf#PIPELINE_INITIALISATION/:code@11 code "validateInputParameters()" @108:5

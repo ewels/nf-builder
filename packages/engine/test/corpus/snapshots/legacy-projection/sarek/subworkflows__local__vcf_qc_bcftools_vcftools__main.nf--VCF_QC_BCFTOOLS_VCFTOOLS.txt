@@ -1,0 +1,247 @@
+workflow subworkflows/local/vcf_qc_bcftools_vcftools/main.nf#VCF_QC_BCFTOOLS_VCFTOOLS legacy
+statements 4, modelled 4
+subworkflows/local/vcf_qc_bcftools_vcftools/main.nf#VCF_QC_BCFTOOLS_VCFTOOLS/:take:vcf take "vcf" @8:5
+  out out (out): -
+subworkflows/local/vcf_qc_bcftools_vcftools/main.nf#VCF_QC_BCFTOOLS_VCFTOOLS/:take:target_bed take "target_bed" @9:5
+  out out (out): -
+subworkflows/local/vcf_qc_bcftools_vcftools/main.nf#VCF_QC_BCFTOOLS_VCFTOOLS/.map@1 chain ".map" steps=map @13:20
+  in in (in): -
+    <- subworkflows/local/vcf_qc_bcftools_vcftools/main.nf#VCF_QC_BCFTOOLS_VCFTOOLS/:take:vcf[out] ? via vcf
+  out out (out): ?
+subworkflows/local/vcf_qc_bcftools_vcftools/main.nf#VCF_QC_BCFTOOLS_VCFTOOLS/BCFTOOLS_STATS@1 call "BCFTOOLS_STATS" callee=BCFTOOLS_STATS:process:modelled:legacy @13:5
+  in $1 (tuple(meta, vcf, tbi)): Tuple
+    <- subworkflows/local/vcf_qc_bcftools_vcftools/main.nf#VCF_QC_BCFTOOLS_VCFTOOLS/.map@1[out] ?
+  in $2 (tuple(meta2, regions)): Tuple
+    = [[:],[]] : List
+  in $3 (tuple(meta3, targets)): Tuple
+    = [[:],[]] : List
+  in $4 (tuple(meta4, samples)): Tuple
+    = [[:],[]] : List
+  in $5 (tuple(meta5, exons)): Tuple
+    = [[:],[]] : List
+  in $6 (tuple(meta6, fasta)): Tuple
+    = [[:],[]] : List
+  out stats (stats): Channel<Tuple>
+  out versions_bcftools (versions_bcftools): Channel<Tuple>
+subworkflows/local/vcf_qc_bcftools_vcftools/main.nf#VCF_QC_BCFTOOLS_VCFTOOLS/VCFTOOLS_TSTV_COUNT@1 call "VCFTOOLS_TSTV_COUNT" callee=VCFTOOLS_TSTV_COUNT:process:modelled:legacy @14:5
+  in $1 (tuple(meta, variant_file)): Tuple
+    <- subworkflows/local/vcf_qc_bcftools_vcftools/main.nf#VCF_QC_BCFTOOLS_VCFTOOLS/:take:vcf[out] ? via vcf
+  in bed (bed): Path
+    <- subworkflows/local/vcf_qc_bcftools_vcftools/main.nf#VCF_QC_BCFTOOLS_VCFTOOLS/:take:target_bed[out] ? via target_bed
+  in diff_variant_file (diff_variant_file): Path
+    = [] : List
+  out vcf (vcf): Channel<Tuple>
+  out bcf (bcf): Channel<Tuple>
+  out frq (frq): Channel<Tuple>
+  out frq_count (frq_count): Channel<Tuple>
+  out idepth (idepth): Channel<Tuple>
+  out ldepth (ldepth): Channel<Tuple>
+  out ldepth_mean (ldepth_mean): Channel<Tuple>
+  out gdepth (gdepth): Channel<Tuple>
+  out hap_ld (hap_ld): Channel<Tuple>
+  out geno_ld (geno_ld): Channel<Tuple>
+  out geno_chisq (geno_chisq): Channel<Tuple>
+  out list_hap_ld (list_hap_ld): Channel<Tuple>
+  out list_geno_ld (list_geno_ld): Channel<Tuple>
+  out interchrom_hap_ld (interchrom_hap_ld): Channel<Tuple>
+  out interchrom_geno_ld (interchrom_geno_ld): Channel<Tuple>
+  out tstv (tstv): Channel<Tuple>
+  out tstv_summary (tstv_summary): Channel<Tuple>
+  out tstv_count (tstv_count): Channel<Tuple>
+  out tstv_qual (tstv_qual): Channel<Tuple>
+  out filter_summary (filter_summary): Channel<Tuple>
+  out sites_pi (sites_pi): Channel<Tuple>
+  out windowed_pi (windowed_pi): Channel<Tuple>
+  out weir_fst (weir_fst): Channel<Tuple>
+  out heterozygosity (heterozygosity): Channel<Tuple>
+  out hwe (hwe): Channel<Tuple>
+  out tajima_d (tajima_d): Channel<Tuple>
+  out freq_burden (freq_burden): Channel<Tuple>
+  out lroh (lroh): Channel<Tuple>
+  out relatedness (relatedness): Channel<Tuple>
+  out relatedness2 (relatedness2): Channel<Tuple>
+  out lqual (lqual): Channel<Tuple>
+  out missing_individual (missing_individual): Channel<Tuple>
+  out missing_site (missing_site): Channel<Tuple>
+  out snp_density (snp_density): Channel<Tuple>
+  out kept_sites (kept_sites): Channel<Tuple>
+  out removed_sites (removed_sites): Channel<Tuple>
+  out singeltons (singeltons): Channel<Tuple>
+  out indel_hist (indel_hist): Channel<Tuple>
+  out hapcount (hapcount): Channel<Tuple>
+  out mendel (mendel): Channel<Tuple>
+  out format (format): Channel<Tuple>
+  out info (info): Channel<Tuple>
+  out genotypes_matrix (genotypes_matrix): Channel<Tuple>
+  out genotypes_matrix_individual (genotypes_matrix_individual): Channel<Tuple>
+  out genotypes_matrix_position (genotypes_matrix_position): Channel<Tuple>
+  out impute_hap (impute_hap): Channel<Tuple>
+  out impute_hap_legend (impute_hap_legend): Channel<Tuple>
+  out impute_hap_indv (impute_hap_indv): Channel<Tuple>
+  out ldhat_sites (ldhat_sites): Channel<Tuple>
+  out ldhat_locs (ldhat_locs): Channel<Tuple>
+  out beagle_gl (beagle_gl): Channel<Tuple>
+  out beagle_pl (beagle_pl): Channel<Tuple>
+  out ped (ped): Channel<Tuple>
+  out map_ (map_): Channel<Tuple>
+  out tped (tped): Channel<Tuple>
+  out tfam (tfam): Channel<Tuple>
+  out diff_sites_in_files (diff_sites_in_files): Channel<Tuple>
+  out diff_indv_in_files (diff_indv_in_files): Channel<Tuple>
+  out diff_sites (diff_sites): Channel<Tuple>
+  out diff_indv (diff_indv): Channel<Tuple>
+  out diff_discd_matrix (diff_discd_matrix): Channel<Tuple>
+  out diff_switch_error (diff_switch_error): Channel<Tuple>
+  out versions_vcftools (versions_vcftools): Channel<Tuple>
+subworkflows/local/vcf_qc_bcftools_vcftools/main.nf#VCF_QC_BCFTOOLS_VCFTOOLS/VCFTOOLS_TSTV_QUAL@1 call "VCFTOOLS_TSTV_QUAL" callee=VCFTOOLS_TSTV_QUAL:process:modelled:legacy @15:5
+  in $1 (tuple(meta, variant_file)): Tuple
+    <- subworkflows/local/vcf_qc_bcftools_vcftools/main.nf#VCF_QC_BCFTOOLS_VCFTOOLS/:take:vcf[out] ? via vcf
+  in bed (bed): Path
+    <- subworkflows/local/vcf_qc_bcftools_vcftools/main.nf#VCF_QC_BCFTOOLS_VCFTOOLS/:take:target_bed[out] ? via target_bed
+  in diff_variant_file (diff_variant_file): Path
+    = [] : List
+  out vcf (vcf): Channel<Tuple>
+  out bcf (bcf): Channel<Tuple>
+  out frq (frq): Channel<Tuple>
+  out frq_count (frq_count): Channel<Tuple>
+  out idepth (idepth): Channel<Tuple>
+  out ldepth (ldepth): Channel<Tuple>
+  out ldepth_mean (ldepth_mean): Channel<Tuple>
+  out gdepth (gdepth): Channel<Tuple>
+  out hap_ld (hap_ld): Channel<Tuple>
+  out geno_ld (geno_ld): Channel<Tuple>
+  out geno_chisq (geno_chisq): Channel<Tuple>
+  out list_hap_ld (list_hap_ld): Channel<Tuple>
+  out list_geno_ld (list_geno_ld): Channel<Tuple>
+  out interchrom_hap_ld (interchrom_hap_ld): Channel<Tuple>
+  out interchrom_geno_ld (interchrom_geno_ld): Channel<Tuple>
+  out tstv (tstv): Channel<Tuple>
+  out tstv_summary (tstv_summary): Channel<Tuple>
+  out tstv_count (tstv_count): Channel<Tuple>
+  out tstv_qual (tstv_qual): Channel<Tuple>
+  out filter_summary (filter_summary): Channel<Tuple>
+  out sites_pi (sites_pi): Channel<Tuple>
+  out windowed_pi (windowed_pi): Channel<Tuple>
+  out weir_fst (weir_fst): Channel<Tuple>
+  out heterozygosity (heterozygosity): Channel<Tuple>
+  out hwe (hwe): Channel<Tuple>
+  out tajima_d (tajima_d): Channel<Tuple>
+  out freq_burden (freq_burden): Channel<Tuple>
+  out lroh (lroh): Channel<Tuple>
+  out relatedness (relatedness): Channel<Tuple>
+  out relatedness2 (relatedness2): Channel<Tuple>
+  out lqual (lqual): Channel<Tuple>
+  out missing_individual (missing_individual): Channel<Tuple>
+  out missing_site (missing_site): Channel<Tuple>
+  out snp_density (snp_density): Channel<Tuple>
+  out kept_sites (kept_sites): Channel<Tuple>
+  out removed_sites (removed_sites): Channel<Tuple>
+  out singeltons (singeltons): Channel<Tuple>
+  out indel_hist (indel_hist): Channel<Tuple>
+  out hapcount (hapcount): Channel<Tuple>
+  out mendel (mendel): Channel<Tuple>
+  out format (format): Channel<Tuple>
+  out info (info): Channel<Tuple>
+  out genotypes_matrix (genotypes_matrix): Channel<Tuple>
+  out genotypes_matrix_individual (genotypes_matrix_individual): Channel<Tuple>
+  out genotypes_matrix_position (genotypes_matrix_position): Channel<Tuple>
+  out impute_hap (impute_hap): Channel<Tuple>
+  out impute_hap_legend (impute_hap_legend): Channel<Tuple>
+  out impute_hap_indv (impute_hap_indv): Channel<Tuple>
+  out ldhat_sites (ldhat_sites): Channel<Tuple>
+  out ldhat_locs (ldhat_locs): Channel<Tuple>
+  out beagle_gl (beagle_gl): Channel<Tuple>
+  out beagle_pl (beagle_pl): Channel<Tuple>
+  out ped (ped): Channel<Tuple>
+  out map_ (map_): Channel<Tuple>
+  out tped (tped): Channel<Tuple>
+  out tfam (tfam): Channel<Tuple>
+  out diff_sites_in_files (diff_sites_in_files): Channel<Tuple>
+  out diff_indv_in_files (diff_indv_in_files): Channel<Tuple>
+  out diff_sites (diff_sites): Channel<Tuple>
+  out diff_indv (diff_indv): Channel<Tuple>
+  out diff_discd_matrix (diff_discd_matrix): Channel<Tuple>
+  out diff_switch_error (diff_switch_error): Channel<Tuple>
+  out versions_vcftools (versions_vcftools): Channel<Tuple>
+subworkflows/local/vcf_qc_bcftools_vcftools/main.nf#VCF_QC_BCFTOOLS_VCFTOOLS/VCFTOOLS_SUMMARY@1 call "VCFTOOLS_SUMMARY" callee=VCFTOOLS_SUMMARY:process:modelled:legacy @16:5
+  in $1 (tuple(meta, variant_file)): Tuple
+    <- subworkflows/local/vcf_qc_bcftools_vcftools/main.nf#VCF_QC_BCFTOOLS_VCFTOOLS/:take:vcf[out] ? via vcf
+  in bed (bed): Path
+    <- subworkflows/local/vcf_qc_bcftools_vcftools/main.nf#VCF_QC_BCFTOOLS_VCFTOOLS/:take:target_bed[out] ? via target_bed
+  in diff_variant_file (diff_variant_file): Path
+    = [] : List
+  out vcf (vcf): Channel<Tuple>
+  out bcf (bcf): Channel<Tuple>
+  out frq (frq): Channel<Tuple>
+  out frq_count (frq_count): Channel<Tuple>
+  out idepth (idepth): Channel<Tuple>
+  out ldepth (ldepth): Channel<Tuple>
+  out ldepth_mean (ldepth_mean): Channel<Tuple>
+  out gdepth (gdepth): Channel<Tuple>
+  out hap_ld (hap_ld): Channel<Tuple>
+  out geno_ld (geno_ld): Channel<Tuple>
+  out geno_chisq (geno_chisq): Channel<Tuple>
+  out list_hap_ld (list_hap_ld): Channel<Tuple>
+  out list_geno_ld (list_geno_ld): Channel<Tuple>
+  out interchrom_hap_ld (interchrom_hap_ld): Channel<Tuple>
+  out interchrom_geno_ld (interchrom_geno_ld): Channel<Tuple>
+  out tstv (tstv): Channel<Tuple>
+  out tstv_summary (tstv_summary): Channel<Tuple>
+  out tstv_count (tstv_count): Channel<Tuple>
+  out tstv_qual (tstv_qual): Channel<Tuple>
+  out filter_summary (filter_summary): Channel<Tuple>
+  out sites_pi (sites_pi): Channel<Tuple>
+  out windowed_pi (windowed_pi): Channel<Tuple>
+  out weir_fst (weir_fst): Channel<Tuple>
+  out heterozygosity (heterozygosity): Channel<Tuple>
+  out hwe (hwe): Channel<Tuple>
+  out tajima_d (tajima_d): Channel<Tuple>
+  out freq_burden (freq_burden): Channel<Tuple>
+  out lroh (lroh): Channel<Tuple>
+  out relatedness (relatedness): Channel<Tuple>
+  out relatedness2 (relatedness2): Channel<Tuple>
+  out lqual (lqual): Channel<Tuple>
+  out missing_individual (missing_individual): Channel<Tuple>
+  out missing_site (missing_site): Channel<Tuple>
+  out snp_density (snp_density): Channel<Tuple>
+  out kept_sites (kept_sites): Channel<Tuple>
+  out removed_sites (removed_sites): Channel<Tuple>
+  out singeltons (singeltons): Channel<Tuple>
+  out indel_hist (indel_hist): Channel<Tuple>
+  out hapcount (hapcount): Channel<Tuple>
+  out mendel (mendel): Channel<Tuple>
+  out format (format): Channel<Tuple>
+  out info (info): Channel<Tuple>
+  out genotypes_matrix (genotypes_matrix): Channel<Tuple>
+  out genotypes_matrix_individual (genotypes_matrix_individual): Channel<Tuple>
+  out genotypes_matrix_position (genotypes_matrix_position): Channel<Tuple>
+  out impute_hap (impute_hap): Channel<Tuple>
+  out impute_hap_legend (impute_hap_legend): Channel<Tuple>
+  out impute_hap_indv (impute_hap_indv): Channel<Tuple>
+  out ldhat_sites (ldhat_sites): Channel<Tuple>
+  out ldhat_locs (ldhat_locs): Channel<Tuple>
+  out beagle_gl (beagle_gl): Channel<Tuple>
+  out beagle_pl (beagle_pl): Channel<Tuple>
+  out ped (ped): Channel<Tuple>
+  out map_ (map_): Channel<Tuple>
+  out tped (tped): Channel<Tuple>
+  out tfam (tfam): Channel<Tuple>
+  out diff_sites_in_files (diff_sites_in_files): Channel<Tuple>
+  out diff_indv_in_files (diff_indv_in_files): Channel<Tuple>
+  out diff_sites (diff_sites): Channel<Tuple>
+  out diff_indv (diff_indv): Channel<Tuple>
+  out diff_discd_matrix (diff_discd_matrix): Channel<Tuple>
+  out diff_switch_error (diff_switch_error): Channel<Tuple>
+  out versions_vcftools (versions_vcftools): Channel<Tuple>
+subworkflows/local/vcf_qc_bcftools_vcftools/main.nf#VCF_QC_BCFTOOLS_VCFTOOLS/:emit:bcftools_stats emit "bcftools_stats" @19:5
+  in in (in): -
+    <- subworkflows/local/vcf_qc_bcftools_vcftools/main.nf#VCF_QC_BCFTOOLS_VCFTOOLS/BCFTOOLS_STATS@1[stats] Channel<Tuple> via BCFTOOLS_STATS.out.stats
+subworkflows/local/vcf_qc_bcftools_vcftools/main.nf#VCF_QC_BCFTOOLS_VCFTOOLS/:emit:vcftools_tstv_counts emit "vcftools_tstv_counts" @20:5
+  in in (in): -
+    <- subworkflows/local/vcf_qc_bcftools_vcftools/main.nf#VCF_QC_BCFTOOLS_VCFTOOLS/VCFTOOLS_TSTV_COUNT@1[tstv_count] Channel<Tuple> via VCFTOOLS_TSTV_COUNT.out.tstv_count
+subworkflows/local/vcf_qc_bcftools_vcftools/main.nf#VCF_QC_BCFTOOLS_VCFTOOLS/:emit:vcftools_tstv_qual emit "vcftools_tstv_qual" @21:5
+  in in (in): -
+    <- subworkflows/local/vcf_qc_bcftools_vcftools/main.nf#VCF_QC_BCFTOOLS_VCFTOOLS/VCFTOOLS_TSTV_QUAL@1[tstv_qual] Channel<Tuple> via VCFTOOLS_TSTV_QUAL.out.tstv_qual
+subworkflows/local/vcf_qc_bcftools_vcftools/main.nf#VCF_QC_BCFTOOLS_VCFTOOLS/:emit:vcftools_filter_summary emit "vcftools_filter_summary" @22:5
+  in in (in): -
+    <- subworkflows/local/vcf_qc_bcftools_vcftools/main.nf#VCF_QC_BCFTOOLS_VCFTOOLS/VCFTOOLS_SUMMARY@1[filter_summary] Channel<Tuple> via VCFTOOLS_SUMMARY.out.filter_summary

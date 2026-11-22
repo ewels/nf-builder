@@ -1,0 +1,77 @@
+workflow subworkflows/local/cram_qc_mosdepth_samtools/main.nf#CRAM_QC_MOSDEPTH_SAMTOOLS legacy
+statements 6, modelled 6
+subworkflows/local/cram_qc_mosdepth_samtools/main.nf#CRAM_QC_MOSDEPTH_SAMTOOLS/:take:cram take "cram" @12:5
+  out out (out): -
+subworkflows/local/cram_qc_mosdepth_samtools/main.nf#CRAM_QC_MOSDEPTH_SAMTOOLS/:take:fasta take "fasta" @13:5
+  out out (out): -
+subworkflows/local/cram_qc_mosdepth_samtools/main.nf#CRAM_QC_MOSDEPTH_SAMTOOLS/:take:fasta_fai take "fasta_fai" @14:5
+  out out (out): -
+subworkflows/local/cram_qc_mosdepth_samtools/main.nf#CRAM_QC_MOSDEPTH_SAMTOOLS/:take:intervals take "intervals" @15:5
+  out out (out): -
+subworkflows/local/cram_qc_mosdepth_samtools/main.nf#CRAM_QC_MOSDEPTH_SAMTOOLS/reports factory "channel.empty" factory=channel.empty @18:15
+  out out (out): Channel<?>
+subworkflows/local/cram_qc_mosdepth_samtools/main.nf#CRAM_QC_MOSDEPTH_SAMTOOLS/.combine@1 chain ".combine.map.collect" steps=combine,map,collect @21:26
+  in in (in): -
+    <- subworkflows/local/cram_qc_mosdepth_samtools/main.nf#CRAM_QC_MOSDEPTH_SAMTOOLS/:take:fasta[out] ? via fasta
+  in 1:1 (combine(right)): -
+    <- subworkflows/local/cram_qc_mosdepth_samtools/main.nf#CRAM_QC_MOSDEPTH_SAMTOOLS/:take:fasta_fai[out] ? via fasta_fai
+  out out (out): Value<Bag<?>>
+subworkflows/local/cram_qc_mosdepth_samtools/main.nf#CRAM_QC_MOSDEPTH_SAMTOOLS/SAMTOOLS_STATS@1 call "SAMTOOLS_STATS" callee=SAMTOOLS_STATS:process:modelled:legacy @21:5
+  in $1 (tuple(meta, input, input_index)): Tuple
+    <- subworkflows/local/cram_qc_mosdepth_samtools/main.nf#CRAM_QC_MOSDEPTH_SAMTOOLS/:take:cram[out] ? via cram
+  in $2 (tuple(meta2, fasta, fai)): Tuple
+    <- subworkflows/local/cram_qc_mosdepth_samtools/main.nf#CRAM_QC_MOSDEPTH_SAMTOOLS/.combine@1[out] Value<Bag<?>>
+  out stats (stats): Channel<Tuple>
+  out versions_samtools (versions_samtools): Channel<Tuple>
+subworkflows/local/cram_qc_mosdepth_samtools/main.nf#CRAM_QC_MOSDEPTH_SAMTOOLS/.map@1 chain ".map" steps=map @23:27
+  in in (in): -
+    <- subworkflows/local/cram_qc_mosdepth_samtools/main.nf#CRAM_QC_MOSDEPTH_SAMTOOLS/:take:intervals[out] ? via intervals
+  out out (out): ?
+subworkflows/local/cram_qc_mosdepth_samtools/main.nf#CRAM_QC_MOSDEPTH_SAMTOOLS/.combine@2 chain ".combine" steps=combine @23:14
+  in in (in): -
+    <- subworkflows/local/cram_qc_mosdepth_samtools/main.nf#CRAM_QC_MOSDEPTH_SAMTOOLS/:take:cram[out] ? via cram
+  in 1:1 (combine(right)): -
+    <- subworkflows/local/cram_qc_mosdepth_samtools/main.nf#CRAM_QC_MOSDEPTH_SAMTOOLS/.map@1[out] ?
+  out out (out): ?
+subworkflows/local/cram_qc_mosdepth_samtools/main.nf#CRAM_QC_MOSDEPTH_SAMTOOLS/MOSDEPTH@1 call "MOSDEPTH" callee=MOSDEPTH:process:modelled:legacy @23:5
+  in $1 (tuple(meta, bam, bai, bed)): Tuple
+    <- subworkflows/local/cram_qc_mosdepth_samtools/main.nf#CRAM_QC_MOSDEPTH_SAMTOOLS/.combine@2[out] ?
+  in $2 (tuple(meta2, fasta)): Tuple
+    <- subworkflows/local/cram_qc_mosdepth_samtools/main.nf#CRAM_QC_MOSDEPTH_SAMTOOLS/:take:fasta[out] ? via fasta
+  in quantize_labels (quantize_labels): -
+    = [] : List
+  out global_txt (global_txt): Channel<Tuple>
+  out summary_txt (summary_txt): Channel<Tuple>
+  out regions_txt (regions_txt): Channel<Tuple>
+  out per_base_d4 (per_base_d4): Channel<Tuple>
+  out per_base_bed (per_base_bed): Channel<Tuple>
+  out per_base_csi (per_base_csi): Channel<Tuple>
+  out regions_bed (regions_bed): Channel<Tuple>
+  out regions_csi (regions_csi): Channel<Tuple>
+  out quantized_bed (quantized_bed): Channel<Tuple>
+  out quantized_csi (quantized_csi): Channel<Tuple>
+  out thresholds_bed (thresholds_bed): Channel<Tuple>
+  out thresholds_csi (thresholds_csi): Channel<Tuple>
+  out versions_mosdepth (versions_mosdepth): Channel<Tuple>
+  out versions_gzip (versions_gzip): Channel<Tuple>
+subworkflows/local/cram_qc_mosdepth_samtools/main.nf#CRAM_QC_MOSDEPTH_SAMTOOLS/reports~2 chain ".mix" steps=mix @26:15
+  in in (in): -
+    <- subworkflows/local/cram_qc_mosdepth_samtools/main.nf#CRAM_QC_MOSDEPTH_SAMTOOLS/reports[out] Channel<?> via reports
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/cram_qc_mosdepth_samtools/main.nf#CRAM_QC_MOSDEPTH_SAMTOOLS/SAMTOOLS_STATS@1[stats] Channel<Tuple> via SAMTOOLS_STATS.out.stats
+  out out (out): Channel<?>
+subworkflows/local/cram_qc_mosdepth_samtools/main.nf#CRAM_QC_MOSDEPTH_SAMTOOLS/reports~3 chain ".mix" steps=mix @27:15
+  in in (in): -
+    <- subworkflows/local/cram_qc_mosdepth_samtools/main.nf#CRAM_QC_MOSDEPTH_SAMTOOLS/reports~2[out] Channel<?> via reports
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/cram_qc_mosdepth_samtools/main.nf#CRAM_QC_MOSDEPTH_SAMTOOLS/MOSDEPTH@1[global_txt] Channel<Tuple> via MOSDEPTH.out.global_txt
+  out out (out): Channel<?>
+subworkflows/local/cram_qc_mosdepth_samtools/main.nf#CRAM_QC_MOSDEPTH_SAMTOOLS/reports~4 chain ".mix" steps=mix @28:15
+  in in (in): -
+    <- subworkflows/local/cram_qc_mosdepth_samtools/main.nf#CRAM_QC_MOSDEPTH_SAMTOOLS/reports~3[out] Channel<?> via reports
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/cram_qc_mosdepth_samtools/main.nf#CRAM_QC_MOSDEPTH_SAMTOOLS/MOSDEPTH@1[regions_txt] Channel<Tuple> via MOSDEPTH.out.regions_txt
+  out out (out): Channel<?>
+subworkflows/local/cram_qc_mosdepth_samtools/main.nf#CRAM_QC_MOSDEPTH_SAMTOOLS/:emit:reports emit "reports" @31:5
+  in in (in): -
+    <- subworkflows/local/cram_qc_mosdepth_samtools/main.nf#CRAM_QC_MOSDEPTH_SAMTOOLS/reports~4[out] Channel<?> via reports

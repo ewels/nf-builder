@@ -38,7 +38,10 @@ const port = (id: string, type: FlowType | null): Port => ({
 export function buildCodeNode(
   statement: Statement,
   context: CodeContext,
-): { readonly node: CodeNode; readonly edges: readonly GraphEdge[] } {
+): {
+  readonly node: Omit<CodeNode, "guards">;
+  readonly edges: readonly GraphEdge[];
+} {
   const { scope, keys, text } = context;
   const { reads, writes } = statementVariables(statement);
   const first = writes[0];
@@ -49,7 +52,10 @@ export function buildCodeNode(
     // `params` as a whole is not a value to wire (`params.x` is)
     if (read.name === "params" && read.properties.length === 0) continue;
     // `x = [x: 1]; y = x.x`: the output port of a code node is named like the variable, but `.x` reads the value's property
-    const whole = scope.lookup(read.name).every((v) => context.isCode(v.node));
+    // a name that isn't bound (a callee read as `X.out.name`) has no code node value
+    const values = scope.lookup(read.name);
+    const whole =
+      values.length > 0 && values.every((v) => context.isCode(v.node));
     const resolved = scope.resolveRead(
       whole ? { name: read.name, properties: [] } : read,
     );
@@ -74,7 +80,7 @@ export function buildCodeNode(
   const type = writes.length === 1 ? context.assignedType() : null;
   const source = text.slice(statement.range.start, statement.range.end);
   const line = (source.split("\n").find((l) => l.trim() !== "") ?? "").trim();
-  const node: CodeNode = {
+  const node: Omit<CodeNode, "guards"> = {
     id,
     kind: "code",
     label:

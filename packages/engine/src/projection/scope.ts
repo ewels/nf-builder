@@ -26,17 +26,149 @@ export interface ResolvedRead {
   }[];
 }
 
+/** The ports a legacy `.out` selector picks: all, the one named so, or the n-th (or `[n]`, a port made on demand). */
+function selectPorts(
+  ports: readonly PortSpec[],
+  selector: string | number | null,
+): PortSpec[] {
+  if (selector === null) return [...ports];
+  if (typeof selector === "string")
+    return ports.filter((p) => p.id === selector);
+  const picked = ports.find((p) => p.id === `[${selector}]`) ?? ports[selector];
+  return picked === undefined ? [] : [picked];
+}
+
+/** The values, once per node (a node's ports are those of its first appearance). */
+function unionValues(values: readonly Value[]): Value[] {
+  const seen = new Map<string, Value>();
+  for (const value of values)
+    if (!seen.has(value.node)) seen.set(value.node, value);
+  return [...seen.values()];
+}
+
 export class WorkflowScope {
   readonly #bindings = new Map<string, readonly Value[]>();
+  /** Legacy `.out` (F-107): the calls that can reach this point, by callee name. */
+  readonly #calls = new Map<string, readonly Value[]>();
+  /** Legacy `runner = PROC`: a variable that stands for a callee. */
+  readonly #aliases = new Map<string, readonly string[]>();
 
   /** The values `name` is bound to; none when it isn't bound. */
   lookup(name: string): readonly Value[] {
     return this.#bindings.get(name) ?? [];
   }
 
-  /** Binds `name`, replacing an earlier binding. */
+  /** Binds `name`, replacing an earlier binding (and a callee alias). */
   bind(name: string, values: readonly Value[]): void {
     this.#bindings.set(name, values);
+    this.#aliases.delete(name);
+  }
+
+  /** Records the call of `callee` that reaches from here on. */
+  recordCall(callee: string, value: Value): void {
+    this.#calls.set(callee, [value]);
+  }
+
+  /** `name = CALLEE`: `name` stands for these callees (several after an `if`), and no value. */
+  bindAlias(name: string, callees: readonly string[]): void {
+    this.#bindings.set(name, []);
+    this.#aliases.set(name, callees);
+  }
+
+  /** The callees `name` stands for: itself, or the ones it aliases; none when it is a bound variable. */
+  calleesOf(name: string): readonly string[] {
+    if (this.lookup(name).length > 0) return [];
+    return this.#aliases.get(name) ?? [name];
+  }
+
+  /** The calls of the callees `name` stands for that reach this point. */
+  callsOf(name: string): readonly Value[] {
+    return unionValues(
+      this.calleesOf(name).flatMap((c) => this.#calls.get(c) ?? []),
+    );
+  }
+
+  /** A copy to project one branch of an `if` in. */
+  fork(): WorkflowScope {
+    const copy = new WorkflowScope();
+    for (const [k, v] of this.#bindings) copy.#bindings.set(k, v);
+    for (const [k, v] of this.#calls) copy.#calls.set(k, v);
+    for (const [k, v] of this.#aliases) copy.#aliases.set(k, v);
+    return copy;
+  }
+
+  /**
+   * After an `if`: each name holds every value any branch end gives it, and this scope's own when the branches
+   * aren't exhaustive (no `else`). Calls and callee aliases are joined the same way.
+   */
+  join(ends: readonly WorkflowScope[], exhaustive: boolean): void {
+    // `this` is never one of `all` (the incoming bindings are a fork), so its tables can be rewritten in place
+    const all = exhaustive ? ends : [...ends, this.fork()];
+    const join = <T>(
+      table: (s: WorkflowScope) => Map<string, readonly T[]>,
+      merge: (all: T[]) => readonly T[],
+    ): void => {
+      const names = new Set(all.flatMap((s) => [...table(s).keys()]));
+      table(this).clear();
+      for (const name of names)
+        table(this).set(
+          name,
+          merge(all.flatMap((s) => table(s).get(name) ?? [])),
+        );
+    };
+    join((s) => s.#bindings, unionValues);
+    join((s) => s.#calls, unionValues);
+    join(
+      (s) => s.#aliases,
+      (l) => [...new Set(l)],
+    );
+  }
+
+  /** Gives each of `names` the binding it has in `from` (a `def` local to a branch goes out of scope). */
+  restore(names: Iterable<string>, from: WorkflowScope): void {
+    for (const name of names) {
+      const values = from.#bindings.get(name);
+      if (values === undefined) this.#bindings.delete(name);
+      else this.#bindings.set(name, values);
+      const aliases = from.#aliases.get(name);
+      if (aliases === undefined) this.#aliases.delete(name);
+      else this.#aliases.set(name, aliases);
+    }
+  }
+
+  /** Gives every binding of the node `id` the extra output `port` (a legacy callee's `.out` selection on demand). */
+  addPort(id: string, port: PortSpec): void {
+    const widen = (v: Value): Value =>
+      v.node === id ? { node: id, ports: [...v.ports, port] } : v;
+    for (const table of [this.#bindings, this.#calls])
+      for (const [name, values] of table) table.set(name, values.map(widen));
+  }
+
+  /**
+   * `<callee>.out`, `.out.<name>` or `.out[<n>]` of the calls that reach this point: the named or n-th output, or
+   * all of them for a null selector. Null when no call reaches or nothing is selected.
+   */
+  resolveOut(
+    name: string,
+    selector: string | number | null,
+  ): ResolvedRead | null {
+    const sources: ResolvedRead["sources"][number][] = [];
+    for (const value of this.callsOf(name)) {
+      const ports = selectPorts(value.ports, selector);
+      for (const port of ports)
+        sources.push({
+          port: { node: value.node, port: port.id },
+          type: port.type,
+        });
+    }
+    if (sources.length === 0) return null;
+    const text =
+      selector === null
+        ? `${name}.out`
+        : typeof selector === "string"
+          ? `${name}.out.${selector}`
+          : `${name}.out[${selector}]`;
+    return { variable: text, consumed: 0, sources };
   }
 
   /**
@@ -44,6 +176,13 @@ export class WorkflowScope {
    * single-output value). Null when `name` is unbound or has no outputs.
    */
   resolveRead(read: ReadPath): ResolvedRead | null {
+    if (read.properties[0] === "out" && this.calleesOf(read.name).length > 0) {
+      const named = read.properties[1];
+      const byName =
+        named === undefined ? null : this.resolveOut(read.name, named);
+      const out = byName ?? this.resolveOut(read.name, null);
+      if (out !== null) return { ...out, consumed: byName === null ? 1 : 2 };
+    }
     const first = read.properties[0];
     const sources: ResolvedRead["sources"][number][] = [];
     let consumed = Number.POSITIVE_INFINITY;

@@ -1,4 +1,5 @@
 workflow main.nf#SUMMARISE legacy
+statements 2, modelled 1
 main.nf#SUMMARISE/:take:pairs take "pairs" @30:5
   out out (out): -
 main.nf#SUMMARISE/fwd code "def (fwd, rev) = ['R1', 'R2']" @33:5

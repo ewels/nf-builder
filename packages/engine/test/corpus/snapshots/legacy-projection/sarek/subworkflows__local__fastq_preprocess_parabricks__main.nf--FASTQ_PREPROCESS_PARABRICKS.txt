@@ -1,0 +1,194 @@
+workflow subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS legacy
+statements 23, modelled 22
+subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/:take:ch_reads take "ch_reads" @9:5
+  out out (out): -
+subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/:take:ch_fasta take "ch_fasta" @10:5
+  out out (out): -
+subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/:take:ch_fasta_fai take "ch_fasta_fai" @11:5
+  out out (out): -
+subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/:take:ch_index take "ch_index" @12:5
+  out out (out): -
+subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/:take:ch_interval_file take "ch_interval_file" @13:5
+  out out (out): -
+subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/:take:ch_known_sites take "ch_known_sites" @14:5
+  out out (out): -
+subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/:take:ch_known_sites_tbi take "ch_known_sites_tbi" @15:5
+  out out (out): -
+subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/:take:val_skip_applybqsr take "val_skip_applybqsr" @16:5
+  out out (out): -
+subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/:take:val_save_mapped take "val_save_mapped" @17:5
+  out out (out): -
+subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/:take:val_save_output_as_bam take "val_save_output_as_bam" @18:5
+  out out (out): -
+subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/:take:val_outdir take "val_outdir" @19:5
+  out out (out): -
+subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/ch_reports factory "channel.empty" factory=channel.empty @22:18
+  out out (out): Channel<?>
+subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/output_fmt code "output_fmt = val_save_output_as_bam ? 'bam' : 'cram'" @24:5
+  in val_save_output_as_bam (val_save_output_as_bam): -
+    <- subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/:take:val_save_output_as_bam[out] ? via val_save_output_as_bam indirect
+  out output_fmt (output_fmt): -
+subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/reads_grouping_key chain ".map.groupTuple.map" steps=map,groupTuple,map @26:26
+  in in (in): -
+    <- subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/:take:ch_reads[out] ? via ch_reads
+  out out (out): Channel<?>
+subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/ch_reads chain ".map" steps=map @35:16
+  in in (in): -
+    <- subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/:take:ch_reads[out] ? via ch_reads
+  out out (out): ?
+subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/ch_interval_file chain ".ifEmpty.map" steps=ifEmpty,map @49:24
+  in in (in): -
+    <- subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/:take:ch_interval_file[out] ? via ch_interval_file
+  out out (out): Channel<?>
+subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/.map@1 chain ".map" steps=map @55:18
+  in in (in): -
+    <- subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/:take:ch_known_sites_tbi[out] ? via ch_known_sites_tbi
+  out out (out): ?
+subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/ch_known_sites_plus_tbi chain ".map.combine.first" steps=map,combine,first @53:31
+  in in (in): -
+    <- subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/:take:ch_known_sites[out] ? via ch_known_sites
+  in 2:1 (combine(right)): -
+    <- subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/.map@1[out] ?
+  out out (out): Value<?>
+subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/PARABRICKS_FQ2BAM@1 call "PARABRICKS_FQ2BAM" callee=PARABRICKS_FQ2BAM:process:modelled:legacy @58:5
+  in $1 (tuple(meta, reads)): Tuple
+    <- subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/ch_reads[out] ? via ch_reads
+  in $2 (tuple(meta2, fasta)): Tuple
+    <- subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/:take:ch_fasta[out] ? via ch_fasta
+  in $3 (tuple(meta3, index)): Tuple
+    <- subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/:take:ch_index[out] ? via ch_index
+  in $4 (tuple(meta4, intervals)): Tuple
+    <- subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/ch_interval_file[out] Channel<?> via ch_interval_file
+  in $5 (tuple(meta5, known_sites, known_sites_index)): Tuple
+    <- subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/ch_known_sites_plus_tbi[out] Value<?> via ch_known_sites_plus_tbi
+  in output_fmt (output_fmt): -
+    <- subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/output_fmt[output_fmt] ? via output_fmt
+  out bam (bam): Channel<Tuple>
+  out bai (bai): Channel<Tuple>
+  out cram (cram): Channel<Tuple>
+  out crai (crai): Channel<Tuple>
+  out bqsr_table (bqsr_table): Channel<Tuple>
+  out qc_metrics (qc_metrics): Channel<Tuple>
+  out duplicate_metrics (duplicate_metrics): Channel<Tuple>
+  out compatible_versions (compatible_versions): Channel<Path>
+  out versions_parabricks (versions_parabricks): Channel<Tuple>
+subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/.map@2 chain ".map" steps=map @76:19
+  guards else of val_skip_applybqsr
+  in in (in): -
+    <- subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/PARABRICKS_FQ2BAM@1[bai] Channel<Tuple> via fq2bam_out_idx indirect
+    <- subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/PARABRICKS_FQ2BAM@1[crai] Channel<Tuple> via fq2bam_out_idx indirect
+  out out (out): ?
+subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/.map@3 chain ".map" steps=map @77:19
+  guards else of val_skip_applybqsr
+  in in (in): -
+    <- subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/PARABRICKS_FQ2BAM@1[bqsr_table] Channel<Tuple> via PARABRICKS_FQ2BAM.out.bqsr_table
+  out out (out): Channel<?>
+subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/aln_idx_recal chain ".map.join.join.map" steps=map,join,join,map @74:25
+  guards else of val_skip_applybqsr
+  in in (in): -
+    <- subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/PARABRICKS_FQ2BAM@1[bam] Channel<Tuple> via fq2bam_out_aln indirect
+    <- subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/PARABRICKS_FQ2BAM@1[cram] Channel<Tuple> via fq2bam_out_aln indirect
+  in 2:1 (join(right)): -
+    <- subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/.map@2[out] ?
+  in 3:1 (join(right)): -
+    <- subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/.map@3[out] Channel<?>
+  out out (out): Channel<?>
+subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/.map@4 chain ".map" steps=map @82:22
+  guards else of val_skip_applybqsr
+  in in (in): -
+    <- subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/ch_interval_file[out] Channel<?> via ch_interval_file
+  out out (out): Channel<?>
+subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/ch_applybqsr_in chain ".combine" steps=combine @81:27
+  guards else of val_skip_applybqsr
+  in in (in): -
+    <- subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/aln_idx_recal[out] Channel<?> via aln_idx_recal
+  in 1:1 (combine(right)): -
+    <- subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/.map@4[out] Channel<?>
+  out out (out): Channel<Tuple>
+subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/PARABRICKS_APPLYBQSR@1 call "PARABRICKS_APPLYBQSR" callee=PARABRICKS_APPLYBQSR:process:modelled:legacy @84:9
+  guards else of val_skip_applybqsr
+  in $1 (tuple(meta, input, input_index, bqsr_table, intervals)): Tuple
+    <- subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/ch_applybqsr_in[out] Channel<Tuple> via ch_applybqsr_in
+  in $2 (tuple(meta5, fasta)): Tuple
+    <- subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/:take:ch_fasta[out] ? via ch_fasta
+  in output_fmt (output_fmt): -
+    <- subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/output_fmt[output_fmt] ? via output_fmt
+  out bam (bam): Channel<Tuple>
+  out bai (bai): Channel<Tuple>
+  out cram (cram): Channel<Tuple>
+  out crai (crai): Channel<Tuple>
+  out versions_parabricks (versions_parabricks): Channel<Tuple>
+subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/bam_mapped chain ".combine.filter.map.map.map.groupTuple" steps=combine,filter,map,map,map,groupTuple @97:22
+  guards then of val_save_output_as_bam
+  in in (in): -
+    <- subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/PARABRICKS_FQ2BAM@1[bam] Channel<Tuple> via mapped_out_aln indirect
+    <- subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/PARABRICKS_FQ2BAM@1[cram] Channel<Tuple> via mapped_out_aln indirect
+    <- subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/PARABRICKS_APPLYBQSR@1[bam] Channel<Tuple> via mapped_out_aln indirect
+  in 1:1 (combine(right)): -
+    <- subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/reads_grouping_key[out] Channel<?> via reads_grouping_key
+  out out (out): Channel<?>
+subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/BAM_MERGE_INDEX_SAMTOOLS@1 call "BAM_MERGE_INDEX_SAMTOOLS" callee=BAM_MERGE_INDEX_SAMTOOLS:workflow:modelled:legacy @112:9
+  guards then of val_save_output_as_bam
+  in bam (bam): -
+    <- subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/bam_mapped[out] Channel<?> via bam_mapped
+  out bam_bai (bam_bai): Channel<Record>
+subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/bam_variant_calling chain ".map" steps=map @114:31
+  guards then of val_save_output_as_bam
+  in in (in): -
+    <- subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/BAM_MERGE_INDEX_SAMTOOLS@1[bam_bai] Channel<Record> via BAM_MERGE_INDEX_SAMTOOLS.out.bam_bai
+  out out (out): Channel<?>
+subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/CHANNEL_ALIGN_CREATE_CSV@1 call "CHANNEL_ALIGN_CREATE_CSV" callee=CHANNEL_ALIGN_CREATE_CSV:workflow:modelled:legacy @118:9
+  guards then of val_save_output_as_bam
+  in bam_indexed (bam_indexed): -
+    <- subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/bam_variant_calling[out] Channel<?> via bam_variant_calling
+  in outdir (outdir): -
+    <- subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/:take:val_outdir[out] ? via val_outdir
+  in save_output_as_bam (save_output_as_bam): -
+    <- subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/:take:val_save_output_as_bam[out] ? via val_save_output_as_bam
+  in parabricks (parabricks): -
+    = true : Boolean
+subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/cram_mapped chain ".combine.filter.map.map.map.groupTuple" steps=combine,filter,map,map,map,groupTuple @127:23
+  guards else of val_save_output_as_bam
+  in in (in): -
+    <- subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/PARABRICKS_FQ2BAM@1[bam] Channel<Tuple> via mapped_out_aln indirect
+    <- subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/PARABRICKS_FQ2BAM@1[cram] Channel<Tuple> via mapped_out_aln indirect
+    <- subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/PARABRICKS_APPLYBQSR@1[bam] Channel<Tuple> via mapped_out_aln indirect
+  in 1:1 (combine(right)): -
+    <- subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/reads_grouping_key[out] Channel<?> via reads_grouping_key
+  out out (out): Channel<?>
+subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/CRAM_MERGE_INDEX_SAMTOOLS@1 call "CRAM_MERGE_INDEX_SAMTOOLS" callee=CRAM_MERGE_INDEX_SAMTOOLS:workflow:modelled:legacy @142:9
+  guards else of val_save_output_as_bam
+  in cram (cram): -
+    <- subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/cram_mapped[out] Channel<?> via cram_mapped
+  in fasta (fasta): -
+    <- subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/:take:ch_fasta[out] ? via ch_fasta
+  in fasta_fai (fasta_fai): -
+    <- subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/:take:ch_fasta_fai[out] ? via ch_fasta_fai
+  out cram_crai (cram_crai): Channel<Record>
+subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/cram_variant_calling chain ".map" steps=map @144:32
+  guards else of val_save_output_as_bam
+  in in (in): -
+    <- subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/CRAM_MERGE_INDEX_SAMTOOLS@1[cram_crai] Channel<Record> via CRAM_MERGE_INDEX_SAMTOOLS.out.cram_crai
+  out out (out): Channel<?>
+subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/CHANNEL_ALIGN_CREATE_CSV@2 call "CHANNEL_ALIGN_CREATE_CSV" callee=CHANNEL_ALIGN_CREATE_CSV:workflow:modelled:legacy @149:13
+  guards else of val_save_output_as_bam; then of val_save_mapped
+  in bam_indexed (bam_indexed): -
+    <- subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/cram_variant_calling[out] Channel<?> via cram_variant_calling
+  in outdir (outdir): -
+    <- subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/:take:val_outdir[out] ? via val_outdir
+  in save_output_as_bam (save_output_as_bam): -
+    <- subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/:take:val_save_mapped[out] ? via val_save_mapped
+  in parabricks (parabricks): -
+    = true : Boolean
+subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/:emit:cram emit "cram" @154:5
+  in in (in): -
+    <- subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/bam_variant_calling[out] Channel<?> via cram_variant_calling indirect
+    <- subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/cram_variant_calling[out] Channel<?> via cram_variant_calling indirect
+subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/:emit:reports emit "reports" @155:5
+  in in (in): -
+    <- subworkflows/local/fastq_preprocess_parabricks/main.nf#FASTQ_PREPROCESS_PARABRICKS/ch_reports[out] Channel<?> via ch_reports
+bound @67:5 fq2bam_out_aln
+bound @68:5 fq2bam_out_idx
+bound @71:9 mapped_out_aln
+bound @90:9 mapped_out_aln
+bound @121:9 cram_variant_calling

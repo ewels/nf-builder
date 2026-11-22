@@ -1,0 +1,66 @@
+workflow subworkflows/local/bam_variant_calling_somatic_muse/main.nf#BAM_VARIANT_CALLING_SOMATIC_MUSE legacy
+statements 5, modelled 5
+subworkflows/local/bam_variant_calling_somatic_muse/main.nf#BAM_VARIANT_CALLING_SOMATIC_MUSE/:take:bam_normal take "bam_normal" @12:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_muse/main.nf#BAM_VARIANT_CALLING_SOMATIC_MUSE/:take:bam_tumor take "bam_tumor" @13:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_muse/main.nf#BAM_VARIANT_CALLING_SOMATIC_MUSE/:take:fasta take "fasta" @14:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_muse/main.nf#BAM_VARIANT_CALLING_SOMATIC_MUSE/:take:dbsnp take "dbsnp" @15:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_muse/main.nf#BAM_VARIANT_CALLING_SOMATIC_MUSE/:take:dbsnp_tbi take "dbsnp_tbi" @16:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_muse/main.nf#BAM_VARIANT_CALLING_SOMATIC_MUSE/ch_bam chain ".join" steps=join @20:14
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_muse/main.nf#BAM_VARIANT_CALLING_SOMATIC_MUSE/:take:bam_tumor[out] ? via bam_tumor
+  in 1:1 (join(right)): -
+    <- subworkflows/local/bam_variant_calling_somatic_muse/main.nf#BAM_VARIANT_CALLING_SOMATIC_MUSE/:take:bam_normal[out] ? via bam_normal
+  out out (out): Channel<Record>
+subworkflows/local/bam_variant_calling_somatic_muse/main.nf#BAM_VARIANT_CALLING_SOMATIC_MUSE/.map@1 chain ".map" steps=map @22:31
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_muse/main.nf#BAM_VARIANT_CALLING_SOMATIC_MUSE/:take:fasta[out] ? via fasta
+  out out (out): ?
+subworkflows/local/bam_variant_calling_somatic_muse/main.nf#BAM_VARIANT_CALLING_SOMATIC_MUSE/.combine@1 chain ".combine" steps=combine @22:16
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_muse/main.nf#BAM_VARIANT_CALLING_SOMATIC_MUSE/ch_bam[out] Channel<Record> via ch_bam
+  in 1:1 (combine(right)): -
+    <- subworkflows/local/bam_variant_calling_somatic_muse/main.nf#BAM_VARIANT_CALLING_SOMATIC_MUSE/.map@1[out] ?
+  out out (out): Channel<Tuple>
+subworkflows/local/bam_variant_calling_somatic_muse/main.nf#BAM_VARIANT_CALLING_SOMATIC_MUSE/MUSE_CALL@1 call "MUSE_CALL" callee=MUSE_CALL:process:modelled:legacy @22:5
+  in $1 (tuple(meta, tumor_bam, tumor_bai, normal_bam, normal_bai, reference)): Tuple
+    <- subworkflows/local/bam_variant_calling_somatic_muse/main.nf#BAM_VARIANT_CALLING_SOMATIC_MUSE/.combine@1[out] Channel<Tuple>
+  out txt (txt): Channel<Tuple>
+  out versions_muse (versions_muse): Channel<Tuple>
+subworkflows/local/bam_variant_calling_somatic_muse/main.nf#BAM_VARIANT_CALLING_SOMATIC_MUSE/.combine@2 chain ".combine" steps=combine @24:42
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_muse/main.nf#BAM_VARIANT_CALLING_SOMATIC_MUSE/:take:dbsnp[out] ? via dbsnp
+  in 1:1 (combine(right)): -
+    <- subworkflows/local/bam_variant_calling_somatic_muse/main.nf#BAM_VARIANT_CALLING_SOMATIC_MUSE/:take:dbsnp_tbi[out] ? via dbsnp_tbi
+  out out (out): ?
+subworkflows/local/bam_variant_calling_somatic_muse/main.nf#BAM_VARIANT_CALLING_SOMATIC_MUSE/.combine@3 chain ".combine" steps=combine @24:16
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_muse/main.nf#BAM_VARIANT_CALLING_SOMATIC_MUSE/MUSE_CALL@1[txt] Channel<Tuple> via MUSE_CALL.out.txt
+  in 1:1 (combine(right)): -
+    <- subworkflows/local/bam_variant_calling_somatic_muse/main.nf#BAM_VARIANT_CALLING_SOMATIC_MUSE/.combine@2[out] ?
+  out out (out): Channel<Tuple>
+subworkflows/local/bam_variant_calling_somatic_muse/main.nf#BAM_VARIANT_CALLING_SOMATIC_MUSE/MUSE_SUMP@1 call "MUSE_SUMP" callee=MUSE_SUMP:process:modelled:legacy @24:5
+  in $1 (tuple(meta, muse_call_txt, ref_vcf, ref_vcf_tbi)): Tuple
+    <- subworkflows/local/bam_variant_calling_somatic_muse/main.nf#BAM_VARIANT_CALLING_SOMATIC_MUSE/.combine@3[out] Channel<Tuple>
+  out vcf (vcf): Channel<Tuple>
+  out tbi (tbi): Channel<Tuple>
+  out versions_muse (versions_muse): Channel<Tuple>
+  out versions_bgzip (versions_bgzip): Channel<Tuple>
+subworkflows/local/bam_variant_calling_somatic_muse/main.nf#BAM_VARIANT_CALLING_SOMATIC_MUSE/vcf chain ".map" steps=map @27:11
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_muse/main.nf#BAM_VARIANT_CALLING_SOMATIC_MUSE/MUSE_SUMP@1[vcf] Channel<Tuple> via MUSE_SUMP.out.vcf
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_somatic_muse/main.nf#BAM_VARIANT_CALLING_SOMATIC_MUSE/tbi chain ".map" steps=map @28:11
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_muse/main.nf#BAM_VARIANT_CALLING_SOMATIC_MUSE/MUSE_SUMP@1[tbi] Channel<Tuple> via MUSE_SUMP.out.tbi
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_somatic_muse/main.nf#BAM_VARIANT_CALLING_SOMATIC_MUSE/:emit:vcf emit "vcf" @31:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_muse/main.nf#BAM_VARIANT_CALLING_SOMATIC_MUSE/vcf[out] Channel<?> via vcf
+subworkflows/local/bam_variant_calling_somatic_muse/main.nf#BAM_VARIANT_CALLING_SOMATIC_MUSE/:emit:tbi emit "tbi" @32:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_muse/main.nf#BAM_VARIANT_CALLING_SOMATIC_MUSE/tbi[out] Channel<?> via tbi

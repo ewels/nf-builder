@@ -1,0 +1,489 @@
+workflow subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES legacy
+statements 46, modelled 43
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/:take:fasta take "fasta" @30:5
+  out out (out): -
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/:take:gtf take "gtf" @31:5
+  out out (out): -
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/:take:gff take "gff" @32:5
+  out out (out): -
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/:take:additional_fasta take "additional_fasta" @33:5
+  out out (out): -
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/:take:transcript_fasta take "transcript_fasta" @34:5
+  out out (out): -
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/:take:gene_bed take "gene_bed" @35:5
+  out out (out): -
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/:take:sortmerna_fasta_list take "sortmerna_fasta_list" @36:5
+  out out (out): -
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/:take:kraken_db take "kraken_db" @37:5
+  out out (out): -
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/:take:gencode take "gencode" @38:5
+  out out (out): -
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/:take:gffread_transcript_fasta take "gffread_transcript_fasta" @39:5
+  out out (out): -
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/:take:featurecounts_group_type take "featurecounts_group_type" @40:5
+  out out (out): -
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/:take:aligner take "aligner" @41:5
+  out out (out): -
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/:take:pseudo_aligner take "pseudo_aligner" @42:5
+  out out (out): -
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/:take:skip_gtf_filter take "skip_gtf_filter" @43:5
+  out out (out): -
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/:take:ribo_removal_tool take "ribo_removal_tool" @44:5
+  out out (out): -
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/:take:skip_alignment take "skip_alignment" @45:5
+  out out (out): -
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/:take:skip_pseudo_alignment take "skip_pseudo_alignment" @46:5
+  out out (out): -
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/:take:use_sentieon_star take "use_sentieon_star" @47:5
+  out out (out): -
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/:take:contaminant_screening take "contaminant_screening" @48:5
+  out out (out): -
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/:take:prokaryotic take "prokaryotic" @49:5
+  out out (out): -
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_gtf factory "channel.empty" factory=channel.empty @55:14
+  out out (out): Channel<?>
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/GUNZIP_GTF@1 call "GUNZIP_GTF" callee=GUNZIP_GTF:process:modelled:legacy @58:27
+  guards then of gtf; then of gtf.endsWith('.gz')
+  in $1 (tuple(meta, archive)): Tuple
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/:take:gtf[out] ? via gtf indirect
+  out gunzip (gunzip): Value<Tuple>
+  out versions_gunzip (versions_gunzip): Value<Tuple>
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_gtf~2 chain ".map" steps=map @58:27
+  guards then of gtf; then of gtf.endsWith('.gz')
+  in in (in): -
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/GUNZIP_GTF@1[gunzip] Value<Tuple>
+  out out (out): Value<?>
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_gtf~3 factory "channel.value" factory=channel.value @60:22
+  guards then of gtf; else of gtf.endsWith('.gz')
+  out out (out): Value<Path>
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/GUNZIP_GFF@1 call "GUNZIP_GFF" callee=GUNZIP_GFF:process:modelled:legacy @65:27
+  guards else of gtf; then of gff; then of gff.endsWith('.gz')
+  in $1 (tuple(meta, archive)): Tuple
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/:take:gff[out] ? via gff indirect
+  out gunzip (gunzip): Value<Tuple>
+  out versions_gunzip (versions_gunzip): Value<Tuple>
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/channel.value@1 factory "channel.value" factory=channel.value @67:22
+  guards else of gtf; then of gff; else of gff.endsWith('.gz')
+  out out (out): Value<Path>
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_gff chain ".map" steps=map @67:22
+  guards else of gtf; then of gff; else of gff.endsWith('.gz')
+  in in (in): -
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/channel.value@1[out] Value<Path>
+  out out (out): Value<?>
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/GFFREAD@1 call "GFFREAD" callee=GFFREAD:process:modelled:legacy @69:23
+  guards else of gtf; then of gff
+  in $1 (tuple(meta, gff)): Tuple
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/GUNZIP_GFF@1[gunzip] Value<Tuple> via ch_gff indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_gff[out] Value<?> via ch_gff indirect
+  in fasta (fasta): Path
+    = [] : List
+  out gtf (gtf): Channel<Tuple>
+  out gffread_gff (gffread_gff): Channel<Tuple>
+  out gffread_fasta (gffread_fasta): Channel<Tuple>
+  out bed (bed): Channel<Tuple>
+  out versions_gffread (versions_gffread): Channel<Tuple>
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_gtf~4 chain ".map" steps=map @69:23
+  guards else of gtf; then of gff
+  in in (in): -
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/GFFREAD@1[gtf] Channel<Tuple>
+  out out (out): Channel<?>
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/fasta_provided code "def fasta_provided = (fasta ? true : false)" @75:5
+  in fasta (fasta): -
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/:take:fasta[out] ? via fasta indirect
+  out fasta_provided (fasta_provided): -
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_fasta factory "channel.of" factory=channel.of @77:16
+  out out (out): Channel<List>
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/GUNZIP_FASTA@1 call "GUNZIP_FASTA" callee=GUNZIP_FASTA:process:modelled:legacy @81:27
+  guards then of fasta_provided; then of fasta.endsWith('.gz')
+  in $1 (tuple(meta, archive)): Tuple
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/:take:fasta[out] ? via fasta indirect
+  out gunzip (gunzip): Value<Tuple>
+  out versions_gunzip (versions_gunzip): Value<Tuple>
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_fasta~2 chain ".map" steps=map @81:27
+  guards then of fasta_provided; then of fasta.endsWith('.gz')
+  in in (in): -
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/GUNZIP_FASTA@1[gunzip] Value<Tuple>
+  out out (out): Value<?>
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_fasta~3 factory "channel.value" factory=channel.value @83:24
+  guards then of fasta_provided; else of fasta.endsWith('.gz')
+  out out (out): Value<Path>
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/filter_gtf_needed code "def filter_gtf_needed = (" @90:5
+  in skip_alignment (skip_alignment): -
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/:take:skip_alignment[out] ? via skip_alignment indirect
+  in aligner (aligner): -
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/:take:aligner[out] ? via aligner indirect
+  in skip_pseudo_alignment (skip_pseudo_alignment): -
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/:take:skip_pseudo_alignment[out] ? via skip_pseudo_alignment indirect
+  in pseudo_aligner (pseudo_aligner): -
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/:take:pseudo_aligner[out] ? via pseudo_aligner indirect
+  in transcript_fasta (transcript_fasta): -
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/:take:transcript_fasta[out] ? via transcript_fasta indirect
+  in skip_gtf_filter (skip_gtf_filter): -
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/:take:skip_gtf_filter[out] ? via skip_gtf_filter indirect
+  out filter_gtf_needed (filter_gtf_needed): -
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/.map@1 chain ".map" steps=map @98:13
+  guards then of filter_gtf_needed
+  in in (in): -
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_gtf[out] Channel<?> via ch_gtf indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_gtf~2[out] Value<?> via ch_gtf indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_gtf~3[out] Value<Path> via ch_gtf indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_gtf~4[out] Channel<?> via ch_gtf indirect
+  out out (out): ?
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/CUSTOM_GTFFILTER@1 call "CUSTOM_GTFFILTER" callee=CUSTOM_GTFFILTER:process:modelled:legacy @97:9
+  guards then of filter_gtf_needed
+  in $1 (tuple(meta, gtf)): Tuple
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/.map@1[out] ?
+  in $2 (tuple(meta2, fasta)): Tuple
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/fasta_provided[fasta_provided] ? via fasta_provided indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_fasta[out] Channel<List> via ch_fasta indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_fasta~2[out] Value<?> via ch_fasta indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_fasta~3[out] Value<Path> via ch_fasta indirect
+  out gtf (gtf): Channel<Tuple>
+  out versions (versions): Channel<Path>
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_gtf~5 chain ".map.first" steps=map,first @103:23
+  guards then of filter_gtf_needed
+  in in (in): -
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/CUSTOM_GTFFILTER@1[gtf] Channel<Tuple> via CUSTOM_GTFFILTER.out.gtf
+  out out (out): Value<?>
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_add_fasta factory "channel.empty" factory=channel.empty @109:20
+  out out (out): Channel<?>
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/GUNZIP_ADDITIONAL_FASTA@1 call "GUNZIP_ADDITIONAL_FASTA" callee=GUNZIP_ADDITIONAL_FASTA:process:modelled:legacy @112:28
+  guards then of fasta_provided && additional_fasta; then of additional_fasta.endsWith('.gz')
+  in $1 (tuple(meta, archive)): Tuple
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/:take:additional_fasta[out] ? via additional_fasta indirect
+  out gunzip (gunzip): Value<Tuple>
+  out versions_gunzip (versions_gunzip): Value<Tuple>
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_add_fasta~2 chain ".map" steps=map @112:28
+  guards then of fasta_provided && additional_fasta; then of additional_fasta.endsWith('.gz')
+  in in (in): -
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/GUNZIP_ADDITIONAL_FASTA@1[gunzip] Value<Tuple>
+  out out (out): Value<?>
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_add_fasta~3 factory "channel.value" factory=channel.value @114:28
+  guards then of fasta_provided && additional_fasta; else of additional_fasta.endsWith('.gz')
+  out out (out): Value<Path>
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/.combine@1 chain ".combine.map" steps=combine,map @118:13
+  guards then of fasta_provided && additional_fasta
+  in in (in): -
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_fasta[out] Channel<List> via ch_fasta indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_fasta~2[out] Value<?> via ch_fasta indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_fasta~3[out] Value<Path> via ch_fasta indirect
+  in 1:1 (combine(right)): -
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_gtf[out] Channel<?> via ch_gtf indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_gtf~2[out] Value<?> via ch_gtf indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_gtf~3[out] Value<Path> via ch_gtf indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_gtf~4[out] Channel<?> via ch_gtf indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_gtf~5[out] Value<?> via ch_gtf indirect
+  out out (out): ?
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/.map@2 chain ".map" steps=map @119:13
+  guards then of fasta_provided && additional_fasta
+  in in (in): -
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_add_fasta~2[out] Value<?> via ch_add_fasta indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_add_fasta~3[out] Value<Path> via ch_add_fasta indirect
+  out out (out): ?
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/CUSTOM_CATADDITIONALFASTA@1 call "CUSTOM_CATADDITIONALFASTA" callee=CUSTOM_CATADDITIONALFASTA:process:modelled:legacy @117:9
+  guards then of fasta_provided && additional_fasta
+  in $1 (tuple(meta, fasta, gtf)): Tuple
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/.combine@1[out] ?
+  in $2 (tuple(meta2, add_fasta)): Tuple
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/.map@2[out] ?
+  in biotype (biotype): -
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/:take:gencode[out] ? via gencode indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/:take:featurecounts_group_type[out] ? via featurecounts_group_type indirect
+  out fasta (fasta): Channel<Tuple>
+  out gtf (gtf): Channel<Tuple>
+  out versions (versions): Channel<Path>
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_fasta~4 chain ".map.first" steps=map,first @122:23
+  guards then of fasta_provided && additional_fasta
+  in in (in): -
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/CUSTOM_CATADDITIONALFASTA@1[fasta] Channel<Tuple> via CUSTOM_CATADDITIONALFASTA.out.fasta
+  out out (out): Value<?>
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_gtf~6 chain ".map.first" steps=map,first @123:23
+  guards then of fasta_provided && additional_fasta
+  in in (in): -
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/CUSTOM_CATADDITIONALFASTA@1[gtf] Channel<Tuple> via CUSTOM_CATADDITIONALFASTA.out.gtf
+  out out (out): Value<?>
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_gene_bed factory "channel.empty" factory=channel.empty @129:19
+  out out (out): Channel<?>
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/GUNZIP_GENE_BED@1 call "GUNZIP_GENE_BED" callee=GUNZIP_GENE_BED:process:modelled:legacy @132:27
+  guards then of gene_bed; then of gene_bed.endsWith('.gz')
+  in $1 (tuple(meta, archive)): Tuple
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/:take:gene_bed[out] ? via gene_bed indirect
+  out gunzip (gunzip): Value<Tuple>
+  out versions_gunzip (versions_gunzip): Value<Tuple>
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_gene_bed~2 chain ".map" steps=map @132:27
+  guards then of gene_bed; then of gene_bed.endsWith('.gz')
+  in in (in): -
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/GUNZIP_GENE_BED@1[gunzip] Value<Tuple>
+  out out (out): Value<?>
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_gene_bed~3 factory "channel.value" factory=channel.value @134:27
+  guards then of gene_bed; else of gene_bed.endsWith('.gz')
+  out out (out): Value<Path>
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/.map@3 chain ".map" steps=map @141:13
+  guards else of gene_bed; then of prokaryotic
+  in in (in): -
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_gtf[out] Channel<?> via ch_gtf indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_gtf~2[out] Value<?> via ch_gtf indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_gtf~3[out] Value<Path> via ch_gtf indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_gtf~4[out] Channel<?> via ch_gtf indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_gtf~5[out] Value<?> via ch_gtf indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_gtf~6[out] Value<?> via ch_gtf indirect
+  out out (out): ?
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/GFFREAD_GENE_BED@1 call "GFFREAD_GENE_BED" callee=GFFREAD_GENE_BED:process:modelled:legacy @140:23
+  guards else of gene_bed; then of prokaryotic
+  in $1 (tuple(meta, gff)): Tuple
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/.map@3[out] ?
+  in fasta (fasta): Path
+    = [] : List
+  out gtf (gtf): Channel<Tuple>
+  out gffread_gff (gffread_gff): Channel<Tuple>
+  out gffread_fasta (gffread_fasta): Channel<Tuple>
+  out bed (bed): Channel<Tuple>
+  out versions_gffread (versions_gffread): Channel<Tuple>
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_gene_bed~4 chain ".map" steps=map @140:23
+  guards else of gene_bed; then of prokaryotic
+  in in (in): -
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/GFFREAD_GENE_BED@1[bed] Channel<Tuple>
+  out out (out): Channel<?>
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/.map@4 chain ".map" steps=map @145:39
+  guards else of gene_bed; else of prokaryotic
+  in in (in): -
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_gtf[out] Channel<?> via ch_gtf indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_gtf~2[out] Value<?> via ch_gtf indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_gtf~3[out] Value<Path> via ch_gtf indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_gtf~4[out] Channel<?> via ch_gtf indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_gtf~5[out] Value<?> via ch_gtf indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_gtf~6[out] Value<?> via ch_gtf indirect
+  out out (out): ?
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/EAUTILS_GTF2BED@1 call "EAUTILS_GTF2BED" callee=EAUTILS_GTF2BED:process:modelled:legacy @145:23
+  guards else of gene_bed; else of prokaryotic
+  in $1 (tuple(meta, gtf)): Tuple
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/.map@4[out] ?
+  out bed (bed): Channel<Tuple>
+  out versions (versions): Channel<Path>
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_gene_bed~5 chain ".map" steps=map @145:23
+  guards else of gene_bed; else of prokaryotic
+  in in (in): -
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/EAUTILS_GTF2BED@1[bed] Channel<Tuple>
+  out out (out): Channel<?>
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_transcript_fasta factory "channel.empty" factory=channel.empty @153:27
+  out out (out): Channel<?>
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/GUNZIP_TRANSCRIPT_FASTA@1 call "GUNZIP_TRANSCRIPT_FASTA" callee=GUNZIP_TRANSCRIPT_FASTA:process:modelled:legacy @157:35
+  guards then of transcript_fasta; then of transcript_fasta.endsWith('.gz')
+  in $1 (tuple(meta, archive)): Tuple
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/:take:transcript_fasta[out] ? via transcript_fasta indirect
+  out gunzip (gunzip): Value<Tuple>
+  out versions_gunzip (versions_gunzip): Value<Tuple>
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_transcript_fasta~2 chain ".map" steps=map @157:35
+  guards then of transcript_fasta; then of transcript_fasta.endsWith('.gz')
+  in in (in): -
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/GUNZIP_TRANSCRIPT_FASTA@1[gunzip] Value<Tuple>
+  out out (out): Value<?>
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_transcript_fasta~3 factory "channel.value" factory=channel.value @159:35
+  guards then of transcript_fasta; else of transcript_fasta.endsWith('.gz')
+  out out (out): Value<Path>
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/PREPROCESS_TRANSCRIPTS_FASTA_GENCODE@1 call "PREPROCESS_TRANSCRIPTS_FASTA_GENCODE" callee=PREPROCESS_TRANSCRIPTS_FASTA_GENCODE:process:modelled:legacy @162:13
+  guards then of transcript_fasta; then of gencode
+  in fasta (fasta): Path
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_transcript_fasta~2[out] Value<?> via ch_transcript_fasta indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_transcript_fasta~3[out] Value<Path> via ch_transcript_fasta indirect
+  out fasta (fasta): Channel<Path>
+  out [1] ([1]): Channel<Tuple>
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/.map@5 chain ".map" steps=map @171:17
+  guards else of transcript_fasta; then of fasta_provided; then of gffread_transcript_fasta
+  in in (in): -
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_gtf[out] Channel<?> via ch_gtf indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_gtf~2[out] Value<?> via ch_gtf indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_gtf~3[out] Value<Path> via ch_gtf indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_gtf~4[out] Channel<?> via ch_gtf indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_gtf~5[out] Value<?> via ch_gtf indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_gtf~6[out] Value<?> via ch_gtf indirect
+  out out (out): ?
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/GFFREAD_TRANSCRIPTS@1 call "GFFREAD_TRANSCRIPTS" callee=GFFREAD_TRANSCRIPTS:process:modelled:legacy @170:13
+  guards else of transcript_fasta; then of fasta_provided; then of gffread_transcript_fasta
+  in $1 (tuple(meta, gff)): Tuple
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/.map@5[out] ?
+  in fasta (fasta): Path
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_fasta[out] Channel<List> via ch_fasta indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_fasta~2[out] Value<?> via ch_fasta indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_fasta~3[out] Value<Path> via ch_fasta indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_fasta~4[out] Value<?> via ch_fasta indirect
+  out gtf (gtf): Channel<Tuple>
+  out gffread_gff (gffread_gff): Channel<Tuple>
+  out gffread_fasta (gffread_fasta): Channel<Tuple>
+  out bed (bed): Channel<Tuple>
+  out versions_gffread (versions_gffread): Channel<Tuple>
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_transcript_fasta~4 chain ".map" steps=map @174:35
+  guards else of transcript_fasta; then of fasta_provided; then of gffread_transcript_fasta
+  in in (in): -
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/GFFREAD_TRANSCRIPTS@1[gffread_fasta] Channel<Tuple> via GFFREAD_TRANSCRIPTS.out.gffread_fasta
+  out out (out): Channel<?>
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/SENTIEON_MAKE_TRANSCRIPTS_FASTA@1 call "SENTIEON_MAKE_TRANSCRIPTS_FASTA" callee=SENTIEON_MAKE_TRANSCRIPTS_FASTA:process:modelled:legacy @177:35
+  guards else of transcript_fasta; then of fasta_provided; else of gffread_transcript_fasta; then of use_sentieon_star
+  in fasta (fasta): Path
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_fasta[out] Channel<List> via ch_fasta indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_fasta~2[out] Value<?> via ch_fasta indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_fasta~3[out] Value<Path> via ch_fasta indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_fasta~4[out] Value<?> via ch_fasta indirect
+  in gtf (gtf): Path
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_gtf[out] Channel<?> via ch_gtf indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_gtf~2[out] Value<?> via ch_gtf indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_gtf~3[out] Value<Path> via ch_gtf indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_gtf~4[out] Channel<?> via ch_gtf indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_gtf~5[out] Value<?> via ch_gtf indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_gtf~6[out] Value<?> via ch_gtf indirect
+  out index (index): Channel<Path>
+  out transcript_fasta (transcript_fasta): Channel<Path>
+  out versions_rsem (versions_rsem): Channel<Tuple>
+  out versions_star (versions_star): Channel<Tuple>
+  out versions_sentieon (versions_sentieon): Channel<Tuple>
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/MAKE_TRANSCRIPTS_FASTA@1 call "MAKE_TRANSCRIPTS_FASTA" callee=MAKE_TRANSCRIPTS_FASTA:process:modelled:legacy @180:35
+  guards else of transcript_fasta; then of fasta_provided; else of gffread_transcript_fasta; else of use_sentieon_star
+  in fasta (fasta): Path
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_fasta[out] Channel<List> via ch_fasta indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_fasta~2[out] Value<?> via ch_fasta indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_fasta~3[out] Value<Path> via ch_fasta indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_fasta~4[out] Value<?> via ch_fasta indirect
+  in gtf (gtf): Path
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_gtf[out] Channel<?> via ch_gtf indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_gtf~2[out] Value<?> via ch_gtf indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_gtf~3[out] Value<Path> via ch_gtf indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_gtf~4[out] Channel<?> via ch_gtf indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_gtf~5[out] Value<?> via ch_gtf indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_gtf~6[out] Value<?> via ch_gtf indirect
+  out index (index): Channel<Path>
+  out transcript_fasta (transcript_fasta): Channel<Path>
+  out versions_rsem (versions_rsem): Channel<Tuple>
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_fasta_fai factory "channel.empty" factory=channel.empty @188:22
+  out out (out): Channel<?>
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_chrom_sizes factory "channel.empty" factory=channel.empty @189:22
+  out out (out): Channel<?>
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/.map@6 chain ".map" steps=map @191:24
+  guards then of fasta_provided
+  in in (in): -
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_fasta[out] Channel<List> via ch_fasta indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_fasta~2[out] Value<?> via ch_fasta indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_fasta~3[out] Value<Path> via ch_fasta indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_fasta~4[out] Value<?> via ch_fasta indirect
+  out out (out): ?
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/SAMTOOLS_FAIDX@1 call "SAMTOOLS_FAIDX" callee=SAMTOOLS_FAIDX:process:modelled:legacy @191:9
+  guards then of fasta_provided
+  in $1 (tuple(meta, fasta, fai)): Tuple
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/.map@6[out] ?
+  in get_sizes (get_sizes): -
+    = true : Boolean
+  out fa (fa): Channel<Tuple>
+  out sizes (sizes): Channel<Tuple>
+  out fai (fai): Channel<Tuple>
+  out gzi (gzi): Channel<Tuple>
+  out versions_samtools (versions_samtools): Channel<Tuple>
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_chrom_sizes~2 chain ".map" steps=map @192:26
+  guards then of fasta_provided
+  in in (in): -
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/SAMTOOLS_FAIDX@1[sizes] Channel<Tuple> via SAMTOOLS_FAIDX.out.sizes
+  out out (out): Channel<?>
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/.map@7 chain ".map" steps=map @194:22
+  guards then of fasta_provided
+  in in (in): -
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/SAMTOOLS_FAIDX@1[fai] Channel<Tuple> via SAMTOOLS_FAIDX.out.fai
+  out out (out): Channel<?>
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_fasta_fai~2 chain ".combine.map.first" steps=combine,map,first @193:26
+  guards then of fasta_provided
+  in in (in): -
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_fasta[out] Channel<List> via ch_fasta indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_fasta~2[out] Value<?> via ch_fasta indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_fasta~3[out] Value<Path> via ch_fasta indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_fasta~4[out] Value<?> via ch_fasta indirect
+  in 1:1 (combine(right)): -
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/.map@7[out] Channel<?>
+  out out (out): Value<?>
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_rrna_fastas factory "channel.empty" factory=channel.empty @202:22
+  out out (out): Channel<?>
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ribo_db code "def ribo_db = file(sortmerna_fasta_list)" @208:9
+  guards then of ribo_removal_tool in ['sortmerna', 'bowtie2']
+  in sortmerna_fasta_list (sortmerna_fasta_list): -
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/:take:sortmerna_fasta_list[out] ? via sortmerna_fasta_list indirect
+  out ribo_db (ribo_db): Path
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/channel.from@1 factory "channel.from" factory=channel.from @209:30
+  guards then of ribo_removal_tool in ['sortmerna', 'bowtie2']
+  out out (out): ?
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_rrna_inputs chain ".map.branch" steps=map,branch @209:30
+  guards then of ribo_removal_tool in ['sortmerna', 'bowtie2']
+  in in (in): -
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/channel.from@1[out] ?
+  out out (out): Record
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/.map@8 chain ".map" steps=map @216:45
+  guards then of ribo_removal_tool in ['sortmerna', 'bowtie2']
+  in in (in): -
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_rrna_inputs[out] Record via ch_rrna_inputs indirect
+  out out (out): ?
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/GUNZIP_RRNA_FASTAS@1 call "GUNZIP_RRNA_FASTAS" callee=GUNZIP_RRNA_FASTAS:process:modelled:legacy @216:26
+  guards then of ribo_removal_tool in ['sortmerna', 'bowtie2']
+  in $1 (tuple(meta, archive)): Tuple
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/.map@8[out] ?
+  out gunzip (gunzip): Channel<Tuple>
+  out versions_gunzip (versions_gunzip): Channel<Tuple>
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_rrna_fastas~2 chain ".map.mix" steps=map,mix @216:26
+  guards then of ribo_removal_tool in ['sortmerna', 'bowtie2']
+  in in (in): -
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/GUNZIP_RRNA_FASTAS@1[gunzip] Channel<Tuple>
+  in 2:1 (mix(other)): -
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_rrna_inputs[out] Record via ch_rrna_inputs indirect
+  out out (out): Channel<?>
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_kraken_db factory "channel.empty" factory=channel.empty @225:20
+  out out (out): Channel<?>
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/UNTAR_KRAKEN_DB@1 call "UNTAR_KRAKEN_DB" callee=UNTAR_KRAKEN_DB:process:modelled:legacy @228:28
+  guards then of contaminant_screening && kraken_db; then of kraken_db.endsWith('.tar.gz')
+  in $1 (tuple(meta, archive)): Tuple
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/:take:kraken_db[out] ? via kraken_db indirect
+  out untar (untar): Value<Tuple>
+  out versions_untar (versions_untar): Value<Tuple>
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_kraken_db~2 chain ".map" steps=map @228:28
+  guards then of contaminant_screening && kraken_db; then of kraken_db.endsWith('.tar.gz')
+  in in (in): -
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/UNTAR_KRAKEN_DB@1[untar] Value<Tuple>
+  out out (out): Value<?>
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_kraken_db~3 factory "channel.value" factory=channel.value @230:28
+  guards then of contaminant_screening && kraken_db; else of kraken_db.endsWith('.tar.gz')
+  out out (out): Value<Path>
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/:emit:fasta_fai emit "fasta_fai" @235:5
+  in in (in): -
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_fasta_fai[out] Channel<?> via ch_fasta_fai indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_fasta_fai~2[out] Value<?> via ch_fasta_fai indirect
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/:emit:gtf emit "gtf" @236:5
+  in in (in): -
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_gtf[out] Channel<?> via ch_gtf indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_gtf~2[out] Value<?> via ch_gtf indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_gtf~3[out] Value<Path> via ch_gtf indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_gtf~4[out] Channel<?> via ch_gtf indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_gtf~5[out] Value<?> via ch_gtf indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_gtf~6[out] Value<?> via ch_gtf indirect
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/:emit:gene_bed emit "gene_bed" @237:5
+  in in (in): -
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_gene_bed~2[out] Value<?> via ch_gene_bed indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_gene_bed~3[out] Value<Path> via ch_gene_bed indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_gene_bed~4[out] Channel<?> via ch_gene_bed indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_gene_bed~5[out] Channel<?> via ch_gene_bed indirect
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/:emit:transcript_fasta emit "transcript_fasta" @238:5
+  in in (in): -
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_transcript_fasta[out] Channel<?> via ch_transcript_fasta indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_transcript_fasta~2[out] Value<?> via ch_transcript_fasta indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_transcript_fasta~3[out] Value<Path> via ch_transcript_fasta indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/PREPROCESS_TRANSCRIPTS_FASTA_GENCODE@1[fasta] Channel<Path> via ch_transcript_fasta indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_transcript_fasta~4[out] Channel<?> via ch_transcript_fasta indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/SENTIEON_MAKE_TRANSCRIPTS_FASTA@1[transcript_fasta] Channel<Path> via ch_transcript_fasta indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/MAKE_TRANSCRIPTS_FASTA@1[transcript_fasta] Channel<Path> via ch_transcript_fasta indirect
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/:emit:chrom_sizes emit "chrom_sizes" @239:5
+  in in (in): -
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_chrom_sizes[out] Channel<?> via ch_chrom_sizes indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_chrom_sizes~2[out] Channel<?> via ch_chrom_sizes indirect
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/:emit:rrna_fastas emit "rrna_fastas" @240:5
+  in in (in): -
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_rrna_fastas[out] Channel<?> via ch_rrna_fastas indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_rrna_fastas~2[out] Channel<?> via ch_rrna_fastas indirect
+subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/:emit:kraken_db emit "kraken_db" @241:5
+  in in (in): -
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_kraken_db[out] Channel<?> via ch_kraken_db indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_kraken_db~2[out] Value<?> via ch_kraken_db indirect
+    <- subworkflows/local/prepare_genome_references/main.nf#PREPARE_GENOME_REFERENCES/ch_kraken_db~3[out] Value<Path> via ch_kraken_db indirect
+bound @63:9 ch_gff
+bound @163:13 ch_transcript_fasta

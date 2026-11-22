@@ -1,0 +1,122 @@
+workflow subworkflows/local/bam_variant_calling_freebayes/main.nf#BAM_VARIANT_CALLING_FREEBAYES legacy
+statements 13, modelled 13
+subworkflows/local/bam_variant_calling_freebayes/main.nf#BAM_VARIANT_CALLING_FREEBAYES/:take:ch_cram take "ch_cram" @16:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_freebayes/main.nf#BAM_VARIANT_CALLING_FREEBAYES/:take:ch_dict take "ch_dict" @17:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_freebayes/main.nf#BAM_VARIANT_CALLING_FREEBAYES/:take:ch_fasta take "ch_fasta" @18:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_freebayes/main.nf#BAM_VARIANT_CALLING_FREEBAYES/:take:ch_fasta_fai take "ch_fasta_fai" @19:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_freebayes/main.nf#BAM_VARIANT_CALLING_FREEBAYES/:take:ch_intervals take "ch_intervals" @20:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_freebayes/main.nf#BAM_VARIANT_CALLING_FREEBAYES/cram_intervals chain ".combine.map" steps=combine,map @24:22
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_freebayes/main.nf#BAM_VARIANT_CALLING_FREEBAYES/:take:ch_cram[out] ? via ch_cram
+  in 1:1 (combine(right)): -
+    <- subworkflows/local/bam_variant_calling_freebayes/main.nf#BAM_VARIANT_CALLING_FREEBAYES/:take:ch_intervals[out] ? via ch_intervals
+  out out (out): ?
+subworkflows/local/bam_variant_calling_freebayes/main.nf#BAM_VARIANT_CALLING_FREEBAYES/FREEBAYES@1 call "FREEBAYES" callee=FREEBAYES:process:modelled:legacy @28:5
+  in $1 (tuple(meta, input_1, input_1_index, input_2, input_2_index, target_bed)): Tuple
+    <- subworkflows/local/bam_variant_calling_freebayes/main.nf#BAM_VARIANT_CALLING_FREEBAYES/cram_intervals[out] ? via cram_intervals
+  in $2 (tuple(meta2, fasta)): Tuple
+    <- subworkflows/local/bam_variant_calling_freebayes/main.nf#BAM_VARIANT_CALLING_FREEBAYES/:take:ch_fasta[out] ? via ch_fasta
+  in $3 (tuple(meta3, fasta_fai)): Tuple
+    <- subworkflows/local/bam_variant_calling_freebayes/main.nf#BAM_VARIANT_CALLING_FREEBAYES/:take:ch_fasta_fai[out] ? via ch_fasta_fai
+  in $4 (tuple(meta4, samples)): Tuple
+    = [[id:'null'], []] : List
+  in $5 (tuple(meta5, populations)): Tuple
+    = [[id:'null'], []] : List
+  in $6 (tuple(meta6, cnv)): Tuple
+    = [[id:'null'], []] : List
+  out vcf (vcf): Channel<Tuple>
+  out versions_freebayes (versions_freebayes): Channel<Tuple>
+subworkflows/local/bam_variant_calling_freebayes/main.nf#BAM_VARIANT_CALLING_FREEBAYES/BCFTOOLS_SORT@1 call "BCFTOOLS_SORT" callee=BCFTOOLS_SORT:process:modelled:legacy @30:5
+  in $1 (tuple(meta, vcf)): Tuple
+    <- subworkflows/local/bam_variant_calling_freebayes/main.nf#BAM_VARIANT_CALLING_FREEBAYES/FREEBAYES@1[vcf] Channel<Tuple> via FREEBAYES.out.vcf
+  out vcf (vcf): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out versions_bcftools (versions_bcftools): Channel<Tuple>
+subworkflows/local/bam_variant_calling_freebayes/main.nf#BAM_VARIANT_CALLING_FREEBAYES/bcftools_vcf_out chain ".branch" steps=branch @33:24
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_freebayes/main.nf#BAM_VARIANT_CALLING_FREEBAYES/BCFTOOLS_SORT@1[vcf] Channel<Tuple> via BCFTOOLS_SORT.out.vcf
+  out out (out): Record
+subworkflows/local/bam_variant_calling_freebayes/main.nf#BAM_VARIANT_CALLING_FREEBAYES/vcf_to_merge chain ".map.groupTuple" steps=map,groupTuple @40:20
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_freebayes/main.nf#BAM_VARIANT_CALLING_FREEBAYES/bcftools_vcf_out[out] Record via bcftools_vcf_out indirect
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_freebayes/main.nf#BAM_VARIANT_CALLING_FREEBAYES/MERGE_FREEBAYES@1 call "MERGE_FREEBAYES" callee=MERGE_FREEBAYES:process:modelled:legacy @41:5
+  in $1 (tuple(meta, vcf)): Tuple
+    <- subworkflows/local/bam_variant_calling_freebayes/main.nf#BAM_VARIANT_CALLING_FREEBAYES/vcf_to_merge[out] Channel<?> via vcf_to_merge
+  in $2 (tuple(meta2, dict)): Tuple
+    <- subworkflows/local/bam_variant_calling_freebayes/main.nf#BAM_VARIANT_CALLING_FREEBAYES/:take:ch_dict[out] ? via ch_dict
+  out vcf (vcf): Channel<Tuple>
+  out tbi (tbi): Channel<Tuple>
+  out versions_gatk4 (versions_gatk4): Channel<Tuple>
+subworkflows/local/bam_variant_calling_freebayes/main.nf#BAM_VARIANT_CALLING_FREEBAYES/.map@1 chain ".map" steps=map @44:24
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_freebayes/main.nf#BAM_VARIANT_CALLING_FREEBAYES/bcftools_vcf_out[out] Record via bcftools_vcf_out indirect
+  out out (out): ?
+subworkflows/local/bam_variant_calling_freebayes/main.nf#BAM_VARIANT_CALLING_FREEBAYES/TABIX_VC_FREEBAYES@1 call "TABIX_VC_FREEBAYES" callee=TABIX_VC_FREEBAYES:process:modelled:legacy @44:5
+  in $1 (tuple(meta, infile, infile_tbi, regions)): Tuple
+    <- subworkflows/local/bam_variant_calling_freebayes/main.nf#BAM_VARIANT_CALLING_FREEBAYES/.map@1[out] ?
+  in action (action): -
+    = 'compress' : String
+  in make_index (make_index): -
+    = true : Boolean
+  in out_ext (out_ext): -
+    = '' : String
+  out output (output): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out versions_htslib (versions_htslib): Channel<Tuple>
+  out versions_xz (versions_xz): Channel<Tuple>
+subworkflows/local/bam_variant_calling_freebayes/main.nf#BAM_VARIANT_CALLING_FREEBAYES/merged_vcf_with_tbi chain ".join.map" steps=join,map @47:27
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_freebayes/main.nf#BAM_VARIANT_CALLING_FREEBAYES/MERGE_FREEBAYES@1[vcf] Channel<Tuple> via MERGE_FREEBAYES.out.vcf
+  in 1:1 (join(right)): -
+    <- subworkflows/local/bam_variant_calling_freebayes/main.nf#BAM_VARIANT_CALLING_FREEBAYES/MERGE_FREEBAYES@1[tbi] Channel<Tuple> via MERGE_FREEBAYES.out.tbi
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_freebayes/main.nf#BAM_VARIANT_CALLING_FREEBAYES/no_intervals_with_tbi chain ".join.map" steps=join,map @51:29
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_freebayes/main.nf#BAM_VARIANT_CALLING_FREEBAYES/bcftools_vcf_out[out] Record via bcftools_vcf_out indirect
+  in 1:1 (join(right)): -
+    <- subworkflows/local/bam_variant_calling_freebayes/main.nf#BAM_VARIANT_CALLING_FREEBAYES/TABIX_VC_FREEBAYES@1[index] Channel<Tuple> via TABIX_VC_FREEBAYES.out.index
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_freebayes/main.nf#BAM_VARIANT_CALLING_FREEBAYES/ch_vcf chain ".mix" steps=mix @56:14
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_freebayes/main.nf#BAM_VARIANT_CALLING_FREEBAYES/merged_vcf_with_tbi[out] Channel<?> via merged_vcf_with_tbi
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/bam_variant_calling_freebayes/main.nf#BAM_VARIANT_CALLING_FREEBAYES/no_intervals_with_tbi[out] Channel<?> via no_intervals_with_tbi
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_freebayes/main.nf#BAM_VARIANT_CALLING_FREEBAYES/VCFLIB_VCFFILTER@1 call "VCFLIB_VCFFILTER" callee=VCFLIB_VCFFILTER:process:modelled:legacy @58:5
+  in $1 (tuple(meta, vcf, tbi)): Tuple
+    <- subworkflows/local/bam_variant_calling_freebayes/main.nf#BAM_VARIANT_CALLING_FREEBAYES/ch_vcf[out] Channel<?> via ch_vcf
+  out vcf (vcf): Channel<Tuple>
+  out versions_vcflib (versions_vcflib): Channel<Tuple>
+subworkflows/local/bam_variant_calling_freebayes/main.nf#BAM_VARIANT_CALLING_FREEBAYES/.map@2 chain ".map" steps=map @63:29
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_freebayes/main.nf#BAM_VARIANT_CALLING_FREEBAYES/VCFLIB_VCFFILTER@1[vcf] Channel<Tuple> via vcf_filtered
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_freebayes/main.nf#BAM_VARIANT_CALLING_FREEBAYES/TABIX_VC_FREEBAYES_FILT@1 call "TABIX_VC_FREEBAYES_FILT" callee=TABIX_VC_FREEBAYES_FILT:process:modelled:legacy @63:5
+  in $1 (tuple(meta, infile, infile_tbi, regions)): Tuple
+    <- subworkflows/local/bam_variant_calling_freebayes/main.nf#BAM_VARIANT_CALLING_FREEBAYES/.map@2[out] Channel<?>
+  in action (action): -
+    = 'compress' : String
+  in make_index (make_index): -
+    = true : Boolean
+  in out_ext (out_ext): -
+    = '' : String
+  out output (output): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out versions_htslib (versions_htslib): Channel<Tuple>
+  out versions_xz (versions_xz): Channel<Tuple>
+subworkflows/local/bam_variant_calling_freebayes/main.nf#BAM_VARIANT_CALLING_FREEBAYES/:emit:vcf_unfiltered emit "vcf_unfiltered" @66:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_freebayes/main.nf#BAM_VARIANT_CALLING_FREEBAYES/ch_vcf[out] Channel<?> via ch_vcf
+subworkflows/local/bam_variant_calling_freebayes/main.nf#BAM_VARIANT_CALLING_FREEBAYES/:emit:vcf emit "vcf" @69:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_freebayes/main.nf#BAM_VARIANT_CALLING_FREEBAYES/VCFLIB_VCFFILTER@1[vcf] Channel<Tuple> via vcf_filtered
+subworkflows/local/bam_variant_calling_freebayes/main.nf#BAM_VARIANT_CALLING_FREEBAYES/:emit:tbi emit "tbi" @70:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_freebayes/main.nf#BAM_VARIANT_CALLING_FREEBAYES/TABIX_VC_FREEBAYES_FILT@1[index] Channel<Tuple> via TABIX_VC_FREEBAYES_FILT.out.index
+bound @60:5 vcf_filtered

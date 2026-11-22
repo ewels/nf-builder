@@ -1,4 +1,5 @@
 workflow main.nf# typed
+statements 4, modelled 3
 main.nf#/:params params "params" @21:1
   out reads (reads): Channel<Sample>
   out transcriptome (transcriptome): Path

@@ -1,0 +1,60 @@
+workflow subworkflows/nf-core/fastq_align_hisat2/main.nf#FASTQ_ALIGN_HISAT2 legacy
+statements 2, modelled 2
+subworkflows/nf-core/fastq_align_hisat2/main.nf#FASTQ_ALIGN_HISAT2/:take:reads take "reads" @9:5
+  out out (out): -
+subworkflows/nf-core/fastq_align_hisat2/main.nf#FASTQ_ALIGN_HISAT2/:take:index take "index" @10:5
+  out out (out): -
+subworkflows/nf-core/fastq_align_hisat2/main.nf#FASTQ_ALIGN_HISAT2/:take:splicesites take "splicesites" @11:5
+  out out (out): -
+subworkflows/nf-core/fastq_align_hisat2/main.nf#FASTQ_ALIGN_HISAT2/:take:ch_fasta_fai take "ch_fasta_fai" @12:5
+  out out (out): -
+subworkflows/nf-core/fastq_align_hisat2/main.nf#FASTQ_ALIGN_HISAT2/:take:save_unaligned take "save_unaligned" @13:5
+  out out (out): -
+subworkflows/nf-core/fastq_align_hisat2/main.nf#FASTQ_ALIGN_HISAT2/HISAT2_ALIGN@1 call "HISAT2_ALIGN" callee=HISAT2_ALIGN:process:modelled:legacy @19:5
+  in $1 (tuple(meta, reads)): Tuple
+    <- subworkflows/nf-core/fastq_align_hisat2/main.nf#FASTQ_ALIGN_HISAT2/:take:reads[out] ? via reads
+  in $2 (tuple(meta2, index)): Tuple
+    <- subworkflows/nf-core/fastq_align_hisat2/main.nf#FASTQ_ALIGN_HISAT2/:take:index[out] ? via index
+  in $3 (tuple(meta3, splicesites)): Tuple
+    <- subworkflows/nf-core/fastq_align_hisat2/main.nf#FASTQ_ALIGN_HISAT2/:take:splicesites[out] ? via splicesites
+  in save_unaligned (save_unaligned): -
+    <- subworkflows/nf-core/fastq_align_hisat2/main.nf#FASTQ_ALIGN_HISAT2/:take:save_unaligned[out] ? via save_unaligned
+  out bam (bam): Channel<Tuple>
+  out summary (summary): Channel<Tuple>
+  out fastq (fastq): Channel<Tuple>
+  out versions_hisat2 (versions_hisat2): Channel<Tuple>
+  out versions_samtools (versions_samtools): Channel<Tuple>
+subworkflows/nf-core/fastq_align_hisat2/main.nf#FASTQ_ALIGN_HISAT2/BAM_SORT_STATS_SAMTOOLS@1 call "BAM_SORT_STATS_SAMTOOLS" callee=BAM_SORT_STATS_SAMTOOLS:workflow:modelled:legacy @24:5
+  in ch_bam (ch_bam): -
+    <- subworkflows/nf-core/fastq_align_hisat2/main.nf#FASTQ_ALIGN_HISAT2/HISAT2_ALIGN@1[bam] Channel<Tuple> via HISAT2_ALIGN.out.bam
+  in ch_fasta_fai (ch_fasta_fai): -
+    <- subworkflows/nf-core/fastq_align_hisat2/main.nf#FASTQ_ALIGN_HISAT2/:take:ch_fasta_fai[out] ? via ch_fasta_fai
+  out bam (bam): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out stats (stats): Channel<Tuple>
+  out flagstat (flagstat): Channel<Tuple>
+  out idxstats (idxstats): Channel<Tuple>
+subworkflows/nf-core/fastq_align_hisat2/main.nf#FASTQ_ALIGN_HISAT2/:emit:orig_bam emit "orig_bam" @27:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_align_hisat2/main.nf#FASTQ_ALIGN_HISAT2/HISAT2_ALIGN@1[bam] Channel<Tuple> via HISAT2_ALIGN.out.bam
+subworkflows/nf-core/fastq_align_hisat2/main.nf#FASTQ_ALIGN_HISAT2/:emit:summary emit "summary" @28:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_align_hisat2/main.nf#FASTQ_ALIGN_HISAT2/HISAT2_ALIGN@1[summary] Channel<Tuple> via HISAT2_ALIGN.out.summary
+subworkflows/nf-core/fastq_align_hisat2/main.nf#FASTQ_ALIGN_HISAT2/:emit:fastq emit "fastq" @29:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_align_hisat2/main.nf#FASTQ_ALIGN_HISAT2/HISAT2_ALIGN@1[fastq] Channel<Tuple> via HISAT2_ALIGN.out.fastq
+subworkflows/nf-core/fastq_align_hisat2/main.nf#FASTQ_ALIGN_HISAT2/:emit:bam emit "bam" @30:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_align_hisat2/main.nf#FASTQ_ALIGN_HISAT2/BAM_SORT_STATS_SAMTOOLS@1[bam] Channel<Tuple> via BAM_SORT_STATS_SAMTOOLS.out.bam
+subworkflows/nf-core/fastq_align_hisat2/main.nf#FASTQ_ALIGN_HISAT2/:emit:index emit "index" @31:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_align_hisat2/main.nf#FASTQ_ALIGN_HISAT2/BAM_SORT_STATS_SAMTOOLS@1[index] Channel<Tuple> via BAM_SORT_STATS_SAMTOOLS.out.index
+subworkflows/nf-core/fastq_align_hisat2/main.nf#FASTQ_ALIGN_HISAT2/:emit:stats emit "stats" @32:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_align_hisat2/main.nf#FASTQ_ALIGN_HISAT2/BAM_SORT_STATS_SAMTOOLS@1[stats] Channel<Tuple> via BAM_SORT_STATS_SAMTOOLS.out.stats
+subworkflows/nf-core/fastq_align_hisat2/main.nf#FASTQ_ALIGN_HISAT2/:emit:flagstat emit "flagstat" @33:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_align_hisat2/main.nf#FASTQ_ALIGN_HISAT2/BAM_SORT_STATS_SAMTOOLS@1[flagstat] Channel<Tuple> via BAM_SORT_STATS_SAMTOOLS.out.flagstat
+subworkflows/nf-core/fastq_align_hisat2/main.nf#FASTQ_ALIGN_HISAT2/:emit:idxstats emit "idxstats" @34:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_align_hisat2/main.nf#FASTQ_ALIGN_HISAT2/BAM_SORT_STATS_SAMTOOLS@1[idxstats] Channel<Tuple> via BAM_SORT_STATS_SAMTOOLS.out.idxstats

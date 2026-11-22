@@ -1,0 +1,75 @@
+workflow subworkflows/local/align_bowtie2/main.nf#ALIGN_BOWTIE2 legacy
+statements 5, modelled 5
+subworkflows/local/align_bowtie2/main.nf#ALIGN_BOWTIE2/:params params "params" @28:1
+  out save_unaligned (save_unaligned): -
+subworkflows/local/align_bowtie2/main.nf#ALIGN_BOWTIE2/:take:reads take "reads" @30:5
+  out out (out): -
+subworkflows/local/align_bowtie2/main.nf#ALIGN_BOWTIE2/:take:index take "index" @31:5
+  out out (out): -
+subworkflows/local/align_bowtie2/main.nf#ALIGN_BOWTIE2/:take:fasta_fai take "fasta_fai" @32:5
+  out out (out): -
+subworkflows/local/align_bowtie2/main.nf#ALIGN_BOWTIE2/.map@1 chain ".map" steps=map @41:9
+  in in (in): -
+    <- subworkflows/local/align_bowtie2/main.nf#ALIGN_BOWTIE2/:take:index[out] ? via index
+  out out (out): ?
+subworkflows/local/align_bowtie2/main.nf#ALIGN_BOWTIE2/BOWTIE2_ALIGN@1 call "BOWTIE2_ALIGN" callee=BOWTIE2_ALIGN:process:modelled:legacy @39:5
+  in $1 (tuple(meta, reads)): Tuple
+    <- subworkflows/local/align_bowtie2/main.nf#ALIGN_BOWTIE2/:take:reads[out] ? via reads
+  in $2 (tuple(meta2, index)): Tuple
+    <- subworkflows/local/align_bowtie2/main.nf#ALIGN_BOWTIE2/.map@1[out] ?
+  in $3 (tuple(meta3, fasta)): Tuple
+    = [ [:], [] ] : List
+  in save_unaligned (save_unaligned): -
+    <- subworkflows/local/align_bowtie2/main.nf#ALIGN_BOWTIE2/:params[save_unaligned] ? via params.save_unaligned
+  in sort_bam (sort_bam): -
+    = false : Boolean
+  out sam (sam): Channel<Tuple>
+  out bam (bam): Channel<Tuple>
+  out cram (cram): Channel<Tuple>
+  out csi (csi): Channel<Tuple>
+  out crai (crai): Channel<Tuple>
+  out log (log): Channel<Tuple>
+  out fastq (fastq): Channel<Tuple>
+  out versions_bowtie2 (versions_bowtie2): Channel<Tuple>
+  out versions_samtools (versions_samtools): Channel<Tuple>
+  out versions_pigz (versions_pigz): Channel<Tuple>
+subworkflows/local/align_bowtie2/main.nf#ALIGN_BOWTIE2/ch_percent_mapped chain ".map" steps=map @51:25
+  in in (in): -
+    <- subworkflows/local/align_bowtie2/main.nf#ALIGN_BOWTIE2/BOWTIE2_ALIGN@1[log] Channel<Tuple> via ch_log
+  out out (out): Channel<?>
+subworkflows/local/align_bowtie2/main.nf#ALIGN_BOWTIE2/BAM_SORT_STATS_SAMTOOLS@1 call "BAM_SORT_STATS_SAMTOOLS" callee=BAM_SORT_STATS_SAMTOOLS:workflow:modelled:legacy @56:5
+  in ch_bam (ch_bam): -
+    <- subworkflows/local/align_bowtie2/main.nf#ALIGN_BOWTIE2/BOWTIE2_ALIGN@1[bam] Channel<Tuple> via ch_orig_bam
+  in ch_fasta_fai (ch_fasta_fai): -
+    <- subworkflows/local/align_bowtie2/main.nf#ALIGN_BOWTIE2/:take:fasta_fai[out] ? via fasta_fai
+  out bam (bam): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out stats (stats): Channel<Tuple>
+  out flagstat (flagstat): Channel<Tuple>
+  out idxstats (idxstats): Channel<Tuple>
+subworkflows/local/align_bowtie2/main.nf#ALIGN_BOWTIE2/:emit:orig_bam emit "orig_bam" @59:5
+  in in (in): -
+    <- subworkflows/local/align_bowtie2/main.nf#ALIGN_BOWTIE2/BOWTIE2_ALIGN@1[bam] Channel<Tuple> via ch_orig_bam
+subworkflows/local/align_bowtie2/main.nf#ALIGN_BOWTIE2/:emit:log_final emit "log_final" @60:5
+  in in (in): -
+    <- subworkflows/local/align_bowtie2/main.nf#ALIGN_BOWTIE2/BOWTIE2_ALIGN@1[log] Channel<Tuple> via ch_log
+subworkflows/local/align_bowtie2/main.nf#ALIGN_BOWTIE2/:emit:bam emit "bam" @61:5
+  in in (in): -
+    <- subworkflows/local/align_bowtie2/main.nf#ALIGN_BOWTIE2/BAM_SORT_STATS_SAMTOOLS@1[bam] Channel<Tuple> via BAM_SORT_STATS_SAMTOOLS.out.bam
+subworkflows/local/align_bowtie2/main.nf#ALIGN_BOWTIE2/:emit:index emit "index" @62:5
+  in in (in): -
+    <- subworkflows/local/align_bowtie2/main.nf#ALIGN_BOWTIE2/BAM_SORT_STATS_SAMTOOLS@1[index] Channel<Tuple> via BAM_SORT_STATS_SAMTOOLS.out.index
+subworkflows/local/align_bowtie2/main.nf#ALIGN_BOWTIE2/:emit:stats emit "stats" @63:5
+  in in (in): -
+    <- subworkflows/local/align_bowtie2/main.nf#ALIGN_BOWTIE2/BAM_SORT_STATS_SAMTOOLS@1[stats] Channel<Tuple> via BAM_SORT_STATS_SAMTOOLS.out.stats
+subworkflows/local/align_bowtie2/main.nf#ALIGN_BOWTIE2/:emit:flagstat emit "flagstat" @64:5
+  in in (in): -
+    <- subworkflows/local/align_bowtie2/main.nf#ALIGN_BOWTIE2/BAM_SORT_STATS_SAMTOOLS@1[flagstat] Channel<Tuple> via BAM_SORT_STATS_SAMTOOLS.out.flagstat
+subworkflows/local/align_bowtie2/main.nf#ALIGN_BOWTIE2/:emit:idxstats emit "idxstats" @65:5
+  in in (in): -
+    <- subworkflows/local/align_bowtie2/main.nf#ALIGN_BOWTIE2/BAM_SORT_STATS_SAMTOOLS@1[idxstats] Channel<Tuple> via BAM_SORT_STATS_SAMTOOLS.out.idxstats
+subworkflows/local/align_bowtie2/main.nf#ALIGN_BOWTIE2/:emit:percent_mapped emit "percent_mapped" @66:5
+  in in (in): -
+    <- subworkflows/local/align_bowtie2/main.nf#ALIGN_BOWTIE2/ch_percent_mapped[out] Channel<?> via ch_percent_mapped
+bound @47:5 ch_orig_bam
+bound @48:5 ch_log

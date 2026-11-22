@@ -1,0 +1,501 @@
+workflow subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL legacy
+statements 48, modelled 48
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:tools take "tools" @20:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:bam take "bam" @21:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:cram take "cram" @22:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:bwa take "bwa" @23:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:cf_chrom_len take "cf_chrom_len" @24:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:chr_files take "chr_files" @25:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:cnvkit_reference take "cnvkit_reference" @26:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:dbsnp take "dbsnp" @27:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:dbsnp_tbi take "dbsnp_tbi" @28:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:dict take "dict" @29:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:fasta take "fasta" @30:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:fasta_fai take "fasta_fai" @31:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:force_call_alleles take "force_call_alleles" @32:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:force_call_alleles_tbi take "force_call_alleles_tbi" @33:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:germline_resource take "germline_resource" @34:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:germline_resource_tbi take "germline_resource_tbi" @35:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:contamination_resource take "contamination_resource" @36:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:contamination_resource_tbi take "contamination_resource_tbi" @37:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:intervals take "intervals" @38:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:intervals_bed_combined take "intervals_bed_combined" @39:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:intervals_bed_gz_tbi_combined take "intervals_bed_gz_tbi_combined" @40:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:mappability take "mappability" @41:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:msisensor2_models take "msisensor2_models" @42:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:panel_of_normals take "panel_of_normals" @43:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:panel_of_normals_tbi take "panel_of_normals_tbi" @44:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:joint_mutect2 take "joint_mutect2" @45:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:wes take "wes" @46:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:contamination_resource_provided take "contamination_resource_provided" @47:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/out_msisensor2 factory "channel.empty" factory=channel.empty @53:22
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/vcf_freebayes factory "channel.empty" factory=channel.empty @54:22
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/vcf_lofreq factory "channel.empty" factory=channel.empty @55:22
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/vcf_manta factory "channel.empty" factory=channel.empty @56:22
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/vcf_mpileup factory "channel.empty" factory=channel.empty @57:22
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/vcf_mutect2 factory "channel.empty" factory=channel.empty @58:22
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/vcf_tiddit factory "channel.empty" factory=channel.empty @59:22
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/vcf_tnscope factory "channel.empty" factory=channel.empty @60:22
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/tbi_freebayes factory "channel.empty" factory=channel.empty @63:22
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/tbi_lofreq factory "channel.empty" factory=channel.empty @64:22
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/tbi_manta factory "channel.empty" factory=channel.empty @65:22
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/tbi_mpileup factory "channel.empty" factory=channel.empty @66:22
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/tbi_mutect2 factory "channel.empty" factory=channel.empty @67:22
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/tbi_tiddit factory "channel.empty" factory=channel.empty @68:22
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/tbi_tnscope factory "channel.empty" factory=channel.empty @69:22
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/BAM_VARIANT_CALLING_MPILEUP@1 call "BAM_VARIANT_CALLING_MPILEUP" callee=BAM_VARIANT_CALLING_MPILEUP:workflow:modelled:legacy @73:9
+  guards then of tools && tools.split(',').contains('mpileup') || tools.split(',').contains('controlfreec')
+  in cram (cram): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:cram[out] ? via cram
+  in dict (dict): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:dict[out] ? via dict
+  in fasta (fasta): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:fasta[out] ? via fasta
+  in fai (fai): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:fasta_fai[out] ? via fasta_fai
+  in intervals (intervals): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:intervals[out] ? via intervals
+  out mpileup (mpileup): Channel<?>
+  out vcf (vcf): Channel<?>
+  out tbi (tbi): Channel<?>
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/.map@1 chain ".map" steps=map @87:13
+  guards then of tools && tools.split(',').contains('controlfreec')
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/BAM_VARIANT_CALLING_MPILEUP@1[mpileup] Channel<?> via BAM_VARIANT_CALLING_MPILEUP.out.mpileup
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/.map@2 chain ".map" steps=map @88:13
+  guards then of tools && tools.split(',').contains('controlfreec')
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:fasta[out] ? via fasta
+  out out (out): ?
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/BAM_VARIANT_CALLING_TUMOR_ONLY_CONTROLFREEC@1 call "BAM_VARIANT_CALLING_TUMOR_ONLY_CONTROLFREEC" callee=BAM_VARIANT_CALLING_TUMOR_ONLY_CONTROLFREEC:workflow:modelled:legacy @86:9
+  guards then of tools && tools.split(',').contains('controlfreec')
+  in controlfreec_input (controlfreec_input): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/.map@1[out] Channel<?>
+  in fasta (fasta): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/.map@2[out] ?
+  in fasta_fai (fasta_fai): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:cf_chrom_len[out] ? via cf_chrom_len indirect
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:fasta_fai[out] ? via fasta_fai indirect
+  in dbsnp (dbsnp): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:dbsnp[out] ? via dbsnp
+  in dbsnp_tbi (dbsnp_tbi): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:dbsnp_tbi[out] ? via dbsnp_tbi
+  in chr_files (chr_files): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:chr_files[out] ? via chr_files
+  in mappability (mappability): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:mappability[out] ? via mappability
+  in intervals_bed (intervals_bed): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:intervals_bed_combined[out] ? via intervals_bed_combined indirect
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:wes[out] ? via wes indirect
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/.map@3 chain ".map" steps=map @102:13
+  guards then of tools && tools.split(',').contains('cnvkit')
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:bam[out] ? via bam
+  out out (out): ?
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/.map@4 chain ".map" steps=map @106:13
+  guards then of tools && tools.split(',').contains('cnvkit')
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:cnvkit_reference[out] ? via cnvkit_reference
+  out out (out): ?
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/BAM_VARIANT_CALLING_CNVKIT@1 call "BAM_VARIANT_CALLING_CNVKIT" callee=BAM_VARIANT_CALLING_CNVKIT:workflow:modelled:legacy @101:9
+  guards then of tools && tools.split(',').contains('cnvkit')
+  in cram (cram): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/.map@3[out] ?
+  in fasta (fasta): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:fasta[out] ? via fasta
+  in fasta_fai (fasta_fai): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:fasta_fai[out] ? via fasta_fai
+  in targets (targets): -
+    = [[id: "null"], []] : List
+  in reference (reference): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/.map@4[out] ?
+  out cnv_calls_raw (cnv_calls_raw): Channel<Tuple>
+  out cnv_calls_export (cnv_calls_export): Channel<Tuple>
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/.map@5 chain ".map" steps=map @113:13
+  guards then of tools && tools.split(',').contains('freebayes')
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:cram[out] ? via cram
+  out out (out): ?
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/BAM_VARIANT_CALLING_FREEBAYES@1 call "BAM_VARIANT_CALLING_FREEBAYES" callee=BAM_VARIANT_CALLING_FREEBAYES:workflow:modelled:legacy @112:9
+  guards then of tools && tools.split(',').contains('freebayes')
+  in ch_cram (ch_cram): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/.map@5[out] ?
+  in ch_dict (ch_dict): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:dict[out] ? via dict
+  in ch_fasta (ch_fasta): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:fasta[out] ? via fasta
+  in ch_fasta_fai (ch_fasta_fai): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:fasta_fai[out] ? via fasta_fai
+  in ch_intervals (ch_intervals): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:intervals[out] ? via intervals
+  out vcf_unfiltered (vcf_unfiltered): Channel<?>
+  out vcf (vcf): Channel<Tuple>
+  out tbi (tbi): Channel<Tuple>
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/MSISENSOR2_MSI@1 call "MSISENSOR2_MSI" callee=MSISENSOR2_MSI:process:modelled:legacy @127:9
+  guards then of tools && tools.split(',').contains('msisensor2')
+  in $1 (tuple(meta, tumor_bam, tumor_bam_index)): Tuple
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:bam[out] ? via bam
+  in $2 (tuple(meta2, models)): Tuple
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:msisensor2_models[out] ? via msisensor2_models
+  out msi (msi): Channel<Tuple>
+  out distribution (distribution): Channel<Tuple>
+  out somatic (somatic): Channel<Tuple>
+  out versions_msisensor2 (versions_msisensor2): Channel<Tuple>
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/out_msisensor2~2 chain ".mix" steps=mix @129:26
+  guards then of tools && tools.split(',').contains('msisensor2')
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/out_msisensor2[out] Channel<?> via out_msisensor2
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/MSISENSOR2_MSI@1[distribution] Channel<Tuple> via MSISENSOR2_MSI.out.distribution
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/out_msisensor2~3 chain ".mix" steps=mix @130:26
+  guards then of tools && tools.split(',').contains('msisensor2')
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/out_msisensor2~2[out] Channel<?> via out_msisensor2
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/MSISENSOR2_MSI@1[somatic] Channel<Tuple> via MSISENSOR2_MSI.out.somatic
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/cram_tumor_only chain ".map" steps=map @134:23
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:cram[out] ? via cram
+  out out (out): ?
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/BAM_VARIANT_CALLING_MUTECT2@1 call "BAM_VARIANT_CALLING_MUTECT2" callee=BAM_VARIANT_CALLING_MUTECT2:workflow:modelled:legacy @138:9
+  guards then of tools && tools.split(',').contains('mutect2')
+  in cram (cram): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/cram_tumor_only[out] ? via cram_tumor_only
+  in fasta (fasta): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:fasta[out] ? via fasta
+  in fai (fai): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:fasta_fai[out] ? via fasta_fai
+  in dict (dict): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:dict[out] ? via dict
+  in force_call_alleles (force_call_alleles): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:force_call_alleles[out] ? via force_call_alleles
+  in force_call_alleles_tbi (force_call_alleles_tbi): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:force_call_alleles_tbi[out] ? via force_call_alleles_tbi
+  in germline_resource (germline_resource): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:germline_resource[out] ? via germline_resource
+  in germline_resource_tbi (germline_resource_tbi): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:germline_resource_tbi[out] ? via germline_resource_tbi
+  in contamination_resource (contamination_resource): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:contamination_resource[out] ? via contamination_resource
+  in contamination_resource_tbi (contamination_resource_tbi): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:contamination_resource_tbi[out] ? via contamination_resource_tbi
+  in panel_of_normals (panel_of_normals): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:panel_of_normals[out] ? via panel_of_normals
+  in panel_of_normals_tbi (panel_of_normals_tbi): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:panel_of_normals_tbi[out] ? via panel_of_normals_tbi
+  in intervals (intervals): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:intervals[out] ? via intervals
+  in joint_mutect2 (joint_mutect2): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:joint_mutect2[out] ? via joint_mutect2
+  in contamination_resource_provided (contamination_resource_provided): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:contamination_resource_provided[out] ? via contamination_resource_provided
+  out vcf (vcf): Channel<Tuple>
+  out tbi (tbi): Channel<Tuple>
+  out stats_filtered (stats_filtered): Channel<Tuple>
+  out artifact_priors (artifact_priors): Channel<Tuple>
+  out pileup_table_normal (pileup_table_normal): ?
+  out pileup_table_tumor (pileup_table_tumor): ?
+  out contamination_table (contamination_table): ?
+  out segmentation_table (segmentation_table): ?
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/cram_parabricks_mutectcaller chain ".filter" steps=filter @161:36
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/cram_tumor_only[out] ? via cram_tumor_only
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER@1 call "BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER" callee=BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER:workflow:modelled:legacy @165:5
+  in cram (cram): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/cram_parabricks_mutectcaller[out] Channel<?> via cram_parabricks_mutectcaller
+  in fasta (fasta): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:fasta[out] ? via fasta
+  in fasta_fai (fasta_fai): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:fasta_fai[out] ? via fasta_fai
+  in dict (dict): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:dict[out] ? via dict
+  in force_call_alleles (force_call_alleles): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:force_call_alleles[out] ? via force_call_alleles
+  in force_call_alleles_tbi (force_call_alleles_tbi): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:force_call_alleles_tbi[out] ? via force_call_alleles_tbi
+  in germline_resource (germline_resource): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:germline_resource[out] ? via germline_resource
+  in germline_resource_tbi (germline_resource_tbi): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:germline_resource_tbi[out] ? via germline_resource_tbi
+  in contamination_resource (contamination_resource): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:contamination_resource[out] ? via contamination_resource
+  in contamination_resource_tbi (contamination_resource_tbi): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:contamination_resource_tbi[out] ? via contamination_resource_tbi
+  in panel_of_normals (panel_of_normals): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:panel_of_normals[out] ? via panel_of_normals
+  in panel_of_normals_tbi (panel_of_normals_tbi): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:panel_of_normals_tbi[out] ? via panel_of_normals_tbi
+  in intervals_bed_combined (intervals_bed_combined): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:intervals_bed_combined[out] ? via intervals_bed_combined
+  in intervals (intervals): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:intervals[out] ? via intervals
+  in contamination_resource_provided (contamination_resource_provided): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:contamination_resource_provided[out] ? via contamination_resource_provided
+  out vcf (vcf): Channel<Tuple>
+  out tbi (tbi): Channel<Tuple>
+  out stats (stats): Channel<Tuple>
+  out stats_filtered (stats_filtered): Channel<Tuple>
+  out artifact_priors (artifact_priors): Channel<Tuple>
+  out contamination_table (contamination_table): ?
+  out segmentation_table (segmentation_table): ?
+  out pileup_table_normal (pileup_table_normal): ?
+  out pileup_table_tumor (pileup_table_tumor): ?
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/BAM_VARIANT_CALLING_TUMOR_ONLY_LOFREQ@1 call "BAM_VARIANT_CALLING_TUMOR_ONLY_LOFREQ" callee=BAM_VARIANT_CALLING_TUMOR_ONLY_LOFREQ:workflow:modelled:legacy @188:9
+  guards then of tools && tools.split(',').contains('lofreq')
+  in input (input): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:cram[out] ? via cram
+  in fasta (fasta): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:fasta[out] ? via fasta
+  in fai (fai): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:fasta_fai[out] ? via fasta_fai
+  in intervals (intervals): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:intervals[out] ? via intervals
+  in dict (dict): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:dict[out] ? via dict
+  out vcf (vcf): Channel<?>
+  out tbi (tbi): Channel<?>
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/BAM_VARIANT_CALLING_TUMOR_ONLY_MANTA@1 call "BAM_VARIANT_CALLING_TUMOR_ONLY_MANTA" callee=BAM_VARIANT_CALLING_TUMOR_ONLY_MANTA:workflow:modelled:legacy @201:9
+  guards then of tools && tools.split(',').contains('manta')
+  in cram (cram): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:cram[out] ? via cram
+  in fasta (fasta): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:fasta[out] ? via fasta
+  in fasta_fai (fasta_fai): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:fasta_fai[out] ? via fasta_fai
+  in intervals (intervals): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:intervals_bed_gz_tbi_combined[out] ? via intervals_bed_gz_tbi_combined
+  out candidate_small_indels_vcf (candidate_small_indels_vcf): Channel<?>
+  out candidate_small_indels_vcf_tbi (candidate_small_indels_vcf_tbi): Channel<?>
+  out candidate_sv_vcf (candidate_sv_vcf): Channel<?>
+  out candidate_sv_vcf_tbi (candidate_sv_vcf_tbi): Channel<?>
+  out tumor_sv_vcf (tumor_sv_vcf): Channel<?>
+  out tumor_sv_vcf_tbi (tumor_sv_vcf_tbi): Channel<?>
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/BAM_VARIANT_CALLING_SINGLE_TIDDIT@1 call "BAM_VARIANT_CALLING_SINGLE_TIDDIT" callee=BAM_VARIANT_CALLING_SINGLE_TIDDIT:workflow:modelled:legacy @214:9
+  guards then of tools && tools.split(',').contains('tiddit')
+  in cram (cram): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:cram[out] ? via cram
+  in fasta (fasta): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:fasta[out] ? via fasta
+  in fasta_fai (fasta_fai): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:fasta_fai[out] ? via fasta_fai
+  in bwa (bwa): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:bwa[out] ? via bwa
+  out ploidy (ploidy): Channel<Tuple>
+  out vcf (vcf): Channel<?>
+  out tbi (tbi): Channel<?>
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/BAM_VARIANT_CALLING_TUMOR_ONLY_TNSCOPE@1 call "BAM_VARIANT_CALLING_TUMOR_ONLY_TNSCOPE" callee=BAM_VARIANT_CALLING_TUMOR_ONLY_TNSCOPE:workflow:modelled:legacy @227:9
+  guards then of tools && tools.split(',').contains('sentieon_tnscope')
+  in input (input): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:cram[out] ? via cram
+  in fasta (fasta): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:fasta[out] ? via fasta
+  in fai (fai): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:fasta_fai[out] ? via fasta_fai
+  in dict (dict): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:dict[out] ? via dict
+  in germline_resource (germline_resource): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:germline_resource[out] ? via germline_resource
+  in germline_resource_tbi (germline_resource_tbi): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:germline_resource_tbi[out] ? via germline_resource_tbi
+  in panel_of_normals (panel_of_normals): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:panel_of_normals[out] ? via panel_of_normals
+  in panel_of_normals_tbi (panel_of_normals_tbi): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:panel_of_normals_tbi[out] ? via panel_of_normals_tbi
+  in intervals (intervals): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:take:intervals[out] ? via intervals
+  out vcf (vcf): Channel<?>
+  out tbi (tbi): Channel<?>
+  out index (index): Channel<?>
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/channel.empty@1 factory "channel.empty" factory=channel.empty @243:15
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/vcf_all chain ".mix" steps=mix @243:15
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/channel.empty@1[out] Channel<?>
+  in 1:1 (mix(1)): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/vcf_freebayes[out] Channel<?> via vcf_freebayes indirect
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/BAM_VARIANT_CALLING_FREEBAYES@1[vcf] Channel<Tuple> via vcf_freebayes indirect
+  in 1:2 (mix(2)): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/vcf_lofreq[out] Channel<?> via vcf_lofreq indirect
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/BAM_VARIANT_CALLING_TUMOR_ONLY_LOFREQ@1[vcf] Channel<?> via vcf_lofreq indirect
+  in 1:3 (mix(3)): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/vcf_manta[out] Channel<?> via vcf_manta indirect
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/BAM_VARIANT_CALLING_TUMOR_ONLY_MANTA@1[tumor_sv_vcf] Channel<?> via vcf_manta indirect
+  in 1:4 (mix(4)): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/vcf_mutect2[out] Channel<?> via vcf_mutect2 indirect
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/BAM_VARIANT_CALLING_MUTECT2@1[vcf] Channel<Tuple> via vcf_mutect2 indirect
+  in 1:5 (mix(5)): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/vcf_mpileup[out] Channel<?> via vcf_mpileup indirect
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/BAM_VARIANT_CALLING_MPILEUP@1[vcf] Channel<?> via vcf_mpileup indirect
+  in 1:6 (mix(6)): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER@1[vcf] Channel<Tuple> via vcf_parabricks_mutectcaller
+  in 1:7 (mix(7)): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/vcf_tiddit[out] Channel<?> via vcf_tiddit indirect
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/BAM_VARIANT_CALLING_SINGLE_TIDDIT@1[vcf] Channel<?> via vcf_tiddit indirect
+  in 1:8 (mix(8)): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/vcf_tnscope[out] Channel<?> via vcf_tnscope indirect
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/BAM_VARIANT_CALLING_TUMOR_ONLY_TNSCOPE@1[vcf] Channel<?> via vcf_tnscope indirect
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/channel.empty@2 factory "channel.empty" factory=channel.empty @255:15
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/tbi_all chain ".mix" steps=mix @255:15
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/channel.empty@2[out] Channel<?>
+  in 1:1 (mix(1)): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/tbi_freebayes[out] Channel<?> via tbi_freebayes indirect
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/BAM_VARIANT_CALLING_FREEBAYES@1[tbi] Channel<Tuple> via tbi_freebayes indirect
+  in 1:2 (mix(2)): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/tbi_lofreq[out] Channel<?> via tbi_lofreq indirect
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/BAM_VARIANT_CALLING_TUMOR_ONLY_LOFREQ@1[tbi] Channel<?> via tbi_lofreq indirect
+  in 1:3 (mix(3)): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/tbi_manta[out] Channel<?> via tbi_manta indirect
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/BAM_VARIANT_CALLING_TUMOR_ONLY_MANTA@1[tumor_sv_vcf_tbi] Channel<?> via tbi_manta indirect
+  in 1:4 (mix(4)): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/tbi_mutect2[out] Channel<?> via tbi_mutect2 indirect
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/BAM_VARIANT_CALLING_MUTECT2@1[tbi] Channel<Tuple> via tbi_mutect2 indirect
+  in 1:5 (mix(5)): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/tbi_mpileup[out] Channel<?> via tbi_mpileup indirect
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/BAM_VARIANT_CALLING_MPILEUP@1[tbi] Channel<?> via tbi_mpileup indirect
+  in 1:6 (mix(6)): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER@1[tbi] Channel<Tuple> via tbi_parabricks_mutectcaller
+  in 1:7 (mix(7)): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/tbi_tiddit[out] Channel<?> via tbi_tiddit indirect
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/BAM_VARIANT_CALLING_SINGLE_TIDDIT@1[tbi] Channel<?> via tbi_tiddit indirect
+  in 1:8 (mix(8)): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/tbi_tnscope[out] Channel<?> via tbi_tnscope indirect
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/BAM_VARIANT_CALLING_TUMOR_ONLY_TNSCOPE@1[tbi] Channel<?> via tbi_tnscope indirect
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:emit:out_msisensor2 emit "out_msisensor2" @268:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/out_msisensor2[out] Channel<?> via out_msisensor2 indirect
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/out_msisensor2~3[out] Channel<?> via out_msisensor2 indirect
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:emit:vcf_all emit "vcf_all" @269:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/vcf_all[out] Channel<?> via vcf_all
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:emit:tbi_all emit "tbi_all" @270:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/tbi_all[out] Channel<?> via tbi_all
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:emit:vcf_freebayes emit "vcf_freebayes" @271:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/vcf_freebayes[out] Channel<?> via vcf_freebayes indirect
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/BAM_VARIANT_CALLING_FREEBAYES@1[vcf] Channel<Tuple> via vcf_freebayes indirect
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:emit:vcf_lofreq emit "vcf_lofreq" @272:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/vcf_lofreq[out] Channel<?> via vcf_lofreq indirect
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/BAM_VARIANT_CALLING_TUMOR_ONLY_LOFREQ@1[vcf] Channel<?> via vcf_lofreq indirect
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:emit:vcf_manta emit "vcf_manta" @273:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/vcf_manta[out] Channel<?> via vcf_manta indirect
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/BAM_VARIANT_CALLING_TUMOR_ONLY_MANTA@1[tumor_sv_vcf] Channel<?> via vcf_manta indirect
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:emit:vcf_mpileup emit "vcf_mpileup" @274:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/vcf_mpileup[out] Channel<?> via vcf_mpileup indirect
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/BAM_VARIANT_CALLING_MPILEUP@1[vcf] Channel<?> via vcf_mpileup indirect
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:emit:vcf_mutect2 emit "vcf_mutect2" @275:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/vcf_mutect2[out] Channel<?> via vcf_mutect2 indirect
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/BAM_VARIANT_CALLING_MUTECT2@1[vcf] Channel<Tuple> via vcf_mutect2 indirect
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:emit:vcf_parabricks_mutectcaller emit "vcf_parabricks_mutectcaller" @276:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER@1[vcf] Channel<Tuple> via vcf_parabricks_mutectcaller
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:emit:vcf_tiddit emit "vcf_tiddit" @277:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/vcf_tiddit[out] Channel<?> via vcf_tiddit indirect
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/BAM_VARIANT_CALLING_SINGLE_TIDDIT@1[vcf] Channel<?> via vcf_tiddit indirect
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:emit:vcf_tnscope emit "vcf_tnscope" @278:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/vcf_tnscope[out] Channel<?> via vcf_tnscope indirect
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/BAM_VARIANT_CALLING_TUMOR_ONLY_TNSCOPE@1[vcf] Channel<?> via vcf_tnscope indirect
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:emit:tbi_freebayes emit "tbi_freebayes" @279:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/tbi_freebayes[out] Channel<?> via tbi_freebayes indirect
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/BAM_VARIANT_CALLING_FREEBAYES@1[tbi] Channel<Tuple> via tbi_freebayes indirect
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:emit:tbi_lofreq emit "tbi_lofreq" @280:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/tbi_lofreq[out] Channel<?> via tbi_lofreq indirect
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/BAM_VARIANT_CALLING_TUMOR_ONLY_LOFREQ@1[tbi] Channel<?> via tbi_lofreq indirect
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:emit:tbi_manta emit "tbi_manta" @281:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/tbi_manta[out] Channel<?> via tbi_manta indirect
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/BAM_VARIANT_CALLING_TUMOR_ONLY_MANTA@1[tumor_sv_vcf_tbi] Channel<?> via tbi_manta indirect
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:emit:tbi_mpileup emit "tbi_mpileup" @282:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/tbi_mpileup[out] Channel<?> via tbi_mpileup indirect
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/BAM_VARIANT_CALLING_MPILEUP@1[tbi] Channel<?> via tbi_mpileup indirect
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:emit:tbi_mutect2 emit "tbi_mutect2" @283:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/tbi_mutect2[out] Channel<?> via tbi_mutect2 indirect
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/BAM_VARIANT_CALLING_MUTECT2@1[tbi] Channel<Tuple> via tbi_mutect2 indirect
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:emit:tbi_parabricks_mutectcaller emit "tbi_parabricks_mutectcaller" @284:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER@1[tbi] Channel<Tuple> via tbi_parabricks_mutectcaller
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:emit:tbi_tiddit emit "tbi_tiddit" @285:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/tbi_tiddit[out] Channel<?> via tbi_tiddit indirect
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/BAM_VARIANT_CALLING_SINGLE_TIDDIT@1[tbi] Channel<?> via tbi_tiddit indirect
+subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/:emit:tbi_tnscope emit "tbi_tnscope" @286:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/tbi_tnscope[out] Channel<?> via tbi_tnscope indirect
+    <- subworkflows/local/bam_variant_calling_tumor_only_all/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_ALL/BAM_VARIANT_CALLING_TUMOR_ONLY_TNSCOPE@1[tbi] Channel<?> via tbi_tnscope indirect
+bound @80:9 vcf_mpileup
+bound @81:9 tbi_mpileup
+bound @120:9 vcf_freebayes
+bound @121:9 tbi_freebayes
+bound @156:9 vcf_mutect2
+bound @157:9 tbi_mutect2
+bound @183:5 vcf_parabricks_mutectcaller
+bound @184:5 tbi_parabricks_mutectcaller
+bound @195:9 vcf_lofreq
+bound @196:9 tbi_lofreq
+bound @208:9 vcf_manta
+bound @209:9 tbi_manta
+bound @221:9 vcf_tiddit
+bound @222:9 tbi_tiddit
+bound @239:9 vcf_tnscope
+bound @240:9 tbi_tnscope

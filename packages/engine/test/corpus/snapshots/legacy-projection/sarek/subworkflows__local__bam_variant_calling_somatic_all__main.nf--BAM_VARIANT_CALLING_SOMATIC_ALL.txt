@@ -1,0 +1,714 @@
+workflow subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL legacy
+statements 66, modelled 66
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:tools take "tools" @25:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:bam take "bam" @26:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:cram take "cram" @27:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:bwa take "bwa" @28:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:cf_chrom_len take "cf_chrom_len" @29:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:chr_files take "chr_files" @30:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:dbsnp take "dbsnp" @31:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:dbsnp_tbi take "dbsnp_tbi" @32:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:dict take "dict" @33:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:fasta take "fasta" @34:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:fasta_fai take "fasta_fai" @35:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:force_call_alleles take "force_call_alleles" @36:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:force_call_alleles_tbi take "force_call_alleles_tbi" @37:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:germline_resource take "germline_resource" @38:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:germline_resource_tbi take "germline_resource_tbi" @39:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:contamination_resource take "contamination_resource" @40:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:contamination_resource_tbi take "contamination_resource_tbi" @41:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:intervals take "intervals" @42:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:intervals_bed_gz_tbi take "intervals_bed_gz_tbi" @43:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:intervals_bed_combined take "intervals_bed_combined" @44:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:intervals_bed_gz_tbi_combined take "intervals_bed_gz_tbi_combined" @45:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:mappability take "mappability" @46:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:msisensorpro_scan take "msisensorpro_scan" @47:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:panel_of_normals take "panel_of_normals" @48:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:panel_of_normals_tbi take "panel_of_normals_tbi" @49:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:allele_files take "allele_files" @50:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:loci_files take "loci_files" @51:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:gc_file take "gc_file" @52:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:rt_file take "rt_file" @53:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:joint_mutect2 take "joint_mutect2" @54:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:wes take "wes" @55:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:contamination_resource_provided take "contamination_resource_provided" @56:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/out_indexcov factory "channel.empty" factory=channel.empty @62:24
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/out_msisensorpro factory "channel.empty" factory=channel.empty @63:24
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/vcf_freebayes factory "channel.empty" factory=channel.empty @64:24
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/vcf_manta factory "channel.empty" factory=channel.empty @65:24
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/vcf_muse factory "channel.empty" factory=channel.empty @66:24
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/vcf_mutect2 factory "channel.empty" factory=channel.empty @67:24
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/vcf_strelka factory "channel.empty" factory=channel.empty @68:24
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/vcf_tiddit factory "channel.empty" factory=channel.empty @69:24
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/vcf_tnscope factory "channel.empty" factory=channel.empty @70:24
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/tbi_freebayes factory "channel.empty" factory=channel.empty @71:24
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/tbi_manta factory "channel.empty" factory=channel.empty @72:24
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/tbi_muse factory "channel.empty" factory=channel.empty @73:24
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/tbi_mutect2 factory "channel.empty" factory=channel.empty @74:24
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/tbi_strelka factory "channel.empty" factory=channel.empty @75:24
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/tbi_tiddit factory "channel.empty" factory=channel.empty @76:24
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/tbi_tnscope factory "channel.empty" factory=channel.empty @77:24
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/.map@1 chain ".map" steps=map @85:13
+  guards then of tools && tools.split(',').contains('ascat')
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:fasta[out] ? via fasta
+  out out (out): ?
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/BAM_VARIANT_CALLING_SOMATIC_ASCAT@1 call "BAM_VARIANT_CALLING_SOMATIC_ASCAT" callee=BAM_VARIANT_CALLING_SOMATIC_ASCAT:workflow:modelled:legacy @80:9
+  guards then of tools && tools.split(',').contains('ascat')
+  in cram_pair (cram_pair): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:cram[out] ? via cram
+  in allele_files (allele_files): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:allele_files[out] ? via allele_files
+  in loci_files (loci_files): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:loci_files[out] ? via loci_files
+  in intervals_bed (intervals_bed): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:intervals_bed_combined[out] ? via intervals_bed_combined indirect
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:wes[out] ? via wes indirect
+  in fasta (fasta): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/.map@1[out] ?
+  in gc_file (gc_file): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:gc_file[out] ? via gc_file
+  in rt_file (rt_file): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:rt_file[out] ? via rt_file
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/cram_normal chain ".map" steps=map @94:23
+  guards then of tools && tools.split(',').contains('controlfreec')
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:cram[out] ? via cram
+  out out (out): ?
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/cram_tumor chain ".map" steps=map @95:22
+  guards then of tools && tools.split(',').contains('controlfreec')
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:cram[out] ? via cram
+  out out (out): ?
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/MPILEUP_NORMAL@1 call "MPILEUP_NORMAL" callee=MPILEUP_NORMAL:workflow:modelled:legacy @97:9
+  guards then of tools && tools.split(',').contains('controlfreec')
+  in cram (cram): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/cram_normal[out] ? via cram_normal
+  in dict (dict): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:dict[out] ? via dict
+  in fasta (fasta): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:fasta[out] ? via fasta
+  in fai (fai): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:fasta_fai[out] ? via fasta_fai
+  in intervals (intervals): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:intervals[out] ? via intervals
+  out mpileup (mpileup): Channel<?>
+  out vcf (vcf): Channel<?>
+  out tbi (tbi): Channel<?>
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/MPILEUP_TUMOR@1 call "MPILEUP_TUMOR" callee=MPILEUP_TUMOR:workflow:modelled:legacy @105:9
+  guards then of tools && tools.split(',').contains('controlfreec')
+  in cram (cram): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/cram_tumor[out] ? via cram_tumor
+  in dict (dict): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:dict[out] ? via dict
+  in fasta (fasta): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:fasta[out] ? via fasta
+  in fai (fai): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:fasta_fai[out] ? via fasta_fai
+  in intervals (intervals): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:intervals[out] ? via intervals
+  out mpileup (mpileup): Channel<?>
+  out vcf (vcf): Channel<?>
+  out tbi (tbi): Channel<?>
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/mpileup_pair chain ".cross.map" steps=cross,map @115:24
+  guards then of tools && tools.split(',').contains('controlfreec')
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/MPILEUP_NORMAL@1[mpileup] Channel<?> via mpileup_normal
+  in 1:1 (cross(right)): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/MPILEUP_TUMOR@1[mpileup] Channel<?> via mpileup_tumor
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/.map@2 chain ".map" steps=map @119:13
+  guards then of tools && tools.split(',').contains('controlfreec')
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:fasta[out] ? via fasta
+  out out (out): ?
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/BAM_VARIANT_CALLING_SOMATIC_CONTROLFREEC@1 call "BAM_VARIANT_CALLING_SOMATIC_CONTROLFREEC" callee=BAM_VARIANT_CALLING_SOMATIC_CONTROLFREEC:workflow:modelled:legacy @117:9
+  guards then of tools && tools.split(',').contains('controlfreec')
+  in controlfreec_input (controlfreec_input): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/mpileup_pair[out] Channel<?> via mpileup_pair
+  in fasta (fasta): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/.map@2[out] ?
+  in fasta_fai (fasta_fai): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:cf_chrom_len[out] ? via cf_chrom_len indirect
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:fasta_fai[out] ? via fasta_fai indirect
+  in dbsnp (dbsnp): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:dbsnp[out] ? via dbsnp
+  in dbsnp_tbi (dbsnp_tbi): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:dbsnp_tbi[out] ? via dbsnp_tbi
+  in chr_files (chr_files): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:chr_files[out] ? via chr_files
+  in mappability (mappability): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:mappability[out] ? via mappability
+  in intervals_bed (intervals_bed): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:intervals_bed_combined[out] ? via intervals_bed_combined indirect
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:wes[out] ? via wes indirect
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/.map@3 chain ".map" steps=map @133:13
+  guards then of tools && tools.split(',').contains('cnvkit')
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:bam[out] ? via bam
+  out out (out): ?
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/.map@4 chain ".map" steps=map @136:13
+  guards then of tools && tools.split(',').contains('cnvkit')
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:intervals_bed_combined[out] ? via intervals_bed_combined
+  out out (out): ?
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/BAM_VARIANT_CALLING_CNVKIT@1 call "BAM_VARIANT_CALLING_CNVKIT" callee=BAM_VARIANT_CALLING_CNVKIT:workflow:modelled:legacy @132:9
+  guards then of tools && tools.split(',').contains('cnvkit')
+  in cram (cram): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/.map@3[out] ?
+  in fasta (fasta): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:fasta[out] ? via fasta
+  in fasta_fai (fasta_fai): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:fasta_fai[out] ? via fasta_fai
+  in targets (targets): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/.map@4[out] ?
+  in reference (reference): -
+    = [[id: "null"], []] : List
+  out cnv_calls_raw (cnv_calls_raw): Channel<Tuple>
+  out cnv_calls_export (cnv_calls_export): Channel<Tuple>
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/BAM_VARIANT_CALLING_FREEBAYES@1 call "BAM_VARIANT_CALLING_FREEBAYES" callee=BAM_VARIANT_CALLING_FREEBAYES:workflow:modelled:legacy @143:9
+  guards then of tools && tools.split(',').contains('freebayes')
+  in ch_cram (ch_cram): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:cram[out] ? via cram
+  in ch_dict (ch_dict): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:dict[out] ? via dict
+  in ch_fasta (ch_fasta): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:fasta[out] ? via fasta
+  in ch_fasta_fai (ch_fasta_fai): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:fasta_fai[out] ? via fasta_fai
+  in ch_intervals (ch_intervals): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:intervals[out] ? via intervals
+  out vcf_unfiltered (vcf_unfiltered): Channel<?>
+  out vcf (vcf): Channel<Tuple>
+  out tbi (tbi): Channel<Tuple>
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/cram_deepsomatic chain ".filter" steps=filter @156:24
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:cram[out] ? via cram
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC@1 call "BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC" callee=BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC:workflow:modelled:legacy @160:5
+  in cram (cram): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/cram_deepsomatic[out] Channel<?> via cram_deepsomatic
+  in dict (dict): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:dict[out] ? via dict
+  in fasta (fasta): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:fasta[out] ? via fasta
+  in fasta_fai (fasta_fai): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:fasta_fai[out] ? via fasta_fai
+  in intervals (intervals): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:intervals[out] ? via intervals
+  out vcf (vcf): Channel<?>
+  out tbi (tbi): Channel<?>
+  out gvcf (gvcf): Channel<?>
+  out gvcf_tbi (gvcf_tbi): Channel<?>
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/BAM_VARIANT_CALLING_SOMATIC_MANTA@1 call "BAM_VARIANT_CALLING_SOMATIC_MANTA" callee=BAM_VARIANT_CALLING_SOMATIC_MANTA:workflow:modelled:legacy @173:9
+  guards then of tools && tools.split(',').contains('manta')
+  in cram (cram): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:cram[out] ? via cram
+  in fasta (fasta): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:fasta[out] ? via fasta
+  in fasta_fai (fasta_fai): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:fasta_fai[out] ? via fasta_fai
+  in intervals (intervals): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:intervals_bed_gz_tbi_combined[out] ? via intervals_bed_gz_tbi_combined
+  out candidate_small_indels_vcf (candidate_small_indels_vcf): Channel<?>
+  out candidate_small_indels_vcf_tbi (candidate_small_indels_vcf_tbi): Channel<?>
+  out candidate_sv_vcf (candidate_sv_vcf): Channel<?>
+  out candidate_sv_vcf_tbi (candidate_sv_vcf_tbi): Channel<?>
+  out diploid_sv_vcf (diploid_sv_vcf): Channel<?>
+  out diploid_sv_vcf_tbi (diploid_sv_vcf_tbi): Channel<?>
+  out somatic_sv_vcf (somatic_sv_vcf): Channel<?>
+  out somatic_sv_vcf_tbi (somatic_sv_vcf_tbi): Channel<?>
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/vcf_manta~2 chain ".mix" steps=mix @180:21
+  guards then of tools && tools.split(',').contains('manta')
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/BAM_VARIANT_CALLING_SOMATIC_MANTA@1[diploid_sv_vcf] Channel<?> via BAM_VARIANT_CALLING_SOMATIC_MANTA.out.diploid_sv_vcf
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/BAM_VARIANT_CALLING_SOMATIC_MANTA@1[somatic_sv_vcf] Channel<?> via BAM_VARIANT_CALLING_SOMATIC_MANTA.out.somatic_sv_vcf
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/tbi_manta~2 chain ".mix" steps=mix @181:21
+  guards then of tools && tools.split(',').contains('manta')
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/BAM_VARIANT_CALLING_SOMATIC_MANTA@1[diploid_sv_vcf_tbi] Channel<?> via BAM_VARIANT_CALLING_SOMATIC_MANTA.out.diploid_sv_vcf_tbi
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/BAM_VARIANT_CALLING_SOMATIC_MANTA@1[somatic_sv_vcf_tbi] Channel<?> via BAM_VARIANT_CALLING_SOMATIC_MANTA.out.somatic_sv_vcf_tbi
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/BAM_VARIANT_CALLING_INDEXCOV@1 call "BAM_VARIANT_CALLING_INDEXCOV" callee=BAM_VARIANT_CALLING_INDEXCOV:workflow:modelled:legacy @187:9
+  guards then of wes == false && tools.split(',').contains('indexcov')
+  in cram (cram): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:cram[out] ? via cram
+  in fasta (fasta): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:fasta[out] ? via fasta
+  in fasta_fai (fasta_fai): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:fasta_fai[out] ? via fasta_fai
+  out out_indexcov (out_indexcov): Channel<Tuple>
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/.map@5 chain ".map" steps=map @200:25
+  guards then of tools && tools.split(',').contains('strelka'); then of tools.split(',').contains('manta')
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/BAM_VARIANT_CALLING_SOMATIC_MANTA@1[candidate_small_indels_vcf] Channel<?> via BAM_VARIANT_CALLING_SOMATIC_MANTA.out.candidate_small_indels_vcf
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/.map@6 chain ".map" steps=map @200:205
+  guards then of tools && tools.split(',').contains('strelka'); then of tools.split(',').contains('manta')
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/BAM_VARIANT_CALLING_SOMATIC_MANTA@1[candidate_small_indels_vcf_tbi] Channel<?> via BAM_VARIANT_CALLING_SOMATIC_MANTA.out.candidate_small_indels_vcf_tbi
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/cram_strelka chain ".join.join" steps=join,join @200:15
+  guards then of tools && tools.split(',').contains('strelka'); then of tools.split(',').contains('manta')
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:cram[out] ? via cram
+  in 1:1 (join(right)): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/.map@5[out] Channel<?>
+  in 2:1 (join(right)): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/.map@6[out] Channel<?>
+  out out (out): Channel<Record>
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/cram_strelka~2 chain ".map" steps=map @201:15
+  guards then of tools && tools.split(',').contains('strelka'); else of tools.split(',').contains('manta')
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:cram[out] ? via cram
+  out out (out): ?
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/.map@7 chain ".map" steps=map @206:13
+  guards then of tools && tools.split(',').contains('strelka')
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:fasta[out] ? via fasta
+  out out (out): ?
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/.map@8 chain ".map" steps=map @207:13
+  guards then of tools && tools.split(',').contains('strelka')
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:fasta_fai[out] ? via fasta_fai
+  out out (out): ?
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/BAM_VARIANT_CALLING_SOMATIC_STRELKA@1 call "BAM_VARIANT_CALLING_SOMATIC_STRELKA" callee=BAM_VARIANT_CALLING_SOMATIC_STRELKA:workflow:modelled:legacy @203:9
+  guards then of tools && tools.split(',').contains('strelka')
+  in cram (cram): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/cram_strelka[out] Channel<Record> via cram_strelka indirect
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/cram_strelka~2[out] ? via cram_strelka indirect
+  in dict (dict): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:dict[out] ? via dict
+  in fasta (fasta): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/.map@7[out] ?
+  in fasta_fai (fasta_fai): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/.map@8[out] ?
+  in intervals (intervals): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:intervals_bed_gz_tbi[out] ? via intervals_bed_gz_tbi
+  out vcf (vcf): Channel<?>
+  out tbi (tbi): Channel<?>
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/.combine@1 chain ".combine" steps=combine @217:33
+  guards then of tools && tools.split(',').contains('msisensorpro')
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:cram[out] ? via cram
+  in 1:1 (combine(right)): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:intervals_bed_combined[out] ? via intervals_bed_combined
+  out out (out): ?
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/MSISENSORPRO_MSISOMATIC@1 call "MSISENSORPRO_MSISOMATIC" callee=MSISENSORPRO_MSISOMATIC:process:modelled:legacy @217:9
+  guards then of tools && tools.split(',').contains('msisensorpro')
+  in $1 (tuple(meta, normal, normal_index, tumor, tumor_index, intervals)): Tuple
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/.combine@1[out] ?
+  in $2 (tuple(meta2, fasta)): Tuple
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:fasta[out] ? via fasta
+  in msisensor_scan (msisensor_scan): Path
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:msisensorpro_scan[out] ? via msisensorpro_scan
+  out output_report (output_report): Channel<Tuple>
+  out output_dis (output_dis): Channel<Tuple>
+  out output_all (output_all): Channel<Tuple>
+  out output_unstable (output_unstable): Channel<Tuple>
+  out versions_msisensorpro (versions_msisensorpro): Channel<Tuple>
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/out_msisensorpro~2 chain ".mix" steps=mix @219:28
+  guards then of tools && tools.split(',').contains('msisensorpro')
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/out_msisensorpro[out] Channel<?> via out_msisensorpro
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/MSISENSORPRO_MSISOMATIC@1[output_report] Channel<Tuple> via MSISENSORPRO_MSISOMATIC.out.output_report
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/.map@9 chain ".map" steps=map @225:13
+  guards then of tools && tools.split(',').contains('muse')
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:bam[out] ? via bam
+  out out (out): ?
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/.map@10 chain ".map" steps=map @226:13
+  guards then of tools && tools.split(',').contains('muse')
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:bam[out] ? via bam
+  out out (out): ?
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/BAM_VARIANT_CALLING_SOMATIC_MUSE@1 call "BAM_VARIANT_CALLING_SOMATIC_MUSE" callee=BAM_VARIANT_CALLING_SOMATIC_MUSE:workflow:modelled:legacy @224:9
+  guards then of tools && tools.split(',').contains('muse')
+  in bam_normal (bam_normal): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/.map@9[out] ?
+  in bam_tumor (bam_tumor): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/.map@10[out] ?
+  in fasta (fasta): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:fasta[out] ? via fasta
+  in dbsnp (dbsnp): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:dbsnp[out] ? via dbsnp
+  in dbsnp_tbi (dbsnp_tbi): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:dbsnp_tbi[out] ? via dbsnp_tbi
+  out vcf (vcf): Channel<?>
+  out tbi (tbi): Channel<?>
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/BAM_VARIANT_CALLING_MUTECT2@1 call "BAM_VARIANT_CALLING_MUTECT2" callee=BAM_VARIANT_CALLING_MUTECT2:workflow:modelled:legacy @238:9
+  guards then of tools && tools.split(',').contains('mutect2')
+  in cram (cram): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:cram[out] ? via cram
+  in fasta (fasta): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:fasta[out] ? via fasta
+  in fai (fai): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:fasta_fai[out] ? via fasta_fai
+  in dict (dict): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:dict[out] ? via dict
+  in force_call_alleles (force_call_alleles): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:force_call_alleles[out] ? via force_call_alleles
+  in force_call_alleles_tbi (force_call_alleles_tbi): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:force_call_alleles_tbi[out] ? via force_call_alleles_tbi
+  in germline_resource (germline_resource): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:germline_resource[out] ? via germline_resource
+  in germline_resource_tbi (germline_resource_tbi): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:germline_resource_tbi[out] ? via germline_resource_tbi
+  in contamination_resource (contamination_resource): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:contamination_resource[out] ? via contamination_resource
+  in contamination_resource_tbi (contamination_resource_tbi): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:contamination_resource_tbi[out] ? via contamination_resource_tbi
+  in panel_of_normals (panel_of_normals): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:panel_of_normals[out] ? via panel_of_normals
+  in panel_of_normals_tbi (panel_of_normals_tbi): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:panel_of_normals_tbi[out] ? via panel_of_normals_tbi
+  in intervals (intervals): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:intervals[out] ? via intervals
+  in joint_mutect2 (joint_mutect2): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:joint_mutect2[out] ? via joint_mutect2
+  in contamination_resource_provided (contamination_resource_provided): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:contamination_resource_provided[out] ? via contamination_resource_provided
+  out vcf (vcf): Channel<Tuple>
+  out tbi (tbi): Channel<Tuple>
+  out stats_filtered (stats_filtered): Channel<Tuple>
+  out artifact_priors (artifact_priors): Channel<Tuple>
+  out pileup_table_normal (pileup_table_normal): ?
+  out pileup_table_tumor (pileup_table_tumor): ?
+  out contamination_table (contamination_table): ?
+  out segmentation_table (segmentation_table): ?
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/cram_parabricks_deepsomatic chain ".filter" steps=filter @261:35
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:cram[out] ? via cram
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/BAM_VARIANT_CALLING_SOMATIC_PARABRICKS_DEEPSOMATIC@1 call "BAM_VARIANT_CALLING_SOMATIC_PARABRICKS_DEEPSOMATIC" callee=BAM_VARIANT_CALLING_SOMATIC_PARABRICKS_DEEPSOMATIC:workflow:modelled:legacy @265:5
+  in cram (cram): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/cram_parabricks_deepsomatic[out] Channel<?> via cram_parabricks_deepsomatic
+  in fasta (fasta): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:fasta[out] ? via fasta
+  in intervals_bed_combined (intervals_bed_combined): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:intervals_bed_combined[out] ? via intervals_bed_combined
+  out vcf (vcf): Channel<?>
+  out tbi (tbi): Channel<?>
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/cram_parabricks_mutectcaller chain ".filter" steps=filter @275:36
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:cram[out] ? via cram
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER@1 call "BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER" callee=BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER:workflow:modelled:legacy @279:5
+  in cram (cram): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/cram_parabricks_mutectcaller[out] Channel<?> via cram_parabricks_mutectcaller
+  in fasta (fasta): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:fasta[out] ? via fasta
+  in fasta_fai (fasta_fai): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:fasta_fai[out] ? via fasta_fai
+  in dict (dict): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:dict[out] ? via dict
+  in force_call_alleles (force_call_alleles): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:force_call_alleles[out] ? via force_call_alleles
+  in force_call_alleles_tbi (force_call_alleles_tbi): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:force_call_alleles_tbi[out] ? via force_call_alleles_tbi
+  in germline_resource (germline_resource): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:germline_resource[out] ? via germline_resource
+  in germline_resource_tbi (germline_resource_tbi): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:germline_resource_tbi[out] ? via germline_resource_tbi
+  in contamination_resource (contamination_resource): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:contamination_resource[out] ? via contamination_resource
+  in contamination_resource_tbi (contamination_resource_tbi): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:contamination_resource_tbi[out] ? via contamination_resource_tbi
+  in panel_of_normals (panel_of_normals): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:panel_of_normals[out] ? via panel_of_normals
+  in panel_of_normals_tbi (panel_of_normals_tbi): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:panel_of_normals_tbi[out] ? via panel_of_normals_tbi
+  in intervals_bed_combined (intervals_bed_combined): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:intervals_bed_combined[out] ? via intervals_bed_combined
+  in intervals (intervals): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:intervals[out] ? via intervals
+  in contamination_resource_provided (contamination_resource_provided): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:contamination_resource_provided[out] ? via contamination_resource_provided
+  out vcf (vcf): Channel<Tuple>
+  out tbi (tbi): Channel<Tuple>
+  out stats (stats): Channel<Tuple>
+  out stats_filtered (stats_filtered): Channel<Tuple>
+  out artifact_priors (artifact_priors): Channel<Tuple>
+  out contamination_table (contamination_table): ?
+  out segmentation_table (segmentation_table): ?
+  out pileup_table_normal (pileup_table_normal): ?
+  out pileup_table_tumor (pileup_table_tumor): ?
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/.map@11 chain ".map" steps=map @304:13
+  guards then of tools && tools.split(',').contains('sentieon_tnscope')
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:cram[out] ? via cram
+  out out (out): ?
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/BAM_VARIANT_CALLING_SOMATIC_TNSCOPE@1 call "BAM_VARIANT_CALLING_SOMATIC_TNSCOPE" callee=BAM_VARIANT_CALLING_SOMATIC_TNSCOPE:workflow:modelled:legacy @303:9
+  guards then of tools && tools.split(',').contains('sentieon_tnscope')
+  in input (input): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/.map@11[out] ?
+  in fasta (fasta): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:fasta[out] ? via fasta
+  in fai (fai): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:fasta_fai[out] ? via fasta_fai
+  in dict (dict): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:dict[out] ? via dict
+  in germline_resource (germline_resource): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:germline_resource[out] ? via germline_resource
+  in germline_resource_tbi (germline_resource_tbi): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:germline_resource_tbi[out] ? via germline_resource_tbi
+  in panel_of_normals (panel_of_normals): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:panel_of_normals[out] ? via panel_of_normals
+  in panel_of_normals_tbi (panel_of_normals_tbi): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:panel_of_normals_tbi[out] ? via panel_of_normals_tbi
+  in intervals (intervals): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:intervals[out] ? via intervals
+  out vcf (vcf): Channel<?>
+  out index (index): Channel<?>
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/.map@12 chain ".map" steps=map @324:13
+  guards then of tools && tools.split(',').contains('tiddit')
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:cram[out] ? via cram
+  out out (out): ?
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/.map@13 chain ".map" steps=map @325:13
+  guards then of tools && tools.split(',').contains('tiddit')
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:cram[out] ? via cram
+  out out (out): ?
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/BAM_VARIANT_CALLING_SOMATIC_TIDDIT@1 call "BAM_VARIANT_CALLING_SOMATIC_TIDDIT" callee=BAM_VARIANT_CALLING_SOMATIC_TIDDIT:workflow:modelled:legacy @323:9
+  guards then of tools && tools.split(',').contains('tiddit')
+  in cram_normal (cram_normal): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/.map@12[out] ?
+  in cram_tumor (cram_tumor): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/.map@13[out] ?
+  in fasta (fasta): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:fasta[out] ? via fasta
+  in fasta_fai (fasta_fai): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:fasta_fai[out] ? via fasta_fai
+  in bwa (bwa): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:take:bwa[out] ? via bwa
+  out vcf (vcf): Channel<?>
+  out tbi (tbi): Channel<?>
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/channel.empty@1 factory "channel.empty" factory=channel.empty @335:15
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/vcf_all chain ".mix" steps=mix @335:15
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/channel.empty@1[out] Channel<?>
+  in 1:1 (mix(1)): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/vcf_freebayes[out] Channel<?> via vcf_freebayes indirect
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/BAM_VARIANT_CALLING_FREEBAYES@1[vcf] Channel<Tuple> via vcf_freebayes indirect
+  in 1:2 (mix(2)): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC@1[vcf] Channel<?> via vcf_deepsomatic
+  in 1:3 (mix(3)): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/vcf_manta[out] Channel<?> via vcf_manta indirect
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/vcf_manta~2[out] Channel<?> via vcf_manta indirect
+  in 1:4 (mix(4)): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/vcf_muse[out] Channel<?> via vcf_muse indirect
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/BAM_VARIANT_CALLING_SOMATIC_MUSE@1[vcf] Channel<?> via vcf_muse indirect
+  in 1:5 (mix(5)): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/vcf_mutect2[out] Channel<?> via vcf_mutect2 indirect
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/BAM_VARIANT_CALLING_MUTECT2@1[vcf] Channel<Tuple> via vcf_mutect2 indirect
+  in 1:6 (mix(6)): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/BAM_VARIANT_CALLING_SOMATIC_PARABRICKS_DEEPSOMATIC@1[vcf] Channel<?> via vcf_parabricks_deepsomatic
+  in 1:7 (mix(7)): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER@1[vcf] Channel<Tuple> via vcf_parabricks_mutectcaller
+  in 1:8 (mix(8)): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/vcf_strelka[out] Channel<?> via vcf_strelka indirect
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/BAM_VARIANT_CALLING_SOMATIC_STRELKA@1[vcf] Channel<?> via vcf_strelka indirect
+  in 1:9 (mix(9)): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/vcf_tiddit[out] Channel<?> via vcf_tiddit indirect
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/BAM_VARIANT_CALLING_SOMATIC_TIDDIT@1[vcf] Channel<?> via vcf_tiddit indirect
+  in 1:10 (mix(10)): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/vcf_tnscope[out] Channel<?> via vcf_tnscope indirect
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/BAM_VARIANT_CALLING_SOMATIC_TNSCOPE@1[vcf] Channel<?> via vcf_tnscope indirect
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/channel.empty@2 factory "channel.empty" factory=channel.empty @349:15
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/tbi_all chain ".mix" steps=mix @349:15
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/channel.empty@2[out] Channel<?>
+  in 1:1 (mix(1)): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/tbi_freebayes[out] Channel<?> via tbi_freebayes indirect
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/BAM_VARIANT_CALLING_FREEBAYES@1[tbi] Channel<Tuple> via tbi_freebayes indirect
+  in 1:2 (mix(2)): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC@1[tbi] Channel<?> via tbi_deepsomatic
+  in 1:3 (mix(3)): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/tbi_manta[out] Channel<?> via tbi_manta indirect
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/tbi_manta~2[out] Channel<?> via tbi_manta indirect
+  in 1:4 (mix(4)): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/tbi_muse[out] Channel<?> via tbi_muse indirect
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/BAM_VARIANT_CALLING_SOMATIC_MUSE@1[tbi] Channel<?> via tbi_muse indirect
+  in 1:5 (mix(5)): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/tbi_mutect2[out] Channel<?> via tbi_mutect2 indirect
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/BAM_VARIANT_CALLING_MUTECT2@1[tbi] Channel<Tuple> via tbi_mutect2 indirect
+  in 1:6 (mix(6)): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/BAM_VARIANT_CALLING_SOMATIC_PARABRICKS_DEEPSOMATIC@1[tbi] Channel<?> via tbi_parabricks_deepsomatic
+  in 1:7 (mix(7)): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER@1[tbi] Channel<Tuple> via tbi_parabricks_mutectcaller
+  in 1:8 (mix(8)): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/tbi_strelka[out] Channel<?> via tbi_strelka indirect
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/BAM_VARIANT_CALLING_SOMATIC_STRELKA@1[tbi] Channel<?> via tbi_strelka indirect
+  in 1:9 (mix(9)): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/tbi_tiddit[out] Channel<?> via tbi_tiddit indirect
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/BAM_VARIANT_CALLING_SOMATIC_TIDDIT@1[tbi] Channel<?> via tbi_tiddit indirect
+  in 1:10 (mix(10)): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/tbi_tnscope[out] Channel<?> via tbi_tnscope indirect
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/BAM_VARIANT_CALLING_SOMATIC_TNSCOPE@1[index] Channel<?> via tbi_tnscope indirect
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:emit:out_indexcov emit "out_indexcov" @364:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/out_indexcov[out] Channel<?> via out_indexcov indirect
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/BAM_VARIANT_CALLING_INDEXCOV@1[out_indexcov] Channel<Tuple> via out_indexcov indirect
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:emit:out_msisensorpro emit "out_msisensorpro" @365:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/out_msisensorpro[out] Channel<?> via out_msisensorpro indirect
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/out_msisensorpro~2[out] Channel<?> via out_msisensorpro indirect
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:emit:vcf_all emit "vcf_all" @366:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/vcf_all[out] Channel<?> via vcf_all
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:emit:vcf_freebayes emit "vcf_freebayes" @367:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/vcf_freebayes[out] Channel<?> via vcf_freebayes indirect
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/BAM_VARIANT_CALLING_FREEBAYES@1[vcf] Channel<Tuple> via vcf_freebayes indirect
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:emit:vcf_deepsomatic emit "vcf_deepsomatic" @368:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC@1[vcf] Channel<?> via vcf_deepsomatic
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:emit:vcf_manta emit "vcf_manta" @369:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/vcf_manta[out] Channel<?> via vcf_manta indirect
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/vcf_manta~2[out] Channel<?> via vcf_manta indirect
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:emit:vcf_muse emit "vcf_muse" @370:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/vcf_muse[out] Channel<?> via vcf_muse indirect
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/BAM_VARIANT_CALLING_SOMATIC_MUSE@1[vcf] Channel<?> via vcf_muse indirect
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:emit:vcf_mutect2 emit "vcf_mutect2" @371:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/vcf_mutect2[out] Channel<?> via vcf_mutect2 indirect
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/BAM_VARIANT_CALLING_MUTECT2@1[vcf] Channel<Tuple> via vcf_mutect2 indirect
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:emit:vcf_parabricks_deepsomatic emit "vcf_parabricks_deepsomatic" @372:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/BAM_VARIANT_CALLING_SOMATIC_PARABRICKS_DEEPSOMATIC@1[vcf] Channel<?> via vcf_parabricks_deepsomatic
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:emit:vcf_parabricks_mutectcaller emit "vcf_parabricks_mutectcaller" @373:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER@1[vcf] Channel<Tuple> via vcf_parabricks_mutectcaller
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:emit:vcf_strelka emit "vcf_strelka" @374:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/vcf_strelka[out] Channel<?> via vcf_strelka indirect
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/BAM_VARIANT_CALLING_SOMATIC_STRELKA@1[vcf] Channel<?> via vcf_strelka indirect
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:emit:vcf_tiddit emit "vcf_tiddit" @375:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/vcf_tiddit[out] Channel<?> via vcf_tiddit indirect
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/BAM_VARIANT_CALLING_SOMATIC_TIDDIT@1[vcf] Channel<?> via vcf_tiddit indirect
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:emit:vcf_tnscope emit "vcf_tnscope" @376:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/vcf_tnscope[out] Channel<?> via vcf_tnscope indirect
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/BAM_VARIANT_CALLING_SOMATIC_TNSCOPE@1[vcf] Channel<?> via vcf_tnscope indirect
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:emit:tbi_all emit "tbi_all" @377:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/tbi_all[out] Channel<?> via tbi_all
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:emit:tbi_freebayes emit "tbi_freebayes" @378:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/tbi_freebayes[out] Channel<?> via tbi_freebayes indirect
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/BAM_VARIANT_CALLING_FREEBAYES@1[tbi] Channel<Tuple> via tbi_freebayes indirect
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:emit:tbi_deepsomatic emit "tbi_deepsomatic" @379:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/BAM_VARIANT_CALLING_SOMATIC_DEEPSOMATIC@1[tbi] Channel<?> via tbi_deepsomatic
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:emit:tbi_manta emit "tbi_manta" @380:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/tbi_manta[out] Channel<?> via tbi_manta indirect
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/tbi_manta~2[out] Channel<?> via tbi_manta indirect
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:emit:tbi_muse emit "tbi_muse" @381:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/tbi_muse[out] Channel<?> via tbi_muse indirect
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/BAM_VARIANT_CALLING_SOMATIC_MUSE@1[tbi] Channel<?> via tbi_muse indirect
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:emit:tbi_mutect2 emit "tbi_mutect2" @382:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/tbi_mutect2[out] Channel<?> via tbi_mutect2 indirect
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/BAM_VARIANT_CALLING_MUTECT2@1[tbi] Channel<Tuple> via tbi_mutect2 indirect
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:emit:tbi_parabricks_deepsomatic emit "tbi_parabricks_deepsomatic" @383:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/BAM_VARIANT_CALLING_SOMATIC_PARABRICKS_DEEPSOMATIC@1[tbi] Channel<?> via tbi_parabricks_deepsomatic
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:emit:tbi_parabricks_mutectcaller emit "tbi_parabricks_mutectcaller" @384:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/BAM_VARIANT_CALLING_PARABRICKS_MUTECTCALLER@1[tbi] Channel<Tuple> via tbi_parabricks_mutectcaller
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:emit:tbi_strelka emit "tbi_strelka" @385:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/tbi_strelka[out] Channel<?> via tbi_strelka indirect
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/BAM_VARIANT_CALLING_SOMATIC_STRELKA@1[tbi] Channel<?> via tbi_strelka indirect
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:emit:tbi_tiddit emit "tbi_tiddit" @386:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/tbi_tiddit[out] Channel<?> via tbi_tiddit indirect
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/BAM_VARIANT_CALLING_SOMATIC_TIDDIT@1[tbi] Channel<?> via tbi_tiddit indirect
+subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/:emit:tbi_tnscope emit "tbi_tnscope" @387:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/tbi_tnscope[out] Channel<?> via tbi_tnscope indirect
+    <- subworkflows/local/bam_variant_calling_somatic_all/main.nf#BAM_VARIANT_CALLING_SOMATIC_ALL/BAM_VARIANT_CALLING_SOMATIC_TNSCOPE@1[index] Channel<?> via tbi_tnscope indirect
+bound @113:9 mpileup_normal
+bound @114:9 mpileup_tumor
+bound @151:9 vcf_freebayes
+bound @152:9 tbi_freebayes
+bound @168:5 vcf_deepsomatic
+bound @169:5 tbi_deepsomatic
+bound @193:9 out_indexcov
+bound @211:9 vcf_strelka
+bound @212:9 tbi_strelka
+bound @232:9 vcf_muse
+bound @233:9 tbi_muse
+bound @256:9 vcf_mutect2
+bound @257:9 tbi_mutect2
+bound @271:5 vcf_parabricks_deepsomatic
+bound @272:5 tbi_parabricks_deepsomatic
+bound @297:5 vcf_parabricks_mutectcaller
+bound @298:5 tbi_parabricks_mutectcaller
+bound @317:9 vcf_tnscope
+bound @318:9 tbi_tnscope
+bound @331:9 vcf_tiddit
+bound @332:9 tbi_tiddit

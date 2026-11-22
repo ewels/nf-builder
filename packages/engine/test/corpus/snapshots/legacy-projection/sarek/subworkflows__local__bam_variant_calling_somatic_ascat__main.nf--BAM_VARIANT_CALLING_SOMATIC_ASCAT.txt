@@ -1,0 +1,41 @@
+workflow subworkflows/local/bam_variant_calling_somatic_ascat/main.nf#BAM_VARIANT_CALLING_SOMATIC_ASCAT legacy
+statements 1, modelled 1
+subworkflows/local/bam_variant_calling_somatic_ascat/main.nf#BAM_VARIANT_CALLING_SOMATIC_ASCAT/:take:cram_pair take "cram_pair" @12:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_ascat/main.nf#BAM_VARIANT_CALLING_SOMATIC_ASCAT/:take:allele_files take "allele_files" @13:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_ascat/main.nf#BAM_VARIANT_CALLING_SOMATIC_ASCAT/:take:loci_files take "loci_files" @14:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_ascat/main.nf#BAM_VARIANT_CALLING_SOMATIC_ASCAT/:take:intervals_bed take "intervals_bed" @15:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_ascat/main.nf#BAM_VARIANT_CALLING_SOMATIC_ASCAT/:take:fasta take "fasta" @16:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_ascat/main.nf#BAM_VARIANT_CALLING_SOMATIC_ASCAT/:take:gc_file take "gc_file" @17:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_ascat/main.nf#BAM_VARIANT_CALLING_SOMATIC_ASCAT/:take:rt_file take "rt_file" @18:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_somatic_ascat/main.nf#BAM_VARIANT_CALLING_SOMATIC_ASCAT/ASCAT@1 call "ASCAT" callee=ASCAT:process:modelled:legacy @22:5
+  in $1 (tuple(meta, input_normal, index_normal, input_tumor, index_tumor)): Tuple
+    <- subworkflows/local/bam_variant_calling_somatic_ascat/main.nf#BAM_VARIANT_CALLING_SOMATIC_ASCAT/:take:cram_pair[out] ? via cram_pair
+  in allele_files (allele_files): Path
+    <- subworkflows/local/bam_variant_calling_somatic_ascat/main.nf#BAM_VARIANT_CALLING_SOMATIC_ASCAT/:take:allele_files[out] ? via allele_files
+  in loci_files (loci_files): Path
+    <- subworkflows/local/bam_variant_calling_somatic_ascat/main.nf#BAM_VARIANT_CALLING_SOMATIC_ASCAT/:take:loci_files[out] ? via loci_files
+  in bed_file (bed_file): Path
+    <- subworkflows/local/bam_variant_calling_somatic_ascat/main.nf#BAM_VARIANT_CALLING_SOMATIC_ASCAT/:take:intervals_bed[out] ? via intervals_bed
+  in fasta (fasta): Path
+    <- subworkflows/local/bam_variant_calling_somatic_ascat/main.nf#BAM_VARIANT_CALLING_SOMATIC_ASCAT/:take:fasta[out] ? via fasta
+  in gc_file (gc_file): Path
+    <- subworkflows/local/bam_variant_calling_somatic_ascat/main.nf#BAM_VARIANT_CALLING_SOMATIC_ASCAT/:take:gc_file[out] ? via gc_file
+  in rt_file (rt_file): Path
+    <- subworkflows/local/bam_variant_calling_somatic_ascat/main.nf#BAM_VARIANT_CALLING_SOMATIC_ASCAT/:take:rt_file[out] ? via rt_file
+  out allelefreqs (allelefreqs): Channel<Tuple>
+  out bafs (bafs): Channel<Tuple>
+  out cnvs (cnvs): Channel<Tuple>
+  out logrs (logrs): Channel<Tuple>
+  out metrics (metrics): Channel<Tuple>
+  out png (png): Channel<Tuple>
+  out purityploidy (purityploidy): Channel<Tuple>
+  out segments (segments): Channel<Tuple>
+  out versions_ascat (versions_ascat): Channel<Tuple>
+  out versions_allelecounter (versions_allelecounter): Channel<Tuple>

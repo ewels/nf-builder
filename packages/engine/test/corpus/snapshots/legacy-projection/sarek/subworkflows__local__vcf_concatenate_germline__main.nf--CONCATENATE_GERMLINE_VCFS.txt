@@ -1,0 +1,50 @@
+workflow subworkflows/local/vcf_concatenate_germline/main.nf#CONCATENATE_GERMLINE_VCFS legacy
+statements 5, modelled 5
+subworkflows/local/vcf_concatenate_germline/main.nf#CONCATENATE_GERMLINE_VCFS/:take:vcfs take "vcfs" @13:5
+  out out (out): -
+subworkflows/local/vcf_concatenate_germline/main.nf#CONCATENATE_GERMLINE_VCFS/ADD_INFO_TO_VCF@1 call "ADD_INFO_TO_VCF" callee=ADD_INFO_TO_VCF:process:modelled:legacy @17:5
+  in $1 (tuple(meta, vcf_gz)): Tuple
+    <- subworkflows/local/vcf_concatenate_germline/main.nf#CONCATENATE_GERMLINE_VCFS/:take:vcfs[out] ? via vcfs
+  out vcf (vcf): Channel<Tuple>
+  out versions_gawk (versions_gawk): Channel<Tuple>
+subworkflows/local/vcf_concatenate_germline/main.nf#CONCATENATE_GERMLINE_VCFS/.map@1 chain ".map" steps=map @18:19
+  in in (in): -
+    <- subworkflows/local/vcf_concatenate_germline/main.nf#CONCATENATE_GERMLINE_VCFS/ADD_INFO_TO_VCF@1[vcf] Channel<Tuple> via ADD_INFO_TO_VCF.out.vcf
+  out out (out): Channel<?>
+subworkflows/local/vcf_concatenate_germline/main.nf#CONCATENATE_GERMLINE_VCFS/TABIX_EXT_VCF@1 call "TABIX_EXT_VCF" callee=TABIX_EXT_VCF:process:modelled:legacy @18:5
+  in $1 (tuple(meta, infile, infile_tbi, regions)): Tuple
+    <- subworkflows/local/vcf_concatenate_germline/main.nf#CONCATENATE_GERMLINE_VCFS/.map@1[out] Channel<?>
+  in action (action): -
+    = 'compress' : String
+  in make_index (make_index): -
+    = true : Boolean
+  in out_ext (out_ext): -
+    = 'vcf' : String
+  out output (output): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out versions_htslib (versions_htslib): Channel<Tuple>
+  out versions_xz (versions_xz): Channel<Tuple>
+subworkflows/local/vcf_concatenate_germline/main.nf#CONCATENATE_GERMLINE_VCFS/germline_vcfs_with_tbis chain ".join.groupTuple" steps=join,groupTuple @21:31
+  in in (in): -
+    <- subworkflows/local/vcf_concatenate_germline/main.nf#CONCATENATE_GERMLINE_VCFS/TABIX_EXT_VCF@1[output] Channel<Tuple> via TABIX_EXT_VCF.out.output
+  in 1:1 (join(1)): -
+    <- subworkflows/local/vcf_concatenate_germline/main.nf#CONCATENATE_GERMLINE_VCFS/TABIX_EXT_VCF@1[index] Channel<Tuple> via TABIX_EXT_VCF.out.index
+  out out (out): Channel<?>
+subworkflows/local/vcf_concatenate_germline/main.nf#CONCATENATE_GERMLINE_VCFS/GERMLINE_VCFS_CONCAT@1 call "GERMLINE_VCFS_CONCAT" callee=GERMLINE_VCFS_CONCAT:process:modelled:legacy @23:5
+  in $1 (tuple(meta, vcfs, tbi)): Tuple
+    <- subworkflows/local/vcf_concatenate_germline/main.nf#CONCATENATE_GERMLINE_VCFS/germline_vcfs_with_tbis[out] Channel<?> via germline_vcfs_with_tbis
+  out vcf (vcf): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out versions_bcftools (versions_bcftools): Channel<Tuple>
+subworkflows/local/vcf_concatenate_germline/main.nf#CONCATENATE_GERMLINE_VCFS/GERMLINE_VCFS_CONCAT_SORT@1 call "GERMLINE_VCFS_CONCAT_SORT" callee=GERMLINE_VCFS_CONCAT_SORT:process:modelled:legacy @24:5
+  in $1 (tuple(meta, vcf)): Tuple
+    <- subworkflows/local/vcf_concatenate_germline/main.nf#CONCATENATE_GERMLINE_VCFS/GERMLINE_VCFS_CONCAT@1[vcf] Channel<Tuple> via GERMLINE_VCFS_CONCAT.out.vcf
+  out vcf (vcf): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out versions_bcftools (versions_bcftools): Channel<Tuple>
+subworkflows/local/vcf_concatenate_germline/main.nf#CONCATENATE_GERMLINE_VCFS/:emit:vcfs emit "vcfs" @27:5
+  in in (in): -
+    <- subworkflows/local/vcf_concatenate_germline/main.nf#CONCATENATE_GERMLINE_VCFS/GERMLINE_VCFS_CONCAT_SORT@1[vcf] Channel<Tuple> via GERMLINE_VCFS_CONCAT_SORT.out.vcf
+subworkflows/local/vcf_concatenate_germline/main.nf#CONCATENATE_GERMLINE_VCFS/:emit:tbis emit "tbis" @28:5
+  in in (in): -
+    <- subworkflows/local/vcf_concatenate_germline/main.nf#CONCATENATE_GERMLINE_VCFS/GERMLINE_VCFS_CONCAT_SORT@1[index] Channel<Tuple> via GERMLINE_VCFS_CONCAT_SORT.out.index

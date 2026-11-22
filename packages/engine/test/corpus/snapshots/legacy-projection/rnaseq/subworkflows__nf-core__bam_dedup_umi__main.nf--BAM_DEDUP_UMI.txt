@@ -1,0 +1,301 @@
+workflow subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI legacy
+statements 32, modelled 31
+subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/:take:ch_genome_bam take "ch_genome_bam" @19:5
+  out out (out): -
+subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/:take:ch_fasta_fai take "ch_fasta_fai" @20:5
+  out out (out): -
+subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/:take:umi_dedup_tool take "umi_dedup_tool" @21:5
+  out out (out): -
+subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/:take:umitools_dedup_stats take "umitools_dedup_stats" @22:5
+  out out (out): -
+subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/:take:ch_transcriptome_bam take "ch_transcriptome_bam" @23:5
+  out out (out): -
+subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/:take:ch_transcript_fasta_fai take "ch_transcript_fasta_fai" @24:5
+  out out (out): -
+subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/:take:umitools_dedup_primary_only take "umitools_dedup_primary_only" @25:5
+  out out (out): -
+subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/ch_tsv_edit_distance factory "channel.empty" factory=channel.empty @28:28
+  out out (out): Channel<?>
+subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/ch_tsv_per_umi factory "channel.empty" factory=channel.empty @29:22
+  out out (out): Channel<?>
+subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/ch_tsv_umi_per_position factory "channel.empty" factory=channel.empty @30:31
+  out out (out): Channel<?>
+subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/ch_genomic_dedup_log factory "channel.empty" factory=channel.empty @31:28
+  out out (out): Channel<?>
+subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/ch_transcriptomic_dedup_log factory "channel.empty" factory=channel.empty @32:35
+  out out (out): Channel<?>
+subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/:code@1 code "if (umi_dedup_tool != "umicollapse" && umi_dedup_tool != "u…" @34:5
+  in umi_dedup_tool (umi_dedup_tool): -
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/:take:umi_dedup_tool[out] ? via umi_dedup_tool indirect
+subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_DEDUP_STATS_SAMTOOLS_UMICOLLAPSE_GENOME@1 call "BAM_DEDUP_STATS_SAMTOOLS_UMICOLLAPSE_GENOME" callee=BAM_DEDUP_STATS_SAMTOOLS_UMICOLLAPSE_GENOME:workflow:modelled:legacy @40:9
+  guards then of umi_dedup_tool == "umicollapse"
+  in ch_bam_bai (ch_bam_bai): -
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/:take:ch_genome_bam[out] ? via ch_genome_bam
+  out bam (bam): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out dedup_stats (dedup_stats): Channel<Tuple>
+  out stats (stats): Channel<Tuple>
+  out flagstat (flagstat): Channel<Tuple>
+  out idxstats (idxstats): Channel<Tuple>
+subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS_GENOME@1 call "BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS_GENOME" callee=BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS_GENOME:workflow:modelled:legacy @47:9
+  guards else of umi_dedup_tool == "umicollapse"; then of umi_dedup_tool == "umitools"
+  in ch_bam_bai (ch_bam_bai): -
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/:take:ch_genome_bam[out] ? via ch_genome_bam
+  in val_get_dedup_stats (val_get_dedup_stats): -
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/:take:umitools_dedup_stats[out] ? via umitools_dedup_stats
+  in val_primary_only (val_primary_only): -
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/:take:umitools_dedup_primary_only[out] ? via umitools_dedup_primary_only
+  out bam (bam): Channel<Tuple>
+  out deduplog (deduplog): Channel<Tuple>
+  out tsv_edit_distance (tsv_edit_distance): Channel<Tuple>
+  out tsv_per_umi (tsv_per_umi): Channel<Tuple>
+  out tsv_umi_per_position (tsv_umi_per_position): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out stats (stats): Channel<Tuple>
+  out flagstat (flagstat): Channel<Tuple>
+  out idxstats (idxstats): Channel<Tuple>
+subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_SORT_STATS_SAMTOOLS@1 call "BAM_SORT_STATS_SAMTOOLS" callee=BAM_SORT_STATS_SAMTOOLS:workflow:modelled:legacy @66:5
+  in ch_bam (ch_bam): -
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/:take:ch_transcriptome_bam[out] ? via ch_transcriptome_bam
+  in ch_fasta_fai (ch_fasta_fai): -
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/:take:ch_transcript_fasta_fai[out] ? via ch_transcript_fasta_fai
+  out bam (bam): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out stats (stats): Channel<Tuple>
+  out flagstat (flagstat): Channel<Tuple>
+  out idxstats (idxstats): Channel<Tuple>
+subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/ch_sorted_transcriptome_bam chain ".join" steps=join @70:35
+  in in (in): -
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_SORT_STATS_SAMTOOLS@1[bam] Channel<Tuple> via BAM_SORT_STATS_SAMTOOLS.out.bam
+  in 1:1 (join(1)): -
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_SORT_STATS_SAMTOOLS@1[index] Channel<Tuple> via BAM_SORT_STATS_SAMTOOLS.out.index
+  out out (out): Channel<?>
+subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_DEDUP_STATS_SAMTOOLS_UMICOLLAPSE_TRANSCRIPTOME@1 call "BAM_DEDUP_STATS_SAMTOOLS_UMICOLLAPSE_TRANSCRIPTOME" callee=BAM_DEDUP_STATS_SAMTOOLS_UMICOLLAPSE_TRANSCRIPTOME:workflow:modelled:legacy @74:9
+  guards then of umi_dedup_tool == "umicollapse"
+  in ch_bam_bai (ch_bam_bai): -
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/ch_sorted_transcriptome_bam[out] Channel<?> via ch_sorted_transcriptome_bam
+  out bam (bam): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out dedup_stats (dedup_stats): Channel<Tuple>
+  out stats (stats): Channel<Tuple>
+  out flagstat (flagstat): Channel<Tuple>
+  out idxstats (idxstats): Channel<Tuple>
+subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS_TRANSCRIPTOME@1 call "BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS_TRANSCRIPTOME" callee=BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS_TRANSCRIPTOME:workflow:modelled:legacy @81:9
+  guards else of umi_dedup_tool == "umicollapse"; then of umi_dedup_tool == "umitools"
+  in ch_bam_bai (ch_bam_bai): -
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/ch_sorted_transcriptome_bam[out] Channel<?> via ch_sorted_transcriptome_bam
+  in val_get_dedup_stats (val_get_dedup_stats): -
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/:take:umitools_dedup_stats[out] ? via umitools_dedup_stats
+  in val_primary_only (val_primary_only): -
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/:take:umitools_dedup_primary_only[out] ? via umitools_dedup_primary_only
+  out bam (bam): Channel<Tuple>
+  out deduplog (deduplog): Channel<Tuple>
+  out tsv_edit_distance (tsv_edit_distance): Channel<Tuple>
+  out tsv_per_umi (tsv_per_umi): Channel<Tuple>
+  out tsv_umi_per_position (tsv_umi_per_position): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out stats (stats): Channel<Tuple>
+  out flagstat (flagstat): Channel<Tuple>
+  out idxstats (idxstats): Channel<Tuple>
+subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/ch_tsv_edit_distance~2 chain ".mix" steps=mix @88:32
+  guards else of umi_dedup_tool == "umicollapse"; then of umi_dedup_tool == "umitools"
+  in in (in): -
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/ch_tsv_edit_distance[out] Channel<?> via ch_tsv_edit_distance indirect
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS_GENOME@1[tsv_edit_distance] Channel<Tuple> via ch_tsv_edit_distance indirect
+  in 1:1 (mix(other)): -
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS_TRANSCRIPTOME@1[tsv_edit_distance] Channel<Tuple> via UMI_DEDUP_TRANSCRIPTOME.out.tsv_edit_distance
+  out out (out): Channel<?>
+subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/ch_tsv_per_umi~2 chain ".mix" steps=mix @89:26
+  guards else of umi_dedup_tool == "umicollapse"; then of umi_dedup_tool == "umitools"
+  in in (in): -
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/ch_tsv_per_umi[out] Channel<?> via ch_tsv_per_umi indirect
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS_GENOME@1[tsv_per_umi] Channel<Tuple> via ch_tsv_per_umi indirect
+  in 1:1 (mix(other)): -
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS_TRANSCRIPTOME@1[tsv_per_umi] Channel<Tuple> via UMI_DEDUP_TRANSCRIPTOME.out.tsv_per_umi
+  out out (out): Channel<?>
+subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/ch_tsv_umi_per_position~2 chain ".mix" steps=mix @90:35
+  guards else of umi_dedup_tool == "umicollapse"; then of umi_dedup_tool == "umitools"
+  in in (in): -
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/ch_tsv_umi_per_position[out] Channel<?> via ch_tsv_umi_per_position indirect
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS_GENOME@1[tsv_umi_per_position] Channel<Tuple> via ch_tsv_umi_per_position indirect
+  in 1:1 (mix(other)): -
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS_TRANSCRIPTOME@1[tsv_umi_per_position] Channel<Tuple> via UMI_DEDUP_TRANSCRIPTOME.out.tsv_umi_per_position
+  out out (out): Channel<?>
+subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/SAMTOOLS_SORT@1 call "SAMTOOLS_SORT" callee=SAMTOOLS_SORT:process:modelled:legacy @94:5
+  in $1 (tuple(meta, bam)): Tuple
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_DEDUP_STATS_SAMTOOLS_UMICOLLAPSE_TRANSCRIPTOME@1[bam] Channel<Tuple> via UMI_DEDUP_TRANSCRIPTOME.out.bam indirect
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS_TRANSCRIPTOME@1[bam] Channel<Tuple> via UMI_DEDUP_TRANSCRIPTOME.out.bam indirect
+  in $2 (tuple(meta2, fasta, fai)): Tuple
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/:take:ch_fasta_fai[out] ? via ch_fasta_fai
+  in index_format (index_format): -
+    = '' : String
+  out bam (bam): Channel<Tuple>
+  out cram (cram): Channel<Tuple>
+  out sam (sam): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out versions_samtools (versions_samtools): Channel<Tuple>
+subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/ended_transcriptome_dedup_bam chain ".branch" steps=branch @103:37
+  in in (in): -
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/SAMTOOLS_SORT@1[bam] Channel<Tuple> via SAMTOOLS_SORT.out.bam
+  out out (out): Record
+subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/.map@1 chain ".map" steps=map @111:9
+  in in (in): -
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/ended_transcriptome_dedup_bam[out] Record via ended_transcriptome_dedup_bam indirect
+  out out (out): ?
+subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/UMITOOLS_PREPAREFORRSEM@1 call "UMITOOLS_PREPAREFORRSEM" callee=UMITOOLS_PREPAREFORRSEM:process:modelled:legacy @110:5
+  in $1 (tuple(meta, bam, bai)): Tuple
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/.map@1[out] ?
+  out bam (bam): Channel<Tuple>
+  out log (log): Channel<Tuple>
+  out versions_umitools (versions_umitools): Channel<Tuple>
+subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/ch_dedup_transcriptome_bam chain ".mix" steps=mix @114:34
+  in in (in): -
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/ended_transcriptome_dedup_bam[out] Record via ended_transcriptome_dedup_bam indirect
+  in 1:1 (mix(other)): -
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/UMITOOLS_PREPAREFORRSEM@1[bam] Channel<Tuple> via UMITOOLS_PREPAREFORRSEM.out.bam
+  out out (out): Channel<?>
+subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/ch_multiqc_files chain ".mix.mix.mix.transpose" steps=mix,mix,mix,transpose @120:24
+  in in (in): -
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/ch_genomic_dedup_log[out] Channel<?> via ch_genomic_dedup_log indirect
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_DEDUP_STATS_SAMTOOLS_UMICOLLAPSE_GENOME@1[dedup_stats] Channel<Tuple> via ch_genomic_dedup_log indirect
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS_GENOME@1[deduplog] Channel<Tuple> via ch_genomic_dedup_log indirect
+  in 1:1 (mix(other)): -
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_DEDUP_STATS_SAMTOOLS_UMICOLLAPSE_GENOME@1[stats] Channel<Tuple> via UMI_DEDUP_GENOME.out.stats indirect
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS_GENOME@1[stats] Channel<Tuple> via UMI_DEDUP_GENOME.out.stats indirect
+  in 2:1 (mix(other)): -
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_DEDUP_STATS_SAMTOOLS_UMICOLLAPSE_GENOME@1[flagstat] Channel<Tuple> via UMI_DEDUP_GENOME.out.flagstat indirect
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS_GENOME@1[flagstat] Channel<Tuple> via UMI_DEDUP_GENOME.out.flagstat indirect
+  in 3:1 (mix(other)): -
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_DEDUP_STATS_SAMTOOLS_UMICOLLAPSE_GENOME@1[idxstats] Channel<Tuple> via UMI_DEDUP_GENOME.out.idxstats indirect
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS_GENOME@1[idxstats] Channel<Tuple> via UMI_DEDUP_GENOME.out.idxstats indirect
+  out out (out): Channel<?>
+subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/ch_per_sample_mqc_bundle chain ".join.join.join.map" steps=join,join,join,map @128:32
+  in in (in): -
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/ch_genomic_dedup_log[out] Channel<?> via ch_genomic_dedup_log indirect
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_DEDUP_STATS_SAMTOOLS_UMICOLLAPSE_GENOME@1[dedup_stats] Channel<Tuple> via ch_genomic_dedup_log indirect
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS_GENOME@1[deduplog] Channel<Tuple> via ch_genomic_dedup_log indirect
+  in 1:1 (join(right)): -
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_DEDUP_STATS_SAMTOOLS_UMICOLLAPSE_GENOME@1[stats] Channel<Tuple> via UMI_DEDUP_GENOME.out.stats indirect
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS_GENOME@1[stats] Channel<Tuple> via UMI_DEDUP_GENOME.out.stats indirect
+  in 2:1 (join(right)): -
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_DEDUP_STATS_SAMTOOLS_UMICOLLAPSE_GENOME@1[flagstat] Channel<Tuple> via UMI_DEDUP_GENOME.out.flagstat indirect
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS_GENOME@1[flagstat] Channel<Tuple> via UMI_DEDUP_GENOME.out.flagstat indirect
+  in 3:1 (join(right)): -
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_DEDUP_STATS_SAMTOOLS_UMICOLLAPSE_GENOME@1[idxstats] Channel<Tuple> via UMI_DEDUP_GENOME.out.idxstats indirect
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS_GENOME@1[idxstats] Channel<Tuple> via UMI_DEDUP_GENOME.out.idxstats indirect
+  out out (out): Channel<?>
+subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/:emit:bam emit "bam" @135:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_DEDUP_STATS_SAMTOOLS_UMICOLLAPSE_GENOME@1[bam] Channel<Tuple> via UMI_DEDUP_GENOME.out.bam indirect
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS_GENOME@1[bam] Channel<Tuple> via UMI_DEDUP_GENOME.out.bam indirect
+subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/:emit:index emit "index" @136:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_DEDUP_STATS_SAMTOOLS_UMICOLLAPSE_GENOME@1[index] Channel<Tuple> via UMI_DEDUP_GENOME.out.index indirect
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS_GENOME@1[index] Channel<Tuple> via UMI_DEDUP_GENOME.out.index indirect
+subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/:emit:genomic_dedup_log emit "genomic_dedup_log" @137:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/ch_genomic_dedup_log[out] Channel<?> via ch_genomic_dedup_log indirect
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_DEDUP_STATS_SAMTOOLS_UMICOLLAPSE_GENOME@1[dedup_stats] Channel<Tuple> via ch_genomic_dedup_log indirect
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS_GENOME@1[deduplog] Channel<Tuple> via ch_genomic_dedup_log indirect
+subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/:emit:transcriptomic_dedup_log emit "transcriptomic_dedup_log" @138:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/ch_transcriptomic_dedup_log[out] Channel<?> via ch_transcriptomic_dedup_log indirect
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_DEDUP_STATS_SAMTOOLS_UMICOLLAPSE_TRANSCRIPTOME@1[dedup_stats] Channel<Tuple> via ch_transcriptomic_dedup_log indirect
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS_TRANSCRIPTOME@1[deduplog] Channel<Tuple> via ch_transcriptomic_dedup_log indirect
+subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/:emit:prepare_for_rsem_log emit "prepare_for_rsem_log" @139:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/UMITOOLS_PREPAREFORRSEM@1[log] Channel<Tuple> via UMITOOLS_PREPAREFORRSEM.out.log
+subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/.mix@1 chain ".mix" steps=mix @140:38
+  in in (in): -
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_DEDUP_STATS_SAMTOOLS_UMICOLLAPSE_GENOME@1[stats] Channel<Tuple> via UMI_DEDUP_GENOME.out.stats indirect
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS_GENOME@1[stats] Channel<Tuple> via UMI_DEDUP_GENOME.out.stats indirect
+  in 1:1 (mix(other)): -
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_DEDUP_STATS_SAMTOOLS_UMICOLLAPSE_TRANSCRIPTOME@1[stats] Channel<Tuple> via UMI_DEDUP_TRANSCRIPTOME.out.stats indirect
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS_TRANSCRIPTOME@1[stats] Channel<Tuple> via UMI_DEDUP_TRANSCRIPTOME.out.stats indirect
+  out out (out): Channel<?>
+subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/:emit:stats emit "stats" @140:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/.mix@1[out] Channel<?>
+subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/.mix@2 chain ".mix" steps=mix @141:38
+  in in (in): -
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_DEDUP_STATS_SAMTOOLS_UMICOLLAPSE_GENOME@1[flagstat] Channel<Tuple> via UMI_DEDUP_GENOME.out.flagstat indirect
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS_GENOME@1[flagstat] Channel<Tuple> via UMI_DEDUP_GENOME.out.flagstat indirect
+  in 1:1 (mix(other)): -
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_DEDUP_STATS_SAMTOOLS_UMICOLLAPSE_TRANSCRIPTOME@1[flagstat] Channel<Tuple> via UMI_DEDUP_TRANSCRIPTOME.out.flagstat indirect
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS_TRANSCRIPTOME@1[flagstat] Channel<Tuple> via UMI_DEDUP_TRANSCRIPTOME.out.flagstat indirect
+  out out (out): Channel<?>
+subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/:emit:flagstat emit "flagstat" @141:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/.mix@2[out] Channel<?>
+subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/.mix@3 chain ".mix" steps=mix @142:38
+  in in (in): -
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_DEDUP_STATS_SAMTOOLS_UMICOLLAPSE_GENOME@1[idxstats] Channel<Tuple> via UMI_DEDUP_GENOME.out.idxstats indirect
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS_GENOME@1[idxstats] Channel<Tuple> via UMI_DEDUP_GENOME.out.idxstats indirect
+  in 1:1 (mix(other)): -
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_DEDUP_STATS_SAMTOOLS_UMICOLLAPSE_TRANSCRIPTOME@1[idxstats] Channel<Tuple> via UMI_DEDUP_TRANSCRIPTOME.out.idxstats indirect
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS_TRANSCRIPTOME@1[idxstats] Channel<Tuple> via UMI_DEDUP_TRANSCRIPTOME.out.idxstats indirect
+  out out (out): Channel<?>
+subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/:emit:idxstats emit "idxstats" @142:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/.mix@3[out] Channel<?>
+subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/:emit:genome_stats emit "genome_stats" @143:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_DEDUP_STATS_SAMTOOLS_UMICOLLAPSE_GENOME@1[stats] Channel<Tuple> via UMI_DEDUP_GENOME.out.stats indirect
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS_GENOME@1[stats] Channel<Tuple> via UMI_DEDUP_GENOME.out.stats indirect
+subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/:emit:genome_flagstat emit "genome_flagstat" @144:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_DEDUP_STATS_SAMTOOLS_UMICOLLAPSE_GENOME@1[flagstat] Channel<Tuple> via UMI_DEDUP_GENOME.out.flagstat indirect
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS_GENOME@1[flagstat] Channel<Tuple> via UMI_DEDUP_GENOME.out.flagstat indirect
+subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/:emit:genome_idxstats emit "genome_idxstats" @145:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_DEDUP_STATS_SAMTOOLS_UMICOLLAPSE_GENOME@1[idxstats] Channel<Tuple> via UMI_DEDUP_GENOME.out.idxstats indirect
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS_GENOME@1[idxstats] Channel<Tuple> via UMI_DEDUP_GENOME.out.idxstats indirect
+subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/:emit:tsv_edit_distance emit "tsv_edit_distance" @146:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/ch_tsv_edit_distance[out] Channel<?> via ch_tsv_edit_distance indirect
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS_GENOME@1[tsv_edit_distance] Channel<Tuple> via ch_tsv_edit_distance indirect
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/ch_tsv_edit_distance~2[out] Channel<?> via ch_tsv_edit_distance indirect
+subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/:emit:tsv_per_umi emit "tsv_per_umi" @147:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/ch_tsv_per_umi[out] Channel<?> via ch_tsv_per_umi indirect
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS_GENOME@1[tsv_per_umi] Channel<Tuple> via ch_tsv_per_umi indirect
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/ch_tsv_per_umi~2[out] Channel<?> via ch_tsv_per_umi indirect
+subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/:emit:tsv_umi_per_position emit "tsv_umi_per_position" @148:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/ch_tsv_umi_per_position[out] Channel<?> via ch_tsv_umi_per_position indirect
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS_GENOME@1[tsv_umi_per_position] Channel<Tuple> via ch_tsv_umi_per_position indirect
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/ch_tsv_umi_per_position~2[out] Channel<?> via ch_tsv_umi_per_position indirect
+subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/:emit:multiqc_files emit "multiqc_files" @149:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/ch_multiqc_files[out] Channel<?> via ch_multiqc_files
+subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/:emit:transcriptome_bam emit "transcriptome_bam" @150:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/ch_dedup_transcriptome_bam[out] Channel<?> via ch_dedup_transcriptome_bam
+subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/:emit:transcriptome_dedup_bam emit "transcriptome_dedup_bam" @151:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_DEDUP_STATS_SAMTOOLS_UMICOLLAPSE_TRANSCRIPTOME@1[bam] Channel<Tuple> via UMI_DEDUP_TRANSCRIPTOME.out.bam indirect
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS_TRANSCRIPTOME@1[bam] Channel<Tuple> via UMI_DEDUP_TRANSCRIPTOME.out.bam indirect
+subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/:emit:transcriptome_sorted_bam emit "transcriptome_sorted_bam" @152:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/SAMTOOLS_SORT@1[bam] Channel<Tuple> via SAMTOOLS_SORT.out.bam
+subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/:emit:transcriptome_sorted_bam_index emit "transcriptome_sorted_bam_index" @153:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_DEDUP_STATS_SAMTOOLS_UMICOLLAPSE_TRANSCRIPTOME@1[index] Channel<Tuple> via UMI_DEDUP_TRANSCRIPTOME.out.index indirect
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS_TRANSCRIPTOME@1[index] Channel<Tuple> via UMI_DEDUP_TRANSCRIPTOME.out.index indirect
+subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/:emit:transcriptome_filtered_bam emit "transcriptome_filtered_bam" @154:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/UMITOOLS_PREPAREFORRSEM@1[bam] Channel<Tuple> via UMITOOLS_PREPAREFORRSEM.out.bam
+subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/:emit:per_sample_mqc_bundle emit "per_sample_mqc_bundle" @155:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_dedup_umi/main.nf#BAM_DEDUP_UMI/ch_per_sample_mqc_bundle[out] Channel<?> via ch_per_sample_mqc_bundle
+bound @43:9 UMI_DEDUP_GENOME
+bound @44:9 ch_genomic_dedup_log
+bound @52:9 UMI_DEDUP_GENOME
+bound @53:9 ch_genomic_dedup_log
+bound @54:9 ch_tsv_edit_distance
+bound @55:9 ch_tsv_per_umi
+bound @56:9 ch_tsv_umi_per_position
+bound @77:9 UMI_DEDUP_TRANSCRIPTOME
+bound @78:9 ch_transcriptomic_dedup_log
+bound @86:9 UMI_DEDUP_TRANSCRIPTOME
+bound @87:9 ch_transcriptomic_dedup_log

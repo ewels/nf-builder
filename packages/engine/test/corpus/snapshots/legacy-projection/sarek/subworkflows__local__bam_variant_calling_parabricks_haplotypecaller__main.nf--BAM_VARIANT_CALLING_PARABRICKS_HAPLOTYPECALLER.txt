@@ -1,0 +1,97 @@
+workflow subworkflows/local/bam_variant_calling_parabricks_haplotypecaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_HAPLOTYPECALLER legacy
+statements 10, modelled 10
+subworkflows/local/bam_variant_calling_parabricks_haplotypecaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_HAPLOTYPECALLER/:take:cram take "cram" @11:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_parabricks_haplotypecaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_HAPLOTYPECALLER/:take:fasta take "fasta" @12:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_parabricks_haplotypecaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_HAPLOTYPECALLER/:take:intervals_bed_combined take "intervals_bed_combined" @13:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_parabricks_haplotypecaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_HAPLOTYPECALLER/cram_intervals chain ".combine.map" steps=combine,map @20:22
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_parabricks_haplotypecaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_HAPLOTYPECALLER/:take:cram[out] ? via cram
+  in 1:1 (combine(right)): -
+    <- subworkflows/local/bam_variant_calling_parabricks_haplotypecaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_HAPLOTYPECALLER/:take:intervals_bed_combined[out] ? via intervals_bed_combined
+  out out (out): ?
+subworkflows/local/bam_variant_calling_parabricks_haplotypecaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_HAPLOTYPECALLER/PARABRICKS_HAPLOTYPECALLER@1 call "PARABRICKS_HAPLOTYPECALLER" callee=PARABRICKS_HAPLOTYPECALLER:process:modelled:legacy @28:5
+  in $1 (tuple(meta, input, input_index, intervals)): Tuple
+    <- subworkflows/local/bam_variant_calling_parabricks_haplotypecaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_HAPLOTYPECALLER/cram_intervals[out] ? via cram_intervals
+  in $2 (tuple(ref_meta, fasta)): Tuple
+    <- subworkflows/local/bam_variant_calling_parabricks_haplotypecaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_HAPLOTYPECALLER/:take:fasta[out] ? via fasta
+  out vcf (vcf): Channel<Tuple>
+  out gvcf (gvcf): Channel<Tuple>
+  out compatible_versions (compatible_versions): Channel<Path>
+  out versions_parabricks (versions_parabricks): Channel<Tuple>
+subworkflows/local/bam_variant_calling_parabricks_haplotypecaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_HAPLOTYPECALLER/.map@1 chain ".map" steps=map @34:26
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_parabricks_haplotypecaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_HAPLOTYPECALLER/PARABRICKS_HAPLOTYPECALLER@1[vcf] Channel<Tuple> via PARABRICKS_HAPLOTYPECALLER.out.vcf
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_parabricks_haplotypecaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_HAPLOTYPECALLER/TABIX_BGZIPTABIX_VCF@1 call "TABIX_BGZIPTABIX_VCF" callee=TABIX_BGZIPTABIX_VCF:process:modelled:legacy @34:5
+  in $1 (tuple(meta, infile, infile_tbi, regions)): Tuple
+    <- subworkflows/local/bam_variant_calling_parabricks_haplotypecaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_HAPLOTYPECALLER/.map@1[out] Channel<?>
+  in action (action): -
+    = 'compress' : String
+  in make_index (make_index): -
+    = true : Boolean
+  in out_ext (out_ext): -
+    = 'vcf' : String
+  out output (output): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out versions_htslib (versions_htslib): Channel<Tuple>
+  out versions_xz (versions_xz): Channel<Tuple>
+subworkflows/local/bam_variant_calling_parabricks_haplotypecaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_HAPLOTYPECALLER/.map@2 chain ".map" steps=map @35:27
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_parabricks_haplotypecaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_HAPLOTYPECALLER/PARABRICKS_HAPLOTYPECALLER@1[gvcf] Channel<Tuple> via PARABRICKS_HAPLOTYPECALLER.out.gvcf
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_parabricks_haplotypecaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_HAPLOTYPECALLER/TABIX_BGZIPTABIX_GVCF@1 call "TABIX_BGZIPTABIX_GVCF" callee=TABIX_BGZIPTABIX_GVCF:process:modelled:legacy @35:5
+  in $1 (tuple(meta, infile, infile_tbi, regions)): Tuple
+    <- subworkflows/local/bam_variant_calling_parabricks_haplotypecaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_HAPLOTYPECALLER/.map@2[out] Channel<?>
+  in action (action): -
+    = 'compress' : String
+  in make_index (make_index): -
+    = true : Boolean
+  in out_ext (out_ext): -
+    = 'g.vcf' : String
+  out output (output): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out versions_htslib (versions_htslib): Channel<Tuple>
+  out versions_xz (versions_xz): Channel<Tuple>
+subworkflows/local/bam_variant_calling_parabricks_haplotypecaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_HAPLOTYPECALLER/vcf_tbi_joined chain ".join" steps=join @37:23
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_parabricks_haplotypecaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_HAPLOTYPECALLER/TABIX_BGZIPTABIX_VCF@1[output] Channel<Tuple> via TABIX_BGZIPTABIX_VCF.out.output
+  in 1:1 (join(1)): -
+    <- subworkflows/local/bam_variant_calling_parabricks_haplotypecaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_HAPLOTYPECALLER/TABIX_BGZIPTABIX_VCF@1[index] Channel<Tuple> via TABIX_BGZIPTABIX_VCF.out.index
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_parabricks_haplotypecaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_HAPLOTYPECALLER/gvcf_tbi_joined chain ".join" steps=join @38:23
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_parabricks_haplotypecaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_HAPLOTYPECALLER/TABIX_BGZIPTABIX_GVCF@1[output] Channel<Tuple> via TABIX_BGZIPTABIX_GVCF.out.output
+  in 1:1 (join(1)): -
+    <- subworkflows/local/bam_variant_calling_parabricks_haplotypecaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_HAPLOTYPECALLER/TABIX_BGZIPTABIX_GVCF@1[index] Channel<Tuple> via TABIX_BGZIPTABIX_GVCF.out.index
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_parabricks_haplotypecaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_HAPLOTYPECALLER/vcf chain ".map" steps=map @40:16
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_parabricks_haplotypecaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_HAPLOTYPECALLER/vcf_tbi_joined[out] Channel<?> via vcf_tbi_joined
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_parabricks_haplotypecaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_HAPLOTYPECALLER/tbi chain ".map" steps=map @41:16
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_parabricks_haplotypecaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_HAPLOTYPECALLER/vcf_tbi_joined[out] Channel<?> via vcf_tbi_joined
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_parabricks_haplotypecaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_HAPLOTYPECALLER/gvcf chain ".map" steps=map @42:16
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_parabricks_haplotypecaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_HAPLOTYPECALLER/gvcf_tbi_joined[out] Channel<?> via gvcf_tbi_joined
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_parabricks_haplotypecaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_HAPLOTYPECALLER/gvcf_tbi chain ".map" steps=map @43:16
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_parabricks_haplotypecaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_HAPLOTYPECALLER/gvcf_tbi_joined[out] Channel<?> via gvcf_tbi_joined
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_parabricks_haplotypecaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_HAPLOTYPECALLER/:emit:vcf emit "vcf" @46:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_parabricks_haplotypecaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_HAPLOTYPECALLER/vcf[out] Channel<?> via vcf
+subworkflows/local/bam_variant_calling_parabricks_haplotypecaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_HAPLOTYPECALLER/:emit:tbi emit "tbi" @47:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_parabricks_haplotypecaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_HAPLOTYPECALLER/tbi[out] Channel<?> via tbi
+subworkflows/local/bam_variant_calling_parabricks_haplotypecaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_HAPLOTYPECALLER/:emit:gvcf emit "gvcf" @48:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_parabricks_haplotypecaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_HAPLOTYPECALLER/gvcf[out] Channel<?> via gvcf
+subworkflows/local/bam_variant_calling_parabricks_haplotypecaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_HAPLOTYPECALLER/:emit:gvcf_tbi emit "gvcf_tbi" @49:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_parabricks_haplotypecaller/main.nf#BAM_VARIANT_CALLING_PARABRICKS_HAPLOTYPECALLER/gvcf_tbi[out] Channel<?> via gvcf_tbi

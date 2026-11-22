@@ -1,0 +1,65 @@
+workflow subworkflows/nf-core/bam_applybqsr/main.nf#BAM_APPLYBQSR legacy
+statements 6, modelled 6
+subworkflows/nf-core/bam_applybqsr/main.nf#BAM_APPLYBQSR/:take:input take "input" @6:5
+  out out (out): -
+subworkflows/nf-core/bam_applybqsr/main.nf#BAM_APPLYBQSR/:take:references take "references" @7:5
+  out out (out): -
+subworkflows/nf-core/bam_applybqsr/main.nf#BAM_APPLYBQSR/:take:intervals take "intervals" @8:5
+  out out (out): -
+subworkflows/nf-core/bam_applybqsr/main.nf#BAM_APPLYBQSR/:take:output_format take "output_format" @9:5
+  out out (out): -
+subworkflows/nf-core/bam_applybqsr/main.nf#BAM_APPLYBQSR/reads_interval chain ".combine.map" steps=combine,map @12:22
+  in in (in): -
+    <- subworkflows/nf-core/bam_applybqsr/main.nf#BAM_APPLYBQSR/:take:input[out] ? via input
+  in 1:1 (combine(right)): -
+    <- subworkflows/nf-core/bam_applybqsr/main.nf#BAM_APPLYBQSR/:take:intervals[out] ? via intervals
+  out out (out): ?
+subworkflows/nf-core/bam_applybqsr/main.nf#BAM_APPLYBQSR/GATK4_APPLYBQSR@1 call "GATK4_APPLYBQSR" callee=GATK4_APPLYBQSR:process:modelled:legacy @19:5
+  in $1 (tuple(meta, input, input_index, bqsr_table, intervals)): Tuple
+    <- subworkflows/nf-core/bam_applybqsr/main.nf#BAM_APPLYBQSR/reads_interval[out] ? via reads_interval
+  in $2 (tuple(meta2, fasta, fai, dict)): Tuple
+    <- subworkflows/nf-core/bam_applybqsr/main.nf#BAM_APPLYBQSR/:take:references[out] ? via references
+  in output_format (output_format): -
+    <- subworkflows/nf-core/bam_applybqsr/main.nf#BAM_APPLYBQSR/:take:output_format[out] ? via output_format
+  out reads (reads): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out versions_gatk4 (versions_gatk4): Channel<Tuple>
+  out versions_samtools (versions_samtools): Channel<Tuple>
+subworkflows/nf-core/bam_applybqsr/main.nf#BAM_APPLYBQSR/reads_applybqsr chain ".join.branch" steps=join,branch @21:23
+  in in (in): -
+    <- subworkflows/nf-core/bam_applybqsr/main.nf#BAM_APPLYBQSR/GATK4_APPLYBQSR@1[reads] Channel<Tuple> via GATK4_APPLYBQSR.out.reads
+  in 1:1 (join(right)): -
+    <- subworkflows/nf-core/bam_applybqsr/main.nf#BAM_APPLYBQSR/GATK4_APPLYBQSR@1[index] Channel<Tuple> via GATK4_APPLYBQSR.out.index
+  out out (out): Record
+subworkflows/nf-core/bam_applybqsr/main.nf#BAM_APPLYBQSR/reads_to_merge chain ".map.groupTuple" steps=map,groupTuple @29:22
+  in in (in): -
+    <- subworkflows/nf-core/bam_applybqsr/main.nf#BAM_APPLYBQSR/reads_applybqsr[out] Record via reads_applybqsr indirect
+  out out (out): Channel<?>
+subworkflows/nf-core/bam_applybqsr/main.nf#BAM_APPLYBQSR/.map@1 chain ".map" steps=map @36:36
+  in in (in): -
+    <- subworkflows/nf-core/bam_applybqsr/main.nf#BAM_APPLYBQSR/:take:references[out] ? via references
+  out out (out): ?
+subworkflows/nf-core/bam_applybqsr/main.nf#BAM_APPLYBQSR/SAMTOOLS_MERGE@1 call "SAMTOOLS_MERGE" callee=SAMTOOLS_MERGE:process:modelled:legacy @36:5
+  in $1 (tuple(meta, input_files, index_files)): Tuple
+    <- subworkflows/nf-core/bam_applybqsr/main.nf#BAM_APPLYBQSR/reads_to_merge[out] Channel<?> via reads_to_merge
+  in $2 (tuple(meta2, fasta, fai, gzi)): Tuple
+    <- subworkflows/nf-core/bam_applybqsr/main.nf#BAM_APPLYBQSR/.map@1[out] ?
+  in index_format (index_format): -
+    <- subworkflows/nf-core/bam_applybqsr/main.nf#BAM_APPLYBQSR/:take:output_format[out] ? via output_format indirect
+  out bam (bam): Channel<Tuple>
+  out cram (cram): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out versions_samtools (versions_samtools): Channel<Tuple>
+subworkflows/nf-core/bam_applybqsr/main.nf#BAM_APPLYBQSR/recal_out chain ".mix.join.mix.map" steps=mix,join,mix,map @39:17
+  in in (in): -
+    <- subworkflows/nf-core/bam_applybqsr/main.nf#BAM_APPLYBQSR/SAMTOOLS_MERGE@1[bam] Channel<Tuple> via SAMTOOLS_MERGE.out.bam
+  in 1:1 (mix(other)): -
+    <- subworkflows/nf-core/bam_applybqsr/main.nf#BAM_APPLYBQSR/SAMTOOLS_MERGE@1[cram] Channel<Tuple> via SAMTOOLS_MERGE.out.cram
+  in 2:1 (join(right)): -
+    <- subworkflows/nf-core/bam_applybqsr/main.nf#BAM_APPLYBQSR/SAMTOOLS_MERGE@1[index] Channel<Tuple> via SAMTOOLS_MERGE.out.index
+  in 3:1 (mix(other)): -
+    <- subworkflows/nf-core/bam_applybqsr/main.nf#BAM_APPLYBQSR/reads_applybqsr[out] Record via reads_applybqsr indirect
+  out out (out): Channel<?>
+subworkflows/nf-core/bam_applybqsr/main.nf#BAM_APPLYBQSR/:emit:recal_out emit "recal_out" @46:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_applybqsr/main.nf#BAM_APPLYBQSR/recal_out[out] Channel<?> via recal_out

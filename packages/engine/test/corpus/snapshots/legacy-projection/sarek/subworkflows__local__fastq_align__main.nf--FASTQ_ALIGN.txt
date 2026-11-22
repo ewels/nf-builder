@@ -1,0 +1,125 @@
+workflow subworkflows/local/fastq_align/main.nf#FASTQ_ALIGN legacy
+statements 12, modelled 12
+subworkflows/local/fastq_align/main.nf#FASTQ_ALIGN/:take:reads take "reads" @14:5
+  out out (out): -
+subworkflows/local/fastq_align/main.nf#FASTQ_ALIGN/:take:index take "index" @15:5
+  out out (out): -
+subworkflows/local/fastq_align/main.nf#FASTQ_ALIGN/:take:sort take "sort" @16:5
+  out out (out): -
+subworkflows/local/fastq_align/main.nf#FASTQ_ALIGN/:take:fasta take "fasta" @17:5
+  out out (out): -
+subworkflows/local/fastq_align/main.nf#FASTQ_ALIGN/:take:fasta_fai take "fasta_fai" @18:5
+  out out (out): -
+subworkflows/local/fastq_align/main.nf#FASTQ_ALIGN/reports factory "channel.empty" factory=channel.empty @22:15
+  out out (out): Channel<?>
+subworkflows/local/fastq_align/main.nf#FASTQ_ALIGN/BWAMEM1_MEM@1 call "BWAMEM1_MEM" callee=BWAMEM1_MEM:process:modelled:legacy @25:5
+  in $1 (tuple(meta, reads)): Tuple
+    <- subworkflows/local/fastq_align/main.nf#FASTQ_ALIGN/:take:reads[out] ? via reads
+  in $2 (tuple(meta2, index)): Tuple
+    <- subworkflows/local/fastq_align/main.nf#FASTQ_ALIGN/:take:index[out] ? via index
+  in $3 (tuple(meta3, fasta)): Tuple
+    = [[id:'no_fasta'], []] : List
+  in sort_bam (sort_bam): -
+    <- subworkflows/local/fastq_align/main.nf#FASTQ_ALIGN/:take:sort[out] ? via sort
+  out bam (bam): Channel<Tuple>
+  out cram (cram): Channel<Tuple>
+  out sam (sam): Channel<Tuple>
+  out csi (csi): Channel<Tuple>
+  out crai (crai): Channel<Tuple>
+  out versions_bwa (versions_bwa): Channel<Tuple>
+  out versions_samtools (versions_samtools): Channel<Tuple>
+subworkflows/local/fastq_align/main.nf#FASTQ_ALIGN/BWAMEM2_MEM@1 call "BWAMEM2_MEM" callee=BWAMEM2_MEM:process:modelled:legacy @26:5
+  in $1 (tuple(meta, reads)): Tuple
+    <- subworkflows/local/fastq_align/main.nf#FASTQ_ALIGN/:take:reads[out] ? via reads
+  in $2 (tuple(meta2, index)): Tuple
+    <- subworkflows/local/fastq_align/main.nf#FASTQ_ALIGN/:take:index[out] ? via index
+  in $3 (tuple(meta3, fasta)): Tuple
+    = [[id:'no_fasta'], []] : List
+  in sort_bam (sort_bam): -
+    <- subworkflows/local/fastq_align/main.nf#FASTQ_ALIGN/:take:sort[out] ? via sort
+  out sam (sam): Channel<Tuple>
+  out bam (bam): Channel<Tuple>
+  out cram (cram): Channel<Tuple>
+  out crai (crai): Channel<Tuple>
+  out csi (csi): Channel<Tuple>
+  out versions_bwamem2 (versions_bwamem2): Channel<Tuple>
+  out versions_samtools (versions_samtools): Channel<Tuple>
+subworkflows/local/fastq_align/main.nf#FASTQ_ALIGN/DRAGMAP_ALIGN@1 call "DRAGMAP_ALIGN" callee=DRAGMAP_ALIGN:process:modelled:legacy @27:5
+  in $1 (tuple(meta, reads)): Tuple
+    <- subworkflows/local/fastq_align/main.nf#FASTQ_ALIGN/:take:reads[out] ? via reads
+  in $2 (tuple(meta2, hashmap)): Tuple
+    <- subworkflows/local/fastq_align/main.nf#FASTQ_ALIGN/:take:index[out] ? via index
+  in $3 (tuple(meta3, fasta)): Tuple
+    = [[id:'no_fasta'], []] : List
+  in sort_bam (sort_bam): -
+    <- subworkflows/local/fastq_align/main.nf#FASTQ_ALIGN/:take:sort[out] ? via sort
+  out sam (sam): Channel<Tuple>
+  out bam (bam): Channel<Tuple>
+  out cram (cram): Channel<Tuple>
+  out crai (crai): Channel<Tuple>
+  out csi (csi): Channel<Tuple>
+  out log (log): Channel<Tuple>
+  out versions_dragmap (versions_dragmap): Channel<Tuple>
+  out versions_samtools (versions_samtools): Channel<Tuple>
+  out versions_pigz (versions_pigz): Channel<Tuple>
+subworkflows/local/fastq_align/main.nf#FASTQ_ALIGN/SENTIEON_BWAMEM@1 call "SENTIEON_BWAMEM" callee=SENTIEON_BWAMEM:process:modelled:legacy @29:5
+  in $1 (tuple(meta, reads)): Tuple
+    <- subworkflows/local/fastq_align/main.nf#FASTQ_ALIGN/:take:reads[out] ? via reads
+  in $2 (tuple(meta2, index)): Tuple
+    <- subworkflows/local/fastq_align/main.nf#FASTQ_ALIGN/:take:index[out] ? via index
+  in $3 (tuple(meta3, fasta)): Tuple
+    <- subworkflows/local/fastq_align/main.nf#FASTQ_ALIGN/:take:fasta[out] ? via fasta
+  in $4 (tuple(meta4, fasta_fai)): Tuple
+    <- subworkflows/local/fastq_align/main.nf#FASTQ_ALIGN/:take:fasta_fai[out] ? via fasta_fai
+  out bam_and_bai (bam_and_bai): Channel<Tuple>
+  out versions_bwa (versions_bwa): Channel<Tuple>
+  out versions_sentieon (versions_sentieon): Channel<Tuple>
+subworkflows/local/fastq_align/main.nf#FASTQ_ALIGN/bam factory "channel.empty" factory=channel.empty @33:11
+  out out (out): Channel<?>
+subworkflows/local/fastq_align/main.nf#FASTQ_ALIGN/bam~2 chain ".mix" steps=mix @34:11
+  in in (in): -
+    <- subworkflows/local/fastq_align/main.nf#FASTQ_ALIGN/bam[out] Channel<?> via bam
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/fastq_align/main.nf#FASTQ_ALIGN/BWAMEM1_MEM@1[bam] Channel<Tuple> via BWAMEM1_MEM.out.bam
+  out out (out): Channel<?>
+subworkflows/local/fastq_align/main.nf#FASTQ_ALIGN/bam~3 chain ".mix" steps=mix @35:11
+  in in (in): -
+    <- subworkflows/local/fastq_align/main.nf#FASTQ_ALIGN/bam~2[out] Channel<?> via bam
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/fastq_align/main.nf#FASTQ_ALIGN/BWAMEM2_MEM@1[bam] Channel<Tuple> via BWAMEM2_MEM.out.bam
+  out out (out): Channel<?>
+subworkflows/local/fastq_align/main.nf#FASTQ_ALIGN/bam~4 chain ".mix" steps=mix @36:11
+  in in (in): -
+    <- subworkflows/local/fastq_align/main.nf#FASTQ_ALIGN/bam~3[out] Channel<?> via bam
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/fastq_align/main.nf#FASTQ_ALIGN/DRAGMAP_ALIGN@1[bam] Channel<Tuple> via DRAGMAP_ALIGN.out.bam
+  out out (out): Channel<?>
+subworkflows/local/fastq_align/main.nf#FASTQ_ALIGN/.map@1 chain ".map" steps=map @37:19
+  in in (in): -
+    <- subworkflows/local/fastq_align/main.nf#FASTQ_ALIGN/SENTIEON_BWAMEM@1[bam_and_bai] Channel<Tuple> via SENTIEON_BWAMEM.out.bam_and_bai
+  out out (out): Channel<?>
+subworkflows/local/fastq_align/main.nf#FASTQ_ALIGN/bam~5 chain ".mix" steps=mix @37:11
+  in in (in): -
+    <- subworkflows/local/fastq_align/main.nf#FASTQ_ALIGN/bam~4[out] Channel<?> via bam
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/fastq_align/main.nf#FASTQ_ALIGN/.map@1[out] Channel<?>
+  out out (out): Channel<?>
+subworkflows/local/fastq_align/main.nf#FASTQ_ALIGN/bai chain ".map" steps=map @39:11
+  in in (in): -
+    <- subworkflows/local/fastq_align/main.nf#FASTQ_ALIGN/SENTIEON_BWAMEM@1[bam_and_bai] Channel<Tuple> via SENTIEON_BWAMEM.out.bam_and_bai
+  out out (out): Channel<?>
+subworkflows/local/fastq_align/main.nf#FASTQ_ALIGN/reports~2 chain ".mix" steps=mix @42:15
+  in in (in): -
+    <- subworkflows/local/fastq_align/main.nf#FASTQ_ALIGN/reports[out] Channel<?> via reports
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/fastq_align/main.nf#FASTQ_ALIGN/DRAGMAP_ALIGN@1[log] Channel<Tuple> via DRAGMAP_ALIGN.out.log
+  out out (out): Channel<?>
+subworkflows/local/fastq_align/main.nf#FASTQ_ALIGN/:emit:bam emit "bam" @45:5
+  in in (in): -
+    <- subworkflows/local/fastq_align/main.nf#FASTQ_ALIGN/bam~5[out] Channel<?> via bam
+subworkflows/local/fastq_align/main.nf#FASTQ_ALIGN/:emit:bai emit "bai" @46:5
+  in in (in): -
+    <- subworkflows/local/fastq_align/main.nf#FASTQ_ALIGN/bai[out] Channel<?> via bai
+subworkflows/local/fastq_align/main.nf#FASTQ_ALIGN/:emit:reports emit "reports" @47:5
+  in in (in): -
+    <- subworkflows/local/fastq_align/main.nf#FASTQ_ALIGN/reports~2[out] Channel<?> via reports

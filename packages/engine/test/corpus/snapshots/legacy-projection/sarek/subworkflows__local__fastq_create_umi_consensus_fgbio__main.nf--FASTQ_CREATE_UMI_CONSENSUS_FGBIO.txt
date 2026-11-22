@@ -1,0 +1,116 @@
+workflow subworkflows/local/fastq_create_umi_consensus_fgbio/main.nf#FASTQ_CREATE_UMI_CONSENSUS_FGBIO legacy
+statements 14, modelled 10
+subworkflows/local/fastq_create_umi_consensus_fgbio/main.nf#FASTQ_CREATE_UMI_CONSENSUS_FGBIO/:take:reads take "reads" @19:5
+  out out (out): -
+subworkflows/local/fastq_create_umi_consensus_fgbio/main.nf#FASTQ_CREATE_UMI_CONSENSUS_FGBIO/:take:fasta take "fasta" @20:5
+  out out (out): -
+subworkflows/local/fastq_create_umi_consensus_fgbio/main.nf#FASTQ_CREATE_UMI_CONSENSUS_FGBIO/:take:fai take "fai" @21:5
+  out out (out): -
+subworkflows/local/fastq_create_umi_consensus_fgbio/main.nf#FASTQ_CREATE_UMI_CONSENSUS_FGBIO/:take:map_index take "map_index" @22:5
+  out out (out): -
+subworkflows/local/fastq_create_umi_consensus_fgbio/main.nf#FASTQ_CREATE_UMI_CONSENSUS_FGBIO/:take:groupreadsbyumi_strategy take "groupreadsbyumi_strategy" @23:5
+  out out (out): -
+subworkflows/local/fastq_create_umi_consensus_fgbio/main.nf#FASTQ_CREATE_UMI_CONSENSUS_FGBIO/:take:aligner take "aligner" @24:5
+  out out (out): -
+subworkflows/local/fastq_create_umi_consensus_fgbio/main.nf#FASTQ_CREATE_UMI_CONSENSUS_FGBIO/FASTQTOBAM@1 call "FASTQTOBAM" callee=FASTQTOBAM:process:modelled:legacy @30:5
+  in $1 (tuple(meta, reads)): Tuple
+    <- subworkflows/local/fastq_create_umi_consensus_fgbio/main.nf#FASTQ_CREATE_UMI_CONSENSUS_FGBIO/:take:reads[out] ? via reads
+  out bam (bam): Channel<Tuple>
+  out versions_fgbio (versions_fgbio): Channel<Tuple>
+subworkflows/local/fastq_create_umi_consensus_fgbio/main.nf#FASTQ_CREATE_UMI_CONSENSUS_FGBIO/split code "split = false" @36:5
+  out split (split): Boolean
+subworkflows/local/fastq_create_umi_consensus_fgbio/main.nf#FASTQ_CREATE_UMI_CONSENSUS_FGBIO/BAM2FASTQ@1 call "BAM2FASTQ" callee=BAM2FASTQ:process:modelled:legacy @37:5
+  in $1 (tuple(meta, inputbam)): Tuple
+    <- subworkflows/local/fastq_create_umi_consensus_fgbio/main.nf#FASTQ_CREATE_UMI_CONSENSUS_FGBIO/FASTQTOBAM@1[bam] Channel<Tuple> via FASTQTOBAM.out.bam
+  in split (split): -
+    <- subworkflows/local/fastq_create_umi_consensus_fgbio/main.nf#FASTQ_CREATE_UMI_CONSENSUS_FGBIO/split[split] Boolean via split
+  out reads (reads): Channel<Tuple>
+  out versions_samtools (versions_samtools): Channel<Tuple>
+  out versions_bgzip (versions_bgzip): Channel<Tuple>
+subworkflows/local/fastq_create_umi_consensus_fgbio/main.nf#FASTQ_CREATE_UMI_CONSENSUS_FGBIO/sort code "sort = false" @41:5
+  out sort (sort): Boolean
+subworkflows/local/fastq_create_umi_consensus_fgbio/main.nf#FASTQ_CREATE_UMI_CONSENSUS_FGBIO/ALIGN_UMI@1 call "ALIGN_UMI" callee=ALIGN_UMI:workflow:modelled:legacy @42:5
+  in reads (reads): -
+    <- subworkflows/local/fastq_create_umi_consensus_fgbio/main.nf#FASTQ_CREATE_UMI_CONSENSUS_FGBIO/BAM2FASTQ@1[reads] Channel<Tuple> via BAM2FASTQ.out.reads
+  in index (index): -
+    <- subworkflows/local/fastq_create_umi_consensus_fgbio/main.nf#FASTQ_CREATE_UMI_CONSENSUS_FGBIO/:take:map_index[out] ? via map_index
+  in sort (sort): -
+    <- subworkflows/local/fastq_create_umi_consensus_fgbio/main.nf#FASTQ_CREATE_UMI_CONSENSUS_FGBIO/sort[sort] Boolean via sort
+  in fasta (fasta): -
+    <- subworkflows/local/fastq_create_umi_consensus_fgbio/main.nf#FASTQ_CREATE_UMI_CONSENSUS_FGBIO/:take:fasta[out] ? via fasta
+  in fasta_fai (fasta_fai): -
+    <- subworkflows/local/fastq_create_umi_consensus_fgbio/main.nf#FASTQ_CREATE_UMI_CONSENSUS_FGBIO/:take:fai[out] ? via fai
+  out bam (bam): Channel<?>
+  out bai (bai): Channel<?>
+  out reports (reports): Channel<?>
+subworkflows/local/fastq_create_umi_consensus_fgbio/main.nf#FASTQ_CREATE_UMI_CONSENSUS_FGBIO/bams_to_fixmate chain ".branch" steps=branch @46:23
+  in in (in): -
+    <- subworkflows/local/fastq_create_umi_consensus_fgbio/main.nf#FASTQ_CREATE_UMI_CONSENSUS_FGBIO/ALIGN_UMI@1[bam] Channel<?> via ALIGN_UMI.out.bam
+  out out (out): Record
+subworkflows/local/fastq_create_umi_consensus_fgbio/main.nf#FASTQ_CREATE_UMI_CONSENSUS_FGBIO/SAMTOOLS_FIXMATE@1 call "SAMTOOLS_FIXMATE" callee=SAMTOOLS_FIXMATE:process:modelled:legacy @52:5
+  in $1 (tuple(meta, input)): Tuple
+    <- subworkflows/local/fastq_create_umi_consensus_fgbio/main.nf#FASTQ_CREATE_UMI_CONSENSUS_FGBIO/bams_to_fixmate[out] Record via bams_to_fixmate indirect
+  in $2 (tuple(meta2, fasta, fai)): Tuple
+    = [[], [], []] : List
+  out bam (bam): Channel<Tuple>
+  out cram (cram): Channel<Tuple>
+  out sam (sam): Channel<Tuple>
+  out versions_samtools (versions_samtools): Channel<Tuple>
+subworkflows/local/fastq_create_umi_consensus_fgbio/main.nf#FASTQ_CREATE_UMI_CONSENSUS_FGBIO/bams_to_merge chain ".mix.map.groupTuple.map.branch" steps=mix,map,groupTuple,map,branch @54:21
+  in in (in): -
+    <- subworkflows/local/fastq_create_umi_consensus_fgbio/main.nf#FASTQ_CREATE_UMI_CONSENSUS_FGBIO/SAMTOOLS_FIXMATE@1[bam] Channel<Tuple> via SAMTOOLS_FIXMATE.out.bam
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/fastq_create_umi_consensus_fgbio/main.nf#FASTQ_CREATE_UMI_CONSENSUS_FGBIO/bams_to_fixmate[out] Record via bams_to_fixmate indirect
+  out out (out): Record
+subworkflows/local/fastq_create_umi_consensus_fgbio/main.nf#FASTQ_CREATE_UMI_CONSENSUS_FGBIO/.map@1 chain ".map" steps=map @71:21
+  in in (in): -
+    <- subworkflows/local/fastq_create_umi_consensus_fgbio/main.nf#FASTQ_CREATE_UMI_CONSENSUS_FGBIO/bams_to_merge[out] Record via bams_to_merge indirect
+  out out (out): ?
+subworkflows/local/fastq_create_umi_consensus_fgbio/main.nf#FASTQ_CREATE_UMI_CONSENSUS_FGBIO/MERGE_CONSENSUS@1 call "MERGE_CONSENSUS" callee=MERGE_CONSENSUS:process:modelled:legacy @71:5
+  in $1 (tuple(meta, input_files, index_files)): Tuple
+    <- subworkflows/local/fastq_create_umi_consensus_fgbio/main.nf#FASTQ_CREATE_UMI_CONSENSUS_FGBIO/.map@1[out] ?
+  in $2 (tuple(meta2, fasta, fai, gzi)): Tuple
+    = [[], [], [], []] : List
+  in index_format (index_format): -
+    = '' : String
+  out bam (bam): Channel<Tuple>
+  out cram (cram): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out versions_samtools (versions_samtools): Channel<Tuple>
+subworkflows/local/fastq_create_umi_consensus_fgbio/main.nf#FASTQ_CREATE_UMI_CONSENSUS_FGBIO/bams_all chain ".mix" steps=mix @73:16
+  in in (in): -
+    <- subworkflows/local/fastq_create_umi_consensus_fgbio/main.nf#FASTQ_CREATE_UMI_CONSENSUS_FGBIO/MERGE_CONSENSUS@1[bam] Channel<Tuple> via MERGE_CONSENSUS.out.bam
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/fastq_create_umi_consensus_fgbio/main.nf#FASTQ_CREATE_UMI_CONSENSUS_FGBIO/bams_to_merge[out] Record via bams_to_merge indirect
+  out out (out): Channel<Tuple>
+subworkflows/local/fastq_create_umi_consensus_fgbio/main.nf#FASTQ_CREATE_UMI_CONSENSUS_FGBIO/GROUPREADSBYUMI@1 call "GROUPREADSBYUMI" callee=GROUPREADSBYUMI:process:modelled:legacy @76:5
+  in $1 (tuple(meta, bam)): Tuple
+    <- subworkflows/local/fastq_create_umi_consensus_fgbio/main.nf#FASTQ_CREATE_UMI_CONSENSUS_FGBIO/bams_all[out] Channel<Tuple> via bams_all
+  in strategy (strategy): -
+    <- subworkflows/local/fastq_create_umi_consensus_fgbio/main.nf#FASTQ_CREATE_UMI_CONSENSUS_FGBIO/:take:groupreadsbyumi_strategy[out] ? via groupreadsbyumi_strategy
+  out bam (bam): Channel<Tuple>
+  out histogram (histogram): Channel<Tuple>
+  out read_metrics (read_metrics): Channel<Tuple>
+  out versions_fgbio (versions_fgbio): Channel<Tuple>
+subworkflows/local/fastq_create_umi_consensus_fgbio/main.nf#FASTQ_CREATE_UMI_CONSENSUS_FGBIO/call_min_reads code "call_min_reads = 1" @82:5
+  out call_min_reads (call_min_reads): Integer
+subworkflows/local/fastq_create_umi_consensus_fgbio/main.nf#FASTQ_CREATE_UMI_CONSENSUS_FGBIO/call_min_baseq code "call_min_baseq = 10" @83:5
+  out call_min_baseq (call_min_baseq): Integer
+subworkflows/local/fastq_create_umi_consensus_fgbio/main.nf#FASTQ_CREATE_UMI_CONSENSUS_FGBIO/CALLUMICONSENSUS@1 call "CALLUMICONSENSUS" callee=CALLUMICONSENSUS:process:modelled:legacy @84:5
+  in $1 (tuple(meta, grouped_bam)): Tuple
+    <- subworkflows/local/fastq_create_umi_consensus_fgbio/main.nf#FASTQ_CREATE_UMI_CONSENSUS_FGBIO/GROUPREADSBYUMI@1[bam] Channel<Tuple> via GROUPREADSBYUMI.out.bam
+  in min_reads (min_reads): -
+    <- subworkflows/local/fastq_create_umi_consensus_fgbio/main.nf#FASTQ_CREATE_UMI_CONSENSUS_FGBIO/call_min_reads[call_min_reads] Integer via call_min_reads
+  in min_baseq (min_baseq): -
+    <- subworkflows/local/fastq_create_umi_consensus_fgbio/main.nf#FASTQ_CREATE_UMI_CONSENSUS_FGBIO/call_min_baseq[call_min_baseq] Integer via call_min_baseq
+  out bam (bam): Channel<Tuple>
+  out versions_fgbio (versions_fgbio): Channel<Tuple>
+subworkflows/local/fastq_create_umi_consensus_fgbio/main.nf#FASTQ_CREATE_UMI_CONSENSUS_FGBIO/:emit:umibam emit "umibam" @87:5
+  in in (in): -
+    <- subworkflows/local/fastq_create_umi_consensus_fgbio/main.nf#FASTQ_CREATE_UMI_CONSENSUS_FGBIO/FASTQTOBAM@1[bam] Channel<Tuple> via FASTQTOBAM.out.bam
+subworkflows/local/fastq_create_umi_consensus_fgbio/main.nf#FASTQ_CREATE_UMI_CONSENSUS_FGBIO/:emit:groupbam emit "groupbam" @88:5
+  in in (in): -
+    <- subworkflows/local/fastq_create_umi_consensus_fgbio/main.nf#FASTQ_CREATE_UMI_CONSENSUS_FGBIO/GROUPREADSBYUMI@1[bam] Channel<Tuple> via GROUPREADSBYUMI.out.bam
+subworkflows/local/fastq_create_umi_consensus_fgbio/main.nf#FASTQ_CREATE_UMI_CONSENSUS_FGBIO/:emit:consensusbam emit "consensusbam" @89:5
+  in in (in): -
+    <- subworkflows/local/fastq_create_umi_consensus_fgbio/main.nf#FASTQ_CREATE_UMI_CONSENSUS_FGBIO/CALLUMICONSENSUS@1[bam] Channel<Tuple> via CALLUMICONSENSUS.out.bam

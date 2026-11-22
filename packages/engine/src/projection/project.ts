@@ -3,15 +3,21 @@
 // Node keys: ./keys.ts. Types: ./types.ts, with nf-lang's call-typing rules in ./signature.ts (Apache-2.0).
 
 import type {
+  Argument,
   Callee,
+  ChainStep,
   Expression,
   FlowType,
   GraphEdge,
   GraphNode,
+  Guard,
+  IfStatement,
   IncludableDeclaration,
+  LegacyOperator,
   MethodCall,
   Port,
   PortRef,
+  ProjectedStatement,
   Projection,
   Range,
   ScriptAst,
@@ -25,8 +31,18 @@ import type {
 import type { Binding } from "../model/file-model";
 import type { ProjectModel } from "../model/project";
 import { buildCodeNode } from "./code";
+import { branchesOf } from "./conditional";
 import { inlineType } from "./inline";
 import { KeyAllocator } from "./keys";
+import {
+  integerIndex,
+  legacyOperatorType,
+  outPath,
+  type PipeStep,
+  pipeSteps,
+  setTarget,
+  unwrap,
+} from "./legacy";
 import {
   type DataflowLibrary,
   dataflowLibrary,
@@ -43,6 +59,9 @@ import {
   callDataflow,
   emitName,
   fallbackSignature,
+  type LegacySignature,
+  legacyProcessSignature,
+  legacyResultDataflow,
   type PortSpec,
   pipelineSignature,
   processSignature,
@@ -133,14 +152,45 @@ type EmitTypes = (
   workflow: string | null,
 ) => ReadonlyMap<string, FlowType>;
 
+/** One operator of a chain: a method call's, or a pipe step's. */
+interface StepCall {
+  readonly operator: string;
+  readonly range: Range;
+  readonly args: readonly Argument[];
+  readonly closures: number;
+}
+
+const stepCall = (
+  operator: string,
+  range: Range,
+  call: MethodCall | null,
+): StepCall => ({
+  operator,
+  range,
+  args: call?.args ?? [],
+  closures:
+    (call?.closures.length ?? 0) +
+    (call?.args.filter((a) => a.kind === "Closure").length ?? 0),
+});
+
+/** A pipe: its source, its steps, and the variable of a final `set { v }`. */
+interface PipePlan {
+  readonly source: Expression;
+  readonly steps: readonly PipeStep[];
+  readonly set: string | null;
+}
+
 interface Callable {
   readonly callee: Callee;
   readonly signature: (argumentCount: number) => Signature;
+  /** A legacy process's ports, which also give its results' dataflow kind (F-107). */
+  readonly legacy?: LegacySignature;
 }
 
 /** What a feeding expression contributes to an input port. */
 interface Feed {
-  readonly range: Range;
+  /** The argument's text, which an edit may patch; null for a feed that isn't one (a pipe's, a fork's). */
+  readonly range: Range | null;
   readonly edges: readonly FeedEdge[];
   /** The type of the argument when known: its source for a direct feed, else its inline type. */
   readonly type: FlowType | null;
@@ -148,10 +198,6 @@ interface Feed {
 type FeedEdge = Omit<GraphEdge, "id" | "to">;
 
 const OUT = "out";
-const unwrap = (expression: Expression): Expression =>
-  expression.kind === "Parenthesized"
-    ? unwrap(expression.expression)
-    : expression;
 const argumentValue = (argument: MethodCall["args"][number]): Expression =>
   argument.kind === "NamedArgument" ? argument.value : argument;
 const methodName = (call: MethodCall): string | null =>
@@ -188,11 +234,21 @@ function readFeed(range: Range, read: ReadPath, resolved: ResolvedRead): Feed {
   };
 }
 
+/** A node as the projector builds it: `#add` gives it the guards around it. */
+type PendingNode<N = GraphNode> = N extends unknown ? Omit<N, "guards"> : never;
+
 class Projecting {
-  readonly #nodes: GraphNode[] = [];
-  readonly #edges = new Map<string, GraphEdge>();
-  readonly #scope = new WorkflowScope();
+  #nodes: GraphNode[] = [];
+  #edges = new Map<string, GraphEdge>();
+  #scope = new WorkflowScope();
+  /** The `if` branches around the statement being projected. */
+  #guardStack: Guard[] = [];
   readonly #keys: KeyAllocator;
+  readonly #statements: ProjectedStatement[] = [];
+  /** The names the statement being projected has bound. */
+  #bound: string[] = [];
+  /** Whether a statement in the `if` being tried bound a graph value (an alias, a call result) or made a non-code node. */
+  #flowed = false;
 
   constructor(
     private readonly model: ProjectModel,
@@ -216,7 +272,7 @@ class Projecting {
     for (const take of takes) {
       const id = this.#keys.take(take.name.name);
       const type = flowFromDeclared(take.type);
-      this.#nodes.push({
+      this.#add({
         id,
         kind: "take",
         label: take.name.name,
@@ -236,6 +292,7 @@ class Projecting {
       workflow: this.ref,
       nodes: this.#nodes,
       edges: this.#sortedEdges(),
+      statements: this.#statements,
     };
   }
 
@@ -259,14 +316,29 @@ class Projecting {
       for (const r of variablesRead(section))
         if (r.name === "params" && r.property !== null) read.add(r.property);
     const entry = this.ref.name === null;
-    if (!(entry && block !== null) && read.size === 0) return;
+    // legacy `params.x = ...` in the entry script, in source order (F-107)
+    const declared: string[] = [];
+    for (const item of entry ? (ast?.body ?? []) : []) {
+      const target = item.kind === "LegacyParam" ? item.target : null;
+      if (
+        target?.object.kind === "Variable" &&
+        target.object.name === "params" &&
+        target.property.kind === "Identifier" &&
+        !declared.includes(target.property.name)
+      )
+        declared.push(target.property.name);
+    }
+    if (!(entry && block !== null) && read.size === 0 && declared.length === 0)
+      return;
     const specs: PortSpec[] = [];
     for (const p of block?.params ?? [])
       specs.push(spec(p.name.name, flowFromDeclared(p.type)));
+    for (const name of declared)
+      if (!specs.some((s) => s.id === name)) specs.push(spec(name, null));
     for (const name of read)
       if (!specs.some((s) => s.id === name)) specs.push(spec(name, null));
     const id = this.#keys.params();
-    this.#nodes.push({
+    this.#add({
       id,
       kind: "params",
       label: "params",
@@ -289,7 +361,7 @@ class Projecting {
       const feed =
         value === null ? this.#feedName(name, item.range) : this.#feed(value);
       const id = this.#keys.emit(name);
-      this.#nodes.push({
+      this.#add({
         id,
         kind: "emit",
         label: name,
@@ -323,7 +395,7 @@ class Projecting {
       if (!specs.some((s) => s.id === name)) specs.push(spec(name, null));
     }
     const id = this.#keys.output();
-    this.#nodes.push({
+    this.#add({
       id,
       kind: "output",
       label: "output",
@@ -337,8 +409,126 @@ class Projecting {
 
   // ---- statements ----
 
+  /** Whether legacy forms apply (`.out`, pipes, legacy operators and factories): lint rejects them in typed code. */
+  get #legacy(): boolean {
+    return this.ref.typed !== true;
+  }
+
   #statement(statement: Statement): void {
     if (statement.kind === "EmptyStatement") return;
+    if (statement.kind === "If" && this.#transparentIf(statement)) return;
+    const before = this.#nodes.length;
+    this.#bound = [];
+    const guards = [...this.#guardStack];
+    this.#project(statement);
+    const created = this.#nodes.slice(before);
+    if (created.some((n) => n.kind !== "code")) this.#flowed = true;
+    this.#statements.push({
+      range: statement.range,
+      nodes: created.map((n) => n.id),
+      binds: this.#bound,
+      modelled: !created.some((n) => n.kind === "code"),
+      guards,
+    });
+  }
+
+  #add(node: PendingNode): void {
+    this.#nodes.push({ ...node, guards: [...this.#guardStack] } as GraphNode);
+  }
+
+  /** Runs `fn` inside a branch: the nodes it makes carry the guard. */
+  #guarded<T>(guard: Guard, fn: () => T): T {
+    this.#guardStack.push(guard);
+    try {
+      return fn();
+    } finally {
+      this.#guardStack.pop();
+    }
+  }
+
+  /** Puts everything the projector has built back as it is now, for a branch that turns out not to be dataflow. */
+  #checkpoint(): () => void {
+    const nodes = [...this.#nodes];
+    const edges = new Map(this.#edges);
+    const scope = this.#scope.fork();
+    const statements = this.#statements.length;
+    const keys = this.#keys.checkpoint();
+    return () => {
+      this.#nodes = nodes;
+      this.#edges = edges;
+      this.#scope = scope;
+      this.#statements.length = statements;
+      keys();
+    };
+  }
+
+  /**
+   * An `if` with dataflow in a branch is transparent: its branch statements are projected in order, each carrying
+   * the branch guards, and each branch starts from the bindings before the `if`. After it, a name holds the
+   * definitions of every branch end (and the earlier one without an `else`). An `if` with no dataflow in it is
+   * left to be one code node. False in that case.
+   */
+  #transparentIf(statement: IfStatement): boolean {
+    const undo = this.#checkpoint();
+    const outer = this.#flowed;
+    this.#flowed = false;
+    this.#ifBranches(statement);
+    const found = this.#flowed;
+    this.#flowed = outer || found;
+    if (!found) undo();
+    return found;
+  }
+
+  #ifBranches(statement: IfStatement): void {
+    const incoming = this.#scope;
+    const ends: WorkflowScope[] = [];
+    const branch = (body: Statement, which: "then" | "else") => {
+      const scope = incoming.fork();
+      this.#scope = scope;
+      const items = body.kind === "Block" ? body.statements : [body];
+      this.#guarded(
+        { condition: statement.condition.range, branch: which },
+        () => {
+          for (const item of items) this.#statement(item);
+        },
+      );
+      // a nested `if` without dataflow swaps in a restored scope, so the branch ends in whatever is current
+      const end = this.#scope;
+      // a `def` in a branch is local to it
+      end.restore(
+        items.flatMap((i) =>
+          i.kind === "VariableDeclaration" && i.def
+            ? i.targets.map((t) => t.name.name)
+            : [],
+        ),
+        incoming,
+      );
+      ends.push(end);
+    };
+    branch(statement.consequent, "then");
+    if (statement.alternate !== null) branch(statement.alternate, "else");
+    this.#scope = incoming;
+    incoming.join(ends, statement.alternate !== null);
+  }
+
+  #bindValues(name: string, values: readonly Value[]): void {
+    if (values.length > 0) this.#flowed = true;
+    this.#scope.bind(name, values);
+    this.#bound.push(name);
+  }
+
+  /** The values a reference resolved to, one per node with the ports it reads. */
+  #valuesOf(resolved: ResolvedRead): Value[] {
+    const byNode = new Map<string, PortSpec[]>();
+    for (const s of resolved.sources)
+      byNode.set(s.port.node, [
+        ...(byNode.get(s.port.node) ?? []),
+        spec(s.port.port, s.type),
+      ]);
+    return [...byNode].map(([node, ports]) => ({ node, ports }));
+  }
+
+  #project(statement: Statement): void {
     let variable: string | null = null;
     let expression: Expression | null = null;
     let declared: TypeRef | null = null;
@@ -347,8 +537,7 @@ class Projecting {
     else if (
       statement.kind === "VariableDeclaration" &&
       !statement.multiple &&
-      statement.targets.length === 1 &&
-      statement.initializer !== null
+      statement.targets.length === 1
     ) {
       variable = statement.targets[0]?.name.name ?? null;
       declared = statement.targets[0]?.type ?? null;
@@ -361,16 +550,96 @@ class Projecting {
       variable = statement.target.name;
       expression = statement.value;
     }
-    if (expression !== null && this.#isDataflow(expression)) {
-      const value = this.#build(
-        expression,
-        variable,
-        flowFromDeclared(declared),
-      );
-      if (variable !== null) this.#scope.bind(variable, [value]);
+    // `def x` and `x = null` bind nothing
+    if (
+      variable !== null &&
+      (expression === null || expression.kind === "Null")
+    ) {
+      this.#bindValues(variable, []);
       return;
     }
+    if (
+      expression !== null &&
+      this.#dataflowStatement(expression, variable, declared)
+    )
+      return;
     this.#code(statement, variable, expression);
+  }
+
+  /** Projects a statement's expression when it is dataflow, an alias or a call-result property; false for anything else. */
+  #dataflowStatement(
+    expression: Expression,
+    variable: string | null,
+    declared: TypeRef | null,
+  ): boolean {
+    const e = unwrap(expression);
+    const pipe = this.#pipeOf(e);
+    if (pipe !== null) {
+      const values = this.#pipe(pipe, variable);
+      if (variable !== null) this.#bindValues(variable, values);
+      return true;
+    }
+    if (this.#isDataflow(e)) {
+      const value = this.#build(e, variable, flowFromDeclared(declared));
+      if (variable !== null) this.#bindValues(variable, [value]);
+      return true;
+    }
+    if (this.#isOutputOfCall(e)) {
+      const nested = this.#nested(e);
+      if (nested === null) return false;
+      if (variable !== null) this.#bindValues(variable, [nested.value]);
+      return true;
+    }
+    // `ref.set { v }` and `ref.tap { v }` on a bare reference are aliases
+    if (
+      e.kind === "MethodCall" &&
+      this.#isAssignCall(e) &&
+      e.receiver !== null
+    ) {
+      const ref = this.#reference(e.receiver);
+      const target = setTarget(e);
+      if (ref === null || !this.#aliasable(ref) || target === null)
+        return false;
+      this.#bindValues(target.variable.name, this.#valuesOf(ref.resolved));
+      return true;
+    }
+    if (variable === null) return false;
+    if (this.#conditionalValue(e, variable)) return true;
+    // `runner = PROC`: the variable stands for a process or workflow (legacy only)
+    if (
+      this.#legacy &&
+      e.kind === "Variable" &&
+      this.#scope.lookup(e.name).length === 0 &&
+      this.#callableByName(e.name) !== null
+    ) {
+      this.#scope.bindAlias(variable, this.#scope.calleesOf(e.name));
+      this.#bound.push(variable);
+      this.#flowed = true;
+      return true;
+    }
+    // an assignment of a graph reference creates no node
+    const ref = this.#reference(e);
+    if (ref === null || !this.#aliasable(ref)) return false;
+    this.#bindValues(variable, this.#valuesOf(ref.resolved));
+    return true;
+  }
+
+  /**
+   * Whether a graph reference stands for the value itself, so an assignment, `set`/`tap`, ternary branch or pipe
+   * source over it is an alias: it consumed all its properties, and isn't a property of a code node's value (`x.p`).
+   */
+  #aliasable(ref: { read: ReadPath; resolved: ResolvedRead } | null): boolean {
+    if (ref === null) return false;
+    const { read, resolved } = ref;
+    if (resolved.consumed !== read.properties.length) return false;
+    return !(
+      read.properties.length > 0 &&
+      resolved.sources.some((src) => this.#isCodeNode(src.port.node))
+    );
+  }
+
+  #isCodeNode(id: string): boolean {
+    return this.#nodes.some((n) => n.id === id && n.kind === "code");
   }
 
   #code(
@@ -382,18 +651,20 @@ class Projecting {
       scope: this.#scope,
       keys: this.#keys,
       text: this.text,
-      isCode: (id) => this.#nodes.some((n) => n.id === id && n.kind === "code"),
+      isCode: (id) => this.#isCodeNode(id),
       // a copy of a graph value (`w2 = w`) has that value's type; anything else an inline one
       assignedType: () =>
         variable === null || expression === null
           ? null
           : this.#feed(expression).type,
     });
-    this.#nodes.push(node);
+    this.#add(node);
     for (const edge of edges) this.#edges.set(edge.id, edge);
     // each assigned name now stands for this node's port of that name, replacing an earlier binding
-    for (const output of node.outputs)
+    for (const output of node.outputs) {
+      this.#bound.push(output.id);
       this.#scope.bind(output.id, [{ node: node.id, ports: [output] }]);
+    }
   }
 
   // ---- dataflow expressions ----
@@ -401,6 +672,17 @@ class Projecting {
   /** A variable, or a chain of simple properties on one, that the scope resolves to graph values. */
   #reference(expression: Expression) {
     const e = unwrap(expression);
+    const out = this.#legacy ? outPath(e) : null;
+    if (out !== null) {
+      this.#demand(out);
+      // `X.out[n]` isn't a property chain; `X.out` and `X.out.name` resolve in the scope
+      if (e.kind === "Index") {
+        const resolved = this.#scope.resolveOut(out.callee, out.selector);
+        return resolved === null
+          ? null
+          : { read: { name: out.callee, properties: [] }, resolved };
+      }
+    }
     if (!isChain(e)) return null;
     const read = variablesRead(e, { closures: false })[0];
     if (read === undefined) return null;
@@ -416,8 +698,42 @@ class Projecting {
       receiver !== null &&
       receiver.kind === "Variable" &&
       this.#scope.lookup(receiver.name).length === 0 &&
-      this.library.isFactory(receiver.name, name)
+      (this.library.isFactory(receiver.name, name) ||
+        // a legacy factory the catalogue lacks, such as `channel.from`: its type isn't known
+        (this.#legacy &&
+          (receiver.name === "channel" || receiver.name === "Channel")))
     );
+  }
+
+  /** `E.set { v }` or `E.tap { v }` in nf-lang's assignment shape. */
+  #isAssignCall(call: MethodCall): boolean {
+    const name = methodName(call);
+    return (
+      name !== null &&
+      call.receiver !== null &&
+      this.library.legacyResult(name) === "assign" &&
+      setTarget(call) !== null
+    );
+  }
+
+  /** A `.out` selection of a callee that has no declared ports (unresolved or unparsed) adds the port it names. */
+  #demand(out: NonNullable<ReturnType<typeof outPath>>): void {
+    if (out.selector === null) return;
+    const id =
+      typeof out.selector === "string" ? out.selector : `[${out.selector}]`;
+    for (const value of this.#scope.callsOf(out.callee)) {
+      const at = this.#nodes.findIndex((n) => n.id === value.node);
+      const found = this.#nodes[at];
+      if (
+        found?.kind !== "call" ||
+        found.callee.status === "modelled" ||
+        value.ports.some((p) => p.id === id)
+      )
+        continue;
+      const added = spec(id, null);
+      this.#nodes[at] = { ...found, outputs: [...found.outputs, port(added)] };
+      this.#scope.addPort(value.node, added);
+    }
   }
 
   /** A catalogue operator on a dataflow expression, or on a reference whose single source isn't plain. */
@@ -425,6 +741,13 @@ class Projecting {
     const name = methodName(call);
     if (name === null || call.receiver === null) return false;
     const receiver = unwrap(call.receiver);
+    const legacy = this.library.legacyResult(name);
+    if (legacy === "assign")
+      return (
+        this.#isAssignCall(call) &&
+        (this.#isDataflow(receiver) || this.#isOutputOfCall(receiver))
+      );
+    if (legacy !== null && !this.#legacy) return false;
     let kind: FlowType["dataflow"] = null;
     if (!this.#isDataflow(receiver) && !this.#isOutputOfCall(receiver)) {
       const ref = this.#reference(receiver);
@@ -440,6 +763,13 @@ class Projecting {
   /** `<call>.<name>`: a property of a dataflow expression, which stands for one output of the node it creates. */
   #isOutputOfCall(expression: Expression): boolean {
     const e = unwrap(expression);
+    if (e.kind === "Index")
+      // `CALL(...)[n]` (legacy results are indexable)
+      return (
+        this.#legacy &&
+        integerIndex(e) !== null &&
+        this.#isCall(unwrap(e.object))
+      );
     return (
       e.kind === "Property" &&
       e.property.kind === "Identifier" &&
@@ -447,9 +777,21 @@ class Projecting {
     );
   }
 
+  #isCall(e: Expression): boolean {
+    return (
+      e.kind === "MethodCall" &&
+      e.receiver === null &&
+      this.#callable(e) !== null
+    );
+  }
+
   #callable(call: MethodCall): Callable | null {
     const name = methodName(call);
     if (name === null || call.receiver !== null) return null;
+    return this.#callableByName(name);
+  }
+
+  #callableByName(name: string): Callable | null {
     const binding = this.model.lookup(this.ref.path, name);
     return binding === undefined ? null : this.#resolveBinding(name, binding);
   }
@@ -512,8 +854,13 @@ class Projecting {
     switch (declaration.kind) {
       case "Process":
       case "Agent": {
-        if (declaration.kind === "Process" && !declaration.typed)
-          return callable("process", "modelled", false);
+        if (declaration.kind === "Process" && !declaration.typed) {
+          const legacy = legacyProcessSignature(declaration, this.library);
+          return {
+            ...callable("process", "modelled", false, () => legacy),
+            legacy,
+          };
+        }
         const signature = processSignature(declaration, this.library);
         return callable(
           declaration.kind === "Agent" ? "agent" : "process",
@@ -558,6 +905,7 @@ class Projecting {
     const e = unwrap(expression) as MethodCall;
     if (this.#isFactoryCall(e)) return this.#factory(e, assigned, declared);
     if (e.receiver === null) return this.#call(e, assigned);
+    if (this.#isAssignCall(e)) return this.#assign(e);
     return this.#chain(e, assigned, declared);
   }
 
@@ -573,10 +921,18 @@ class Projecting {
       return { value, direct: value.ports.length === 1 };
     }
     const e = unwrap(expression);
-    if (!this.#isOutputOfCall(e) || e.kind !== "Property") return null;
+    if (!this.#isOutputOfCall(e)) return null;
+    if (e.kind !== "Property" && e.kind !== "Index") return null;
     const value = this.#build(e.object, null);
-    const name = e.property.kind === "Identifier" ? e.property.name : "";
-    const named = value.ports.filter((p) => p.id === name);
+    const index = e.kind === "Index" ? integerIndex(e) : null;
+    const name =
+      e.kind === "Property" && e.property.kind === "Identifier"
+        ? e.property.name
+        : "";
+    const named =
+      index === null
+        ? value.ports.filter((p) => p.id === name)
+        : value.ports.slice(index, index + 1);
     return named.length > 0
       ? { value: { node: value.node, ports: named }, direct: true }
       : { value, direct: false };
@@ -585,19 +941,8 @@ class Projecting {
   #feed(expression: Expression): Feed {
     const range = expression.range;
     const nested = this.#nested(expression);
-    if (nested !== null) {
-      const { value, direct } = nested;
-      return {
-        range,
-        edges: value.ports.map((p) => ({
-          from: { node: value.node, port: p.id },
-          type: p.type ?? UNKNOWN,
-          variable: null,
-          direct,
-        })),
-        type: direct ? (value.ports[0]?.type ?? null) : null,
-      };
-    }
+    if (nested !== null)
+      return this.#valueFeed(nested.value, range, nested.direct);
     const ref = this.#reference(expression);
     if (ref !== null) return readFeed(range, ref.read, ref.resolved);
     const edges: FeedEdge[] = [];
@@ -636,16 +981,31 @@ class Projecting {
 
   #call(call: MethodCall, assigned: string | null): Value {
     const callable = this.#callable(call) as Callable;
-    const pipeline =
+    const record =
       callable.callee.kind === "pipeline" &&
-      callable.callee.status === "modelled";
-    const record = pipeline ? recordArguments(call) : null;
+      callable.callee.status === "modelled"
+        ? recordArguments(call)
+        : null;
     const args =
       record === null
         ? call.args.map(argumentValue)
         : record.map((r) => r.value);
     const feeds = args.map((a) => this.#feed(a));
-    const signature = callable.signature(args.length);
+    return this.#callNode(callable, feeds, record, call.range, assigned);
+  }
+
+  /** The call node for `callable` with one feed per argument (a pipeline's `record(...)` keys them by name). */
+  #callNode(
+    callable: Callable,
+    feeds: readonly Feed[],
+    record: ReturnType<typeof recordArguments>,
+    range: Range,
+    assigned: string | null,
+  ): Value {
+    const pipeline =
+      callable.callee.kind === "pipeline" &&
+      callable.callee.status === "modelled";
+    const signature = callable.signature(feeds.length);
     // each feed goes to the input port with the same position, or, for a pipeline's record(...), the same name
     const inputSpecs: PortSpec[] = [];
     const fed = new Map<string, Feed>();
@@ -658,8 +1018,8 @@ class Projecting {
       });
     } else {
       const count = pipeline
-        ? args.length
-        : Math.max(signature.inputs.length, args.length);
+        ? feeds.length
+        : Math.max(signature.inputs.length, feeds.length);
       for (let i = 0; i < count; i++) {
         const input =
           (pipeline ? undefined : signature.inputs[i]) ??
@@ -669,10 +1029,17 @@ class Projecting {
       }
     }
     const { callee } = callable;
-    const kind = callDataflow(feeds.map((f) => f.type));
+    const kind =
+      callable.legacy === undefined
+        ? callDataflow(feeds.map((f) => f.type))
+        : legacyResultDataflow(
+            callable.legacy,
+            feeds.map((f) => f.type?.dataflow ?? null),
+          );
     const processLike = callee.kind === "process" || callee.kind === "agent";
     const outputs = signature.outputs.map((o): PortSpec => {
-      if (!processLike || !callee.typed) return o;
+      if (!processLike || (!callee.typed && callable.legacy === undefined))
+        return o;
       const element = o.type?.element ?? null;
       return {
         ...o,
@@ -688,18 +1055,219 @@ class Projecting {
       assigned === null
         ? this.#keys.unassigned(name)
         : this.#keys.assigned(assigned);
-    this.#nodes.push({
+    this.#add({
       id,
       kind: "call",
       label: name,
       inputs: inputSpecs.map((s) => port(s, fed.get(s.id))),
       outputs: outputs.map((s) => port(s)),
-      range: call.range,
+      range,
       callee,
     });
     for (const [input, feed] of fed)
       this.#connect(feed, { node: id, port: input });
-    return { node: id, ports: outputs };
+    const value = { node: id, ports: outputs };
+    this.#scope.recordCall(callee.name, value);
+    return value;
+  }
+
+  // ---- pipes ----
+
+  /** A pipe's steps with its final `set { v }` taken off; null when the expression isn't a projectable pipe. */
+  #pipeOf(e: Expression): PipePlan | null {
+    if (!this.#legacy || e.kind !== "Binary") return null;
+    const pipe = pipeSteps(e);
+    if (pipe === null) return null;
+    const steps = [...pipe.steps];
+    const source = unwrap(pipe.source);
+    if (
+      !(
+        this.#isDataflow(source) ||
+        this.#isOutputOfCall(source) ||
+        this.#aliasable(this.#reference(source))
+      )
+    )
+      return null;
+    const last = steps[steps.length - 1];
+    const target =
+      last?.kind === "step" && last.expression.kind === "MethodCall"
+        ? setTarget(last.expression)
+        : null;
+    const set = target?.form === "set" ? target.variable.name : null;
+    if (set !== null) steps.pop();
+    for (const step of steps) {
+      if (step.kind === "fork") {
+        if (!step.names.every((n) => this.#callableByName(n) !== null))
+          return null;
+      } else if (step.kind === "step") {
+        const callable = this.#callableByName(step.name) !== null;
+        // `set` is only the last step, and `tap` isn't a step: both would have to bind
+        const operator =
+          this.library.legacyResult(step.name) !== "assign" &&
+          this.library.isOperator(step.name, null);
+        if (!callable && !operator) return null;
+      }
+    }
+    return { source, steps, set };
+  }
+
+  /** A feed for one or more ports of a value (several ports of one value are read indirectly). */
+  #valueFeed(
+    value: Value,
+    range: Range | null,
+    direct = value.ports.length === 1,
+  ): Feed {
+    return {
+      range,
+      edges: value.ports.map((p) => ({
+        from: { node: value.node, port: p.id },
+        type: p.type ?? UNKNOWN,
+        variable: null,
+        direct,
+      })),
+      type: direct ? (value.ports[0]?.type ?? null) : null,
+    };
+  }
+
+  /** `a | b | (c & d) | e`: the values the last step produces. The last node takes `assigned` (or the `set` variable). */
+  #pipe({ source, steps, set }: PipePlan, assigned: string | null): Value[] {
+    const final = set ?? assigned;
+    const ref =
+      this.#isDataflow(source) || this.#isOutputOfCall(source)
+        ? null
+        : this.#reference(source);
+    let current: Value[] =
+      ref === null
+        ? [(this.#nested(source) as { value: Value }).value]
+        : this.#valuesOf(ref.resolved);
+    let at = 0;
+    while (at < steps.length) {
+      const step = steps[at] as PipeStep;
+      const range = step.range;
+      const spread = current.flatMap((v) =>
+        v.ports.map((p) => this.#valueFeed({ node: v.node, ports: [p] }, null)),
+      );
+      if (step.kind === "fork") {
+        current = step.names.map((name) =>
+          this.#callNode(
+            this.#callableByName(name) as Callable,
+            spread,
+            null,
+            range,
+            null,
+          ),
+        );
+        at += 1;
+      } else if (step.kind === "step" && this.#callableByName(step.name)) {
+        const extra =
+          step.expression.kind === "MethodCall"
+            ? step.expression.args.map((a) => this.#feed(argumentValue(a)))
+            : [];
+        current = [
+          this.#callNode(
+            this.#callableByName(step.name) as Callable,
+            [...spread, ...extra],
+            null,
+            range,
+            at === steps.length - 1 ? final : null,
+          ),
+        ];
+        at += 1;
+      } else {
+        // consecutive operators are one chain, on the first value, with the other values as argument ports
+        const group: StepCall[] = [];
+        let end = at;
+        while (end < steps.length) {
+          const s = steps[end] as PipeStep;
+          if (s.kind !== "step" || this.#callableByName(s.name) !== null) break;
+          group.push(
+            stepCall(
+              s.name,
+              s.range,
+              s.expression.kind === "MethodCall" ? s.expression : null,
+            ),
+          );
+          end += 1;
+        }
+        const [first, ...rest] = current;
+        current = [
+          this.#chainNode(
+            range,
+            this.#valueFeed(first as Value, null),
+            rest.map((v) => this.#valueFeed(v, null)),
+            group,
+            end === steps.length ? final : null,
+            null,
+          ),
+        ];
+        at = end;
+      }
+    }
+    if (set !== null) this.#bindValues(set, current);
+    return current;
+  }
+
+  /** What a branch of a ternary or elvis expression stands for: dataflow, a graph reference, or neither. */
+  #branchKind(e: Expression): "dataflow" | "reference" | "other" {
+    const x = unwrap(e);
+    if (
+      this.#pipeOf(x) !== null ||
+      this.#isDataflow(x) ||
+      this.#isOutputOfCall(x)
+    )
+      return "dataflow";
+    if (this.#aliasable(this.#reference(x))) return "reference";
+    return "other";
+  }
+
+  /**
+   * `x = c ? A : B` and `x = a ?: b`, where a branch is dataflow or a graph reference and the others read no graph
+   * value: dataflow branches become nodes guarded by the condition (the first keyed `x`, the next `x~2`), and `x`
+   * is bound to every branch's values. False for any other expression.
+   */
+  #conditionalValue(e: Expression, variable: string): boolean {
+    const branches = branchesOf(e);
+    if (branches === null) return false;
+    const kinds = branches.map((b) => this.#branchKind(b.expression));
+    if (!kinds.some((k) => k !== "other")) return false;
+    const readsNothing = branches.every(
+      (b, i) =>
+        kinds[i] !== "other" ||
+        variablesRead(b.expression, { closures: false }).every(
+          (r) => this.#scope.resolveRead(r) === null,
+        ),
+    );
+    if (!readsNothing) return false;
+    const values: Value[] = [];
+    branches.forEach((b, i) => {
+      const x = unwrap(b.expression);
+      if (kinds[i] === "other") return;
+      this.#guarded(b.guard, () => {
+        const pipe = this.#pipeOf(x);
+        if (kinds[i] === "reference") {
+          const ref = this.#reference(x);
+          if (ref !== null) values.push(...this.#valuesOf(ref.resolved));
+        } else if (pipe !== null) values.push(...this.#pipe(pipe, variable));
+        else if (this.#isDataflow(x)) values.push(this.#build(x, variable));
+        else values.push((this.#nested(x) as { value: Value }).value);
+      });
+    });
+    this.#bindValues(variable, values);
+    return true;
+  }
+
+  /**
+   * `E.set { v }` behaves like `v = E`, and `E.tap { v }` ends the chain there: E's top node is keyed `v` and any
+   * operators after the tap read it (AR-12). Neither makes a node of its own.
+   */
+  #assign(call: MethodCall): Value {
+    const target = setTarget(call) as NonNullable<ReturnType<typeof setTarget>>;
+    const receiver = unwrap(call.receiver as Expression);
+    const value = this.#isDataflow(receiver)
+      ? this.#build(receiver, target.variable.name)
+      : (this.#nested(receiver) as { value: Value }).value;
+    this.#bindValues(target.variable.name, [value]);
+    return value;
   }
 
   #factory(
@@ -722,7 +1290,7 @@ class Projecting {
       assigned === null
         ? this.#keys.unassigned(label)
         : this.#keys.assigned(assigned);
-    this.#nodes.push({
+    this.#add({
       id,
       kind: "factory",
       label,
@@ -744,36 +1312,68 @@ class Projecting {
     let at: Expression = outer;
     for (;;) {
       at = unwrap(at);
+      // a `tap` or `set` ends the chain: what it taps is the base, keyed by its variable
       if (
         at.kind === "MethodCall" &&
         !this.#isFactoryCall(at) &&
-        this.#isOperatorCall(at)
+        this.#isOperatorCall(at) &&
+        !this.#isAssignCall(at)
       ) {
         calls.unshift(at);
         at = at.receiver as Expression;
       } else break;
     }
-    const base = this.#feed(at);
+    const steps = calls.map((call) =>
+      stepCall(methodName(call) as string, call.range, call),
+    );
+    return this.#chainNode(
+      outer.range,
+      this.#feed(at),
+      [],
+      steps,
+      assigned,
+      declared,
+    );
+  }
+
+  /**
+   * The chain node for `steps` on `base`. `extras` are further values the receiver stands for (the other results of
+   * a fork): they go to the first step's argument ports.
+   */
+  #chainNode(
+    range: Range,
+    base: Feed,
+    extras: readonly Feed[],
+    calls: readonly StepCall[],
+    assigned: string | null,
+    declared: FlowType | null,
+  ): Value {
     let current: FlowType = base.type ?? UNKNOWN;
     let voidEnd = false;
     const pending: { port: Port; feed: Feed }[] = [];
-    const steps = calls.map((call, index) => {
-      const operator = methodName(call) as string;
+    const steps = calls.map((call, index): ChainStep => {
+      const operator = call.operator;
       const stepNumber = index + 1;
       const named = call.args.some((a) => a.kind === "NamedArgument");
-      const closures =
-        call.closures.length +
-        call.args.filter((a) => a.kind === "Closure").length;
-      const feeds = call.args.map((argument) => ({
-        argument,
-        feed:
-          argument.kind === "Closure"
-            ? null
-            : this.#feed(argumentValue(argument)),
-      }));
+      const closures = call.closures;
+      const feeds: { argument: Argument | null; feed: Feed | null }[] = [
+        ...(index === 0 ? extras : []).map((feed) => ({
+          argument: null,
+          feed,
+        })),
+        ...call.args.map((argument) => ({
+          argument,
+          feed:
+            argument.kind === "Closure"
+              ? null
+              : this.#feed(argumentValue(argument)),
+        })),
+      ];
       const operatorArguments: OperatorArguments = {
         positional: feeds
-          .filter((f) => f.argument.kind !== "NamedArgument" && f.feed !== null)
+          .filter(
+            (f) => f.argument?.kind !== "NamedArgument" && f.feed !== null,
+          )
           .map((f) => (f.feed as Feed).type),
         named,
         closures,
@@ -785,7 +1385,7 @@ class Projecting {
       );
       let positionalSeen = 0;
       feeds.forEach(({ argument, feed }, argIndex) => {
-        const isNamed = argument.kind === "NamedArgument";
+        const isNamed = argument?.kind === "NamedArgument";
         if (!isNamed) positionalSeen += 1;
         if (feed === null || feed.edges.length === 0) return;
         const parameter =
@@ -802,14 +1402,14 @@ class Projecting {
           feed,
         });
       });
-      const result = this.library.operatorType(
-        operator,
-        current,
-        operatorArguments,
-      );
+      const legacy = this.library.legacyResult(operator);
+      const result =
+        legacy !== null && legacy !== "assign"
+          ? legacyOperatorType(operator, legacy, current)
+          : this.library.operatorType(operator, current, operatorArguments);
       voidEnd = result === "void" && index === calls.length - 1;
       current = result === "void" ? UNKNOWN : result;
-      return { operator, range: call.range, known: true };
+      return { operator, range: call.range, known: legacy === null };
     });
     const first = steps[0]?.operator ?? "";
     const id =
@@ -817,13 +1417,13 @@ class Projecting {
         ? this.#keys.unassigned(`.${first}`)
         : this.#keys.assigned(assigned);
     const outputs = voidEnd ? [] : [spec(OUT, declared ?? current)];
-    this.#nodes.push({
+    this.#add({
       id,
       kind: "chain",
       label: steps.map((s) => `.${s.operator}`).join(""),
       inputs: [port(spec("in", null), base), ...pending.map((p) => p.port)],
       outputs: outputs.map((s) => port(s)),
-      range: outer.range,
+      range,
       steps,
     });
     this.#connect(base, { node: id, port: "in" });
@@ -893,11 +1493,17 @@ function inferredEmits(projection: Projection): ReadonlyMap<string, FlowType> {
   return types;
 }
 
+export interface ProjectorOptions {
+  /** The pack's legacy-only operators (F-107). */
+  readonly legacyOperators?: readonly LegacyOperator[];
+}
+
 export function createProjector(
   model: ProjectModel,
   catalogue: ScriptCatalogue,
+  options: ProjectorOptions = {},
 ): Projector {
-  const library = dataflowLibrary(catalogue);
+  const library = dataflowLibrary(catalogue, options.legacyOperators);
   // a projector is a snapshot of the model (F-113 replaces it after a change)
   let all: Listed[] | undefined;
   const listed = (): Listed[] =>

@@ -1,0 +1,12 @@
+workflow main.nf# legacy
+statements 2, modelled 2
+main.nf#/ch factory "channel.of" factory=channel.of @7:10
+  out out (out): Channel<Integer>
+main.nf#/foo@1 call "foo" callee=foo:process:modelled:typed @8:9
+  in x (x): Integer
+    <- main.nf#/ch[out] Channel<Integer> via ch
+  out y (y): Channel<Integer>
+main.nf#/bar@1 call "bar" callee=bar:workflow:modelled:typed @8:5
+  in ys (ys): Channel<Integer>
+    <- main.nf#/foo@1[y] Channel<Integer>
+  out out (out): Channel<?>
