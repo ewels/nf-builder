@@ -56,15 +56,15 @@ export type {
   WorkflowTarget,
 } from "@nf-builder/lang-core";
 export {
-  applyTextEdits,
   compareDiagnostics,
   countDiagnostics,
   createDiagnoser,
   type Diagnoser,
   type DiagnoserOptions,
   type DiagnosticCounts,
-  loadLints,
-} from "./diagnostics/index";
+} from "./diagnostics/diagnose";
+export { loadLints } from "./diagnostics/lints";
+export { applyTextEdits } from "./diagnostics/text-edits";
 export {
   applyCommand,
   commit,

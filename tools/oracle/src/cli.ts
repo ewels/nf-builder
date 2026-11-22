@@ -1,6 +1,5 @@
 import {
   appendFileSync,
-  existsSync,
   mkdirSync,
   realpathSync,
   writeFileSync,
@@ -110,9 +109,7 @@ export function main(argv: readonly string[], deps: OracleDeps = {}): number {
             loadTreeManifest(CONFIG_AST_ERRORS_FILE, "config-ast-errors"),
             loadTreeManifest(PROJECTION_FIXTURES_FILE, "projection-fixtures"),
             loadTreeManifest(FREE_VARIABLE_PROBES_FILE, "free-variable-probes"),
-            ...(existsSync(LINT_FIXTURES_FILE)
-              ? [loadTreeManifest(LINT_FIXTURES_FILE, "lint-fixtures")]
-              : []),
+            loadTreeManifest(LINT_FIXTURES_FILE, "lint-fixtures"),
           ]
         : []);
     const plain = values.case === undefined && values.manifest === undefined;

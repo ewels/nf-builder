@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { loadLints } from "../../src/diagnostics/lints";
 import { applyTextEdits } from "../../src/diagnostics/text-edits";
 import { readTree } from "../model/read-tree";
-import { diagnoseTree, FIXTURES, fixtureDirs } from "./open";
+import { diagnoseFiles, FIXTURES, fixtureDirs } from "./open";
 
 // The harness is driven by the pack's registry: a code added there is tested here against its fixtures.
 const lints = await loadLints("26.10");
@@ -34,7 +34,7 @@ const diagnosed = new Map<string, Promise<readonly Diagnostic[]>>();
 const diagnose = (dir: string) => {
   let list = diagnosed.get(dir);
   if (!list) {
-    list = diagnoseTree(dir).then((r) => r.diagnoser.all());
+    list = diagnoseFiles(readTree(dir)).then((r) => r.diagnoser.all());
     diagnosed.set(dir, list);
   }
   return list;
@@ -42,7 +42,10 @@ const diagnose = (dir: string) => {
 const treeOf = (code: string, kind: string) =>
   dirs.find((d) => d.code === code && d.kind === kind)?.dir;
 
-/** How a code's diagnostics are compared with lint's errors: which lint messages count, and where our message may differ (paths). */
+/**
+ * How a code's diagnostics are compared with lint's: which lint messages count, and where our message may differ
+ * (paths). A lint-origin code uses its registry `lintPattern` against lint's errors, or its warnings for a warning code.
+ */
 const PARITY: Record<
   string,
   { lint: RegExp; cut: string | null; key?: "lint" | "warnings" }
@@ -51,74 +54,14 @@ const PARITY: Record<
   "include-target": { lint: /^Invalid include source/, cut: "'" },
   "include-not-parsed": { lint: /^Module could not be parsed/, cut: "'" },
   "include-name": { lint: /^Included name/, cut: " in module" },
-  // warnings that `nextflow lint` prints
-  "deprecated-when": {
-    lint: /^The `when` section is deprecated/,
-    cut: null,
-    key: "warnings",
-  },
-  "deprecated-shell": {
-    lint: /^The `shell` block is deprecated/,
-    cut: null,
-    key: "warnings",
-  },
-  "deprecated-channel": {
-    lint: /^The use of `Channel` to access channel factories/,
-    cut: null,
-    key: "warnings",
-  },
-  "implicit-it": {
-    lint: /^Implicit closure parameter is deprecated/,
-    cut: null,
-    key: "warnings",
-  },
-  "missing-type": {
-    lint: /should have a type annotation$/,
-    cut: null,
-    key: "warnings",
-  },
-  "typed-process-outputs": {
-    lint: /^Typed process should have only one output/,
-    cut: null,
-    key: "warnings",
-  },
-  "publish-type-ignored": {
-    lint: /^Workflow output type should be declared/,
-    cut: null,
-    key: "warnings",
-  },
-  // errors
-  "feature-flag": { lint: /^Unrecognized feature flag/, cut: null },
-  "pipeline-include-types": {
-    lint: /^Including a pipeline requires/,
-    cut: null,
-  },
-  "config-include-placement": {
-    lint: /^Config includes are only allowed/,
-    cut: null,
-  },
-  "agent-output": {
-    lint: /^(Agent output `|`(eval|env)` is not defined)/,
-    cut: null,
-  },
-  "include-alias": {
-    lint: /^(An included pipeline must be aliased|Included types cannot be aliased)/,
-    cut: null,
-  },
-  "duplicate-name": { lint: /is already (included|declared)$/, cut: null },
-  "call-arity": {
-    lint: /^(Incorrect number of call arguments|(Process|Agent|Workflow) `[^`]+` expects)/,
-    cut: null,
-  },
-  "type-mismatch": {
-    lint: /^(Argument with type .+ is not compatible with (process input|agent input|parameter)|(Workflow emit|Workflow output|Assignment target).+ cannot be assigned to value)/,
-    cut: null,
-  },
-  "multiple-channels": {
-    lint: /was called with multiple channel arguments/,
-    cut: null,
-  },
 };
+for (const c of lints.codes)
+  if (c.origin === "lint" && c.lintPattern)
+    PARITY[c.code] = {
+      lint: c.lintPattern,
+      cut: null,
+      key: c.severity === "error" ? "lint" : "warnings",
+    };
 const VERBS = new Set([
   "add",
   "check",
@@ -144,11 +87,9 @@ const VERBS = new Set([
   "use",
   "write",
   "finish",
-  "it",
   "edit",
   "change",
   "declare",
-  "turn",
 ]);
 
 describe("F-112 fixtures", () => {
@@ -161,8 +102,7 @@ describe("F-112 fixtures", () => {
   });
 
   for (const { code, severity, fixable, spec, origin } of codes) {
-    const label = `${code}`;
-    it(`F-112 step 1: ${label} has a positive and a negative fixture`, () => {
+    it(`F-112 step 1: ${code} has a positive and a negative fixture`, () => {
       expect(treeOf(code, "positive"), "positive").toBeDefined();
       expect(treeOf(code, "negative"), "negative").toBeDefined();
       expect(
@@ -171,7 +111,7 @@ describe("F-112 fixtures", () => {
       ).toBe(fixable);
     });
 
-    it(`F-112 step 1 ${spec.join(" ")}: ${label} fires on its positive fixture and not on its negative`, async () => {
+    it(`F-112 step 1 ${spec.join(" ")}: ${code} fires on its positive fixture and not on its negative`, async () => {
       const positive = (
         await diagnose(treeOf(code, "positive") as string)
       ).filter((d) => d.code === code);
@@ -183,7 +123,7 @@ describe("F-112 fixtures", () => {
       for (const d of positive) expect(d.severity).toBe(severity);
     });
 
-    it(`F-112 step 1 ADR-0005: ${label} matches nextflow lint on the fixtures`, async () => {
+    it(`F-112 step 1 ADR-0005: ${code} matches nextflow lint on the fixtures`, async () => {
       const ours = (await diagnose(treeOf(code, "positive") as string)).filter(
         (d) => d.code === code,
       );
@@ -207,7 +147,7 @@ describe("F-112 fixtures", () => {
       });
     });
 
-    it(`F-112 ADR-0005: ${label}'s severity matches the oracle`, () => {
+    it(`F-112 ADR-0005: ${code}'s severity matches the oracle`, () => {
       const errors = recorded(code, "positive", "lint");
       const warnings = recorded(code, "positive", "warnings");
       // lint accepts a process called twice in one workflow (upstream bug 24), so an own error has no counterpart
@@ -219,7 +159,7 @@ describe("F-112 fixtures", () => {
         expect(recorded(code, kind, "lint"), kind).toEqual([]);
     });
 
-    it(`F-112 step 2: every ${label} message states what to do`, async () => {
+    it(`F-112 step 2: every ${code} message states what to do`, async () => {
       const ours = (await diagnose(treeOf(code, "positive") as string)).filter(
         (d) => d.code === code,
       );
@@ -236,7 +176,7 @@ describe("F-112 fixtures", () => {
     });
 
     if (fixable)
-      it(`F-112 step 2 AR-05: every ${label} diagnostic carries a quick fix, and applying the fixes gives its fixed tree with no ${label} left`, async () => {
+      it(`F-112 step 2 AR-05: every ${code} diagnostic carries a quick fix, and applying the fixes gives its fixed tree with no ${code} left`, async () => {
         const dir = treeOf(code, "positive") as string;
         const list = (await diagnose(dir)).filter((d) => d.code === code);
         expect(list.length).toBeGreaterThan(0);
@@ -256,7 +196,7 @@ describe("F-112 fixtures", () => {
         expect(after.filter((d) => d.code === code)).toEqual([]);
       });
     else
-      it(`F-112 step 2: ${label} offers no quick fix`, async () => {
+      it(`F-112 step 2: ${code} offers no quick fix`, async () => {
         const list = (
           await diagnose(treeOf(code, "positive") as string)
         ).filter((d) => d.code === code);

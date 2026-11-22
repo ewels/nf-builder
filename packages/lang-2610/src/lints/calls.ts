@@ -5,6 +5,7 @@ import type {
   Argument,
   AstNode,
   BinaryExpr,
+  ElvisExpr,
   Expression,
   IfStatement,
   IncludableDeclaration,
@@ -13,7 +14,7 @@ import type {
   LintRule,
   MethodCall,
   ProcessDef,
-  WorkflowDef,
+  TernaryExpr,
 } from "@nf-builder/lang-core";
 import { childNodes, walk } from "@nf-builder/lang-core";
 import {
@@ -21,6 +22,7 @@ import {
   configPublishes,
   directiveCalls,
   methodName,
+  nameOf,
   readsIn,
   scriptOf,
   workflowCalls,
@@ -76,9 +78,7 @@ function typedInputs(def: AgentDef | Extract<ProcessDef, { typed: true }>) {
   );
 }
 
-const LABEL = { Process: "Process", Agent: "Agent", Workflow: "Workflow" };
-
-export interface ArityMismatch {
+interface ArityMismatch {
   readonly call: MethodCall;
   readonly label: string;
   readonly name: string;
@@ -87,7 +87,7 @@ export interface ArityMismatch {
 }
 
 /** The calls of processes, agents and named workflows with the wrong number of arguments (pipeline calls are typed). */
-export function arityMismatches(context: LintContext): ArityMismatch[] {
+function arityMismatches(context: LintContext): ArityMismatch[] {
   const ast = scriptOf(context);
   if (!ast) return [];
   const out: ArityMismatch[] = [];
@@ -109,7 +109,7 @@ export function arityMismatches(context: LintContext): ArityMismatch[] {
     if (names && names.length !== got)
       out.push({
         call,
-        label: LABEL[declaration.kind],
+        label: declaration.kind,
         name,
         names,
         got,
@@ -118,6 +118,10 @@ export function arityMismatches(context: LintContext): ArityMismatch[] {
   });
   return out;
 }
+
+/** Where `arityMismatches` found calls: nf-lang checks a call's argument types only when their number is right. */
+export const wrongArgumentCount = (context: LintContext): ReadonlySet<number> =>
+  new Set(arityMismatches(context).map((m) => m.call.range.start));
 
 const inputAdvice = (names: readonly string[]): string =>
   names.length === 0
@@ -128,41 +132,45 @@ const inputAdvice = (names: readonly string[]): string =>
  * Ours: a `null` argument for a typed process input that isn't nullable. `nextflow lint` accepts it, but the run stops
  * with "input at index N cannot be null" (probed on 26.10.7), so the input is as good as unconnected.
  */
-function nullArguments(context: LintContext): LintFinding[] {
-  const ast = scriptOf(context);
-  const out: LintFinding[] = [];
-  if (!ast) return out;
-  walk(ast, (node) => {
-    if (node.kind !== "MethodCall" || (node as MethodCall).receiver !== null)
-      return undefined;
-    const call = node as MethodCall;
-    const declaration = context.lookup(methodName(call))?.declaration;
-    if (declaration?.kind !== "Process" || !declaration.typed) return undefined;
-    const inputs = declaration.inputs?.items ?? [];
-    const args = call.args;
-    if (
-      inputs.length !== argumentCount(call) ||
-      args.some((a) => a.kind === "NamedArgument") ||
-      call.closures.length > 0
-    )
-      return undefined;
-    args.forEach((arg, i) => {
-      const input = inputs[i];
+export const nullArgument: LintRule = {
+  code: "null-argument",
+  check: (context) => {
+    const ast = scriptOf(context);
+    const out: LintFinding[] = [];
+    if (!ast?.typesEnabled) return out;
+    walk(ast, (node) => {
+      if (node.kind !== "MethodCall" || (node as MethodCall).receiver !== null)
+        return undefined;
+      const call = node as MethodCall;
+      const declaration = context.lookup(methodName(call))?.declaration;
+      if (declaration?.kind !== "Process" || !declaration.typed)
+        return undefined;
+      const inputs = declaration.inputs?.items ?? [];
+      const args = call.args;
       if (
-        arg.kind === "Null" &&
-        input?.kind === "TypedName" &&
-        input.type !== null &&
-        !input.type.nullable
+        inputs.length !== argumentCount(call) ||
+        args.some((a) => a.kind === "NamedArgument") ||
+        call.closures.length > 0
       )
-        out.push({
-          range: arg.range,
-          message: `Input \`${input.name.name}\` of process \`${methodName(call)}\` is not nullable but receives \`null\` -- pass a value, or add \`?\` to the input's type`,
-        });
+        return undefined;
+      args.forEach((arg, i) => {
+        const input = inputs[i];
+        if (
+          arg.kind === "Null" &&
+          input?.kind === "TypedName" &&
+          input.type !== null &&
+          !input.type.nullable
+        )
+          out.push({
+            range: arg.range,
+            message: `Input \`${input.name.name}\` of process \`${methodName(call)}\` is not nullable but receives \`null\` -- pass a value, or add \`?\` to the input's type`,
+          });
+      });
+      return undefined;
     });
-    return undefined;
-  });
-  return out;
-}
+    return out;
+  },
+};
 
 /**
  * `TypeCheckingVisitor.java#L648` (typed scripts, reported at the method name) and `CallArityVisitor.java#L73` (legacy
@@ -172,21 +180,18 @@ export const callArity: LintRule = {
   code: "call-arity",
   check: (context) => {
     const typed = scriptOf(context)?.typesEnabled ?? false;
-    return [
-      ...arityMismatches(context).map(
-        ({ call, label, name, names, got }): LintFinding =>
-          typed
-            ? {
-                range: call.method.range,
-                message: `${label} \`${name}\` expects ${names.length} argument(s) but received ${got} -- ${inputAdvice(names)}`,
-              }
-            : {
-                range: call.range,
-                message: `Incorrect number of call arguments, expected ${names.length} but received ${got} -- ${inputAdvice(names)}`,
-              },
-      ),
-      ...(typed ? nullArguments(context) : []),
-    ];
+    return arityMismatches(context).map(
+      ({ call, label, name, names, got }): LintFinding =>
+        typed
+          ? {
+              range: call.method.range,
+              message: `${label} \`${name}\` expects ${names.length} argument(s) but received ${got} -- ${inputAdvice(names)}`,
+            }
+          : {
+              range: call.range,
+              message: `Incorrect number of call arguments, expected ${names.length} but received ${got} -- ${inputAdvice(names)}`,
+            },
+    );
   },
 };
 
@@ -201,10 +206,7 @@ function routesOutputs(process: ProcessDef): boolean {
       (o) =>
         o.expression.kind === "MethodCall" &&
         o.expression.args.some(
-          (a) =>
-            a.kind === "NamedArgument" &&
-            (a.name.kind === "Identifier" ? a.name.name : a.name.value) ===
-              "topic",
+          (a) => a.kind === "NamedArgument" && nameOf(a.name) === "topic",
         ),
     )
   )
@@ -235,13 +237,12 @@ export const unusedOutput: LintRule = {
   check: (context) => {
     const ast = scriptOf(context);
     if (!ast) return [];
+    const typedCaller = ast.typesEnabled;
     let configRoutes: boolean | undefined;
     const out: LintFinding[] = [];
     for (const def of ast.body) {
       if (def.kind !== "Workflow") continue;
-      for (const { call, statement, assigned } of workflowCalls(
-        def as WorkflowDef,
-      )) {
+      for (const { call, statement, assigned } of workflowCalls(def)) {
         const name = methodName(call);
         const declaration = context.lookup(name)?.declaration;
         if (declaration?.kind !== "Process") continue;
@@ -251,16 +252,15 @@ export const unusedOutput: LintRule = {
         if (configRoutes) continue;
         const range = call.range;
         if (assigned === null) {
-          const reads = readsIn([def]).get(name) ?? [];
-          if (!declaration.typed && reads.some((r) => r.property === "out"))
-            continue;
+          const reads = readsIn(def).get(name) ?? [];
+          if (!typedCaller && reads.some((r) => r.property === "out")) continue;
           out.push({
             range,
             message: `The outputs of \`${name}\` are never used -- ${TRY}`,
           });
           continue;
         }
-        const reads = readsIn([def], statement.range.end).get(assigned) ?? [];
+        const reads = readsIn(def, statement.range.end).get(assigned) ?? [];
         if (reads.length === 0) {
           out.push({
             range,
@@ -300,7 +300,7 @@ export const duplicateCall: LintRule = {
       context.lookup(name)?.declaration?.kind === "Process";
     for (const def of ast.body) {
       if (def.kind !== "Workflow" || !def.main) continue;
-      // the branch of each enclosing `if`: "<if number>.then" or "<if number>.else"
+      // the branch of each enclosing `if`, ternary, elvis or short-circuit operator: "<number>.then", ".else" or ".right"
       const path: string[] = [];
       let ifs = 0;
       const seen = new Map<string, string[][]>();
@@ -317,18 +317,48 @@ export const duplicateCall: LintRule = {
         seen.set(name, [...earlier, [...path]]);
       };
       const go = (node: AstNode): void => {
+        const branched = (
+          id: number,
+          label: string,
+          child: AstNode | null,
+        ): void => {
+          if (!child) return;
+          path.push(`${id}.${label}`);
+          go(child);
+          path.pop();
+        };
         if (node.kind === "If") {
           const branch = node as IfStatement;
           const id = ifs++;
           go(branch.condition);
-          path.push(`${id}.then`);
-          go(branch.consequent);
-          path.pop();
-          if (branch.alternate) {
-            path.push(`${id}.else`);
-            go(branch.alternate);
-            path.pop();
-          }
+          branched(id, "then", branch.consequent);
+          branched(id, "else", branch.alternate);
+          return;
+        }
+        if (node.kind === "Ternary") {
+          const choice = node as TernaryExpr;
+          const id = ifs++;
+          go(choice.condition);
+          branched(id, "then", choice.consequent);
+          branched(id, "else", choice.alternate);
+          return;
+        }
+        if (node.kind === "Elvis") {
+          const choice = node as ElvisExpr;
+          const id = ifs++;
+          go(choice.condition);
+          branched(id, "else", choice.alternate);
+          return;
+        }
+        if (
+          node.kind === "Binary" &&
+          ((node as BinaryExpr).operator === "&&" ||
+            (node as BinaryExpr).operator === "||")
+        ) {
+          const logical = node as BinaryExpr;
+          const id = ifs++;
+          go(logical.left);
+          branched(id, "right", logical.right);
           return;
         }
         if (node.kind === "MethodCall") {

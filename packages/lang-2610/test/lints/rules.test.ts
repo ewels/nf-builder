@@ -1,9 +1,10 @@
-import type { LintFinding, LintRule } from "@nf-builder/lang-core";
+import type { LintFinding } from "@nf-builder/lang-core";
 import { describe, expect, it } from "vitest";
 import {
   callArity,
   declaredInputs,
   duplicateCall,
+  nullArgument,
   unusedOutput,
 } from "../../src/lints/calls.ts";
 import {
@@ -22,12 +23,8 @@ import {
   publishDir,
   tupleWhereRecord,
 } from "../../src/lints/legacy.ts";
-import { catalogue, context } from "./context.ts";
+import { at, catalogue, context, run } from "./context.ts";
 
-const run = (rule: LintRule, text: string, language?: "script" | "config") =>
-  rule.check(context(text, language));
-const at = (text: string, findings: readonly LintFinding[]) =>
-  findings.map((f) => text.slice(f.range.start, f.range.end));
 // A minimal applier (a pack may not import the engine's applyTextEdits): edits are applied last to first.
 const apply = (text: string, findings: readonly LintFinding[]) => {
   const unique = new Map(
@@ -51,6 +48,7 @@ describe("F-112 LA-34 deprecations", () => {
       "    channel.of(1).map { -> it }",
       "    channel.of(1).map { def it = 3; it }",
       "    channel.of(1).map { x -> x.collect { it } }",
+      // biome-ignore lint/suspicious/noTemplateCurlyInString: Nextflow source, not a template
       '    channel.of(1).map { "${it}" }',
       "    println it",
       "}",
@@ -72,6 +70,22 @@ describe("F-112 LA-34 deprecations", () => {
     expect(fixed).toBe(
       "workflow {\n    channel.of(1).map { it -> it }.map { it -> it + it }\n}",
     );
+  });
+
+  it("F-112 LA-34: the implicit it fix is withheld when an enclosing scope already has it visible", () => {
+    const nested =
+      "workflow {\n    channel.of(1).map { it.collect { it * 2 } }\n}";
+    const found = run(implicitIt, nested);
+    expect(found.map((f) => f.fix !== undefined)).toEqual([true, false]);
+    expect(at(nested, found)).toEqual(["it", "it"]);
+    expect(apply(nested, found)).toBe(
+      "workflow {\n    channel.of(1).map { it -> it.collect { it * 2 } }\n}",
+    );
+    const declared =
+      "workflow {\n    channel.of(1).map { it -> it.collect { it * 2 } }\n}";
+    const inner = run(implicitIt, declared);
+    expect(inner).toHaveLength(1);
+    expect(inner[0]?.fix).toBeUndefined();
   });
 
   it("F-112 LA-34: implicit it is flagged in configs as well", () => {
@@ -187,6 +201,7 @@ describe("F-112 LA-35 LA-36 legacy patterns", () => {
       "process p {",
       "    cpus { params.cpus }",
       "    script:",
+      // biome-ignore lint/suspicious/noTemplateCurlyInString: Nextflow source, not a template
       '    "${params.a}"',
       "}",
       "def f() {",
@@ -340,7 +355,7 @@ workflow {
     expect(at(text, found)).toEqual(["p", "w", "p"]);
   });
 
-  it("F-112 LA-33: a null argument for a typed process input that isn't nullable is an unconnected input (nextflow run fails, lint accepts)", () => {
+  it("F-112 LA-33: null-argument: a null argument for a typed process input that isn't nullable is an unconnected input (nextflow run fails, lint accepts)", () => {
     const text = `nextflow.enable.types = true
 
 process hello {
@@ -361,16 +376,17 @@ workflow {
     hello('a', null, null)
 }
 `;
-    const found = run(callArity, text);
+    expect(run(callArity, text)).toEqual([]);
+    const found = run(nullArgument, text);
     expect(found.map((f) => f.message)).toEqual([
       "Input `name` of process `hello` is not nullable but receives `null` -- pass a value, or add `?` to the input's type",
       "Input `path` of process `hello` is not nullable but receives `null` -- pass a value, or add `?` to the input's type",
     ]);
     expect(at(text, found)).toEqual(["null", "null"]);
     // a legacy script and a legacy process are left alone
-    expect(run(callArity, `${PROCESS}\nworkflow {\n    p(null)\n}\n`)).toEqual(
-      [],
-    );
+    expect(
+      run(nullArgument, `${PROCESS}\nworkflow {\n    p(null)\n}\n`),
+    ).toEqual([]);
   });
 
   it("F-112 LA-33: declared inputs are the take names, the typed input names or the legacy qualifier arguments", () => {
@@ -431,6 +447,7 @@ process quiet {
     expect(flagged("    hello().view()")).toEqual([]);
     expect(flagged("    hello() | view")).toEqual([]);
     expect(flagged("    r = hello()\n    r.view()")).toEqual([]);
+    // biome-ignore lint/suspicious/noTemplateCurlyInString: Nextflow source, not a template
     expect(flagged('    def r = hello()\n    println "${r}"')).toEqual([]);
     expect(flagged("    r = hello()\n    emit:\n    r")).toEqual([]);
     expect(flagged("    r = hello()\n    publish:\n    out = r")).toEqual([]);
@@ -511,6 +528,24 @@ process topical {
     ]);
     expect(flagged("    topical()")).toEqual([]);
   });
+
+  it("F-112 LA-33: a legacy script calling an included typed process may read X.out", () => {
+    const typed = context(
+      "nextflow.enable.types = true\n\nprocess HELLO {\n    input:\n    x: Integer\n\n    output:\n    stdout()\n\n    script:\n    'echo'\n}\n",
+    );
+    const caller = context(
+      "workflow {\n    HELLO(1)\n    HELLO.out.view()\n}\n",
+    );
+    const included = {
+      ...caller,
+      lookup: typed.lookup,
+    };
+    expect(unusedOutput.check(included)).toEqual([]);
+    const unread = context("workflow {\n    HELLO(1)\n}\n");
+    expect(
+      unusedOutput.check({ ...unread, lookup: typed.lookup }),
+    ).toHaveLength(1);
+  });
 });
 
 describe("F-112 AR-05 LA-33 duplicate-call", () => {
@@ -579,6 +614,24 @@ describe("F-112 AR-05 LA-33 duplicate-call", () => {
       ]),
     );
     expect(both.map((f) => f.range.line)).toEqual([8]);
+    const none = (line: string) =>
+      expect(run(duplicateCall, body([line]))).toEqual([]);
+    none("    ch = params.a ? HELLO(1) : HELLO(2)");
+    none("    ch = params.a ?: HELLO(2)");
+    none("    ch = params.a && HELLO(1)");
+    none("    ch = params.a || HELLO(1)");
+    // the left operand and the condition always run, so a call there is a certain earlier call
+    expect(
+      run(
+        duplicateCall,
+        body(["    HELLO()", "    ch = params.a && HELLO()"]),
+      ).map((f) => f.range.line),
+    ).toEqual([7]);
+    expect(
+      run(duplicateCall, body(["    ch = HELLO() || 1", "    HELLO()"])).map(
+        (f) => f.range.line,
+      ),
+    ).toEqual([7]);
     const two = `${proc}workflow A {\n    main:\n    HELLO()\n}\nworkflow {\n    HELLO()\n}\n`;
     expect(run(duplicateCall, two)).toEqual([]);
   });

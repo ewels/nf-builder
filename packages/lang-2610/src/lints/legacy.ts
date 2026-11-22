@@ -6,26 +6,21 @@ import {
   type LintFinding,
   type LintRule,
   type MethodCall,
-  type ProcessDef,
   type Range,
   type TypedName,
-  type TypedProcess,
   type Variable,
   walk,
 } from "@nf-builder/lang-core";
-import { directiveCalls, methodName, scriptOf } from "./scan.ts";
+import { bodyOf, directiveCalls, methodName } from "./scan.ts";
 
 const MIGRATE =
   "migrate it to static types: give it its own script with `nextflow.enable.types = true` and typed inputs and outputs";
-
-const body = (context: Parameters<LintRule["check"]>[0]) =>
-  scriptOf(context)?.body ?? [];
 
 /** Ours (LA-35): a process with legacy inputs and outputs, at its name. */
 export const legacyProcess: LintRule = {
   code: "legacy-process",
   check: (context) =>
-    body(context).flatMap((item): LintFinding[] =>
+    bodyOf(context).flatMap((item): LintFinding[] =>
       item.kind === "Process" && !item.typed
         ? [
             {
@@ -51,7 +46,7 @@ const keywordRange = (range: Range): Range => ({
 export const legacyWorkflow: LintRule = {
   code: "legacy-workflow",
   check: (context) =>
-    body(context).flatMap((item): LintFinding[] =>
+    bodyOf(context).flatMap((item): LintFinding[] =>
       item.kind === "Workflow" && !item.typed
         ? [
             {
@@ -67,7 +62,7 @@ export const legacyWorkflow: LintRule = {
 export const legacyParams: LintRule = {
   code: "legacy-params",
   check: (context) =>
-    body(context).flatMap((item): LintFinding[] =>
+    bodyOf(context).flatMap((item): LintFinding[] =>
       item.kind === "LegacyParam"
         ? [
             {
@@ -99,7 +94,7 @@ export const paramsOutsideEntry: LintRule = {
   code: "params-outside-entry",
   check: (context) => {
     const out: LintFinding[] = [];
-    for (const item of body(context)) {
+    for (const item of bodyOf(context)) {
       const outside =
         item.kind === "Process" ||
         item.kind === "Agent" ||
@@ -136,12 +131,11 @@ export const tupleWhereRecord: LintRule = {
         message:
           "A tuple is matched by position -- use a record (`record(...)`) so values are matched by name",
       });
-    for (const item of body(context)) {
+    for (const item of bodyOf(context)) {
       if (item.kind !== "Process" || !item.typed) continue;
-      const process: TypedProcess = item;
-      for (const input of process.inputs?.items ?? [])
+      for (const input of item.inputs?.items ?? [])
         if (input.kind === "TupleInput") flag(input.range);
-      for (const output of process.outputs?.items ?? []) {
+      for (const output of item.outputs?.items ?? []) {
         const value =
           output.kind === "NamedOutput" ? output.value : output.expression;
         if (value && isTupleCall(value)) flag(value.range);
@@ -155,9 +149,9 @@ export const tupleWhereRecord: LintRule = {
 export const publishDir: LintRule = {
   code: "publish-dir",
   check: (context) =>
-    body(context).flatMap((item): LintFinding[] =>
+    bodyOf(context).flatMap((item): LintFinding[] =>
       item.kind === "Process"
-        ? directiveCalls(item as ProcessDef)
+        ? directiveCalls(item)
             .filter((call) => methodName(call) === "publishDir")
             .map((call) => ({
               range: call.range,

@@ -27,10 +27,10 @@ const HELLO = `process hello {
 `;
 
 /** The installed pack's lints with `rules` replaced. */
-const withRules = async (rules: readonly LintRule[]): Promise<PackLints> => {
-  const { lints } = await diagnoseFiles([]);
-  return { ...lints, rules };
-};
+const withRules = async (rules: readonly LintRule[]): Promise<PackLints> => ({
+  ...(await loadLints("26.10")),
+  rules,
+});
 
 describe("F-112 diagnoser", () => {
   it("F-112 AR-05: diagnostics come from the parser, the model and the pack's rules, each with path, range, severity, message and code", async () => {
@@ -135,6 +135,50 @@ describe("F-112 diagnoser", () => {
     expect(list.find((d) => d.code === "internal")?.message).toBe(
       "Rule `syntax` failed: kaboom -- it is kept as written; edit it as text",
     );
+  });
+
+  it("F-112 IO-14: advice that throws leaves the raw message and the diagnostics intact", async () => {
+    const lints: PackLints = {
+      ...(await loadLints("26.10")),
+      rules: [],
+      advise: () => {
+        throw new Error("advice bug");
+      },
+    };
+    const { diagnoser, model } = await diagnoseFiles(
+      [
+        { path: "bad.nf", text: "import java.nio.file.Path\n" },
+        { path: "main.nf", text: "include { nothere } from './hello.nf'\n" },
+        { path: "hello.nf", text: HELLO },
+      ],
+      lints,
+    );
+    const raw = model.file("bad.nf")?.source.problems[0]?.message;
+    expect(diagnoser.file("bad.nf").map((d) => [d.code, d.message])).toEqual([
+      ["syntax", raw],
+    ]);
+    expect(diagnoser.file("main.nf").map((d) => d.message)).toEqual([
+      model.diagnostics()[0]?.message,
+    ]);
+  });
+
+  it("F-112 AR-05: a file's diagnostics are computed once and the same array is returned", async () => {
+    let runs = 0;
+    const counting: LintRule = {
+      code: "syntax",
+      check: () => {
+        runs++;
+        return [];
+      },
+    };
+    const { diagnoser } = await diagnoseFiles(
+      [{ path: "main.nf", text: HELLO }],
+      await withRules([counting]),
+    );
+    const first = diagnoser.file("main.nf");
+    expect(diagnoser.file("main.nf")).toBe(first);
+    diagnoser.all();
+    expect(runs).toBe(1);
   });
 
   it("F-112 IO-14: a parser that throws gives an internal warning, not a syntax error", async () => {

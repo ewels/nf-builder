@@ -3,6 +3,7 @@
 import {
   type AgentDef,
   type Closure,
+  type LintContext,
   type LintFinding,
   type LintRule,
   type MethodCall,
@@ -10,12 +11,16 @@ import {
   type TextEdit,
   walk,
 } from "@nf-builder/lang-core";
-import { directiveCalls, forEachIt, methodName, scriptOf } from "./scan.ts";
+import {
+  bodyOf,
+  directiveCalls,
+  forEachIt,
+  methodName,
+  scriptOf,
+} from "./scan.ts";
 
-const processes = (
-  context: Parameters<LintRule["check"]>[0],
-): (ProcessDef | AgentDef)[] =>
-  (scriptOf(context)?.body ?? []).filter(
+const processes = (context: LintContext): (ProcessDef | AgentDef)[] =>
+  bodyOf(context).filter(
     (item): item is ProcessDef | AgentDef =>
       item.kind === "Process" || item.kind === "Agent",
   );
@@ -107,8 +112,8 @@ export const implicitIt: LintRule = {
     const root = context.file.ast;
     const out: LintFinding[] = [];
     if (root)
-      forEachIt(root, (it, closure) => {
-        const edit = declareIt(context.file.text, closure);
+      forEachIt(root, (it, closure, shadows) => {
+        const edit = shadows ? null : declareIt(context.file.text, closure);
         out.push({
           range: it.range,
           message:

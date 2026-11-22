@@ -116,7 +116,7 @@ export const PARSE_ADVICE: readonly (readonly [RegExp, string])[] = [
 ];
 
 /** Include advice by code; nf-lang's wording stays the start of the message. */
-export const INCLUDE_ADVICE: Readonly<Record<string, string>> = {
+const INCLUDE_ADVICE: Readonly<Record<string, string>> = {
   "include-target": "create the file, or correct the path in the include",
   "include-not-parsed": "fix the syntax errors in that file first",
   "include-name": "check the name, or define it in that file",

@@ -17,7 +17,7 @@ import type {
   TypeExpr,
   WorkflowDef,
 } from "@nf-builder/lang-core";
-import { arityMismatches } from "./calls.ts";
+import { wrongArgumentCount } from "./calls.ts";
 import { scriptOf } from "./scan.ts";
 
 const BUILTIN = new Set([
@@ -135,7 +135,7 @@ function asTake(
 }
 
 /** nf-lang's `asDataflowType` (L273): a plain output target takes the kind of a value source. */
-export function outputTarget(target: FlowType, source: FlowType): FlowType {
+function outputTarget(target: FlowType, source: FlowType): FlowType {
   if (target.dataflow === "channel" || target.dataflow === "value")
     return target;
   return source.dataflow === "value"
@@ -220,9 +220,7 @@ export const typeMismatch: LintRule = {
   code: "type-mismatch",
   check: (context) => {
     if (!scriptOf(context)?.typesEnabled) return [];
-    const wrongCount = new Set(
-      arityMismatches(context).map((m) => m.call.range.start),
-    );
+    const wrongCount = wrongArgumentCount(context);
     const isRecord = isRecordIn(context);
     const out: LintFinding[] = [];
     for (const projection of context.projections()) {
@@ -308,9 +306,7 @@ export const multipleChannels: LintRule = {
   code: "multiple-channels",
   check: (context) => {
     if (!scriptOf(context)?.typesEnabled) return [];
-    const wrongCount = new Set(
-      arityMismatches(context).map((m) => m.call.range.start),
-    );
+    const wrongCount = wrongArgumentCount(context);
     const out: LintFinding[] = [];
     for (const projection of context.projections()) {
       const index = indexEdges(projection);
@@ -328,11 +324,18 @@ export const multipleChannels: LintRule = {
             port.argument !== null &&
             sourceOf(index, node, port)?.dataflow === "channel",
         ).length;
-        if (channels > 1)
+        if (channels > 1) {
+          // the declared name, not the alias the call is written with
+          const declaration = context.lookup(callee.name)?.declaration;
+          const declared =
+            declaration?.kind === "Process" || declaration?.kind === "Agent"
+              ? declaration.name.name
+              : callee.name;
           out.push({
             range: node.range,
-            message: `${callee.kind === "agent" ? "Agent" : "Process"} \`${callee.name}\` was called with multiple channel arguments which can lead to non-deterministic behavior -- make sure that at most one argument is a channel and that all other arguments are dataflow values`,
+            message: `${callee.kind === "agent" ? "Agent" : "Process"} \`${declared}\` was called with multiple channel arguments which can lead to non-deterministic behavior -- make sure that at most one argument is a channel and that all other arguments are dataflow values`,
           });
+        }
       }
     }
     return out;

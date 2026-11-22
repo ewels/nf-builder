@@ -1,5 +1,10 @@
 // The diagnoser (AR-05, F-112): parse problems, model diagnostics and the pack's rules, per file, sorted. It never throws.
-import type { Catalogue, Diagnostic, PackLints } from "@nf-builder/lang-core";
+import type {
+  Catalogue,
+  Diagnostic,
+  LintContext,
+  PackLints,
+} from "@nf-builder/lang-core";
 import type { ProjectModel } from "../model/project";
 import type { Projector } from "../projection/project";
 import { lintContext } from "./context";
@@ -51,6 +56,14 @@ export function createDiagnoser(options: DiagnoserOptions): Diagnoser {
   const { model, projector, catalogue, lints } = options;
   const severities = new Map(lints.codes.map((c) => [c.code, c.severity]));
   const memo = new Map<string, readonly Diagnostic[]>();
+  /** The pack's advice appended; the raw message if the pack throws. */
+  const advise = (code: string, message: string): string => {
+    try {
+      return lints.advise(code, message);
+    } catch {
+      return message;
+    }
+  };
 
   function compute(path: string): Diagnostic[] {
     const file = model.file(path);
@@ -62,7 +75,7 @@ export function createDiagnoser(options: DiagnoserOptions): Diagnoser {
         path,
         range,
         severity: "warning",
-        message: lints.advise(INTERNAL, message),
+        message: advise(INTERNAL, message),
         code: INTERNAL,
       });
 
@@ -74,14 +87,14 @@ export function createDiagnoser(options: DiagnoserOptions): Diagnoser {
           path,
           range,
           severity: severities.get("syntax") ?? "error",
-          message: lints.advise("syntax", problem.message),
+          message: advise("syntax", problem.message),
           code: "syntax",
         });
     }
     for (const d of file.diagnostics)
-      out.push({ ...d, message: lints.advise(d.code, d.message) });
+      out.push({ ...d, message: advise(d.code, d.message) });
 
-    let context: ReturnType<typeof lintContext> = null;
+    let context: LintContext | null = null;
     try {
       context = lintContext({ model, projector, catalogue, path });
     } catch (error) {

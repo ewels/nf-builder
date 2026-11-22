@@ -1,4 +1,3 @@
-import type { LintFinding, LintRule } from "@nf-builder/lang-core";
 import { describe, expect, it } from "vitest";
 import {
   agentOutput,
@@ -11,12 +10,8 @@ import {
   publishTypeIgnored,
   typedProcessOutputs,
 } from "../../src/lints/typed.ts";
-import { context } from "./context.ts";
+import { at, run } from "./context.ts";
 
-const run = (rule: LintRule, text: string, language?: "script" | "config") =>
-  rule.check(context(text, language));
-const at = (text: string, findings: readonly LintFinding[]) =>
-  findings.map((f) => text.slice(f.range.start, f.range.end));
 const TYPED = "nextflow.enable.types = true\n\n";
 
 describe("F-112 LA-37 typed-code warnings", () => {

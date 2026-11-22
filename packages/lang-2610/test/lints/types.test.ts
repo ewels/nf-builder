@@ -343,6 +343,29 @@ describe("F-112 LA-29 LA-32 rules", () => {
         ]),
       ),
     ).toEqual([]);
+    // a call with the wrong number of arguments is skipped, the same call with the right number is checked
+    const counted = (args: string) => {
+      const base = typedContext(
+        `process P {\n    input:\n    name: String\n    other: String\n\n    script:\n    'x'\n}\nworkflow {\n    P(${args})\n}`,
+        [],
+      );
+      const start = base.file.text.indexOf("P(");
+      const node = {
+        ...callNode("process", true, [nameIn]),
+        range: { ...RANGE, start, end: start + 4 },
+      } as GraphNode;
+      return {
+        ...base,
+        projections: () => [
+          projection(
+            [node],
+            [edge(node, "name", flow("channel", t("Integer")))],
+          ),
+        ],
+      };
+    };
+    expect(typeMismatch.check(counted("1"))).toEqual([]);
+    expect(typeMismatch.check(counted("1, 2"))).toHaveLength(1);
     // an argument that no edge feeds and that has no inline type is unknown
     const loose = callNode("process", true, [
       port("name", flow("plain", t("String")), true),
@@ -466,6 +489,28 @@ workflow {
     ).toEqual([
       "Process `pair` was called with multiple channel arguments which can lead to non-deterministic behavior -- make sure that at most one argument is a channel and that all other arguments are dataflow values",
     ]);
+    // a call through an alias names the declaration, as nextflow lint does (`include { pair as PAIR2 }`)
+    const aliased = callNode("process", true, [x, y], "PAIR2");
+    const base = typedContext(
+      "process pair {\n    script:\n    'x'\n}\nworkflow {}",
+      [
+        projection(
+          [aliased],
+          [
+            edge(aliased, "x", flow("channel", t("String"))),
+            edge(aliased, "y", flow("channel", t("String"))),
+          ],
+        ),
+      ],
+    );
+    expect(
+      multipleChannels
+        .check({
+          ...base,
+          lookup: (name) => base.lookup(name === "PAIR2" ? "pair" : name),
+        })
+        .map((f) => f.message.split(" was ")[0]),
+    ).toEqual(["Process `pair`"]);
     const agent = callNode("agent", true, [x, y], "ask");
     expect(
       multipleChannels

@@ -49,9 +49,8 @@ export interface LintFinding {
 
 export interface LintBinding {
   readonly declaration: IncludableDeclaration | null;
-  readonly path: string | null;
+  /** Whether the declaring script enables types; null when it isn't a parsed script. */
   readonly typesEnabled: boolean | null;
-  readonly entry: IncludeEntry | null;
 }
 
 export interface LintInclude {

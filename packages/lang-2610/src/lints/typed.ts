@@ -4,10 +4,10 @@ import type {
   LintFinding,
   LintRule,
   ProcessInput,
-  Range,
   TypedName,
 } from "@nf-builder/lang-core";
-import { scriptOf } from "./scan.ts";
+import { spanRanges } from "../ast/positions.ts";
+import { bodyOf } from "./scan.ts";
 
 const missing = (what: string, name: TypedName["name"]): LintFinding => ({
   range: name.range,
@@ -35,7 +35,7 @@ function untypedInputs(items: readonly ProcessInput[]): LintFinding[] {
 export const missingType: LintRule = {
   code: "missing-type",
   check: (context) =>
-    (scriptOf(context)?.body ?? []).flatMap((item): LintFinding[] => {
+    bodyOf(context).flatMap((item): LintFinding[] => {
       if (item.kind === "Agent" || (item.kind === "Process" && item.typed))
         return untypedInputs(item.inputs?.items ?? []);
       if (item.kind === "Workflow" && item.typed)
@@ -52,7 +52,7 @@ export const missingType: LintRule = {
 export const typedProcessOutputs: LintRule = {
   code: "typed-process-outputs",
   check: (context) =>
-    (scriptOf(context)?.body ?? []).flatMap((item): LintFinding[] => {
+    bodyOf(context).flatMap((item): LintFinding[] => {
       if (item.kind !== "Process" || !item.typed) return [];
       const outputs = item.outputs;
       if (!outputs?.labelRange || outputs.items.length < 2) return [];
@@ -72,21 +72,13 @@ export const typedProcessOutputs: LintRule = {
 export const publishTypeIgnored: LintRule = {
   code: "publish-type-ignored",
   check: (context) =>
-    (scriptOf(context)?.body ?? []).flatMap((item): LintFinding[] => {
+    bodyOf(context).flatMap((item): LintFinding[] => {
       if (item.kind !== "Workflow") return [];
       return (item.publishers?.items ?? []).flatMap((target): LintFinding[] => {
         if (target.type === null) return [];
-        const range: Range = {
-          start: target.name.range.start,
-          end: target.type.range.end,
-          line: target.name.range.line,
-          column: target.name.range.column,
-          endLine: target.type.range.endLine,
-          endColumn: target.type.range.endColumn,
-        };
         return [
           {
-            range,
+            range: spanRanges(target.name.range, target.type.range),
             message:
               "Workflow output type should be declared in the output block -- the type annotation in the publish statement is ignored",
             fix: {

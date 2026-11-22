@@ -109,6 +109,10 @@
 - Incorrect number of call arguments, expected 1 but received 2 -- pass one argument for each input: `x`
 - Process `hello` expects 2 argument(s) but received 1 -- pass one argument for each input: `x`, `y`
 
+## null-argument
+
+- Input `name` of process `hello` is not nullable but receives `null` -- pass a value, or add `?` to the input's type
+
 ## duplicate-call
 
 - Process `BYE` is already called in this workflow -- include it again under another name (`include { BYE as BYE_2 }`) to call it twice

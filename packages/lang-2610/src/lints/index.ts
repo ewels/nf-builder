@@ -1,6 +1,11 @@
 import type { PackLints } from "@nf-builder/lang-core";
 import { advise } from "./advice.ts";
-import { callArity, duplicateCall, unusedOutput } from "./calls.ts";
+import {
+  callArity,
+  duplicateCall,
+  nullArgument,
+  unusedOutput,
+} from "./calls.ts";
 import { CODES } from "./codes.ts";
 import {
   deprecatedChannel,
@@ -57,6 +62,7 @@ export const lints: PackLints = {
     includeAlias,
     duplicateName,
     callArity,
+    nullArgument,
     duplicateCall,
     unusedOutput,
     typeMismatch,

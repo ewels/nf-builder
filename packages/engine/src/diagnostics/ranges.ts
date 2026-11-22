@@ -13,10 +13,8 @@ function offsetAt(
     if (next < 0) return text.length;
     start = next + 1;
   }
-  const lineEnd = (() => {
-    const next = text.indexOf("\n", start);
-    return next < 0 ? text.length : next;
-  })();
+  const next = text.indexOf("\n", start);
+  const lineEnd = next < 0 ? text.length : next;
   let offset = start;
   for (let c = 1; c < column && offset < lineEnd; c++) {
     const code = text.codePointAt(offset) ?? 0;

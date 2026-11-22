@@ -7,13 +7,17 @@ import {
   type ConfigAst,
   type ConfigStatement,
   childNodes,
+  type Expression,
+  type Identifier,
   type LintContext,
   type MethodCall,
   type NamedOutput,
   type ProcessDef,
   type PropertyExpr,
   type ScriptAst,
+  type ScriptItem,
   type Statement,
+  type StringLiteral,
   type Variable,
   type VariableDeclaration,
   type WorkflowDef,
@@ -24,9 +28,16 @@ import {
 export const scriptOf = (context: LintContext): ScriptAst | null =>
   context.file.language === "nextflow" ? context.file.ast : null;
 
+/** The script's top-level items; none for a config or a file nothing could be modelled in. */
+export const bodyOf = (context: LintContext): readonly ScriptItem[] =>
+  scriptOf(context)?.body ?? [];
+
+/** A name written as an identifier or a quoted string (`foo`, `'foo'`). */
+export const nameOf = (name: Identifier | StringLiteral): string =>
+  name.kind === "Identifier" ? name.name : name.value;
+
 /** A call's method name; a quoted name gives its value. */
-export const methodName = (call: MethodCall): string =>
-  call.method.kind === "Identifier" ? call.method.name : call.method.value;
+export const methodName = (call: MethodCall): string => nameOf(call.method);
 
 interface Frame {
   readonly closure: Closure | null;
@@ -36,11 +47,12 @@ interface Frame {
 /**
  * Calls `visit` for each `it` that nf-lang resolves to the implicit parameter of a closure: the nearest scope that
  * declares `it` is a closure with no declared parameters, so not a declared parameter, a `def it` or a catch variable.
- * Block, closure and catch bodies are scopes.
+ * Block, closure and catch bodies are scopes. `shadows` is true when an enclosing scope already has `it` visible (a
+ * frame that names it, or a closure with no parameters), so declaring `it` again would be an error.
  */
 export function forEachIt(
   root: AstNode,
-  visit: (it: Variable, closure: Closure) => void,
+  visit: (it: Variable, closure: Closure, shadows: boolean) => void,
 ): void {
   const frames: Frame[] = [];
   const resolve = (it: Variable): void => {
@@ -49,7 +61,17 @@ export function forEachIt(
       if (frame.names.has("it")) return;
       const { closure } = frame;
       if (closure && (closure.params === null || closure.params.length === 0)) {
-        visit(it, closure);
+        const outer = frames.slice(0, i);
+        visit(
+          it,
+          closure,
+          outer.some(
+            (f) =>
+              f.names.has("it") ||
+              (f.closure !== null &&
+                (f.closure.params === null || f.closure.params.length === 0)),
+          ),
+        );
         return;
       }
     }
@@ -95,17 +117,17 @@ export function directiveCalls(
 }
 
 /** What reads of a name look like: the whole value (`r`) or one property (`r.out`, `r.txt`). */
-export interface Read {
+interface Read {
   readonly whole: boolean;
   readonly property: string | null;
 }
 
 /**
- * The reads of each variable name under `nodes`, counting closures, GStrings and the implicit read of an emit or
+ * The reads of each variable name under `root`, counting closures, GStrings and the implicit read of an emit or
  * output written as `name: Type` with no value. Only reads that start at or after `after` count.
  */
 export function readsIn(
-  nodes: readonly AstNode[],
+  root: AstNode,
   after = 0,
 ): ReadonlyMap<string, readonly Read[]> {
   const reads = new Map<string, Read[]>();
@@ -114,27 +136,22 @@ export function readsIn(
     if (list) list.push(read);
     else reads.set(name, [read]);
   };
-  for (const root of nodes)
-    walk(root, (node, parent) => {
-      if (node.range.end <= after) return false;
-      if (node.kind === "NamedOutput") {
-        const output = node as unknown as NamedOutput;
-        if (output.value === null)
-          add(output.name.name, { whole: true, property: null });
-      } else if (node.kind === "Variable") {
-        const name = (node as Variable).name;
-        const owner =
-          parent?.kind === "Property" ? (parent as PropertyExpr) : null;
-        if (owner && owner.object === node) {
-          const property =
-            owner.property.kind === "Identifier"
-              ? owner.property.name
-              : owner.property.value;
-          add(name, { whole: false, property });
-        } else add(name, { whole: true, property: null });
-      }
-      return undefined;
-    });
+  walk(root, (node, parent) => {
+    if (node.range.end <= after) return false;
+    if (node.kind === "NamedOutput") {
+      const output = node as unknown as NamedOutput;
+      if (output.value === null)
+        add(output.name.name, { whole: true, property: null });
+    } else if (node.kind === "Variable") {
+      const name = (node as Variable).name;
+      const owner =
+        parent?.kind === "Property" ? (parent as PropertyExpr) : null;
+      if (owner && owner.object === node)
+        add(name, { whole: false, property: nameOf(owner.property) });
+      else add(name, { whole: true, property: null });
+    }
+    return undefined;
+  });
   return reads;
 }
 
@@ -145,16 +162,15 @@ export function argumentCount(call: MethodCall): number {
   return positional + named + call.closures.length;
 }
 
-export interface WorkflowCall {
+interface WorkflowCall {
   readonly call: MethodCall;
   readonly statement: Statement;
   /** The variable the result is assigned to, `null` for a bare call. */
   readonly assigned: string | null;
 }
 
-const isBareCall = (e: unknown): e is MethodCall =>
-  (e as MethodCall | null)?.kind === "MethodCall" &&
-  (e as MethodCall).receiver === null;
+const isBareCall = (e: Expression | null): e is MethodCall =>
+  e?.kind === "MethodCall" && e.receiver === null;
 
 /**
  * The calls in a workflow's `main` that stand as a whole statement: `CALL(...)`, `v = CALL(...)` and `def v = CALL(...)`,

@@ -1,21 +1,6 @@
 // The diagnostic codes this pack describes (F-112, ADR 0005).
 import type { DiagnosticCode } from "@nf-builder/lang-core";
 
-const INCLUDE_UPSTREAM = [
-  "modules/nf-lang/src/main/java/nextflow/script/control/ResolveIncludeVisitor.java#L90-L141",
-];
-
-const includeCode = (code: string): DiagnosticCode => ({
-  code,
-  severity: "error",
-  spec: ["AR-03", "AR-05"],
-  origin: "model",
-  upstream: INCLUDE_UPSTREAM,
-  lintPattern: null,
-  verbatim: [],
-  fixable: false,
-});
-
 const NF_LANG = "modules/nf-lang/src/main/java/nextflow";
 const BUILDER = `${NF_LANG}/script/parser/ScriptAstBuilder.java`;
 const RESOLVE_INCLUDE = `${NF_LANG}/script/control/ResolveIncludeVisitor.java`;
@@ -34,20 +19,23 @@ const code = (
   ...fields,
 });
 
+const includeCode = (name: string): DiagnosticCode =>
+  code({
+    code: name,
+    severity: "error",
+    spec: ["AR-03", "AR-05"],
+    origin: "model",
+    upstream: [`${RESOLVE_INCLUDE}#L90-L141`],
+  });
+
 export const CODES: readonly DiagnosticCode[] = [
-  {
+  code({
     code: "syntax",
     severity: "error",
     spec: ["LA-30"],
     origin: "parser",
-    upstream: [
-      "modules/nf-lang/src/main/java/nextflow/script/parser/ScriptAstBuilder.java",
-      "modules/nf-lang/src/main/java/nextflow/config/parser/ConfigAstBuilder.java",
-    ],
-    lintPattern: null,
-    verbatim: [],
-    fixable: false,
-  },
+    upstream: [BUILDER, `${NF_LANG}/config/parser/ConfigAstBuilder.java`],
+  }),
   includeCode("include-target"),
   includeCode("include-not-parsed"),
   includeCode("include-name"),
@@ -248,6 +236,12 @@ export const CODES: readonly DiagnosticCode[] = [
     ],
     lintPattern:
       /^(Incorrect number of call arguments|(Process|Agent|Workflow) `[^`]+` expects \d+ argument\(s\))/,
+  }),
+  code({
+    code: "null-argument",
+    severity: "error",
+    spec: ["LA-33"],
+    origin: "ours",
   }),
   code({
     code: "duplicate-call",

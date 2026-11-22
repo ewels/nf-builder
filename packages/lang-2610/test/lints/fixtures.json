@@ -474,6 +474,16 @@
       "warnings": []
     },
     {
+      "file": "null-argument/negative/main.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "null-argument/positive/main.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
       "file": "params-outside-entry/negative/main.nf",
       "lint": [],
       "warnings": []

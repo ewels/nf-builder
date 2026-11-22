@@ -7,7 +7,7 @@ import {
 } from "node:fs";
 import { basename, dirname, join } from "node:path";
 import { isRecord, type Outcome } from "./cases.ts";
-import { type Evaluation, parseLintJson } from "./check.ts";
+import { type Evaluation, type LintMessage, parseLintJson } from "./check.ts";
 import type { Exec } from "./nextflow.ts";
 import { type CheckResult, LINT_COMMAND } from "./run.ts";
 
@@ -86,15 +86,11 @@ export type TreeRunOptions = {
   log?: (line: string) => void;
 };
 
-const show = (errors: readonly Located[]): string =>
-  errors.length === 0
-    ? "no errors"
-    : errors.map((e) => `${e.line}:${e.column} ${e.message}`).join(" | ");
-
-const showWarnings = (warnings: readonly Located[]): string =>
-  warnings.length === 0
-    ? "no warnings"
-    : warnings.map((e) => `${e.line}:${e.column} ${e.message}`).join(" | ");
+const show = (list: readonly Located[], none = "no errors"): string =>
+  list.length === 0
+    ? none
+    : list.map((e) => `${e.line}:${e.column} ${e.message}`).join(" | ");
+const showWarnings = (list: readonly Located[]) => show(list, "no warnings");
 
 /**
  * Copies the tree (keeping relative paths: includes and `modules/nf-core/` resolve against them), runs `nextflow lint -o
@@ -128,14 +124,7 @@ export function runTree(
     ].join("\n"),
   );
   const report = parseLintJson(result.stdout);
-  const group = (
-    list: readonly {
-      filename?: string;
-      startLine?: number;
-      startColumn?: number;
-      message: string;
-    }[],
-  ): Map<string, Located[]> => {
+  const group = (list: readonly LintMessage[]): Map<string, Located[]> => {
     const map = new Map<string, Located[]>();
     for (const e of list)
       map.set(e.filename ?? "?", [

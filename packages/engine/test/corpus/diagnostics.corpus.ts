@@ -97,20 +97,11 @@ describe("F-112 corpus diagnostics", () => {
       const ours = pin.diagnostics.filter((d) =>
         patterns.some((c) => c.code === d.code),
       );
-      const where = (list: { at: string }[]) => list.map((e) => e.at).sort();
       expect(
-        where(
-          ours.map((d) => ({
-            at: key(d.path, d.range.line, d.range.column),
-          })),
-        ),
+        ours.map((d) => key(d.path, d.range.line, d.range.column)).sort(),
         pin.id,
       ).toEqual(
-        where(
-          theirs.map((e) => ({
-            at: key(e.filename, e.startLine, e.startColumn),
-          })),
-        ),
+        theirs.map((e) => key(e.filename, e.startLine, e.startColumn)).sort(),
       );
       const messages = new Map(
         theirs.map((e) => [

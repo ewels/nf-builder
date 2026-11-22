@@ -1,19 +1,21 @@
 // A lint context for unit tests: one file, its own declarations for `lookup`, no includes (the engine tests cover those).
-import { readFileSync } from "node:fs";
-import type { Catalogue, LintContext, ScriptAst } from "@nf-builder/lang-core";
+import type {
+  Catalogue,
+  LintContext,
+  LintFinding,
+  LintRule,
+  ScriptAst,
+} from "@nf-builder/lang-core";
+import { configCatalogue, scriptCatalogue } from "../../src/catalogue.ts";
 import {
   parseConfigSource,
   parseScriptSource,
 } from "../../src/source/parse-source.ts";
 
-const json = (file: string): unknown =>
-  JSON.parse(
-    readFileSync(new URL(`../../catalogue/${file}`, import.meta.url), "utf8"),
-  );
-export const catalogue = {
-  script: json("script.json"),
-  config: json("config.json"),
-} as Catalogue;
+export const catalogue: Catalogue = {
+  script: scriptCatalogue,
+  config: configCatalogue,
+};
 
 export function context(
   text: string,
@@ -48,12 +50,7 @@ export function context(
           d.name.name === name,
       );
       return declaration
-        ? ({
-            declaration,
-            path: "main.nf",
-            typesEnabled: true,
-            entry: null,
-          } as never)
+        ? ({ declaration, typesEnabled: true } as never)
         : undefined;
     },
     includes: [],
@@ -61,3 +58,14 @@ export function context(
     configs: () => [],
   };
 }
+
+/** Runs one rule over `text`. */
+export const run = (
+  rule: LintRule,
+  text: string,
+  language?: "script" | "config",
+) => rule.check(context(text, language));
+
+/** The source text each finding covers. */
+export const at = (text: string, findings: readonly LintFinding[]) =>
+  findings.map((f) => text.slice(f.range.start, f.range.end));

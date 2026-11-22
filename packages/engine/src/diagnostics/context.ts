@@ -1,24 +1,23 @@
 import type {
   Catalogue,
   ConfigAst,
+  IncludableDeclaration,
+  IncludeTarget,
   LintBinding,
   LintContext,
   LintInclude,
   Projection,
 } from "@nf-builder/lang-core";
-import type { Binding } from "../model/file-model";
 import type { ProjectModel } from "../model/project";
 import type { Projector } from "../projection/project";
 
-export interface LintContextOptions {
+/** Builds the context the pack's rules see for one file; null when the file has no AST (a verbatim or plain file). */
+export function lintContext(options: {
   model: ProjectModel;
   projector: Projector;
   catalogue: Catalogue;
   path: string;
-}
-
-/** Builds the context the pack's rules see for one file; null when the file has no AST (a verbatim or plain file). */
-export function lintContext(options: LintContextOptions): LintContext | null {
+}): LintContext | null {
   const { model, projector, catalogue, path } = options;
   const file = model.file(path);
   const source = file?.source;
@@ -27,29 +26,23 @@ export function lintContext(options: LintContextOptions): LintContext | null {
     return null;
   if (source.ast === null) return null;
 
-  const typesOf = (target: string | null): boolean | null => {
-    const other = target === null ? undefined : model.file(target)?.source;
-    return other?.language === "nextflow" && other.ast
-      ? other.ast.typesEnabled
-      : null;
-  };
-  const binding = (found: Binding): LintBinding => {
-    if (found.kind === "declaration")
-      return {
-        declaration: found.declaration,
-        path,
-        typesEnabled: typesOf(path),
-        entry: null,
-      };
-    const { target } = found.include;
-    const targetPath = target.kind === "file" ? target.path : null;
+  /** `declaration`, declared in the file at `declaredIn`; types are known for a parsed script only. */
+  const binding = (
+    declaration: IncludableDeclaration | null,
+    declaredIn: string | null,
+  ): LintBinding => {
+    const other =
+      declaredIn === null ? undefined : model.file(declaredIn)?.source;
     return {
-      declaration: found.entry.declaration,
-      path: targetPath,
-      typesEnabled: typesOf(targetPath),
-      entry: found.entry.entry,
+      declaration,
+      typesEnabled:
+        other?.language === "nextflow" && other.ast
+          ? other.ast.typesEnabled
+          : null,
     };
   };
+  const fileOf = (target: IncludeTarget): string | null =>
+    target.kind === "file" ? target.path : null;
 
   const includes: LintInclude[] = [];
   for (const include of file.includes) {
@@ -59,7 +52,7 @@ export function lintContext(options: LintContextOptions): LintContext | null {
         include: include.node,
         entry: resolved.entry,
         target: include.target,
-        binding: binding({ kind: "include", include, entry: resolved }),
+        binding: binding(resolved.declaration, fileOf(include.target)),
         pipeline: resolved.pipeline,
       });
   }
@@ -71,7 +64,10 @@ export function lintContext(options: LintContextOptions): LintContext | null {
     catalogue,
     lookup: (name) => {
       const found = model.lookup(path, name);
-      return found ? binding(found) : undefined;
+      if (!found) return undefined;
+      return found.kind === "declaration"
+        ? binding(found.declaration, path)
+        : binding(found.entry.declaration, fileOf(found.include.target));
     },
     includes,
     projections: () =>

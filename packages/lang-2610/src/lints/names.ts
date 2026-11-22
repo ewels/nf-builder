@@ -16,14 +16,14 @@ import type {
   Wildcard,
 } from "@nf-builder/lang-core";
 import { walk } from "@nf-builder/lang-core";
-import { methodName, scriptOf } from "./scan.ts";
+import { bodyOf, methodName, scriptOf } from "./scan.ts";
 
 /** `VariableScopeVisitor.java#L249`: a feature flag the catalogue doesn't list. */
 export const featureFlag: LintRule = {
   code: "feature-flag",
   check: (context) => {
     const known = context.catalogue.script.featureFlags.map((f) => f.name);
-    return (scriptOf(context)?.body ?? []).flatMap((item): LintFinding[] =>
+    return bodyOf(context).flatMap((item): LintFinding[] =>
       item.kind === "FeatureFlag" && !known.includes(item.name.name)
         ? [
             {
@@ -127,11 +127,6 @@ function entryEdit(
   };
 }
 
-interface Registered {
-  readonly entry: IncludeEntry;
-  readonly same: string;
-}
-
 /**
  * `VariableScopeVisitor.java#L150`, `#L183`, `#L189`, `#L210`, `#L217`, `#L260`: a name included twice, declared twice
  * or declared and included. Functions may overload. Only an identical include entry (same name, alias and target)
@@ -151,10 +146,11 @@ export const duplicateName: LintRule = {
         ...(fix ? { fix } : {}),
       });
 
-    // includes, in order; entries nf-lang cannot resolve or rejects for their alias are not registered
-    const included = new Map<string, Registered>();
+    // includes, in order; entries nf-lang cannot resolve or rejects for their alias are not registered. `included` maps
+    // each name to the first entry's name, alias and target, so an identical entry is told from a clash.
+    const included = new Map<string, string>();
     const dups = new Set<IncludeEntry>();
-    const found: { i: LintInclude; first: Registered }[] = [];
+    const found: LintInclude[] = [];
     for (const i of context.includes) {
       const resolved =
         i.binding.declaration !== null ||
@@ -172,20 +168,19 @@ export const duplicateName: LintRule = {
             : "";
       const same = `${i.entry.name.name} as ${i.entry.alias?.name ?? ""} from ${i.target.kind}:${target}`;
       const first = included.get(name);
-      if (first) {
-        found.push({ i, first });
-        if (first.same === same) dups.add(i.entry);
+      if (first !== undefined) {
+        found.push(i);
+        if (first === same) dups.add(i.entry);
       }
-      included.set(name, { entry: i.entry, same });
+      included.set(name, same);
     }
-    for (const { i, first } of found) {
+    for (const i of found) {
       const name = (i.entry.alias ?? i.entry.name).name;
-      const identical = dups.has(i.entry);
       const index = i.include.entries.indexOf(i.entry);
       flag(
         i.include.range,
         `\`${name}\` is already included`,
-        identical
+        dups.has(i.entry)
           ? {
               title: "Remove the duplicate include",
               edits: [entryEdit(text, i.include, index, dups)],
@@ -309,7 +304,7 @@ export const agentOutput: LintRule = {
           message: `Agent output \`${name}\` has unsupported ${bad} -- ${SUPPORTED_TYPES}`,
         });
     };
-    for (const item of scriptOf(context)?.body ?? []) {
+    for (const item of bodyOf(context)) {
       if (item.kind !== "Agent") continue;
       for (const output of item.outputs?.items ?? []) {
         if (output.kind === "NamedOutput") check(output);
