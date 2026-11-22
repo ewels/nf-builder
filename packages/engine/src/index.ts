@@ -91,6 +91,23 @@ export {
 } from "./projection/project";
 export { formatFlowType, formatType } from "./projection/types";
 export {
+  type Applied,
+  type ApplyOutcome,
+  createEngineService,
+  type DiagnosticsResult,
+  type EngineApi,
+  type EngineRefusal,
+  type EngineRefusalCode,
+  type EngineServiceOptions,
+  type FileSummary,
+  type LoadPhase,
+  type LoadProgress,
+  type OpenRequest,
+  type ProjectChange,
+  type ProjectionResult,
+  type ProjectSummary,
+} from "./service";
+export {
   type Equivalence,
   equivalent,
   normaliseText,
