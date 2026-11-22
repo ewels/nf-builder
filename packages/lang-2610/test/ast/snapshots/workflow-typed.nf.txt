@@ -9,12 +9,14 @@ Script typesEnabled=true 1:1-13:1
         name Identifier 5:5-5:14 "greetings"
         type TypeRef name="Channel" nullable=false 5:16-5:31
           typeArguments[0] TypeRef nullable=false 5:24-5:30 "String"
+            typeArguments=[]
     main Section label="main" labelRange=7:5-7:10 7:5-8:50
       items[0] Assignment operator="=" 8:5-8:50
         target Variable 8:5-8:13 "messages"
         value MethodCall navigation="." trailingComma=false parens=false 8:16-8:50
           receiver Variable 8:16-8:25 "greetings"
           method Identifier 8:26-8:29 "map"
+          args=[]
           closures[0] Closure 8:30-8:50
             params[0] Parameter def=false 8:32-8:33
               name Identifier 8:32-8:33 "v"
@@ -28,3 +30,4 @@ Script typesEnabled=true 1:1-13:1
         name Identifier 11:5-11:13 "messages"
         type TypeRef name="Channel" nullable=false 11:15-11:30
           typeArguments[0] TypeRef nullable=false 11:23-11:29 "String"
+            typeArguments=[]

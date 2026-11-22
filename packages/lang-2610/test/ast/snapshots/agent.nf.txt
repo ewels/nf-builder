@@ -8,18 +8,23 @@ Script typesEnabled=false 1:1-17:1
         expression MethodCall trailingComma=false parens=false 3:5-3:30
           method Identifier 3:5-3:10 "model"
           args[0] String value="openai/gpt-5-mini" quote="'" 3:11-3:30 "'openai/gpt-5-mini'"
+          closures=[]
       items[1] ExpressionStatement 4:5-4:58
         expression MethodCall trailingComma=false parens=false 4:5-4:58
           method Identifier 4:5-4:16 "instruction"
           args[0] String value="You are a concise scientific assistant." quote="'" 4:17-4:58 "'You are a concise scientific assistant.'"
+          closures=[]
     inputs Section label="input" labelRange=6:5-6:11 6:5-7:21
       items[0] TypedName 7:5-7:21
         name Identifier 7:5-7:13 "question"
         type TypeRef nullable=false 7:15-7:21 "String"
+          typeArguments=[]
     outputs Section label="output" labelRange=9:5-9:12 9:5-10:13
       items[0] ExpressionStatement 10:5-10:13
         expression MethodCall trailingComma=false parens=true 10:5-10:13
           method Identifier 10:5-10:11 "stdout"
+          args=[]
+          closures=[]
     prompt Section label="prompt" labelRange=12:5-12:12 12:5-15:8
       items[0] ExpressionStatement 13:5-15:8
         expression GString quote="\"\"\"" 13:5-15:8

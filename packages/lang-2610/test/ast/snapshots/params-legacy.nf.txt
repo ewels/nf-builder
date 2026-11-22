@@ -12,3 +12,4 @@ Script typesEnabled=false 1:1-6:1
           args[0] Property navigation="." 4:13-4:27
             object Variable 4:13-4:19 "params"
             property Identifier 4:20-4:27 "message"
+          closures=[]

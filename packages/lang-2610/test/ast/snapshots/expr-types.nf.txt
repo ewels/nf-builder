@@ -8,21 +8,28 @@ Script typesEnabled=true 1:1-6:1
       name Identifier 3:14-3:15 "a"
       type TypeRef name="Map" nullable=false 3:17-3:36
         typeArguments[0] TypeRef nullable=false 3:21-3:27 "String"
+          typeArguments=[]
         typeArguments[1] TypeRef nullable=false 3:28-3:35 "Integer"
+          typeArguments=[]
     params[1] Parameter def=false 3:38-3:48
       name Identifier 3:38-3:39 "b"
       type TypeRef nullable=true 3:41-3:48 "String?"
+        typeArguments=[]
     params[2] Parameter def=false 3:50-3:71
       name Identifier 3:50-3:51 "c"
       type TypeRef nullable=false 3:53-3:71 "java.nio.file.Path"
+        typeArguments=[]
     params[3] Parameter def=false 3:73-3:83
       name Identifier 3:73-3:74 "d"
       type TypeRef name="List" nullable=false 3:76-3:83
         typeArguments[0] Wildcard 3:81-3:82 "?"
     returnType TypeRef name="Set" nullable=false 3:88-3:99
       typeArguments[0] TypeRef nullable=false 3:92-3:98 "String"
+        typeArguments=[]
     body Block 3:100-5:2
       statements[0] Return 4:5-4:22
         value MethodCall navigation="." trailingComma=false parens=true 4:12-4:22
           receiver Variable 4:12-4:13 "a"
           method Identifier 4:14-4:20 "keySet"
+          args=[]
+          closures=[]

@@ -246,7 +246,7 @@
         "Ranges slice back to exact source"
       ],
       "passes": false,
-      "notes": "From F-101: 7 ported ConfigAstBuilderTest inputs (L059, L076, L097, L113, L129, L163, L175) parse at grammar level and must be rejected by the config AST builder here (owner F-103 in packages/lang-2610/test/ported/cases.json). Also from F-101: the ported valid-escape cases must stay error-free once the config AST builder checks escapes (EscapeUtils)."
+      "notes": "From F-101: 7 ported ConfigAstBuilderTest inputs (L059, L076, L097, L113, L129, L163, L175) parse at grammar level and must be rejected by the config AST builder here (owner F-103 in packages/lang-2610/test/ported/cases.json). Also from F-101: the ported valid-escape cases must stay error-free once the config AST builder checks escapes (EscapeUtils). From F-102: SourceFile (AR-01: path, text, language, AST, comment map, parse status) is not in lang-core yet; F-104 adds it with LanguagePack.loadParser, and F-103's config parse result is part of its union."
     },
     {
       "id": "F-104",

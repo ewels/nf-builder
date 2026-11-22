@@ -5,3 +5,4 @@ Script typesEnabled=false 1:1-4:1
         expression MethodCall trailingComma=false parens=false 2:5-2:27
           method Identifier 2:5-2:12 "println"
           args[0] String value="Hello world!" quote="'" 2:13-2:27 "'Hello world!'"
+          closures=[]

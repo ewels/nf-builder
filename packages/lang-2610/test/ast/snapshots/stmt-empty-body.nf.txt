@@ -11,3 +11,4 @@ Script typesEnabled=false 1:1-6:1
         expression MethodCall trailingComma=false parens=false 4:5-4:19
           method Identifier 4:5-4:12 "println"
           args[0] String value="done" quote="'" 4:13-4:19 "'done'"
+          closures=[]

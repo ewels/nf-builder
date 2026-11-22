@@ -110,8 +110,11 @@ function typeArguments(
   });
 }
 
-/** A type as written: `Path`, `java.nio.file.Path`, `int`, `Map<String, ?>`, `Path?`. */
-export function typeRef(ctx: TypeContext, cx: BuildContext): TypeRef {
+/** A type as written: `Path`, `java.nio.file.Path`, `int`, `Map<String, ?>`, `Path?`; also the type of `new T<...>(...)`. */
+export function typeRef(
+  ctx: TypeContext | CreatedNameContext,
+  cx: BuildContext,
+): TypeRef {
   const primitive = ctx.primitiveType();
   const qualified = ctx.qualifiedClassName();
   return {
@@ -132,22 +135,6 @@ export function qualifiedType(
     kind: "TypeRef",
     name: ctx.getText(),
     typeArguments: [],
-    nullable: false,
-    range: cx.range(ctx),
-  };
-}
-
-/** The type of `new T<...>(...)`. */
-export function createdName(
-  ctx: CreatedNameContext,
-  cx: BuildContext,
-): TypeRef {
-  const primitive = ctx.primitiveType();
-  const qualified = ctx.qualifiedClassName();
-  return {
-    kind: "TypeRef",
-    name: (primitive ?? qualified)?.getText() ?? ctx.getText(),
-    typeArguments: typeArguments(ctx.typeArguments(), cx),
     nullable: false,
     range: cx.range(ctx),
   };

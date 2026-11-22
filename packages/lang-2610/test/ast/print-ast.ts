@@ -2,7 +2,7 @@ import { type AstNode, childNodes, type Range } from "@nf-builder/lang-core";
 
 // The snapshot format (a test helper, not product code): one line per node, indented two spaces per level,
 // `<field>[<i>] <Kind> <scalars> <line:col-endLine:endCol>`, and for a node without children the JSON-escaped source slice.
-// Children come in `childNodes` order. Null fields and empty arrays are omitted. Comments print as pseudo-children.
+// Children come in `childNodes` order. Null fields are omitted; an empty array prints as `<field>=[]`. Comments print as pseudo-children.
 
 const NOT_CHILDREN = new Set([
   "leadingComments",
@@ -34,18 +34,11 @@ function scalars(node: AstNode, slice: string, leaf: boolean): string {
     if (isRange(value)) {
       out.push(`${key}=${rangeText(value)}`);
     } else if (typeof value === "string") {
-      // `value` of a string literal is shown only when unescaping changed it
-      if (key === "value" && node.kind === "String" && slice === value)
-        continue;
-      if (key === "value" && node.kind === "GStringText" && slice === value)
-        continue;
-      if (
-        key === "value" &&
-        leaf &&
-        node.kind !== "String" &&
-        node.kind !== "GStringText"
-      )
-        continue;
+      // `value` of a string literal is shown only when unescaping changed it; a leaf's slice shows any other `value`
+      if (key === "value") {
+        const literal = node.kind === "String" || node.kind === "GStringText";
+        if (literal ? slice === value : leaf) continue;
+      }
       out.push(`${key}=${JSON.stringify(value)}`);
     } else if (typeof value === "number" || typeof value === "boolean") {
       if (key === "value" && leaf) continue;
@@ -53,17 +46,6 @@ function scalars(node: AstNode, slice: string, leaf: boolean): string {
     }
   }
   return out.join(" ");
-}
-
-function printComment(
-  label: string,
-  c: Comment,
-  indent: string,
-  lines: string[],
-): void {
-  lines.push(
-    `${indent}${label} ${c.kind} ${rangeText(c.range)} ${JSON.stringify(c.text)}`,
-  );
 }
 
 function print(
@@ -88,20 +70,26 @@ function print(
 
   const inner = "  ".repeat(depth + 1);
   const rec = node as unknown as Record<string, unknown>;
+  const comments = (field: string) => {
+    for (const [i, c] of (
+      (rec[field] as Comment[] | undefined) ?? []
+    ).entries())
+      lines.push(
+        `${inner}${field}[${i}] ${c.kind} ${rangeText(c.range)} ${JSON.stringify(c.text)}`,
+      );
+  };
   const shebang = rec.shebang as Comment | null | undefined;
-  if (shebang) printComment("shebang", shebang, inner, lines);
-  for (const [i, c] of (
-    (rec.comments as Comment[] | undefined) ?? []
-  ).entries())
-    printComment(`comments[${i}]`, c, inner, lines);
-  for (const [i, c] of (
-    (rec.leadingComments as Comment[] | undefined) ?? []
-  ).entries())
-    printComment(`leadingComments[${i}]`, c, inner, lines);
+  if (shebang)
+    lines.push(
+      `${inner}shebang ${shebang.kind} ${rangeText(shebang.range)} ${JSON.stringify(shebang.text)}`,
+    );
+  comments("comments");
+  comments("leadingComments");
 
   for (const [key, value] of Object.entries(node)) {
     if (NOT_CHILDREN.has(key)) continue;
     if (Array.isArray(value)) {
+      if (value.length === 0) lines.push(`${inner}${key}=[]`);
       value.forEach((item, i) => {
         if (isNode(item)) print(item, `${key}[${i}]`, text, depth + 1, lines);
       });
@@ -110,14 +98,8 @@ function print(
     }
   }
 
-  for (const [i, c] of (
-    (rec.trailingComments as Comment[] | undefined) ?? []
-  ).entries())
-    printComment(`trailingComments[${i}]`, c, inner, lines);
-  for (const [i, c] of (
-    (rec.danglingComments as Comment[] | undefined) ?? []
-  ).entries())
-    printComment(`danglingComments[${i}]`, c, inner, lines);
+  comments("trailingComments");
+  comments("danglingComments");
 }
 
 export function printAst(node: AstNode, text: string): string {

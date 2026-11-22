@@ -6,10 +6,12 @@ Script typesEnabled=false 1:1-12:1
         expression MethodCall trailingComma=false parens=false 3:5-3:17
           method Identifier 3:5-3:8 "val"
           args[0] Variable 3:9-3:17 "greeting"
+          closures=[]
       items[1] ExpressionStatement 4:5-4:13
         expression MethodCall trailingComma=false parens=false 4:5-4:13
           method Identifier 4:5-4:8 "val"
           args[0] Variable 4:9-4:13 "name"
+          closures=[]
     exec Section label="exec" labelRange=6:5-6:10 6:5-7:38
       items[0] Assignment operator="=" 7:5-7:38
         target Variable 7:5-7:12 "message"
@@ -25,3 +27,4 @@ Script typesEnabled=false 1:1-12:1
         expression MethodCall trailingComma=false parens=false 10:5-10:16
           method Identifier 10:5-10:8 "val"
           args[0] Variable 10:9-10:16 "message"
+          closures=[]

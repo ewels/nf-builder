@@ -19,10 +19,12 @@ Script typesEnabled=false 1:1-61:1
               expression Property navigation="." 5:12-5:19
                 object Variable 5:12-5:16 "meta"
                 property Identifier 5:17-5:19 "id"
+          closures=[]
       items[1] ExpressionStatement 6:5-6:24
         expression MethodCall trailingComma=false parens=false 6:5-6:24
           method Identifier 6:5-6:10 "label"
           args[0] String value="process_low" quote="'" 6:11-6:24 "'process_low'"
+          closures=[]
       items[2] ExpressionStatement 8:5-8:41
         expression MethodCall trailingComma=false parens=false 8:5-8:41
           method Identifier 8:5-8:10 "conda"
@@ -30,6 +32,7 @@ Script typesEnabled=false 1:1-61:1
             parts[0] Interpolation braced=true 8:12-8:24
               expression Variable 8:14-8:23 "moduleDir"
             parts[1] GStringText 8:24-8:40 "/environment.yml"
+          closures=[]
       items[3] ExpressionStatement 9:5-11:80
         expression MethodCall trailingComma=false parens=false 9:5-11:80
           method Identifier 9:5-9:14 "container"
@@ -52,6 +55,7 @@ Script typesEnabled=false 1:1-61:1
                       property Identifier 9:89-9:122 "singularity_pull_docker_container"
                 consequent String value="https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/81/816bda6dd014e810753f642611232443ddeabb2b47f9681ad43f9044816f00ff/data" quote="'" 10:11-10:153 "'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/81/816bda6dd014e810753f642611232443ddeabb2b47f9681ad43f9044816f00ff/data'"
                 alternate String value="community.wave.seqera.io/library/fastqc:0.13.0--b342db7b694c9af4" quote="'" 11:11-11:77 "'community.wave.seqera.io/library/fastqc:0.13.0--b342db7b694c9af4'"
+          closures=[]
     inputs Section label="input" labelRange=13:5-13:11 13:5-14:49
       items[0] ExpressionStatement 14:5-14:49
         expression MethodCall trailingComma=false parens=false 14:5-14:49
@@ -59,12 +63,15 @@ Script typesEnabled=false 1:1-61:1
           args[0] MethodCall trailingComma=false parens=true 14:11-14:20
             method Identifier 14:11-14:14 "val"
             args[0] Variable 14:15-14:19 "meta"
+            closures=[]
           args[1] MethodCall trailingComma=false parens=true 14:22-14:49
             method Identifier 14:22-14:26 "path"
             args[0] Variable 14:27-14:32 "reads"
             args[1] NamedArgument 14:34-14:48
               name Identifier 14:34-14:41 "stageAs"
               value String value="?/*" quote="'" 14:43-14:48 "'?/*'"
+            closures=[]
+          closures=[]
     outputs Section label="output" labelRange=16:5-16:12 16:5-19:144
       items[0] ExpressionStatement 17:5-17:48
         expression MethodCall trailingComma=false parens=false 17:5-17:48
@@ -72,24 +79,30 @@ Script typesEnabled=false 1:1-61:1
           args[0] MethodCall trailingComma=false parens=true 17:11-17:20
             method Identifier 17:11-17:14 "val"
             args[0] Variable 17:15-17:19 "meta"
+            closures=[]
           args[1] MethodCall trailingComma=false parens=true 17:22-17:36
             method Identifier 17:22-17:26 "path"
             args[0] String value="*.html" quote="\"" 17:27-17:35 "\"*.html\""
+            closures=[]
           args[2] NamedArgument 17:38-17:48
             name Identifier 17:38-17:42 "emit"
             value Variable 17:44-17:48 "html"
+          closures=[]
       items[1] ExpressionStatement 18:5-18:46
         expression MethodCall trailingComma=false parens=false 18:5-18:46
           method Identifier 18:5-18:10 "tuple"
           args[0] MethodCall trailingComma=false parens=true 18:11-18:20
             method Identifier 18:11-18:14 "val"
             args[0] Variable 18:15-18:19 "meta"
+            closures=[]
           args[1] MethodCall trailingComma=false parens=true 18:22-18:35
             method Identifier 18:22-18:26 "path"
             args[0] String value="*.zip" quote="\"" 18:27-18:34 "\"*.zip\""
+            closures=[]
           args[2] NamedArgument 18:37-18:46
             name Identifier 18:37-18:41 "emit"
             value Variable 18:43-18:46 "zip"
+          closures=[]
       items[2] ExpressionStatement 19:5-19:144
         expression MethodCall trailingComma=false parens=false 19:5-19:144
           method Identifier 19:5-19:10 "tuple"
@@ -100,18 +113,22 @@ Script typesEnabled=false 1:1-61:1
                 expression Property navigation="." 19:18-19:30
                   object Variable 19:18-19:22 "task"
                   property Identifier 19:23-19:30 "process"
+            closures=[]
           args[1] MethodCall trailingComma=false parens=true 19:35-19:48
             method Identifier 19:35-19:38 "val"
             args[0] String value="fastqc" quote="'" 19:39-19:47 "'fastqc'"
+            closures=[]
           args[2] MethodCall trailingComma=false parens=true 19:50-19:104
             method Identifier 19:50-19:54 "eval"
             args[0] String value="fastqc --version | sed \"/FastQC v/!d; s/.*v//\"" quote="'" 19:55-19:103 "'fastqc --version | sed \"/FastQC v/!d; s/.*v//\"'"
+            closures=[]
           args[3] NamedArgument 19:106-19:127
             name Identifier 19:106-19:110 "emit"
             value Variable 19:112-19:127 "versions_fastqc"
           args[4] NamedArgument 19:129-19:144
             name Identifier 19:129-19:134 "topic"
             value Variable 19:136-19:144 "versions"
+          closures=[]
     when Section label="when" labelRange=21:5-21:10 21:5-22:43
       items[0] Binary operator="||" 22:5-22:43
         left Binary operator="==" 22:5-22:26
@@ -160,10 +177,13 @@ Script typesEnabled=false 1:1-61:1
             left TypeTest operator="instanceof" 28:25-28:46
               operand Variable 28:25-28:30 "reads"
               type TypeRef nullable=false 28:42-28:46 "Path"
+                typeArguments=[]
             right Binary operator="==" 28:50-28:67
               left MethodCall navigation="." trailingComma=false parens=true 28:50-28:62
                 receiver Variable 28:50-28:55 "reads"
                 method Identifier 28:56-28:60 "size"
+                args=[]
+                closures=[]
               right Number integer=true 28:66-28:67 "1"
           consequent List trailingComma=false 28:70-28:111
             elements[0] List trailingComma=false 28:71-28:110
@@ -180,7 +200,10 @@ Script typesEnabled=false 1:1-61:1
             receiver MethodCall navigation="." trailingComma=false parens=true 28:114-28:131
               receiver Variable 28:114-28:119 "reads"
               method Identifier 28:120-28:129 "withIndex"
+              args=[]
+              closures=[]
             method Identifier 28:132-28:139 "collect"
+            args=[]
             closures[0] Closure 28:140-28:212
               params[0] Parameter def=false 28:142-28:147
                 name Identifier 28:142-28:147 "entry"
@@ -210,8 +233,10 @@ Script typesEnabled=false 1:1-61:1
             receiver Variable 29:21-29:34 "old_new_pairs"
             method Identifier 29:36-29:40 "join"
             args[0] String value=" " quote="'" 29:41-29:44 "' '"
+            closures=[]
           method Identifier 29:46-29:50 "join"
           args[0] String value=" " quote="'" 29:51-29:54 "' '"
+          closures=[]
       items[4] VariableDeclaration def=true multiple=false 30:5-30:92
         targets[0] TypedName 30:9-30:22
           name Identifier 30:9-30:22 "renamed_files"
@@ -219,6 +244,7 @@ Script typesEnabled=false 1:1-61:1
           receiver MethodCall navigation="." trailingComma=false parens=false 30:25-30:82
             receiver Variable 30:25-30:38 "old_new_pairs"
             method Identifier 30:39-30:46 "collect"
+            args=[]
             closures[0] Closure 30:47-30:82
               params[0] Parameter def=false 30:49-30:58
                 name Identifier 30:49-30:58 "_old_name"
@@ -228,6 +254,7 @@ Script typesEnabled=false 1:1-61:1
                 expression Variable 30:72-30:80 "new_name"
           method Identifier 30:83-30:87 "join"
           args[0] String value=" " quote="'" 30:88-30:91 "' '"
+          closures=[]
       items[5] VariableDeclaration def=true multiple=false 35:5-37:15
         leadingComments[0] line 32:5-32:147 "// The total amount of allocated RAM by FastQC is equal to the number of threads defined (--threads) time the amount of RAM defined (--memory)"
         leadingComments[1] line 33:5-33:106 "// https://github.com/s-andrews/FastQC/blob/1faeea0412093224d7f6a07f777fad60a5650795/fastqc#L211-L222"
@@ -247,10 +274,13 @@ Script typesEnabled=false 1:1-61:1
                     property Identifier 36:17-36:23 "memory"
                   method Identifier 36:24-36:30 "toUnit"
                   args[0] String value="MB" quote="'" 36:31-36:35 "'MB'"
+                  closures=[]
                 right Property navigation="." 36:39-36:48
                   object Variable 36:39-36:43 "task"
                   property Identifier 36:44-36:48 "cpus"
             method Identifier 36:50-36:58 "intValue"
+            args=[]
+            closures=[]
           alternate Null 37:11-37:15 "null"
       items[6] VariableDeclaration def=true multiple=false 39:5-39:97
         leadingComments[0] line 38:5-38:55 "// FastQC memory value allowed range (100 - 10000)"

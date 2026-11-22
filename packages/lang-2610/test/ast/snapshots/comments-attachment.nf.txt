@@ -25,17 +25,21 @@ Script typesEnabled=false 1:1-48:1
         expression MethodCall trailingComma=false parens=false 9:5-9:11
           method Identifier 9:5-9:9 "cpus"
           args[0] Number integer=true 9:10-9:11 "1"
+          closures=[]
         trailingComments[0] line 9:12-9:28 "// one is enough"
     inputs Section label="input" labelRange=11:5-11:11 11:5-12:13
       items[0] ExpressionStatement 12:5-12:13
         expression MethodCall trailingComma=false parens=false 12:5-12:13
           method Identifier 12:5-12:8 "val"
           args[0] Variable 12:9-12:13 "name"
+          closures=[]
         trailingComments[0] line 12:14-12:29 "// who to greet"
     outputs Section label="output" labelRange=14:5-14:12 14:5-15:11
       items[0] ExpressionStatement 15:5-15:11
         expression MethodCall trailingComma=false parens=false 15:5-15:11
           method Identifier 15:5-15:11 "stdout"
+          args=[]
+          closures=[]
     exec Section label="script" labelRange=17:5-17:12 17:5-21:8
       items[0] ExpressionStatement 19:5-21:8
         leadingComments[0] line 18:5-18:19 "// the command"
@@ -57,8 +61,10 @@ Script typesEnabled=false 1:1-48:1
               method Identifier 27:13-27:15 "of"
               args[0] String value="a" quote="'" 27:16-27:19 "'a'"
               args[1] String value="b" quote="'" 27:21-27:24 "'b'"
+              closures=[]
               trailingComments[0] line 27:26-27:35 "// source"
             method Identifier 29:10-29:13 "map"
+            args=[]
             closures[0] Closure 29:14-29:38
               params[0] Parameter def=false 29:16-29:17
                 name Identifier 29:16-29:17 "v"
@@ -66,8 +72,11 @@ Script typesEnabled=false 1:1-48:1
                 expression MethodCall navigation="." trailingComma=false parens=true 29:21-29:36
                   receiver Variable 29:21-29:22 "v"
                   method Identifier 29:23-29:34 "toUpperCase"
+                  args=[]
+                  closures=[]
             trailingComments[0] line 29:39-29:55 "// upper-case it"
           method Identifier 30:10-30:13 "set"
+          args=[]
           closures[0] Closure 30:14-30:23
             body[0] ExpressionStatement 30:16-30:21
               expression Variable 30:16-30:21 "names"
@@ -76,6 +85,7 @@ Script typesEnabled=false 1:1-48:1
           method Identifier 31:5-31:10 "HELLO"
           args[0] Variable 32:9-32:14 "names"
             trailingComments[0] line 32:15-32:35 "// the only argument"
+          closures=[]
       items[2] VariableDeclaration def=true multiple=false 34:5-37:6
         targets[0] TypedName 34:9-34:15
           name Identifier 34:9-34:15 "config"
@@ -94,11 +104,13 @@ Script typesEnabled=false 1:1-48:1
             expression MethodCall trailingComma=false parens=false 39:9-39:22
               method Identifier 39:9-39:16 "println"
               args[0] String value="yes" quote="'" 39:17-39:22 "'yes'"
+              closures=[]
         alternate Block 42:10-44:6
           leadingComments[0] line 41:5-41:19 "// before else"
           statements[0] ExpressionStatement 43:9-43:21
             expression MethodCall trailingComma=false parens=false 43:9-43:21
               method Identifier 43:9-43:16 "println"
               args[0] String value="no" quote="'" 43:17-43:21 "'no'"
+              closures=[]
     danglingComments[0] line 45:5-45:43 "// dangling at the end of the workflow"
   danglingComments[0] line 47:1-47:35 "// dangling at the end of the file"
