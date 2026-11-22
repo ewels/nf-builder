@@ -5,7 +5,7 @@
 
 ## Context
 
-ADR 0011 uses real Nextflow as an oracle, from the Docker image `nextflow/nextflow:26.10.x`, in CI only. ADR 0018 lets agents also run Nextflow locally and says F-005 pins the version and adds a wrapper. Spike S1 (F-005) is the oracle's first user; templates (F-203), the printer (F-110) and exports (F-301, F-404, F-504) follow. The agent sandbox has Java 21 and no Docker daemon. Each release ships `nextflow-<version>-dist`, the launcher with the runtime jar appended, which runs offline on Java 17 to 26. The release publishes no checksum. Research: [plan facts](../research/2026-11-22-spike-s1-typed-legacy-interop.md).
+ADR 0011 uses real Nextflow as an oracle, from the Docker image `nextflow/nextflow:26.10.x`, in CI only. ADR 0018 lets agents also run Nextflow locally and says F-005 pins the version and adds a wrapper. Spike S1 (F-005) is the oracle's first user; templates (F-203), the printer (F-110) and exports (F-301, F-404, F-504) follow. The agent sandbox has Java 21 and no Docker daemon. Each release ships `nextflow-<version>-dist`, the launcher with the runtime jar appended, which runs offline on Java 17 to 26. The release publishes no checksum. Research: [spike S1 report](../research/2026-11-22-spike-s1-typed-legacy-interop.md).
 
 ## Decision
 
