@@ -474,8 +474,8 @@
         "Resize and collapse both side columns; widths persist after reload",
         "Visual snapshot matches the approved baseline"
       ],
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Verified 2026-11-22 on PR #12: step 1 by the F-201 e2e tests (drag, keyboard, collapse, reload persistence; the keyboard and persistence test also runs on Firefox and WebKit as @smoke); step 2 by the @visual test against the CI-rendered baseline e2e/__screenshots__/app-shell-layout.spec.ts/app-shell-default-chromium-linux.png, viewed and approved by the orchestrator (ADR 0021)."
     },
     {
       "id": "F-202",
@@ -827,7 +827,7 @@
         "Apply a quick fix (for example `Channel.of` → `channel.of`): the suggestion disappears and one undo step reverts it"
       ],
       "passes": false,
-      "notes": ""
+      "notes": "From F-201: the status bar's suggestions count is plain text until the problems panel exists; F-309 makes it link to the panel (UX-03)."
     },
     {
       "id": "F-310",

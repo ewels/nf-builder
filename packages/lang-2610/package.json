@@ -9,5 +9,8 @@
   "scripts": {
     "typecheck": "tsc",
     "test": "vitest run"
+  },
+  "dependencies": {
+    "@nf-builder/lang-core": "workspace:*"
   }
 }

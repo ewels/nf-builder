@@ -111,3 +111,15 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
 - Decisions: the hand-off README settles the plans' open points.
 - Blockers: none. Open maintainer issues: #6 (Renovate), #7 (required checks). This session couldn't reach `*.netlify.app`, `registry.nextflow.io`, `docs.seqera.io`, `cdn.jsdelivr.net` or `codeload.github.com`.
 - Notes for the next session: run Nextflow locally with `.cache/nextflow/nextflow-26.10.7-dist` (download it from GitHub releases; `NXF_HOME=.cache/nextflow/home NXF_OFFLINE=true`); in the cloud sandbox export `PW_CHROMIUM_EXECUTABLE` for e2e (AGENTS.md); `pnpm corpus:fetch` populates `.cache/corpus`.
+
+## 2026-11-22 · F-201 · Claude (autonomous)
+- Did: app shell (`apps/web/src/shell/`): header with placeholder controls and the Nextflow version from the installed packs, side columns that resize by pointer or keyboard and collapse to a rail, tab strip, status bar; Zustand layout store persisted to localStorage; `LanguagePack` in lang-core, `pack` in lang-2610, `installedPackVersions()` in engine; a CI-rendered `@visual` baseline. PR #12.
+- State: passing.
+- Next: F-005 and F-006 in flight; then F-007, F-008, F-010.
+- Decisions:
+  - Hand-rolled resizing, widths and limits, layout format `nf-builder:layout` version 1 in localStorage, visual baselines rendered in CI and approved from the artifact ([ADR 0021](../adr/0021-app-shell-layout.md)).
+  - `zustand` 5.1.0 as an apps/web runtime dependency (named in ADR 0003).
+  - `.github/workflows/ci.yml`: the Chromium e2e job runs on `ubuntu-24.04` (ADR 0021).
+  - WCAG 2.5.7 single-pointer alternative deferred to F-701; the suggestions link to F-309 (notes).
+  - AGENTS.md: the `*.netlify.app` note now says some sandboxes can't reach it (this one can).
+- Blockers: none.
