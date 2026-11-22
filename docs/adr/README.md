@@ -49,3 +49,4 @@ Process: [0001](0001-record-decisions-as-adrs.md). Template: [template.md](templ
 | [0043](0043-engine-worker.md) | Run the engine in a module worker behind Comlink, and benchmark it in Chromium | Accepted (agent) |
 | [0044](0044-embeddable-in-frames.md) | Let the app load and work inside frames | Accepted |
 | [0045](0045-projects-in-indexeddb.md) | Store projects in IndexedDB from the engine worker, without a library | Accepted (agent) |
+| [0046](0046-canvas-rendering.md) | Render projections with React Flow 13 in a lazily loaded canvas, with view logic in the engine and an interim layered layout | Accepted (agent) |

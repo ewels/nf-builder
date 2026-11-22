@@ -538,15 +538,16 @@
         "LA-50"
       ],
       "depends_on": [
-        "F-202"
+        "F-202",
+        "F-205"
       ],
       "steps": [
-        "Create from each template; the canvas shows the expected nodes",
+        "Create from each template; the canvas shows the expected nodes; each template's canvas matches its approved visual baseline",
         "Oracle job: every template passes `nextflow lint` and `nextflow run -stub`",
         "Every template has doc comments on all processes and workflows, and schema descriptions for all parameters (no documentation suggestions)"
       ],
       "passes": false,
-      "notes": "Template list depends on open question Q6. From F-202: createProject({name, languageVersion, files}) replaces the name-only New project dialog's create; Start blank currently stores no files."
+      "notes": "Template list depends on open question Q6. From F-202: createProject({name, languageVersion, files}) replaces the name-only New project dialog's create; Start blank currently stores no files. From F-205 (ADR 0046): the template canvas check moved here from F-205 step 1."
     },
     {
       "id": "F-204",
@@ -587,12 +588,12 @@
         "F-113"
       ],
       "steps": [
-        "Open each template and a corpus pipeline; visual snapshots per node kind match baselines",
+        "Open fixture projects covering every node kind and a corpus pipeline; visual snapshots per node kind match baselines",
         "Typed processes and workflows show the `typed` badge, legacy ones none; value edges are dashed",
         "Hovering an edge shows its type"
       ],
-      "passes": false,
-      "notes": "From F-106: node kinds call, chain, factory, take, emit, params, output, code; callee.status modelled/unparsed/unresolved and callee.typed for badges; FlowType.dataflow channel/value/plain on edges; node ids are the layout keys (ADR 0036). From F-108: code nodes have label (first line, 60 characters) and text (the exact statement) for UX-22 and UX-28. From F-107: nodes carry guards (branch and condition text) for nodes inside dataflow ifs and ternaries; chain steps with known: false are legacy operators. From F-107: a legacy port can have several edges into it (the union of reaching definitions after an if/else, ADR 0038). From F-113: render from getEngine().project(path, workflow) and refresh on each change's revision."
+      "passes": true,
+      "notes": "From F-106: node kinds call, chain, factory, take, emit, params, output, code; callee.status modelled/unparsed/unresolved and callee.typed for badges; FlowType.dataflow channel/value/plain on edges; node ids are the layout keys (ADR 0036). From F-108: code nodes have label (first line, 60 characters) and text (the exact statement) for UX-22 and UX-28. From F-107: nodes carry guards (branch and condition text) for nodes inside dataflow ifs and ternaries; chain steps with known: false are legacy operators. From F-107: a legacy port can have several edges into it (the union of reaching definitions after an if/else, ADR 0038). From F-113: render from getEngine().project(path, workflow) and refresh on each change's revision. Step 1 reworded 2026-11-22 (ADR 0046; was: \"Open each template and a corpus pipeline; visual snapshots per node kind match baselines\"): the template check moved to F-203, which depends on F-205. Verified 2026-11-22: step 1 by e2e/canvas.spec.ts (f205-canvas covers every node kind; per-kind and rnaseq-nf-typed @visual baselines approved from CI, ADR 0021) and the engine view and fixture tests; steps 2 and 3 by the edge style and tooltip e2e tests. Opened projects (F-202) show on the canvas."
     },
     {
       "id": "F-206",
@@ -611,7 +612,7 @@
         "Click empty canvas: workflow summary shows"
       ],
       "passes": false,
-      "notes": "From F-112: find a node's diagnostics by range containment."
+      "notes": "From F-112: find a node's diagnostics by range containment. From F-205: the selection highlight (UX-24) is yours; React Flow's useNodesState resets selection when the projection or port-labels toggle changes, so keep the selection across refreshes. The canvas store is apps/web/src/canvas/canvas-store.ts (useWorkspace)."
     },
     {
       "id": "F-207",
@@ -631,7 +632,7 @@
         "Rename a process through the app: its position is kept"
       ],
       "passes": false,
-      "notes": "From F-111: node ids can change after variable introduction, a statement move or a rename; diff the projections to carry layout keys (ADR 0008). From F-202: .nf-builder/layout.json written through the workspace is autosaved like any file."
+      "notes": "From F-111: node ids can change after variable introduction, a statement move or a rename; diff the projections to carry layout keys (ADR 0008). From F-202: .nf-builder/layout.json written through the workspace is autosaved like any file. From F-205: replace layeredLayout inside canvasView with ELK and stored positions; enable dragging; re-approve the canvas baselines, and keep the per-kind test's zoom-1 assertion."
     },
     {
       "id": "F-208",
@@ -651,7 +652,7 @@
         "Monaco is absent from the initial bundle (bundle report)"
       ],
       "passes": false,
-      "notes": "From F-111: show a ReplaceFileText refusal's problems as diagnostics. From F-113: edits go through getEngine().apply(command, revision); a refusal comes back in the ApplyOutcome as an EngineRefusal with the code and message. From F-202: readFile(path) gives the current text; a code edit is autosaved through apply."
+      "notes": "From F-111: show a ReplaceFileText refusal's problems as diagnostics. From F-113: edits go through getEngine().apply(command, revision); a refusal comes back in the ApplyOutcome as an EngineRefusal with the code and message. From F-202: readFile(path) gives the current text; a code edit is autosaved through apply. From F-205: workflow tabs (tab-strip.tsx, canvas-store.ts) gain a view mode."
     },
     {
       "id": "F-209",
@@ -730,7 +731,7 @@
         "Delete an edge: the call argument is removed and the code still parses"
       ],
       "passes": false,
-      "notes": "From F-005 (S1): nextflow lint doesn't check a legacy tuple input's arity, so connecting to a legacy tuple input compares arity with its declaration (LA-14). From F-111: a refused Connect serves as the invalid-target dry run; type checks and LA-14 arity are F-112's. Disconnect writes null for a missing earlier positional input (ADR 0039). From F-112: lints.connection(source, node, port) dims invalid targets while dragging; a type-mismatch diagnostic's range is the port's argument, used to draw the edge red (UX-24). LA-14 tuple arity is yours (and F-504's): nextflow lint doesn't check it."
+      "notes": "From F-005 (S1): nextflow lint doesn't check a legacy tuple input's arity, so connecting to a legacy tuple input compares arity with its declaration (LA-14). From F-111: a refused Connect serves as the invalid-target dry run; type checks and LA-14 arity are F-112's. Disconnect writes null for a missing earlier positional input (ADR 0039). From F-112: lints.connection(source, node, port) dims invalid targets while dragging; a type-mismatch diagnostic's range is the port's argument, used to draw the edge red (UX-24). LA-14 tuple arity is yours (and F-504's): nextflow lint doesn't check it. From F-205: draw mismatch red over the edge-<dataflow> class."
     },
     {
       "id": "F-303",
@@ -830,7 +831,7 @@
         "Breadcrumb back returns to main.nf"
       ],
       "passes": false,
-      "notes": "From F-111: takes, emits, params and outputs have no edit commands yet."
+      "notes": "From F-111: takes, emits, params and outputs have no edit commands yet. From F-205: closing tabs, the breadcrumb and double-click to open a workflow go through canvasStore.openWorkflow."
     },
     {
       "id": "F-308",
@@ -874,7 +875,7 @@
         "Apply a quick fix (for example `Channel.of` → `channel.of`): the suggestion disappears and one undo step reverts it"
       ],
       "passes": false,
-      "notes": "From F-201: the status bar's suggestions count is plain text until the problems panel exists; F-309 makes it link to the panel (UX-03). From F-112: Diagnostic.severity includes `suggestion`; countDiagnostics separates errors, warnings and suggestions (UX-03); the pack's lints.codes give severity, spec and fixability for grouping; a QuickFix is { title, path, edits }: apply it with applyTextEdits into F-111's ReplaceFileText as one undo step (F-209), refuse it if the file changed since it was diagnosed, then re-diagnose. Step 2's example is `deprecated-channel`."
+      "notes": "From F-201: the status bar's suggestions count is plain text until the problems panel exists; F-309 makes it link to the panel (UX-03). From F-112: Diagnostic.severity includes `suggestion`; countDiagnostics separates errors, warnings and suggestions (UX-03); the pack's lints.codes give severity, spec and fixability for grouping; a QuickFix is { title, path, edits }: apply it with applyTextEdits into F-111's ReplaceFileText as one undo step (F-209), refuse it if the file changed since it was diagnosed, then re-diagnose. Step 2's example is `deprecated-channel`. From F-205: draw mismatch red over the edge-<dataflow> class; status-bar node and channel counts come from canvasCounts."
     },
     {
       "id": "F-310",
@@ -1332,7 +1333,7 @@
         "axe reports no violations on the main screens"
       ],
       "passes": false,
-      "notes": "From F-201: drag-to-resize columns needs a single-pointer alternative for WCAG 2.5.7 (keyboard resizing alone doesn't satisfy it)."
+      "notes": "From F-201: drag-to-resize columns needs a single-pointer alternative for WCAG 2.5.7 (keyboard resizing alone doesn't satisfy it). From F-205: the F shortcut for fit view, keyboard parity for edge tooltips, and the canvas ariaLabelConfig and node descriptions need an audit."
     },
     {
       "id": "F-702",
