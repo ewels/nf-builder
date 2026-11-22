@@ -12,6 +12,8 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-110 printer | `feat/F-110`, in PR | Plan deleted in its PR. |
 | F-105 semantic model | not started | [plan](plan-F-105.md). Branch from `main` after F-104 merges. |
 | F-106 typed projection | not started | [plan](plan-F-106.md). Branch from `main` after F-105 merges. |
+| F-107 legacy projection | not started | [plan](plan-F-107.md). After F-106; parallel with F-108. |
+| F-108 code nodes | not started | [plan](plan-F-108.md). After F-106; parallel with F-107. |
 | F-501 registry snapshot | not started | [plan](plan-F-501.md). Branch from `main` after F-104 merges; runs alongside F-105. |
 
 Next free ADR number: 0033.
@@ -43,6 +45,13 @@ Next free ADR number: 0033.
 ### F-106 — [plan](plan-F-106.md)
 - Accept every recommendation in section 6: types in lang-core, logic in the engine with catalogue data; the 2.5 node-key grammar in a new ADR (a stored format once F-207 writes `layout.json`); the 2.4 type subset with `plain` values; code-node shells until F-108; calls are processes, workflows, agents and pipelines (unparsed and unresolved marked by status); the plan's port names; a type-probe oracle tree; whitespace-only per F-104's `equivalent`; projector as a snapshot, F-113 owns invalidation; no Playwright test.
 - Rebase sections 3 and 4 on F-104's and F-105's names as built (section 1.4 lists them).
+- Amendment from the F-107/F-108 plans: task 4 also creates `packages/engine/src/projection/scope.ts` (`lookup`, `bind`, `resolveRead`, multi-value bindings) and `Read.properties`, so F-107 and F-108 can run in parallel (plan-F-107.md section 1.5).
+
+### F-107 — [plan](plan-F-107.md)
+- Accept every recommendation in section 6. Step 2's 90% needs alias statements, call-result properties, callee aliases and transparent dataflow `if`s and ternaries as well as AR-14's four forms (74% without them): keep them in F-107, amend AR-14 and record it in the F-107 ADR. Legacy operator data in the pack (`LanguagePack.legacyOperators`). Commit all 119 corpus workflow snapshots with a licences row.
+
+### F-108 — [plan](plan-F-108.md)
+- Accept every recommendation in section 6: closure reads are code-node inputs; mutations are reads only; conditional writes replace the binding; no port for `params` as a whole; keys from the first output; a lint-only free-variable oracle tree. One ADR for the LA-27 readings.
 
 ### F-501 — [plan](plan-F-501.md)
 - Accept every recommendation in section 6: an orphan `registry-snapshot` branch fetched by each Netlify build; ship without the build-hook secret and open a `maintainer` issue for it; split `index.json` (QA-06) and `ports.json`, with IO-31 read as the pair; `tools/registry-snapshot` may import lang-core and pack entries (amends ADR 0003); make lang-2610 erasable for plain Node; ports from registry metadata in `meta.yml` order; parser wins on kind and component; every bundle file; pinned dependency closure; plugin release admitted by the pinned Nextflow; the failure policy; a path-filtered PR dry run outside "CI green"; daily at 03:23 UTC; the fixture snapshot for e2e. ADR 0034.
