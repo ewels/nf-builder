@@ -18,12 +18,11 @@ export class RegistryHttpError extends Error {
   }
 }
 
-export interface RegistryApiOptions {
+interface RegistryApiOptions {
   readonly baseUrl?: string;
   readonly fetch?: typeof fetch;
   readonly sleep?: (ms: number) => Promise<void>;
   readonly log?: (message: string) => void;
-  readonly maxAttempts?: number;
 }
 
 export interface RegistryApi {
@@ -39,6 +38,7 @@ export interface RegistryApi {
 }
 
 const PAGE_SIZE = 100;
+const MAX_ATTEMPTS = 5;
 
 export function createRegistryApi(
   options: RegistryApiOptions = {},
@@ -49,7 +49,6 @@ export function createRegistryApi(
     options.sleep ??
     ((ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms)));
   const log = options.log ?? (() => {});
-  const maxAttempts = options.maxAttempts ?? 5;
   /** Milliseconds the registry asked us to wait before the next request (ratelimit-remaining reached 0). */
   let pendingDelay = 0;
   /** The last response's ratelimit-reset, in seconds. */
@@ -62,9 +61,14 @@ export function createRegistryApi(
   ): Promise<Response> {
     let status = 0;
     let detail: string | undefined;
-    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+      // A 429 waits its ratelimit-reset; anything else backs off 1, 2, 4, 8 s.
       const retryDelay =
-        attempt === 1 ? 0 : retryWait(attempt, status, lastReset);
+        attempt === 1
+          ? 0
+          : status === 429 && lastReset !== null
+            ? lastReset * 1000
+            : 1000 * 2 ** (attempt - 2);
       const wait = Math.max(pendingDelay, retryDelay);
       pendingDelay = 0;
       if (wait > 0) {
@@ -97,29 +101,23 @@ export function createRegistryApi(
     }
     throw new RegistryHttpError(url, status, detail);
   }
-  function retryWait(
-    attempt: number,
-    status: number,
-    reset: number | null,
-  ): number {
-    if (status === 429 && reset !== null) return reset * 1000;
-    return 1000 * 2 ** (attempt - 2);
-  }
 
   const json = async <T>(path: string): Promise<T> =>
     (await get(`${base}${path}`)).json() as Promise<T>;
   const enc = encodeURIComponent;
 
-  async function listPaged<T extends { last?: boolean }>(
+  /** Every item under `key` of every page, until a page says `last`. */
+  async function listAll<T>(
     path: string,
-    kind: string | null,
+    key: string,
+    kind = "",
   ): Promise<T[]> {
-    const pages: T[] = [];
+    const items: T[] = [];
     for (let page = 1; ; page++) {
       const query = `size=${PAGE_SIZE}&page=${page}${kind ? `&kind=${kind}` : ""}`;
-      const body = await json<T>(`${path}?${query}`);
-      pages.push(body);
-      if (body.last !== false) return pages;
+      const body = await json<Record<string, unknown>>(`${path}?${query}`);
+      items.push(...(body[key] as T[]));
+      if (body.last !== false) return items;
     }
   }
 
@@ -131,11 +129,12 @@ export function createRegistryApi(
     async listModules() {
       const names = new Set<string>();
       for (const kind of ["Process", "Workflow"])
-        for (const page of await listPaged<{
-          modules: { name: string }[];
-          last?: boolean;
-        }>("/modules/list", kind))
-          for (const m of page.modules) names.add(m.name);
+        for (const m of await listAll<{ name: string }>(
+          "/modules/list",
+          "modules",
+          kind,
+        ))
+          names.add(m.name);
       return [...names];
     },
     async getModule(name) {
@@ -162,13 +161,9 @@ export function createRegistryApi(
       return new Uint8Array(await response.arrayBuffer());
     },
     async listPlugins() {
-      const ids: string[] = [];
-      for (const page of await listPaged<{
-        plugins: { id: string }[];
-        last?: boolean;
-      }>("/plugins", null))
-        for (const p of page.plugins) ids.push(p.id);
-      return ids;
+      return (await listAll<{ id: string }>("/plugins", "plugins")).map(
+        (p) => p.id,
+      );
     },
     async getPlugin(id) {
       return (await json<{ plugin: ApiPlugin }>(`/plugins/${enc(id)}`)).plugin;

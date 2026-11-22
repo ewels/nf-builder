@@ -91,10 +91,7 @@ export async function main(argv: string[]): Promise<number> {
       nextflow,
       now: () => now ?? new Date(),
       previous,
-      only:
-        onlyModules || onlyPlugins
-          ? { modules: onlyModules, plugins: onlyPlugins }
-          : undefined,
+      only: { modules: onlyModules, plugins: onlyPlugins },
       log: (m) => console.log(m),
     });
     writeSnapshot(out, files);

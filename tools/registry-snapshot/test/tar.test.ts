@@ -91,4 +91,19 @@ describe("F-501 module tar reader", () => {
     );
     expect(files).toEqual([{ path: long, text: "x" }]);
   });
+
+  it("F-501: an unparsable size field throws, and so does a truncated archive or an oversized expansion", () => {
+    const bad = entry("a.txt", "x");
+    new TextEncoder().encodeInto("zzzzzzzzzzz\0", bad.subarray(124, 136));
+    // Fix up nothing else: the checksum is not verified, the size is.
+    expect(() => readModuleTarGz(tarGz(bad))).toThrow(/size/);
+
+    const truncated = entry("a.txt", "x".repeat(2000)).subarray(0, 1024);
+    expect(() => readModuleTarGz(new Uint8Array(gzipSync(truncated)))).toThrow(
+      /truncated/,
+    );
+
+    const bomb = new Uint8Array(gzipSync(new Uint8Array(65 * 1024 * 1024)));
+    expect(() => readModuleTarGz(bomb)).toThrow();
+  });
 });

@@ -227,6 +227,74 @@ describe("F-501 snapshot build", () => {
     );
   });
 
+  it("F-501: a failed workflow module that keeps its previous bundle also keeps its pinned dependency versions", async () => {
+    const { api } = replayApi();
+    const failing: RegistryApi = {
+      ...api,
+      getModule: async (name) => {
+        if (name === "nf-core/bam_applybqsr")
+          throw new RegistryHttpError("https://registry.example/x", 500);
+        return api.getModule(name);
+      },
+    };
+    const previous = readPreviousSnapshot(expectedDir) as PreviousSnapshot;
+    const { files, report } = await buildSnapshot(
+      options(failing, {
+        previous,
+        limits: { maxFailureRatio: 1, minCountRatio: 0 },
+      }),
+    );
+    expect(report.failures).toEqual([
+      expect.objectContaining({ id: "nf-core/bam_applybqsr", kept: true }),
+    ]);
+    expect(
+      files.has(moduleBundlePath("nf-core/gatk4/applybqsr", "0.0.0-6d1763b")),
+    ).toBe(true);
+    expect(
+      files.has(moduleBundlePath("nf-core/samtools/merge", "0.0.0-df69bf6")),
+    ).toBe(true);
+  });
+
+  it("F-501: names, versions and plugin ids are validated before they become paths; an invalid item is a failure", async () => {
+    for (const bad of [
+      "../x/y",
+      "nf-core/../../etc",
+      "nf-core",
+      "NF/x",
+      "a/b c",
+      "/a/b",
+      "a//b",
+    ])
+      expect(() => moduleBundlePath(bad, "1.0.0"), bad).toThrow(/invalid/);
+    for (const bad of ["../1", "1/2", "", "-1", "1 0"])
+      expect(() => moduleBundlePath("nf-core/x", bad), bad).toThrow(/invalid/);
+    for (const bad of ["../p", "a/b", "", ".hidden"])
+      expect(() => pluginFilePath(bad, "1.0.0"), bad).toThrow(/invalid/);
+    expect(moduleBundlePath("nf-core/samtools/merge", "0.0.0-df69bf6")).toBe(
+      "registry/modules/nf-core/samtools/merge/0.0.0-df69bf6.json",
+    );
+    expect(pluginFilePath("nf-schema", "3.1.0")).toBe(
+      "registry/plugins/nf-schema/3.1.0.json",
+    );
+
+    const { api } = replayApi();
+    const hostile: RegistryApi = {
+      ...api,
+      getPlugin: async (id) => ({ id, releases: [] }),
+    };
+    const { report } = await buildSnapshot(
+      options(hostile, {
+        only: { modules: ["nf-core/../../evil", FASTQC], plugins: ["../evil"] },
+        limits: { maxFailureRatio: 1, minCountRatio: 0 },
+      }),
+    );
+    expect(report.failures.map((f) => f.id)).toEqual([
+      "nf-core/../../evil",
+      "../evil",
+    ]);
+    expect(report.modules).toBe(1);
+  });
+
   it("F-501: a checksum mismatch fails the module", async () => {
     const { api } = replayApi();
     const corrupt: RegistryApi = {

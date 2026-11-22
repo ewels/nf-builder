@@ -2,6 +2,8 @@ import { gunzipSync } from "node:zlib";
 import type { SnapshotFile } from "@nf-builder/lang-core";
 
 const BLOCK = 512;
+/** The largest module is about 150 kB of text; a bundle expanding past this is not a module. */
+const MAX_TAR_BYTES = 64 * 1024 * 1024;
 const utf8 = new TextDecoder("utf-8", { fatal: true });
 const latin = new TextDecoder("latin1");
 
@@ -39,7 +41,9 @@ function checkPath(path: string): string {
  * and `..` paths, links and devices. Content that is not valid UTF-8 becomes `base64`. Sorted by path.
  */
 export function readModuleTarGz(bytes: Uint8Array): SnapshotFile[] {
-  const tar = new Uint8Array(gunzipSync(bytes));
+  const tar = new Uint8Array(
+    gunzipSync(bytes, { maxOutputLength: MAX_TAR_BYTES }),
+  );
   const files: SnapshotFile[] = [];
   let pax = new Map<string, string>();
   let longName: string | null = null;
@@ -47,10 +51,12 @@ export function readModuleTarGz(bytes: Uint8Array): SnapshotFile[] {
   while (at + BLOCK <= tar.length) {
     const header = tar.subarray(at, at + BLOCK);
     if (header.every((b) => b === 0)) break;
-    const size = Number.parseInt(
-      cString(header.subarray(124, 136)).trim() || "0",
-      8,
-    );
+    const sizeField = cString(header.subarray(124, 136)).trim() || "0";
+    if (!/^[0-7]+$/.test(sizeField))
+      throw new Error(`tar: invalid size field ${JSON.stringify(sizeField)}`);
+    const size = Number.parseInt(sizeField, 8);
+    if (at + BLOCK + size > tar.length)
+      throw new Error("tar: truncated archive");
     const type = String.fromCharCode(header[156] || 0x30);
     const data = tar.subarray(at + BLOCK, at + BLOCK + size);
     at += BLOCK + Math.ceil(size / BLOCK) * BLOCK;

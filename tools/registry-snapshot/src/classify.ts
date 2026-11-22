@@ -1,6 +1,6 @@
 import type { SourceParser } from "@nf-builder/lang-core";
 
-export interface Classification {
+interface Classification {
   readonly kind: "process" | "workflow";
   readonly component: string | null;
   /** null: main.nf could not be modelled (ADR 0004). */

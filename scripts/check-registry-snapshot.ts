@@ -9,7 +9,7 @@ import { type Budget, readBudget } from "./check-bundle-budget.ts";
 import { isMain, type Problem, reportProblems } from "./check-common.ts";
 
 type Json = Record<string, unknown>;
-export type SnapshotCheck = {
+type SnapshotCheck = {
   ok: boolean;
   indexGzipBytes: number;
   problems: Problem[];
@@ -80,18 +80,16 @@ function checkContents(
   }
   const portsByName = (ports?.modules ?? {}) as Json;
 
-  const needed = new Set<string>();
+  const queue: string[] = [];
   for (const m of (index.modules ?? []) as {
     name: string;
     version: string;
   }[]) {
     if (ports && !(m.name in portsByName))
       fail(`registry/ports.json has no ports for ${m.name}`);
-    const path = bundlePath(m.name, m.version);
-    needed.add(path);
+    queue.push(bundlePath(m.name, m.version));
   }
   const seen = new Set<string>();
-  const queue = [...needed];
   for (let path = queue.shift(); path !== undefined; path = queue.shift()) {
     if (seen.has(path)) continue;
     seen.add(path);
@@ -119,18 +117,15 @@ function checkContents(
   return { ok: problems.length === 0, indexGzipBytes, problems, warnings };
 }
 
-export function checkRegistrySnapshot(
-  dir: string,
-  budget: Budget = readBudget("QA-06"),
-): SnapshotCheck {
+export function checkRegistrySnapshot(dir: string): SnapshotCheck {
   const read = (path: string): string | undefined => {
     const file = join(dir, path);
     return existsSync(file) ? readFileSync(file, "utf8") : undefined;
   };
-  return checkContents(read, budget, dir);
+  return checkContents(read, readBudget("QA-06"), dir);
 }
 
-export type DeployedOptions = {
+type DeployedOptions = {
   timeoutMs: number;
   intervalMs: number;
   log?: (message: string) => void;
@@ -177,8 +172,8 @@ export async function checkDeployedSnapshot(
     }
   };
   const deadline = now() + options.timeoutMs;
-  for (;;) {
-    if (served(await get("registry/index.json"))) break;
+  let indexText = await get("registry/index.json");
+  while (!served(indexText)) {
     if (now() + options.intervalMs > deadline)
       return {
         ok: false,
@@ -192,31 +187,23 @@ export async function checkDeployedSnapshot(
       };
     log(`waiting for ${base} to serve ${generatedAt}`);
     await sleep(options.intervalMs);
+    indexText = await get("registry/index.json");
   }
-  // Fetch every file the snapshot names, then run the same content checks on the copies.
-  const cache = new Map<string, string>();
-  const index = JSON.parse(
-    (await get("registry/index.json")) as string,
-  ) as Json;
-  const paths = ["registry/index.json", "registry/ports.json"];
-  for (const m of (index.modules ?? []) as { name: string; version: string }[])
-    paths.push(bundlePath(m.name, m.version));
-  for (const p of (index.plugins ?? []) as { id: string; version: string }[])
-    paths.push(pluginPath(p.id, p.version));
-  for (const path of paths) {
-    const text = await get(path);
-    if (text !== undefined) cache.set(path, text);
-    // Pinned versions come with the bundles; fetch them as they are named.
-    if (text !== undefined && path.startsWith("registry/modules/"))
-      for (const pin of ((JSON.parse(text) as Json).requires ?? []) as {
-        name: string;
-        version: string;
-      }[]) {
-        const pinPath = bundlePath(pin.name, pin.version);
-        if (!paths.includes(pinPath)) paths.push(pinPath);
-      }
+  // Run the content checks on copies, fetching each file they ask for, until they ask for nothing new.
+  const cache = new Map([["registry/index.json", indexText]]);
+  for (;;) {
+    const missing = new Set<string>();
+    const result = checkContents(
+      (path) => {
+        if (!cache.has(path)) missing.add(path);
+        return cache.get(path);
+      },
+      readBudget("QA-06"),
+      base,
+    );
+    if (missing.size === 0) return result;
+    for (const path of missing) cache.set(path, await get(path));
   }
-  return checkContents((path) => cache.get(path), readBudget("QA-06"), base);
 }
 
 async function main(argv: string[]): Promise<number> {

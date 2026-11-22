@@ -1,7 +1,7 @@
 import { gzipSync } from "node:zlib";
 import type { BuildReport } from "./build.ts";
 
-export interface SnapshotSizes {
+interface SnapshotSizes {
   readonly files: number;
   readonly totalBytes: number;
   readonly indexBytes: number;

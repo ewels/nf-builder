@@ -271,12 +271,46 @@ describe("CI workflows", () => {
       expect(pushes[0]).toContain("HEAD:refs/heads/registry-snapshot");
       expect(pushes[0]).not.toMatch(/main/);
       expect(publish).toContain('ignore = "exit 0"');
-      expect(publish).toMatch(
+      // The job that can write checks out nothing and installs nothing.
+      expect(publish).not.toMatch(
+        /actions\/checkout|\.\/\.github\/actions\/setup|pnpm install/,
+      );
+      // The hook and the deployed-site check run in a separate read-only job.
+      const verify = job("verify");
+      expect(verify).toContain("needs: [build, publish]");
+      expect(verify).toContain(
+        "if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'",
+      );
+      expect(verify).toContain('install: "false"');
+      expect(verify).toMatch(
         /NETLIFY_BUILD_HOOK: \$\{\{ secrets\.NETLIFY_BUILD_HOOK \}\}/,
       );
-      expect(publish).toContain(
+      expect(verify).toContain(
         "pnpm check:registry --url https://nf-builder.netlify.app --generated-at",
       );
+      expect(publish).not.toContain("NETLIFY_BUILD_HOOK");
+    });
+
+    it("F-501 step 1: the repository is private, so every git read or write of it carries the job token as an http.extraheader and never prompts", () => {
+      const text = workflow();
+      const gitCalls = [
+        ...text.matchAll(
+          /^\s*(?:status=.*)?git .*\b(ls-remote|clone|fetch|push|pull)\b.*$/gm,
+        ),
+      ].map((m) => m[0]);
+      expect(gitCalls.length).toBeGreaterThanOrEqual(3);
+      for (const call of gitCalls)
+        expect(call, call).toContain(
+          '-c "http.extraheader=Authorization: Basic $auth"',
+        );
+      // Each step that runs such a git call sets the token and GIT_TERMINAL_PROMPT=0.
+      for (const name of ["build", "publish"]) {
+        expect(job(name), name).toMatch(
+          /GITHUB_TOKEN: \$\{\{ github\.token \}\}/,
+        );
+        expect(job(name), name).toContain('GIT_TERMINAL_PROMPT: "0"');
+      }
+      expect(job("build")).not.toContain("contents: write");
     });
 
     it("F-501 step 2 QA-06: the build job runs pnpm check:registry before uploading", () => {

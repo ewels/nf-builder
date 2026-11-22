@@ -34,6 +34,7 @@ describe("F-501 ports", () => {
         {
           name: "versions_fastqc",
           port: [
+            // biome-ignore lint/suspicious/noTemplateCurlyInString: a Nextflow expression as the registry writes it, not a template
             "${task.process}:string",
             "fastqc:string",
             'fastqc --version | sed "/FastQC v/!d; s/.*v//":eval',

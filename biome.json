@@ -13,7 +13,6 @@
       "!packages/lang-*/src/generated",
       "!packages/lang-*/catalogue",
       "!packages/lang-*/palette.json",
-      "!apps/web/public/registry",
       "!tools/registry-snapshot/test/fixtures/recorded",
       "!tools/registry-snapshot/test/fixtures/expected"
     ]

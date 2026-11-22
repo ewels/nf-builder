@@ -2,18 +2,13 @@
 
 export interface ApiServiceInfo {
   readonly version: string;
-  readonly commitId?: string;
-}
-
-export interface ApiModuleItem {
-  readonly name?: string;
-  readonly type?: string;
-  readonly description?: string;
-  readonly pattern?: string;
 }
 
 export interface ApiModuleChannel {
-  readonly items?: readonly ApiModuleItem[];
+  readonly items?: readonly {
+    readonly name?: string;
+    readonly type?: string;
+  }[];
   readonly tuple?: boolean;
 }
 
@@ -32,24 +27,19 @@ export interface ApiModuleRelease {
   /** "sha256:<hex>" of the tar.gz. */
   readonly checksum: string;
   readonly status?: string;
-  readonly size?: number;
   readonly metadata?: ApiModuleMetadata;
 }
 
-export interface ApiModuleSummary {
+export interface ApiModule {
   readonly name: string;
   readonly kind?: string;
   readonly revoked?: boolean;
-}
-
-export interface ApiModule extends ApiModuleSummary {
   readonly description?: string;
   readonly latest?: ApiModuleRelease;
 }
 
 export interface ApiPluginRelease {
   readonly version: string;
-  readonly date?: string;
   readonly requires?: string;
   readonly status?: string;
   /** README markdown. */

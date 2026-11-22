@@ -298,11 +298,11 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
 
 ## 2026-11-22 · F-501 · Claude (autonomous)
 - Did: `tools/registry-snapshot` builds the registry snapshot from registry.nextflow.io (module index, `meta.yml` ports, per-release bundles with every file, pinned dependency closure, plugin index and specs), classifying typed and legacy modules with the 26.10 pack's parser; `pnpm check:registry` checks QA-06 and integrity; the `Registry snapshot` workflow builds daily and publishes to the `registry-snapshot` branch; Netlify builds copy it to `/registry/`.
-- State: passing.
+- State: built, not passing: blocked on #31 (the repository is private, so Netlify builds can't read the snapshot branch; they warn and serve no snapshot).
 - Next: F-105 in review, then F-106; F-502 and F-503 can follow F-501.
 - Decisions:
-  - Format v1 split into `index.json` (QA-06) and `ports.json`, IO-31's module index read as the pair; an orphan snapshot branch fetched by each Netlify build; `tools/registry-snapshot` may import lang-core and pack entries (amends ADR 0003, new dependency-cruiser rule); an erasable lang-2610 for plain Node; ports from registry metadata in `meta.yml` order; the parser decides kind, component and typed; plugin release admitted by the pinned Nextflow; the failure policy; build-time hosts registry.nextflow.io, public-cr-prod.seqera.io and github.com ([ADR 0035](../adr/0035-registry-snapshot.md)).
+  - Format v1 split into `index.json` (QA-06) and `ports.json`, IO-31's module index read as the pair; an orphan snapshot branch fetched by each Netlify build (with a read token while the repository is private; warn and serve nothing when it can't be read); `tools/registry-snapshot` may import lang-core and pack entries (amends ADR 0003, new dependency-cruiser rule); an erasable lang-2610 for plain Node; ports from registry metadata in `meta.yml` order; the parser decides kind, component and typed; plugin release admitted by the pinned Nextflow; the failure policy; build-time hosts registry.nextflow.io, public-cr-prod.seqera.io and github.com ([ADR 0035](../adr/0035-registry-snapshot.md)).
   - `.github/workflows/registry-snapshot.yml`: new workflow, read-only except the publish job, SHA-pinned actions (new: `actions/download-artifact` v8.0.2); not a merge gate.
   - `yaml` is a dependency of the build tool (already in the repo); no new browser runtime dependency.
   - Registry problems found while measuring are in `docs/research/upstream-bugs.md` (17 to 19).
-- Blockers: the `NETLIFY_BUILD_HOOK` secret (#27): until it's set, a new snapshot reaches the site at the next production deploy.
+- Blockers: #31, give Netlify builds read access to the `registry-snapshot` branch (make the repository public, or set `REGISTRY_SNAPSHOT_TOKEN`); #27, the `NETLIFY_BUILD_HOOK` secret for daily deploys.

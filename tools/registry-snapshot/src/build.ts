@@ -14,7 +14,13 @@ import type {
 import { REGISTRY_URL, type RegistryApi } from "./api.ts";
 import type { ApiModule, ApiModuleRelease } from "./api-types.ts";
 import { classifyModule } from "./classify.ts";
-import { moduleBundlePath, pluginFilePath, serialise } from "./files.ts";
+import {
+  checkModuleName,
+  checkPluginId,
+  moduleBundlePath,
+  pluginFilePath,
+  serialise,
+} from "./files.ts";
 import { pluginSnapshot } from "./plugins.ts";
 import { modulePorts } from "./ports.ts";
 import { readModuleTarGz } from "./tar.ts";
@@ -153,13 +159,13 @@ export async function buildSnapshot(
   async function releaseFiles(
     name: string,
     release: ApiModuleRelease,
-  ): Promise<SnapshotFile[]> {
+  ): Promise<readonly SnapshotFile[]> {
     const old = previous?.read(moduleBundlePath(name, release.version));
     if (old !== undefined) {
       const bundle = JSON.parse(old) as SnapshotModuleBundle;
       if (bundle.checksum === release.checksum) {
         report.reused++;
-        return [...bundle.files];
+        return bundle.files;
       }
     }
     log(`downloading ${name}@${release.version}`);
@@ -191,8 +197,7 @@ export async function buildSnapshot(
       componentName: metadata?.componentName,
     });
     const requires = (metadata?.requires?.modules ?? [])
-      .map(parsePin)
-      .flatMap((p) => (p ? [p] : []))
+      .flatMap((pin) => parsePin(pin) ?? [])
       .sort((a, b) => byName(a.name, b.name) || byName(a.version, b.version));
     const bundle: SnapshotModuleBundle = {
       format: 1,
@@ -201,7 +206,7 @@ export async function buildSnapshot(
       checksum: release.checksum,
       component: classification.component,
       requires,
-      files: [...releaseFilesList].sort((a, b) => byName(a.path, b.path)),
+      files: releaseFilesList,
     };
     files.set(moduleBundlePath(name, release.version), serialise(bundle));
     for (const pin of requires) pinQueue.push(pin);
@@ -222,21 +227,34 @@ export async function buildSnapshot(
     };
   }
 
+  /** Queues the pinned versions of a kept bundle, so keeping a workflow doesn't drop its dependencies. */
+  const keepBundle = (path: string, text: string): void => {
+    files.set(path, text);
+    for (const pin of (JSON.parse(text) as SnapshotModuleBundle).requires)
+      pinQueue.push(pin);
+  };
+
+  /** Keeps the previous snapshot's entry, ports and bundle of `name`, when it has them (and they are valid). */
   const keepModule = (name: string): boolean => {
-    const entry = previous?.index.modules.find((m) => m.name === name);
-    const modulePorts = previous?.ports.modules[name];
-    const bundle =
-      entry && previous?.read(moduleBundlePath(name, entry.version));
-    if (!(entry && modulePorts && bundle)) return false;
-    entries.set(name, entry);
-    ports.set(name, modulePorts);
-    files.set(moduleBundlePath(name, entry.version), bundle);
-    return true;
+    try {
+      const entry = previous?.index.modules.find((m) => m.name === name);
+      const keptPorts = previous?.ports.modules[name];
+      const path = entry && moduleBundlePath(name, entry.version);
+      const bundle = path && previous?.read(path);
+      if (!(entry && keptPorts && path && bundle)) return false;
+      entries.set(name, entry);
+      ports.set(name, keptPorts);
+      keepBundle(path, bundle);
+      return true;
+    } catch {
+      return false;
+    }
   };
 
   const names = options.only?.modules ?? (await api.listModules());
   for (const name of names) {
     try {
+      checkModuleName(name);
       const module = await api.getModule(name);
       const latest = module.latest;
       if (
@@ -277,20 +295,23 @@ export async function buildSnapshot(
   // Pinned dependency versions that aren't a module's latest also get a bundle, closed over their own pins.
   const visited = new Set<string>();
   for (let pin = pinQueue.shift(); pin; pin = pinQueue.shift()) {
-    const path = moduleBundlePath(pin.name, pin.version);
-    if (files.has(path) || visited.has(path)) continue;
-    visited.add(path);
+    const id = `${pin.name}@${pin.version}`;
+    if (visited.has(id)) continue;
+    visited.add(id);
+    let path = "";
     try {
+      path = moduleBundlePath(pin.name, pin.version);
+      if (files.has(path)) continue;
       await buildRelease(
         pin.name,
         await api.getModuleRelease(pin.name, pin.version),
       );
       report.pins++;
     } catch (error) {
-      const old = previous?.read(path);
-      if (old !== undefined) files.set(path, old);
+      const old = path ? previous?.read(path) : undefined;
+      if (path && old !== undefined) keepBundle(path, old);
       report.failures.push({
-        id: `${pin.name}@${pin.version}`,
+        id,
         error: message(error),
         kept: old !== undefined,
       });
@@ -301,6 +322,7 @@ export async function buildSnapshot(
   const pluginIds = options.only?.plugins ?? (await api.listPlugins());
   for (const id of pluginIds) {
     try {
+      checkPluginId(id);
       const result = pluginSnapshot(await api.getPlugin(id), options.nextflow);
       if ("skipped" in result) {
         report.skippedPlugins.push(result.skipped);
@@ -313,17 +335,20 @@ export async function buildSnapshot(
       );
       report.pluginProblems.push(...result.problems);
     } catch (error) {
-      const entry = previous?.index.plugins.find((p) => p.id === id);
-      const old = entry && previous?.read(pluginFilePath(id, entry.version));
-      if (entry && old !== undefined) {
-        plugins.push(entry);
-        files.set(pluginFilePath(id, entry.version), old);
+      let kept = false;
+      try {
+        const entry = previous?.index.plugins.find((p) => p.id === id);
+        const path = entry && pluginFilePath(id, entry.version);
+        const old = path && previous?.read(path);
+        if (entry && path && old !== undefined) {
+          plugins.push(entry);
+          files.set(path, old);
+          kept = true;
+        }
+      } catch {
+        // An invalid id or version in the previous snapshot: nothing to keep.
       }
-      report.failures.push({
-        id,
-        error: message(error),
-        kept: Boolean(entry && old !== undefined),
-      });
+      report.failures.push({ id, error: message(error), kept });
     }
   }
 
