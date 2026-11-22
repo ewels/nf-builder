@@ -44,12 +44,11 @@ export function labelOf(item: ScriptItem | ConfigItem, text: string): string {
     case "ConfigAssign":
       return join("assign", item.path.map((n) => n.name).join("."));
     case "ConfigBlock":
+    case "ConfigApplyBlock":
       return join("block", item.name.name);
     case "ConfigInclude":
       return "includeConfig";
     default:
-      return item.kind === "ConfigApplyBlock" || item.kind === "ConfigSelector"
-        ? "block"
-        : "statement";
+      return item.kind === "ConfigSelector" ? "block" : "statement";
   }
 }
