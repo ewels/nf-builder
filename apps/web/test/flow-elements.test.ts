@@ -1,0 +1,94 @@
+import type { CanvasView } from "@nf-builder/engine";
+import { describe, expect, it } from "vitest";
+import {
+  inputHandle,
+  outputHandle,
+  toFlowEdges,
+  toFlowNodes,
+} from "../src/canvas/flow-elements";
+
+const view: CanvasView = {
+  nodes: [
+    {
+      id: "main.nf#/a",
+      kind: "call",
+      appearance: "process",
+      shape: "card",
+      title: "A",
+      subtitle: "process",
+      badge: null,
+      inputs: [{ id: "x", label: "x", type: null }],
+      outputs: [{ id: "out", label: "out", type: null }],
+      ariaLabel: "A, process, 1 input, 1 output",
+      x: 10,
+      y: 20,
+      width: 208,
+      height: 84,
+      rowHeight: 20,
+    },
+    {
+      id: "main.nf#/:emit:r",
+      kind: "emit",
+      appearance: "emit",
+      shape: "pill",
+      title: "r",
+      subtitle: "emit",
+      badge: null,
+      inputs: [{ id: "in", label: "in", type: null }],
+      outputs: [],
+      ariaLabel: "r, emit, 1 input, 0 outputs",
+      x: 300,
+      y: 30,
+      width: 96,
+      height: 32,
+      rowHeight: 20,
+    },
+  ],
+  edges: [
+    {
+      id: "e1",
+      source: "main.nf#/a",
+      sourcePort: "out",
+      target: "main.nf#/:emit:r",
+      targetPort: "in",
+      dataflow: "value",
+      tooltip: "Value<Path> · params.fasta",
+    },
+  ],
+};
+
+describe("F-205 flow elements", () => {
+  it("F-205 AR-31: toFlowNodes keeps ids, positions and sizes and passes the view as data", () => {
+    const nodes = toFlowNodes(view, false);
+    expect(
+      nodes.map((n) => [
+        n.id,
+        n.type,
+        n.position,
+        n.initialWidth,
+        n.initialHeight,
+      ]),
+    ).toEqual([
+      ["main.nf#/a", "card", { x: 10, y: 20 }, 208, 84],
+      ["main.nf#/:emit:r", "pill", { x: 300, y: 30 }, 96, 32],
+    ]);
+    expect(nodes[0]?.data.view).toBe(view.nodes[0]);
+    expect(nodes[0]?.data.portLabels).toBe(false);
+  });
+
+  it("F-205 UX-24: toFlowEdges maps ports to handle ids and sets aria labels from tooltips", () => {
+    const [edge] = toFlowEdges(view);
+    expect(edge).toMatchObject({
+      id: "e1",
+      type: "flow",
+      source: "main.nf#/a",
+      sourceHandle: outputHandle({ id: "out" }),
+      target: "main.nf#/:emit:r",
+      targetHandle: inputHandle({ id: "in" }),
+      ariaLabel: "Value<Path> · params.fasta",
+      data: { dataflow: "value" },
+    });
+    expect(outputHandle({ id: "out" })).toBe("out:out");
+    expect(inputHandle({ id: "x" })).toBe("in:x");
+  });
+});

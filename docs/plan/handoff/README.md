@@ -17,12 +17,12 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-111 edit commands | merged, PR #38 | |
 | F-112 diagnostics | merged, PR #40 | |
 | F-113 engine worker | merged, PR #39 | |
-| F-202 projects in IndexedDB | `feat/F-202`, in PR | Plan deleted in its PR. |
-| F-205 canvas | `feat/F-205` | Tasks 1–3 committed; task 4 building. [plan](plan-F-205.md). |
-| F-203 new project dialog | not started | [plan](plan-F-203.md). After F-202 and F-205. |
-| F-206 details pane | not started | [plan](plan-F-206.md). After F-205. |
+| F-202 projects in IndexedDB | merged, PR #42 | |
+| F-205 canvas | merged, PR #41 | |
+| F-203 new project dialog | `feat/F-203` (`/home/user/wt-F-203`) | Tasks 1–5 committed (oracle keys, three templates, engine `templates`); tasks 6–7 building; merge `main` (F-205) before task 8. [plan](plan-F-203.md). |
+| F-206 details pane | `feat/F-206` (`/home/user/wt-F-206`) | Tasks 1–2 building; task 0 done by F-112. [plan](plan-F-206.md). |
 | F-207 layout sidecar | not started | [plan](plan-F-207.md). After F-205 and F-202. |
-| F-208 view modes and Code | not started | [plan](plan-F-208.md). After F-205. |
+| F-208 view modes and Code | `feat/F-208` (`/home/user/wt-F-208`) | Tasks 1–2 building. [plan](plan-F-208.md). |
 | F-209 undo and redo | not started | [plan](plan-F-209.md). After F-202, F-205 and F-208. |
 | F-501 registry snapshot | merged, PR #29, **not passing** | Live `/registry/` passes a sampled check; waiting for the dispatched snapshot run's `workflow_run` deploy and `verify`, then flip in a PR. |
 | F-011 GitHub Pages hosting | merged, PR #37 | Live at https://ewels.github.io/nf-builder/; first `verify` passed. |
@@ -31,7 +31,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 
 Branches are stacked: `feat/F-108` → `feat/F-107`; `feat/F-111` also merges F-107. Open PRs for F-108, F-107 and F-111 against `main` in that order (merge `main` into each first), each green before the next. Worktrees: `/home/user/wt-F-1xx`.
 
-Next free ADR number: 0046 (0045 is F-202's).
+Next free ADR number: 0047 (0046 is F-205's).
 
 ## Decisions already taken on the plans' open points
 
@@ -85,7 +85,7 @@ Next free ADR number: 0046 (0045 is F-202's).
 ### F-202 (merged with its PR)
 - Accept every recommendation in section 6: a hand-written IndexedDB wrapper instead of Dexie (amends one clause of ADR 0002); schema v1 (`projects`, `files` keyed by `[projectId, path]`, text only) with migrations; storage and autosave in the engine worker, `persist()`/`estimate()` on the main thread; `fake-indexeddb` 6.2.8 as a web dev dependency; the IO-01 and IO-03 readings (warning at 80%, step 3 simulates 85%); blank project has no files until F-203; step 1's content edit through `window.nfBuilderEngine` until F-208; `readFile`/`close` added to F-113's service (fold in if F-113 is still open); no new UX row for loading progress; a disclosure-button switcher with native dialogs; no multi-tab coordination; the F-201 header test update and baseline re-approval from CI. One ADR at landing.
 
-### F-205 — [plan](plan-F-205.md)
+### F-205 (merged with its PR)
 - Open point 1: option B. F-205 step 1 becomes "Open fixture projects covering every node kind and a corpus pipeline; visual snapshots per node kind match baselines"; F-203 step 1 gains "each template's canvas matches its approved visual baseline" and F-203 depends on F-205. The template check moves to F-203 rather than being dropped: an ADR and the `scope-change` label in F-205's PR.
 - Accept the other recommendations: `@xyflow/react` 13.0.2 pinned (12.12.1 fallback), a lazily loaded canvas, the interim layered layout until F-207 (ADR 0008's end state unchanged), view logic in the engine run on the main thread, the corpus restored in the Chromium e2e leg (ci.yml edit), `window.nfBuilderWorkspace`, plain edges dotted and unknown solid muted (UX-24), unresolved callees drawn as unparsed with "not found" (UX-22), badge when `callee.typed === true`, session-only port-labels toggle, visible attribution at bottom centre, selection highlight left to F-206, status-bar counts wired, `apps/web/src/workspace/` owned by whichever of F-202 and F-205 lands first.
 
@@ -93,6 +93,10 @@ Next free ADR number: 0046 (0045 is F-202's).
 - Accept every recommendation in section 6: an orphan `registry-snapshot` branch fetched by each Netlify build; ship without the build-hook secret and open a `maintainer` issue for it; split `index.json` (QA-06) and `ports.json`, with IO-31 read as the pair; `tools/registry-snapshot` may import lang-core and pack entries (amends ADR 0003); make lang-2610 erasable for plain Node; ports from registry metadata in `meta.yml` order; parser wins on kind and component; every bundle file; pinned dependency closure; plugin release admitted by the pinned Nextflow; the failure policy; a path-filtered PR dry run outside "CI green"; daily at 03:23 UTC; the fixture snapshot for e2e. ADR 0035 (F-105 takes 0034).
 
 ## Process notes for the next session
+
+- Plans written before F-202 and F-205 merged name `apps/web/src/workspace/workspace-store.ts`; the canvas store is now `apps/web/src/canvas/canvas-store.ts` (`useWorkspace`, `show`, `changed`), and `apps/web/src/workspace/` is F-202's worker-side code.
+- Visual baselines: download the `playwright-chromium` artefact through `api.github.com/repos/ewels/nf-builder/actions/runs/<id>/artifacts`, view each `-actual.png`, copy to `e2e/__screenshots__/<spec>/<name>-chromium-linux.png` (ADR 0021).
+- Several worktrees share e2e ports 4173 and 5173; builders wait rather than kill servers.
 
 - Docs-only changes go straight to `main` after `pnpm check` (ADR 0031); everything else through a PR.
 - Wait for CI by polling the public check-runs API rather than subscribing to PRs (Netlify bot comments are noisy).

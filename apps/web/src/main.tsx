@@ -1,6 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { AppShell } from "./app-shell";
+import { canvasStore } from "./canvas/canvas-store";
 import { getEngine } from "./engine/engine-client";
 import { startProjects } from "./project/project-store";
 import "./styles.css";
@@ -10,6 +11,14 @@ if (!root) throw new Error("nf-builder: #root element missing");
 
 // Test hook (F-113): the engine API, started on first access. Same-origin under the strict CSP.
 Object.defineProperty(window, "nfBuilderEngine", { get: getEngine });
+
+// Test hook (F-205): opens a project in the UI. Same rationale.
+Object.defineProperty(window, "nfBuilderWorkspace", {
+  get: () => {
+    const { open, openWorkflow } = canvasStore.getState();
+    return { open, openWorkflow };
+  },
+});
 
 startProjects();
 // Best effort: write pending changes when the page goes away (IO-01).

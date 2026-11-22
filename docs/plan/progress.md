@@ -506,3 +506,24 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - Project ids fall back to `getRandomValues` where `crypto.randomUUID` is missing, as it is in a frame inside an insecure page.
   - The F-201 UX-01 test now expects an enabled project switcher. This is a behaviour change, not a weakened test, and the app-shell baseline is re-approved from CI (ADR 0021).
 - Blockers: none.
+
+## 2026-11-22 · F-205 · Claude (autonomous)
+- Did:
+  - The canvas. `canvasView` in the engine maps projections to node and edge views, with an interim layered layout.
+  - A lazily loaded React Flow 13 canvas with node anatomy, edges styled by dataflow, type tooltips, controls, a minimap and a port-labels toggle.
+  - Workflow tabs and a canvas store. Projects opened through F-202 now show on the canvas.
+  - The `f205-canvas` fixture covers every node kind. Visual baselines per node kind and for rnaseq-nf-typed were viewed and approved from CI.
+- State: passing.
+- Next: F-203, then F-206 to F-209.
+- Decisions:
+  - [ADR 0046](../adr/0046-canvas-rendering.md) covers:
+    - `@xyflow/react` 13.0.2 as a new runtime dependency, in a lazily loaded canvas;
+    - view logic in the engine;
+    - the interim layered layout;
+    - the UX-21, UX-22 and UX-24 readings (UX-22 and UX-24 amended);
+    - the `window.nfBuilderWorkspace` hook;
+    - the corpus step in the Chromium end-to-end leg (`ci.yml`);
+    - four IO-41 entries.
+  - `scope-change`: F-205 step 1 is reworded. The template check moves to F-203, which now depends on F-205.
+  - A licences row for the corpus-derived baselines.
+- Blockers: none.
