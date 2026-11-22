@@ -3,42 +3,122 @@
     "pipeline": "rnaseq",
     "file": "modules/nf-core/trimgalore/main.nf",
     "knownDifference": "type-rename",
-    "cause": "lint -format renames the resolved type through the Java class hierarchy: `as int` becomes `as Integer`."
+    "cause": "lint -format renames the resolved type through the Java class hierarchy: `as int` becomes `as Integer`.",
+    "differingLines": {
+      "formatted": [
+        35,
+        37
+      ],
+      "printed": [
+        35,
+        37
+      ]
+    }
   },
   {
     "pipeline": "rnaseq",
     "file": "subworkflows/local/multiqc_rnaseq/main.nf",
     "knownDifference": "type-rename",
-    "cause": "lint -format renames the resolved type through the Java class hierarchy: `as boolean` becomes `as Boolean`, and `new LinkedHashMap(...)` becomes `new Map(...)`, an abstract type that fails lint."
+    "cause": "lint -format renames the resolved type through the Java class hierarchy: `as boolean` becomes `as Boolean`, and `new LinkedHashMap(...)` becomes `new Map(...)`, an abstract type that fails lint.",
+    "differingLines": {
+      "formatted": [
+        261,
+        298,
+        472,
+        473
+      ],
+      "printed": [
+        261,
+        298,
+        472,
+        473
+      ]
+    }
   },
   {
     "pipeline": "rnaseq",
     "file": "subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf",
     "knownDifference": "type-rename",
-    "cause": "lint -format renames the resolved type through the Java class hierarchy: `as double` becomes `as Float`, and `Double.isNaN` becomes `Float.isNaN`, a different class."
+    "cause": "lint -format renames the resolved type through the Java class hierarchy: `as double` becomes `as Float`, and `Double.isNaN` becomes `Float.isNaN`, a different class.",
+    "differingLines": {
+      "formatted": [
+        892,
+        894
+      ],
+      "printed": [
+        892,
+        894
+      ]
+    }
   },
   {
     "pipeline": "rnaseq",
     "file": "subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf",
     "knownDifference": "type-rename",
-    "cause": "lint -format renames the resolved type through the Java class hierarchy: `as double` becomes `as Float`."
+    "cause": "lint -format renames the resolved type through the Java class hierarchy: `as double` becomes `as Float`.",
+    "differingLines": {
+      "formatted": [
+        27,
+        28,
+        44,
+        45,
+        46,
+        69,
+        70
+      ],
+      "printed": [
+        27,
+        28,
+        44,
+        45,
+        46,
+        69,
+        70
+      ]
+    }
   },
   {
     "pipeline": "rnaseq",
     "file": "subworkflows/nf-core/fastq_remove_rrna/main.nf",
     "knownDifference": "type-rename",
-    "cause": "lint -format renames the resolved type through the Java class hierarchy: `as float` and `as int` become `as Float` and `as Integer`."
+    "cause": "lint -format renames the resolved type through the Java class hierarchy: `as float` and `as int` become `as Float` and `as Integer`.",
+    "differingLines": {
+      "formatted": [
+        33,
+        36
+      ],
+      "printed": [
+        33,
+        36
+      ]
+    }
   },
   {
     "pipeline": "sarek",
     "file": "main.nf",
     "knownDifference": "type-rename",
-    "cause": "lint -format renames the resolved type through the Java class hierarchy: `as boolean` becomes `as Boolean`."
+    "cause": "lint -format renames the resolved type through the Java class hierarchy: `as boolean` becomes `as Boolean`.",
+    "differingLines": {
+      "formatted": [
+        313
+      ],
+      "printed": [
+        313
+      ]
+    }
   },
   {
     "pipeline": "sarek",
     "file": "subworkflows/local/samplesheet_to_channel/main.nf",
     "knownDifference": "catch-package",
-    "cause": "lint -format drops the package of every catch type: `catch (java.lang.reflect.InvocationTargetException ex)` loses its package, and `InvocationTargetException` is not defined (checked with nextflow lint on the formatted file)."
+    "cause": "lint -format drops the package of every catch type: `catch (java.lang.reflect.InvocationTargetException ex)` loses its package, and `InvocationTargetException` is not defined (checked with nextflow lint on the formatted file).",
+    "differingLines": {
+      "formatted": [
+        359
+      ],
+      "printed": [
+        359
+      ]
+    }
   }
 ]

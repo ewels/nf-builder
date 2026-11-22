@@ -7,6 +7,7 @@ import { join } from "node:path";
 import { beforeAll, describe, expect, it } from "vitest";
 import { parseScriptAst } from "../../src/ast/index.ts";
 import { createLayout, printScript } from "../../src/printer/index.ts";
+import { lineDiff } from "../printer/line-diff.ts";
 import { listSources } from "./corpus-files.ts";
 
 const ROOT = join(import.meta.dirname, "../../../..");
@@ -25,22 +26,29 @@ type Known = {
   file: string;
   knownDifference: string;
   cause: string;
+  /** The lines (1-based) where our output and nf-lang's differ: what the known bug changes and nothing else. */
+  differingLines: { formatted: number[]; printed: number[] };
 };
-const KNOWN_IDS = [
-  "type-rename",
-  "catch-package",
-  "call-wrap",
-  "named-args-comma",
-  "directive-comment",
-];
+const KNOWN_IDS = Object.keys(
+  (
+    JSON.parse(
+      readFileSync(
+        join(import.meta.dirname, "../printer/fixtures.json"),
+        "utf8",
+      ),
+    ) as { knownDifferences: Record<string, string> }
+  ).knownDifferences,
+);
 const known = JSON.parse(
   readFileSync(
     join(import.meta.dirname, "known-format-differences.json"),
     "utf8",
   ),
 ) as Known[];
+const knownFor = (pipeline: string, file: string) =>
+  known.find((k) => k.pipeline === pipeline && k.file === file);
 const isKnown = (pipeline: string, file: string) =>
-  known.some((k) => k.pipeline === pipeline && k.file === file);
+  knownFor(pipeline, file) !== undefined;
 
 type Row = {
   pipeline: string;
@@ -126,14 +134,20 @@ describe("corpus printer parity", () => {
     );
     expect(stale.map((k) => `${k.pipeline}/${k.file}`)).toEqual([]);
     for (const k of known) expect(KNOWN_IDS).toContain(k.knownDifference);
+    // and only on the lines the known bug changes
+    for (const r of different) {
+      const k = knownFor(r.pipeline, r.file);
+      expect(
+        lineDiff(r.formatted, r.printed ?? ""),
+        `${r.pipeline}/${r.file}`,
+      ).toEqual(k?.differingLines);
+    }
     expect(state.rows.length).toBeGreaterThan(0);
     report();
   });
 
   it("F-110 LA-45: printing every formatted corpus script again changes nothing", () => {
-    const changed = state.rows.filter(
-      (r) => r.reprinted !== r.formatted && !isKnown(r.pipeline, r.file),
-    );
+    const changed = state.rows.filter((r) => r.reprinted !== r.formatted);
     expect(changed.map((r) => `${r.pipeline}/${r.file}`)).toEqual([]);
   });
 });

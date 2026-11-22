@@ -13,6 +13,7 @@ import {
   printScript,
 } from "../../src/printer/index.ts";
 import { commentTexts } from "./comment-texts.ts";
+import { lineDiff } from "./line-diff.ts";
 
 type Tree = {
   name: string;
@@ -25,6 +26,8 @@ type Entry = {
   path: string;
   kind: "parsed" | "support" | "synthesised" | "edited";
   knownDifference?: string;
+  /** The lines (1-based) where printed and formatted differ: what the known difference changes and nothing else. */
+  differingLines?: { formatted: number[]; printed: number[] };
 };
 type Manifest = {
   trees: Tree[];
@@ -79,6 +82,7 @@ describe("printer fixtures", () => {
         );
         // a known difference that no longer differs must be removed from the manifest
         expect(result.text).not.toBe(formatted);
+        expect(lineDiff(formatted, result.text)).toEqual(f.differingLines);
         expect(result.missingComments).toEqual([]);
       });
     }

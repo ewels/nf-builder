@@ -117,7 +117,7 @@ describe("synthesised and edited trees", () => {
       "synth/create-process/modules/local/count_lines/main.nf",
     ).text;
     expect(countLines).toContain(
-      '    """\n    wc -l ${text} > lines.txt\n    """',
+      `    """\n    wc -l \${text} > lines.txt\n    """`,
     );
     // the doc comment follows the blank line after the flag
     expect(
@@ -143,7 +143,7 @@ describe("synthesised and edited trees", () => {
     );
   });
 
-  it("F-110 LA-45: parse(print(parse(x))) has the structure of parse(x) for every expected file", () => {
+  it("F-110 LA-45: parse(print(parse(x))) has the structure of parse(x) for the expected files whose text it keeps", () => {
     const files = [
       // not typed/process.nf (its multi-line string is re-indented) typed/function.nf (a legacy type becomes modern) nor typed/expressions.nf (named arguments move last)
       "typed/workflow.nf",

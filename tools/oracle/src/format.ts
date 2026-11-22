@@ -56,7 +56,7 @@ const FILE_KEYS = new Set([
   "spec",
   "covers",
   "source",
-  "adjusted",
+  "differingLines",
 ]);
 const KINDS: readonly string[] = ["parsed", "support", "synthesised", "edited"];
 
@@ -372,9 +372,19 @@ export function runFormatTrees(
         .map((f) => f.path),
     );
     const before = new Map<string, string>();
-    for (const path of listFiles(expectedDir).filter(isScript))
-      if (!exempt.has(path))
-        before.set(path, readFileSync(join(expectedDir, path), "utf8"));
+    // what lint -format may leave in an exempt file: the printed text as it was, or what it wrote for the input
+    const allowed = new Map<string, string[]>();
+    for (const path of listFiles(expectedDir).filter(isScript)) {
+      const text = readFileSync(join(expectedDir, path), "utf8");
+      if (!exempt.has(path)) before.set(path, text);
+      else {
+        const golden = join(tree.formatted, path);
+        allowed.set(path, [
+          text,
+          ...(existsSync(golden) ? [readFileSync(golden, "utf8")] : []),
+        ]);
+      }
+    }
     results.push(
       check(tree, expectedDir, "fixed-point", (report) => {
         const compared = compareFiles(
@@ -383,6 +393,14 @@ export function runFormatTrees(
           "lint -format changed the file",
         );
         const problems = [...compared.problems];
+        for (const [path, texts] of allowed) {
+          const file = join(expectedDir, path);
+          const actual = existsSync(file) ? readFileSync(file, "utf8") : null;
+          if (actual === null || !texts.includes(actual))
+            problems.push(
+              `${path}: lint -format left neither the printed text nor formatted/${path} (a known difference allows only those)`,
+            );
+        }
         if (report !== null && report.summary.filesFormatted > exempt.size)
           problems.push(
             `lint -format reports ${report.summary.filesFormatted} file(s) formatted, expected ${exempt.size === 0 ? "0" : `at most ${exempt.size}`}`,

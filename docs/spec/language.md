@@ -69,4 +69,4 @@ Every lint message says what to do. Mechanical fixes are offered as quick fixes.
 | LA-42 | Tool versions go to the `versions` topic from a `topic:` section. |
 | LA-43 | Channel factories use lower-case `channel.`; closures name their parameters. |
 | LA-44 | Operators come from the set recommended for static typing; `mix` takes one argument per call. |
-| LA-45 | Code is formatted as `nextflow lint -format` would (ADR 0005), apart from the known differences where its output is broken (ADR 0032). New and edited declarations are formatted; untouched declarations keep their source text (F-104). |
+| LA-45 | Code is formatted as `nextflow lint -format` would (ADR 0005), apart from the known differences where its output is broken (ADR 0032). New and edited declarations are formatted; declarations an edit didn't touch are printed from their source text (ADR 0032, F-104). |

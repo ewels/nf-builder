@@ -28,7 +28,11 @@ export function printScript(
   new ScriptFormatter(fmt).script(ast);
   return {
     text: fmt.toString(),
-    missingComments: missing(ast.comments, fmt),
+    // the comment map, and the comments of nodes an edit created, which it doesn't list
+    missingComments: missing(
+      [...new Set([...ast.comments, ...attachedComments(ast)])],
+      fmt,
+    ),
   };
 }
 

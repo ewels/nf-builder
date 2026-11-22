@@ -72,6 +72,9 @@ describe("printer errors", () => {
     expect(printDeclaration(tampered.body[0] as never).missingComments).toEqual(
       [comment],
     );
+    // a comment on a node an edit created is in no comment map, and printScript still reports it
+    const unlisted = { ...tampered, comments: [] } as ScriptAst;
+    expect(printScript(unlisted).missingComments).toEqual([comment]);
     // and an untouched tree reports none
     expect(printScript(ast).missingComments).toEqual([]);
   });

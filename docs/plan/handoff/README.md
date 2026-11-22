@@ -7,12 +7,12 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | Feature | Branch | State |
 |---|---|---|
 | F-102 script AST | merged, PR #23 | |
-| F-103 config AST | `feat/F-103`, in PR | Plan deleted in its PR. |
-| F-104 round trip | not started | [plan](plan-F-104.md). Branch from `main` after F-102 (and F-103) merge. |
+| F-103 config AST | merged, PR #24 | |
+| F-104 round trip | `feat/F-104` | Tasks 1–2 building. [plan](plan-F-104.md). |
 | F-110 printer | `feat/F-110`, in PR | Plan deleted in its PR. |
 | F-105 semantic model | not started | [plan](plan-F-105.md). Branch from `main` after F-104 merges. |
 
-Next free ADR number: 0032.
+Next free ADR number: 0033.
 
 ## Decisions already taken on the plans' open points
 

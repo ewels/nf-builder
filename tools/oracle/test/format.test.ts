@@ -180,11 +180,14 @@ describe("F-110 format trees", () => {
       });
       return runFormatTrees(manifest, { exec, formatDir: tmp() })[1];
     };
-    expect(run(true, { "a.nf": "a  = 1\n" })?.matched).toBe(true);
+    expect(run(true, { "a.nf": "a  = 1\n" })?.matched).toBe(false);
+    // formatted/a.nf is "a = 1": that, or the printed text unchanged, is all a known difference allows
+    expect(run(true, { "a.nf": "a = 1\n" })?.matched).toBe(true);
+    expect(run(true, {})?.matched).toBe(true);
     expect(run(false, { "a.nf": "a  = 1\n" })?.matched).toBe(false);
     // the allowance is for the files named, not for more
     expect(
-      run(true, { "a.nf": "a  = 1\n", "lib/b.nf": "b  = 2\n" })?.matched,
+      run(true, { "a.nf": "a = 1\n", "lib/b.nf": "b  = 2\n" })?.matched,
     ).toBe(false);
   });
 

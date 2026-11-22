@@ -181,9 +181,23 @@
     },
     {
       "tree": "printer",
+      "path": "typed/crlf.nf",
+      "kind": "parsed",
+      "spec": [
+        "LA-45"
+      ],
+      "covers": [
+        "CRLF line endings",
+        "tabs",
+        "multi-line strings"
+      ]
+    },
+    {
+      "tree": "printer",
       "path": "la14/main.nf",
       "kind": "parsed",
       "spec": [
+        "LA-14",
         "LA-45"
       ],
       "covers": [
@@ -205,7 +219,25 @@
       "covers": [
         "Type names"
       ],
-      "knownDifference": "type-rename"
+      "knownDifference": "type-rename",
+      "differingLines": {
+        "formatted": [
+          2,
+          7,
+          8,
+          9,
+          10,
+          11
+        ],
+        "printed": [
+          2,
+          7,
+          8,
+          9,
+          10,
+          11
+        ]
+      }
     },
     {
       "tree": "printer",
@@ -217,7 +249,15 @@
       "covers": [
         "Catch"
       ],
-      "knownDifference": "catch-package"
+      "knownDifference": "catch-package",
+      "differingLines": {
+        "formatted": [
+          9
+        ],
+        "printed": [
+          9
+        ]
+      }
     },
     {
       "tree": "printer",
@@ -229,7 +269,17 @@
       "covers": [
         "Call arguments"
       ],
-      "knownDifference": "named-args-comma"
+      "knownDifference": "named-args-comma",
+      "differingLines": {
+        "formatted": [
+          5,
+          9
+        ],
+        "printed": [
+          5,
+          9
+        ]
+      }
     },
     {
       "tree": "printer",
@@ -242,7 +292,17 @@
         "Directives",
         "comments"
       ],
-      "knownDifference": "directive-comment"
+      "knownDifference": "directive-comment",
+      "differingLines": {
+        "formatted": [
+          3,
+          6
+        ],
+        "printed": [
+          3,
+          6
+        ]
+      }
     },
     {
       "tree": "printer",
@@ -500,7 +560,15 @@
       "tree": "ast",
       "path": "stmt-try-catch.nf",
       "kind": "parsed",
-      "knownDifference": "catch-package"
+      "knownDifference": "catch-package",
+      "differingLines": {
+        "formatted": [
+          11
+        ],
+        "printed": [
+          11
+        ]
+      }
     },
     {
       "tree": "ast",
@@ -561,13 +629,35 @@
       "tree": "ast",
       "path": "expr-call-value.nf",
       "kind": "parsed",
-      "knownDifference": "call-wrap"
+      "knownDifference": "call-wrap",
+      "differingLines": {
+        "formatted": [
+          6,
+          7,
+          8,
+          9,
+          10,
+          11
+        ],
+        "printed": [
+          6,
+          7
+        ]
+      }
     },
     {
       "tree": "ast",
       "path": "expr-constructor.nf",
       "kind": "parsed",
-      "knownDifference": "type-rename"
+      "knownDifference": "type-rename",
+      "differingLines": {
+        "formatted": [
+          3
+        ],
+        "printed": [
+          3
+        ]
+      }
     },
     {
       "tree": "ast",

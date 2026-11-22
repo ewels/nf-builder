@@ -68,8 +68,6 @@ const receiverOf = (call: MethodCall | CallExpr): Expression | null =>
 const isTripleQuoted = (text: string) =>
   text.startsWith('"""') || text.startsWith("'''");
 
-const lines = (text: string) => text.replace(/\r\n?/g, "\n");
-
 export class Formatter {
   /** The comments the formatter wrote (upstream `CommentAttacher.markEmitted`). */
   readonly emitted = new Set<Comment>();
@@ -205,8 +203,7 @@ export class Formatter {
    * Shift the interior lines of a multi-line string by the indentation shift of the statement that contains it. Blank
    * lines are left alone, and a line is never shifted past its first non-whitespace character (L263).
    */
-  private reindentString(raw: string): string {
-    const text = lines(raw);
+  private reindentString(text: string): string {
     const delta = this.stringIndentDelta;
     if (delta === 0 || !text.includes("\n")) return text;
     const parts = text.split("\n");
@@ -502,7 +499,7 @@ export class Formatter {
         this.append(
           isTripleQuoted(node.text)
             ? this.reindentString(node.text)
-            : lines(node.text),
+            : node.text,
         );
         return;
       case "Boolean":
@@ -529,7 +526,7 @@ export class Formatter {
         this.append(
           node.property.kind === "Identifier"
             ? node.property.name
-            : lines(node.property.text),
+            : node.property.text,
         );
         return;
       case "Index":
@@ -631,9 +628,7 @@ export class Formatter {
 
     if (node.kind === "MethodCall") {
       this.append(
-        node.method.kind === "Identifier"
-          ? node.method.name
-          : lines(node.method.text),
+        node.method.kind === "Identifier" ? node.method.name : node.method.text,
       );
     } else {
       this.append("call");
@@ -897,7 +892,7 @@ export class Formatter {
   private entry(node: NamedArgument | MapEntry): void {
     const key = node.kind === "NamedArgument" ? node.name : node.key;
     if (key.kind === "Identifier") this.append(key.name);
-    else if (key.kind === "String") this.append(lines(key.text));
+    else if (key.kind === "String") this.append(key.text);
     else this.expression(key);
     this.append(": ");
     this.expression(node.value);
@@ -909,9 +904,7 @@ export class Formatter {
     this.append(node.quote);
     for (const part of node.parts) {
       if (part.kind === "GStringText") {
-        this.append(
-          tripleQuoted ? this.reindentString(part.text) : lines(part.text),
-        );
+        this.append(tripleQuoted ? this.reindentString(part.text) : part.text);
       } else {
         this.append("${");
         this.expression(part.expression);
