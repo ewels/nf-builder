@@ -19,6 +19,7 @@ const fake = (load: () => Promise<SourceParser>): LanguagePack => ({
   legacyOperators: [],
   loadCatalogue: () => Promise.reject(new Error("not used here")),
   loadParser: load,
+  loadLints: () => Promise.reject(new Error("not used here")),
 });
 
 describe("F-104 ADR-0027 ADR-0028: loadParser", () => {

@@ -1,5 +1,6 @@
 import type { Catalogue } from "./catalogue.ts";
 import type { IncludeRules } from "./includes.ts";
+import type { PackLints } from "./lint.ts";
 import type { PaletteDefinition } from "./palette.ts";
 import type { SourceParser } from "./source-file.ts";
 
@@ -23,6 +24,8 @@ export interface LanguagePack {
   loadCatalogue(): Promise<Catalogue>;
   /** The parser with declaration-level fallback, loaded on first call (a dynamic import; ADR 0004, ADR 0027). */
   loadParser(): Promise<SourceParser>;
+  /** The diagnostic codes, advice and rules, loaded on first call (a dynamic import, so it stays out of the initial bundle; QA-01, F-112). */
+  loadLints(): Promise<PackLints>;
 }
 
 export * from "./ast/index.ts";
@@ -39,7 +42,12 @@ export type {
   ScriptCatalogue,
   Signature,
 } from "./catalogue.ts";
-export type { Diagnostic, DiagnosticSeverity } from "./diagnostic.ts";
+export type {
+  Diagnostic,
+  DiagnosticSeverity,
+  QuickFix,
+  TextEdit,
+} from "./diagnostic.ts";
 export type {
   Includable,
   IncludableDeclaration,
@@ -47,6 +55,18 @@ export type {
   IncludeTarget,
   ProjectTree,
 } from "./includes.ts";
+export type {
+  Compatibility,
+  DiagnosticCode,
+  DiagnosticOrigin,
+  LintBinding,
+  LintContext,
+  LintFinding,
+  LintFix,
+  LintInclude,
+  LintRule,
+  PackLints,
+} from "./lint.ts";
 export type {
   CatalogueItem,
   ConstructItem,
