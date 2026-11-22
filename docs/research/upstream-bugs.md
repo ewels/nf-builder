@@ -351,3 +351,33 @@ workflow {
 - **What happens:** `nextflow run main.nf` prints `  first` and `    second`. After `nextflow lint -format .`, the string's lines are re-indented (here to column 1, losing even their relative indentation), and the same run prints `first` and `second`. Formatting changed what the program does.
 - **Expected:** the formatter leaves string content alone, or re-indents only strings whose value can't change (for example those passed through `stripIndent()` or `stripMargin()`).
 - **nf-builder:** the printer matches upstream here (F-110 parity) and only reprints declarations an edit touches (ADR 0032); F-111's reprint test lists the workflows whose strings are re-indented. A known difference may be added if this is confirmed as a bug.
+
+### 24. Lint accepts a process called twice in one workflow
+
+```nextflow
+nextflow.enable.types = true
+
+process HELLO {
+    input:
+    x: String
+
+    output:
+    y: String = x
+
+    script:
+    """
+    echo ${x}
+    """
+}
+
+workflow {
+    a = HELLO('one')
+    b = HELLO('two')
+    a.view()
+    b.view()
+}
+```
+
+- **What happens:** `nextflow lint .` reports no errors. `nextflow run main.nf -stub` fails with "Process 'HELLO' was called twice -- include it with a different alias or call it in a different workflow".
+- **Expected:** lint reports the second call, as it reports other errors the runtime would raise.
+- **nf-builder:** AddCall refuses a second call of the same callee in one workflow (F-111, ADR 0039), and F-112 can report it in imported code.
