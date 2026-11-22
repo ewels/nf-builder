@@ -136,8 +136,38 @@ export async function expectBaseline(
 
 type Clip = { x: number; y: number; width: number; height: number };
 
-/** The page rectangle of a node with `pad` pixels around it. */
+/**
+ * Waits until every node on the canvas has the same box over several consecutive animation frames: a toggle changes node
+ * heights and the layout re-places the nodes, so a clip measured too early is off.
+ */
+export async function layoutSettled(page: Page): Promise<void> {
+  await page.evaluate(
+    () =>
+      new Promise<void>((resolve) => {
+        const boxes = () =>
+          [...document.querySelectorAll(".react-flow__node")]
+            .map((el) => {
+              const r = el.getBoundingClientRect();
+              return `${r.x},${r.y},${r.width},${r.height}`;
+            })
+            .join(";");
+        let last = boxes();
+        let stable = 0;
+        const tick = () => {
+          const now = boxes();
+          stable = now === last ? stable + 1 : 0;
+          last = now;
+          if (stable >= 10) resolve();
+          else requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+      }),
+  );
+}
+
+/** The page rectangle of a node with `pad` pixels around it, once the layout has settled. */
 export async function nodeClip(locator: Locator, pad = 16): Promise<Clip> {
+  await layoutSettled(locator.page());
   const box = await locator.boundingBox();
   if (box === null) throw new Error("the node has no box");
   return {
