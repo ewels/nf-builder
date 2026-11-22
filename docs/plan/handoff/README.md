@@ -10,7 +10,7 @@ F-005, F-006 and F-201 don't depend on each other. F-005 and F-006 both touch th
 
 ## Decisions already taken on each plan's open points
 
-### F-005 (spike S1) — [plan](plan-F-005.md)
+### F-005 (spike S1) — merged in #13, plan deleted
 
 - The plan says "ADR 0018" for its own decisions; ADR 0018 is now taken (parallel features and local Nextflow, which already records the local-run permission). Write the oracle tool and its hosts as the next free ADR number, amending the ADR 0003 tools table for `tools/oracle`.
 - Nextflow pin: put the version and SHA-256 in `packages/lang-2610/upstream.json` (see F-006 O6), not in `tools/oracle/oracle.yaml`; the oracle reads it by path (tools can't import packages).

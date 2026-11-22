@@ -115,8 +115,8 @@
         "Report in `docs/research/` records each outcome with logs",
         "ADR 0007 history and LA-14 updated (via a Proposed ADR if the decision changes)"
       ],
-      "passes": false,
-      "notes": "The oracle job should also lint tools/corpus/fixtures/ and check each result against fixtures.yaml (AGENTS.md, ADR 0017)."
+      "passes": true,
+      "notes": "The oracle job should also lint tools/corpus/fixtures/ and check each result against fixtures.yaml (AGENTS.md, ADR 0017). Verified 2026-11-22 on PR #13: the CI oracle job (Temurin 21, cold cache download checked against the pinned SHA-256, nextflow -version 26.10.7) ran nextflow lint and run -stub on eight S1 cases (16 checks) and linted the nine corpus fixtures, all matching; the local run agrees. Report: docs/research/2026-11-22-spike-s1-typed-legacy-interop.md. No Playwright test, so --grep F-005 finds nothing; the CI run is the end-to-end evidence (Q13)."
     },
     {
       "id": "F-006",
@@ -386,7 +386,7 @@
         "Printed fixtures pass `nextflow lint` with no errors"
       ],
       "passes": false,
-      "notes": ""
+      "notes": "From F-005 (S1): in typed code the printer emits a legacy tuple input as tuple(a, b, ...), one argument per declared component; a mixed list literal fails nextflow lint (LA-14)."
     },
     {
       "id": "F-111",
@@ -683,7 +683,7 @@
         "Delete an edge: the call argument is removed and the code still parses"
       ],
       "passes": false,
-      "notes": ""
+      "notes": "From F-005 (S1): nextflow lint doesn't check a legacy tuple input's arity, so connecting to a legacy tuple input compares arity with its declaration (LA-14)."
     },
     {
       "id": "F-303",
@@ -1081,7 +1081,7 @@
         "Drop it again: the bundle is not duplicated"
       ],
       "passes": false,
-      "notes": ""
+      "notes": "From F-005 (S1): typed workflows may call legacy registry modules across files with no warning; tuple inputs as tuple(...), outputs by assignment (LA-14). .module-info isn't written until its checksum algorithm is verified with the oracle (ADR 0009 spike result)."
     },
     {
       "id": "F-505",

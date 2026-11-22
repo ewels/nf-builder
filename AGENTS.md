@@ -88,7 +88,7 @@ If your change adds a dependency, moves a package boundary, changes a stored or 
 - Use the Nextflow agent skills:
   - Claude Code: eight skills from `seqeralabs/nextflow-plugin` are vendored in `.claude/skills/` (see its README), so cloud sessions get them too;
   - other agents: `npx skills add seqeralabs/nextflow-plugin`.
-- Nextflow code in templates and fixtures must pass the oracle (`pnpm oracle`, CI job `oracle`: `nextflow lint` and `nextflow run -stub` on 26.10). In typed code, build a legacy `tuple` input with `tuple(...)`, never a mixed list literal (spike S1). The exception is `tools/corpus/fixtures/`, which is malformed on purpose: there the oracle must reproduce the `lint` result recorded in `fixtures.yaml` (ADR 0017).
+- Nextflow code in templates and fixtures must pass the oracle (`pnpm oracle`, CI job `oracle`: `nextflow lint` and `nextflow run -stub` on 26.10). In typed code, build a legacy `tuple` input with `tuple(...)`, never a mixed list literal (spike S1). The exceptions are malformed on purpose: in `tools/corpus/fixtures/` the oracle must reproduce the `lint` result recorded in `fixtures.yaml` (ADR 0017), and an oracle case marked `expect: error` in `tools/oracle/cases/cases.yaml` must fail as recorded (ADR 0019).
 
 ## Conventions that tools don't enforce
 

@@ -17,17 +17,18 @@
 - `pnpm nextflow` runs the pinned `nextflow-26.10.7-dist` (SHA-256 `c54cd4b7…80a6` in `packages/lang-2610/upstream.json`) with `NXF_HOME=.cache/nextflow/home`, `NXF_OFFLINE=true`, `NXF_SYNTAX_PARSER=v2` and inherited `NXF_VER` dropped.
 - `pnpm oracle` copies each case to `.cache/oracle/runs/<id>/` and runs `nextflow lint -o json .` and `nextflow run main.nf -stub`, comparing the exit status and expected texts with `tools/oracle/cases/cases.yaml`. It also lints each corpus fixture alone and compares with `tools/corpus/fixtures/fixtures.yaml`.
 - `-stub` needs no tools or containers; every S1 process with a `script:` has a `stub:`.
-- Logs: CI artifact `nextflow-oracle` (`runs/<case>/lint.log`, `run.log`, `report.md`, `results.json`).
+- Logs: CI artefact `nextflow-oracle` (`runs/<case>/lint.log`, `run.log`, `report.md`, `results.json`).
 
 ## Cases
 
-All 14 case checks and 9 fixture checks matched, locally and in CI.
+All 16 case checks and 9 fixture checks matched, locally and in CI.
 
 | Case | Shape | lint | run -stub |
 |---|---|---|---|
 | `s1-typed-calls-legacy` | typed entry calls a legacy process and workflow from `module.nf` (verbatim from DataflowTypesTest) | ok | ok |
 | `s1-typed-calls-legacy-module` | typed entry calls an nf-core-shaped legacy module (`tuple val(meta), path(reads)`), input built with `tuple([id: reads.baseName], reads)`, outputs read by assignment (`legacy_out.txt`) | ok, 0 errors, 0 warnings | ok; prints `txt: [[id:s1], …/s1.count.txt]` and `versions: …/versions.txt` |
-| `s1-typed-list-literal-tuple` | same, input built with `[[id: reads.baseName], reads]` | error: `main.nf:14:25 List expression has inconsistent element types -- some elements have type Map<String, String> while others have type Path` | ok, with `WARN: Type checking found 1 error(s) -- run nextflow lint to inspect them` |
+| `s1-typed-list-literal-tuple` | same, input built with `[[id: reads.baseName], reads]` | error: `main.nf:12:25 List expression has inconsistent element types -- some elements have type Map<String, String> while others have type Path` | ok, with `WARN: Type checking found 1 error(s) -- run nextflow lint to inspect them` |
+| `s1-typed-legacy-tuple-arity` | same, passing a one-component `tuple([id: reads.baseName])` to the two-component input | ok | error: "Input tuple does not match tuple declaration in process `LEGACY_COUNT`" |
 | `s1-legacy-calls-typed` | legacy entry calls a typed process (verbatim from DataflowTypesTest) | ok | ok |
 | `s1-legacy-calls-typed-module` | legacy entry calls a typed module from `modules/local/` | ok | ok; prints `count: …/count.txt` |
 | `s1-mixed-types-on` | types enabled, typed and legacy processes in one script | error: `Invalid input declaration in typed process` (plus two follow-on "not defined" errors) | error: `Error main.nf:28:5: Invalid input declaration in typed process`, then `Script compilation failed` |
@@ -35,10 +36,10 @@ All 14 case checks and 9 fixture checks matched, locally and in CI.
 
 ## Hypotheses vs results
 
-- The plan expected `s1-typed-calls-legacy-module` to pass lint with a list literal `[[id: x], reads]`, the shape nf-core code uses. It failed: in typed scripts, `TypeCheckingVisitor.visitListExpression` rejects any list literal whose elements have different inferred types (`S/modules/nf-lang/src/main/java/nextflow/script/control/TypeCheckingVisitor.java#L1403-L1424`, comparing with `Types.isEqual`, `S/modules/nf-lang/src/main/java/nextflow/script/dsl/Types.java#L198-L210`). Map literals with mixed value types are fine. `nextflow run` only warns (`S/docs/migrations/26-10.mdx#L22`).
+- The F-005 plan expected `s1-typed-calls-legacy-module` to pass lint with a list literal `[[id: x], reads]`, the shape nf-core code uses. It failed: in typed scripts, `TypeCheckingVisitor.visitListExpression` rejects any list literal whose elements have different inferred types (`S/modules/nf-lang/src/main/java/nextflow/script/control/TypeCheckingVisitor.java#L1403-L1424`, comparing with `Types.isEqual`, `S/modules/nf-lang/src/main/java/nextflow/script/dsl/Types.java#L198-L210`). Map literals with mixed value types are fine. `nextflow run` only warns (`S/docs/migrations/26-10.mdx#L22`).
 - The documented idiom is the stdlib `tuple()` function (`Tuple tuple(Object... args)`, `S/modules/nf-lang/src/main/java/nextflow/script/dsl/ScriptDsl.java#L213-L216`; `S/docs/reference/stdlib-namespaces/global.mdx#L188-L190`; `S/docs/reference/semantics.mdx#L192-L208`; `S/docs/tutorials/static-types-operators.mdx#L176`). With it the case passes lint and run with no warning. The list-literal form stays as its own case so the oracle keeps recording the difference.
-- Lint doesn't check a legacy input's shape: in a scratch run, `tuple([id: x])` sent to the two-component input passed lint and failed at run time (`Error executing process > 'LEGACY_COUNT (1)'`). The app has to compare arity itself.
-- `tuple(record(id: x), reads)` also passes lint and run, and `meta.id` works in the legacy process; nf-core modules that use Map operations on `meta` (`meta + [...]`) were not tested with a record.
+- Lint doesn't check a legacy input's shape: case `s1-typed-legacy-tuple-arity` sends `tuple([id: x])` to the two-component input; lint passes and the run fails with "Input tuple does not match tuple declaration in process `LEGACY_COUNT`". The app has to compare arity itself.
+- In a scratch run (not an oracle case), `tuple(record(id: x), reads)` also passed lint and run, and `meta.id` worked in the legacy process; nf-core modules that use Map operations on `meta` (`meta + [...]`) were not tested with a record.
 - Every other expectation held as planned.
 
 ## Lint warnings seen
