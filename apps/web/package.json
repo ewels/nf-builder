@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@nf-builder/engine": "workspace:*",
+    "@xyflow/react": "13.0.2",
     "comlink": "4.4.2",
     "react": "19.3.1",
     "react-dom": "19.3.1",

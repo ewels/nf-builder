@@ -255,7 +255,36 @@ html.is-resizing body * {
   border-bottom: 1px solid var(--color-border);
 }
 
+.workflow-tabs {
+  display: flex;
+  align-self: stretch;
+  gap: 2px;
+}
+
+.workflow-tab {
+  font: inherit;
+  font-size: 13px;
+  padding: 0 var(--space-3);
+  color: #3d4659;
+  background: transparent;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+}
+
+.workflow-tab[aria-selected="true"] {
+  color: var(--color-text);
+  font-weight: 600;
+  border-bottom-color: var(--color-accent);
+}
+
+.workflow-tab:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: -2px;
+}
+
 .canvas-area {
+  position: relative;
   flex: 1;
   min-height: 0;
   display: grid;

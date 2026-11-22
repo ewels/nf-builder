@@ -1,5 +1,6 @@
 import { installedPackVersions } from "@nf-builder/engine";
 import type { JSX } from "react";
+import { CanvasHost } from "./canvas/canvas-host";
 import { COLLAPSED_WIDTH, useLayout } from "./layout/layout-store";
 import { AppHeader } from "./shell/app-header";
 import { ColumnSeparator } from "./shell/column-separator";
@@ -7,13 +8,29 @@ import { LeftColumn } from "./shell/left-column";
 import { SideColumn } from "./shell/side-column";
 import { StatusBar } from "./shell/status-bar";
 import { TabStrip } from "./shell/tab-strip";
+import { type CanvasContent, useWorkspace } from "./workspace/workspace-store";
 
 const languageVersions = installedPackVersions();
+
+/** The status bar's counts: the nodes and channels of the active canvas (UX-03). */
+export function canvasCounts(content: CanvasContent): {
+  nodes: number;
+  channels: number;
+} {
+  return content.status === "ready"
+    ? {
+        nodes: content.projection.nodes.length,
+        channels: content.projection.edges.length,
+      }
+    : { nodes: 0, channels: 0 };
+}
 
 export function AppShell(): JSX.Element {
   const left = useLayout((s) => s.left);
   const right = useLayout((s) => s.right);
   const leftWidth = left.collapsed ? COLLAPSED_WIDTH : left.width;
+  const content = useWorkspace((s) => s.content);
+  const counts = canvasCounts(content);
   const rightWidth = right.collapsed ? COLLAPSED_WIDTH : right.width;
   return (
     <div className="app-shell">
@@ -30,9 +47,7 @@ export function AppShell(): JSX.Element {
         )}
         <main className="column column-centre" aria-label="Canvas and editor">
           <TabStrip />
-          <div className="canvas-area">
-            <p className="muted">No project open</p>
-          </div>
+          <CanvasHost />
         </main>
         {right.collapsed ? null : (
           <ColumnSeparator side="right" label="Resize details" />
@@ -48,8 +63,8 @@ export function AppShell(): JSX.Element {
       <StatusBar
         problems={0}
         suggestions={0}
-        nodes={0}
-        channels={0}
+        nodes={counts.nodes}
+        channels={counts.channels}
         languageVersion={languageVersions[0]}
       />
     </div>

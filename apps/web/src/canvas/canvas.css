@@ -1,0 +1,43 @@
+.workflow-canvas {
+  position: absolute;
+  inset: 0;
+}
+
+.canvas-node {
+  box-sizing: border-box;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface);
+  font-size: 12px;
+  overflow: hidden;
+}
+
+.canvas-node.is-pill {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 0 var(--space-3);
+}
+
+.canvas-node-header {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-2) var(--space-3);
+}
+
+.canvas-node-title {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.canvas-node-subtitle {
+  color: var(--color-muted);
+}
+
+.react-flow__edge-path {
+  stroke: var(--color-muted);
+  stroke-width: 1.5;
+}
