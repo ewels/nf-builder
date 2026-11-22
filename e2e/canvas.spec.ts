@@ -8,13 +8,18 @@ import {
 import { WEB_DIST } from "../scripts/check-common.ts";
 import { SMOKE_TAG } from "./browsers.ts";
 import {
+  BAD_DECLARATION,
   canvasReady,
+  NODE,
+  node,
   openFixture,
+  openProject,
   openWorkflow,
   viewportZoom,
 } from "./canvas.ts";
 import { watchForCspViolations } from "./csp.ts";
 import type { EngineHook } from "./engine.ts";
+import { E2E_BASE_PATH } from "./urls.ts";
 
 interface Counts {
   nodes: number;
@@ -112,12 +117,103 @@ test("F-205 UX-26: zoom in and out change the zoom, fit view brings every node i
   await expect(page.locator(".react-flow__minimap-node")).toHaveCount(total);
 });
 
+test("F-205 UX-21 UX-22: each node shows its icon, title and subtitle, inputs on the left edge and outputs on the right", async ({
+  page,
+}) => {
+  await page.goto("./");
+  await openFixture(page);
+  await canvasReady(page);
+  const greeted = node(page, NODE.greeted);
+  await expect(greeted.locator("[data-glyph='process'] svg")).toBeVisible();
+  await expect(greeted.locator(".canvas-node-title")).toHaveText("GREET");
+  await expect(greeted.locator(".canvas-node-subtitle")).toHaveText("process");
+  await expect(node(page, NODE.wc).locator(".canvas-node-subtitle")).toHaveText(
+    "nf-core/wordcount",
+  );
+  await expect(
+    node(page, NODE.wc).locator("[data-glyph='module'] svg"),
+  ).toBeVisible();
+  const box = await greeted.boundingBox();
+  if (box === null) throw new Error("no node box");
+  const centre = box.x + box.width / 2;
+  const inputs = greeted.locator(".react-flow__handle.target");
+  const outputs = greeted.locator(".react-flow__handle.source");
+  expect(await inputs.count()).toBeGreaterThan(0);
+  expect(await outputs.count()).toBeGreaterThan(0);
+  for (const handle of await inputs.all()) {
+    const h = await handle.boundingBox();
+    expect((h?.x ?? Number.POSITIVE_INFINITY) < centre).toBe(true);
+  }
+  for (const handle of await outputs.all()) {
+    const h = await handle.boundingBox();
+    expect((h?.x ?? 0) > centre).toBe(true);
+  }
+  await expect(
+    greeted.locator(".canvas-port.is-input").first(),
+  ).not.toBeEmpty();
+});
+
+test("F-205 step 2 UX-23 ADR-0007: typed processes and workflows show the typed badge; legacy processes, workflows and modules show none", async ({
+  page,
+}) => {
+  await page.goto("./");
+  await openFixture(page);
+  await canvasReady(page);
+  for (const id of [NODE.greeted, NODE.shouted])
+    await expect(node(page, id).locator(".canvas-badge")).toHaveText("typed");
+  for (const id of [NODE.counted, NODE.wc, NODE.tail, NODE.params])
+    await expect(node(page, id).locator(".canvas-badge")).toHaveCount(0);
+});
+
+test("F-205 UX-21: the port labels toggle hides and restores labels and node height", async ({
+  page,
+}) => {
+  await page.goto("./");
+  await openFixture(page);
+  await canvasReady(page);
+  const greeted = node(page, NODE.greeted);
+  const labelled = await greeted.boundingBox();
+  const toggle = page.getByRole("button", { name: "Hide port labels" });
+  await expect(toggle).toHaveAttribute("aria-pressed", "false");
+  await toggle.click();
+  const show = page.getByRole("button", { name: "Show port labels" });
+  await expect(show).toHaveAttribute("aria-pressed", "true");
+  await expect(greeted.locator(".canvas-port")).toHaveCount(0);
+  await expect
+    .poll(async () => (await greeted.boundingBox())?.height ?? 0)
+    .toBeLessThan((labelled?.height ?? 0) - 1);
+  await show.click();
+  await expect(greeted.locator(".canvas-port").first()).toBeVisible();
+  await expect
+    .poll(async () => (await greeted.boundingBox())?.height ?? 0)
+    .toBeCloseTo(labelled?.height ?? 0, 0);
+});
+
+test('F-205 UX-22: an unparsed callee draws with an error outline and "could not be parsed"', async ({
+  page,
+}) => {
+  await page.goto("./");
+  await openProject(page, [
+    { path: "main.nf", text: readFileSync(BAD_DECLARATION, "utf8") },
+  ]);
+  await canvasReady(page);
+  const bad = page.locator(".canvas-node.is-unparsed");
+  await expect(bad).toHaveCount(1);
+  await expect(bad.locator(".canvas-node-title")).toHaveText("SECOND");
+  await expect(bad.locator(".canvas-node-subtitle")).toHaveText(
+    "could not be parsed",
+  );
+  await expect(bad).toHaveCSS("border-top-width", "2px");
+  await expect(bad).toHaveCSS("border-top-color", "rgb(155, 28, 28)");
+  await expect(bad.locator("[data-glyph='unparsed'] svg")).toBeVisible();
+});
+
 test("F-205 QA-01 ADR-0003: React Flow is only in a lazy chunk", () => {
   const manifest = JSON.parse(
     readFileSync(join(WEB_DIST, ".vite/manifest.json"), "utf8"),
   ) as Manifest;
   const html = readFileSync(join(WEB_DIST, "index.html"), "utf8");
-  const initial = new Set(initialJsFiles(manifest, html));
+  const initial = new Set(initialJsFiles(manifest, html, E2E_BASE_PATH));
   const canvas = Object.entries(manifest).find(([key]) =>
     key.endsWith("canvas/workflow-canvas.tsx"),
   );

@@ -4,37 +4,181 @@
 }
 
 .canvas-node {
+  position: relative;
   box-sizing: border-box;
   border: 1px solid var(--color-border);
   border-radius: 8px;
   background: var(--color-surface);
+  color: var(--color-text);
   font-size: 12px;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .canvas-node.is-pill {
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: var(--space-1);
   border-radius: 999px;
   padding: 0 var(--space-3);
 }
 
+.canvas-node.is-take,
+.canvas-node.is-emit {
+  border-style: dashed;
+}
+
+.canvas-node.is-process {
+  border-color: var(--tone-green-fg);
+}
+.canvas-node.is-module {
+  border-color: var(--tone-green-fg);
+  border-width: 2px;
+}
+.canvas-node.is-workflow {
+  border-color: var(--tone-blue-fg);
+  box-shadow: 4px 4px 0 var(--tone-blue-bg);
+}
+.canvas-node.is-chain {
+  border-color: var(--tone-amber-fg);
+  background: var(--tone-amber-bg);
+}
+.canvas-node.is-factory,
+.canvas-node.is-params {
+  border-color: var(--tone-purple-fg);
+}
+.canvas-node.is-output,
+.canvas-node.is-emit {
+  border-color: var(--tone-pink-fg);
+}
+.canvas-node.is-take {
+  border-color: var(--tone-blue-fg);
+}
+.canvas-node.is-code {
+  border-color: var(--tone-grey-fg);
+  background: var(--tone-grey-bg);
+}
+.canvas-node.is-unparsed {
+  border: 2px solid var(--color-error);
+  background: var(--tone-red-bg);
+}
+
 .canvas-node-header {
   display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0 var(--space-3);
+  overflow: hidden;
+  border-radius: 7px 7px 0 0;
+}
+
+.canvas-node-text {
+  display: flex;
   flex-direction: column;
-  padding: var(--space-2) var(--space-3);
+  min-width: 0;
+}
+
+.canvas-glyph {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
 }
 
 .canvas-node-title {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-weight: 600;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+.canvas-node-title.is-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-weight: 400;
+}
+
+.canvas-node.is-pill .canvas-node-title {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-weight: 400;
+}
+
 .canvas-node-subtitle {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   color: var(--color-muted);
+}
+
+.canvas-node.is-unparsed .canvas-node-subtitle {
+  color: var(--color-error);
+  font-weight: 600;
+}
+
+.canvas-pill-prefix {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.canvas-badge {
+  position: absolute;
+  top: 0;
+  right: var(--space-3);
+  transform: translateY(-50%);
+  z-index: 1;
+  padding: 0 6px;
+  font-size: 10px;
+  line-height: 14px;
+  color: var(--tone-blue-fg);
+  background: var(--tone-blue-bg);
+  border: 1px solid var(--tone-blue-fg);
+  border-radius: 8px;
+}
+
+.canvas-ports {
+  display: flex;
+  flex-direction: column;
+}
+
+.canvas-port-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-2);
+  height: var(--port-row);
+  padding: 0 var(--space-3);
+  font-size: 11px;
+  line-height: 1;
+}
+
+.canvas-port {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--color-muted);
+}
+
+.canvas-port.is-output {
+  margin-left: auto;
+  text-align: right;
+}
+
+.canvas-node .react-flow__handle {
+  width: 8px;
+  height: 8px;
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-muted);
+}
+
+.canvas-node.is-compact .react-flow__handle {
+  width: 6px;
+  height: 6px;
 }
 
 .react-flow__edge-path {
