@@ -51,11 +51,9 @@ Sketch, to be fixed in M1:
 ```ts
 interface LanguagePack {
   version: string;                      // "26.10"
-  parseScript(text: string): ParseResult;
-  parseConfig(text: string): ParseResult;
+  loadParser(): Promise<SourceParser>;  // parser and printer, lazily loaded (ADR 0033)
   palette: PaletteDefinition;           // palette.json, ADR 0025
   loadCatalogue(): Promise<Catalogue>;  // generated, lazily loaded (ADR 0005, ADR 0028)
-  printer: Printer;                     // declarations → text, ADR 0005
   lints: LintRule[];
   templates: Template[];
   defaults: ProjectDefaults;

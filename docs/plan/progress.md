@@ -283,3 +283,15 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - The upstream bugs are in `docs/research/upstream-bugs.md` for the maintainer to file.
   - `formatted*/` goldens are generated files (`pnpm oracle --write-format`, AGENTS.md); `docs/licences.md` rows for the ported formatter and its tests. No new dependency, no workflow edit.
 - Blockers: none.
+
+## 2026-11-22 · F-104 · Claude (autonomous)
+- Did: lossless per-file model. `SourceFile` (AR-01) in lang-core; a hand-written pre-scanner and a chunked fallback parse in `lang-2610/src/source/`; items with builder errors or failing chunks become `Unparsed`; the engine builds, prints (untouched items from their source slices) and compares (`equivalent`) source files; `LanguagePack.loadParser()` loads the parser and the printer as one lazy chunk. All 570 corpus files and the 9 fixtures round-trip byte for byte; the malformed fixtures are isolated as recorded.
+- State: passing.
+- Next: F-105 and F-501 in parallel.
+- Decisions:
+  - Declaration-level fallback in two tiers, the pre-scanner rules, `scope: "file"` for whole-script checks, the status rule, print from source slices, the reading of the glossary's "equivalent", `Unparsed` in the AST unions, `source: "internal"`, and a lazy `loadParser()` carrying the printer, replacing the sketch's synchronous parse methods ([ADR 0033](../adr/0033-declaration-fallback-and-source-file.md); architecture sketch updated).
+  - Types in lang-core, scanner and isolation in the pack, `SourceFile` construction, print and equivalence in the engine; no boundary change.
+  - `SourceFile` is in memory only, not a stored or exported format. `yaml` as a lang-2610 dev dependency and Node types for engine tests; no new runtime dependency.
+  - A lazy-chunk end-to-end test guards QA-01 even though F-104 has no UI.
+  - Flaky F-102 comment tests under load get explicit 30 s timeouts (no assertion changed).
+- Blockers: none.

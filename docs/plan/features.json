@@ -266,8 +266,8 @@
         "Corpus test: parse and print every file with no edits; output is equivalent (spec glossary) for 100% of files",
         "Malformed fixtures: the bad declaration is isolated, the rest of the file is modelled"
       ],
-      "passes": false,
-      "notes": "From F-102: parseScriptAst (lang-2610, internal) returns ScriptParseResult; declarations with builder errors are listed in errors by range; section-order.nf gives an InvalidDeclaration. Add LanguagePack.loadParser and SourceFile (AR-01) here. From F-103: parseConfigAst (packages/lang-2610/src/ast/config/parse.ts, internal) gives top-level ConfigAssign/ConfigBlock/ConfigInclude/ConfigApplyBlock statements with ranges (fixtures.yaml names: assign <path>, block <name>), ConfigInvalid (statement omitted after a fatal error) and ConfigIncomplete kept, and every comment attached once with the root list in order. From F-110: printScript, printDeclaration and createLayout live in packages/lang-2610/src/printer/ (not on the pack entry); wire one lazy loader that carries both the parser and the printer."
+      "passes": true,
+      "notes": "From F-102: parseScriptAst (lang-2610, internal) returns ScriptParseResult; declarations with builder errors are listed in errors by range; section-order.nf gives an InvalidDeclaration. Add LanguagePack.loadParser and SourceFile (AR-01) here. From F-103: parseConfigAst (packages/lang-2610/src/ast/config/parse.ts, internal) gives top-level ConfigAssign/ConfigBlock/ConfigInclude/ConfigApplyBlock statements with ranges (fixtures.yaml names: assign <path>, block <name>), ConfigInvalid (statement omitted after a fatal error) and ConfigIncomplete kept, and every comment attached once with the root list in order. From F-110: printScript, printDeclaration and createLayout live in packages/lang-2610/src/printer/ (not on the pack entry); wire one lazy loader that carries both the parser and the printer. Verified 2026-11-22: step 1 by packages/engine/test/corpus/round-trip.corpus.ts in CI corpus-parse: all 570 corpus files plus the 9 fixtures print back byte for byte and are equivalent to their re-parse; every model accounts for every character; every lint-clean file is fully modelled (571 modelled, 7 partial, 1 verbatim, the last 8 being lint-rejected fixtures). Step 2 by packages/lang-2610/test/source/malformed-fixtures.test.ts against fixtures.yaml (all 9), with fallback.corpus.ts (the pre-scanner's chunks parse alone and stitch back into the whole-file AST on all 570 corpus files) and truncation tests (IO-14). The parser and printer load lazily (e2e/parser-chunk.spec.ts, ADR 0033)."
     },
     {
       "id": "F-105",
@@ -285,7 +285,7 @@
         "Changing one file re-models only that file and its dependants (asserted via instrumentation)"
       ],
       "passes": false,
-      "notes": "From F-103: includeConfig sources are ConfigInclude nodes with the source expression; resolving them (and reporting 'Invalid include source') is F-105's."
+      "notes": "From F-103: includeConfig sources are ConfigInclude nodes with the source expression; resolving them (and reporting 'Invalid include source') is F-105's. From F-104: SourceFile (lang-core) with status modelled/partial/verbatim/plain; top-level Unparsed items keep their text and a DeclarationHead (keyword, name); engine createSourceFile(path, text, await loadParser(version)); the loaded SourceParser also carries the printer."
     },
     {
       "id": "F-106",
@@ -411,7 +411,7 @@
         "An edit that would mix typed and legacy definitions in one script is refused with a message"
       ],
       "passes": false,
-      "notes": "From F-110: nodes an edit creates carry NO_RANGE and get the fresh layout (ADR 0032); synthesised triple-quoted strings carry their final indentation and StringLiteral.text must be set. Never write a print whose missingComments is non-empty. printDeclaration reprints and normalises the whole declaration (println 'x' becomes println('x')); decide whether AddCall needs statement-level printing (AR-22)."
+      "notes": "From F-110: nodes an edit creates carry NO_RANGE and get the fresh layout (ADR 0032); synthesised triple-quoted strings carry their final indentation and StringLiteral.text must be set. Never write a print whose missingComments is non-empty. printDeclaration reprints and normalises the whole declaration (println 'x' becomes println('x')); decide whether AddCall needs statement-level printing (AR-22). From F-104: printSourceFile and equivalent (engine/src/source/) are the base for AR-22: replace an item's slice with printer output (SourceParser.printer) and check every other item stays equivalent."
     },
     {
       "id": "F-112",
@@ -437,7 +437,7 @@
         "Every message states what to do; mechanical cases carry a quick-fix command"
       ],
       "passes": false,
-      "notes": "From F-101: 8 ported AgentParserTest inputs (L485-L491, L518: agent output types, eval not defined) parse and are rejected only by name and type resolution (owner F-112 in packages/lang-2610/test/ported/cases.json). From F-102: AST-builder errors come with nf-lang wording in ScriptParseResult.errors (source builder or parser); warnings (ScriptAstBuilder.java #L597, #L619, #L634, #L695, #L824, #L836, #L977, #L1059) and resolver errors are F-112's. From F-103: selector placement, includeConfig placement and include resolution are resolver checks, not AST-builder errors (lint 26.10.7: a selector inside docker passes lint; includeConfig inside process gives 'Config includes are only allowed at the top-level or in a profile'); decimal number-format errors are not ported."
+      "notes": "From F-101: 8 ported AgentParserTest inputs (L485-L491, L518: agent output types, eval not defined) parse and are rejected only by name and type resolution (owner F-112 in packages/lang-2610/test/ported/cases.json). From F-102: AST-builder errors come with nf-lang wording in ScriptParseResult.errors (source builder or parser); warnings (ScriptAstBuilder.java #L597, #L619, #L634, #L695, #L824, #L836, #L977, #L1059) and resolver errors are F-112's. From F-103: selector placement, includeConfig placement and include resolution are resolver checks, not AST-builder errors (lint 26.10.7: a selector inside docker passes lint; includeConfig inside process gives 'Config includes are only allowed at the top-level or in a profile'); decimal number-format errors are not ported. From F-104: whole-script checks carry scope 'file' and never isolate a declaration; Unparsed.problems hold the chunk's own errors; source 'internal' marks caught exceptions and model-check failures."
     },
     {
       "id": "F-113",
@@ -456,7 +456,7 @@
         "The main thread does no parsing (asserted in a Playwright performance trace)"
       ],
       "passes": false,
-      "notes": "From F-201's plan: the shell reads installed pack versions through engine on the main thread; once a pack's entry holds the parser, move that list behind the worker so the parser stays out of the initial bundle (QA-01 check will catch it). From F-006: QA-03 risk. Sarek parses in 1.1 s warm but 15.9 s cold in Node (first-use DFA construction for real grammar ambiguities; upstream Java pays it too). Measure in the worker, then consider parsing open or changed files first, warming the parser at worker start, or caching parse results. 2026-11-22, maintainer (ADR 0029): QA-03 no longer asks for 3 s. The worker must keep the UI responsive and report loading progress; sarek must finish within 30 s on the CI reference profile. The earlier cold-start note no longer needs lazy parsing or caching."
+      "notes": "From F-201's plan: the shell reads installed pack versions through engine on the main thread; once a pack's entry holds the parser, move that list behind the worker so the parser stays out of the initial bundle (QA-01 check will catch it). From F-006: QA-03 risk. Sarek parses in 1.1 s warm but 15.9 s cold in Node (first-use DFA construction for real grammar ambiguities; upstream Java pays it too). Measure in the worker, then consider parsing open or changed files first, warming the parser at worker start, or caching parse results. 2026-11-22, maintainer (ADR 0029): QA-03 no longer asks for 3 s. The worker must keep the UI responsive and report loading progress; sarek must finish within 30 s on the CI reference profile. The earlier cold-start note no longer needs lazy parsing or caching. From F-104: LanguagePack.loadParser() is a dynamic import (parser and printer in one chunk); call it in the worker. A failing file is parsed at most twice (whole, then per chunk); the whole-corpus round trip takes about 31 s in Node."
     },
     {
       "id": "F-201",
@@ -989,7 +989,7 @@
         "Export, clear storage, import the zip: layout identical (ADR 0008 confirmation)"
       ],
       "passes": false,
-      "notes": ""
+      "notes": "From F-104: untouched files export as printSourceFile output (byte-identical); IO-20 checks use engine equivalent()."
     },
     {
       "id": "F-405",
