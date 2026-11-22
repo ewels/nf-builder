@@ -654,14 +654,15 @@
       ],
       "depends_on": [
         "F-202",
-        "F-204"
+        "F-204",
+        "F-403"
       ],
       "steps": [
         "Create a file and a folder from the Files view, upload a file, and drop a zip: all appear in the tree and persist after reload",
         "A registry module folder shows the `registry` tag and a file with a syntax error shows an error badge"
       ],
       "passes": false,
-      "notes": "Added 2026-11-22 (F-204 PR, scope-change): UX-16 had no owning feature; F-301 and F-403 rely on the Files view."
+      "notes": "Added 2026-11-22 (F-204 PR, scope-change; Q16): UX-16 had no owning feature; F-301 step 1 relies on the Files view. Dropping a zip reuses F-403's zip import."
     },
     {
       "id": "F-301",
@@ -674,7 +675,8 @@
       ],
       "depends_on": [
         "F-204",
-        "F-209"
+        "F-209",
+        "F-210"
       ],
       "steps": [
         "Drag Process onto the canvas: node appears; Files shows `modules/local/<name>/main.nf`; main.nf has the include and call",
@@ -682,7 +684,7 @@
         "Exported result passes `nextflow lint`"
       ],
       "passes": false,
-      "notes": ""
+      "notes": "From F-204: palette item descriptions are only a title tooltip on non-focusable rows; making items focusable here must also expose descriptions to keyboard users (QA-11)."
     },
     {
       "id": "F-302",
