@@ -1,0 +1,19 @@
+workflow typed.nf#TYPED_TAIL typed
+typed.nf#TYPED_TAIL/:take:names take "names" @7:5
+  out out (out): Channel<String>
+typed.nf#TYPED_TAIL/prefix code "def prefix = 'typed'" @10:5
+  out prefix (prefix): String
+typed.nf#TYPED_TAIL/suffix code "suffix = prefix + '-tail'" @11:5
+  in prefix (prefix): -
+    <- typed.nf#TYPED_TAIL/prefix[prefix] String via prefix indirect
+  out suffix (suffix): -
+typed.nf#TYPED_TAIL/:code@1 code "log.info("suffix ${suffix}")" @12:5
+  in suffix (suffix): -
+    <- typed.nf#TYPED_TAIL/suffix[suffix] ? via suffix indirect
+typed.nf#TYPED_TAIL/out chain ".map" steps=map @13:11
+  in in (in): -
+    <- typed.nf#TYPED_TAIL/:take:names[out] Channel<String> via names
+  out out (out): Channel<?>
+typed.nf#TYPED_TAIL/:emit:out emit "out" @16:5
+  in in (in): Channel<String>
+    <- typed.nf#TYPED_TAIL/out[out] Channel<?> via out
