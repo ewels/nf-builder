@@ -141,3 +141,33 @@ jobs:
       - uses: ./.github/actions/corpus
       - name: The cache now holds every pin, so a second run is a no-op (F-009 step 2)
         run: pnpm corpus:fetch --check
+
+  oracle:
+    name: Nextflow oracle (ADR 0019)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
+        with:
+          distribution: temurin
+          java-version: "21"
+      - name: Restore the pinned Nextflow
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .cache/nextflow
+          key: nextflow-v1-${{ hashFiles('packages/lang-2610/upstream.json') }}
+      - name: Nextflow version (LA-03)
+        run: pnpm nextflow -- -version
+      - run: pnpm oracle
+      - name: Upload the oracle logs
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: nextflow-oracle
+          path: .cache/oracle/
+          retention-days: 30
+          if-no-files-found: ignore

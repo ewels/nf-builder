@@ -30,6 +30,7 @@ describe("CI workflows", () => {
       "features",
       "audit",
       "corpus",
+      "oracle",
     ]) {
       expect(ci, job).toMatch(new RegExp(`^  ${job}:`, "m"));
     }
@@ -38,7 +39,7 @@ describe("CI workflows", () => {
     }
     const jobs = ci.split(/^jobs:/m)[1] ?? "";
     const blocks = jobs.split(/^ {2}(?=[\w-]+:\s*$)/m).slice(1);
-    expect(blocks.length).toBe(8);
+    expect(blocks.length).toBe(9);
     for (const block of blocks) expect(block).toContain("timeout-minutes:");
     for (const command of [
       "pnpm check",
@@ -49,9 +50,25 @@ describe("CI workflows", () => {
       "node scripts/check-features.ts",
       "pnpm audit --audit-level high",
       "pnpm corpus:fetch --check",
+      "pnpm oracle",
     ]) {
       expect(ci, command).toContain(`run: ${command}`);
     }
+  });
+
+  it("F-005 ADR-0019: the oracle job sets up Temurin 21, caches .cache/nextflow keyed on upstream.json, prints the Nextflow version, runs pnpm oracle and uploads .cache/oracle even on failure", () => {
+    const ci = read(join(WORKFLOWS, "ci.yml"));
+    const job = ci.split(/^ {2}oracle:\s*$/m)[1] ?? "";
+    expect(job).toContain("distribution: temurin");
+    expect(job).toContain('java-version: "21"');
+    expect(job).toContain("path: .cache/nextflow");
+    expect(job).toContain("hashFiles('packages/lang-2610/upstream.json')");
+    expect(job).toContain("run: pnpm nextflow -- -version");
+    expect(job).toContain("run: pnpm oracle");
+    expect(job).toMatch(
+      /if: always\(\)\n\s+uses: actions\/upload-artifact@[0-9a-f]{40}[^\n]*\n(?:[^\n]*\n)*?\s+path: \.cache\/oracle\//,
+    );
+    expect(job).not.toContain("GITHUB_STEP_SUMMARY");
   });
 
   it("F-003: every action in .github/workflows and .github/actions is pinned to a full commit SHA with a version comment", () => {

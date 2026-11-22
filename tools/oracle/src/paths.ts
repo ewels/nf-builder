@@ -10,3 +10,4 @@ export const PIN_FILE = `${REPO_ROOT}/packages/lang-2610/upstream.json`;
 export const CACHE_DIR = `${REPO_ROOT}/.cache`;
 export const NEXTFLOW_CACHE = `${CACHE_DIR}/nextflow`;
 export const ORACLE_CACHE = `${CACHE_DIR}/oracle`;
+export const DEFAULT_MANIFEST = `${TOOL_DIR}/cases/cases.yaml`;
