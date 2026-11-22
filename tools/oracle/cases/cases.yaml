@@ -216,6 +216,40 @@ cases:
       - https://github.com/nextflow-io/nextflow/blob/v26.10.7/modules/nf-lang/src/main/java/nextflow/script/formatter/ScriptFormattingVisitor.java
     lint: { expect: ok }
     run: { expect: ok }
+  # F-107: legacy dataflow. The first is the projection fixture (lint clean, runs with -stub); the second records the
+  # runtime class of legacy values, and its probe lines are the output below (recorded from a real run, not written by hand).
+  - id: f107-legacy-dataflow
+    about: A legacy entry workflow and subworkflow with legacy params, pipes and forks, set and tap, .out by name and index, a process name in a variable, a ternary over .out, legacy-only operators and every legacy process qualifier.
+    spec: [F-107, AR-14, LA-21, LA-28]
+    sources:
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/workflow.mdx#L608-L629
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/workflow.mdx#L666-L723
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/process.mdx#L1065-L1089
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/process.mdx#L1105-L1116
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/reference/operator.mdx
+    lint: { expect: ok }
+    run: { expect: ok }
+  - id: f107-legacy-kinds
+    about: The runtime class of legacy values (value, queue or broadcast channel; each makes the result a channel), printed as probe lines.
+    spec: [F-107, LA-28, ADR-0005]
+    sources:
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/reference/operator.mdx
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/process.mdx#L671-L700
+    lint: { expect: ok }
+    run:
+      expect: ok
+      output:
+        [
+          "probe a DataflowBroadcast",
+          "probe b DataflowVariable",
+          "probe c DataflowVariable",
+          "probe ECHO.out.same DataflowBroadcast",
+          "probe ONE.out[0] DataflowVariable",
+          "probe TWO.out[0] DataflowBroadcast",
+          "probe concat DataflowBroadcast",
+          "probe last DataflowVariable",
+          "probe value.map DataflowVariable",
+        ]
   # F-108: code nodes with free-variable ports.
   - id: f108-code-nodes
     about: Arbitrary Groovy statements (declarations, tuple targets, if/else and try/catch assignments, compound assignment, GStrings, logging, list building, closures, a local function call, assert, workflow.onComplete) between dataflow in legacy workflows, plus a typed workflow with the same kinds of statements in its own file.

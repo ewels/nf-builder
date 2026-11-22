@@ -1,0 +1,28 @@
+workflow legacy-dataflow.nf# legacy
+statements 6, modelled 6
+legacy-dataflow.nf#/channel.of@1 factory "channel.of" factory=channel.of @15:5
+  out out (out): Channel<Integer>
+legacy-dataflow.nf#/.map@1 chain ".map.view" steps=map,view @15:27
+  in in (in): -
+    <- legacy-dataflow.nf#/channel.of@1[out] Channel<Integer>
+  out out (out): Channel<?>
+legacy-dataflow.nf#/channel.of@2 factory "channel.of" factory=channel.of @16:11
+  out out (out): Channel<String>
+legacy-dataflow.nf#/SPLIT@1 call "SPLIT" callee=SPLIT:process:modelled:legacy @16:5
+  in x (x): -
+    <- legacy-dataflow.nf#/channel.of@2[out] Channel<String>
+  out item (item): Channel<?>
+legacy-dataflow.nf#/.view@1 chain ".view" steps=view @17:5
+  in in (in): -
+    <- legacy-dataflow.nf#/SPLIT@1[item] Channel<?> via SPLIT.out.item
+  out out (out): Channel<?>
+legacy-dataflow.nf#/copy factory "channel.of" factory=channel.of @18:5
+  out out (out): Channel<String>
+legacy-dataflow.nf#/.view@2 chain ".view" steps=view @19:5
+  in in (in): -
+    <- legacy-dataflow.nf#/copy[out] Channel<String> via copy
+  out out (out): Channel<String>
+legacy-dataflow.nf#/.view@3 chain ".view" steps=view @20:5
+  in in (in): -
+    <- legacy-dataflow.nf#/copy[out] Channel<String> via original
+  out out (out): Channel<String>

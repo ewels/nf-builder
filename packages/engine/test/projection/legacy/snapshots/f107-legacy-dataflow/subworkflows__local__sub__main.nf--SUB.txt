@@ -1,0 +1,37 @@
+workflow subworkflows/local/sub/main.nf#SUB legacy
+statements 5, modelled 5
+subworkflows/local/sub/main.nf#SUB/:take:ch_names take "ch_names" @8:5
+  out out (out): -
+subworkflows/local/sub/main.nf#SUB/:take:do_upper take "do_upper" @9:5
+  out out (out): -
+subworkflows/local/sub/main.nf#SUB/ch_all factory "channel.empty" factory=channel.empty @12:14
+  out out (out): Channel<?>
+subworkflows/local/sub/main.nf#SUB/GREET@1 call "GREET" callee=GREET:process:modelled:legacy @13:5
+  in x (x): -
+    <- subworkflows/local/sub/main.nf#SUB/:take:ch_names[out] ? via ch_names
+  out out (out): Channel<String>
+subworkflows/local/sub/main.nf#SUB/ch_all~2 chain ".mix" steps=mix @14:14
+  in in (in): -
+    <- subworkflows/local/sub/main.nf#SUB/ch_all[out] Channel<?> via ch_all
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/sub/main.nf#SUB/GREET@1[out] Channel<String> via GREET.out
+  out out (out): Channel<?>
+subworkflows/local/sub/main.nf#SUB/TO_UPPER@1 call "TO_UPPER" callee=TO_UPPER:process:modelled:legacy @16:9
+  guards then of do_upper
+  in x (x): -
+    <- subworkflows/local/sub/main.nf#SUB/:take:ch_names[out] ? via ch_names
+  out out (out): Channel<String>
+subworkflows/local/sub/main.nf#SUB/ch_all~3 chain ".mix" steps=mix @17:18
+  guards then of do_upper
+  in in (in): -
+    <- subworkflows/local/sub/main.nf#SUB/ch_all~2[out] Channel<?> via ch_all
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/sub/main.nf#SUB/TO_UPPER@1[out] Channel<String> via TO_UPPER.out
+  out out (out): Channel<?>
+subworkflows/local/sub/main.nf#SUB/:emit:merged emit "merged" @21:5
+  in in (in): -
+    <- subworkflows/local/sub/main.nf#SUB/ch_all~2[out] Channel<?> via ch_all indirect
+    <- subworkflows/local/sub/main.nf#SUB/ch_all~3[out] Channel<?> via ch_all indirect
+subworkflows/local/sub/main.nf#SUB/:emit:greeted emit "greeted" @22:5
+  in in (in): -
+    <- subworkflows/local/sub/main.nf#SUB/GREET@1[out] Channel<String> via GREET.out

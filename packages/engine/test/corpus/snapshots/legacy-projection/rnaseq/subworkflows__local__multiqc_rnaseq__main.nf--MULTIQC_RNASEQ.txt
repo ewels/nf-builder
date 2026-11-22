@@ -1,0 +1,260 @@
+workflow subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ legacy
+statements 28, modelled 23
+subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/:take:ch_multiqc_files take "ch_multiqc_files" @16:5
+  out out (out): -
+subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/:take:ch_per_sample_bundle_raw take "ch_per_sample_bundle_raw" @17:5
+  out out (out): -
+subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/:take:ch_strand_data take "ch_strand_data" @18:5
+  out out (out): -
+subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/:take:ch_trim_read_count take "ch_trim_read_count" @19:5
+  out out (out): -
+subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/:take:ch_percent_mapped_pass take "ch_percent_mapped_pass" @20:5
+  out out (out): -
+subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/:take:aligner_display_name take "aligner_display_name" @21:5
+  out out (out): -
+subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/:take:ch_fastq take "ch_fastq" @22:5
+  out out (out): -
+subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/:take:ch_collated_versions take "ch_collated_versions" @23:5
+  out out (out): -
+subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/:take:samplesheet_path take "samplesheet_path" @24:5
+  out out (out): -
+subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/:take:samplesheet_schema take "samplesheet_schema" @25:5
+  out out (out): -
+subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/:take:mqc_default_config take "mqc_default_config" @26:5
+  out out (out): -
+subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/:take:mqc_custom_config take "mqc_custom_config" @27:5
+  out out (out): -
+subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/:take:mqc_logo take "mqc_logo" @28:5
+  out out (out): -
+subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/:take:methods_description_yml take "methods_description_yml" @29:5
+  out out (out): -
+subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/:take:strand_summary_asset take "strand_summary_asset" @30:5
+  out out (out): -
+subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/:take:strand_composition_asset take "strand_composition_asset" @31:5
+  out out (out): -
+subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/:take:sample_status_header take "sample_status_header" @32:5
+  out out (out): -
+subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/:take:min_trimmed_reads take "min_trimmed_reads" @33:5
+  out out (out): -
+subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/:take:skip_quantification_merge take "skip_quantification_merge" @34:5
+  out out (out): -
+subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/status_header_lines code "def status_header_lines = sample_status_header.readLines().…" @49:5
+  in sample_status_header (sample_status_header): -
+    <- subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/:take:sample_status_header[out] ? via sample_status_header indirect
+  out status_header_lines (status_header_lines): -
+subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/ch_sample_anchor_by_id chain ".map" steps=map @50:31
+  in in (in): -
+    <- subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/:take:ch_per_sample_bundle_raw[out] ? via ch_per_sample_bundle_raw
+  out out (out): ?
+subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/ch_fail_trimmed_fail_by_id chain ".filter.collectFile.map" steps=filter,collectFile,map @52:34
+  in in (in): -
+    <- subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/:take:ch_trim_read_count[out] ? via ch_trim_read_count
+  out out (out): Channel<?>
+subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/ch_fail_trimmed_all chain ".join.map" steps=join,map @62:27
+  in in (in): -
+    <- subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/ch_sample_anchor_by_id[out] ? via ch_sample_anchor_by_id
+  in 1:1 (join(right)): -
+    <- subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/ch_fail_trimmed_fail_by_id[out] Channel<?> via ch_fail_trimmed_fail_by_id
+  out out (out): Channel<?>
+subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/ch_fail_trimmed_merged chain ".map.flatten.collectFile.map" steps=map,flatten,collectFile,map @66:30
+  in in (in): -
+    <- subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/ch_fail_trimmed_all[out] Channel<?> via ch_fail_trimmed_all
+  out out (out): Channel<?>
+subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/ch_fail_mapped_fail_by_id chain ".filter.collectFile.map" steps=filter,collectFile,map @72:33
+  in in (in): -
+    <- subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/:take:ch_percent_mapped_pass[out] ? via ch_percent_mapped_pass
+  out out (out): Channel<?>
+subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/ch_fail_mapped_all chain ".join.map" steps=join,map @82:26
+  in in (in): -
+    <- subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/ch_sample_anchor_by_id[out] ? via ch_sample_anchor_by_id
+  in 1:1 (join(right)): -
+    <- subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/ch_fail_mapped_fail_by_id[out] Channel<?> via ch_fail_mapped_fail_by_id
+  out out (out): Channel<?>
+subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/ch_fail_mapped_merged chain ".map.flatten.collectFile.map" steps=map,flatten,collectFile,map @86:29
+  in in (in): -
+    <- subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/ch_fail_mapped_all[out] Channel<?> via ch_fail_mapped_all
+  in 3:3 (collectFile(opts)): -
+    <- subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/status_header_lines[status_header_lines] ? via status_header_lines
+  out out (out): Channel<?>
+subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/strand_summary_static code "def strand_summary_static     = loadMultiqcAsset(strand_sum…" @100:5
+  in strand_summary_asset (strand_summary_asset): -
+    <- subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/:take:strand_summary_asset[out] ? via strand_summary_asset indirect
+  out strand_summary_static (strand_summary_static): -
+subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/strand_composition_static code "def strand_composition_static = loadMultiqcAsset(strand_com…" @101:5
+  in strand_composition_asset (strand_composition_asset): -
+    <- subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/:take:strand_composition_asset[out] ? via strand_composition_asset indirect
+  in strand_summary_static (strand_summary_static): -
+    <- subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/strand_summary_static[strand_summary_static] ? via strand_summary_static indirect
+  out strand_composition_static (strand_composition_static): -
+subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/channel.of@1 factory "channel.of" factory=channel.of @106:29
+  out out (out): Channel<?>
+subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/ch_mqc_dynamic_config chain ".collectFile" steps=collectFile @106:29
+  in in (in): -
+    <- subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/channel.of@1[out] Channel<?>
+  out out (out): Channel<?>
+subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/channel.value@1 factory "channel.value" factory=channel.value @110:27
+  out out (out): Value<?>
+subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/ch_workflow_summary chain ".collectFile" steps=collectFile @110:27
+  in in (in): -
+    <- subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/channel.value@1[out] Value<?>
+  out out (out): ?
+subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/channel.value@2 factory "channel.value" factory=channel.value @114:30
+  out out (out): Value<?>
+subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/ch_methods_description chain ".collectFile" steps=collectFile @114:30
+  in in (in): -
+    <- subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/channel.value@2[out] Value<?>
+  out out (out): ?
+subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/buildMultiqcInputTuple code "def buildMultiqcInputTuple = { id, files, dynamic_config, r…" @131:5
+  in mqc_default_config (mqc_default_config): -
+    <- subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/:take:mqc_default_config[out] ? via mqc_default_config indirect
+  in mqc_custom_config (mqc_custom_config): -
+    <- subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/:take:mqc_custom_config[out] ? via mqc_custom_config indirect
+  in mqc_logo (mqc_logo): -
+    <- subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/:take:mqc_logo[out] ? via mqc_logo indirect
+  out buildMultiqcInputTuple (buildMultiqcInputTuple): -
+subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/ch_strand_summary_by_id chain ".collectFile.map" steps=collectFile,map @143:35
+  guards then of skip_quantification_merge
+  in in (in): -
+    <- subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/:take:ch_strand_data[out] ? via ch_strand_data
+  out out (out): Channel<?>
+subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/ch_strand_composition_by_id chain ".collectFile.map" steps=collectFile,map @152:39
+  guards then of skip_quantification_merge
+  in in (in): -
+    <- subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/:take:ch_strand_data[out] ? via ch_strand_data
+  out out (out): Channel<?>
+subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/.map@1 chain ".map" steps=map @166:19
+  guards then of skip_quantification_merge
+  in in (in): -
+    <- subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/ch_fail_trimmed_all[out] Channel<?> via ch_fail_trimmed_all
+  out out (out): Channel<?>
+subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/.map@2 chain ".map" steps=map @167:19
+  guards then of skip_quantification_merge
+  in in (in): -
+    <- subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/ch_fail_mapped_all[out] Channel<?> via ch_fail_mapped_all
+  out out (out): Channel<?>
+subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/ch_per_sample_bundle chain ".join.join.join.join.map" steps=join,join,join,join,map @165:32
+  guards then of skip_quantification_merge
+  in in (in): -
+    <- subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/:take:ch_per_sample_bundle_raw[out] ? via ch_per_sample_bundle_raw
+  in 1:1 (join(right)): -
+    <- subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/.map@1[out] Channel<?>
+  in 2:1 (join(right)): -
+    <- subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/.map@2[out] Channel<?>
+  in 3:1 (join(right)): -
+    <- subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/ch_strand_summary_by_id[out] Channel<?> via ch_strand_summary_by_id
+  in 4:1 (join(right)): -
+    <- subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/ch_strand_composition_by_id[out] Channel<?> via ch_strand_composition_by_id
+  out out (out): Channel<?>
+subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/channel.value@3 factory "channel.value" factory=channel.value @179:32
+  guards then of skip_quantification_merge
+  out out (out): Value<?>
+subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/ch_manifest_versions chain ".collectFile" steps=collectFile @179:32
+  guards then of skip_quantification_merge
+  in in (in): -
+    <- subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/channel.value@3[out] Value<?>
+  out out (out): ?
+subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/ch_static_globals chain ".mix.mix.collect" steps=mix,mix,collect @182:29
+  guards then of skip_quantification_merge
+  in in (in): -
+    <- subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/ch_workflow_summary[out] ? via ch_workflow_summary
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/ch_methods_description[out] ? via ch_methods_description
+  in 2:1 (mix(other)): -
+    <- subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/ch_manifest_versions[out] ? via ch_manifest_versions
+  out out (out): Value<Bag<?>>
+subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/ch_global_files chain ".mix.map.collect.ifEmpty" steps=mix,map,collect,ifEmpty @187:27
+  guards then of skip_quantification_merge
+  in in (in): -
+    <- subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/ch_fail_trimmed_merged[out] Channel<?> via ch_fail_trimmed_merged
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/ch_fail_mapped_merged[out] Channel<?> via ch_fail_mapped_merged
+  out out (out): ?
+subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/.toList@1 chain ".toList" steps=toList @195:22
+  guards then of skip_quantification_merge
+  in in (in): -
+    <- subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/ch_global_files[out] ? via ch_global_files
+  out out (out): Value<?>
+subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/ch_multiqc_input chain ".combine.combine.combine.map" steps=combine,combine,combine,map @193:28
+  guards then of skip_quantification_merge
+  in in (in): -
+    <- subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/ch_per_sample_bundle[out] Channel<?> via ch_per_sample_bundle
+  in 1:1 (combine(right)): -
+    <- subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/ch_static_globals[out] Value<Bag<?>> via ch_static_globals indirect
+  in 2:1 (combine(right)): -
+    <- subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/.toList@1[out] Value<?>
+  in 3:1 (combine(right)): -
+    <- subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/ch_mqc_dynamic_config[out] Channel<?> via ch_mqc_dynamic_config
+  out out (out): Channel<?>
+subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/ch_strand_rows chain ".collect" steps=collect @209:26
+  guards else of skip_quantification_merge
+  in in (in): -
+    <- subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/:take:ch_strand_data[out] ? via ch_strand_data
+  out out (out): Value<?>
+subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/ch_strand_summary_merged chain ".map.collectFile.map" steps=map,collectFile,map @211:36
+  guards else of skip_quantification_merge
+  in in (in): -
+    <- subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/ch_strand_rows[out] Value<?> via ch_strand_rows
+  out out (out): ?
+subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/ch_strand_composition_merged chain ".map.collectFile.map" steps=map,collectFile,map @216:40
+  guards else of skip_quantification_merge
+  in in (in): -
+    <- subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/ch_strand_rows[out] Value<?> via ch_strand_rows
+  out out (out): ?
+subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/ch_name_replacements code "ch_name_replacements = multiqcNameReplacements(ch_fastq)" @222:9
+  guards else of skip_quantification_merge
+  in ch_fastq (ch_fastq): -
+    <- subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/:take:ch_fastq[out] ? via ch_fastq indirect
+  out ch_name_replacements (ch_name_replacements): -
+subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/.mix@1 chain ".mix.mix.map" steps=mix,mix,map @231:18
+  guards else of skip_quantification_merge
+  in in (in): -
+    <- subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/ch_workflow_summary[out] ? via ch_workflow_summary
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/:take:ch_collated_versions[out] ? via ch_collated_versions
+  in 2:1 (mix(other)): -
+    <- subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/ch_methods_description[out] ? via ch_methods_description
+  out out (out): Channel<?>
+subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/ch_multiqc_files_merged chain ".mix.mix.mix.mix.mix" steps=mix,mix,mix,mix,mix @226:35
+  guards else of skip_quantification_merge
+  in in (in): -
+    <- subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/:take:ch_multiqc_files[out] ? via ch_multiqc_files
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/ch_fail_trimmed_merged[out] Channel<?> via ch_fail_trimmed_merged
+  in 2:1 (mix(other)): -
+    <- subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/ch_fail_mapped_merged[out] Channel<?> via ch_fail_mapped_merged
+  in 3:1 (mix(other)): -
+    <- subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/ch_strand_summary_merged[out] ? via ch_strand_summary_merged
+  in 4:1 (mix(other)): -
+    <- subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/ch_strand_composition_merged[out] ? via ch_strand_composition_merged
+  in 5:1 (mix(other)): -
+    <- subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/.mix@1[out] Channel<?>
+  out out (out): Channel<?>
+subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/.ifEmpty@1 chain ".ifEmpty.toList" steps=ifEmpty,toList @237:22
+  guards else of skip_quantification_merge
+  in in (in): -
+    <- subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/ch_name_replacements[ch_name_replacements] ? via ch_name_replacements
+  out out (out): Value<?>
+subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/ch_multiqc_input~2 chain ".map.collect.map.combine.combine.map" steps=map,collect,map,combine,combine,map @233:28
+  guards else of skip_quantification_merge
+  in in (in): -
+    <- subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/ch_multiqc_files_merged[out] Channel<?> via ch_multiqc_files_merged
+  in 4:1 (combine(right)): -
+    <- subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/.ifEmpty@1[out] Value<?>
+  in 5:1 (combine(fields)): -
+    <- subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/ch_mqc_dynamic_config[out] Channel<?> via ch_mqc_dynamic_config
+  out out (out): Value<?>
+subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/MULTIQC@1 call "MULTIQC" callee=MULTIQC:process:modelled:legacy @244:5
+  in $1 (tuple(meta, multiqc_files, multiqc_config, multiqc_logo, replace_names, sample_names)): Tuple
+    <- subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/ch_multiqc_input[out] Channel<?> via ch_multiqc_input indirect
+    <- subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/ch_multiqc_input~2[out] Value<?> via ch_multiqc_input indirect
+  out report (report): Channel<Tuple>
+  out data (data): Channel<Tuple>
+  out plots (plots): Channel<Tuple>
+  out versions (versions): Channel<Tuple>
+subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/.map@3 chain ".map" steps=map @247:14
+  in in (in): -
+    <- subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/MULTIQC@1[report] Channel<Tuple> via MULTIQC.out.report
+  out out (out): Channel<?>
+subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/:emit:report emit "report" @247:5
+  in in (in): -
+    <- subworkflows/local/multiqc_rnaseq/main.nf#MULTIQC_RNASEQ/.map@3[out] Channel<?>

@@ -1,0 +1,29 @@
+workflow modules/rnaseq.nf#RNASEQ legacy
+statements 4, modelled 4
+modules/rnaseq.nf#RNASEQ/:take:read_pairs_ch take "read_pairs_ch" @7:5
+  out out (out): -
+modules/rnaseq.nf#RNASEQ/:take:transcriptome take "transcriptome" @8:5
+  out out (out): -
+modules/rnaseq.nf#RNASEQ/index call "INDEX" callee=INDEX:process:modelled:legacy @11:13
+  in transcriptome (transcriptome): Path
+    <- modules/rnaseq.nf#RNASEQ/:take:transcriptome[out] ? via transcriptome
+  out out (out): Channel<Path>
+modules/rnaseq.nf#RNASEQ/fastqc_ch call "FASTQC" callee=FASTQC:process:modelled:legacy @12:17
+  in $1 (tuple(id, fastq_1, fastq_2)): Tuple
+    <- modules/rnaseq.nf#RNASEQ/:take:read_pairs_ch[out] ? via read_pairs_ch
+  out out (out): Channel<Tuple>
+modules/rnaseq.nf#RNASEQ/quant_ch call "QUANT" callee=QUANT:process:modelled:legacy @13:16
+  in $1 (tuple(id, fastq_1, fastq_2)): Tuple
+    <- modules/rnaseq.nf#RNASEQ/:take:read_pairs_ch[out] ? via read_pairs_ch
+  in index (index): Path
+    <- modules/rnaseq.nf#RNASEQ/index[out] Channel<Path> via index
+  out out (out): Channel<Tuple>
+modules/rnaseq.nf#RNASEQ/samples_ch chain ".join" steps=join @14:18
+  in in (in): -
+    <- modules/rnaseq.nf#RNASEQ/fastqc_ch[out] Channel<Tuple> via fastqc_ch
+  in 1:1 (join(1)): -
+    <- modules/rnaseq.nf#RNASEQ/quant_ch[out] Channel<Tuple> via quant_ch
+  out out (out): Channel<?>
+modules/rnaseq.nf#RNASEQ/:emit:samples emit "samples" @17:5
+  in in (in): -
+    <- modules/rnaseq.nf#RNASEQ/samples_ch[out] Channel<?> via samples_ch

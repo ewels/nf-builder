@@ -1,0 +1,266 @@
+workflow subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL legacy
+statements 19, modelled 17
+subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/:take:vcf take "vcf" @13:5
+  out out (out): -
+subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/:take:fasta take "fasta" @14:5
+  out out (out): -
+subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/:take:tools take "tools" @15:5
+  out out (out): -
+subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/:take:snpeff_db take "snpeff_db" @16:5
+  out out (out): -
+subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/:take:snpeff_cache take "snpeff_cache" @17:5
+  out out (out): -
+subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/:take:vep_genome take "vep_genome" @18:5
+  out out (out): -
+subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/:take:vep_species take "vep_species" @19:5
+  out out (out): -
+subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/:take:vep_cache_version take "vep_cache_version" @20:5
+  out out (out): -
+subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/:take:vep_cache take "vep_cache" @21:5
+  out out (out): -
+subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/:take:vep_extra_files take "vep_extra_files" @22:5
+  out out (out): -
+subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/:take:bcftools_annotations take "bcftools_annotations" @23:5
+  out out (out): -
+subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/:take:bcftools_annotations_index take "bcftools_annotations_index" @24:5
+  out out (out): -
+subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/:take:bcftools_columns take "bcftools_columns" @25:5
+  out out (out): -
+subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/:take:bcftools_header_lines take "bcftools_header_lines" @26:5
+  out out (out): -
+subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/:take:snpsift_db take "snpsift_db" @27:5
+  out out (out): -
+subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/vcf_ann factory "channel.empty" factory=channel.empty @30:15
+  out out (out): Channel<?>
+subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/tab_ann factory "channel.empty" factory=channel.empty @31:15
+  out out (out): Channel<?>
+subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/json_ann factory "channel.empty" factory=channel.empty @32:16
+  out out (out): Channel<?>
+subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/.map@1 chain ".map.combine.combine.combine.combine.map" steps=map,combine,combine,combine,combine,map @36:13
+  guards then of tools.split(',').contains('bcfann')
+  in in (in): -
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/:take:vcf[out] ? via vcf
+  in 2:1 (combine(right)): -
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/:take:bcftools_annotations[out] ? via bcftools_annotations
+  in 3:1 (combine(right)): -
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/:take:bcftools_annotations_index[out] ? via bcftools_annotations_index
+  in 4:1 (combine(right)): -
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/:take:bcftools_columns[out] ? via bcftools_columns
+  in 5:1 (combine(right)): -
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/:take:bcftools_header_lines[out] ? via bcftools_header_lines
+  out out (out): ?
+subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/BCFTOOLS_ANNOTATE@1 call "BCFTOOLS_ANNOTATE" callee=BCFTOOLS_ANNOTATE:process:modelled:legacy @35:9
+  guards then of tools.split(',').contains('bcfann')
+  in $1 (tuple(meta, input, index, annotations, annotations_index, columns, header_lines, rename_chrs)): Tuple
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/.map@1[out] ?
+  out vcf (vcf): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out versions_bcftools (versions_bcftools): Channel<Tuple>
+subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/.join@1 chain ".join" steps=join @39:31
+  guards then of tools.split(',').contains('bcfann')
+  in in (in): -
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/BCFTOOLS_ANNOTATE@1[vcf] Channel<Tuple> via BCFTOOLS_ANNOTATE.out.vcf
+  in 1:1 (join(right)): -
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/BCFTOOLS_ANNOTATE@1[index] Channel<Tuple> via BCFTOOLS_ANNOTATE.out.index
+  out out (out): Channel<Record>
+subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/vcf_ann~2 chain ".mix" steps=mix @39:19
+  guards then of tools.split(',').contains('bcfann')
+  in in (in): -
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/vcf_ann[out] Channel<?> via vcf_ann
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/.join@1[out] Channel<Record>
+  out out (out): Channel<?>
+subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/VCF_ANNOTATE_SNPEFF@1 call "VCF_ANNOTATE_SNPEFF" callee=VCF_ANNOTATE_SNPEFF:workflow:modelled:legacy @43:9
+  guards then of tools.split(',').contains('merge') || tools.split(',').contains('snpeff')
+  in ch_vcf (ch_vcf): -
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/:take:vcf[out] ? via vcf
+  in val_snpeff_db (val_snpeff_db): -
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/:take:snpeff_db[out] ? via snpeff_db
+  in ch_snpeff_cache (ch_snpeff_cache): -
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/:take:snpeff_cache[out] ? via snpeff_cache
+  out vcf_tbi (vcf_tbi): Channel<?>
+  out reports (reports): Channel<Tuple>
+  out summary (summary): Channel<Tuple>
+  out genes_txt (genes_txt): Channel<Tuple>
+subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/vcf_ann~3 chain ".mix" steps=mix @45:19
+  guards then of tools.split(',').contains('merge') || tools.split(',').contains('snpeff')
+  in in (in): -
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/vcf_ann[out] Channel<?> via vcf_ann indirect
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/vcf_ann~2[out] Channel<?> via vcf_ann indirect
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/VCF_ANNOTATE_SNPEFF@1[vcf_tbi] Channel<?> via VCF_ANNOTATE_SNPEFF.out.vcf_tbi
+  out out (out): Channel<?>
+subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/vcf_ann_for_merge chain ".map" steps=map @49:29
+  guards then of tools.split(',').contains('merge')
+  in in (in): -
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/VCF_ANNOTATE_SNPEFF@1[vcf_tbi] Channel<?> via VCF_ANNOTATE_SNPEFF.out.vcf_tbi
+  out out (out): Channel<?>
+subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/VCF_ANNOTATE_MERGE@1 call "VCF_ANNOTATE_MERGE" callee=VCF_ANNOTATE_MERGE:process:modelled:legacy @50:9
+  guards then of tools.split(',').contains('merge')
+  in $1 (tuple(meta, vcf, custom_extra_files)): Tuple
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/vcf_ann_for_merge[out] Channel<?> via vcf_ann_for_merge
+  in genome (genome): -
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/:take:vep_genome[out] ? via vep_genome
+  in species (species): -
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/:take:vep_species[out] ? via vep_species
+  in cache_version (cache_version): -
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/:take:vep_cache_version[out] ? via vep_cache_version
+  in $5 (tuple(meta2, cache)): Tuple
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/:take:vep_cache[out] ? via vep_cache
+  in $6 (tuple(meta3, fasta)): Tuple
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/:take:fasta[out] ? via fasta
+  in extra_files (extra_files): Path
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/:take:vep_extra_files[out] ? via vep_extra_files
+  in $8 (tuple(gtf, gtf_tbi)): Tuple
+    = [[], []] : List
+  out vcf (vcf): Channel<Tuple>
+  out tbi (tbi): Channel<Tuple>
+  out tab (tab): Channel<Tuple>
+  out json (json): Channel<Tuple>
+  out report (report): Channel<Tuple>
+  out versions_ensemblvep (versions_ensemblvep): Channel<Tuple>
+  out versions_tabix (versions_tabix): Channel<Tuple>
+  out versions_perlmathcdf (versions_perlmathcdf): Channel<Tuple>
+subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/.join@2 chain ".join" steps=join @52:31
+  guards then of tools.split(',').contains('merge')
+  in in (in): -
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/VCF_ANNOTATE_MERGE@1[vcf] Channel<Tuple> via VCF_ANNOTATE_MERGE.out.vcf
+  in 1:1 (join(right)): -
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/VCF_ANNOTATE_MERGE@1[tbi] Channel<Tuple> via VCF_ANNOTATE_MERGE.out.tbi
+  out out (out): Channel<Record>
+subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/vcf_ann~4 chain ".mix" steps=mix @52:19
+  guards then of tools.split(',').contains('merge')
+  in in (in): -
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/vcf_ann[out] Channel<?> via vcf_ann indirect
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/vcf_ann~2[out] Channel<?> via vcf_ann indirect
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/vcf_ann~3[out] Channel<?> via vcf_ann indirect
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/.join@2[out] Channel<Record>
+  out out (out): Channel<?>
+subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/vcf_for_vep chain ".map" steps=map @56:23
+  guards then of tools.split(',').contains('vep')
+  in in (in): -
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/:take:vcf[out] ? via vcf
+  out out (out): ?
+subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/ENSEMBLVEP_VEP@1 call "ENSEMBLVEP_VEP" callee=ENSEMBLVEP_VEP:process:modelled:legacy @57:9
+  guards then of tools.split(',').contains('vep')
+  in $1 (tuple(meta, vcf, custom_extra_files)): Tuple
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/vcf_for_vep[out] ? via vcf_for_vep
+  in genome (genome): -
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/:take:vep_genome[out] ? via vep_genome
+  in species (species): -
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/:take:vep_species[out] ? via vep_species
+  in cache_version (cache_version): -
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/:take:vep_cache_version[out] ? via vep_cache_version
+  in $5 (tuple(meta2, cache)): Tuple
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/:take:vep_cache[out] ? via vep_cache
+  in $6 (tuple(meta3, fasta)): Tuple
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/:take:fasta[out] ? via fasta
+  in extra_files (extra_files): Path
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/:take:vep_extra_files[out] ? via vep_extra_files
+  in $8 (tuple(gtf, gtf_tbi)): Tuple
+    = [[], []] : List
+  out vcf (vcf): Channel<Tuple>
+  out tbi (tbi): Channel<Tuple>
+  out tab (tab): Channel<Tuple>
+  out json (json): Channel<Tuple>
+  out report (report): Channel<Tuple>
+  out versions_ensemblvep (versions_ensemblvep): Channel<Tuple>
+  out versions_tabix (versions_tabix): Channel<Tuple>
+  out versions_perlmathcdf (versions_perlmathcdf): Channel<Tuple>
+subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/.join@3 chain ".join" steps=join @59:31
+  guards then of tools.split(',').contains('vep')
+  in in (in): -
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/ENSEMBLVEP_VEP@1[vcf] Channel<Tuple> via ENSEMBLVEP_VEP.out.vcf
+  in 1:1 (join(right)): -
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/ENSEMBLVEP_VEP@1[tbi] Channel<Tuple> via ENSEMBLVEP_VEP.out.tbi
+  out out (out): Channel<Record>
+subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/vcf_ann~5 chain ".mix" steps=mix @59:19
+  guards then of tools.split(',').contains('vep')
+  in in (in): -
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/vcf_ann[out] Channel<?> via vcf_ann indirect
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/vcf_ann~2[out] Channel<?> via vcf_ann indirect
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/vcf_ann~3[out] Channel<?> via vcf_ann indirect
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/vcf_ann~4[out] Channel<?> via vcf_ann indirect
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/.join@3[out] Channel<Record>
+  out out (out): Channel<?>
+subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/tab_ann~2 chain ".mix" steps=mix @60:19
+  guards then of tools.split(',').contains('vep')
+  in in (in): -
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/tab_ann[out] Channel<?> via tab_ann
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/ENSEMBLVEP_VEP@1[tab] Channel<Tuple> via ENSEMBLVEP_VEP.out.tab
+  out out (out): Channel<?>
+subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/json_ann~2 chain ".mix" steps=mix @61:20
+  guards then of tools.split(',').contains('vep')
+  in in (in): -
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/json_ann[out] Channel<?> via json_ann
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/ENSEMBLVEP_VEP@1[json] Channel<Tuple> via ENSEMBLVEP_VEP.out.json
+  out out (out): Channel<?>
+subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/has_other_annotators code "def has_other_annotators = ['merge', 'snpeff', 'vep', 'bcfa…" @67:9
+  guards then of tools.split(',').contains('snpsift')
+  in tools (tools): -
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/:take:tools[out] ? via tools indirect
+  out has_other_annotators (has_other_annotators): -
+subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/snpsift_input code "def snpsift_input = tools.split(',').contains('merge')" @68:9
+  guards then of tools.split(',').contains('snpsift')
+  in tools (tools): -
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/:take:tools[out] ? via tools indirect
+  in VCF_ANNOTATE_MERGE.out.vcf (VCF_ANNOTATE_MERGE.out.vcf): -
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/VCF_ANNOTATE_MERGE@1[vcf] Channel<Tuple> via VCF_ANNOTATE_MERGE.out.vcf indirect
+  in has_other_annotators (has_other_annotators): -
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/has_other_annotators[has_other_annotators] ? via has_other_annotators indirect
+  in vcf_ann (vcf_ann): -
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/vcf_ann[out] Channel<?> via vcf_ann indirect
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/vcf_ann~2[out] Channel<?> via vcf_ann indirect
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/vcf_ann~3[out] Channel<?> via vcf_ann indirect
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/vcf_ann~4[out] Channel<?> via vcf_ann indirect
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/vcf_ann~5[out] Channel<?> via vcf_ann indirect
+  in vcf (vcf): -
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/:take:vcf[out] ? via vcf indirect
+  out snpsift_input (snpsift_input): -
+subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/SNPSIFT_ANNMEM@1 call "SNPSIFT_ANNMEM" callee=SNPSIFT_ANNMEM:process:modelled:legacy @72:9
+  guards then of tools.split(',').contains('snpsift')
+  in $1 (tuple(meta, vcf, vcf_tbi)): Tuple
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/snpsift_input[snpsift_input] ? via snpsift_input
+  in $2 (tuple(db_vcf, db_vcf_tbi, db_vardb, db_fields, db_prefixes)): Tuple
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/:take:snpsift_db[out] ? via snpsift_db
+  out vcf (vcf): Channel<Tuple>
+  out tbi (tbi): Channel<Tuple>
+  out versions_snpsift (versions_snpsift): Channel<Tuple>
+subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/.join@4 chain ".join" steps=join @73:31
+  guards then of tools.split(',').contains('snpsift')
+  in in (in): -
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/SNPSIFT_ANNMEM@1[vcf] Channel<Tuple> via SNPSIFT_ANNMEM.out.vcf
+  in 1:1 (join(right)): -
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/SNPSIFT_ANNMEM@1[tbi] Channel<Tuple> via SNPSIFT_ANNMEM.out.tbi
+  out out (out): Channel<Record>
+subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/vcf_ann~6 chain ".mix" steps=mix @73:19
+  guards then of tools.split(',').contains('snpsift')
+  in in (in): -
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/vcf_ann[out] Channel<?> via vcf_ann indirect
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/vcf_ann~2[out] Channel<?> via vcf_ann indirect
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/vcf_ann~3[out] Channel<?> via vcf_ann indirect
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/vcf_ann~4[out] Channel<?> via vcf_ann indirect
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/vcf_ann~5[out] Channel<?> via vcf_ann indirect
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/.join@4[out] Channel<Record>
+  out out (out): Channel<?>
+subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/:emit:vcf_ann emit "vcf_ann" @77:5
+  in in (in): -
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/vcf_ann[out] Channel<?> via vcf_ann indirect
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/vcf_ann~2[out] Channel<?> via vcf_ann indirect
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/vcf_ann~3[out] Channel<?> via vcf_ann indirect
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/vcf_ann~4[out] Channel<?> via vcf_ann indirect
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/vcf_ann~5[out] Channel<?> via vcf_ann indirect
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/vcf_ann~6[out] Channel<?> via vcf_ann indirect
+subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/:emit:tab_ann emit "tab_ann" @78:5
+  in in (in): -
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/tab_ann[out] Channel<?> via tab_ann indirect
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/tab_ann~2[out] Channel<?> via tab_ann indirect
+subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/:emit:json_ann emit "json_ann" @79:5
+  in in (in): -
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/json_ann[out] Channel<?> via json_ann indirect
+    <- subworkflows/local/vcf_annotate_all/main.nf#VCF_ANNOTATE_ALL/json_ann~2[out] Channel<?> via json_ann indirect

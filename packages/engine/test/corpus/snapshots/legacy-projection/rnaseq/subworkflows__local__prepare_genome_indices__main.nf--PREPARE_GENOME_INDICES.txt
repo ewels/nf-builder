@@ -1,0 +1,557 @@
+workflow subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES legacy
+statements 52, modelled 45
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:take:ch_fasta_fai take "ch_fasta_fai" @32:5
+  out out (out): -
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:take:ch_gtf take "ch_gtf" @33:5
+  out out (out): -
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:take:ch_transcript_fasta take "ch_transcript_fasta" @34:5
+  out out (out): -
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:take:ch_rrna_fastas take "ch_rrna_fastas" @35:5
+  out out (out): -
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:take:fasta_provided take "fasta_provided" @36:5
+  out out (out): -
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:take:splicesites take "splicesites" @37:5
+  out out (out): -
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:take:bbsplit_fasta_list take "bbsplit_fasta_list" @38:5
+  out out (out): -
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:take:star_index take "star_index" @39:5
+  out out (out): -
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:take:rsem_index take "rsem_index" @40:5
+  out out (out): -
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:take:salmon_index take "salmon_index" @41:5
+  out out (out): -
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:take:kallisto_index take "kallisto_index" @42:5
+  out out (out): -
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:take:hisat2_index take "hisat2_index" @43:5
+  out out (out): -
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:take:bowtie2_index take "bowtie2_index" @44:5
+  out out (out): -
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:take:bbsplit_index take "bbsplit_index" @45:5
+  out out (out): -
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:take:sortmerna_index take "sortmerna_index" @46:5
+  out out (out): -
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:take:bowtie2_rrna_index take "bowtie2_rrna_index" @47:5
+  out out (out): -
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:take:aligner take "aligner" @48:5
+  out out (out): -
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:take:pseudo_aligner take "pseudo_aligner" @49:5
+  out out (out): -
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:take:skip_bbsplit take "skip_bbsplit" @50:5
+  out out (out): -
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:take:ribo_removal_tool take "ribo_removal_tool" @51:5
+  out out (out): -
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:take:skip_alignment take "skip_alignment" @52:5
+  out out (out): -
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:take:skip_pseudo_alignment take "skip_pseudo_alignment" @53:5
+  out out (out): -
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:take:use_sentieon_star take "use_sentieon_star" @54:5
+  out out (out): -
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:take:use_parabricks_star take "use_parabricks_star" @55:5
+  out out (out): -
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:take:star_index_legacy take "star_index_legacy" @56:5
+  out out (out): -
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:take:hisat2_build_memory take "hisat2_build_memory" @57:5
+  out out (out): -
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:take:any_auto_strandedness take "any_auto_strandedness" @58:5
+  out out (out): -
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_fasta chain ".map" steps=map @61:16
+  in in (in): -
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:take:ch_fasta_fai[out] ? via ch_fasta_fai
+  out out (out): ?
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/prepare_tool_indices code "def prepare_tool_indices = []" @66:5
+  out prepare_tool_indices (prepare_tool_indices): List
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:code@1 code "if (!skip_bbsplit)                                         …" @67:5
+  in skip_bbsplit (skip_bbsplit): -
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:take:skip_bbsplit[out] ? via skip_bbsplit indirect
+  in prepare_tool_indices (prepare_tool_indices): -
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/prepare_tool_indices[prepare_tool_indices] List via prepare_tool_indices indirect
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:code@2 code "if (ribo_removal_tool == 'sortmerna')                      …" @68:5
+  in ribo_removal_tool (ribo_removal_tool): -
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:take:ribo_removal_tool[out] ? via ribo_removal_tool indirect
+  in prepare_tool_indices (prepare_tool_indices): -
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/prepare_tool_indices[prepare_tool_indices] List via prepare_tool_indices indirect
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:code@3 code "if (ribo_removal_tool == 'bowtie2' && bowtie2_rrna_index)  …" @69:5
+  in ribo_removal_tool (ribo_removal_tool): -
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:take:ribo_removal_tool[out] ? via ribo_removal_tool indirect
+  in bowtie2_rrna_index (bowtie2_rrna_index): -
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:take:bowtie2_rrna_index[out] ? via bowtie2_rrna_index indirect
+  in prepare_tool_indices (prepare_tool_indices): -
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/prepare_tool_indices[prepare_tool_indices] List via prepare_tool_indices indirect
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:code@4 code "if ((!skip_alignment && aligner) || aligner == 'star_rsem')…" @70:5
+  in skip_alignment (skip_alignment): -
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:take:skip_alignment[out] ? via skip_alignment indirect
+  in aligner (aligner): -
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:take:aligner[out] ? via aligner indirect
+  in prepare_tool_indices (prepare_tool_indices): -
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/prepare_tool_indices[prepare_tool_indices] List via prepare_tool_indices indirect
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:code@5 code "if (!skip_pseudo_alignment && pseudo_aligner)              …" @71:5
+  in skip_pseudo_alignment (skip_pseudo_alignment): -
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:take:skip_pseudo_alignment[out] ? via skip_pseudo_alignment indirect
+  in pseudo_aligner (pseudo_aligner): -
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:take:pseudo_aligner[out] ? via pseudo_aligner indirect
+  in prepare_tool_indices (prepare_tool_indices): -
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/prepare_tool_indices[prepare_tool_indices] List via prepare_tool_indices indirect
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:code@6 code "if (any_auto_strandedness)                                 …" @72:5
+  in any_auto_strandedness (any_auto_strandedness): -
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:take:any_auto_strandedness[out] ? via any_auto_strandedness indirect
+  in prepare_tool_indices (prepare_tool_indices): -
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/prepare_tool_indices[prepare_tool_indices] List via prepare_tool_indices indirect
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_bbsplit_index factory "channel.empty" factory=channel.empty @77:24
+  out out (out): Channel<?>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/UNTAR_BBSPLIT_INDEX@1 call "UNTAR_BBSPLIT_INDEX" callee=UNTAR_BBSPLIT_INDEX:process:modelled:legacy @82:36
+  guards then of 'bbsplit' in prepare_tool_indices; then of bbsplit_index; then of bbsplit_index.endsWith('.tar.gz')
+  in $1 (tuple(meta, archive)): Tuple
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:take:bbsplit_index[out] ? via bbsplit_index indirect
+  out untar (untar): Value<Tuple>
+  out versions_untar (versions_untar): Value<Tuple>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_bbsplit_index~2 chain ".map" steps=map @82:36
+  guards then of 'bbsplit' in prepare_tool_indices; then of bbsplit_index; then of bbsplit_index.endsWith('.tar.gz')
+  in in (in): -
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/UNTAR_BBSPLIT_INDEX@1[untar] Value<Tuple>
+  out out (out): Value<?>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_bbsplit_index~3 factory "channel.value" factory=channel.value @84:36
+  guards then of 'bbsplit' in prepare_tool_indices; then of bbsplit_index; else of bbsplit_index.endsWith('.tar.gz')
+  out out (out): Value<Path>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/channel.from@1 factory "channel.from" factory=channel.from @89:13
+  guards then of 'bbsplit' in prepare_tool_indices; else of bbsplit_index; then of fasta_provided
+  out out (out): ?
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_bbsplit_fasta_list chain ".splitCsv.flatMap.groupTuple.map.collect" steps=splitCsv,flatMap,groupTuple,map,collect @89:13
+  guards then of 'bbsplit' in prepare_tool_indices; else of bbsplit_index; then of fasta_provided
+  in in (in): -
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/channel.from@1[out] ?
+  out out (out): Value<?>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/BBMAP_BBSPLIT@1 call "BBMAP_BBSPLIT" callee=BBMAP_BBSPLIT:process:modelled:legacy @98:32
+  guards then of 'bbsplit' in prepare_tool_indices; else of bbsplit_index; then of fasta_provided
+  in $1 (tuple(meta, reads)): Tuple
+    = [ [:], [] ] : List
+  in index (index): Path
+    = [] : List
+  in primary_ref (primary_ref): Path
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_fasta[out] ? via ch_fasta
+  in $4 (tuple(other_ref_names, other_ref_paths)): Tuple
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_bbsplit_fasta_list[out] Value<?> via ch_bbsplit_fasta_list
+  in only_build_index (only_build_index): -
+    = true : Boolean
+  out index (index): Channel<Path>
+  out primary_fastq (primary_fastq): Channel<Tuple>
+  out all_fastq (all_fastq): Channel<Tuple>
+  out stats (stats): Channel<Tuple>
+  out log (log): Channel<Tuple>
+  out versions_bbmap (versions_bbmap): Channel<Tuple>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_sortmerna_index factory "channel.empty" factory=channel.empty @112:26
+  out out (out): Channel<?>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/UNTAR_SORTMERNA_INDEX@1 call "UNTAR_SORTMERNA_INDEX" callee=UNTAR_SORTMERNA_INDEX:process:modelled:legacy @118:38
+  guards then of 'sortmerna' in prepare_tool_indices; then of sortmerna_index; then of sortmerna_index.endsWith('.tar.gz')
+  in $1 (tuple(meta, archive)): Tuple
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:take:sortmerna_index[out] ? via sortmerna_index indirect
+  out untar (untar): Value<Tuple>
+  out versions_untar (versions_untar): Value<Tuple>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_sortmerna_index~2 chain ".map" steps=map @118:38
+  guards then of 'sortmerna' in prepare_tool_indices; then of sortmerna_index; then of sortmerna_index.endsWith('.tar.gz')
+  in in (in): -
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/UNTAR_SORTMERNA_INDEX@1[untar] Value<Tuple>
+  out out (out): Value<?>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_sortmerna_index~3 factory "channel.value" factory=channel.value @120:38
+  guards then of 'sortmerna' in prepare_tool_indices; then of sortmerna_index; else of sortmerna_index.endsWith('.tar.gz')
+  out out (out): Value<List>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/channel.of@1 factory "channel.of" factory=channel.of @125:17
+  guards then of 'sortmerna' in prepare_tool_indices; else of sortmerna_index
+  out out (out): Channel<List>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/.collect@1 chain ".collect.map" steps=collect,map @126:17
+  guards then of 'sortmerna' in prepare_tool_indices; else of sortmerna_index
+  in in (in): -
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:take:ch_rrna_fastas[out] ? via ch_rrna_fastas
+  out out (out): Value<?>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/channel.of@2 factory "channel.of" factory=channel.of @127:17
+  guards then of 'sortmerna' in prepare_tool_indices; else of sortmerna_index
+  out out (out): Channel<List>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/SORTMERNA_INDEX@1 call "SORTMERNA_INDEX" callee=SORTMERNA_INDEX:process:modelled:legacy @124:13
+  guards then of 'sortmerna' in prepare_tool_indices; else of sortmerna_index
+  in $1 (tuple(meta, reads)): Tuple
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/channel.of@1[out] Channel<List>
+  in $2 (tuple(meta2, fastas)): Tuple
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/.collect@1[out] Value<?>
+  in $3 (tuple(meta3, index)): Tuple
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/channel.of@2[out] Channel<List>
+  out reads (reads): Channel<Tuple>
+  out log (log): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out versions_sortmerna (versions_sortmerna): Channel<Tuple>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_sortmerna_index~4 chain ".first" steps=first @129:34
+  guards then of 'sortmerna' in prepare_tool_indices; else of sortmerna_index
+  in in (in): -
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/SORTMERNA_INDEX@1[index] Channel<Tuple> via SORTMERNA_INDEX.out.index
+  out out (out): Value<Tuple>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_bowtie2_rrna_index factory "channel.empty" factory=channel.empty @136:29
+  out out (out): Channel<?>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/UNTAR_BOWTIE2_RRNA_INDEX@1 call "UNTAR_BOWTIE2_RRNA_INDEX" callee=UNTAR_BOWTIE2_RRNA_INDEX:process:modelled:legacy @139:37
+  guards then of 'bowtie2_rrna' in prepare_tool_indices; then of bowtie2_rrna_index.endsWith('.tar.gz')
+  in $1 (tuple(meta, archive)): Tuple
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:take:bowtie2_rrna_index[out] ? via bowtie2_rrna_index indirect
+  out untar (untar): Value<Tuple>
+  out versions_untar (versions_untar): Value<Tuple>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_bowtie2_rrna_index~2 chain ".first" steps=first @139:37
+  guards then of 'bowtie2_rrna' in prepare_tool_indices; then of bowtie2_rrna_index.endsWith('.tar.gz')
+  in in (in): -
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/UNTAR_BOWTIE2_RRNA_INDEX@1[untar] Value<Tuple>
+  out out (out): Value<Tuple>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_bowtie2_rrna_index~3 factory "channel.value" factory=channel.value @141:37
+  guards then of 'bowtie2_rrna' in prepare_tool_indices; else of bowtie2_rrna_index.endsWith('.tar.gz')
+  out out (out): Value<List>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_star_index factory "channel.empty" factory=channel.empty @149:21
+  out out (out): Channel<?>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/.map@1 chain ".map" steps=map @154:17
+  guards then of prepare_tool_indices.intersect(['star_salmon', 'star_rsem']); then of use_parabricks_star && fasta_provided
+  in in (in): -
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_fasta[out] ? via ch_fasta
+  out out (out): ?
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/.map@2 chain ".map" steps=map @155:17
+  guards then of prepare_tool_indices.intersect(['star_salmon', 'star_rsem']); then of use_parabricks_star && fasta_provided
+  in in (in): -
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:take:ch_gtf[out] ? via ch_gtf
+  out out (out): ?
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/PARABRICKS_STARGENOMEGENERATE@1 call "PARABRICKS_STARGENOMEGENERATE" callee=PARABRICKS_STARGENOMEGENERATE:process:modelled:legacy @153:29
+  guards then of prepare_tool_indices.intersect(['star_salmon', 'star_rsem']); then of use_parabricks_star && fasta_provided
+  in $1 (tuple(meta, fasta)): Tuple
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/.map@1[out] ?
+  in $2 (tuple(meta2, gtf)): Tuple
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/.map@2[out] ?
+  out index (index): Channel<Tuple>
+  out versions_star (versions_star): Channel<Tuple>
+  out versions_samtools (versions_samtools): Channel<Tuple>
+  out versions_gawk (versions_gawk): Channel<Tuple>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_star_index~2 chain ".map" steps=map @153:29
+  guards then of prepare_tool_indices.intersect(['star_salmon', 'star_rsem']); then of use_parabricks_star && fasta_provided
+  in in (in): -
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/PARABRICKS_STARGENOMEGENERATE@1[index] Channel<Tuple>
+  out out (out): Channel<?>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/UNTAR_STAR_INDEX@1 call "UNTAR_STAR_INDEX" callee=UNTAR_STAR_INDEX:process:modelled:legacy @164:19
+  guards then of prepare_tool_indices.intersect(['star_salmon', 'star_rsem']); else of use_parabricks_star && fasta_provided; then of star_index; then of star_index.endsWith('.tar.gz')
+  in $1 (tuple(meta, archive)): Tuple
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:take:star_index[out] ? via star_index indirect
+  out untar (untar): Value<Tuple>
+  out versions_untar (versions_untar): Value<Tuple>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_star_raw factory "channel.value" factory=channel.value @165:19
+  guards then of prepare_tool_indices.intersect(['star_salmon', 'star_rsem']); else of use_parabricks_star && fasta_provided; then of star_index; else of star_index.endsWith('.tar.gz')
+  out out (out): Value<List>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/STAR_GENOMEPARAMS_UPGRADE@1 call "STAR_GENOMEPARAMS_UPGRADE" callee=STAR_GENOMEPARAMS_UPGRADE:process:modelled:legacy @167:19
+  guards then of prepare_tool_indices.intersect(['star_salmon', 'star_rsem']); else of use_parabricks_star && fasta_provided; then of star_index; then of star_index_legacy
+  in $1 (tuple(meta, index)): Tuple
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/UNTAR_STAR_INDEX@1[untar] Value<Tuple> via ch_star_raw indirect
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_star_raw[out] Value<List> via ch_star_raw indirect
+  out index (index): Channel<Tuple>
+  out versions_gawk (versions_gawk): Channel<Tuple>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_star_index~3 chain ".map" steps=map @167:19
+  guards then of prepare_tool_indices.intersect(['star_salmon', 'star_rsem']); else of use_parabricks_star && fasta_provided; then of star_index; then of star_index_legacy
+  in in (in): -
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/STAR_GENOMEPARAMS_UPGRADE@1[index] Channel<Tuple>
+  out out (out): Channel<?>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_star_index~4 chain ".map" steps=map @168:19
+  guards then of prepare_tool_indices.intersect(['star_salmon', 'star_rsem']); else of use_parabricks_star && fasta_provided; then of star_index; else of star_index_legacy
+  in in (in): -
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/UNTAR_STAR_INDEX@1[untar] Value<Tuple> via ch_star_raw indirect
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_star_raw[out] Value<List> via ch_star_raw indirect
+  out out (out): ?
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/.map@3 chain ".map" steps=map @172:17
+  guards then of prepare_tool_indices.intersect(['star_salmon', 'star_rsem']); else of use_parabricks_star && fasta_provided; else of star_index; then of fasta_provided
+  in in (in): -
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_fasta[out] ? via ch_fasta
+  out out (out): ?
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/.map@4 chain ".map" steps=map @173:17
+  guards then of prepare_tool_indices.intersect(['star_salmon', 'star_rsem']); else of use_parabricks_star && fasta_provided; else of star_index; then of fasta_provided
+  in in (in): -
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:take:ch_gtf[out] ? via ch_gtf
+  out out (out): ?
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/STAR_GENOMEGENERATE@1 call "STAR_GENOMEGENERATE" callee=STAR_GENOMEGENERATE:process:modelled:legacy @171:29
+  guards then of prepare_tool_indices.intersect(['star_salmon', 'star_rsem']); else of use_parabricks_star && fasta_provided; else of star_index; then of fasta_provided
+  in $1 (tuple(meta, fasta)): Tuple
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/.map@3[out] ?
+  in $2 (tuple(meta2, gtf)): Tuple
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/.map@4[out] ?
+  out index (index): Channel<Tuple>
+  out versions_star (versions_star): Channel<Tuple>
+  out versions_samtools (versions_samtools): Channel<Tuple>
+  out versions_gawk (versions_gawk): Channel<Tuple>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_star_index~5 chain ".map" steps=map @171:29
+  guards then of prepare_tool_indices.intersect(['star_salmon', 'star_rsem']); else of use_parabricks_star && fasta_provided; else of star_index; then of fasta_provided
+  in in (in): -
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/STAR_GENOMEGENERATE@1[index] Channel<Tuple>
+  out out (out): Channel<?>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_rsem_index factory "channel.empty" factory=channel.empty @181:21
+  out out (out): Channel<?>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/UNTAR_RSEM_INDEX@1 call "UNTAR_RSEM_INDEX" callee=UNTAR_RSEM_INDEX:process:modelled:legacy @185:33
+  guards then of 'star_rsem' in prepare_tool_indices; then of rsem_index; then of rsem_index.endsWith('.tar.gz')
+  in $1 (tuple(meta, archive)): Tuple
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:take:rsem_index[out] ? via rsem_index indirect
+  out untar (untar): Value<Tuple>
+  out versions_untar (versions_untar): Value<Tuple>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_rsem_index~2 chain ".map" steps=map @185:33
+  guards then of 'star_rsem' in prepare_tool_indices; then of rsem_index; then of rsem_index.endsWith('.tar.gz')
+  in in (in): -
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/UNTAR_RSEM_INDEX@1[untar] Value<Tuple>
+  out out (out): Value<?>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_rsem_index~3 factory "channel.value" factory=channel.value @187:33
+  guards then of 'star_rsem' in prepare_tool_indices; then of rsem_index; else of rsem_index.endsWith('.tar.gz')
+  out out (out): Value<Path>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/SENTIEON_RSEM_PREPAREREFERENCE_GENOME@1 call "SENTIEON_RSEM_PREPAREREFERENCE_GENOME" callee=SENTIEON_RSEM_PREPAREREFERENCE_GENOME:process:modelled:legacy @193:33
+  guards then of 'star_rsem' in prepare_tool_indices; else of rsem_index; then of fasta_provided; then of use_sentieon_star
+  in fasta (fasta): Path
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_fasta[out] ? via ch_fasta
+  in gtf (gtf): Path
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:take:ch_gtf[out] ? via ch_gtf
+  out index (index): Channel<Path>
+  out transcript_fasta (transcript_fasta): Channel<Path>
+  out versions_rsem (versions_rsem): Channel<Tuple>
+  out versions_star (versions_star): Channel<Tuple>
+  out versions_sentieon (versions_sentieon): Channel<Tuple>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/RSEM_PREPAREREFERENCE_GENOME@1 call "RSEM_PREPAREREFERENCE_GENOME" callee=RSEM_PREPAREREFERENCE_GENOME:process:modelled:legacy @195:33
+  guards then of 'star_rsem' in prepare_tool_indices; else of rsem_index; then of fasta_provided; else of use_sentieon_star
+  in fasta (fasta): Path
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_fasta[out] ? via ch_fasta
+  in gtf (gtf): Path
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:take:ch_gtf[out] ? via ch_gtf
+  out index (index): Channel<Path>
+  out transcript_fasta (transcript_fasta): Channel<Path>
+  out versions_rsem (versions_rsem): Channel<Tuple>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_splicesites factory "channel.empty" factory=channel.empty @204:23
+  out out (out): Channel<?>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_hisat2_index factory "channel.empty" factory=channel.empty @205:23
+  out out (out): Channel<?>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_splicesites~2 factory "channel.value" factory=channel.value @209:30
+  guards then of 'hisat2' in prepare_tool_indices; then of splicesites
+  out out (out): Value<Path>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/.map@5 chain ".map" steps=map @212:56
+  guards then of 'hisat2' in prepare_tool_indices; else of splicesites; then of fasta_provided
+  in in (in): -
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:take:ch_gtf[out] ? via ch_gtf
+  out out (out): ?
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/HISAT2_EXTRACTSPLICESITES@1 call "HISAT2_EXTRACTSPLICESITES" callee=HISAT2_EXTRACTSPLICESITES:process:modelled:legacy @212:30
+  guards then of 'hisat2' in prepare_tool_indices; else of splicesites; then of fasta_provided
+  in $1 (tuple(meta, gtf)): Tuple
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/.map@5[out] ?
+  out txt (txt): Channel<Tuple>
+  out versions_hisat2 (versions_hisat2): Channel<Tuple>
+  out versions_samtools (versions_samtools): Channel<Tuple>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_splicesites~3 chain ".map" steps=map @212:30
+  guards then of 'hisat2' in prepare_tool_indices; else of splicesites; then of fasta_provided
+  in in (in): -
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/HISAT2_EXTRACTSPLICESITES@1[txt] Channel<Tuple>
+  out out (out): Channel<?>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/UNTAR_HISAT2_INDEX@1 call "UNTAR_HISAT2_INDEX" callee=UNTAR_HISAT2_INDEX:process:modelled:legacy @217:35
+  guards then of 'hisat2' in prepare_tool_indices; then of hisat2_index; then of hisat2_index.endsWith('.tar.gz')
+  in $1 (tuple(meta, archive)): Tuple
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:take:hisat2_index[out] ? via hisat2_index indirect
+  out untar (untar): Value<Tuple>
+  out versions_untar (versions_untar): Value<Tuple>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_hisat2_index~2 chain ".map" steps=map @217:35
+  guards then of 'hisat2' in prepare_tool_indices; then of hisat2_index; then of hisat2_index.endsWith('.tar.gz')
+  in in (in): -
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/UNTAR_HISAT2_INDEX@1[untar] Value<Tuple>
+  out out (out): Value<?>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_hisat2_index~3 factory "channel.value" factory=channel.value @219:35
+  guards then of 'hisat2' in prepare_tool_indices; then of hisat2_index; else of hisat2_index.endsWith('.tar.gz')
+  out out (out): Value<Path>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/.combine@1 chain ".combine.combine.map" steps=combine,combine,map @224:17
+  guards then of 'hisat2' in prepare_tool_indices; else of hisat2_index; then of fasta_provided
+  in in (in): -
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_fasta[out] ? via ch_fasta
+  in 1:1 (combine(right)): -
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:take:ch_gtf[out] ? via ch_gtf
+  in 2:1 (combine(right)): -
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_splicesites[out] Channel<?> via ch_splicesites indirect
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_splicesites~2[out] Value<Path> via ch_splicesites indirect
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_splicesites~3[out] Channel<?> via ch_splicesites indirect
+  out out (out): ?
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/HISAT2_BUILD@1 call "HISAT2_BUILD" callee=HISAT2_BUILD:process:modelled:legacy @223:31
+  guards then of 'hisat2' in prepare_tool_indices; else of hisat2_index; then of fasta_provided
+  in $1 (tuple(meta, fasta, gtf, splicesites)): Tuple
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/.combine@1[out] ?
+  in hisat2_memory_input (hisat2_memory_input): -
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:take:hisat2_build_memory[out] ? via hisat2_build_memory
+  out index (index): Channel<Tuple>
+  out versions_hisat2 (versions_hisat2): Channel<Tuple>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_hisat2_index~4 chain ".map.first" steps=map,first @223:31
+  guards then of 'hisat2' in prepare_tool_indices; else of hisat2_index; then of fasta_provided
+  in in (in): -
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/HISAT2_BUILD@1[index] Channel<Tuple>
+  out out (out): Value<?>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_bowtie2_index factory "channel.empty" factory=channel.empty @236:24
+  out out (out): Channel<?>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/UNTAR_BOWTIE2_INDEX@1 call "UNTAR_BOWTIE2_INDEX" callee=UNTAR_BOWTIE2_INDEX:process:modelled:legacy @240:36
+  guards then of 'bowtie2_salmon' in prepare_tool_indices; then of bowtie2_index; then of bowtie2_index.endsWith('.tar.gz')
+  in $1 (tuple(meta, archive)): Tuple
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:take:bowtie2_index[out] ? via bowtie2_index indirect
+  out untar (untar): Value<Tuple>
+  out versions_untar (versions_untar): Value<Tuple>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_bowtie2_index~2 chain ".map" steps=map @240:36
+  guards then of 'bowtie2_salmon' in prepare_tool_indices; then of bowtie2_index; then of bowtie2_index.endsWith('.tar.gz')
+  in in (in): -
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/UNTAR_BOWTIE2_INDEX@1[untar] Value<Tuple>
+  out out (out): Value<?>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_bowtie2_index~3 factory "channel.value" factory=channel.value @242:36
+  guards then of 'bowtie2_salmon' in prepare_tool_indices; then of bowtie2_index; else of bowtie2_index.endsWith('.tar.gz')
+  out out (out): Value<Path>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/.map@6 chain ".map" steps=map @248:17
+  guards then of 'bowtie2_salmon' in prepare_tool_indices; else of bowtie2_index; then of ch_transcript_fasta
+  in in (in): -
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:take:ch_transcript_fasta[out] ? via ch_transcript_fasta
+  out out (out): ?
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/BOWTIE2_BUILD@1 call "BOWTIE2_BUILD" callee=BOWTIE2_BUILD:process:modelled:legacy @247:13
+  guards then of 'bowtie2_salmon' in prepare_tool_indices; else of bowtie2_index; then of ch_transcript_fasta
+  in $1 (tuple(meta, fasta)): Tuple
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/.map@6[out] ?
+  out index (index): Channel<Tuple>
+  out versions_bowtie2 (versions_bowtie2): Channel<Tuple>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_bowtie2_index~4 chain ".map" steps=map @250:32
+  guards then of 'bowtie2_salmon' in prepare_tool_indices; else of bowtie2_index; then of ch_transcript_fasta
+  in in (in): -
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/BOWTIE2_BUILD@1[index] Channel<Tuple> via BOWTIE2_BUILD.out.index
+  out out (out): Channel<?>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_salmon_index factory "channel.empty" factory=channel.empty @258:23
+  out out (out): Channel<?>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/UNTAR_SALMON_INDEX@1 call "UNTAR_SALMON_INDEX" callee=UNTAR_SALMON_INDEX:process:modelled:legacy @261:31
+  guards then of salmon_index; then of salmon_index.endsWith('.tar.gz')
+  in $1 (tuple(meta, archive)): Tuple
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:take:salmon_index[out] ? via salmon_index indirect
+  out untar (untar): Value<Tuple>
+  out versions_untar (versions_untar): Value<Tuple>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_salmon_index~2 chain ".first" steps=first @261:31
+  guards then of salmon_index; then of salmon_index.endsWith('.tar.gz')
+  in in (in): -
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/UNTAR_SALMON_INDEX@1[untar] Value<Tuple>
+  out out (out): Value<Tuple>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_salmon_index~3 factory "channel.value" factory=channel.value @263:31
+  guards then of salmon_index; else of salmon_index.endsWith('.tar.gz')
+  out out (out): Value<List>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/.map@7 chain ".map" steps=map @271:30
+  guards else of salmon_index; then of 'salmon' in prepare_tool_indices; then of ch_transcript_fasta && fasta_provided
+  in in (in): -
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_fasta[out] ? via ch_fasta
+  out out (out): ?
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/.combine@2 chain ".combine.map" steps=combine,map @270:17
+  guards else of salmon_index; then of 'salmon' in prepare_tool_indices; then of ch_transcript_fasta && fasta_provided
+  in in (in): -
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:take:ch_transcript_fasta[out] ? via ch_transcript_fasta
+  in 1:1 (combine(right)): -
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/.map@7[out] ?
+  out out (out): ?
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/SALMON_INDEX@1 call "SALMON_INDEX" callee=SALMON_INDEX:process:modelled:legacy @269:31
+  guards else of salmon_index; then of 'salmon' in prepare_tool_indices; then of ch_transcript_fasta && fasta_provided
+  in $1 (tuple(meta, transcript_fasta, genome_fasta)): Tuple
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/.combine@2[out] ?
+  out index (index): Channel<Tuple>
+  out versions_salmon (versions_salmon): Channel<Tuple>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_salmon_index~4 chain ".first" steps=first @269:31
+  guards else of salmon_index; then of 'salmon' in prepare_tool_indices; then of ch_transcript_fasta && fasta_provided
+  in in (in): -
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/SALMON_INDEX@1[index] Channel<Tuple>
+  out out (out): Value<Tuple>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/.map@8 chain ".map" steps=map @277:17
+  guards else of salmon_index; then of 'salmon' in prepare_tool_indices; else of ch_transcript_fasta && fasta_provided; then of ch_transcript_fasta
+  in in (in): -
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:take:ch_transcript_fasta[out] ? via ch_transcript_fasta
+  out out (out): ?
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/SALMON_INDEX@2 call "SALMON_INDEX" callee=SALMON_INDEX:process:modelled:legacy @276:31
+  guards else of salmon_index; then of 'salmon' in prepare_tool_indices; else of ch_transcript_fasta && fasta_provided; then of ch_transcript_fasta
+  in $1 (tuple(meta, transcript_fasta, genome_fasta)): Tuple
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/.map@8[out] ?
+  out index (index): Channel<Tuple>
+  out versions_salmon (versions_salmon): Channel<Tuple>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_salmon_index~5 chain ".first" steps=first @276:31
+  guards else of salmon_index; then of 'salmon' in prepare_tool_indices; else of ch_transcript_fasta && fasta_provided; then of ch_transcript_fasta
+  in in (in): -
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/SALMON_INDEX@2[index] Channel<Tuple>
+  out out (out): Value<Tuple>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_kallisto_index factory "channel.empty" factory=channel.empty @285:25
+  out out (out): Channel<?>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/UNTAR_KALLISTO_INDEX@1 call "UNTAR_KALLISTO_INDEX" callee=UNTAR_KALLISTO_INDEX:process:modelled:legacy @288:33
+  guards then of kallisto_index; then of kallisto_index.endsWith('.tar.gz')
+  in $1 (tuple(meta, archive)): Tuple
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:take:kallisto_index[out] ? via kallisto_index indirect
+  out untar (untar): Value<Tuple>
+  out versions_untar (versions_untar): Value<Tuple>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_kallisto_index~2 chain ".first" steps=first @288:33
+  guards then of kallisto_index; then of kallisto_index.endsWith('.tar.gz')
+  in in (in): -
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/UNTAR_KALLISTO_INDEX@1[untar] Value<Tuple>
+  out out (out): Value<Tuple>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_kallisto_index~3 factory "channel.value" factory=channel.value @290:33
+  guards then of kallisto_index; else of kallisto_index.endsWith('.tar.gz')
+  out out (out): Value<List>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/.map@9 chain ".map" steps=map @294:50
+  guards else of kallisto_index; then of 'kallisto' in prepare_tool_indices
+  in in (in): -
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:take:ch_transcript_fasta[out] ? via ch_transcript_fasta
+  out out (out): ?
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/KALLISTO_INDEX@1 call "KALLISTO_INDEX" callee=KALLISTO_INDEX:process:modelled:legacy @294:33
+  guards else of kallisto_index; then of 'kallisto' in prepare_tool_indices
+  in $1 (tuple(meta, fasta)): Tuple
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/.map@9[out] ?
+  out index (index): Channel<Tuple>
+  out versions_kallisto (versions_kallisto): Channel<Tuple>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_kallisto_index~4 chain ".first" steps=first @294:33
+  guards else of kallisto_index; then of 'kallisto' in prepare_tool_indices
+  in in (in): -
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/KALLISTO_INDEX@1[index] Channel<Tuple>
+  out out (out): Value<Tuple>
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:emit:splicesites emit "splicesites" @299:5
+  in in (in): -
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_splicesites[out] Channel<?> via ch_splicesites indirect
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_splicesites~2[out] Value<Path> via ch_splicesites indirect
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_splicesites~3[out] Channel<?> via ch_splicesites indirect
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:emit:bbsplit_index emit "bbsplit_index" @300:5
+  in in (in): -
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_bbsplit_index[out] Channel<?> via ch_bbsplit_index indirect
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_bbsplit_index~2[out] Value<?> via ch_bbsplit_index indirect
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_bbsplit_index~3[out] Value<Path> via ch_bbsplit_index indirect
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/BBMAP_BBSPLIT@1[index] Channel<Path> via ch_bbsplit_index indirect
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:emit:sortmerna_index emit "sortmerna_index" @301:5
+  in in (in): -
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_sortmerna_index[out] Channel<?> via ch_sortmerna_index indirect
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_sortmerna_index~2[out] Value<?> via ch_sortmerna_index indirect
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_sortmerna_index~3[out] Value<List> via ch_sortmerna_index indirect
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_sortmerna_index~4[out] Value<Tuple> via ch_sortmerna_index indirect
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:emit:bowtie2_rrna_index emit "bowtie2_rrna_index" @302:5
+  in in (in): -
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_bowtie2_rrna_index[out] Channel<?> via ch_bowtie2_rrna_index indirect
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_bowtie2_rrna_index~2[out] Value<Tuple> via ch_bowtie2_rrna_index indirect
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_bowtie2_rrna_index~3[out] Value<List> via ch_bowtie2_rrna_index indirect
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:emit:star_index emit "star_index" @303:5
+  in in (in): -
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_star_index[out] Channel<?> via ch_star_index indirect
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_star_index~2[out] Channel<?> via ch_star_index indirect
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_star_index~3[out] Channel<?> via ch_star_index indirect
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_star_index~4[out] ? via ch_star_index indirect
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_star_index~5[out] Channel<?> via ch_star_index indirect
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:emit:rsem_index emit "rsem_index" @304:5
+  in in (in): -
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_rsem_index[out] Channel<?> via ch_rsem_index indirect
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_rsem_index~2[out] Value<?> via ch_rsem_index indirect
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_rsem_index~3[out] Value<Path> via ch_rsem_index indirect
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/SENTIEON_RSEM_PREPAREREFERENCE_GENOME@1[index] Channel<Path> via ch_rsem_index indirect
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/RSEM_PREPAREREFERENCE_GENOME@1[index] Channel<Path> via ch_rsem_index indirect
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:emit:hisat2_index emit "hisat2_index" @305:5
+  in in (in): -
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_hisat2_index[out] Channel<?> via ch_hisat2_index indirect
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_hisat2_index~2[out] Value<?> via ch_hisat2_index indirect
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_hisat2_index~3[out] Value<Path> via ch_hisat2_index indirect
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_hisat2_index~4[out] Value<?> via ch_hisat2_index indirect
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:emit:bowtie2_index emit "bowtie2_index" @306:5
+  in in (in): -
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_bowtie2_index[out] Channel<?> via ch_bowtie2_index indirect
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_bowtie2_index~2[out] Value<?> via ch_bowtie2_index indirect
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_bowtie2_index~3[out] Value<Path> via ch_bowtie2_index indirect
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_bowtie2_index~4[out] Channel<?> via ch_bowtie2_index indirect
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:emit:salmon_index emit "salmon_index" @307:5
+  in in (in): -
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_salmon_index[out] Channel<?> via ch_salmon_index indirect
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_salmon_index~2[out] Value<Tuple> via ch_salmon_index indirect
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_salmon_index~3[out] Value<List> via ch_salmon_index indirect
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_salmon_index~4[out] Value<Tuple> via ch_salmon_index indirect
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_salmon_index~5[out] Value<Tuple> via ch_salmon_index indirect
+subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/:emit:kallisto_index emit "kallisto_index" @308:5
+  in in (in): -
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_kallisto_index[out] Channel<?> via ch_kallisto_index indirect
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_kallisto_index~2[out] Value<Tuple> via ch_kallisto_index indirect
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_kallisto_index~3[out] Value<List> via ch_kallisto_index indirect
+    <- subworkflows/local/prepare_genome_indices/main.nf#PREPARE_GENOME_INDICES/ch_kallisto_index~4[out] Value<Tuple> via ch_kallisto_index indirect

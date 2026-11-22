@@ -26,7 +26,9 @@ export function openTree(
 export async function projectorFor(model: ProjectModel): Promise<Projector> {
   const pack = installedPacks[0];
   if (pack === undefined) throw new Error("no pack installed");
-  return createProjector(model, (await pack.loadCatalogue()).script);
+  return createProjector(model, (await pack.loadCatalogue()).script, {
+    legacyOperators: pack.legacyOperators,
+  });
 }
 
 /** Opens a small project of `path -> text` pairs and projects it. */

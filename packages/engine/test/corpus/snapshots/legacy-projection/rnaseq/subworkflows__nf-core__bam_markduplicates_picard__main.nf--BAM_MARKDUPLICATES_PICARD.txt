@@ -1,0 +1,75 @@
+workflow subworkflows/nf-core/bam_markduplicates_picard/main.nf#BAM_MARKDUPLICATES_PICARD legacy
+statements 6, modelled 6
+subworkflows/nf-core/bam_markduplicates_picard/main.nf#BAM_MARKDUPLICATES_PICARD/:take:ch_reads take "ch_reads" @14:5
+  out out (out): -
+subworkflows/nf-core/bam_markduplicates_picard/main.nf#BAM_MARKDUPLICATES_PICARD/:take:ch_fasta_fai take "ch_fasta_fai" @15:5
+  out out (out): -
+subworkflows/nf-core/bam_markduplicates_picard/main.nf#BAM_MARKDUPLICATES_PICARD/PICARD_MARKDUPLICATES@1 call "PICARD_MARKDUPLICATES" callee=PICARD_MARKDUPLICATES:process:modelled:legacy @18:5
+  in $1 (tuple(meta, reads)): Tuple
+    <- subworkflows/nf-core/bam_markduplicates_picard/main.nf#BAM_MARKDUPLICATES_PICARD/:take:ch_reads[out] ? via ch_reads
+  in $2 (tuple(meta2, fasta, fai)): Tuple
+    <- subworkflows/nf-core/bam_markduplicates_picard/main.nf#BAM_MARKDUPLICATES_PICARD/:take:ch_fasta_fai[out] ? via ch_fasta_fai
+  out bam (bam): Channel<Tuple>
+  out bai (bai): Channel<Tuple>
+  out cram (cram): Channel<Tuple>
+  out metrics (metrics): Channel<Tuple>
+  out versions_picard (versions_picard): Channel<Tuple>
+subworkflows/nf-core/bam_markduplicates_picard/main.nf#BAM_MARKDUPLICATES_PICARD/ch_markdup chain ".mix" steps=mix @20:18
+  in in (in): -
+    <- subworkflows/nf-core/bam_markduplicates_picard/main.nf#BAM_MARKDUPLICATES_PICARD/PICARD_MARKDUPLICATES@1[bam] Channel<Tuple> via PICARD_MARKDUPLICATES.out.bam
+  in 1:1 (mix(other)): -
+    <- subworkflows/nf-core/bam_markduplicates_picard/main.nf#BAM_MARKDUPLICATES_PICARD/PICARD_MARKDUPLICATES@1[cram] Channel<Tuple> via PICARD_MARKDUPLICATES.out.cram
+  out out (out): Channel<Tuple>
+subworkflows/nf-core/bam_markduplicates_picard/main.nf#BAM_MARKDUPLICATES_PICARD/SAMTOOLS_INDEX@1 call "SAMTOOLS_INDEX" callee=SAMTOOLS_INDEX:process:modelled:legacy @22:5
+  in $1 (tuple(meta, input)): Tuple
+    <- subworkflows/nf-core/bam_markduplicates_picard/main.nf#BAM_MARKDUPLICATES_PICARD/ch_markdup[out] Channel<Tuple> via ch_markdup
+  out index (index): Channel<Tuple>
+  out versions_samtools (versions_samtools): Channel<Tuple>
+subworkflows/nf-core/bam_markduplicates_picard/main.nf#BAM_MARKDUPLICATES_PICARD/ch_reads_index chain ".join" steps=join @24:22
+  in in (in): -
+    <- subworkflows/nf-core/bam_markduplicates_picard/main.nf#BAM_MARKDUPLICATES_PICARD/ch_markdup[out] Channel<Tuple> via ch_markdup
+  in 1:1 (join(right)): -
+    <- subworkflows/nf-core/bam_markduplicates_picard/main.nf#BAM_MARKDUPLICATES_PICARD/SAMTOOLS_INDEX@1[index] Channel<Tuple> via SAMTOOLS_INDEX.out.index
+  out out (out): Channel<Record>
+subworkflows/nf-core/bam_markduplicates_picard/main.nf#BAM_MARKDUPLICATES_PICARD/BAM_STATS_SAMTOOLS@1 call "BAM_STATS_SAMTOOLS" callee=BAM_STATS_SAMTOOLS:workflow:modelled:legacy @26:5
+  in ch_bam_bai (ch_bam_bai): -
+    <- subworkflows/nf-core/bam_markduplicates_picard/main.nf#BAM_MARKDUPLICATES_PICARD/ch_reads_index[out] Channel<Record> via ch_reads_index
+  in ch_fasta_fai (ch_fasta_fai): -
+    <- subworkflows/nf-core/bam_markduplicates_picard/main.nf#BAM_MARKDUPLICATES_PICARD/:take:ch_fasta_fai[out] ? via ch_fasta_fai
+  out stats (stats): Channel<Tuple>
+  out flagstat (flagstat): Channel<Tuple>
+  out idxstats (idxstats): Channel<Tuple>
+subworkflows/nf-core/bam_markduplicates_picard/main.nf#BAM_MARKDUPLICATES_PICARD/ch_per_sample_mqc_bundle chain ".join.join.join.map" steps=join,join,join,map @28:32
+  in in (in): -
+    <- subworkflows/nf-core/bam_markduplicates_picard/main.nf#BAM_MARKDUPLICATES_PICARD/BAM_STATS_SAMTOOLS@1[stats] Channel<Tuple> via BAM_STATS_SAMTOOLS.out.stats
+  in 1:1 (join(right)): -
+    <- subworkflows/nf-core/bam_markduplicates_picard/main.nf#BAM_MARKDUPLICATES_PICARD/BAM_STATS_SAMTOOLS@1[flagstat] Channel<Tuple> via BAM_STATS_SAMTOOLS.out.flagstat
+  in 2:1 (join(right)): -
+    <- subworkflows/nf-core/bam_markduplicates_picard/main.nf#BAM_MARKDUPLICATES_PICARD/BAM_STATS_SAMTOOLS@1[idxstats] Channel<Tuple> via BAM_STATS_SAMTOOLS.out.idxstats
+  in 3:1 (join(right)): -
+    <- subworkflows/nf-core/bam_markduplicates_picard/main.nf#BAM_MARKDUPLICATES_PICARD/PICARD_MARKDUPLICATES@1[metrics] Channel<Tuple> via PICARD_MARKDUPLICATES.out.metrics
+  out out (out): Channel<?>
+subworkflows/nf-core/bam_markduplicates_picard/main.nf#BAM_MARKDUPLICATES_PICARD/:emit:bam emit "bam" @35:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_markduplicates_picard/main.nf#BAM_MARKDUPLICATES_PICARD/PICARD_MARKDUPLICATES@1[bam] Channel<Tuple> via PICARD_MARKDUPLICATES.out.bam
+subworkflows/nf-core/bam_markduplicates_picard/main.nf#BAM_MARKDUPLICATES_PICARD/:emit:cram emit "cram" @36:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_markduplicates_picard/main.nf#BAM_MARKDUPLICATES_PICARD/PICARD_MARKDUPLICATES@1[cram] Channel<Tuple> via PICARD_MARKDUPLICATES.out.cram
+subworkflows/nf-core/bam_markduplicates_picard/main.nf#BAM_MARKDUPLICATES_PICARD/:emit:metrics emit "metrics" @37:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_markduplicates_picard/main.nf#BAM_MARKDUPLICATES_PICARD/PICARD_MARKDUPLICATES@1[metrics] Channel<Tuple> via PICARD_MARKDUPLICATES.out.metrics
+subworkflows/nf-core/bam_markduplicates_picard/main.nf#BAM_MARKDUPLICATES_PICARD/:emit:index emit "index" @38:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_markduplicates_picard/main.nf#BAM_MARKDUPLICATES_PICARD/SAMTOOLS_INDEX@1[index] Channel<Tuple> via SAMTOOLS_INDEX.out.index
+subworkflows/nf-core/bam_markduplicates_picard/main.nf#BAM_MARKDUPLICATES_PICARD/:emit:stats emit "stats" @39:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_markduplicates_picard/main.nf#BAM_MARKDUPLICATES_PICARD/BAM_STATS_SAMTOOLS@1[stats] Channel<Tuple> via BAM_STATS_SAMTOOLS.out.stats
+subworkflows/nf-core/bam_markduplicates_picard/main.nf#BAM_MARKDUPLICATES_PICARD/:emit:flagstat emit "flagstat" @40:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_markduplicates_picard/main.nf#BAM_MARKDUPLICATES_PICARD/BAM_STATS_SAMTOOLS@1[flagstat] Channel<Tuple> via BAM_STATS_SAMTOOLS.out.flagstat
+subworkflows/nf-core/bam_markduplicates_picard/main.nf#BAM_MARKDUPLICATES_PICARD/:emit:idxstats emit "idxstats" @41:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_markduplicates_picard/main.nf#BAM_MARKDUPLICATES_PICARD/BAM_STATS_SAMTOOLS@1[idxstats] Channel<Tuple> via BAM_STATS_SAMTOOLS.out.idxstats
+subworkflows/nf-core/bam_markduplicates_picard/main.nf#BAM_MARKDUPLICATES_PICARD/:emit:per_sample_mqc_bundle emit "per_sample_mqc_bundle" @42:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_markduplicates_picard/main.nf#BAM_MARKDUPLICATES_PICARD/ch_per_sample_mqc_bundle[out] Channel<?> via ch_per_sample_mqc_bundle

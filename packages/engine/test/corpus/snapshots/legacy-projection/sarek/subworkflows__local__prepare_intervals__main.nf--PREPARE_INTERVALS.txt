@@ -1,0 +1,226 @@
+workflow subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS legacy
+statements 27, modelled 24
+subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/:take:fasta_fai take "fasta_fai" @19:5
+  out out (out): -
+subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/:take:intervals take "intervals" @20:5
+  out out (out): -
+subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/:take:no_intervals take "no_intervals" @21:5
+  out out (out): -
+subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/:take:nucleotides_per_second take "nucleotides_per_second" @22:5
+  out out (out): -
+subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/:take:outdir take "outdir" @23:5
+  out out (out): -
+subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/:take:step take "step" @24:5
+  out out (out): -
+subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/:take:fai_checked take "fai_checked" @25:5
+  out out (out): -
+subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/intervals_bed factory "channel.empty" factory=channel.empty @28:28
+  out out (out): Channel<?>
+subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/intervals_bed_gz_tbi factory "channel.empty" factory=channel.empty @29:28
+  out out (out): Channel<?>
+subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/intervals_combined factory "channel.empty" factory=channel.empty @30:28
+  out out (out): Channel<?>
+subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/:code@1 code "file("${outdir}/no_intervals.bed").text        = """ @33:9
+  guards then of no_intervals
+  in outdir (outdir): -
+    <- subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/:take:outdir[out] ? via outdir indirect
+subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/:code@2 code "file("${outdir}/no_intervals.bed.gz").text     = "no_interv…" @34:9
+  guards then of no_intervals
+  in outdir (outdir): -
+    <- subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/:take:outdir[out] ? via outdir indirect
+subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/:code@3 code "file("${outdir}/no_intervals.bed.gz.tbi").text = "no_interv…" @35:9
+  guards then of no_intervals
+  in outdir (outdir): -
+    <- subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/:take:outdir[out] ? via outdir indirect
+subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/channel.fromPath@1 factory "channel.fromPath" factory=channel.fromPath @37:32
+  guards then of no_intervals
+  out out (out): Channel<Path>
+subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/intervals_bed~2 chain ".map" steps=map @37:32
+  guards then of no_intervals
+  in in (in): -
+    <- subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/channel.fromPath@1[out] Channel<Path>
+  out out (out): Channel<?>
+subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/channel.fromPath@2 factory "channel.fromPath" factory=channel.fromPath @38:32
+  guards then of no_intervals
+  out out (out): Channel<Path>
+subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/intervals_bed_gz_tbi~2 chain ".collect.map" steps=collect,map @38:32
+  guards then of no_intervals
+  in in (in): -
+    <- subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/channel.fromPath@2[out] Channel<Path>
+  out out (out): Value<?>
+subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/channel.fromPath@3 factory "channel.fromPath" factory=channel.fromPath @39:32
+  guards then of no_intervals
+  out out (out): Channel<Path>
+subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/intervals_combined~2 chain ".map" steps=map @39:32
+  guards then of no_intervals
+  in in (in): -
+    <- subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/channel.fromPath@3[out] Channel<Path>
+  out out (out): Channel<?>
+subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/BUILD_INTERVALS@1 call "BUILD_INTERVALS" callee=BUILD_INTERVALS:process:modelled:legacy @43:13
+  guards else of no_intervals; then of step != 'annotate' && step != 'controlfreec'; then of !intervals
+  in $1 (tuple(meta, input)): Tuple
+    <- subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/:take:fasta_fai[out] ? via fasta_fai
+  in program_file (program_file): Path
+    = [] : List
+  in disable_redirect_output (disable_redirect_output): -
+    = [] : List
+  out output (output): Channel<Tuple>
+  out versions_gawk (versions_gawk): Channel<Tuple>
+subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/.map@1 chain ".map" steps=map @47:34
+  guards else of no_intervals; then of step != 'annotate' && step != 'controlfreec'; then of !intervals
+  in in (in): -
+    <- subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/BUILD_INTERVALS@1[output] Channel<Tuple> via intervals_combined
+  out out (out): Channel<?>
+subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/CREATE_INTERVALS_BED@1 call "CREATE_INTERVALS_BED" callee=CREATE_INTERVALS_BED:process:modelled:legacy @47:13
+  guards else of no_intervals; then of step != 'annotate' && step != 'controlfreec'; then of !intervals
+  in intervals (intervals): Path
+    <- subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/.map@1[out] Channel<?>
+  in nucleotides_per_second (nucleotides_per_second): -
+    <- subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/:take:nucleotides_per_second[out] ? via nucleotides_per_second
+  out bed (bed): Channel<Path>
+  out versions_gawk (versions_gawk): Channel<Tuple>
+subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/channel.fromPath@4 factory "channel.fromPath" factory=channel.fromPath @52:34
+  guards else of no_intervals; then of step != 'annotate' && step != 'controlfreec'; else of !intervals
+  out out (out): Channel<Path>
+subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/intervals_combined~3 chain ".map" steps=map @52:34
+  guards else of no_intervals; then of step != 'annotate' && step != 'controlfreec'; else of !intervals
+  in in (in): -
+    <- subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/channel.fromPath@4[out] Channel<Path>
+  out out (out): Channel<?>
+subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/.map@2 chain ".map" steps=map @57:51
+  guards else of no_intervals; then of step != 'annotate' && step != 'controlfreec'; else of !intervals; then of intervals.toLowerCase().endsWith(".bed")
+  in in (in): -
+    <- subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/:take:fasta_fai[out] ? via fasta_fai
+  out out (out): ?
+subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/BEDTOOLS_SORT@1 call "BEDTOOLS_SORT" callee=BEDTOOLS_SORT:process:modelled:legacy @57:17
+  guards else of no_intervals; then of step != 'annotate' && step != 'controlfreec'; else of !intervals; then of intervals.toLowerCase().endsWith(".bed")
+  in $1 (tuple(meta, intervals)): Tuple
+    <- subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/intervals_combined~3[out] Channel<?> via intervals_combined
+  in genome_file (genome_file): Path
+    <- subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/.map@2[out] ?
+  in suffix (suffix): -
+    = [] : List
+  out sorted (sorted): Channel<Tuple>
+  out versions_bedtools (versions_bedtools): Channel<Tuple>
+subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/intervals_combined~4 chain ".combine.map" steps=combine,map @64:42
+  guards else of no_intervals; then of step != 'annotate' && step != 'controlfreec'; else of !intervals; then of intervals.toLowerCase().endsWith(".bed"); then of !fai_checked
+  in in (in): -
+    <- subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/BEDTOOLS_SORT@1[sorted] Channel<Tuple> via intervals_combined
+  in 1:1 (combine(right)): -
+    <- subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/:take:fasta_fai[out] ? via fasta_fai
+  out out (out): Channel<?>
+subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/.map@3 chain ".map" steps=map @73:34
+  guards else of no_intervals; then of step != 'annotate' && step != 'controlfreec'; else of !intervals
+  in in (in): -
+    <- subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/intervals_combined~3[out] Channel<?> via intervals_combined indirect
+    <- subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/BEDTOOLS_SORT@1[sorted] Channel<Tuple> via intervals_combined indirect
+    <- subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/intervals_combined~4[out] Channel<?> via intervals_combined indirect
+  out out (out): ?
+subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/CREATE_INTERVALS_BED@2 call "CREATE_INTERVALS_BED" callee=CREATE_INTERVALS_BED:process:modelled:legacy @73:13
+  guards else of no_intervals; then of step != 'annotate' && step != 'controlfreec'; else of !intervals
+  in intervals (intervals): Path
+    <- subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/.map@3[out] ?
+  in nucleotides_per_second (nucleotides_per_second): -
+    <- subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/:take:nucleotides_per_second[out] ? via nucleotides_per_second
+  out bed (bed): Channel<Path>
+  out versions_gawk (versions_gawk): Channel<Tuple>
+subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/GATK4_INTERVALLISTTOBED@1 call "GATK4_INTERVALLISTTOBED" callee=GATK4_INTERVALLISTTOBED:process:modelled:legacy @79:17
+  guards else of no_intervals; then of step != 'annotate' && step != 'controlfreec'; else of !intervals; then of intervals.endsWith(".interval_list")
+  in $1 (tuple(meta, intervals)): Tuple
+    <- subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/intervals_combined~3[out] Channel<?> via intervals_combined indirect
+    <- subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/BEDTOOLS_SORT@1[sorted] Channel<Tuple> via intervals_combined indirect
+    <- subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/intervals_combined~4[out] Channel<?> via intervals_combined indirect
+  out bed (bed): Channel<Tuple>
+  out versions_gatk4 (versions_gatk4): Channel<Tuple>
+subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/intervals_bed~3 chain ".flatten.map.toSortedList.flatten.collate.map.collect.map.transpose" steps=flatten,map,toSortedList,flatten,collate,map,collect,map,transpose @89:25
+  guards else of no_intervals; then of step != 'annotate' && step != 'controlfreec'
+  in in (in): -
+    <- subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/CREATE_INTERVALS_BED@1[bed] Channel<Path> via intervals_bed indirect
+    <- subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/CREATE_INTERVALS_BED@2[bed] Channel<Path> via intervals_bed indirect
+  out out (out): ?
+subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/.map@4 chain ".map" steps=map @109:41
+  guards else of no_intervals; then of step != 'annotate' && step != 'controlfreec'
+  in in (in): -
+    <- subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/intervals_bed~3[out] ? via intervals_bed
+  out out (out): ?
+subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/TABIX_BGZIPTABIX_INTERVAL_SPLIT@1 call "TABIX_BGZIPTABIX_INTERVAL_SPLIT" callee=TABIX_BGZIPTABIX_INTERVAL_SPLIT:process:modelled:legacy @109:9
+  guards else of no_intervals; then of step != 'annotate' && step != 'controlfreec'
+  in $1 (tuple(meta, infile, infile_tbi, regions)): Tuple
+    <- subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/.map@4[out] ?
+  in action (action): -
+    = 'compress' : String
+  in make_index (make_index): -
+    = true : Boolean
+  in out_ext (out_ext): -
+    = 'bed' : String
+  out output (output): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out versions_htslib (versions_htslib): Channel<Tuple>
+  out versions_xz (versions_xz): Channel<Tuple>
+subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/intervals_bed_gz_tbi~3 chain ".join.map.toList.map.transpose" steps=join,map,toList,map,transpose @111:32
+  guards else of no_intervals; then of step != 'annotate' && step != 'controlfreec'
+  in in (in): -
+    <- subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/TABIX_BGZIPTABIX_INTERVAL_SPLIT@1[output] Channel<Tuple> via TABIX_BGZIPTABIX_INTERVAL_SPLIT.out.output
+  in 1:1 (join(1)): -
+    <- subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/TABIX_BGZIPTABIX_INTERVAL_SPLIT@1[index] Channel<Tuple> via TABIX_BGZIPTABIX_INTERVAL_SPLIT.out.index
+  out out (out): ?
+subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/.map@5 chain ".map" steps=map @117:40
+  in in (in): -
+    <- subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/intervals_combined[out] Channel<?> via intervals_combined indirect
+    <- subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/intervals_combined~2[out] Channel<?> via intervals_combined indirect
+    <- subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/BUILD_INTERVALS@1[output] Channel<Tuple> via intervals_combined indirect
+    <- subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/intervals_combined~3[out] Channel<?> via intervals_combined indirect
+    <- subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/BEDTOOLS_SORT@1[sorted] Channel<Tuple> via intervals_combined indirect
+    <- subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/intervals_combined~4[out] Channel<?> via intervals_combined indirect
+    <- subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/GATK4_INTERVALLISTTOBED@1[bed] Channel<Tuple> via intervals_combined indirect
+  out out (out): ?
+subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/TABIX_BGZIPTABIX_INTERVAL_COMBINED@1 call "TABIX_BGZIPTABIX_INTERVAL_COMBINED" callee=TABIX_BGZIPTABIX_INTERVAL_COMBINED:process:modelled:legacy @117:5
+  in $1 (tuple(meta, infile, infile_tbi, regions)): Tuple
+    <- subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/.map@5[out] ?
+  in action (action): -
+    = 'compress' : String
+  in make_index (make_index): -
+    = true : Boolean
+  in out_ext (out_ext): -
+    = 'bed' : String
+  out output (output): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out versions_htslib (versions_htslib): Channel<Tuple>
+  out versions_xz (versions_xz): Channel<Tuple>
+subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/intervals_bed_combined chain ".map.collect" steps=map,collect @119:37
+  in in (in): -
+    <- subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/intervals_combined[out] Channel<?> via intervals_combined indirect
+    <- subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/intervals_combined~2[out] Channel<?> via intervals_combined indirect
+    <- subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/BUILD_INTERVALS@1[output] Channel<Tuple> via intervals_combined indirect
+    <- subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/intervals_combined~3[out] Channel<?> via intervals_combined indirect
+    <- subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/BEDTOOLS_SORT@1[sorted] Channel<Tuple> via intervals_combined indirect
+    <- subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/intervals_combined~4[out] Channel<?> via intervals_combined indirect
+    <- subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/GATK4_INTERVALLISTTOBED@1[bed] Channel<Tuple> via intervals_combined indirect
+  out out (out): Value<Bag<?>>
+subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/intervals_bed_gz_tbi_combined chain ".join.map.collect" steps=join,map,collect @120:37
+  in in (in): -
+    <- subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/TABIX_BGZIPTABIX_INTERVAL_COMBINED@1[output] Channel<Tuple> via TABIX_BGZIPTABIX_INTERVAL_COMBINED.out.output
+  in 1:1 (join(1)): -
+    <- subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/TABIX_BGZIPTABIX_INTERVAL_COMBINED@1[index] Channel<Tuple> via TABIX_BGZIPTABIX_INTERVAL_COMBINED.out.index
+  out out (out): Value<Bag<?>>
+subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/:emit:intervals_bed emit "intervals_bed" @124:5
+  in in (in): -
+    <- subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/intervals_bed[out] Channel<?> via intervals_bed indirect
+    <- subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/intervals_bed~2[out] Channel<?> via intervals_bed indirect
+    <- subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/intervals_bed~3[out] ? via intervals_bed indirect
+subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/:emit:intervals_bed_gz_tbi emit "intervals_bed_gz_tbi" @125:5
+  in in (in): -
+    <- subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/intervals_bed_gz_tbi[out] Channel<?> via intervals_bed_gz_tbi indirect
+    <- subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/intervals_bed_gz_tbi~2[out] Value<?> via intervals_bed_gz_tbi indirect
+    <- subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/intervals_bed_gz_tbi~3[out] ? via intervals_bed_gz_tbi indirect
+subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/:emit:intervals_bed_combined emit "intervals_bed_combined" @127:5
+  in in (in): -
+    <- subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/intervals_bed_combined[out] Value<Bag<?>> via intervals_bed_combined
+subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/:emit:intervals_bed_gz_tbi_combined emit "intervals_bed_gz_tbi_combined" @128:5
+  in in (in): -
+    <- subworkflows/local/prepare_intervals/main.nf#PREPARE_INTERVALS/intervals_bed_gz_tbi_combined[out] Value<Bag<?>> via intervals_bed_gz_tbi_combined
+bound @45:13 intervals_combined
+bound @49:13 intervals_bed
+bound @59:17 intervals_combined
+bound @75:13 intervals_bed
+bound @80:17 intervals_combined

@@ -76,6 +76,7 @@ export {
 export { installedPackVersions } from "./packs";
 export { loadPalette } from "./palette";
 export { paletteItemCount, searchPalette } from "./palette-search";
+export { projectionCoverage } from "./projection/coverage";
 export type {
   FreeRead,
   StatementVariables,
@@ -83,7 +84,11 @@ export type {
 } from "./projection/free-variables";
 export { statementVariables } from "./projection/free-variables";
 export { formatNodeKey, parseNodeKey } from "./projection/keys";
-export { createProjector, type Projector } from "./projection/project";
+export {
+  createProjector,
+  type Projector,
+  type ProjectorOptions,
+} from "./projection/project";
 export { formatFlowType, formatType } from "./projection/types";
 export {
   type Equivalence,

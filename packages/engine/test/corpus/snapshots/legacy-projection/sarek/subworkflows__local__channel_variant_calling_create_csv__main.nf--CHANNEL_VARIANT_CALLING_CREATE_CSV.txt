@@ -1,0 +1,12 @@
+workflow subworkflows/local/channel_variant_calling_create_csv/main.nf#CHANNEL_VARIANT_CALLING_CREATE_CSV legacy
+statements 1, modelled 1
+subworkflows/local/channel_variant_calling_create_csv/main.nf#CHANNEL_VARIANT_CALLING_CREATE_CSV/:take:vcf_to_annotate take "vcf_to_annotate" @7:9
+  out out (out): -
+subworkflows/local/channel_variant_calling_create_csv/main.nf#CHANNEL_VARIANT_CALLING_CREATE_CSV/:take:outdir take "outdir" @8:9
+  out out (out): -
+subworkflows/local/channel_variant_calling_create_csv/main.nf#CHANNEL_VARIANT_CALLING_CREATE_CSV/.collectFile@1 chain ".collectFile" steps=collectFile @12:9
+  in in (in): -
+    <- subworkflows/local/channel_variant_calling_create_csv/main.nf#CHANNEL_VARIANT_CALLING_CREATE_CSV/:take:vcf_to_annotate[out] ? via vcf_to_annotate
+  in 1:4 (collectFile(opts)): -
+    <- subworkflows/local/channel_variant_calling_create_csv/main.nf#CHANNEL_VARIANT_CALLING_CREATE_CSV/:take:outdir[out] ? via outdir indirect
+  out out (out): Channel<?>

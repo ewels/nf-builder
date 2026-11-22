@@ -1,0 +1,74 @@
+workflow subworkflows/local/bam_variant_calling_tumor_only_lofreq/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_LOFREQ legacy
+statements 8, modelled 8
+subworkflows/local/bam_variant_calling_tumor_only_lofreq/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_LOFREQ/:take:input take "input" @6:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_tumor_only_lofreq/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_LOFREQ/:take:fasta take "fasta" @7:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_tumor_only_lofreq/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_LOFREQ/:take:fai take "fai" @8:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_tumor_only_lofreq/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_LOFREQ/:take:intervals take "intervals" @9:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_tumor_only_lofreq/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_LOFREQ/:take:dict take "dict" @10:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_tumor_only_lofreq/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_LOFREQ/input_intervals chain ".combine.map" steps=combine,map @15:23
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_lofreq/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_LOFREQ/:take:input[out] ? via input
+  in 1:1 (combine(right)): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_lofreq/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_LOFREQ/:take:intervals[out] ? via intervals
+  out out (out): ?
+subworkflows/local/bam_variant_calling_tumor_only_lofreq/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_LOFREQ/LOFREQ@1 call "LOFREQ" callee=LOFREQ:process:modelled:legacy @19:5
+  in $1 (tuple(meta, bam, bai, intervals)): Tuple
+    <- subworkflows/local/bam_variant_calling_tumor_only_lofreq/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_LOFREQ/input_intervals[out] ? via input_intervals
+  in $2 (tuple(meta2, fasta)): Tuple
+    <- subworkflows/local/bam_variant_calling_tumor_only_lofreq/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_LOFREQ/:take:fasta[out] ? via fasta
+  in $3 (tuple(meta3, fai)): Tuple
+    <- subworkflows/local/bam_variant_calling_tumor_only_lofreq/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_LOFREQ/:take:fai[out] ? via fai
+  out vcf (vcf): Channel<Tuple>
+  out tbi (tbi): Channel<Tuple>
+  out versions_lofreq (versions_lofreq): Channel<Tuple>
+subworkflows/local/bam_variant_calling_tumor_only_lofreq/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_LOFREQ/vcf_branch chain ".branch" steps=branch @22:18
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_lofreq/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_LOFREQ/LOFREQ@1[vcf] Channel<Tuple> via LOFREQ.out.vcf
+  out out (out): Record
+subworkflows/local/bam_variant_calling_tumor_only_lofreq/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_LOFREQ/tbi_branch chain ".branch" steps=branch @29:18
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_lofreq/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_LOFREQ/LOFREQ@1[tbi] Channel<Tuple> via LOFREQ.out.tbi
+  out out (out): Record
+subworkflows/local/bam_variant_calling_tumor_only_lofreq/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_LOFREQ/vcf_to_merge chain ".map.groupTuple" steps=map,groupTuple @36:20
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_lofreq/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_LOFREQ/vcf_branch[out] Record via vcf_branch indirect
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_tumor_only_lofreq/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_LOFREQ/MERGE_LOFREQ@1 call "MERGE_LOFREQ" callee=MERGE_LOFREQ:process:modelled:legacy @38:5
+  in $1 (tuple(meta, vcf)): Tuple
+    <- subworkflows/local/bam_variant_calling_tumor_only_lofreq/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_LOFREQ/vcf_to_merge[out] Channel<?> via vcf_to_merge
+  in $2 (tuple(meta2, dict)): Tuple
+    <- subworkflows/local/bam_variant_calling_tumor_only_lofreq/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_LOFREQ/:take:dict[out] ? via dict
+  out vcf (vcf): Channel<Tuple>
+  out tbi (tbi): Channel<Tuple>
+  out versions_gatk4 (versions_gatk4): Channel<Tuple>
+subworkflows/local/bam_variant_calling_tumor_only_lofreq/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_LOFREQ/channel.empty@1 factory "channel.empty" factory=channel.empty @42:11
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_tumor_only_lofreq/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_LOFREQ/vcf chain ".mix.map" steps=mix,map @42:11
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_lofreq/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_LOFREQ/channel.empty@1[out] Channel<?>
+  in 1:1 (mix(1)): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_lofreq/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_LOFREQ/MERGE_LOFREQ@1[vcf] Channel<Tuple> via MERGE_LOFREQ.out.vcf
+  in 1:2 (mix(2)): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_lofreq/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_LOFREQ/vcf_branch[out] Record via vcf_branch indirect
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_tumor_only_lofreq/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_LOFREQ/channel.empty@2 factory "channel.empty" factory=channel.empty @43:11
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_tumor_only_lofreq/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_LOFREQ/tbi chain ".mix.map" steps=mix,map @43:11
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_lofreq/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_LOFREQ/channel.empty@2[out] Channel<?>
+  in 1:1 (mix(1)): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_lofreq/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_LOFREQ/MERGE_LOFREQ@1[tbi] Channel<Tuple> via MERGE_LOFREQ.out.tbi
+  in 1:2 (mix(2)): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_lofreq/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_LOFREQ/tbi_branch[out] Record via tbi_branch indirect
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_tumor_only_lofreq/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_LOFREQ/:emit:vcf emit "vcf" @46:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_lofreq/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_LOFREQ/vcf[out] Channel<?> via vcf
+subworkflows/local/bam_variant_calling_tumor_only_lofreq/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_LOFREQ/:emit:tbi emit "tbi" @47:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_lofreq/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_LOFREQ/tbi[out] Channel<?> via tbi

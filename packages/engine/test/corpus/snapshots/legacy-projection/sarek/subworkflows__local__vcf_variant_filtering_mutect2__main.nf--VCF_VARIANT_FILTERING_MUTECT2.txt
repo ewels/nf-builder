@@ -1,0 +1,271 @@
+workflow subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2 legacy
+statements 31, modelled 29
+subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/:take:calls_in take "calls_in" @16:5
+  out out (out): -
+subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/:take:cram_in take "cram_in" @17:5
+  out out (out): -
+subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/:take:intervals take "intervals" @18:5
+  out out (out): -
+subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/:take:fasta take "fasta" @19:5
+  out out (out): -
+subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/:take:fai take "fai" @20:5
+  out out (out): -
+subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/:take:dict take "dict" @21:5
+  out out (out): -
+subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/:take:contamination_resource take "contamination_resource" @22:5
+  out out (out): -
+subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/:take:contamination_resource_tbi take "contamination_resource_tbi" @23:5
+  out out (out): -
+subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/:take:contamination_resource_provided take "contamination_resource_provided" @24:5
+  out out (out): -
+subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/:take:joint take "joint" @25:5
+  out out (out): -
+subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/:take:variantcaller take "variantcaller" @26:5
+  out out (out): -
+subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/calls chain ".map" steps=map @29:13
+  in in (in): -
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/:take:calls_in[out] ? via calls_in
+  out out (out): ?
+subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/cram chain ".map" steps=map @30:12
+  in in (in): -
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/:take:cram_in[out] ? via cram_in
+  out out (out): ?
+subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/.map@1 chain ".map" steps=map @32:31
+  in in (in): -
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/calls[out] ? via calls
+  out out (out): ?
+subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/LEARNREADORIENTATIONMODEL@1 call "LEARNREADORIENTATIONMODEL" callee=LEARNREADORIENTATIONMODEL:process:modelled:legacy @32:5
+  in $1 (tuple(meta, f1r2)): Tuple
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/.map@1[out] ?
+  out artifactprior (artifactprior): Channel<Tuple>
+  out versions_gatk4 (versions_gatk4): Channel<Tuple>
+subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/vcf_with_priors chain ".map.join" steps=map,join @34:23
+  in in (in): -
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/calls[out] ? via calls
+  in 2:1 (join(right)): -
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/LEARNREADORIENTATIONMODEL@1[artifactprior] Channel<Tuple> via LEARNREADORIENTATIONMODEL.out.artifactprior
+  out out (out): Channel<Record>
+subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/pileup_table_normal factory "channel.empty" factory=channel.empty @38:27
+  out out (out): Channel<?>
+subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/pileup_table_tumor factory "channel.empty" factory=channel.empty @39:27
+  out out (out): Channel<?>
+subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/contamination_table factory "channel.empty" factory=channel.empty @40:27
+  out out (out): Channel<?>
+subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/segmentation_table factory "channel.empty" factory=channel.empty @41:27
+  out out (out): Channel<?>
+subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/cram_intervals chain ".combine.map" steps=combine,map @44:26
+  guards then of contamination_resource_provided
+  in in (in): -
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/cram[out] ? via cram
+  in 1:1 (combine(right)): -
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/:take:intervals[out] ? via intervals
+  out out (out): ?
+subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/pileup chain ".multiMap" steps=multiMap @52:18
+  guards then of contamination_resource_provided
+  in in (in): -
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/cram_intervals[out] ? via cram_intervals
+  out out (out): Record
+subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/pileup_normal chain ".filter.unique" steps=filter,unique @58:25
+  guards then of contamination_resource_provided
+  in in (in): -
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/pileup[out] Record via pileup indirect
+  out out (out): Channel<?>
+subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/GETPILEUPSUMMARIES_NORMAL@1 call "GETPILEUPSUMMARIES_NORMAL" callee=GETPILEUPSUMMARIES_NORMAL:process:modelled:legacy @60:9
+  guards then of contamination_resource_provided
+  in $1 (tuple(meta, input, index, intervals)): Tuple
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/pileup_normal[out] Channel<?> via pileup_normal
+  in $2 (tuple(meta2, fasta)): Tuple
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/:take:fasta[out] ? via fasta
+  in $3 (tuple(meta3, fai)): Tuple
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/:take:fai[out] ? via fai
+  in $4 (tuple(meta4, dict)): Tuple
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/:take:dict[out] ? via dict
+  in variants (variants): Path
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/:take:contamination_resource[out] ? via contamination_resource
+  in variants_tbi (variants_tbi): Path
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/:take:contamination_resource_tbi[out] ? via contamination_resource_tbi
+  out table (table): Channel<Tuple>
+  out versions_gatk4 (versions_gatk4): Channel<Tuple>
+subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/GETPILEUPSUMMARIES_TUMOR@1 call "GETPILEUPSUMMARIES_TUMOR" callee=GETPILEUPSUMMARIES_TUMOR:process:modelled:legacy @61:9
+  guards then of contamination_resource_provided
+  in $1 (tuple(meta, input, index, intervals)): Tuple
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/pileup[out] Record via pileup indirect
+  in $2 (tuple(meta2, fasta)): Tuple
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/:take:fasta[out] ? via fasta
+  in $3 (tuple(meta3, fai)): Tuple
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/:take:fai[out] ? via fai
+  in $4 (tuple(meta4, dict)): Tuple
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/:take:dict[out] ? via dict
+  in variants (variants): Path
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/:take:contamination_resource[out] ? via contamination_resource
+  in variants_tbi (variants_tbi): Path
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/:take:contamination_resource_tbi[out] ? via contamination_resource_tbi
+  out table (table): Channel<Tuple>
+  out versions_gatk4 (versions_gatk4): Channel<Tuple>
+subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/pileup_normal_gather code "pileup_normal_gather = gatherPileups(GETPILEUPSUMMARIES_NOR…" @63:9
+  guards then of contamination_resource_provided
+  in GETPILEUPSUMMARIES_NORMAL.out.table (GETPILEUPSUMMARIES_NORMAL.out.table): -
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/GETPILEUPSUMMARIES_NORMAL@1[table] Channel<Tuple> via GETPILEUPSUMMARIES_NORMAL.out.table indirect
+  out pileup_normal_gather (pileup_normal_gather): -
+subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/pileup_tumor_gather code "pileup_tumor_gather = gatherPileups(GETPILEUPSUMMARIES_TUMO…" @64:9
+  guards then of contamination_resource_provided
+  in GETPILEUPSUMMARIES_TUMOR.out.table (GETPILEUPSUMMARIES_TUMOR.out.table): -
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/GETPILEUPSUMMARIES_TUMOR@1[table] Channel<Tuple> via GETPILEUPSUMMARIES_TUMOR.out.table indirect
+  out pileup_tumor_gather (pileup_tumor_gather): -
+subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/.map@2 chain ".map" steps=map @66:70
+  guards then of contamination_resource_provided
+  in in (in): -
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/:take:dict[out] ? via dict
+  out out (out): ?
+subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/GATHERPILEUPSUMMARIES_NORMAL@1 call "GATHERPILEUPSUMMARIES_NORMAL" callee=GATHERPILEUPSUMMARIES_NORMAL:process:modelled:legacy @66:9
+  guards then of contamination_resource_provided
+  in $1 (tuple(meta, pileup)): Tuple
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/pileup_normal_gather[pileup_normal_gather] ? via pileup_normal_gather indirect
+  in dict (dict): Path
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/.map@2[out] ?
+  out table (table): Channel<Tuple>
+  out versions_gatk4 (versions_gatk4): Channel<Tuple>
+subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/.map@3 chain ".map" steps=map @67:68
+  guards then of contamination_resource_provided
+  in in (in): -
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/:take:dict[out] ? via dict
+  out out (out): ?
+subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/GATHERPILEUPSUMMARIES_TUMOR@1 call "GATHERPILEUPSUMMARIES_TUMOR" callee=GATHERPILEUPSUMMARIES_TUMOR:process:modelled:legacy @67:9
+  guards then of contamination_resource_provided
+  in $1 (tuple(meta, pileup)): Tuple
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/pileup_tumor_gather[pileup_tumor_gather] ? via pileup_tumor_gather indirect
+  in dict (dict): Path
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/.map@3[out] ?
+  out table (table): Channel<Tuple>
+  out versions_gatk4 (versions_gatk4): Channel<Tuple>
+subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/channel.empty@1 factory "channel.empty" factory=channel.empty @69:31
+  guards then of contamination_resource_provided
+  out out (out): Channel<?>
+subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/pileup_table_normal~2 chain ".mix.map" steps=mix,map @69:31
+  guards then of contamination_resource_provided
+  in in (in): -
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/channel.empty@1[out] Channel<?>
+  in 1:1 (mix(1)): -
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/GATHERPILEUPSUMMARIES_NORMAL@1[table] Channel<Tuple> via GATHERPILEUPSUMMARIES_NORMAL.out.table
+  in 1:2 (mix(2)): -
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/pileup_normal_gather[pileup_normal_gather] ? via pileup_normal_gather indirect
+  out out (out): Channel<?>
+subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/channel.empty@2 factory "channel.empty" factory=channel.empty @72:30
+  guards then of contamination_resource_provided
+  out out (out): Channel<?>
+subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/pileup_table_tumor~2 chain ".mix.map" steps=mix,map @72:30
+  guards then of contamination_resource_provided
+  in in (in): -
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/channel.empty@2[out] Channel<?>
+  in 1:1 (mix(1)): -
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/GATHERPILEUPSUMMARIES_TUMOR@1[table] Channel<Tuple> via GATHERPILEUPSUMMARIES_TUMOR.out.table
+  in 1:2 (mix(2)): -
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/pileup_tumor_gather[pileup_tumor_gather] ? via pileup_tumor_gather indirect
+  out out (out): Channel<?>
+subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/pileup_table_tumor_branch_status chain ".branch" steps=branch @76:44
+  guards then of contamination_resource_provided
+  in in (in): -
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/pileup_table_tumor~2[out] Channel<?> via pileup_table_tumor
+  out out (out): Record
+subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/pileup_table_normal_by_normal chain ".map" steps=map @83:41
+  guards then of contamination_resource_provided
+  in in (in): -
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/pileup_table_normal~2[out] Channel<?> via pileup_table_normal
+  out out (out): Channel<?>
+subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/.map@4 chain ".map" steps=map @89:18
+  guards then of contamination_resource_provided
+  in in (in): -
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/pileup_table_tumor_branch_status[out] Record via pileup_table_tumor_branch_status indirect
+  out out (out): ?
+subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/calculatecontamination_in chain ".map.combine.map.mix" steps=map,combine,map,mix @85:37
+  guards then of contamination_resource_provided
+  in in (in): -
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/pileup_table_tumor_branch_status[out] Record via pileup_table_tumor_branch_status indirect
+  in 2:1 (combine(1)): -
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/pileup_table_normal_by_normal[out] Channel<?> via pileup_table_normal_by_normal
+  in 4:1 (mix(other)): -
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/.map@4[out] ?
+  out out (out): Channel<?>
+subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/CALCULATECONTAMINATION@1 call "CALCULATECONTAMINATION" callee=CALCULATECONTAMINATION:process:modelled:legacy @91:9
+  guards then of contamination_resource_provided
+  in $1 (tuple(meta, pileup, matched)): Tuple
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/calculatecontamination_in[out] Channel<?> via calculatecontamination_in
+  out contamination (contamination): Channel<Tuple>
+  out segmentation (segmentation): Channel<Tuple>
+  out versions_gatk4 (versions_gatk4): Channel<Tuple>
+subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/contamination_table~2 chain ".map.groupTuple" steps=map,groupTuple @95:35
+  guards then of contamination_resource_provided; then of joint
+  in in (in): -
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/CALCULATECONTAMINATION@1[contamination] Channel<Tuple> via CALCULATECONTAMINATION.out.contamination
+  out out (out): Channel<?>
+subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/segmentation_table~2 chain ".map.groupTuple" steps=map,groupTuple @96:34
+  guards then of contamination_resource_provided; then of joint
+  in in (in): -
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/CALCULATECONTAMINATION@1[segmentation] Channel<Tuple> via CALCULATECONTAMINATION.out.segmentation
+  out out (out): Channel<?>
+subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/vcf_to_filter chain ".join.join.map" steps=join,join,map @103:25
+  guards then of contamination_resource_provided
+  in in (in): -
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/vcf_with_priors[out] Channel<Record> via vcf_with_priors
+  in 1:1 (join(right)): -
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/CALCULATECONTAMINATION@1[segmentation] Channel<Tuple> via segmentation_table indirect
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/segmentation_table~2[out] Channel<?> via segmentation_table indirect
+  in 2:1 (join(right)): -
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/CALCULATECONTAMINATION@1[contamination] Channel<Tuple> via contamination_table indirect
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/contamination_table~2[out] Channel<?> via contamination_table indirect
+  out out (out): Channel<?>
+subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/vcf_to_filter~2 chain ".map" steps=map @112:25
+  guards else of contamination_resource_provided
+  in in (in): -
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/vcf_with_priors[out] Channel<Record> via vcf_with_priors
+  out out (out): Channel<?>
+subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/fasta_fai_dict chain ".combine.combine.map.collect" steps=combine,combine,map,collect @117:22
+  in in (in): -
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/:take:fasta[out] ? via fasta
+  in 1:1 (combine(right)): -
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/:take:fai[out] ? via fai
+  in 2:1 (combine(right)): -
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/:take:dict[out] ? via dict
+  out out (out): Value<Bag<?>>
+subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/FILTERMUTECTCALLS@1 call "FILTERMUTECTCALLS" callee=FILTERMUTECTCALLS:process:modelled:legacy @123:5
+  in $1 (tuple(meta, vcf, vcf_tbi, stats, orientationbias, segmentation, table, estimate)): Tuple
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/vcf_to_filter[out] Channel<?> via vcf_to_filter indirect
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/vcf_to_filter~2[out] Channel<?> via vcf_to_filter indirect
+  in $2 (tuple(meta2, fasta, fai, dict)): Tuple
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/fasta_fai_dict[out] Value<Bag<?>> via fasta_fai_dict
+  out vcf (vcf): Channel<Tuple>
+  out tbi (tbi): Channel<Tuple>
+  out stats (stats): Channel<Tuple>
+  out versions_gatk4 (versions_gatk4): Channel<Tuple>
+subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/:emit:vcf emit "vcf" @126:5
+  in in (in): -
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/FILTERMUTECTCALLS@1[vcf] Channel<Tuple> via FILTERMUTECTCALLS.out.vcf
+subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/:emit:tbi emit "tbi" @127:5
+  in in (in): -
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/FILTERMUTECTCALLS@1[tbi] Channel<Tuple> via FILTERMUTECTCALLS.out.tbi
+subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/:emit:stats_filtered emit "stats_filtered" @128:5
+  in in (in): -
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/FILTERMUTECTCALLS@1[stats] Channel<Tuple> via FILTERMUTECTCALLS.out.stats
+subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/:emit:artifact_priors emit "artifact_priors" @129:5
+  in in (in): -
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/LEARNREADORIENTATIONMODEL@1[artifactprior] Channel<Tuple> via LEARNREADORIENTATIONMODEL.out.artifactprior
+subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/:emit:contamination_table emit "contamination_table" @130:5
+  in in (in): -
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/contamination_table[out] Channel<?> via contamination_table indirect
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/CALCULATECONTAMINATION@1[contamination] Channel<Tuple> via contamination_table indirect
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/contamination_table~2[out] Channel<?> via contamination_table indirect
+subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/:emit:segmentation_table emit "segmentation_table" @131:5
+  in in (in): -
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/segmentation_table[out] Channel<?> via segmentation_table indirect
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/CALCULATECONTAMINATION@1[segmentation] Channel<Tuple> via segmentation_table indirect
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/segmentation_table~2[out] Channel<?> via segmentation_table indirect
+subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/:emit:pileup_table_normal emit "pileup_table_normal" @132:5
+  in in (in): -
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/pileup_table_normal[out] Channel<?> via pileup_table_normal indirect
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/pileup_table_normal~2[out] Channel<?> via pileup_table_normal indirect
+subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/:emit:pileup_table_tumor emit "pileup_table_tumor" @133:5
+  in in (in): -
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/pileup_table_tumor[out] Channel<?> via pileup_table_tumor indirect
+    <- subworkflows/local/vcf_variant_filtering_mutect2/main.nf#VCF_VARIANT_FILTERING_MUTECT2/pileup_table_tumor~2[out] Channel<?> via pileup_table_tumor indirect
+bound @99:13 contamination_table
+bound @100:13 segmentation_table

@@ -1,0 +1,74 @@
+workflow subworkflows/local/bam_variant_calling_cnvkit/main.nf#BAM_VARIANT_CALLING_CNVKIT legacy
+statements 8, modelled 7
+subworkflows/local/bam_variant_calling_cnvkit/main.nf#BAM_VARIANT_CALLING_CNVKIT/:take:cram take "cram" @14:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_cnvkit/main.nf#BAM_VARIANT_CALLING_CNVKIT/:take:fasta take "fasta" @15:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_cnvkit/main.nf#BAM_VARIANT_CALLING_CNVKIT/:take:fasta_fai take "fasta_fai" @16:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_cnvkit/main.nf#BAM_VARIANT_CALLING_CNVKIT/:take:targets take "targets" @17:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_cnvkit/main.nf#BAM_VARIANT_CALLING_CNVKIT/:take:reference take "reference" @18:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_cnvkit/main.nf#BAM_VARIANT_CALLING_CNVKIT/generate_pon code "generate_pon = false" @21:5
+  out generate_pon (generate_pon): Boolean
+subworkflows/local/bam_variant_calling_cnvkit/main.nf#BAM_VARIANT_CALLING_CNVKIT/cram_input chain ".map" steps=map @24:18
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_cnvkit/main.nf#BAM_VARIANT_CALLING_CNVKIT/:take:cram[out] ? via cram
+  out out (out): ?
+subworkflows/local/bam_variant_calling_cnvkit/main.nf#BAM_VARIANT_CALLING_CNVKIT/fasta_input chain ".combine.map" steps=combine,map @26:19
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_cnvkit/main.nf#BAM_VARIANT_CALLING_CNVKIT/:take:fasta[out] ? via fasta
+  in 1:1 (combine(right)): -
+    <- subworkflows/local/bam_variant_calling_cnvkit/main.nf#BAM_VARIANT_CALLING_CNVKIT/:take:fasta_fai[out] ? via fasta_fai
+  out out (out): ?
+subworkflows/local/bam_variant_calling_cnvkit/main.nf#BAM_VARIANT_CALLING_CNVKIT/CNVKIT_BATCH@1 call "CNVKIT_BATCH" callee=CNVKIT_BATCH:process:modelled:legacy @28:5
+  in $1 (tuple(meta, tumor, tumor_index, normal, normal_index)): Tuple
+    <- subworkflows/local/bam_variant_calling_cnvkit/main.nf#BAM_VARIANT_CALLING_CNVKIT/cram_input[out] ? via cram_input
+  in $2 (tuple(meta2, fasta, fasta_fai)): Tuple
+    <- subworkflows/local/bam_variant_calling_cnvkit/main.nf#BAM_VARIANT_CALLING_CNVKIT/fasta_input[out] ? via fasta_input
+  in $3 (tuple(meta4, targets)): Tuple
+    <- subworkflows/local/bam_variant_calling_cnvkit/main.nf#BAM_VARIANT_CALLING_CNVKIT/:take:targets[out] ? via targets
+  in $4 (tuple(meta5, reference)): Tuple
+    <- subworkflows/local/bam_variant_calling_cnvkit/main.nf#BAM_VARIANT_CALLING_CNVKIT/:take:reference[out] ? via reference
+  in panel_of_normals (panel_of_normals): -
+    <- subworkflows/local/bam_variant_calling_cnvkit/main.nf#BAM_VARIANT_CALLING_CNVKIT/generate_pon[generate_pon] Boolean via generate_pon
+  out bed (bed): Channel<Tuple>
+  out cnn (cnn): Channel<Tuple>
+  out cnr (cnr): Channel<Tuple>
+  out cns (cns): Channel<Tuple>
+  out pdf (pdf): Channel<Tuple>
+  out png (png): Channel<Tuple>
+  out versions_cnvkit (versions_cnvkit): Channel<Tuple>
+  out versions_samtools (versions_samtools): Channel<Tuple>
+subworkflows/local/bam_variant_calling_cnvkit/main.nf#BAM_VARIANT_CALLING_CNVKIT/.map@1 chain ".map" steps=map @34:17
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_cnvkit/main.nf#BAM_VARIANT_CALLING_CNVKIT/CNVKIT_BATCH@1[cns] Channel<Tuple> via CNVKIT_BATCH.out.cns
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_cnvkit/main.nf#BAM_VARIANT_CALLING_CNVKIT/CNVKIT_CALL@1 call "CNVKIT_CALL" callee=CNVKIT_CALL:process:modelled:legacy @34:5
+  in $1 (tuple(meta, cns, vcf)): Tuple
+    <- subworkflows/local/bam_variant_calling_cnvkit/main.nf#BAM_VARIANT_CALLING_CNVKIT/.map@1[out] Channel<?>
+  out cns (cns): Channel<Tuple>
+  out versions_cnvkit (versions_cnvkit): Channel<Tuple>
+subworkflows/local/bam_variant_calling_cnvkit/main.nf#BAM_VARIANT_CALLING_CNVKIT/CNVKIT_EXPORT@1 call "CNVKIT_EXPORT" callee=CNVKIT_EXPORT:process:modelled:legacy @37:5
+  in $1 (tuple(meta, cns)): Tuple
+    <- subworkflows/local/bam_variant_calling_cnvkit/main.nf#BAM_VARIANT_CALLING_CNVKIT/CNVKIT_CALL@1[cns] Channel<Tuple> via CNVKIT_CALL.out.cns
+  out output (output): Channel<Tuple>
+  out versions_cnvkit (versions_cnvkit): Channel<Tuple>
+subworkflows/local/bam_variant_calling_cnvkit/main.nf#BAM_VARIANT_CALLING_CNVKIT/ch_genemetrics chain ".join.map" steps=join,map @39:22
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_cnvkit/main.nf#BAM_VARIANT_CALLING_CNVKIT/CNVKIT_BATCH@1[cnr] Channel<Tuple> via CNVKIT_BATCH.out.cnr
+  in 1:1 (join(1)): -
+    <- subworkflows/local/bam_variant_calling_cnvkit/main.nf#BAM_VARIANT_CALLING_CNVKIT/CNVKIT_BATCH@1[cns] Channel<Tuple> via CNVKIT_BATCH.out.cns
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_cnvkit/main.nf#BAM_VARIANT_CALLING_CNVKIT/CNVKIT_GENEMETRICS@1 call "CNVKIT_GENEMETRICS" callee=CNVKIT_GENEMETRICS:process:modelled:legacy @40:5
+  in $1 (tuple(meta, cnr, cns)): Tuple
+    <- subworkflows/local/bam_variant_calling_cnvkit/main.nf#BAM_VARIANT_CALLING_CNVKIT/ch_genemetrics[out] Channel<?> via ch_genemetrics
+  out tsv (tsv): Channel<Tuple>
+  out versions_cnvkit (versions_cnvkit): Channel<Tuple>
+subworkflows/local/bam_variant_calling_cnvkit/main.nf#BAM_VARIANT_CALLING_CNVKIT/:emit:cnv_calls_raw emit "cnv_calls_raw" @43:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_cnvkit/main.nf#BAM_VARIANT_CALLING_CNVKIT/CNVKIT_CALL@1[cns] Channel<Tuple> via CNVKIT_CALL.out.cns
+subworkflows/local/bam_variant_calling_cnvkit/main.nf#BAM_VARIANT_CALLING_CNVKIT/:emit:cnv_calls_export emit "cnv_calls_export" @44:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_cnvkit/main.nf#BAM_VARIANT_CALLING_CNVKIT/CNVKIT_EXPORT@1[output] Channel<Tuple> via CNVKIT_EXPORT.out.output

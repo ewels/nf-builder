@@ -1,0 +1,16 @@
+workflow main.nf# legacy
+statements 2, modelled 2
+main.nf#/channel.fromPath@1 factory "channel.fromPath" factory=channel.fromPath @9:18
+  out out (out): Channel<Path>
+main.nf#/ch_samples chain ".map" steps=map @9:18
+  in in (in): -
+    <- main.nf#/channel.fromPath@1[out] Channel<Path>
+  out out (out): Channel<?>
+main.nf#/TYPED_COUNT@1 call "TYPED_COUNT" callee=TYPED_COUNT:process:modelled:typed @11:5
+  in $1 (record(id, reads)): Record
+    <- main.nf#/ch_samples[out] Channel<?> via ch_samples
+  out out (out): Channel<Path>
+main.nf#/.view@1 chain ".view" steps=view @11:5
+  in in (in): -
+    <- main.nf#/TYPED_COUNT@1[out] Channel<Path>
+  out out (out): Channel<Path>

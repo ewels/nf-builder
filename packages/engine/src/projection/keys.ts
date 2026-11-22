@@ -110,6 +110,20 @@ export class KeyAllocator {
     });
   }
 
+  /** A function that puts the counters back as they are now (for a branch the projector abandons). */
+  checkpoint(): () => void {
+    const assigned = new Map(this.#assigned);
+    const unassigned = new Map(this.#unassigned);
+    const code = this.#code;
+    return () => {
+      this.#assigned.clear();
+      for (const [k, v] of assigned) this.#assigned.set(k, v);
+      this.#unassigned.clear();
+      for (const [k, v] of unassigned) this.#unassigned.set(k, v);
+      this.#code = code;
+    };
+  }
+
   #next(counts: Map<string, number>, name: string): number {
     const occurrence = (counts.get(name) ?? 0) + 1;
     counts.set(name, occurrence);

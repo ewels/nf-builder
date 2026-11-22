@@ -1,0 +1,1019 @@
+workflow subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME legacy
+statements 90, modelled 88
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:take:ascat_alleles_in take "ascat_alleles_in" @26:5
+  out out (out): -
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:take:ascat_loci_in take "ascat_loci_in" @27:5
+  out out (out): -
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:take:ascat_loci_gc_in take "ascat_loci_gc_in" @28:5
+  out out (out): -
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:take:ascat_loci_rt_in take "ascat_loci_rt_in" @29:5
+  out out (out): -
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:take:bbsplit_fasta_list_in take "bbsplit_fasta_list_in" @30:5
+  out out (out): -
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:take:bbsplit_index_in take "bbsplit_index_in" @31:5
+  out out (out): -
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:take:bcftools_annotations_in take "bcftools_annotations_in" @32:5
+  out out (out): -
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:take:bcftools_annotations_tbi_in take "bcftools_annotations_tbi_in" @33:5
+  out out (out): -
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:take:bwa_in take "bwa_in" @34:5
+  out out (out): -
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:take:bwamem2_in take "bwamem2_in" @35:5
+  out out (out): -
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:take:chr_dir_in take "chr_dir_in" @36:5
+  out out (out): -
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:take:contamination_resource_in take "contamination_resource_in" @37:5
+  out out (out): -
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:take:contamination_resource_tbi_in take "contamination_resource_tbi_in" @38:5
+  out out (out): -
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:take:dbsnp_in take "dbsnp_in" @39:5
+  out out (out): -
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:take:dbsnp_tbi_in take "dbsnp_tbi_in" @40:5
+  out out (out): -
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:take:dict_in take "dict_in" @41:5
+  out out (out): -
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:take:dragmap_in take "dragmap_in" @42:5
+  out out (out): -
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:take:fasta_in take "fasta_in" @43:5
+  out out (out): -
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:take:fasta_fai_in take "fasta_fai_in" @44:5
+  out out (out): -
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:take:force_call_alleles_in take "force_call_alleles_in" @45:5
+  out out (out): -
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:take:force_call_alleles_tbi_in take "force_call_alleles_tbi_in" @46:5
+  out out (out): -
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:take:germline_resource_in take "germline_resource_in" @47:5
+  out out (out): -
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:take:germline_resource_tbi_in take "germline_resource_tbi_in" @48:5
+  out out (out): -
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:take:known_indels_in take "known_indels_in" @49:5
+  out out (out): -
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:take:known_indels_tbi_in take "known_indels_tbi_in" @50:5
+  out out (out): -
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:take:known_snps_in take "known_snps_in" @51:5
+  out out (out): -
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:take:known_snps_tbi_in take "known_snps_tbi_in" @52:5
+  out out (out): -
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:take:msisensor2_models_in take "msisensor2_models_in" @53:5
+  out out (out): -
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:take:msisensorpro_scan_in take "msisensorpro_scan_in" @54:5
+  out out (out): -
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:take:pon_in take "pon_in" @55:5
+  out out (out): -
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:take:pon_tbi_in take "pon_tbi_in" @56:5
+  out out (out): -
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:take:aligner take "aligner" @57:5
+  out out (out): -
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:take:step take "step" @58:5
+  out out (out): -
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:take:tools take "tools" @59:5
+  out out (out): -
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:take:vep_include_fasta take "vep_include_fasta" @60:5
+  out out (out): -
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@1 factory "channel.fromPath" factory=channel.fromPath @64:24
+  guards then of fasta_in
+  out out (out): Channel<Path>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/fasta chain ".map.collect" steps=map,collect @64:24
+  guards then of fasta_in
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@1[out] Channel<Path>
+  out out (out): Value<Bag<?>>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/fasta~2 factory "channel.empty" factory=channel.empty @64:110
+  guards else of fasta_in
+  out out (out): Channel<?>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/BWAMEM1_INDEX@1 call "BWAMEM1_INDEX" callee=BWAMEM1_INDEX:process:modelled:legacy @69:13
+  guards then of step == 'mapping'; then of !bwa_in && (aligner == "bwa-mem" || aligner == "sentieon-bwamem" || aligner == "parabricks")
+  in $1 (tuple(meta, fasta)): Tuple
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/fasta[out] Value<Bag<?>> via fasta indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/fasta~2[out] Channel<?> via fasta indirect
+  out index (index): Channel<Tuple>
+  out versions_bwa (versions_bwa): Channel<Tuple>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/index_alignment chain ".collect" steps=collect @70:31
+  guards then of step == 'mapping'; then of !bwa_in && (aligner == "bwa-mem" || aligner == "sentieon-bwamem" || aligner == "parabricks")
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/BWAMEM1_INDEX@1[index] Channel<Tuple> via BWAMEM1_INDEX.out.index
+  out out (out): Value<Bag<Tuple>>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@2 factory "channel.fromPath" factory=channel.fromPath @73:31
+  guards then of step == 'mapping'; else of !bwa_in && (aligner == "bwa-mem" || aligner == "sentieon-bwamem" || aligner == "parabricks"); then of aligner == "bwa-mem" || aligner == "sentieon-bwamem" || aligner == "parabricks"
+  out out (out): Channel<Path>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/index_alignment~2 chain ".map.collect" steps=map,collect @73:31
+  guards then of step == 'mapping'; else of !bwa_in && (aligner == "bwa-mem" || aligner == "sentieon-bwamem" || aligner == "parabricks"); then of aligner == "bwa-mem" || aligner == "sentieon-bwamem" || aligner == "parabricks"
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@2[out] Channel<Path>
+  out out (out): Value<Bag<?>>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/BWAMEM2_INDEX@1 call "BWAMEM2_INDEX" callee=BWAMEM2_INDEX:process:modelled:legacy @76:13
+  guards then of step == 'mapping'; else of !bwa_in && (aligner == "bwa-mem" || aligner == "sentieon-bwamem" || aligner == "parabricks"); else of aligner == "bwa-mem" || aligner == "sentieon-bwamem" || aligner == "parabricks"; then of !bwamem2_in && aligner == 'bwa-mem2'
+  in $1 (tuple(meta, fasta)): Tuple
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/fasta[out] Value<Bag<?>> via fasta indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/fasta~2[out] Channel<?> via fasta indirect
+  out index (index): Channel<Tuple>
+  out versions_bwamem2 (versions_bwamem2): Channel<Tuple>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/index_alignment~3 chain ".collect" steps=collect @77:31
+  guards then of step == 'mapping'; else of !bwa_in && (aligner == "bwa-mem" || aligner == "sentieon-bwamem" || aligner == "parabricks"); else of aligner == "bwa-mem" || aligner == "sentieon-bwamem" || aligner == "parabricks"; then of !bwamem2_in && aligner == 'bwa-mem2'
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/BWAMEM2_INDEX@1[index] Channel<Tuple> via BWAMEM2_INDEX.out.index
+  out out (out): Value<Bag<Tuple>>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@3 factory "channel.fromPath" factory=channel.fromPath @80:31
+  guards then of step == 'mapping'; else of !bwa_in && (aligner == "bwa-mem" || aligner == "sentieon-bwamem" || aligner == "parabricks"); else of aligner == "bwa-mem" || aligner == "sentieon-bwamem" || aligner == "parabricks"; else of !bwamem2_in && aligner == 'bwa-mem2'; then of aligner == 'bwa-mem2'
+  out out (out): Channel<Path>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/index_alignment~4 chain ".map.collect" steps=map,collect @80:31
+  guards then of step == 'mapping'; else of !bwa_in && (aligner == "bwa-mem" || aligner == "sentieon-bwamem" || aligner == "parabricks"); else of aligner == "bwa-mem" || aligner == "sentieon-bwamem" || aligner == "parabricks"; else of !bwamem2_in && aligner == 'bwa-mem2'; then of aligner == 'bwa-mem2'
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@3[out] Channel<Path>
+  out out (out): Value<Bag<?>>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/DRAGMAP_HASHTABLE@1 call "DRAGMAP_HASHTABLE" callee=DRAGMAP_HASHTABLE:process:modelled:legacy @83:13
+  guards then of step == 'mapping'; else of !bwa_in && (aligner == "bwa-mem" || aligner == "sentieon-bwamem" || aligner == "parabricks"); else of aligner == "bwa-mem" || aligner == "sentieon-bwamem" || aligner == "parabricks"; else of !bwamem2_in && aligner == 'bwa-mem2'; else of aligner == 'bwa-mem2'; then of !dragmap_in && aligner == 'dragmap'
+  in $1 (tuple(meta, fasta)): Tuple
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/fasta[out] Value<Bag<?>> via fasta indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/fasta~2[out] Channel<?> via fasta indirect
+  out hashmap (hashmap): Channel<Tuple>
+  out versions_dragmap (versions_dragmap): Channel<Tuple>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/index_alignment~5 chain ".collect" steps=collect @84:31
+  guards then of step == 'mapping'; else of !bwa_in && (aligner == "bwa-mem" || aligner == "sentieon-bwamem" || aligner == "parabricks"); else of aligner == "bwa-mem" || aligner == "sentieon-bwamem" || aligner == "parabricks"; else of !bwamem2_in && aligner == 'bwa-mem2'; else of aligner == 'bwa-mem2'; then of !dragmap_in && aligner == 'dragmap'
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/DRAGMAP_HASHTABLE@1[hashmap] Channel<Tuple> via DRAGMAP_HASHTABLE.out.hashmap
+  out out (out): Value<Bag<Tuple>>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@4 factory "channel.fromPath" factory=channel.fromPath @87:31
+  guards then of step == 'mapping'; else of !bwa_in && (aligner == "bwa-mem" || aligner == "sentieon-bwamem" || aligner == "parabricks"); else of aligner == "bwa-mem" || aligner == "sentieon-bwamem" || aligner == "parabricks"; else of !bwamem2_in && aligner == 'bwa-mem2'; else of aligner == 'bwa-mem2'; else of !dragmap_in && aligner == 'dragmap'; then of aligner == 'dragmap'
+  out out (out): Channel<Path>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/index_alignment~6 chain ".map.collect" steps=map,collect @87:31
+  guards then of step == 'mapping'; else of !bwa_in && (aligner == "bwa-mem" || aligner == "sentieon-bwamem" || aligner == "parabricks"); else of aligner == "bwa-mem" || aligner == "sentieon-bwamem" || aligner == "parabricks"; else of !bwamem2_in && aligner == 'bwa-mem2'; else of aligner == 'bwa-mem2'; else of !dragmap_in && aligner == 'dragmap'; then of aligner == 'dragmap'
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@4[out] Channel<Path>
+  out out (out): Value<Bag<?>>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/index_alignment~7 factory "channel.empty" factory=channel.empty @91:27
+  guards else of step == 'mapping'
+  out out (out): Channel<?>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/GATK4_CREATESEQUENCEDICTIONARY@1 call "GATK4_CREATESEQUENCEDICTIONARY" callee=GATK4_CREATESEQUENCEDICTIONARY:process:modelled:legacy @95:9
+  guards then of !dict_in && step != "annotate"
+  in $1 (tuple(meta, fasta)): Tuple
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/fasta[out] Value<Bag<?>> via fasta indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/fasta~2[out] Channel<?> via fasta indirect
+  out dict (dict): Channel<Tuple>
+  out versions_gatk4 (versions_gatk4): Channel<Tuple>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/dict chain ".collect" steps=collect @96:16
+  guards then of !dict_in && step != "annotate"
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/GATK4_CREATESEQUENCEDICTIONARY@1[dict] Channel<Tuple> via GATK4_CREATESEQUENCEDICTIONARY.out.dict
+  out out (out): Value<Bag<Tuple>>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@5 factory "channel.fromPath" factory=channel.fromPath @99:16
+  guards else of !dict_in && step != "annotate"; then of dict_in
+  out out (out): Channel<Path>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/dict~2 chain ".map.collect" steps=map,collect @99:16
+  guards else of !dict_in && step != "annotate"; then of dict_in
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@5[out] Channel<Path>
+  out out (out): Value<Bag<?>>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/dict~3 factory "channel.empty" factory=channel.empty @102:16
+  guards else of !dict_in && step != "annotate"; else of dict_in
+  out out (out): Channel<?>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/.map@1 chain ".map" steps=map @106:24
+  guards then of !fasta_fai_in && step != "annotate"
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/fasta[out] Value<Bag<?>> via fasta indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/fasta~2[out] Channel<?> via fasta indirect
+  out out (out): ?
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/SAMTOOLS_FAIDX@1 call "SAMTOOLS_FAIDX" callee=SAMTOOLS_FAIDX:process:modelled:legacy @106:9
+  guards then of !fasta_fai_in && step != "annotate"
+  in $1 (tuple(meta, fasta, fai)): Tuple
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/.map@1[out] ?
+  in get_sizes (get_sizes): -
+    = false : Boolean
+  out fa (fa): Channel<Tuple>
+  out sizes (sizes): Channel<Tuple>
+  out fai (fai): Channel<Tuple>
+  out gzi (gzi): Channel<Tuple>
+  out versions_samtools (versions_samtools): Channel<Tuple>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/fasta_fai chain ".collect" steps=collect @107:21
+  guards then of !fasta_fai_in && step != "annotate"
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/SAMTOOLS_FAIDX@1[fai] Channel<Tuple> via SAMTOOLS_FAIDX.out.fai
+  out out (out): Value<Bag<Tuple>>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@6 factory "channel.fromPath" factory=channel.fromPath @110:21
+  guards else of !fasta_fai_in && step != "annotate"; then of fasta_fai_in
+  out out (out): Channel<Path>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/fasta_fai~2 chain ".map.collect" steps=map,collect @110:21
+  guards else of !fasta_fai_in && step != "annotate"; then of fasta_fai_in
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@6[out] Channel<Path>
+  out out (out): Value<Bag<?>>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/fasta_fai~3 factory "channel.empty" factory=channel.empty @113:21
+  guards else of !fasta_fai_in && step != "annotate"; else of fasta_fai_in
+  out out (out): Channel<?>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/bbsplit_index factory "channel.empty" factory=channel.empty @117:21
+  out out (out): Channel<?>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/UNTAR_BBSPLIT_INDEX@1 call "UNTAR_BBSPLIT_INDEX" callee=UNTAR_BBSPLIT_INDEX:process:modelled:legacy @122:33
+  guards then of tools && tools.split(',').contains('bbsplit'); then of bbsplit_index_in; then of bbsplit_index_in.endsWith('.tar.gz')
+  in $1 (tuple(meta, archive)): Tuple
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:take:bbsplit_index_in[out] ? via bbsplit_index_in indirect
+  out untar (untar): Value<Tuple>
+  out versions_untar (versions_untar): Value<Tuple>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/bbsplit_index~2 chain ".map" steps=map @122:33
+  guards then of tools && tools.split(',').contains('bbsplit'); then of bbsplit_index_in; then of bbsplit_index_in.endsWith('.tar.gz')
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/UNTAR_BBSPLIT_INDEX@1[untar] Value<Tuple>
+  out out (out): Value<?>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/bbsplit_index~3 factory "channel.value" factory=channel.value @125:33
+  guards then of tools && tools.split(',').contains('bbsplit'); then of bbsplit_index_in; else of bbsplit_index_in.endsWith('.tar.gz')
+  out out (out): Value<Path>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.of@1 factory "channel.of" factory=channel.of @130:37
+  guards then of tools && tools.split(',').contains('bbsplit'); else of bbsplit_index_in; then of bbsplit_fasta_list_in
+  out out (out): Channel<Path>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/ch_bbsplit_fasta_list chain ".splitCsv.flatMap.groupTuple.map.collect" steps=splitCsv,flatMap,groupTuple,map,collect @130:37
+  guards then of tools && tools.split(',').contains('bbsplit'); else of bbsplit_index_in; then of bbsplit_fasta_list_in
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.of@1[out] Channel<Path>
+  out out (out): Value<?>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/.map@2 chain ".map" steps=map @140:17
+  guards then of tools && tools.split(',').contains('bbsplit'); else of bbsplit_index_in; then of bbsplit_fasta_list_in
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/fasta[out] Value<Bag<?>> via fasta indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/fasta~2[out] Channel<?> via fasta indirect
+  out out (out): ?
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/BBMAP_INDEX@1 call "BBMAP_INDEX" callee=BBMAP_INDEX:process:modelled:legacy @137:29
+  guards then of tools && tools.split(',').contains('bbsplit'); else of bbsplit_index_in; then of bbsplit_fasta_list_in
+  in $1 (tuple(meta, reads)): Tuple
+    = [[id: "build_index"], []] : List
+  in index (index): Path
+    = [] : List
+  in primary_ref (primary_ref): Path
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/.map@2[out] ?
+  in $4 (tuple(other_ref_names, other_ref_paths)): Tuple
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/ch_bbsplit_fasta_list[out] Value<?> via ch_bbsplit_fasta_list
+  in only_build_index (only_build_index): -
+    = true : Boolean
+  out index (index): Channel<Path>
+  out primary_fastq (primary_fastq): Channel<Tuple>
+  out all_fastq (all_fastq): Channel<Tuple>
+  out stats (stats): Channel<Tuple>
+  out log (log): Channel<Tuple>
+  out versions_bbmap (versions_bbmap): Channel<Tuple>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@7 factory "channel.fromPath" factory=channel.fromPath @147:54
+  guards then of bcftools_annotations_in
+  out out (out): Channel<Path>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/bcftools_annotations chain ".collect" steps=collect @147:54
+  guards then of bcftools_annotations_in
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@7[out] Channel<Path>
+  out out (out): Value<Bag<Path>>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/bcftools_annotations~2 factory "channel.value" factory=channel.value @147:108
+  guards else of bcftools_annotations_in
+  out out (out): Value<List>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@8 factory "channel.fromPath" factory=channel.fromPath @148:62
+  guards then of bcftools_annotations_tbi_in
+  out out (out): Channel<Path>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/bcftools_annotations_tbi chain ".collect" steps=collect @148:62
+  guards then of bcftools_annotations_tbi_in
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@8[out] Channel<Path>
+  out out (out): Value<Bag<Path>>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/bcftools_annotations_tbi~2 factory "channel.value" factory=channel.value @148:120
+  guards else of bcftools_annotations_tbi_in
+  out out (out): Value<List>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/.flatten@1 chain ".flatten.map" steps=flatten,map @151:36
+  guards then of !bcftools_annotations_tbi_in && bcftools_annotations_in
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/bcftools_annotations[out] Value<Bag<Path>> via bcftools_annotations indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/bcftools_annotations~2[out] Value<List> via bcftools_annotations indirect
+  out out (out): Channel<?>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/TABIX_BCFTOOLS_ANNOTATIONS@1 call "TABIX_BCFTOOLS_ANNOTATIONS" callee=TABIX_BCFTOOLS_ANNOTATIONS:process:modelled:legacy @151:9
+  guards then of !bcftools_annotations_tbi_in && bcftools_annotations_in
+  in $1 (tuple(meta, infile, infile_tbi, regions)): Tuple
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/.flatten@1[out] Channel<?>
+  in action (action): -
+    = 'compress' : String
+  in make_index (make_index): -
+    = true : Boolean
+  in out_ext (out_ext): -
+    = '' : String
+  out output (output): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out versions_htslib (versions_htslib): Channel<Tuple>
+  out versions_xz (versions_xz): Channel<Tuple>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/bcftools_annotations_tbi~3 chain ".map.collect" steps=map,collect @152:36
+  guards then of !bcftools_annotations_tbi_in && bcftools_annotations_in
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/TABIX_BCFTOOLS_ANNOTATIONS@1[index] Channel<Tuple> via TABIX_BCFTOOLS_ANNOTATIONS.out.index
+  out out (out): Value<Bag<?>>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@9 factory "channel.fromPath" factory=channel.fromPath @156:24
+  guards then of dbsnp_in
+  out out (out): Channel<Path>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/dbsnp chain ".collect" steps=collect @156:24
+  guards then of dbsnp_in
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@9[out] Channel<Path>
+  out out (out): Value<Bag<Path>>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/dbsnp~2 factory "channel.value" factory=channel.value @156:63
+  guards else of dbsnp_in
+  out out (out): Value<List>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@10 factory "channel.fromPath" factory=channel.fromPath @157:32
+  guards then of dbsnp_tbi_in
+  out out (out): Channel<Path>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/dbsnp_tbi chain ".collect" steps=collect @157:32
+  guards then of dbsnp_tbi_in
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@10[out] Channel<Path>
+  out out (out): Value<Bag<Path>>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/dbsnp_tbi~2 factory "channel.value" factory=channel.value @157:75
+  guards else of dbsnp_tbi_in
+  out out (out): Value<List>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/.flatten@2 chain ".flatten.map" steps=flatten,map @160:21
+  guards then of !dbsnp_tbi_in && dbsnp_in && ((step == "mapping" || step == "markduplicates" || step == "prepare_recalibration") || (tools.split(',').contains('controlfreec') || tools.split(',').contains('haplotypecaller') || tools.split(',').contains('sentieon_haplotyper') || tools.split(',').contains('sentieon_dnascope') || tools.split(',').contains('muse') || tools.split(',').contains('mutect2')))
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/dbsnp[out] Value<Bag<Path>> via dbsnp indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/dbsnp~2[out] Value<List> via dbsnp indirect
+  out out (out): Channel<?>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/TABIX_DBSNP@1 call "TABIX_DBSNP" callee=TABIX_DBSNP:process:modelled:legacy @160:9
+  guards then of !dbsnp_tbi_in && dbsnp_in && ((step == "mapping" || step == "markduplicates" || step == "prepare_recalibration") || (tools.split(',').contains('controlfreec') || tools.split(',').contains('haplotypecaller') || tools.split(',').contains('sentieon_haplotyper') || tools.split(',').contains('sentieon_dnascope') || tools.split(',').contains('muse') || tools.split(',').contains('mutect2')))
+  in $1 (tuple(meta, infile, infile_tbi, regions)): Tuple
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/.flatten@2[out] Channel<?>
+  in action (action): -
+    = 'compress' : String
+  in make_index (make_index): -
+    = true : Boolean
+  in out_ext (out_ext): -
+    = '' : String
+  out output (output): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out versions_htslib (versions_htslib): Channel<Tuple>
+  out versions_xz (versions_xz): Channel<Tuple>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/dbsnp_tbi~3 chain ".map.collect" steps=map,collect @161:21
+  guards then of !dbsnp_tbi_in && dbsnp_in && ((step == "mapping" || step == "markduplicates" || step == "prepare_recalibration") || (tools.split(',').contains('controlfreec') || tools.split(',').contains('haplotypecaller') || tools.split(',').contains('sentieon_haplotyper') || tools.split(',').contains('sentieon_dnascope') || tools.split(',').contains('muse') || tools.split(',').contains('mutect2')))
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/TABIX_DBSNP@1[index] Channel<Tuple> via TABIX_DBSNP.out.index
+  out out (out): Value<Bag<?>>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/run_mutect2 code "def run_mutect2 = tools.split(',').contains('mutect2') || t…" @165:5
+  in tools (tools): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:take:tools[out] ? via tools indirect
+  out run_mutect2 (run_mutect2): -
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@11 factory "channel.fromPath" factory=channel.fromPath @167:48
+  guards then of germline_resource_in
+  out out (out): Channel<Path>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/germline_resource chain ".collect" steps=collect @167:48
+  guards then of germline_resource_in
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@11[out] Channel<Path>
+  out out (out): Value<Bag<Path>>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/germline_resource~2 factory "channel.value" factory=channel.value @167:99
+  guards else of germline_resource_in
+  out out (out): Value<List>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@12 factory "channel.fromPath" factory=channel.fromPath @168:56
+  guards then of germline_resource_tbi_in
+  out out (out): Channel<Path>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/germline_resource_tbi chain ".collect" steps=collect @168:56
+  guards then of germline_resource_tbi_in
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@12[out] Channel<Path>
+  out out (out): Value<Bag<Path>>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/germline_resource_tbi~2 factory "channel.value" factory=channel.value @168:111
+  guards else of germline_resource_tbi_in
+  out out (out): Value<List>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/.flatten@3 chain ".flatten.map" steps=flatten,map @171:33
+  guards then of !germline_resource_tbi_in && germline_resource_in && (run_mutect2 || tools.split(',').contains('sentieon_tnscope'))
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/germline_resource[out] Value<Bag<Path>> via germline_resource indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/germline_resource~2[out] Value<List> via germline_resource indirect
+  out out (out): Channel<?>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/TABIX_GERMLINE_RESOURCE@1 call "TABIX_GERMLINE_RESOURCE" callee=TABIX_GERMLINE_RESOURCE:process:modelled:legacy @171:9
+  guards then of !germline_resource_tbi_in && germline_resource_in && (run_mutect2 || tools.split(',').contains('sentieon_tnscope'))
+  in $1 (tuple(meta, infile, infile_tbi, regions)): Tuple
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/.flatten@3[out] Channel<?>
+  in action (action): -
+    = 'compress' : String
+  in make_index (make_index): -
+    = true : Boolean
+  in out_ext (out_ext): -
+    = '' : String
+  out output (output): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out versions_htslib (versions_htslib): Channel<Tuple>
+  out versions_xz (versions_xz): Channel<Tuple>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/germline_resource_tbi~3 chain ".map.collect" steps=map,collect @172:33
+  guards then of !germline_resource_tbi_in && germline_resource_in && (run_mutect2 || tools.split(',').contains('sentieon_tnscope'))
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/TABIX_GERMLINE_RESOURCE@1[index] Channel<Tuple> via TABIX_GERMLINE_RESOURCE.out.index
+  out out (out): Value<Bag<?>>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@13 factory "channel.fromPath" factory=channel.fromPath @176:58
+  guards then of contamination_resource_in
+  out out (out): Channel<Path>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/contamination_resource chain ".collect" steps=collect @176:58
+  guards then of contamination_resource_in
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@13[out] Channel<Path>
+  out out (out): Value<Bag<Path>>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/contamination_resource_tbi code "contamination_resource_tbi = contamination_resource_in ? (c…" @177:5
+  in contamination_resource_in (contamination_resource_in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:take:contamination_resource_in[out] ? via contamination_resource_in indirect
+  in contamination_resource_tbi_in (contamination_resource_tbi_in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:take:contamination_resource_tbi_in[out] ? via contamination_resource_tbi_in indirect
+  in germline_resource_tbi (germline_resource_tbi): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/germline_resource_tbi[out] Value<Bag<Path>> via germline_resource_tbi indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/germline_resource_tbi~2[out] Value<List> via germline_resource_tbi indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/germline_resource_tbi~3[out] Value<Bag<?>> via germline_resource_tbi indirect
+  out contamination_resource_tbi (contamination_resource_tbi): -
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/.flatten@4 chain ".flatten.map" steps=flatten,map @180:38
+  guards then of contamination_resource_in && !contamination_resource_tbi_in && run_mutect2
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/germline_resource[out] Value<Bag<Path>> via contamination_resource indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/germline_resource~2[out] Value<List> via contamination_resource indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/contamination_resource[out] Value<Bag<Path>> via contamination_resource indirect
+  out out (out): Channel<?>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/TABIX_CONTAMINATION_RESOURCE@1 call "TABIX_CONTAMINATION_RESOURCE" callee=TABIX_CONTAMINATION_RESOURCE:process:modelled:legacy @180:9
+  guards then of contamination_resource_in && !contamination_resource_tbi_in && run_mutect2
+  in $1 (tuple(meta, infile, infile_tbi, regions)): Tuple
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/.flatten@4[out] Channel<?>
+  in action (action): -
+    = 'compress' : String
+  in make_index (make_index): -
+    = true : Boolean
+  in out_ext (out_ext): -
+    = '' : String
+  out output (output): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out versions_htslib (versions_htslib): Channel<Tuple>
+  out versions_xz (versions_xz): Channel<Tuple>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/contamination_resource_tbi~2 chain ".map.collect" steps=map,collect @181:38
+  guards then of contamination_resource_in && !contamination_resource_tbi_in && run_mutect2
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/TABIX_CONTAMINATION_RESOURCE@1[index] Channel<Tuple> via TABIX_CONTAMINATION_RESOURCE.out.index
+  out out (out): Value<Bag<?>>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@14 factory "channel.fromPath" factory=channel.fromPath @184:38
+  guards then of known_indels_in
+  out out (out): Channel<Path>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/known_indels chain ".collect" steps=collect @184:38
+  guards then of known_indels_in
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@14[out] Channel<Path>
+  out out (out): Value<Bag<Path>>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/known_indels~2 factory "channel.value" factory=channel.value @184:84
+  guards else of known_indels_in
+  out out (out): Value<List>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@15 factory "channel.fromPath" factory=channel.fromPath @185:46
+  guards then of known_indels_tbi_in
+  out out (out): Channel<Path>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/known_indels_tbi chain ".collect" steps=collect @185:46
+  guards then of known_indels_tbi_in
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@15[out] Channel<Path>
+  out out (out): Value<Bag<Path>>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/known_indels_tbi~2 factory "channel.value" factory=channel.value @185:96
+  guards else of known_indels_tbi_in
+  out out (out): Value<List>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/.flatten@5 chain ".flatten.map" steps=flatten,map @188:28
+  guards then of !known_indels_tbi_in && known_indels_in && (step == 'mapping' || step == "markduplicates" || step == 'prepare_recalibration' || (tools.split(',').contains('haplotypecaller') || tools.split(',').contains('sentieon_haplotyper') || tools.split(',').contains('sentieon_dnascope')))
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/known_indels[out] Value<Bag<Path>> via known_indels indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/known_indels~2[out] Value<List> via known_indels indirect
+  out out (out): Channel<?>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/TABIX_KNOWN_INDELS@1 call "TABIX_KNOWN_INDELS" callee=TABIX_KNOWN_INDELS:process:modelled:legacy @188:9
+  guards then of !known_indels_tbi_in && known_indels_in && (step == 'mapping' || step == "markduplicates" || step == 'prepare_recalibration' || (tools.split(',').contains('haplotypecaller') || tools.split(',').contains('sentieon_haplotyper') || tools.split(',').contains('sentieon_dnascope')))
+  in $1 (tuple(meta, infile, infile_tbi, regions)): Tuple
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/.flatten@5[out] Channel<?>
+  in action (action): -
+    = 'compress' : String
+  in make_index (make_index): -
+    = true : Boolean
+  in out_ext (out_ext): -
+    = '' : String
+  out output (output): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out versions_htslib (versions_htslib): Channel<Tuple>
+  out versions_xz (versions_xz): Channel<Tuple>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/known_indels_tbi~3 chain ".map.collect" steps=map,collect @189:28
+  guards then of !known_indels_tbi_in && known_indels_in && (step == 'mapping' || step == "markduplicates" || step == 'prepare_recalibration' || (tools.split(',').contains('haplotypecaller') || tools.split(',').contains('sentieon_haplotyper') || tools.split(',').contains('sentieon_dnascope')))
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/TABIX_KNOWN_INDELS@1[index] Channel<Tuple> via TABIX_KNOWN_INDELS.out.index
+  out out (out): Value<Bag<?>>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@16 factory "channel.fromPath" factory=channel.fromPath @192:34
+  guards then of known_snps_in
+  out out (out): Channel<Path>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/known_snps chain ".collect" steps=collect @192:34
+  guards then of known_snps_in
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@16[out] Channel<Path>
+  out out (out): Value<Bag<Path>>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/known_snps~2 factory "channel.value" factory=channel.value @192:78
+  guards else of known_snps_in
+  out out (out): Value<List>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@17 factory "channel.fromPath" factory=channel.fromPath @193:42
+  guards then of known_snps_tbi_in
+  out out (out): Channel<Path>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/known_snps_tbi chain ".collect" steps=collect @193:42
+  guards then of known_snps_tbi_in
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@17[out] Channel<Path>
+  out out (out): Value<Bag<Path>>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/known_snps_tbi~2 factory "channel.value" factory=channel.value @193:90
+  guards else of known_snps_tbi_in
+  out out (out): Value<List>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/.flatten@6 chain ".flatten.map" steps=flatten,map @196:26
+  guards then of !known_snps_tbi_in && known_snps_in && (step == 'mapping' || step == "markduplicates" || step == 'prepare_recalibration' || (tools.split(',').contains('haplotypecaller') || tools.split(',').contains('sentieon_haplotyper')))
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/known_snps[out] Value<Bag<Path>> via known_snps indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/known_snps~2[out] Value<List> via known_snps indirect
+  out out (out): Channel<?>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/TABIX_KNOWN_SNPS@1 call "TABIX_KNOWN_SNPS" callee=TABIX_KNOWN_SNPS:process:modelled:legacy @196:9
+  guards then of !known_snps_tbi_in && known_snps_in && (step == 'mapping' || step == "markduplicates" || step == 'prepare_recalibration' || (tools.split(',').contains('haplotypecaller') || tools.split(',').contains('sentieon_haplotyper')))
+  in $1 (tuple(meta, infile, infile_tbi, regions)): Tuple
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/.flatten@6[out] Channel<?>
+  in action (action): -
+    = 'compress' : String
+  in make_index (make_index): -
+    = true : Boolean
+  in out_ext (out_ext): -
+    = '' : String
+  out output (output): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out versions_htslib (versions_htslib): Channel<Tuple>
+  out versions_xz (versions_xz): Channel<Tuple>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/known_snps_tbi~3 chain ".map.collect" steps=map,collect @197:26
+  guards then of !known_snps_tbi_in && known_snps_in && (step == 'mapping' || step == "markduplicates" || step == 'prepare_recalibration' || (tools.split(',').contains('haplotypecaller') || tools.split(',').contains('sentieon_haplotyper')))
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/TABIX_KNOWN_SNPS@1[index] Channel<Tuple> via TABIX_KNOWN_SNPS.out.index
+  out out (out): Value<Bag<?>>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@18 factory "channel.fromPath" factory=channel.fromPath @200:50
+  guards then of force_call_alleles_in
+  out out (out): Channel<Path>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/force_call_alleles chain ".collect" steps=collect @200:50
+  guards then of force_call_alleles_in
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@18[out] Channel<Path>
+  out out (out): Value<Bag<Path>>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/force_call_alleles~2 factory "channel.value" factory=channel.value @200:102
+  guards else of force_call_alleles_in
+  out out (out): Value<List>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@19 factory "channel.fromPath" factory=channel.fromPath @201:58
+  guards then of force_call_alleles_tbi_in
+  out out (out): Channel<Path>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/force_call_alleles_tbi chain ".collect" steps=collect @201:58
+  guards then of force_call_alleles_tbi_in
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@19[out] Channel<Path>
+  out out (out): Value<Bag<Path>>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/force_call_alleles_tbi~2 factory "channel.value" factory=channel.value @201:114
+  guards else of force_call_alleles_tbi_in
+  out out (out): Value<List>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/.flatten@7 chain ".flatten.map" steps=flatten,map @204:34
+  guards then of !force_call_alleles_tbi_in && force_call_alleles_in && run_mutect2
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/force_call_alleles[out] Value<Bag<Path>> via force_call_alleles indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/force_call_alleles~2[out] Value<List> via force_call_alleles indirect
+  out out (out): Channel<?>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/TABIX_FORCE_CALL_ALLELES@1 call "TABIX_FORCE_CALL_ALLELES" callee=TABIX_FORCE_CALL_ALLELES:process:modelled:legacy @204:9
+  guards then of !force_call_alleles_tbi_in && force_call_alleles_in && run_mutect2
+  in $1 (tuple(meta, infile, infile_tbi, regions)): Tuple
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/.flatten@7[out] Channel<?>
+  in action (action): -
+    = 'compress' : String
+  in make_index (make_index): -
+    = true : Boolean
+  in out_ext (out_ext): -
+    = '' : String
+  out output (output): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out versions_htslib (versions_htslib): Channel<Tuple>
+  out versions_xz (versions_xz): Channel<Tuple>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/force_call_alleles_tbi~3 chain ".map.collect" steps=map,collect @205:34
+  guards then of !force_call_alleles_tbi_in && force_call_alleles_in && run_mutect2
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/TABIX_FORCE_CALL_ALLELES@1[index] Channel<Tuple> via TABIX_FORCE_CALL_ALLELES.out.index
+  out out (out): Value<Bag<?>>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@20 factory "channel.fromPath" factory=channel.fromPath @208:20
+  guards then of pon_in
+  out out (out): Channel<Path>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/pon chain ".collect" steps=collect @208:20
+  guards then of pon_in
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@20[out] Channel<Path>
+  out out (out): Value<Bag<Path>>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/pon~2 factory "channel.value" factory=channel.value @208:57
+  guards else of pon_in
+  out out (out): Value<List>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@21 factory "channel.fromPath" factory=channel.fromPath @209:28
+  guards then of pon_tbi_in
+  out out (out): Channel<Path>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/pon_tbi chain ".collect" steps=collect @209:28
+  guards then of pon_tbi_in
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@21[out] Channel<Path>
+  out out (out): Value<Bag<Path>>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/pon_tbi~2 factory "channel.value" factory=channel.value @209:69
+  guards else of pon_tbi_in
+  out out (out): Value<List>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/.flatten@8 chain ".flatten.map" steps=flatten,map @212:19
+  guards then of !pon_tbi_in && pon_in && run_mutect2
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/pon[out] Value<Bag<Path>> via pon indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/pon~2[out] Value<List> via pon indirect
+  out out (out): Channel<?>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/TABIX_PON@1 call "TABIX_PON" callee=TABIX_PON:process:modelled:legacy @212:9
+  guards then of !pon_tbi_in && pon_in && run_mutect2
+  in $1 (tuple(meta, infile, infile_tbi, regions)): Tuple
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/.flatten@8[out] Channel<?>
+  in action (action): -
+    = 'compress' : String
+  in make_index (make_index): -
+    = true : Boolean
+  in out_ext (out_ext): -
+    = '' : String
+  out output (output): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out versions_htslib (versions_htslib): Channel<Tuple>
+  out versions_xz (versions_xz): Channel<Tuple>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/pon_tbi~3 chain ".map.collect" steps=map,collect @213:19
+  guards then of !pon_tbi_in && pon_in && run_mutect2
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/TABIX_PON@1[index] Channel<Tuple> via TABIX_PON.out.index
+  out out (out): Value<Bag<?>>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/known_sites_indels chain ".concat.collect" steps=concat,collect @218:26
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/dbsnp[out] Value<Bag<Path>> via dbsnp indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/dbsnp~2[out] Value<List> via dbsnp indirect
+  in 1:1 (concat(1)): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/known_indels[out] Value<Bag<Path>> via known_indels indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/known_indels~2[out] Value<List> via known_indels indirect
+  out out (out): Value<Bag<?>>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/known_sites_indels_tbi chain ".concat.collect" steps=concat,collect @219:30
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/dbsnp_tbi[out] Value<Bag<Path>> via dbsnp_tbi indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/dbsnp_tbi~2[out] Value<List> via dbsnp_tbi indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/dbsnp_tbi~3[out] Value<Bag<?>> via dbsnp_tbi indirect
+  in 1:1 (concat(1)): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/known_indels_tbi[out] Value<Bag<Path>> via known_indels_tbi indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/known_indels_tbi~2[out] Value<List> via known_indels_tbi indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/known_indels_tbi~3[out] Value<Bag<?>> via known_indels_tbi indirect
+  out out (out): Value<Bag<?>>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/known_sites_snps chain ".concat.collect" steps=concat,collect @220:24
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/dbsnp[out] Value<Bag<Path>> via dbsnp indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/dbsnp~2[out] Value<List> via dbsnp indirect
+  in 1:1 (concat(1)): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/known_snps[out] Value<Bag<Path>> via known_snps indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/known_snps~2[out] Value<List> via known_snps indirect
+  out out (out): Value<Bag<?>>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/known_sites_snps_tbi chain ".concat.collect" steps=concat,collect @221:28
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/dbsnp_tbi[out] Value<Bag<Path>> via dbsnp_tbi indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/dbsnp_tbi~2[out] Value<List> via dbsnp_tbi indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/dbsnp_tbi~3[out] Value<Bag<?>> via dbsnp_tbi indirect
+  in 1:1 (concat(1)): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/known_snps_tbi[out] Value<Bag<Path>> via known_snps_tbi indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/known_snps_tbi~2[out] Value<List> via known_snps_tbi indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/known_snps_tbi~3[out] Value<Bag<?>> via known_snps_tbi indirect
+  out out (out): Value<Bag<?>>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@22 factory "channel.fromPath" factory=channel.fromPath @225:33
+  guards then of msisensor2_models_in && msisensor2_models_in.endsWith(".tar.gz") && tools.split(',').contains('msisensor2')
+  out out (out): Channel<Path>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/.map@3 chain ".map" steps=map @225:33
+  guards then of msisensor2_models_in && msisensor2_models_in.endsWith(".tar.gz") && tools.split(',').contains('msisensor2')
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@22[out] Channel<Path>
+  out out (out): Channel<?>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/UNTAR_MSISENSOR2_MODELS@1 call "UNTAR_MSISENSOR2_MODELS" callee=UNTAR_MSISENSOR2_MODELS:process:modelled:legacy @225:9
+  guards then of msisensor2_models_in && msisensor2_models_in.endsWith(".tar.gz") && tools.split(',').contains('msisensor2')
+  in $1 (tuple(meta, archive)): Tuple
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/.map@3[out] Channel<?>
+  out untar (untar): Channel<Tuple>
+  out versions_untar (versions_untar): Channel<Tuple>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/msisensor2_models chain ".collect" steps=collect @226:29
+  guards then of msisensor2_models_in && msisensor2_models_in.endsWith(".tar.gz") && tools.split(',').contains('msisensor2')
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/UNTAR_MSISENSOR2_MODELS@1[untar] Channel<Tuple> via UNTAR_MSISENSOR2_MODELS.out.untar
+  out out (out): Value<Bag<Tuple>>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@23 factory "channel.fromPath" factory=channel.fromPath @229:29
+  guards else of msisensor2_models_in && msisensor2_models_in.endsWith(".tar.gz") && tools.split(',').contains('msisensor2'); then of msisensor2_models_in && tools.split(',').contains('msisensor2')
+  out out (out): Channel<Path>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/msisensor2_models~2 chain ".map.collect" steps=map,collect @229:29
+  guards else of msisensor2_models_in && msisensor2_models_in.endsWith(".tar.gz") && tools.split(',').contains('msisensor2'); then of msisensor2_models_in && tools.split(',').contains('msisensor2')
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@23[out] Channel<Path>
+  out out (out): Value<Bag<?>>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/msisensor2_models~3 factory "channel.value" factory=channel.value @232:29
+  guards else of msisensor2_models_in && msisensor2_models_in.endsWith(".tar.gz") && tools.split(',').contains('msisensor2'); else of msisensor2_models_in && tools.split(',').contains('msisensor2')
+  out out (out): Value<List>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@24 factory "channel.fromPath" factory=channel.fromPath @236:29
+  guards then of msisensorpro_scan_in
+  out out (out): Channel<Path>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/msisensorpro_scan chain ".collect" steps=collect @236:29
+  guards then of msisensorpro_scan_in
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@24[out] Channel<Path>
+  out out (out): Value<Bag<Path>>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/MSISENSORPRO_SCAN@1 call "MSISENSORPRO_SCAN" callee=MSISENSORPRO_SCAN:process:modelled:legacy @239:9
+  guards else of msisensorpro_scan_in; then of tools.split(',').contains('msisensorpro')
+  in $1 (tuple(meta, fasta)): Tuple
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/fasta[out] Value<Bag<?>> via fasta indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/fasta~2[out] Channel<?> via fasta indirect
+  out list (list): Channel<Tuple>
+  out versions_msisensorpro (versions_msisensorpro): Channel<Tuple>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/msisensorpro_scan~2 chain ".map.collect" steps=map,collect @240:29
+  guards else of msisensorpro_scan_in; then of tools.split(',').contains('msisensorpro')
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/MSISENSORPRO_SCAN@1[list] Channel<Tuple> via MSISENSORPRO_SCAN.out.list
+  out out (out): Value<Bag<?>>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/msisensorpro_scan~3 factory "channel.value" factory=channel.value @243:29
+  guards else of msisensorpro_scan_in; else of tools.split(',').contains('msisensorpro')
+  out out (out): Value<List>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/ascat_alleles factory "channel.empty" factory=channel.empty @248:25
+  guards then of !ascat_alleles_in
+  out out (out): Channel<?>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@25 factory "channel.fromPath" factory=channel.fromPath @251:23
+  guards else of !ascat_alleles_in; then of ascat_alleles_in.endsWith(".zip") && tools.split(',').contains('ascat')
+  out out (out): Channel<Path>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/.map@4 chain ".map" steps=map @251:23
+  guards else of !ascat_alleles_in; then of ascat_alleles_in.endsWith(".zip") && tools.split(',').contains('ascat')
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@25[out] Channel<Path>
+  out out (out): Channel<?>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/UNZIP_ALLELES@1 call "UNZIP_ALLELES" callee=UNZIP_ALLELES:process:modelled:legacy @251:9
+  guards else of !ascat_alleles_in; then of ascat_alleles_in.endsWith(".zip") && tools.split(',').contains('ascat')
+  in $1 (tuple(meta, archive)): Tuple
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/.map@4[out] Channel<?>
+  out unzipped_archive (unzipped_archive): Channel<Tuple>
+  out versions_7za (versions_7za): Channel<Tuple>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/ascat_alleles~2 chain ".map.collect" steps=map,collect @252:25
+  guards else of !ascat_alleles_in; then of ascat_alleles_in.endsWith(".zip") && tools.split(',').contains('ascat')
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/UNZIP_ALLELES@1[unzipped_archive] Channel<Tuple> via UNZIP_ALLELES.out.unzipped_archive
+  out out (out): Value<Bag<?>>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@26 factory "channel.fromPath" factory=channel.fromPath @255:25
+  guards else of !ascat_alleles_in; else of ascat_alleles_in.endsWith(".zip") && tools.split(',').contains('ascat')
+  out out (out): Channel<Path>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/ascat_alleles~3 chain ".collect" steps=collect @255:25
+  guards else of !ascat_alleles_in; else of ascat_alleles_in.endsWith(".zip") && tools.split(',').contains('ascat')
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@26[out] Channel<Path>
+  out out (out): Value<Bag<Path>>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/ascat_loci factory "channel.empty" factory=channel.empty @259:22
+  guards then of !ascat_loci_in
+  out out (out): Channel<?>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@27 factory "channel.fromPath" factory=channel.fromPath @262:20
+  guards else of !ascat_loci_in; then of ascat_loci_in.endsWith(".zip") && tools.split(',').contains('ascat')
+  out out (out): Channel<Path>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/.map@5 chain ".map" steps=map @262:20
+  guards else of !ascat_loci_in; then of ascat_loci_in.endsWith(".zip") && tools.split(',').contains('ascat')
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@27[out] Channel<Path>
+  out out (out): Channel<?>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/UNZIP_LOCI@1 call "UNZIP_LOCI" callee=UNZIP_LOCI:process:modelled:legacy @262:9
+  guards else of !ascat_loci_in; then of ascat_loci_in.endsWith(".zip") && tools.split(',').contains('ascat')
+  in $1 (tuple(meta, archive)): Tuple
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/.map@5[out] Channel<?>
+  out unzipped_archive (unzipped_archive): Channel<Tuple>
+  out versions_7za (versions_7za): Channel<Tuple>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/ascat_loci~2 chain ".map.collect" steps=map,collect @263:22
+  guards else of !ascat_loci_in; then of ascat_loci_in.endsWith(".zip") && tools.split(',').contains('ascat')
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/UNZIP_LOCI@1[unzipped_archive] Channel<Tuple> via UNZIP_LOCI.out.unzipped_archive
+  out out (out): Value<Bag<?>>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@28 factory "channel.fromPath" factory=channel.fromPath @266:22
+  guards else of !ascat_loci_in; else of ascat_loci_in.endsWith(".zip") && tools.split(',').contains('ascat')
+  out out (out): Channel<Path>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/ascat_loci~3 chain ".collect" steps=collect @266:22
+  guards else of !ascat_loci_in; else of ascat_loci_in.endsWith(".zip") && tools.split(',').contains('ascat')
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@28[out] Channel<Path>
+  out out (out): Value<Bag<Path>>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/ascat_loci_gc factory "channel.value" factory=channel.value @270:25
+  guards then of !ascat_loci_gc_in
+  out out (out): Value<List>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@29 factory "channel.fromPath" factory=channel.fromPath @273:18
+  guards else of !ascat_loci_gc_in; then of ascat_loci_gc_in.endsWith(".zip") && tools.split(',').contains('ascat')
+  out out (out): Channel<Path>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/.map@6 chain ".map" steps=map @273:18
+  guards else of !ascat_loci_gc_in; then of ascat_loci_gc_in.endsWith(".zip") && tools.split(',').contains('ascat')
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@29[out] Channel<Path>
+  out out (out): Channel<?>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/UNZIP_GC@1 call "UNZIP_GC" callee=UNZIP_GC:process:modelled:legacy @273:9
+  guards else of !ascat_loci_gc_in; then of ascat_loci_gc_in.endsWith(".zip") && tools.split(',').contains('ascat')
+  in $1 (tuple(meta, archive)): Tuple
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/.map@6[out] Channel<?>
+  out unzipped_archive (unzipped_archive): Channel<Tuple>
+  out versions_7za (versions_7za): Channel<Tuple>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/ascat_loci_gc~2 chain ".map.collect" steps=map,collect @274:25
+  guards else of !ascat_loci_gc_in; then of ascat_loci_gc_in.endsWith(".zip") && tools.split(',').contains('ascat')
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/UNZIP_GC@1[unzipped_archive] Channel<Tuple> via UNZIP_GC.out.unzipped_archive
+  out out (out): Value<Bag<?>>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@30 factory "channel.fromPath" factory=channel.fromPath @277:25
+  guards else of !ascat_loci_gc_in; else of ascat_loci_gc_in.endsWith(".zip") && tools.split(',').contains('ascat')
+  out out (out): Channel<Path>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/ascat_loci_gc~3 chain ".collect" steps=collect @277:25
+  guards else of !ascat_loci_gc_in; else of ascat_loci_gc_in.endsWith(".zip") && tools.split(',').contains('ascat')
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@30[out] Channel<Path>
+  out out (out): Value<Bag<Path>>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/ascat_loci_rt factory "channel.value" factory=channel.value @281:25
+  guards then of !ascat_loci_rt_in
+  out out (out): Value<List>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@31 factory "channel.fromPath" factory=channel.fromPath @284:18
+  guards else of !ascat_loci_rt_in; then of ascat_loci_rt_in.endsWith(".zip") && tools.split(',').contains('ascat')
+  out out (out): Channel<Path>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/.map@7 chain ".map" steps=map @284:18
+  guards else of !ascat_loci_rt_in; then of ascat_loci_rt_in.endsWith(".zip") && tools.split(',').contains('ascat')
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@31[out] Channel<Path>
+  out out (out): Channel<?>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/UNZIP_RT@1 call "UNZIP_RT" callee=UNZIP_RT:process:modelled:legacy @284:9
+  guards else of !ascat_loci_rt_in; then of ascat_loci_rt_in.endsWith(".zip") && tools.split(',').contains('ascat')
+  in $1 (tuple(meta, archive)): Tuple
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/.map@7[out] Channel<?>
+  out unzipped_archive (unzipped_archive): Channel<Tuple>
+  out versions_7za (versions_7za): Channel<Tuple>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/ascat_loci_rt~2 chain ".map.collect" steps=map,collect @285:25
+  guards else of !ascat_loci_rt_in; then of ascat_loci_rt_in.endsWith(".zip") && tools.split(',').contains('ascat')
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/UNZIP_RT@1[unzipped_archive] Channel<Tuple> via UNZIP_RT.out.unzipped_archive
+  out out (out): Value<Bag<?>>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@32 factory "channel.fromPath" factory=channel.fromPath @288:25
+  guards else of !ascat_loci_rt_in; else of ascat_loci_rt_in.endsWith(".zip") && tools.split(',').contains('ascat')
+  out out (out): Channel<Path>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/ascat_loci_rt~3 chain ".collect" steps=collect @288:25
+  guards else of !ascat_loci_rt_in; else of ascat_loci_rt_in.endsWith(".zip") && tools.split(',').contains('ascat')
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@32[out] Channel<Path>
+  out out (out): Value<Bag<Path>>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/chr_dir factory "channel.value" factory=channel.value @292:19
+  guards then of !chr_dir_in
+  out out (out): Value<List>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@33 factory "channel.fromPath" factory=channel.fromPath @295:23
+  guards else of !chr_dir_in; then of chr_dir_in.endsWith(".tar.gz") && tools.split(',').contains('controlfreec')
+  out out (out): Channel<Path>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/.map@8 chain ".map" steps=map @295:23
+  guards else of !chr_dir_in; then of chr_dir_in.endsWith(".tar.gz") && tools.split(',').contains('controlfreec')
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@33[out] Channel<Path>
+  out out (out): Channel<?>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/UNTAR_CHR_DIR@1 call "UNTAR_CHR_DIR" callee=UNTAR_CHR_DIR:process:modelled:legacy @295:9
+  guards else of !chr_dir_in; then of chr_dir_in.endsWith(".tar.gz") && tools.split(',').contains('controlfreec')
+  in $1 (tuple(meta, archive)): Tuple
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/.map@8[out] Channel<?>
+  out untar (untar): Channel<Tuple>
+  out versions_untar (versions_untar): Channel<Tuple>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/chr_dir~2 chain ".map.collect" steps=map,collect @296:19
+  guards else of !chr_dir_in; then of chr_dir_in.endsWith(".tar.gz") && tools.split(',').contains('controlfreec')
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/UNTAR_CHR_DIR@1[untar] Channel<Tuple> via UNTAR_CHR_DIR.out.untar
+  out out (out): Value<Bag<?>>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@34 factory "channel.fromPath" factory=channel.fromPath @299:19
+  guards else of !chr_dir_in; else of chr_dir_in.endsWith(".tar.gz") && tools.split(',').contains('controlfreec')
+  out out (out): Channel<Path>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/chr_dir~3 chain ".collect" steps=collect @299:19
+  guards else of !chr_dir_in; else of chr_dir_in.endsWith(".tar.gz") && tools.split(',').contains('controlfreec')
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/channel.fromPath@34[out] Channel<Path>
+  out out (out): Value<Bag<Path>>
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:emit:ascat_alleles emit "ascat_alleles" @303:5
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/ascat_alleles[out] Channel<?> via ascat_alleles indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/ascat_alleles~2[out] Value<Bag<?>> via ascat_alleles indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/ascat_alleles~3[out] Value<Bag<Path>> via ascat_alleles indirect
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:emit:ascat_loci emit "ascat_loci" @304:5
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/ascat_loci[out] Channel<?> via ascat_loci indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/ascat_loci~2[out] Value<Bag<?>> via ascat_loci indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/ascat_loci~3[out] Value<Bag<Path>> via ascat_loci indirect
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:emit:ascat_loci_gc emit "ascat_loci_gc" @305:5
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/ascat_loci_gc[out] Value<List> via ascat_loci_gc indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/ascat_loci_gc~2[out] Value<Bag<?>> via ascat_loci_gc indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/ascat_loci_gc~3[out] Value<Bag<Path>> via ascat_loci_gc indirect
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:emit:ascat_loci_rt emit "ascat_loci_rt" @306:5
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/ascat_loci_rt[out] Value<List> via ascat_loci_rt indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/ascat_loci_rt~2[out] Value<Bag<?>> via ascat_loci_rt indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/ascat_loci_rt~3[out] Value<Bag<Path>> via ascat_loci_rt indirect
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:emit:bbsplit_index emit "bbsplit_index" @307:5
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/bbsplit_index[out] Channel<?> via bbsplit_index indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/bbsplit_index~2[out] Value<?> via bbsplit_index indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/bbsplit_index~3[out] Value<Path> via bbsplit_index indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/BBMAP_INDEX@1[index] Channel<Path> via bbsplit_index indirect
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:emit:bcftools_annotations emit "bcftools_annotations" @308:5
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/bcftools_annotations[out] Value<Bag<Path>> via bcftools_annotations indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/bcftools_annotations~2[out] Value<List> via bcftools_annotations indirect
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:emit:bcftools_annotations_tbi emit "bcftools_annotations_tbi" @309:5
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/bcftools_annotations_tbi[out] Value<Bag<Path>> via bcftools_annotations_tbi indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/bcftools_annotations_tbi~2[out] Value<List> via bcftools_annotations_tbi indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/bcftools_annotations_tbi~3[out] Value<Bag<?>> via bcftools_annotations_tbi indirect
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:emit:chr_dir emit "chr_dir" @310:5
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/chr_dir[out] Value<List> via chr_dir indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/chr_dir~2[out] Value<Bag<?>> via chr_dir indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/chr_dir~3[out] Value<Bag<Path>> via chr_dir indirect
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:emit:contamination_resource emit "contamination_resource" @311:5
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/germline_resource[out] Value<Bag<Path>> via contamination_resource indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/germline_resource~2[out] Value<List> via contamination_resource indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/contamination_resource[out] Value<Bag<Path>> via contamination_resource indirect
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:emit:contamination_resource_tbi emit "contamination_resource_tbi" @312:5
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/contamination_resource_tbi[contamination_resource_tbi] ? via contamination_resource_tbi indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/contamination_resource_tbi~2[out] Value<Bag<?>> via contamination_resource_tbi indirect
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:emit:dbsnp emit "dbsnp" @313:5
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/dbsnp[out] Value<Bag<Path>> via dbsnp indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/dbsnp~2[out] Value<List> via dbsnp indirect
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:emit:dbsnp_tbi emit "dbsnp_tbi" @314:5
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/dbsnp_tbi[out] Value<Bag<Path>> via dbsnp_tbi indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/dbsnp_tbi~2[out] Value<List> via dbsnp_tbi indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/dbsnp_tbi~3[out] Value<Bag<?>> via dbsnp_tbi indirect
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:emit:dict emit "dict" @315:5
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/dict[out] Value<Bag<Tuple>> via dict indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/dict~2[out] Value<Bag<?>> via dict indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/dict~3[out] Channel<?> via dict indirect
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:emit:fasta emit "fasta" @316:5
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/fasta[out] Value<Bag<?>> via fasta indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/fasta~2[out] Channel<?> via fasta indirect
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:emit:fasta_fai emit "fasta_fai" @317:5
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/fasta_fai[out] Value<Bag<Tuple>> via fasta_fai indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/fasta_fai~2[out] Value<Bag<?>> via fasta_fai indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/fasta_fai~3[out] Channel<?> via fasta_fai indirect
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:emit:force_call_alleles emit "force_call_alleles" @318:5
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/force_call_alleles[out] Value<Bag<Path>> via force_call_alleles indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/force_call_alleles~2[out] Value<List> via force_call_alleles indirect
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:emit:force_call_alleles_tbi emit "force_call_alleles_tbi" @319:5
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/force_call_alleles_tbi[out] Value<Bag<Path>> via force_call_alleles_tbi indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/force_call_alleles_tbi~2[out] Value<List> via force_call_alleles_tbi indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/force_call_alleles_tbi~3[out] Value<Bag<?>> via force_call_alleles_tbi indirect
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:emit:germline_resource emit "germline_resource" @320:5
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/germline_resource[out] Value<Bag<Path>> via germline_resource indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/germline_resource~2[out] Value<List> via germline_resource indirect
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:emit:germline_resource_tbi emit "germline_resource_tbi" @321:5
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/germline_resource_tbi[out] Value<Bag<Path>> via germline_resource_tbi indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/germline_resource_tbi~2[out] Value<List> via germline_resource_tbi indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/germline_resource_tbi~3[out] Value<Bag<?>> via germline_resource_tbi indirect
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:emit:index_alignment emit "index_alignment" @322:5
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/index_alignment[out] Value<Bag<Tuple>> via index_alignment indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/index_alignment~2[out] Value<Bag<?>> via index_alignment indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/index_alignment~3[out] Value<Bag<Tuple>> via index_alignment indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/index_alignment~4[out] Value<Bag<?>> via index_alignment indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/index_alignment~5[out] Value<Bag<Tuple>> via index_alignment indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/index_alignment~6[out] Value<Bag<?>> via index_alignment indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/index_alignment~7[out] Channel<?> via index_alignment indirect
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:emit:known_indels emit "known_indels" @323:5
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/known_indels[out] Value<Bag<Path>> via known_indels indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/known_indels~2[out] Value<List> via known_indels indirect
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:emit:known_indels_tbi emit "known_indels_tbi" @324:5
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/known_indels_tbi[out] Value<Bag<Path>> via known_indels_tbi indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/known_indels_tbi~2[out] Value<List> via known_indels_tbi indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/known_indels_tbi~3[out] Value<Bag<?>> via known_indels_tbi indirect
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:emit:known_sites_indels emit "known_sites_indels" @325:5
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/known_sites_indels[out] Value<Bag<?>> via known_sites_indels
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:emit:known_sites_indels_tbi emit "known_sites_indels_tbi" @326:5
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/known_sites_indels_tbi[out] Value<Bag<?>> via known_sites_indels_tbi
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:emit:known_sites_snps emit "known_sites_snps" @327:5
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/known_sites_snps[out] Value<Bag<?>> via known_sites_snps
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:emit:known_sites_snps_tbi emit "known_sites_snps_tbi" @328:5
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/known_sites_snps_tbi[out] Value<Bag<?>> via known_sites_snps_tbi
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:emit:known_snps emit "known_snps" @329:5
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/known_snps[out] Value<Bag<Path>> via known_snps indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/known_snps~2[out] Value<List> via known_snps indirect
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:emit:known_snps_tbi emit "known_snps_tbi" @330:5
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/known_snps_tbi[out] Value<Bag<Path>> via known_snps_tbi indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/known_snps_tbi~2[out] Value<List> via known_snps_tbi indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/known_snps_tbi~3[out] Value<Bag<?>> via known_snps_tbi indirect
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:emit:msisensor2_models emit "msisensor2_models" @331:5
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/msisensor2_models[out] Value<Bag<Tuple>> via msisensor2_models indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/msisensor2_models~2[out] Value<Bag<?>> via msisensor2_models indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/msisensor2_models~3[out] Value<List> via msisensor2_models indirect
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:emit:msisensorpro_scan emit "msisensorpro_scan" @332:5
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/msisensorpro_scan[out] Value<Bag<Path>> via msisensorpro_scan indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/msisensorpro_scan~2[out] Value<Bag<?>> via msisensorpro_scan indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/msisensorpro_scan~3[out] Value<List> via msisensorpro_scan indirect
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:emit:pon emit "pon" @333:5
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/pon[out] Value<Bag<Path>> via pon indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/pon~2[out] Value<List> via pon indirect
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:emit:pon_tbi emit "pon_tbi" @334:5
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/pon_tbi[out] Value<Bag<Path>> via pon_tbi indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/pon_tbi~2[out] Value<List> via pon_tbi indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/pon_tbi~3[out] Value<Bag<?>> via pon_tbi indirect
+subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/:emit:vep_fasta emit "vep_fasta" @335:5
+  in in (in): -
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/fasta[out] Value<Bag<?>> via vep_fasta indirect
+    <- subworkflows/local/prepare_genome/main.nf#PREPARE_GENOME/fasta~2[out] Channel<?> via vep_fasta indirect
+bound @65:5 vep_fasta

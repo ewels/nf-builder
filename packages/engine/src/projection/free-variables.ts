@@ -15,12 +15,11 @@ import {
   type Closure,
   childNodes,
   type Expression,
-  type MethodCall,
   type Range,
   type Statement,
-  type Variable,
   type VariableDeclaration,
 } from "@nf-builder/lang-core";
+import { setTarget } from "./legacy";
 import { propertyChain } from "./reads";
 
 export interface FreeRead {
@@ -47,8 +46,6 @@ export interface StatementVariables {
   /** The variables the statement assigns at workflow scope, once each, in first-write order. */
   readonly writes: readonly Write[];
 }
-
-const SET_METHODS = new Set(["set", "tap"]);
 
 /** The variables `statement` reads that nothing in it declares, and the workflow-scope variables it assigns. */
 export function statementVariables(statement: Statement): StatementVariables {
@@ -102,28 +99,6 @@ export function statementVariables(statement: Statement): StatementVariables {
     scopes.pop();
   };
 
-  /** `x.set { v }` and `x.tap { v }`: the closure names a variable to declare. */
-  const setTarget = (call: MethodCall): Variable | null => {
-    if (
-      call.receiver === null ||
-      call.method.kind !== "Identifier" ||
-      !SET_METHODS.has(call.method.name) ||
-      call.args.length > 0 ||
-      call.closures.length !== 1
-    )
-      return null;
-    const closure = call.closures[0] as Closure;
-    const only = closure.body[0];
-    if (
-      closure.params !== null ||
-      closure.body.length !== 1 ||
-      only?.kind !== "ExpressionStatement" ||
-      only.expression.kind !== "Variable"
-    )
-      return null;
-    return only.expression;
-  };
-
   const assign = (node: Assignment): void => {
     visit(node.value);
     const target = node.target;
@@ -167,7 +142,8 @@ export function statementVariables(statement: Statement): StatementVariables {
         return;
       case "MethodCall": {
         if (n.receiver !== null) visit(n.receiver);
-        const target = setTarget(n);
+        const target =
+          n.receiver === null ? null : (setTarget(n)?.variable ?? null);
         if (target !== null) {
           write(target.name, target.range, true);
           return;

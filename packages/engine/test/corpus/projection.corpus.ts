@@ -147,18 +147,23 @@ describe("F-106 IO-14 AR-10 corpus projection", () => {
           seen.add(n.id);
           stats.nodes[n.kind] = (stats.nodes[n.kind] ?? 0) + 1;
         }
+        // every AST statement has a projected statement within its range (a transparent `if` by its branches)
         const statements = mainStatements(pinned, ref.path, ref.name);
         stats.statements += statements.length;
         for (const s of statements)
           expect(
-            p.nodes.some(
-              (n) =>
-                !["take", "emit", "params", "output"].includes(n.kind) &&
-                n.range.start >= s.range.start &&
-                n.range.end <= s.range.end,
+            p.statements.some(
+              (ps) =>
+                ps.range.start >= s.range.start && ps.range.end <= s.range.end,
             ),
             `${pinned.id}:${ref.path}:${s.range.line}`,
           ).toBe(true);
+        // F-107: every projected statement is listed with the nodes it made or the names it bound
+        for (const s of p.statements)
+          expect(
+            s.nodes.length + s.binds.length,
+            `${pinned.id}:${ref.path}:${s.range.line}`,
+          ).toBeGreaterThan(0);
         for (const e of p.edges) {
           expect(p.nodes.some((n) => n.id === e.from.node)).toBe(true);
           expect(p.nodes.some((n) => n.id === e.to.node)).toBe(true);

@@ -1,0 +1,277 @@
+workflow subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK legacy
+statements 22, modelled 22
+subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/:take:input take "input" @19:5
+  out out (out): -
+subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/:take:fasta take "fasta" @20:5
+  out out (out): -
+subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/:take:fai take "fai" @21:5
+  out out (out): -
+subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/:take:dict take "dict" @22:5
+  out out (out): -
+subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/:take:dbsnp take "dbsnp" @23:5
+  out out (out): -
+subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/:take:dbsnp_tbi take "dbsnp_tbi" @24:5
+  out out (out): -
+subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/:take:dbsnp_vqsr take "dbsnp_vqsr" @25:5
+  out out (out): -
+subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/:take:resource_indels_vcf take "resource_indels_vcf" @26:5
+  out out (out): -
+subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/:take:resource_indels_tbi take "resource_indels_tbi" @27:5
+  out out (out): -
+subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/:take:known_indels_vqsr take "known_indels_vqsr" @28:5
+  out out (out): -
+subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/:take:resource_snps_vcf take "resource_snps_vcf" @29:5
+  out out (out): -
+subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/:take:resource_snps_tbi take "resource_snps_tbi" @30:5
+  out out (out): -
+subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/:take:known_snps_vqsr take "known_snps_vqsr" @31:5
+  out out (out): -
+subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/gendb_input chain ".map.groupTuple.map" steps=map,groupTuple,map @38:19
+  in in (in): -
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/:take:input[out] ? via input
+  out out (out): Channel<?>
+subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/GATK4_GENOMICSDBIMPORT@1 call "GATK4_GENOMICSDBIMPORT" callee=GATK4_GENOMICSDBIMPORT:process:modelled:legacy @47:5
+  in $1 (tuple(meta, vcf, tbi, interval_file, interval_value, wspace)): Tuple
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/gendb_input[out] Channel<?> via gendb_input
+  in run_intlist (run_intlist): -
+    = false : Boolean
+  in run_updatewspace (run_updatewspace): -
+    = false : Boolean
+  in input_map (input_map): -
+    = false : Boolean
+  out genomicsdb (genomicsdb): Channel<Tuple>
+  out updatedb (updatedb): Channel<Tuple>
+  out intervallist (intervallist): Channel<Tuple>
+  out versions_gatk4 (versions_gatk4): Channel<Tuple>
+subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/genotype_input chain ".map" steps=map @49:22
+  in in (in): -
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/GATK4_GENOMICSDBIMPORT@1[genomicsdb] Channel<Tuple> via GATK4_GENOMICSDBIMPORT.out.genomicsdb
+  out out (out): Channel<?>
+subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/.map@1 chain ".map" steps=map @54:59
+  in in (in): -
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/:take:dbsnp[out] ? via dbsnp
+  out out (out): ?
+subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/.map@2 chain ".map" steps=map @54:99
+  in in (in): -
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/:take:dbsnp_tbi[out] ? via dbsnp_tbi
+  out out (out): ?
+subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/GATK4_GENOTYPEGVCFS@1 call "GATK4_GENOTYPEGVCFS" callee=GATK4_GENOTYPEGVCFS:process:modelled:legacy @54:5
+  in $1 (tuple(meta, input, gvcf_index, intervals, intervals_index)): Tuple
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/genotype_input[out] Channel<?> via genotype_input
+  in $2 (tuple(meta2, fasta)): Tuple
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/:take:fasta[out] ? via fasta
+  in $3 (tuple(meta3, fai)): Tuple
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/:take:fai[out] ? via fai
+  in $4 (tuple(meta4, dict)): Tuple
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/:take:dict[out] ? via dict
+  in $5 (tuple(meta5, dbsnp)): Tuple
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/.map@1[out] ?
+  in $6 (tuple(meta6, dbsnp_tbi)): Tuple
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/.map@2[out] ?
+  out vcf (vcf): Channel<Tuple>
+  out tbi (tbi): Channel<Tuple>
+  out versions_gatk4 (versions_gatk4): Channel<Tuple>
+subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/BCFTOOLS_SORT@1 call "BCFTOOLS_SORT" callee=BCFTOOLS_SORT:process:modelled:legacy @56:5
+  in $1 (tuple(meta, vcf)): Tuple
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/GATK4_GENOTYPEGVCFS@1[vcf] Channel<Tuple> via GATK4_GENOTYPEGVCFS.out.vcf
+  out vcf (vcf): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out versions_bcftools (versions_bcftools): Channel<Tuple>
+subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/gvcf_to_merge chain ".map.groupTuple" steps=map,groupTuple @57:21
+  in in (in): -
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/BCFTOOLS_SORT@1[vcf] Channel<Tuple> via BCFTOOLS_SORT.out.vcf
+  out out (out): Channel<?>
+subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/MERGE_GENOTYPEGVCFS@1 call "MERGE_GENOTYPEGVCFS" callee=MERGE_GENOTYPEGVCFS:process:modelled:legacy @61:5
+  in $1 (tuple(meta, vcf)): Tuple
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/gvcf_to_merge[out] Channel<?> via gvcf_to_merge
+  in $2 (tuple(meta2, dict)): Tuple
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/:take:dict[out] ? via dict
+  out vcf (vcf): Channel<Tuple>
+  out tbi (tbi): Channel<Tuple>
+  out versions_gatk4 (versions_gatk4): Channel<Tuple>
+subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/vqsr_input chain ".join" steps=join @63:18
+  in in (in): -
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/MERGE_GENOTYPEGVCFS@1[vcf] Channel<Tuple> via MERGE_GENOTYPEGVCFS.out.vcf
+  in 1:1 (join(right)): -
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/MERGE_GENOTYPEGVCFS@1[tbi] Channel<Tuple> via MERGE_GENOTYPEGVCFS.out.tbi
+  out out (out): Channel<Record>
+subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/indels_resource_label chain ".mix.collect" steps=mix,collect @64:29
+  in in (in): -
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/:take:known_indels_vqsr[out] ? via known_indels_vqsr
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/:take:dbsnp_vqsr[out] ? via dbsnp_vqsr
+  out out (out): Value<Bag<?>>
+subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/snps_resource_label chain ".mix.collect" steps=mix,collect @65:27
+  in in (in): -
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/:take:known_snps_vqsr[out] ? via known_snps_vqsr
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/:take:dbsnp_vqsr[out] ? via dbsnp_vqsr
+  out out (out): Value<Bag<?>>
+subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/.map@3 chain ".map" steps=map @73:9
+  in in (in): -
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/:take:fasta[out] ? via fasta
+  out out (out): ?
+subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/.map@4 chain ".map" steps=map @74:9
+  in in (in): -
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/:take:fai[out] ? via fai
+  out out (out): ?
+subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/.map@5 chain ".map" steps=map @75:9
+  in in (in): -
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/:take:dict[out] ? via dict
+  out out (out): ?
+subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/VARIANTRECALIBRATOR_INDEL@1 call "VARIANTRECALIBRATOR_INDEL" callee=VARIANTRECALIBRATOR_INDEL:process:modelled:legacy @68:5
+  in $1 (tuple(meta, vcf, tbi)): Tuple
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/vqsr_input[out] Channel<Record> via vqsr_input
+  in resource_vcf (resource_vcf): Path
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/:take:resource_indels_vcf[out] ? via resource_indels_vcf
+  in resource_tbi (resource_tbi): Path
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/:take:resource_indels_tbi[out] ? via resource_indels_tbi
+  in labels (labels): -
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/indels_resource_label[out] Value<Bag<?>> via indels_resource_label
+  in fasta (fasta): Path
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/.map@3[out] ?
+  in fai (fai): Path
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/.map@4[out] ?
+  in dict (dict): Path
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/.map@5[out] ?
+  out recal (recal): Channel<Tuple>
+  out idx (idx): Channel<Tuple>
+  out tranches (tranches): Channel<Tuple>
+  out plots (plots): Channel<Tuple>
+  out versions_gatk4 (versions_gatk4): Channel<Tuple>
+subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/.map@6 chain ".map" steps=map @82:9
+  in in (in): -
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/:take:fasta[out] ? via fasta
+  out out (out): ?
+subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/.map@7 chain ".map" steps=map @83:9
+  in in (in): -
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/:take:fai[out] ? via fai
+  out out (out): ?
+subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/.map@8 chain ".map" steps=map @84:9
+  in in (in): -
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/:take:dict[out] ? via dict
+  out out (out): ?
+subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/VARIANTRECALIBRATOR_SNP@1 call "VARIANTRECALIBRATOR_SNP" callee=VARIANTRECALIBRATOR_SNP:process:modelled:legacy @77:5
+  in $1 (tuple(meta, vcf, tbi)): Tuple
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/vqsr_input[out] Channel<Record> via vqsr_input
+  in resource_vcf (resource_vcf): Path
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/:take:resource_snps_vcf[out] ? via resource_snps_vcf
+  in resource_tbi (resource_tbi): Path
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/:take:resource_snps_tbi[out] ? via resource_snps_tbi
+  in labels (labels): -
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/snps_resource_label[out] Value<Bag<?>> via snps_resource_label
+  in fasta (fasta): Path
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/.map@6[out] ?
+  in fai (fai): Path
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/.map@7[out] ?
+  in dict (dict): Path
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/.map@8[out] ?
+  out recal (recal): Channel<Tuple>
+  out idx (idx): Channel<Tuple>
+  out tranches (tranches): Channel<Tuple>
+  out plots (plots): Channel<Tuple>
+  out versions_gatk4 (versions_gatk4): Channel<Tuple>
+subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/vqsr_input_snp chain ".join.join.join.map" steps=join,join,join,map @92:22
+  in in (in): -
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/vqsr_input[out] Channel<Record> via vqsr_input
+  in 1:1 (join(right)): -
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/VARIANTRECALIBRATOR_SNP@1[recal] Channel<Tuple> via VARIANTRECALIBRATOR_SNP.out.recal
+  in 2:1 (join(right)): -
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/VARIANTRECALIBRATOR_SNP@1[idx] Channel<Tuple> via VARIANTRECALIBRATOR_SNP.out.idx
+  in 3:1 (join(right)): -
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/VARIANTRECALIBRATOR_SNP@1[tranches] Channel<Tuple> via VARIANTRECALIBRATOR_SNP.out.tranches
+  out out (out): Channel<?>
+subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/.map@9 chain ".map" steps=map @99:9
+  in in (in): -
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/:take:fasta[out] ? via fasta
+  out out (out): ?
+subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/.map@10 chain ".map" steps=map @100:9
+  in in (in): -
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/:take:fai[out] ? via fai
+  out out (out): ?
+subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/.map@11 chain ".map" steps=map @101:9
+  in in (in): -
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/:take:dict[out] ? via dict
+  out out (out): ?
+subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/GATK4_APPLYVQSR_SNP@1 call "GATK4_APPLYVQSR_SNP" callee=GATK4_APPLYVQSR_SNP:process:modelled:legacy @97:5
+  in $1 (tuple(meta, vcf, vcf_tbi, recal, recal_index, tranches)): Tuple
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/vqsr_input_snp[out] Channel<?> via vqsr_input_snp
+  in fasta (fasta): Path
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/.map@9[out] ?
+  in fai (fai): Path
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/.map@10[out] ?
+  in dict (dict): Path
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/.map@11[out] ?
+  out vcf (vcf): Channel<Tuple>
+  out tbi (tbi): Channel<Tuple>
+  out versions_gatk4 (versions_gatk4): Channel<Tuple>
+subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/vqsr_input_indel chain ".join.map.join.join.join.map" steps=join,map,join,join,join,map @105:24
+  in in (in): -
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/GATK4_APPLYVQSR_SNP@1[vcf] Channel<Tuple> via GATK4_APPLYVQSR_SNP.out.vcf
+  in 1:1 (join(1)): -
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/GATK4_APPLYVQSR_SNP@1[tbi] Channel<Tuple> via GATK4_APPLYVQSR_SNP.out.tbi
+  in 3:1 (join(right)): -
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/VARIANTRECALIBRATOR_INDEL@1[recal] Channel<Tuple> via VARIANTRECALIBRATOR_INDEL.out.recal
+  in 4:1 (join(right)): -
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/VARIANTRECALIBRATOR_INDEL@1[idx] Channel<Tuple> via VARIANTRECALIBRATOR_INDEL.out.idx
+  in 5:1 (join(right)): -
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/VARIANTRECALIBRATOR_INDEL@1[tranches] Channel<Tuple> via VARIANTRECALIBRATOR_INDEL.out.tranches
+  out out (out): Channel<?>
+subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/.map@12 chain ".map" steps=map @113:9
+  in in (in): -
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/:take:fasta[out] ? via fasta
+  out out (out): ?
+subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/.map@13 chain ".map" steps=map @114:9
+  in in (in): -
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/:take:fai[out] ? via fai
+  out out (out): ?
+subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/.map@14 chain ".map" steps=map @115:9
+  in in (in): -
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/:take:dict[out] ? via dict
+  out out (out): ?
+subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/GATK4_APPLYVQSR_INDEL@1 call "GATK4_APPLYVQSR_INDEL" callee=GATK4_APPLYVQSR_INDEL:process:modelled:legacy @111:5
+  in $1 (tuple(meta, vcf, vcf_tbi, recal, recal_index, tranches)): Tuple
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/vqsr_input_indel[out] Channel<?> via vqsr_input_indel
+  in fasta (fasta): Path
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/.map@12[out] ?
+  in fai (fai): Path
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/.map@13[out] ?
+  in dict (dict): Path
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/.map@14[out] ?
+  out vcf (vcf): Channel<Tuple>
+  out tbi (tbi): Channel<Tuple>
+  out versions_gatk4 (versions_gatk4): Channel<Tuple>
+subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/merge_vcf_for_join chain ".map" steps=map @122:26
+  in in (in): -
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/MERGE_GENOTYPEGVCFS@1[vcf] Channel<Tuple> via MERGE_GENOTYPEGVCFS.out.vcf
+  out out (out): Channel<?>
+subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/merge_tbi_for_join chain ".map" steps=map @123:26
+  in in (in): -
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/MERGE_GENOTYPEGVCFS@1[tbi] Channel<Tuple> via MERGE_GENOTYPEGVCFS.out.tbi
+  out out (out): Channel<?>
+subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/vqsr_vcf_for_join chain ".ifEmpty.map" steps=ifEmpty,map @126:25
+  in in (in): -
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/GATK4_APPLYVQSR_INDEL@1[vcf] Channel<Tuple> via GATK4_APPLYVQSR_INDEL.out.vcf
+  out out (out): Channel<?>
+subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/vqsr_tbi_for_join chain ".ifEmpty.map" steps=ifEmpty,map @127:25
+  in in (in): -
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/GATK4_APPLYVQSR_INDEL@1[tbi] Channel<Tuple> via GATK4_APPLYVQSR_INDEL.out.tbi
+  out out (out): Channel<?>
+subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/genotype_vcf chain ".join.map" steps=join,map @133:20
+  in in (in): -
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/merge_vcf_for_join[out] Channel<?> via merge_vcf_for_join
+  in 1:1 (join(right)): -
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/vqsr_vcf_for_join[out] Channel<?> via vqsr_vcf_for_join
+  out out (out): Channel<?>
+subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/genotype_index chain ".join.map" steps=join,map @141:22
+  in in (in): -
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/merge_tbi_for_join[out] Channel<?> via merge_tbi_for_join
+  in 1:1 (join(right)): -
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/vqsr_tbi_for_join[out] Channel<?> via vqsr_tbi_for_join
+  out out (out): Channel<?>
+subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/:emit:genotype_index emit "genotype_index" @151:5
+  in in (in): -
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/genotype_index[out] Channel<?> via genotype_index
+subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/:emit:genotype_vcf emit "genotype_vcf" @152:5
+  in in (in): -
+    <- subworkflows/local/bam_joint_calling_germline_gatk/main.nf#BAM_JOINT_CALLING_GERMLINE_GATK/genotype_vcf[out] Channel<?> via genotype_vcf

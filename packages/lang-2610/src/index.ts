@@ -4,6 +4,7 @@ import type {
   ScriptCatalogue,
 } from "@nf-builder/lang-core";
 import { includes } from "./includes/index.ts";
+import { legacyOperators } from "./legacy-operators.ts";
 import { palette } from "./palette.ts";
 import { scaffold } from "./scaffold.ts";
 
@@ -13,6 +14,7 @@ export const pack: LanguagePack = {
   palette,
   includes,
   scaffold,
+  legacyOperators,
   loadCatalogue: async () => {
     const [script, config] = await Promise.all([
       import("../catalogue/script.json"),

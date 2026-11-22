@@ -32,7 +32,7 @@ files (IndexedDB) ──► engine worker: parse ─► AST ─► semantic mode
 | AR-11 | Node identity uses the layout keys in ADR 0008, so positions survive re-parses. The key grammar is in ADR 0036. |
 | AR-12 | Chain boundaries: a chain is a maximal sequence of operator method calls with no assignment in between (ADR 0008). |
 | AR-13 | A statement the projection can't model becomes a code node (ADR 0004). Its inputs and outputs come from a free-variable analysis of the statement. |
-| AR-14 | Typed workflows use plain assignments and call results. Legacy workflows may also use `.out`, `|`, `set` and `tap`; the projection handles these forms. |
+| AR-14 | Typed workflows use plain assignments and call results. Legacy workflows may also use `.out`, `|`, `set` and `tap`; the projection handles these forms, as well as aliases, call-result properties and `if`/ternary choices between dataflow branches (ADR 0038). |
 
 ## Edit commands
 

@@ -1,0 +1,12 @@
+workflow subworkflows/local/channel_applybqsr_create_csv/main.nf#CHANNEL_APPLYBQSR_CREATE_CSV legacy
+statements 1, modelled 1
+subworkflows/local/channel_applybqsr_create_csv/main.nf#CHANNEL_APPLYBQSR_CREATE_CSV/:take:cram_recalibrated_index take "cram_recalibrated_index" @7:5
+  out out (out): -
+subworkflows/local/channel_applybqsr_create_csv/main.nf#CHANNEL_APPLYBQSR_CREATE_CSV/:take:outdir take "outdir" @8:5
+  out out (out): -
+subworkflows/local/channel_applybqsr_create_csv/main.nf#CHANNEL_APPLYBQSR_CREATE_CSV/.collectFile@1 chain ".collectFile" steps=collectFile @12:5
+  in in (in): -
+    <- subworkflows/local/channel_applybqsr_create_csv/main.nf#CHANNEL_APPLYBQSR_CREATE_CSV/:take:cram_recalibrated_index[out] ? via cram_recalibrated_index
+  in 1:4 (collectFile(opts)): -
+    <- subworkflows/local/channel_applybqsr_create_csv/main.nf#CHANNEL_APPLYBQSR_CREATE_CSV/:take:outdir[out] ? via outdir indirect
+  out out (out): Channel<?>

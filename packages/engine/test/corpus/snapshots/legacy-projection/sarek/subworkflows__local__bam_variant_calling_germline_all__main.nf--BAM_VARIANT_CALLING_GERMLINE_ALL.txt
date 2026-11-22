@@ -1,0 +1,865 @@
+workflow subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL legacy
+statements 93, modelled 91
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:params params "params" @24:1
+  out cnvkit_reference (cnvkit_reference): -
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:tools take "tools" @26:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:skip_tools take "skip_tools" @27:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:bam take "bam" @28:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:cram take "cram" @29:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:bwa take "bwa" @30:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:cnvkit_reference take "cnvkit_reference" @31:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:dbsnp take "dbsnp" @32:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:dbsnp_tbi take "dbsnp_tbi" @33:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:dbsnp_vqsr take "dbsnp_vqsr" @34:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:dict take "dict" @35:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:fasta take "fasta" @36:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:fasta_fai take "fasta_fai" @37:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:intervals take "intervals" @38:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:intervals_bed_combined take "intervals_bed_combined" @39:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:intervals_bed_gz_tbi_combined take "intervals_bed_gz_tbi_combined" @40:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:intervals_bed_combined_haplotypec take "intervals_bed_combined_haplotypec" @41:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:intervals_bed_gz_tbi take "intervals_bed_gz_tbi" @42:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:known_indels_vqsr take "known_indels_vqsr" @43:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:known_sites_indels take "known_sites_indels" @44:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:known_sites_indels_tbi take "known_sites_indels_tbi" @45:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:known_sites_snps take "known_sites_snps" @46:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:known_sites_snps_tbi take "known_sites_snps_tbi" @47:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:known_snps_vqsr take "known_snps_vqsr" @48:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:joint_germline take "joint_germline" @49:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:wes take "wes" @50:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:skip_haplotypecaller_filter take "skip_haplotypecaller_filter" @51:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:sentieon_haplotyper_emit_mode take "sentieon_haplotyper_emit_mode" @52:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:sentieon_dnascope_emit_mode take "sentieon_dnascope_emit_mode" @53:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:sentieon_dnascope_pcr_indel_model take "sentieon_dnascope_pcr_indel_model" @54:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:sentieon_dnascope_model take "sentieon_dnascope_model" @55:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/gvcf_parabricks_haplotypecaller factory "channel.empty" factory=channel.empty @59:43
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/gvcf_sentieon_dnascope factory "channel.empty" factory=channel.empty @60:43
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/gvcf_sentieon_haplotyper factory "channel.empty" factory=channel.empty @61:43
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/gvcf_tbi_parabricks_haplotypecaller factory "channel.empty" factory=channel.empty @62:43
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/gvcf_tbi_sentieon_dnascope factory "channel.empty" factory=channel.empty @63:43
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/gvcf_tbi_sentieon_haplotyper factory "channel.empty" factory=channel.empty @64:43
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/out_indexcov factory "channel.empty" factory=channel.empty @66:42
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/vcf_deepvariant factory "channel.empty" factory=channel.empty @67:42
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/vcf_parabricks_deepvariant factory "channel.empty" factory=channel.empty @68:42
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/vcf_freebayes factory "channel.empty" factory=channel.empty @69:42
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/vcf_haplotypecaller factory "channel.empty" factory=channel.empty @70:42
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/vcf_manta factory "channel.empty" factory=channel.empty @71:42
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/vcf_mpileup factory "channel.empty" factory=channel.empty @72:42
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/vcf_parabricks_haplotypecaller factory "channel.empty" factory=channel.empty @73:42
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/vcf_sentieon_dnascope factory "channel.empty" factory=channel.empty @74:42
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/vcf_sentieon_haplotyper factory "channel.empty" factory=channel.empty @75:42
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/vcf_strelka factory "channel.empty" factory=channel.empty @76:42
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/vcf_tiddit factory "channel.empty" factory=channel.empty @77:42
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/tbi_deepvariant factory "channel.empty" factory=channel.empty @78:42
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/tbi_parabricks_deepvariant factory "channel.empty" factory=channel.empty @79:42
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/tbi_freebayes factory "channel.empty" factory=channel.empty @80:42
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/tbi_haplotypecaller factory "channel.empty" factory=channel.empty @81:42
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/tbi_manta factory "channel.empty" factory=channel.empty @82:42
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/tbi_mpileup factory "channel.empty" factory=channel.empty @83:42
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/tbi_parabricks_haplotypecaller factory "channel.empty" factory=channel.empty @84:42
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/tbi_sentieon_dnascope factory "channel.empty" factory=channel.empty @85:42
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/tbi_sentieon_haplotyper factory "channel.empty" factory=channel.empty @86:42
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/tbi_strelka factory "channel.empty" factory=channel.empty @87:42
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/tbi_tiddit factory "channel.empty" factory=channel.empty @88:42
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/tools_list code "def tools_list = tools ? tools.split(',') as List : []" @91:5
+  in tools (tools): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:tools[out] ? via tools indirect
+  out tools_list (tools_list): -
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/skip_tools_list code "def skip_tools_list = skip_tools ? skip_tools.split(',') as…" @92:5
+  in skip_tools (skip_tools): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:skip_tools[out] ? via skip_tools indirect
+  out skip_tools_list (skip_tools_list): -
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_MPILEUP@1 call "BAM_VARIANT_CALLING_MPILEUP" callee=BAM_VARIANT_CALLING_MPILEUP:workflow:modelled:legacy @96:9
+  guards then of tools_list.contains('mpileup')
+  in cram (cram): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:cram[out] ? via cram
+  in dict (dict): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:dict[out] ? via dict
+  in fasta (fasta): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:fasta[out] ? via fasta
+  in fai (fai): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:fasta_fai[out] ? via fasta_fai
+  in intervals (intervals): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:intervals[out] ? via intervals
+  out mpileup (mpileup): Channel<?>
+  out vcf (vcf): Channel<?>
+  out tbi (tbi): Channel<?>
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/.map@1 chain ".map" steps=map @112:13
+  guards then of tools_list.contains('cnvkit')
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:bam[out] ? via bam
+  out out (out): ?
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/.map@2 chain ".map" steps=map @115:13
+  guards then of tools_list.contains('cnvkit')
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:intervals_bed_combined[out] ? via intervals_bed_combined
+  out out (out): ?
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_CNVKIT@1 call "BAM_VARIANT_CALLING_CNVKIT" callee=BAM_VARIANT_CALLING_CNVKIT:workflow:modelled:legacy @109:9
+  guards then of tools_list.contains('cnvkit')
+  in cram (cram): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/.map@1[out] ?
+  in fasta (fasta): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:fasta[out] ? via fasta
+  in fasta_fai (fasta_fai): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:fasta_fai[out] ? via fasta_fai
+  in targets (targets): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/.map@2[out] ?
+  in reference (reference): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:params[cnvkit_reference] ? via params.cnvkit_reference indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:cnvkit_reference[out] ? via cnvkit_reference indirect
+  out cnv_calls_raw (cnv_calls_raw): Channel<Tuple>
+  out cnv_calls_export (cnv_calls_export): Channel<Tuple>
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_DEEPVARIANT@1 call "BAM_VARIANT_CALLING_DEEPVARIANT" callee=BAM_VARIANT_CALLING_DEEPVARIANT:workflow:modelled:legacy @122:9
+  guards then of tools_list.contains('deepvariant')
+  in cram (cram): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:cram[out] ? via cram
+  in dict (dict): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:dict[out] ? via dict
+  in fasta (fasta): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:fasta[out] ? via fasta
+  in fasta_fai (fasta_fai): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:fasta_fai[out] ? via fasta_fai
+  in intervals (intervals): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:intervals[out] ? via intervals
+  out gvcf (gvcf): Channel<?>
+  out vcf (vcf): Channel<?>
+  out tbi (tbi): Channel<?>
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_PARABRICKS_DEEPVARIANT@1 call "BAM_VARIANT_CALLING_PARABRICKS_DEEPVARIANT" callee=BAM_VARIANT_CALLING_PARABRICKS_DEEPVARIANT:workflow:modelled:legacy @136:9
+  guards then of tools && tools.split(',').contains('parabricks_deepvariant')
+  in cram (cram): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:cram[out] ? via cram
+  in fasta (fasta): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:fasta[out] ? via fasta
+  in intervals_bed_combined (intervals_bed_combined): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:intervals_bed_combined[out] ? via intervals_bed_combined
+  out vcf (vcf): Channel<?>
+  out tbi (tbi): Channel<?>
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/.map@3 chain ".map" steps=map @151:13
+  guards then of tools_list.contains('freebayes')
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:cram[out] ? via cram
+  out out (out): ?
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_FREEBAYES@1 call "BAM_VARIANT_CALLING_FREEBAYES" callee=BAM_VARIANT_CALLING_FREEBAYES:workflow:modelled:legacy @149:9
+  guards then of tools_list.contains('freebayes')
+  in ch_cram (ch_cram): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/.map@3[out] ?
+  in ch_dict (ch_dict): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:dict[out] ? via dict
+  in ch_fasta (ch_fasta): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:fasta[out] ? via fasta
+  in ch_fasta_fai (ch_fasta_fai): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:fasta_fai[out] ? via fasta_fai
+  in ch_intervals (ch_intervals): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:intervals[out] ? via intervals
+  out vcf_unfiltered (vcf_unfiltered): Channel<?>
+  out vcf (vcf): Channel<Tuple>
+  out tbi (tbi): Channel<Tuple>
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/.map@4 chain ".map" steps=map @169:13
+  guards then of tools_list.contains('haplotypecaller')
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:dbsnp[out] ? via dbsnp
+  out out (out): ?
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/.map@5 chain ".map" steps=map @170:13
+  guards then of tools_list.contains('haplotypecaller')
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:dbsnp_tbi[out] ? via dbsnp_tbi
+  out out (out): ?
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_HAPLOTYPECALLER@1 call "BAM_VARIANT_CALLING_HAPLOTYPECALLER" callee=BAM_VARIANT_CALLING_HAPLOTYPECALLER:workflow:modelled:legacy @164:9
+  guards then of tools_list.contains('haplotypecaller')
+  in cram (cram): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:cram[out] ? via cram
+  in fasta (fasta): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:fasta[out] ? via fasta
+  in fasta_fai (fasta_fai): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:fasta_fai[out] ? via fasta_fai
+  in dict (dict): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:dict[out] ? via dict
+  in dbsnp (dbsnp): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/.map@4[out] ?
+  in dbsnp_tbi (dbsnp_tbi): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/.map@5[out] ?
+  in intervals (intervals): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:intervals[out] ? via intervals
+  out gvcf_tbi_intervals (gvcf_tbi_intervals): Channel<?>
+  out realigned_bam (realigned_bam): Channel<Record>
+  out vcf (vcf): Channel<?>
+  out tbi (tbi): Channel<?>
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_JOINT_CALLING_GERMLINE_GATK@1 call "BAM_JOINT_CALLING_GERMLINE_GATK" callee=BAM_JOINT_CALLING_GERMLINE_GATK:workflow:modelled:legacy @177:13
+  guards then of tools_list.contains('haplotypecaller'); then of joint_germline
+  in input (input): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_HAPLOTYPECALLER@1[gvcf_tbi_intervals] Channel<?> via BAM_VARIANT_CALLING_HAPLOTYPECALLER.out.gvcf_tbi_intervals
+  in fasta (fasta): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:fasta[out] ? via fasta
+  in fai (fai): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:fasta_fai[out] ? via fasta_fai
+  in dict (dict): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:dict[out] ? via dict
+  in dbsnp (dbsnp): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:dbsnp[out] ? via dbsnp
+  in dbsnp_tbi (dbsnp_tbi): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:dbsnp_tbi[out] ? via dbsnp_tbi
+  in dbsnp_vqsr (dbsnp_vqsr): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:dbsnp_vqsr[out] ? via dbsnp_vqsr
+  in resource_indels_vcf (resource_indels_vcf): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:known_sites_indels[out] ? via known_sites_indels
+  in resource_indels_tbi (resource_indels_tbi): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:known_sites_indels_tbi[out] ? via known_sites_indels_tbi
+  in known_indels_vqsr (known_indels_vqsr): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:known_indels_vqsr[out] ? via known_indels_vqsr
+  in resource_snps_vcf (resource_snps_vcf): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:known_sites_snps[out] ? via known_sites_snps
+  in resource_snps_tbi (resource_snps_tbi): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:known_sites_snps_tbi[out] ? via known_sites_snps_tbi
+  in known_snps_vqsr (known_snps_vqsr): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:known_snps_vqsr[out] ? via known_snps_vqsr
+  out genotype_index (genotype_index): Channel<?>
+  out genotype_vcf (genotype_vcf): Channel<?>
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/.join@1 chain ".join" steps=join @200:21
+  guards then of tools_list.contains('haplotypecaller'); else of joint_germline; then of !skip_haplotypecaller_filter
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_HAPLOTYPECALLER@1[vcf] Channel<?> via vcf_haplotypecaller
+  in 1:1 (join(right)): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_HAPLOTYPECALLER@1[tbi] Channel<?> via tbi_haplotypecaller
+  out out (out): Channel<Record>
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/.map@6 chain ".map" steps=map @201:21
+  guards then of tools_list.contains('haplotypecaller'); else of joint_germline; then of !skip_haplotypecaller_filter
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:fasta[out] ? via fasta
+  out out (out): ?
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/.map@7 chain ".map" steps=map @202:21
+  guards then of tools_list.contains('haplotypecaller'); else of joint_germline; then of !skip_haplotypecaller_filter
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:fasta_fai[out] ? via fasta_fai
+  out out (out): ?
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/.map@8 chain ".map" steps=map @203:21
+  guards then of tools_list.contains('haplotypecaller'); else of joint_germline; then of !skip_haplotypecaller_filter
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:dict[out] ? via dict
+  out out (out): ?
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/.concat@1 chain ".concat.flatten.unique.collect" steps=concat,flatten,unique,collect @205:21
+  guards then of tools_list.contains('haplotypecaller'); else of joint_germline; then of !skip_haplotypecaller_filter
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:known_sites_indels[out] ? via known_sites_indels
+  in 1:1 (concat(1)): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:known_sites_snps[out] ? via known_sites_snps
+  out out (out): Value<Bag<?>>
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/.concat@2 chain ".concat.flatten.unique.collect" steps=concat,flatten,unique,collect @206:21
+  guards then of tools_list.contains('haplotypecaller'); else of joint_germline; then of !skip_haplotypecaller_filter
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:known_sites_indels_tbi[out] ? via known_sites_indels_tbi
+  in 1:1 (concat(1)): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:known_sites_snps_tbi[out] ? via known_sites_snps_tbi
+  out out (out): Value<Bag<?>>
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/VCF_VARIANT_FILTERING_HAPLOTYPECALLER@1 call "VCF_VARIANT_FILTERING_HAPLOTYPECALLER" callee=VCF_VARIANT_FILTERING_HAPLOTYPECALLER:workflow:modelled:legacy @199:17
+  guards then of tools_list.contains('haplotypecaller'); else of joint_germline; then of !skip_haplotypecaller_filter
+  in vcf (vcf): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/.join@1[out] Channel<Record>
+  in fasta (fasta): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/.map@6[out] ?
+  in fasta_fai (fasta_fai): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/.map@7[out] ?
+  in dict (dict): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/.map@8[out] ?
+  in intervals_bed_combined (intervals_bed_combined): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:intervals_bed_combined_haplotypec[out] ? via intervals_bed_combined_haplotypec
+  in known_sites (known_sites): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/.concat@1[out] Value<Bag<?>>
+  in known_sites_tbi (known_sites_tbi): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/.concat@2[out] Value<Bag<?>>
+  out filtered_vcf (filtered_vcf): Channel<?>
+  out filtered_tbi (filtered_tbi): Channel<?>
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_PARABRICKS_HAPLOTYPECALLER@1 call "BAM_VARIANT_CALLING_PARABRICKS_HAPLOTYPECALLER" callee=BAM_VARIANT_CALLING_PARABRICKS_HAPLOTYPECALLER:workflow:modelled:legacy @217:9
+  guards then of tools_list.contains('parabricks_haplotypecaller')
+  in cram (cram): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:cram[out] ? via cram
+  in fasta (fasta): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:fasta[out] ? via fasta
+  in intervals_bed_combined (intervals_bed_combined): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:intervals_bed_combined[out] ? via intervals_bed_combined
+  out vcf (vcf): Channel<?>
+  out tbi (tbi): Channel<?>
+  out gvcf (gvcf): Channel<?>
+  out gvcf_tbi (gvcf_tbi): Channel<?>
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_GERMLINE_MANTA@1 call "BAM_VARIANT_CALLING_GERMLINE_MANTA" callee=BAM_VARIANT_CALLING_GERMLINE_MANTA:workflow:modelled:legacy @231:9
+  guards then of tools_list.contains('manta')
+  in cram (cram): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:cram[out] ? via cram
+  in fasta (fasta): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:fasta[out] ? via fasta
+  in fasta_fai (fasta_fai): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:fasta_fai[out] ? via fasta_fai
+  in intervals (intervals): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:intervals_bed_gz_tbi_combined[out] ? via intervals_bed_gz_tbi_combined
+  out candidate_small_indels_vcf (candidate_small_indels_vcf): Channel<?>
+  out candidate_small_indels_vcf_tbi (candidate_small_indels_vcf_tbi): Channel<?>
+  out candidate_sv_vcf (candidate_sv_vcf): Channel<?>
+  out candidate_sv_vcf_tbi (candidate_sv_vcf_tbi): Channel<?>
+  out diploid_sv_vcf (diploid_sv_vcf): Channel<?>
+  out diploid_sv_vcf_tbi (diploid_sv_vcf_tbi): Channel<?>
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_INDEXCOV@1 call "BAM_VARIANT_CALLING_INDEXCOV" callee=BAM_VARIANT_CALLING_INDEXCOV:workflow:modelled:legacy @244:9
+  guards then of wes == false && tools_list.contains('indexcov')
+  in cram (cram): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:cram[out] ? via cram
+  in fasta (fasta): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:fasta[out] ? via fasta
+  in fasta_fai (fasta_fai): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:fasta_fai[out] ? via fasta_fai
+  out out_indexcov (out_indexcov): Channel<Tuple>
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_SENTIEON_DNASCOPE@1 call "BAM_VARIANT_CALLING_SENTIEON_DNASCOPE" callee=BAM_VARIANT_CALLING_SENTIEON_DNASCOPE:workflow:modelled:legacy @255:9
+  guards then of tools_list.contains('sentieon_dnascope')
+  in cram (cram): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:cram[out] ? via cram
+  in fasta (fasta): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:fasta[out] ? via fasta
+  in fasta_fai (fasta_fai): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:fasta_fai[out] ? via fasta_fai
+  in dict (dict): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:dict[out] ? via dict
+  in dbsnp (dbsnp): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:dbsnp[out] ? via dbsnp
+  in dbsnp_tbi (dbsnp_tbi): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:dbsnp_tbi[out] ? via dbsnp_tbi
+  in intervals (intervals): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:intervals[out] ? via intervals
+  in joint_germline (joint_germline): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:joint_germline[out] ? via joint_germline
+  in sentieon_dnascope_emit_mode (sentieon_dnascope_emit_mode): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:sentieon_dnascope_emit_mode[out] ? via sentieon_dnascope_emit_mode
+  in sentieon_dnascope_pcr_indel_model (sentieon_dnascope_pcr_indel_model): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:sentieon_dnascope_pcr_indel_model[out] ? via sentieon_dnascope_pcr_indel_model
+  in sentieon_dnascope_model (sentieon_dnascope_model): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:sentieon_dnascope_model[out] ? via sentieon_dnascope_model
+  out vcf (vcf): Channel<?>
+  out vcf_tbi (vcf_tbi): Channel<?>
+  out gvcf (gvcf): Channel<?>
+  out gvcf_tbi (gvcf_tbi): Channel<?>
+  out genotype_intervals (genotype_intervals): ?
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_JOINT_CALLING_GERMLINE_SENTIEON@1 call "BAM_JOINT_CALLING_GERMLINE_SENTIEON" callee=BAM_JOINT_CALLING_GERMLINE_SENTIEON:workflow:modelled:legacy @274:13
+  guards then of tools_list.contains('sentieon_dnascope'); then of joint_germline
+  in input (input): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_SENTIEON_DNASCOPE@1[genotype_intervals] ? via BAM_VARIANT_CALLING_SENTIEON_DNASCOPE.out.genotype_intervals
+  in fasta (fasta): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:fasta[out] ? via fasta
+  in fai (fai): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:fasta_fai[out] ? via fasta_fai
+  in dict (dict): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:dict[out] ? via dict
+  in dbsnp (dbsnp): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:dbsnp[out] ? via dbsnp
+  in dbsnp_tbi (dbsnp_tbi): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:dbsnp_tbi[out] ? via dbsnp_tbi
+  in dbsnp_vqsr (dbsnp_vqsr): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:dbsnp_vqsr[out] ? via dbsnp_vqsr
+  in resource_indels_vcf (resource_indels_vcf): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:known_sites_indels[out] ? via known_sites_indels
+  in resource_indels_tbi (resource_indels_tbi): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:known_sites_indels_tbi[out] ? via known_sites_indels_tbi
+  in known_indels_vqsr (known_indels_vqsr): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:known_indels_vqsr[out] ? via known_indels_vqsr
+  in resource_snps_vcf (resource_snps_vcf): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:known_sites_snps[out] ? via known_sites_snps
+  in resource_snps_tbi (resource_snps_tbi): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:known_sites_snps_tbi[out] ? via known_sites_snps_tbi
+  in known_snps_vqsr (known_snps_vqsr): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:known_snps_vqsr[out] ? via known_snps_vqsr
+  in variant_caller (variant_caller): -
+    = 'sentieon_dnascope' : String
+  out genotype_index (genotype_index): ?
+  out genotype_vcf (genotype_vcf): ?
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/.join@2 chain ".join" steps=join @297:21
+  guards then of tools_list.contains('sentieon_dnascope'); else of joint_germline; then of !skip_tools_list.contains('dnascope_filter')
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_SENTIEON_DNASCOPE@1[vcf] Channel<?> via vcf_sentieon_dnascope
+  in 1:1 (join(right)): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_SENTIEON_DNASCOPE@1[vcf_tbi] Channel<?> via tbi_sentieon_dnascope
+  out out (out): Channel<Record>
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/.map@9 chain ".map" steps=map @300:21
+  guards then of tools_list.contains('sentieon_dnascope'); else of joint_germline; then of !skip_tools_list.contains('dnascope_filter')
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:sentieon_dnascope_model[out] ? via sentieon_dnascope_model
+  out out (out): ?
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/SENTIEON_DNAMODELAPPLY@1 call "SENTIEON_DNAMODELAPPLY" callee=SENTIEON_DNAMODELAPPLY:process:modelled:legacy @296:17
+  guards then of tools_list.contains('sentieon_dnascope'); else of joint_germline; then of !skip_tools_list.contains('dnascope_filter')
+  in $1 (tuple(meta, vcf, idx)): Tuple
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/.join@2[out] Channel<Record>
+  in $2 (tuple(meta2, fasta)): Tuple
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:fasta[out] ? via fasta
+  in $3 (tuple(meta3, fai)): Tuple
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:fasta_fai[out] ? via fasta_fai
+  in $4 (tuple(meta4, ml_model)): Tuple
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/.map@9[out] ?
+  out vcf (vcf): Channel<Tuple>
+  out tbi (tbi): Channel<Tuple>
+  out versions_sentieon (versions_sentieon): Channel<Tuple>
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER@1 call "BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER" callee=BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER:workflow:modelled:legacy @311:9
+  guards then of tools_list.contains('sentieon_haplotyper')
+  in cram (cram): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:cram[out] ? via cram
+  in fasta (fasta): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:fasta[out] ? via fasta
+  in fasta_fai (fasta_fai): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:fasta_fai[out] ? via fasta_fai
+  in dict (dict): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:dict[out] ? via dict
+  in dbsnp (dbsnp): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:dbsnp[out] ? via dbsnp
+  in dbsnp_tbi (dbsnp_tbi): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:dbsnp_tbi[out] ? via dbsnp_tbi
+  in intervals (intervals): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:intervals[out] ? via intervals
+  in joint_germline (joint_germline): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:joint_germline[out] ? via joint_germline
+  in sentieon_haplotyper_emit_mode (sentieon_haplotyper_emit_mode): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:sentieon_haplotyper_emit_mode[out] ? via sentieon_haplotyper_emit_mode
+  out vcf (vcf): Channel<?>
+  out vcf_tbi (vcf_tbi): Channel<?>
+  out gvcf (gvcf): Channel<?>
+  out gvcf_tbi (gvcf_tbi): Channel<?>
+  out genotype_intervals (genotype_intervals): ?
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_JOINT_CALLING_GERMLINE_SENTIEON@2 call "BAM_JOINT_CALLING_GERMLINE_SENTIEON" callee=BAM_JOINT_CALLING_GERMLINE_SENTIEON:workflow:modelled:legacy @328:13
+  guards then of tools_list.contains('sentieon_haplotyper'); then of joint_germline
+  in input (input): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER@1[genotype_intervals] ? via BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER.out.genotype_intervals
+  in fasta (fasta): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:fasta[out] ? via fasta
+  in fai (fai): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:fasta_fai[out] ? via fasta_fai
+  in dict (dict): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:dict[out] ? via dict
+  in dbsnp (dbsnp): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:dbsnp[out] ? via dbsnp
+  in dbsnp_tbi (dbsnp_tbi): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:dbsnp_tbi[out] ? via dbsnp_tbi
+  in dbsnp_vqsr (dbsnp_vqsr): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:dbsnp_vqsr[out] ? via dbsnp_vqsr
+  in resource_indels_vcf (resource_indels_vcf): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:known_sites_indels[out] ? via known_sites_indels
+  in resource_indels_tbi (resource_indels_tbi): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:known_sites_indels_tbi[out] ? via known_sites_indels_tbi
+  in known_indels_vqsr (known_indels_vqsr): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:known_indels_vqsr[out] ? via known_indels_vqsr
+  in resource_snps_vcf (resource_snps_vcf): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:known_sites_snps[out] ? via known_sites_snps
+  in resource_snps_tbi (resource_snps_tbi): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:known_sites_snps_tbi[out] ? via known_sites_snps_tbi
+  in known_snps_vqsr (known_snps_vqsr): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:known_snps_vqsr[out] ? via known_snps_vqsr
+  in variant_caller (variant_caller): -
+    = 'sentieon_haplotyper' : String
+  out genotype_index (genotype_index): ?
+  out genotype_vcf (genotype_vcf): ?
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/.join@3 chain ".join" steps=join @352:21
+  guards then of tools_list.contains('sentieon_haplotyper'); else of joint_germline; then of !skip_tools_list.contains('haplotyper_filter')
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER@1[vcf] Channel<?> via vcf_sentieon_haplotyper
+  in 1:1 (join(right)): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER@1[vcf_tbi] Channel<?> via tbi_sentieon_haplotyper
+  out out (out): Channel<Record>
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/.map@10 chain ".map" steps=map @353:21
+  guards then of tools_list.contains('sentieon_haplotyper'); else of joint_germline; then of !skip_tools_list.contains('haplotyper_filter')
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:fasta[out] ? via fasta
+  out out (out): ?
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/.map@11 chain ".map" steps=map @354:21
+  guards then of tools_list.contains('sentieon_haplotyper'); else of joint_germline; then of !skip_tools_list.contains('haplotyper_filter')
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:fasta_fai[out] ? via fasta_fai
+  out out (out): ?
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/.map@12 chain ".map" steps=map @355:21
+  guards then of tools_list.contains('sentieon_haplotyper'); else of joint_germline; then of !skip_tools_list.contains('haplotyper_filter')
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:dict[out] ? via dict
+  out out (out): ?
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/.concat@3 chain ".concat.flatten.unique.collect" steps=concat,flatten,unique,collect @357:21
+  guards then of tools_list.contains('sentieon_haplotyper'); else of joint_germline; then of !skip_tools_list.contains('haplotyper_filter')
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:known_sites_indels[out] ? via known_sites_indels
+  in 1:1 (concat(1)): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:known_sites_snps[out] ? via known_sites_snps
+  out out (out): Value<Bag<?>>
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/.concat@4 chain ".concat.flatten.unique.collect" steps=concat,flatten,unique,collect @358:21
+  guards then of tools_list.contains('sentieon_haplotyper'); else of joint_germline; then of !skip_tools_list.contains('haplotyper_filter')
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:known_sites_indels_tbi[out] ? via known_sites_indels_tbi
+  in 1:1 (concat(1)): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:known_sites_snps_tbi[out] ? via known_sites_snps_tbi
+  out out (out): Value<Bag<?>>
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/SENTIEON_HAPLOTYPER_VCF_VARIANT_FILTERING_HAPLOTYPECALLER@1 call "SENTIEON_HAPLOTYPER_VCF_VARIANT_FILTERING_HAPLOTYPECALLER" callee=SENTIEON_HAPLOTYPER_VCF_VARIANT_FILTERING_HAPLOTYPECALLER:workflow:modelled:legacy @351:17
+  guards then of tools_list.contains('sentieon_haplotyper'); else of joint_germline; then of !skip_tools_list.contains('haplotyper_filter')
+  in vcf (vcf): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/.join@3[out] Channel<Record>
+  in fasta (fasta): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/.map@10[out] ?
+  in fasta_fai (fasta_fai): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/.map@11[out] ?
+  in dict (dict): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/.map@12[out] ?
+  in intervals_bed_combined (intervals_bed_combined): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:intervals_bed_combined_haplotypec[out] ? via intervals_bed_combined_haplotypec
+  in known_sites (known_sites): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/.concat@3[out] Value<Bag<?>>
+  in known_sites_tbi (known_sites_tbi): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/.concat@4[out] Value<Bag<?>>
+  out filtered_vcf (filtered_vcf): Channel<?>
+  out filtered_tbi (filtered_tbi): Channel<?>
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/.map@13 chain ".map" steps=map @373:13
+  guards then of tools_list.contains('strelka')
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:fasta[out] ? via fasta
+  out out (out): ?
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/.map@14 chain ".map" steps=map @374:13
+  guards then of tools_list.contains('strelka')
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:fasta_fai[out] ? via fasta_fai
+  out out (out): ?
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_SINGLE_STRELKA@1 call "BAM_VARIANT_CALLING_SINGLE_STRELKA" callee=BAM_VARIANT_CALLING_SINGLE_STRELKA:workflow:modelled:legacy @370:9
+  guards then of tools_list.contains('strelka')
+  in cram (cram): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:cram[out] ? via cram
+  in dict (dict): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:dict[out] ? via dict
+  in fasta (fasta): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/.map@13[out] ?
+  in fasta_fai (fasta_fai): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/.map@14[out] ?
+  in intervals (intervals): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:intervals_bed_gz_tbi[out] ? via intervals_bed_gz_tbi
+  out vcf (vcf): Channel<?>
+  out tbi (tbi): Channel<?>
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_SINGLE_TIDDIT@1 call "BAM_VARIANT_CALLING_SINGLE_TIDDIT" callee=BAM_VARIANT_CALLING_SINGLE_TIDDIT:workflow:modelled:legacy @384:9
+  guards then of tools_list.contains('tiddit')
+  in cram (cram): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:cram[out] ? via cram
+  in fasta (fasta): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:fasta[out] ? via fasta
+  in fasta_fai (fasta_fai): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:fasta_fai[out] ? via fasta_fai
+  in bwa (bwa): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:take:bwa[out] ? via bwa
+  out ploidy (ploidy): Channel<Tuple>
+  out vcf (vcf): Channel<?>
+  out tbi (tbi): Channel<?>
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/channel.empty@1 factory "channel.empty" factory=channel.empty @396:15
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/vcf_all chain ".mix" steps=mix @396:15
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/channel.empty@1[out] Channel<?>
+  in 1:1 (mix(1)): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/vcf_deepvariant[out] Channel<?> via vcf_deepvariant indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_DEEPVARIANT@1[vcf] Channel<?> via vcf_deepvariant indirect
+  in 1:2 (mix(2)): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/vcf_parabricks_deepvariant[out] Channel<?> via vcf_parabricks_deepvariant indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_PARABRICKS_DEEPVARIANT@1[vcf] Channel<?> via vcf_parabricks_deepvariant indirect
+  in 1:3 (mix(3)): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/vcf_freebayes[out] Channel<?> via vcf_freebayes indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_FREEBAYES@1[vcf] Channel<Tuple> via vcf_freebayes indirect
+  in 1:4 (mix(4)): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/vcf_haplotypecaller[out] Channel<?> via vcf_haplotypecaller indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_HAPLOTYPECALLER@1[vcf] Channel<?> via vcf_haplotypecaller indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_JOINT_CALLING_GERMLINE_GATK@1[genotype_vcf] Channel<?> via vcf_haplotypecaller indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/VCF_VARIANT_FILTERING_HAPLOTYPECALLER@1[filtered_vcf] Channel<?> via vcf_haplotypecaller indirect
+  in 1:5 (mix(5)): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/vcf_manta[out] Channel<?> via vcf_manta indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_GERMLINE_MANTA@1[diploid_sv_vcf] Channel<?> via vcf_manta indirect
+  in 1:6 (mix(6)): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/vcf_mpileup[out] Channel<?> via vcf_mpileup indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_MPILEUP@1[vcf] Channel<?> via vcf_mpileup indirect
+  in 1:7 (mix(7)): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/vcf_parabricks_haplotypecaller[out] Channel<?> via vcf_parabricks_haplotypecaller indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_PARABRICKS_HAPLOTYPECALLER@1[vcf] Channel<?> via vcf_parabricks_haplotypecaller indirect
+  in 1:8 (mix(8)): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/vcf_sentieon_dnascope[out] Channel<?> via vcf_sentieon_dnascope indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_SENTIEON_DNASCOPE@1[vcf] Channel<?> via vcf_sentieon_dnascope indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_JOINT_CALLING_GERMLINE_SENTIEON@1[genotype_vcf] ? via vcf_sentieon_dnascope indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/SENTIEON_DNAMODELAPPLY@1[vcf] Channel<Tuple> via vcf_sentieon_dnascope indirect
+  in 1:9 (mix(9)): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/vcf_sentieon_haplotyper[out] Channel<?> via vcf_sentieon_haplotyper indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER@1[vcf] Channel<?> via vcf_sentieon_haplotyper indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_JOINT_CALLING_GERMLINE_SENTIEON@2[genotype_vcf] ? via vcf_sentieon_haplotyper indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/SENTIEON_HAPLOTYPER_VCF_VARIANT_FILTERING_HAPLOTYPECALLER@1[filtered_vcf] Channel<?> via vcf_sentieon_haplotyper indirect
+  in 1:10 (mix(10)): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/vcf_strelka[out] Channel<?> via vcf_strelka indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_SINGLE_STRELKA@1[vcf] Channel<?> via vcf_strelka indirect
+  in 1:11 (mix(11)): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/vcf_tiddit[out] Channel<?> via vcf_tiddit indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_SINGLE_TIDDIT@1[vcf] Channel<?> via vcf_tiddit indirect
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/channel.empty@2 factory "channel.empty" factory=channel.empty @410:15
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/tbi_all chain ".mix" steps=mix @410:15
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/channel.empty@2[out] Channel<?>
+  in 1:1 (mix(1)): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/tbi_deepvariant[out] Channel<?> via tbi_deepvariant indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_DEEPVARIANT@1[tbi] Channel<?> via tbi_deepvariant indirect
+  in 1:2 (mix(2)): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/tbi_parabricks_deepvariant[out] Channel<?> via tbi_parabricks_deepvariant indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_PARABRICKS_DEEPVARIANT@1[tbi] Channel<?> via tbi_parabricks_deepvariant indirect
+  in 1:3 (mix(3)): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/tbi_freebayes[out] Channel<?> via tbi_freebayes indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_FREEBAYES@1[tbi] Channel<Tuple> via tbi_freebayes indirect
+  in 1:4 (mix(4)): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/tbi_haplotypecaller[out] Channel<?> via tbi_haplotypecaller indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_HAPLOTYPECALLER@1[tbi] Channel<?> via tbi_haplotypecaller indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_JOINT_CALLING_GERMLINE_GATK@1[genotype_index] Channel<?> via tbi_haplotypecaller indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/VCF_VARIANT_FILTERING_HAPLOTYPECALLER@1[filtered_tbi] Channel<?> via tbi_haplotypecaller indirect
+  in 1:5 (mix(5)): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/tbi_manta[out] Channel<?> via tbi_manta indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_GERMLINE_MANTA@1[diploid_sv_vcf_tbi] Channel<?> via tbi_manta indirect
+  in 1:6 (mix(6)): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/tbi_mpileup[out] Channel<?> via tbi_mpileup indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_MPILEUP@1[tbi] Channel<?> via tbi_mpileup indirect
+  in 1:7 (mix(7)): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/tbi_parabricks_haplotypecaller[out] Channel<?> via tbi_parabricks_haplotypecaller indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_PARABRICKS_HAPLOTYPECALLER@1[tbi] Channel<?> via tbi_parabricks_haplotypecaller indirect
+  in 1:8 (mix(8)): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/tbi_sentieon_dnascope[out] Channel<?> via tbi_sentieon_dnascope indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_SENTIEON_DNASCOPE@1[vcf_tbi] Channel<?> via tbi_sentieon_dnascope indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_JOINT_CALLING_GERMLINE_SENTIEON@1[genotype_index] ? via tbi_sentieon_dnascope indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/SENTIEON_DNAMODELAPPLY@1[tbi] Channel<Tuple> via tbi_sentieon_dnascope indirect
+  in 1:9 (mix(9)): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/tbi_sentieon_haplotyper[out] Channel<?> via tbi_sentieon_haplotyper indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER@1[vcf_tbi] Channel<?> via tbi_sentieon_haplotyper indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_JOINT_CALLING_GERMLINE_SENTIEON@2[genotype_index] ? via tbi_sentieon_haplotyper indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/SENTIEON_HAPLOTYPER_VCF_VARIANT_FILTERING_HAPLOTYPECALLER@1[filtered_tbi] Channel<?> via tbi_sentieon_haplotyper indirect
+  in 1:10 (mix(10)): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/tbi_strelka[out] Channel<?> via tbi_strelka indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_SINGLE_STRELKA@1[tbi] Channel<?> via tbi_strelka indirect
+  in 1:11 (mix(11)): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/tbi_tiddit[out] Channel<?> via tbi_tiddit indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_SINGLE_TIDDIT@1[tbi] Channel<?> via tbi_tiddit indirect
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:emit:gvcf_parabricks_haplotypecaller emit "gvcf_parabricks_haplotypecaller" @425:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/gvcf_parabricks_haplotypecaller[out] Channel<?> via gvcf_parabricks_haplotypecaller indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_PARABRICKS_HAPLOTYPECALLER@1[gvcf] Channel<?> via gvcf_parabricks_haplotypecaller indirect
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:emit:gvcf_sentieon_dnascope emit "gvcf_sentieon_dnascope" @426:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/gvcf_sentieon_dnascope[out] Channel<?> via gvcf_sentieon_dnascope indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_SENTIEON_DNASCOPE@1[gvcf] Channel<?> via gvcf_sentieon_dnascope indirect
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:emit:gvcf_sentieon_haplotyper emit "gvcf_sentieon_haplotyper" @427:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/gvcf_sentieon_haplotyper[out] Channel<?> via gvcf_sentieon_haplotyper indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER@1[gvcf] Channel<?> via gvcf_sentieon_haplotyper indirect
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:emit:gvcf_tbi_parabricks_haplotypecaller emit "gvcf_tbi_parabricks_haplotypecaller" @428:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/gvcf_tbi_parabricks_haplotypecaller[out] Channel<?> via gvcf_tbi_parabricks_haplotypecaller indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_PARABRICKS_HAPLOTYPECALLER@1[gvcf_tbi] Channel<?> via gvcf_tbi_parabricks_haplotypecaller indirect
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:emit:gvcf_tbi_sentieon_dnascope emit "gvcf_tbi_sentieon_dnascope" @429:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/gvcf_tbi_sentieon_dnascope[out] Channel<?> via gvcf_tbi_sentieon_dnascope indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_SENTIEON_DNASCOPE@1[gvcf_tbi] Channel<?> via gvcf_tbi_sentieon_dnascope indirect
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:emit:gvcf_tbi_sentieon_haplotyper emit "gvcf_tbi_sentieon_haplotyper" @430:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/gvcf_tbi_sentieon_haplotyper[out] Channel<?> via gvcf_tbi_sentieon_haplotyper indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER@1[gvcf_tbi] Channel<?> via gvcf_tbi_sentieon_haplotyper indirect
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:emit:out_indexcov emit "out_indexcov" @431:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/out_indexcov[out] Channel<?> via out_indexcov indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_INDEXCOV@1[out_indexcov] Channel<Tuple> via out_indexcov indirect
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:emit:vcf_all emit "vcf_all" @432:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/vcf_all[out] Channel<?> via vcf_all
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:emit:vcf_deepvariant emit "vcf_deepvariant" @433:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/vcf_deepvariant[out] Channel<?> via vcf_deepvariant indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_DEEPVARIANT@1[vcf] Channel<?> via vcf_deepvariant indirect
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:emit:vcf_parabricks_deepvariant emit "vcf_parabricks_deepvariant" @434:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/vcf_parabricks_deepvariant[out] Channel<?> via vcf_parabricks_deepvariant indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_PARABRICKS_DEEPVARIANT@1[vcf] Channel<?> via vcf_parabricks_deepvariant indirect
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:emit:vcf_freebayes emit "vcf_freebayes" @435:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/vcf_freebayes[out] Channel<?> via vcf_freebayes indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_FREEBAYES@1[vcf] Channel<Tuple> via vcf_freebayes indirect
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:emit:vcf_haplotypecaller emit "vcf_haplotypecaller" @436:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/vcf_haplotypecaller[out] Channel<?> via vcf_haplotypecaller indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_HAPLOTYPECALLER@1[vcf] Channel<?> via vcf_haplotypecaller indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_JOINT_CALLING_GERMLINE_GATK@1[genotype_vcf] Channel<?> via vcf_haplotypecaller indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/VCF_VARIANT_FILTERING_HAPLOTYPECALLER@1[filtered_vcf] Channel<?> via vcf_haplotypecaller indirect
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:emit:vcf_manta emit "vcf_manta" @437:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/vcf_manta[out] Channel<?> via vcf_manta indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_GERMLINE_MANTA@1[diploid_sv_vcf] Channel<?> via vcf_manta indirect
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:emit:vcf_mpileup emit "vcf_mpileup" @438:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/vcf_mpileup[out] Channel<?> via vcf_mpileup indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_MPILEUP@1[vcf] Channel<?> via vcf_mpileup indirect
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:emit:vcf_parabricks_haplotypecaller emit "vcf_parabricks_haplotypecaller" @439:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/vcf_parabricks_haplotypecaller[out] Channel<?> via vcf_parabricks_haplotypecaller indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_PARABRICKS_HAPLOTYPECALLER@1[vcf] Channel<?> via vcf_parabricks_haplotypecaller indirect
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:emit:vcf_strelka emit "vcf_strelka" @440:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/vcf_strelka[out] Channel<?> via vcf_strelka indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_SINGLE_STRELKA@1[vcf] Channel<?> via vcf_strelka indirect
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:emit:vcf_sentieon_dnascope emit "vcf_sentieon_dnascope" @441:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/vcf_sentieon_dnascope[out] Channel<?> via vcf_sentieon_dnascope indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_SENTIEON_DNASCOPE@1[vcf] Channel<?> via vcf_sentieon_dnascope indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_JOINT_CALLING_GERMLINE_SENTIEON@1[genotype_vcf] ? via vcf_sentieon_dnascope indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/SENTIEON_DNAMODELAPPLY@1[vcf] Channel<Tuple> via vcf_sentieon_dnascope indirect
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:emit:vcf_sentieon_haplotyper emit "vcf_sentieon_haplotyper" @442:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/vcf_sentieon_haplotyper[out] Channel<?> via vcf_sentieon_haplotyper indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER@1[vcf] Channel<?> via vcf_sentieon_haplotyper indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_JOINT_CALLING_GERMLINE_SENTIEON@2[genotype_vcf] ? via vcf_sentieon_haplotyper indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/SENTIEON_HAPLOTYPER_VCF_VARIANT_FILTERING_HAPLOTYPECALLER@1[filtered_vcf] Channel<?> via vcf_sentieon_haplotyper indirect
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:emit:vcf_tiddit emit "vcf_tiddit" @443:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/vcf_tiddit[out] Channel<?> via vcf_tiddit indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_SINGLE_TIDDIT@1[vcf] Channel<?> via vcf_tiddit indirect
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:emit:tbi_all emit "tbi_all" @444:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/tbi_all[out] Channel<?> via tbi_all
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:emit:tbi_deepvariant emit "tbi_deepvariant" @445:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/tbi_deepvariant[out] Channel<?> via tbi_deepvariant indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_DEEPVARIANT@1[tbi] Channel<?> via tbi_deepvariant indirect
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:emit:tbi_parabricks_deepvariant emit "tbi_parabricks_deepvariant" @446:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/tbi_parabricks_deepvariant[out] Channel<?> via tbi_parabricks_deepvariant indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_PARABRICKS_DEEPVARIANT@1[tbi] Channel<?> via tbi_parabricks_deepvariant indirect
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:emit:tbi_freebayes emit "tbi_freebayes" @447:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/tbi_freebayes[out] Channel<?> via tbi_freebayes indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_FREEBAYES@1[tbi] Channel<Tuple> via tbi_freebayes indirect
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:emit:tbi_haplotypecaller emit "tbi_haplotypecaller" @448:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/tbi_haplotypecaller[out] Channel<?> via tbi_haplotypecaller indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_HAPLOTYPECALLER@1[tbi] Channel<?> via tbi_haplotypecaller indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_JOINT_CALLING_GERMLINE_GATK@1[genotype_index] Channel<?> via tbi_haplotypecaller indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/VCF_VARIANT_FILTERING_HAPLOTYPECALLER@1[filtered_tbi] Channel<?> via tbi_haplotypecaller indirect
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:emit:tbi_manta emit "tbi_manta" @449:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/tbi_manta[out] Channel<?> via tbi_manta indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_GERMLINE_MANTA@1[diploid_sv_vcf_tbi] Channel<?> via tbi_manta indirect
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:emit:tbi_mpileup emit "tbi_mpileup" @450:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/tbi_mpileup[out] Channel<?> via tbi_mpileup indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_MPILEUP@1[tbi] Channel<?> via tbi_mpileup indirect
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:emit:tbi_parabricks_haplotypecaller emit "tbi_parabricks_haplotypecaller" @451:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/tbi_parabricks_haplotypecaller[out] Channel<?> via tbi_parabricks_haplotypecaller indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_PARABRICKS_HAPLOTYPECALLER@1[tbi] Channel<?> via tbi_parabricks_haplotypecaller indirect
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:emit:tbi_sentieon_dnascope emit "tbi_sentieon_dnascope" @452:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/tbi_sentieon_dnascope[out] Channel<?> via tbi_sentieon_dnascope indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_SENTIEON_DNASCOPE@1[vcf_tbi] Channel<?> via tbi_sentieon_dnascope indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_JOINT_CALLING_GERMLINE_SENTIEON@1[genotype_index] ? via tbi_sentieon_dnascope indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/SENTIEON_DNAMODELAPPLY@1[tbi] Channel<Tuple> via tbi_sentieon_dnascope indirect
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:emit:tbi_sentieon_haplotyper emit "tbi_sentieon_haplotyper" @453:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/tbi_sentieon_haplotyper[out] Channel<?> via tbi_sentieon_haplotyper indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_SENTIEON_HAPLOTYPER@1[vcf_tbi] Channel<?> via tbi_sentieon_haplotyper indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_JOINT_CALLING_GERMLINE_SENTIEON@2[genotype_index] ? via tbi_sentieon_haplotyper indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/SENTIEON_HAPLOTYPER_VCF_VARIANT_FILTERING_HAPLOTYPECALLER@1[filtered_tbi] Channel<?> via tbi_sentieon_haplotyper indirect
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:emit:tbi_strelka emit "tbi_strelka" @454:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/tbi_strelka[out] Channel<?> via tbi_strelka indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_SINGLE_STRELKA@1[tbi] Channel<?> via tbi_strelka indirect
+subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/:emit:tbi_tiddit emit "tbi_tiddit" @455:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/tbi_tiddit[out] Channel<?> via tbi_tiddit indirect
+    <- subworkflows/local/bam_variant_calling_germline_all/main.nf#BAM_VARIANT_CALLING_GERMLINE_ALL/BAM_VARIANT_CALLING_SINGLE_TIDDIT@1[tbi] Channel<?> via tbi_tiddit indirect
+bound @103:9 vcf_mpileup
+bound @104:9 tbi_mpileup
+bound @130:9 vcf_deepvariant
+bound @131:9 tbi_deepvariant
+bound @142:9 vcf_parabricks_deepvariant
+bound @143:9 tbi_parabricks_deepvariant
+bound @158:9 vcf_freebayes
+bound @159:9 tbi_freebayes
+bound @173:9 vcf_haplotypecaller
+bound @174:9 tbi_haplotypecaller
+bound @192:13 vcf_haplotypecaller
+bound @193:13 tbi_haplotypecaller
+bound @208:17 vcf_haplotypecaller
+bound @209:17 tbi_haplotypecaller
+bound @223:9 vcf_parabricks_haplotypecaller
+bound @224:9 tbi_parabricks_haplotypecaller
+bound @225:9 gvcf_parabricks_haplotypecaller
+bound @226:9 gvcf_tbi_parabricks_haplotypecaller
+bound @238:9 vcf_manta
+bound @239:9 tbi_manta
+bound @250:9 out_indexcov
+bound @268:9 vcf_sentieon_dnascope
+bound @269:9 tbi_sentieon_dnascope
+bound @270:9 gvcf_sentieon_dnascope
+bound @271:9 gvcf_tbi_sentieon_dnascope
+bound @290:13 vcf_sentieon_dnascope
+bound @291:13 tbi_sentieon_dnascope
+bound @302:17 vcf_sentieon_dnascope
+bound @303:17 tbi_sentieon_dnascope
+bound @322:9 vcf_sentieon_haplotyper
+bound @323:9 tbi_sentieon_haplotyper
+bound @324:9 gvcf_sentieon_haplotyper
+bound @325:9 gvcf_tbi_sentieon_haplotyper
+bound @344:13 vcf_sentieon_haplotyper
+bound @345:13 tbi_sentieon_haplotyper
+bound @360:17 vcf_sentieon_haplotyper
+bound @361:17 tbi_sentieon_haplotyper
+bound @378:9 vcf_strelka
+bound @379:9 tbi_strelka
+bound @392:9 vcf_tiddit
+bound @393:9 tbi_tiddit

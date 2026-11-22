@@ -1,0 +1,344 @@
+workflow subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING legacy
+statements 28, modelled 24
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/:take:tools take "tools" @14:5
+  out out (out): -
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/:take:cram_germline take "cram_germline" @15:5
+  out out (out): -
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/:take:germline_vcfs take "germline_vcfs" @16:5
+  out out (out): -
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/:take:germline_tbis take "germline_tbis" @17:5
+  out out (out): -
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/:take:cram_tumor_only take "cram_tumor_only" @18:5
+  out out (out): -
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/:take:tumor_only_vcfs take "tumor_only_vcfs" @19:5
+  out out (out): -
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/:take:tumor_only_tbis take "tumor_only_tbis" @20:5
+  out out (out): -
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/:take:cram_somatic take "cram_somatic" @21:5
+  out out (out): -
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/:take:somatic_vcfs take "somatic_vcfs" @22:5
+  out out (out): -
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/:take:somatic_tbis take "somatic_tbis" @23:5
+  out out (out): -
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/:take:fasta take "fasta" @24:5
+  out out (out): -
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/:take:fai take "fai" @25:5
+  out out (out): -
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/:take:concatenate_vcfs take "concatenate_vcfs" @26:5
+  out out (out): -
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/:take:filter_vcfs take "filter_vcfs" @27:5
+  out out (out): -
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/:take:snv_consensus_calling take "snv_consensus_calling" @28:5
+  out out (out): -
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/:take:normalize_vcfs take "normalize_vcfs" @29:5
+  out out (out): -
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/:take:varlociraptor_chunk_size take "varlociraptor_chunk_size" @30:5
+  out out (out): -
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/:take:varlociraptor_events_germline take "varlociraptor_events_germline" @31:5
+  out out (out): -
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/:take:varlociraptor_events_somatic take "varlociraptor_events_somatic" @32:5
+  out out (out): -
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/:take:varlociraptor_events_tumor_only take "varlociraptor_events_tumor_only" @33:5
+  out out (out): -
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/:take:varlociraptor_fdr take "varlociraptor_fdr" @34:5
+  out out (out): -
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/:take:varlociraptor_scenario_germline take "varlociraptor_scenario_germline" @35:5
+  out out (out): -
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/:take:varlociraptor_scenario_somatic take "varlociraptor_scenario_somatic" @36:5
+  out out (out): -
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/:take:varlociraptor_scenario_tumor_only take "varlociraptor_scenario_tumor_only" @37:5
+  out out (out): -
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/vcf_tbi factory "channel.empty" factory=channel.empty @41:24
+  out out (out): Channel<?>
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/passthrough_vcfs factory "channel.empty" factory=channel.empty @43:24
+  out out (out): Channel<?>
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/VCF_VARLOCIRAPTOR_GERMLINE@1 call "VCF_VARLOCIRAPTOR_GERMLINE" callee=VCF_VARLOCIRAPTOR_GERMLINE:workflow:modelled:legacy @50:9
+  guards then of tools && tools.split(',').contains('varlociraptor')
+  in ch_cram (ch_cram): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/:take:cram_germline[out] ? via cram_germline
+  in ch_fasta (ch_fasta): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/:take:fasta[out] ? via fasta
+  in ch_fasta_fai (ch_fasta_fai): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/:take:fai[out] ? via fai
+  in ch_scenario (ch_scenario): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/:take:varlociraptor_scenario_germline[out] ? via varlociraptor_scenario_germline
+  in ch_vcf (ch_vcf): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/:take:germline_vcfs[out] ? via germline_vcfs
+  in val_num_chunks (val_num_chunks): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/:take:varlociraptor_chunk_size[out] ? via varlociraptor_chunk_size
+  in val_sampletype (val_sampletype): -
+    = 'normal' : String
+  in val_events (val_events): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/:take:varlociraptor_events_germline[out] ? via varlociraptor_events_germline
+  in val_fdr (val_fdr): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/:take:varlociraptor_fdr[out] ? via varlociraptor_fdr
+  out vcf (vcf): Channel<Tuple>
+  out tbi (tbi): Channel<Tuple>
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/VCF_VARLOCIRAPTOR_SOMATIC@1 call "VCF_VARLOCIRAPTOR_SOMATIC" callee=VCF_VARLOCIRAPTOR_SOMATIC:workflow:modelled:legacy @53:9
+  guards then of tools && tools.split(',').contains('varlociraptor')
+  in ch_cram (ch_cram): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/:take:cram_somatic[out] ? via cram_somatic
+  in ch_fasta (ch_fasta): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/:take:fasta[out] ? via fasta
+  in ch_fasta_fai (ch_fasta_fai): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/:take:fai[out] ? via fai
+  in ch_scenario (ch_scenario): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/:take:varlociraptor_scenario_somatic[out] ? via varlociraptor_scenario_somatic
+  in ch_somatic_vcf (ch_somatic_vcf): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/:take:somatic_vcfs[out] ? via somatic_vcfs
+  in ch_germline_vcf (ch_germline_vcf): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/:take:germline_vcfs[out] ? via germline_vcfs
+  in val_num_chunks (val_num_chunks): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/:take:varlociraptor_chunk_size[out] ? via varlociraptor_chunk_size
+  in val_events (val_events): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/:take:varlociraptor_events_somatic[out] ? via varlociraptor_events_somatic
+  in val_fdr (val_fdr): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/:take:varlociraptor_fdr[out] ? via varlociraptor_fdr
+  out vcf (vcf): Channel<Tuple>
+  out tbi (tbi): Channel<Tuple>
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/VCF_VARLOCIRAPTOR_TUMOR_ONLY@1 call "VCF_VARLOCIRAPTOR_TUMOR_ONLY" callee=VCF_VARLOCIRAPTOR_TUMOR_ONLY:workflow:modelled:legacy @56:9
+  guards then of tools && tools.split(',').contains('varlociraptor')
+  in ch_cram (ch_cram): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/:take:cram_tumor_only[out] ? via cram_tumor_only
+  in ch_fasta (ch_fasta): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/:take:fasta[out] ? via fasta
+  in ch_fasta_fai (ch_fasta_fai): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/:take:fai[out] ? via fai
+  in ch_scenario (ch_scenario): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/:take:varlociraptor_scenario_tumor_only[out] ? via varlociraptor_scenario_tumor_only
+  in ch_vcf (ch_vcf): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/:take:tumor_only_vcfs[out] ? via tumor_only_vcfs
+  in val_num_chunks (val_num_chunks): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/:take:varlociraptor_chunk_size[out] ? via varlociraptor_chunk_size
+  in val_sampletype (val_sampletype): -
+    = 'tumor' : String
+  in val_events (val_events): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/:take:varlociraptor_events_tumor_only[out] ? via varlociraptor_events_tumor_only
+  in val_fdr (val_fdr): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/:take:varlociraptor_fdr[out] ? via varlociraptor_fdr
+  out vcf (vcf): Channel<Tuple>
+  out tbi (tbi): Channel<Tuple>
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/channel.empty@1 factory "channel.empty" factory=channel.empty @58:30
+  guards then of tools && tools.split(',').contains('varlociraptor')
+  out out (out): Channel<?>
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/varlociraptor_vcfs chain ".mix" steps=mix @58:30
+  guards then of tools && tools.split(',').contains('varlociraptor')
+  in in (in): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/channel.empty@1[out] Channel<?>
+  in 1:1 (mix(1)): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/VCF_VARLOCIRAPTOR_GERMLINE@1[vcf] Channel<Tuple> via VCF_VARLOCIRAPTOR_GERMLINE.out.vcf
+  in 1:2 (mix(2)): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/VCF_VARLOCIRAPTOR_SOMATIC@1[vcf] Channel<Tuple> via VCF_VARLOCIRAPTOR_SOMATIC.out.vcf
+  in 1:3 (mix(3)): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/VCF_VARLOCIRAPTOR_TUMOR_ONLY@1[vcf] Channel<Tuple> via VCF_VARLOCIRAPTOR_TUMOR_ONLY.out.vcf
+  out out (out): Channel<?>
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/channel.empty@2 factory "channel.empty" factory=channel.empty @59:30
+  guards then of tools && tools.split(',').contains('varlociraptor')
+  out out (out): Channel<?>
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/varlociraptor_tbis chain ".mix" steps=mix @59:30
+  guards then of tools && tools.split(',').contains('varlociraptor')
+  in in (in): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/channel.empty@2[out] Channel<?>
+  in 1:1 (mix(1)): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/VCF_VARLOCIRAPTOR_GERMLINE@1[tbi] Channel<Tuple> via VCF_VARLOCIRAPTOR_GERMLINE.out.tbi
+  in 1:2 (mix(2)): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/VCF_VARLOCIRAPTOR_SOMATIC@1[tbi] Channel<Tuple> via VCF_VARLOCIRAPTOR_SOMATIC.out.tbi
+  in 1:3 (mix(3)): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/VCF_VARLOCIRAPTOR_TUMOR_ONLY@1[tbi] Channel<Tuple> via VCF_VARLOCIRAPTOR_TUMOR_ONLY.out.tbi
+  out out (out): Channel<?>
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/vcf_tbi~2 chain ".join.map" steps=join,map @61:19
+  guards then of tools && tools.split(',').contains('varlociraptor')
+  in in (in): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/varlociraptor_vcfs[out] Channel<?> via varlociraptor_vcfs
+  in 1:1 (join(right)): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/varlociraptor_tbis[out] Channel<?> via varlociraptor_tbis
+  out out (out): Channel<?>
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/small_variantcallers code "def small_variantcallers = ['bcftools', 'deepsomatic', 'dee…" @77:9
+  guards else of tools && tools.split(',').contains('varlociraptor'); then of filter_vcfs || normalize_vcfs || concatenate_vcfs
+  out small_variantcallers (small_variantcallers): List
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/excluded_variantcallers code "def excluded_variantcallers = ['manta', 'tiddit', 'samtools…" @81:9
+  guards else of tools && tools.split(',').contains('varlociraptor'); then of filter_vcfs || normalize_vcfs || concatenate_vcfs
+  out excluded_variantcallers (excluded_variantcallers): List
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/channel.empty@3 factory "channel.empty" factory=channel.empty @84:20
+  guards else of tools && tools.split(',').contains('varlociraptor'); then of filter_vcfs || normalize_vcfs || concatenate_vcfs
+  out out (out): Channel<?>
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/all_vcfs chain ".mix.map" steps=mix,map @84:20
+  guards else of tools && tools.split(',').contains('varlociraptor'); then of filter_vcfs || normalize_vcfs || concatenate_vcfs
+  in in (in): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/channel.empty@3[out] Channel<?>
+  in 1:1 (mix(1)): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/:take:germline_vcfs[out] ? via germline_vcfs
+  in 1:2 (mix(2)): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/:take:tumor_only_vcfs[out] ? via tumor_only_vcfs
+  in 1:3 (mix(3)): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/:take:somatic_vcfs[out] ? via somatic_vcfs
+  out out (out): Channel<?>
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/channel.empty@4 factory "channel.empty" factory=channel.empty @85:20
+  guards else of tools && tools.split(',').contains('varlociraptor'); then of filter_vcfs || normalize_vcfs || concatenate_vcfs
+  out out (out): Channel<?>
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/all_tbis chain ".mix.map" steps=mix,map @85:20
+  guards else of tools && tools.split(',').contains('varlociraptor'); then of filter_vcfs || normalize_vcfs || concatenate_vcfs
+  in in (in): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/channel.empty@4[out] Channel<?>
+  in 1:1 (mix(1)): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/:take:germline_tbis[out] ? via germline_tbis
+  in 1:2 (mix(2)): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/:take:tumor_only_tbis[out] ? via tumor_only_tbis
+  in 1:3 (mix(3)): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/:take:somatic_tbis[out] ? via somatic_tbis
+  out out (out): Channel<?>
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/all_vcf_tbi chain ".join.map.branch" steps=join,map,branch @87:23
+  guards else of tools && tools.split(',').contains('varlociraptor'); then of filter_vcfs || normalize_vcfs || concatenate_vcfs
+  in in (in): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/all_vcfs[out] Channel<?> via all_vcfs
+  in 1:1 (join(right)): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/all_tbis[out] Channel<?> via all_tbis
+  out out (out): Record
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/.subscribe@1 chain ".subscribe" steps=subscribe @95:9
+  guards else of tools && tools.split(',').contains('varlociraptor'); then of filter_vcfs || normalize_vcfs || concatenate_vcfs
+  in in (in): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/all_vcf_tbi[out] Record via all_vcf_tbi indirect
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/small_variant_vcf_tbi chain ".map" steps=map @102:33
+  guards else of tools && tools.split(',').contains('varlociraptor'); then of filter_vcfs || normalize_vcfs || concatenate_vcfs
+  in in (in): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/all_vcf_tbi[out] Record via all_vcf_tbi indirect
+  out out (out): ?
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/FILTER_VCFS@1 call "FILTER_VCFS" callee=FILTER_VCFS:process:modelled:legacy @110:13
+  guards else of tools && tools.split(',').contains('varlociraptor'); then of filter_vcfs || normalize_vcfs || concatenate_vcfs; then of filter_vcfs
+  in $1 (tuple(meta, vcf, index)): Tuple
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/small_variant_vcf_tbi[out] ? via small_variant_vcf_tbi
+  in regions (regions): Path
+    = [] : List
+  in targets (targets): Path
+    = [] : List
+  in samples (samples): Path
+    = [] : List
+  out vcf (vcf): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out versions_bcftools (versions_bcftools): Channel<Tuple>
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/small_variant_vcf_tbi~2 chain ".join" steps=join @112:37
+  guards else of tools && tools.split(',').contains('varlociraptor'); then of filter_vcfs || normalize_vcfs || concatenate_vcfs; then of filter_vcfs
+  in in (in): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/FILTER_VCFS@1[vcf] Channel<Tuple> via FILTER_VCFS.out.vcf
+  in 1:1 (join(right)): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/FILTER_VCFS@1[index] Channel<Tuple> via FILTER_VCFS.out.index
+  out out (out): Channel<Record>
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/small_variant_publish_dir code "small_variant_publish_dir = 'filtered'" @113:13
+  guards else of tools && tools.split(',').contains('varlociraptor'); then of filter_vcfs || normalize_vcfs || concatenate_vcfs; then of filter_vcfs
+  out small_variant_publish_dir (small_variant_publish_dir): String
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/.map@1 chain ".map" steps=map @118:28
+  guards else of tools && tools.split(',').contains('varlociraptor'); then of filter_vcfs || normalize_vcfs || concatenate_vcfs; then of normalize_vcfs
+  in in (in): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/small_variant_vcf_tbi[out] ? via small_variant_vcf_tbi indirect
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/small_variant_vcf_tbi~2[out] Channel<Record> via small_variant_vcf_tbi indirect
+  out out (out): ?
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/NORMALIZE_VCFS@1 call "NORMALIZE_VCFS" callee=NORMALIZE_VCFS:workflow:modelled:legacy @118:13
+  guards else of tools && tools.split(',').contains('varlociraptor'); then of filter_vcfs || normalize_vcfs || concatenate_vcfs; then of normalize_vcfs
+  in vcfs (vcfs): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/.map@1[out] ?
+  in fasta (fasta): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/:take:fasta[out] ? via fasta
+  out vcfs (vcfs): Channel<Tuple>
+  out tbis (tbis): Channel<Tuple>
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/small_variant_vcf_tbi~3 chain ".join" steps=join @120:37
+  guards else of tools && tools.split(',').contains('varlociraptor'); then of filter_vcfs || normalize_vcfs || concatenate_vcfs; then of normalize_vcfs
+  in in (in): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/NORMALIZE_VCFS@1[vcfs] Channel<Tuple> via NORMALIZE_VCFS.out.vcfs
+  in 1:1 (join(right)): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/NORMALIZE_VCFS@1[tbis] Channel<Tuple> via NORMALIZE_VCFS.out.tbis
+  out out (out): Channel<Record>
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/small_variant_publish_dir~2 code "small_variant_publish_dir = 'normalized'" @121:13
+  guards else of tools && tools.split(',').contains('varlociraptor'); then of filter_vcfs || normalize_vcfs || concatenate_vcfs; then of normalize_vcfs
+  out small_variant_publish_dir (small_variant_publish_dir): String
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/vcf_tbi~3 chain ".map.mix" steps=map,mix @125:19
+  guards else of tools && tools.split(',').contains('varlociraptor'); then of filter_vcfs || normalize_vcfs || concatenate_vcfs
+  in in (in): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/small_variant_vcf_tbi[out] ? via small_variant_vcf_tbi indirect
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/small_variant_vcf_tbi~2[out] Channel<Record> via small_variant_vcf_tbi indirect
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/small_variant_vcf_tbi~3[out] Channel<Record> via small_variant_vcf_tbi indirect
+  in 2:1 (mix(other)): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/all_vcf_tbi[out] Record via all_vcf_tbi indirect
+  out out (out): Channel<?>
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/CONSENSUS@1 call "CONSENSUS" callee=CONSENSUS:workflow:modelled:legacy @131:13
+  guards else of tools && tools.split(',').contains('varlociraptor'); then of filter_vcfs || normalize_vcfs || concatenate_vcfs; then of normalize_vcfs && snv_consensus_calling
+  in vcfs (vcfs): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/small_variant_vcf_tbi[out] ? via small_variant_vcf_tbi indirect
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/small_variant_vcf_tbi~2[out] Channel<Record> via small_variant_vcf_tbi indirect
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/small_variant_vcf_tbi~3[out] Channel<Record> via small_variant_vcf_tbi indirect
+  out vcfs (vcfs): Channel<Tuple>
+  out tbis (tbis): Channel<Tuple>
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/.join@1 chain ".join.map" steps=join,map @135:17
+  guards else of tools && tools.split(',').contains('varlociraptor'); then of filter_vcfs || normalize_vcfs || concatenate_vcfs; then of normalize_vcfs && snv_consensus_calling
+  in in (in): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/CONSENSUS@1[vcfs] Channel<Tuple> via CONSENSUS.out.vcfs
+  in 1:1 (join(right)): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/CONSENSUS@1[tbis] Channel<Tuple> via CONSENSUS.out.tbis
+  out out (out): Channel<?>
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/vcf_tbi~4 chain ".mix" steps=mix @134:23
+  guards else of tools && tools.split(',').contains('varlociraptor'); then of filter_vcfs || normalize_vcfs || concatenate_vcfs; then of normalize_vcfs && snv_consensus_calling
+  in in (in): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/vcf_tbi~3[out] Channel<?> via vcf_tbi
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/.join@1[out] Channel<?>
+  out out (out): Channel<?>
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/CONCATENATE_GERMLINE_VCFS@1 call "CONCATENATE_GERMLINE_VCFS" callee=CONCATENATE_GERMLINE_VCFS:workflow:modelled:legacy @141:13
+  guards else of tools && tools.split(',').contains('varlociraptor'); then of filter_vcfs || normalize_vcfs || concatenate_vcfs; then of concatenate_vcfs
+  in vcfs (vcfs): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/:take:germline_vcfs[out] ? via germline_vcfs
+  out vcfs (vcfs): Channel<Tuple>
+  out tbis (tbis): Channel<Tuple>
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/.join@2 chain ".join.map" steps=join,map @144:17
+  guards else of tools && tools.split(',').contains('varlociraptor'); then of filter_vcfs || normalize_vcfs || concatenate_vcfs; then of concatenate_vcfs
+  in in (in): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/CONCATENATE_GERMLINE_VCFS@1[vcfs] Channel<Tuple> via CONCATENATE_GERMLINE_VCFS.out.vcfs
+  in 1:1 (join(right)): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/CONCATENATE_GERMLINE_VCFS@1[tbis] Channel<Tuple> via CONCATENATE_GERMLINE_VCFS.out.tbis
+  out out (out): Channel<?>
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/vcf_tbi~5 chain ".mix" steps=mix @143:23
+  guards else of tools && tools.split(',').contains('varlociraptor'); then of filter_vcfs || normalize_vcfs || concatenate_vcfs; then of concatenate_vcfs
+  in in (in): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/vcf_tbi~3[out] Channel<?> via vcf_tbi indirect
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/vcf_tbi~4[out] Channel<?> via vcf_tbi indirect
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/.join@2[out] Channel<?>
+  out out (out): Channel<?>
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/channel.empty@5 factory "channel.empty" factory=channel.empty @151:28
+  guards else of tools && tools.split(',').contains('varlociraptor'); else of filter_vcfs || normalize_vcfs || concatenate_vcfs
+  out out (out): Channel<?>
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/passthrough_vcfs~2 chain ".mix" steps=mix @151:28
+  guards else of tools && tools.split(',').contains('varlociraptor'); else of filter_vcfs || normalize_vcfs || concatenate_vcfs
+  in in (in): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/channel.empty@5[out] Channel<?>
+  in 1:1 (mix(1)): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/:take:germline_vcfs[out] ? via germline_vcfs
+  in 1:2 (mix(2)): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/:take:tumor_only_vcfs[out] ? via tumor_only_vcfs
+  in 1:3 (mix(3)): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/:take:somatic_vcfs[out] ? via somatic_vcfs
+  out out (out): Channel<?>
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/.map@2 chain ".map.mix" steps=map,mix @158:12
+  in in (in): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/vcf_tbi[out] Channel<?> via vcf_tbi indirect
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/vcf_tbi~2[out] Channel<?> via vcf_tbi indirect
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/vcf_tbi~3[out] Channel<?> via vcf_tbi indirect
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/vcf_tbi~4[out] Channel<?> via vcf_tbi indirect
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/vcf_tbi~5[out] Channel<?> via vcf_tbi indirect
+  in 2:1 (mix(other)): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/passthrough_vcfs[out] Channel<?> via passthrough_vcfs indirect
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/passthrough_vcfs~2[out] Channel<?> via passthrough_vcfs indirect
+  out out (out): Channel<?>
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/:emit:vcfs emit "vcfs" @158:5
+  in in (in): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/.map@2[out] Channel<?>
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/.map@3 chain ".map" steps=map @159:12
+  in in (in): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/vcf_tbi[out] Channel<?> via vcf_tbi indirect
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/vcf_tbi~2[out] Channel<?> via vcf_tbi indirect
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/vcf_tbi~3[out] Channel<?> via vcf_tbi indirect
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/vcf_tbi~4[out] Channel<?> via vcf_tbi indirect
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/vcf_tbi~5[out] Channel<?> via vcf_tbi indirect
+  out out (out): ?
+subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/:emit:tbis emit "tbis" @159:5
+  in in (in): -
+    <- subworkflows/local/post_variantcalling/main.nf#POST_VARIANTCALLING/.map@3[out] ?
+bound @103:9 small_variant_publish_dir

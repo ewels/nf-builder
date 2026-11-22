@@ -1,0 +1,332 @@
+workflow subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION legacy
+statements 16, modelled 4
+subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params params "params" @25:1
+  out ascat_alleles (ascat_alleles): -
+  out ascat_loci (ascat_loci): -
+  out ascat_loci_gc (ascat_loci_gc): -
+  out ascat_loci_rt (ascat_loci_rt): -
+  out bwa (bwa): -
+  out bwamem2 (bwamem2): -
+  out bcftools_annotations (bcftools_annotations): -
+  out bcftools_annotations_tbi (bcftools_annotations_tbi): -
+  out bcftools_columns (bcftools_columns): -
+  out bcftools_header_lines (bcftools_header_lines): -
+  out cf_chrom_len (cf_chrom_len): -
+  out chr_dir (chr_dir): -
+  out cnvkit_reference (cnvkit_reference): -
+  out contamination_resource (contamination_resource): -
+  out contamination_resource_tbi (contamination_resource_tbi): -
+  out dbnsfp (dbnsfp): -
+  out dbnsfp_tbi (dbnsfp_tbi): -
+  out dbsnp (dbsnp): -
+  out dbsnp_tbi (dbsnp_tbi): -
+  out dict (dict): -
+  out dragmap (dragmap): -
+  out fasta (fasta): -
+  out fasta_fai (fasta_fai): -
+  out force_call_alleles (force_call_alleles): -
+  out force_call_alleles_tbi (force_call_alleles_tbi): -
+  out germline_resource (germline_resource): -
+  out germline_resource_tbi (germline_resource_tbi): -
+  out input (input): -
+  out intervals (intervals): -
+  out known_indels (known_indels): -
+  out known_indels_tbi (known_indels_tbi): -
+  out known_snps (known_snps): -
+  out known_snps_tbi (known_snps_tbi): -
+  out mappability (mappability): -
+  out multiqc_config (multiqc_config): -
+  out ngscheckmate_bed (ngscheckmate_bed): -
+  out pon (pon): -
+  out pon_tbi (pon_tbi): -
+  out sentieon_dnascope_model (sentieon_dnascope_model): -
+  out spliceai_indel (spliceai_indel): -
+  out spliceai_indel_tbi (spliceai_indel_tbi): -
+  out spliceai_snv (spliceai_snv): -
+  out spliceai_snv_tbi (spliceai_snv_tbi): -
+  out tools (tools): -
+  out snpeff_cache (snpeff_cache): -
+  out vep_cache (vep_cache): -
+  out input_restart (input_restart): -
+  out build_only_index (build_only_index): -
+  out step (step): -
+  out outdir (outdir): -
+  out aligner (aligner): -
+  out joint_germline (joint_germline): -
+  out joint_mutect2 (joint_mutect2): -
+  out no_intervals (no_intervals): -
+  out sentieon_dnascope_emit_mode (sentieon_dnascope_emit_mode): -
+  out sentieon_haplotyper_emit_mode (sentieon_haplotyper_emit_mode): -
+  out seq_center (seq_center): -
+  out seq_platform (seq_platform): -
+  out skip_tools (skip_tools): -
+  out snpeff_db (snpeff_db): -
+  out umi_length (umi_length): -
+  out umi_location (umi_location): -
+  out umi_in_read_header (umi_in_read_header): -
+  out umi_read_structure (umi_read_structure): -
+  out wes (wes): -
+subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:take:version take "version" @27:5
+  out out (out): -
+subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:take:validate_params take "validate_params" @28:5
+  out out (out): -
+subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:take:monochrome_logs take "monochrome_logs" @29:5
+  out out (out): -
+subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:take:nextflow_cli_args take "nextflow_cli_args" @30:5
+  out out (out): -
+subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:take:outdir take "outdir" @31:5
+  out out (out): -
+subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:take:input take "input" @32:5
+  out out (out): -
+subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:take:help take "help" @33:5
+  out out (out): -
+subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:take:help_full take "help_full" @34:5
+  out out (out): -
+subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:take:show_hidden take "show_hidden" @35:5
+  out out (out): -
+subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/UTILS_NEXTFLOW_PIPELINE@1 call "UTILS_NEXTFLOW_PIPELINE" callee=UTILS_NEXTFLOW_PIPELINE:workflow:modelled:legacy @41:5
+  in print_version (print_version): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:take:version[out] ? via version
+  in dump_parameters (dump_parameters): -
+    = true : Boolean
+  in outdir (outdir): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:take:outdir[out] ? via outdir
+  in check_conda_channels (check_conda_channels): -
+  out dummy_emit (dummy_emit): ?
+subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/before_text code "def before_text = """ @51:5
+  out before_text (before_text): String
+subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/after_text code "def after_text = """ @52:5
+  out after_text (after_text): String
+subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/before_text~2 code "before_text = """" @53:5
+  out before_text (before_text): String
+subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/after_text~2 code "after_text = """${workflow.manifest.doi ? "\n* The pipeline…" @70:5
+  out after_text (after_text): String
+subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/before_text~3 code "if (monochrome_logs) {" @77:5
+  in monochrome_logs (monochrome_logs): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:take:monochrome_logs[out] ? via monochrome_logs indirect
+  in before_text (before_text): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/before_text~2[before_text] String via before_text indirect
+  out before_text (before_text): -
+subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/command code "command = "nextflow run ${workflow.manifest.name} -profile …" @81:5
+  out command (command): String
+subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/UTILS_NFSCHEMA_PLUGIN@1 call "UTILS_NFSCHEMA_PLUGIN" callee=UTILS_NFSCHEMA_PLUGIN:workflow:modelled:legacy @83:5
+  in input_workflow (input_workflow): -
+  in validate_params (validate_params): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:take:validate_params[out] ? via validate_params
+  in parameters_schema (parameters_schema): -
+    = null : Null
+  in help (help): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:take:help[out] ? via help
+  in help_full (help_full): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:take:help_full[out] ? via help_full
+  in show_hidden (show_hidden): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:take:show_hidden[out] ? via show_hidden
+  in before_text (before_text): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/before_text~3[before_text] ? via before_text
+  in after_text (after_text): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/after_text~2[after_text] String via after_text
+  in command (command): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/command[command] String via command
+  in cli_typecast (cli_typecast): -
+    = false : Boolean
+  out dummy_emit (dummy_emit): ?
+subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/UTILS_NFCORE_PIPELINE@1 call "UTILS_NFCORE_PIPELINE" callee=UTILS_NFCORE_PIPELINE:workflow:modelled:legacy @97:5
+  in nextflow_cli_args (nextflow_cli_args): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:take:nextflow_cli_args[out] ? via nextflow_cli_args
+  out valid_config (valid_config): ?
+subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:code@1 code "validateInputParameters()" @100:5
+subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/checkPathParamList code "def checkPathParamList = [" @103:5
+  in params.ascat_alleles (params.ascat_alleles): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[ascat_alleles] ? via params.ascat_alleles indirect
+  in params.ascat_loci (params.ascat_loci): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[ascat_loci] ? via params.ascat_loci indirect
+  in params.ascat_loci_gc (params.ascat_loci_gc): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[ascat_loci_gc] ? via params.ascat_loci_gc indirect
+  in params.ascat_loci_rt (params.ascat_loci_rt): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[ascat_loci_rt] ? via params.ascat_loci_rt indirect
+  in params.bwa (params.bwa): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[bwa] ? via params.bwa indirect
+  in params.bwamem2 (params.bwamem2): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[bwamem2] ? via params.bwamem2 indirect
+  in params.bcftools_annotations (params.bcftools_annotations): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[bcftools_annotations] ? via params.bcftools_annotations indirect
+  in params.bcftools_annotations_tbi (params.bcftools_annotations_tbi): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[bcftools_annotations_tbi] ? via params.bcftools_annotations_tbi indirect
+  in params.bcftools_columns (params.bcftools_columns): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[bcftools_columns] ? via params.bcftools_columns indirect
+  in params.bcftools_header_lines (params.bcftools_header_lines): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[bcftools_header_lines] ? via params.bcftools_header_lines indirect
+  in params.cf_chrom_len (params.cf_chrom_len): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[cf_chrom_len] ? via params.cf_chrom_len indirect
+  in params.chr_dir (params.chr_dir): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[chr_dir] ? via params.chr_dir indirect
+  in params.cnvkit_reference (params.cnvkit_reference): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[cnvkit_reference] ? via params.cnvkit_reference indirect
+  in params.contamination_resource (params.contamination_resource): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[contamination_resource] ? via params.contamination_resource indirect
+  in params.contamination_resource_tbi (params.contamination_resource_tbi): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[contamination_resource_tbi] ? via params.contamination_resource_tbi indirect
+  in params.dbnsfp (params.dbnsfp): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[dbnsfp] ? via params.dbnsfp indirect
+  in params.dbnsfp_tbi (params.dbnsfp_tbi): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[dbnsfp_tbi] ? via params.dbnsfp_tbi indirect
+  in params.dbsnp (params.dbsnp): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[dbsnp] ? via params.dbsnp indirect
+  in params.dbsnp_tbi (params.dbsnp_tbi): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[dbsnp_tbi] ? via params.dbsnp_tbi indirect
+  in params.dict (params.dict): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[dict] ? via params.dict indirect
+  in params.dragmap (params.dragmap): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[dragmap] ? via params.dragmap indirect
+  in params.fasta (params.fasta): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[fasta] ? via params.fasta indirect
+  in params.fasta_fai (params.fasta_fai): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[fasta_fai] ? via params.fasta_fai indirect
+  in params.force_call_alleles (params.force_call_alleles): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[force_call_alleles] ? via params.force_call_alleles indirect
+  in params.force_call_alleles_tbi (params.force_call_alleles_tbi): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[force_call_alleles_tbi] ? via params.force_call_alleles_tbi indirect
+  in params.germline_resource (params.germline_resource): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[germline_resource] ? via params.germline_resource indirect
+  in params.germline_resource_tbi (params.germline_resource_tbi): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[germline_resource_tbi] ? via params.germline_resource_tbi indirect
+  in params.input (params.input): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[input] ? via params.input indirect
+  in params.intervals (params.intervals): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[intervals] ? via params.intervals indirect
+  in params.known_indels (params.known_indels): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[known_indels] ? via params.known_indels indirect
+  in params.known_indels_tbi (params.known_indels_tbi): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[known_indels_tbi] ? via params.known_indels_tbi indirect
+  in params.known_snps (params.known_snps): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[known_snps] ? via params.known_snps indirect
+  in params.known_snps_tbi (params.known_snps_tbi): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[known_snps_tbi] ? via params.known_snps_tbi indirect
+  in params.mappability (params.mappability): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[mappability] ? via params.mappability indirect
+  in params.multiqc_config (params.multiqc_config): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[multiqc_config] ? via params.multiqc_config indirect
+  in params.ngscheckmate_bed (params.ngscheckmate_bed): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[ngscheckmate_bed] ? via params.ngscheckmate_bed indirect
+  in params.pon (params.pon): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[pon] ? via params.pon indirect
+  in params.pon_tbi (params.pon_tbi): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[pon_tbi] ? via params.pon_tbi indirect
+  in params.sentieon_dnascope_model (params.sentieon_dnascope_model): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[sentieon_dnascope_model] ? via params.sentieon_dnascope_model indirect
+  in params.spliceai_indel (params.spliceai_indel): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[spliceai_indel] ? via params.spliceai_indel indirect
+  in params.spliceai_indel_tbi (params.spliceai_indel_tbi): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[spliceai_indel_tbi] ? via params.spliceai_indel_tbi indirect
+  in params.spliceai_snv (params.spliceai_snv): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[spliceai_snv] ? via params.spliceai_snv indirect
+  in params.spliceai_snv_tbi (params.spliceai_snv_tbi): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[spliceai_snv_tbi] ? via params.spliceai_snv_tbi indirect
+  out checkPathParamList (checkPathParamList): List
+subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:code@2 code "if (params.tools && (params.tools.split(',').contains('snpe…" @150:5
+  in params.tools (params.tools): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[tools] ? via params.tools indirect
+  in checkPathParamList (checkPathParamList): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/checkPathParamList[checkPathParamList] List via checkPathParamList indirect
+  in params.snpeff_cache (params.snpeff_cache): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[snpeff_cache] ? via params.snpeff_cache indirect
+subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:code@3 code "if (params.tools && (params.tools.split(',').contains('vep'…" @153:5
+  in params.tools (params.tools): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[tools] ? via params.tools indirect
+  in checkPathParamList (checkPathParamList): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/checkPathParamList[checkPathParamList] List via checkPathParamList indirect
+  in params.vep_cache (params.vep_cache): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[vep_cache] ? via params.vep_cache indirect
+subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:code@4 code "params.input_restart = retrieveInput((!params.build_only_in…" @157:5
+  in params.build_only_index (params.build_only_index): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[build_only_index] ? via params.build_only_index indirect
+  in input (input): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:take:input[out] ? via input indirect
+  in params.step (params.step): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[step] ? via params.step indirect
+  in params.outdir (params.outdir): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[outdir] ? via params.outdir indirect
+  in params.input_restart (params.input_restart): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[input_restart] ? via params.input_restart indirect
+subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/ch_from_samplesheet code "ch_from_samplesheet = params.build_only_index" @159:5
+  in params.build_only_index (params.build_only_index): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[build_only_index] ? via params.build_only_index indirect
+  in input (input): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:take:input[out] ? via input indirect
+  in params.input_restart (params.input_restart): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[input_restart] ? via params.input_restart indirect
+  out ch_from_samplesheet (ch_from_samplesheet): -
+subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/SAMPLESHEET_TO_CHANNEL@1 call "SAMPLESHEET_TO_CHANNEL" callee=SAMPLESHEET_TO_CHANNEL:workflow:modelled:legacy @165:5
+  in ch_from_samplesheet (ch_from_samplesheet): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/ch_from_samplesheet[ch_from_samplesheet] ? via ch_from_samplesheet
+  in aligner (aligner): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[aligner] ? via params.aligner
+  in ascat_alleles (ascat_alleles): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[ascat_alleles] ? via params.ascat_alleles
+  in ascat_loci (ascat_loci): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[ascat_loci] ? via params.ascat_loci
+  in ascat_loci_gc (ascat_loci_gc): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[ascat_loci_gc] ? via params.ascat_loci_gc
+  in ascat_loci_rt (ascat_loci_rt): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[ascat_loci_rt] ? via params.ascat_loci_rt
+  in bcftools_annotations (bcftools_annotations): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[bcftools_annotations] ? via params.bcftools_annotations
+  in bcftools_annotations_tbi (bcftools_annotations_tbi): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[bcftools_annotations_tbi] ? via params.bcftools_annotations_tbi
+  in bcftools_header_lines (bcftools_header_lines): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[bcftools_header_lines] ? via params.bcftools_header_lines
+  in build_only_index (build_only_index): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[build_only_index] ? via params.build_only_index
+  in contamination_resource (contamination_resource): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[contamination_resource] ? via params.contamination_resource
+  in dbsnp (dbsnp): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[dbsnp] ? via params.dbsnp
+  in fasta (fasta): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[fasta] ? via params.fasta
+  in germline_resource (germline_resource): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[germline_resource] ? via params.germline_resource
+  in intervals (intervals): -
+  in joint_germline (joint_germline): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[joint_germline] ? via params.joint_germline
+  in joint_mutect2 (joint_mutect2): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[joint_mutect2] ? via params.joint_mutect2
+  in known_indels (known_indels): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[known_indels] ? via params.known_indels
+  in known_snps (known_snps): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[known_snps] ? via params.known_snps
+  in no_intervals (no_intervals): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[no_intervals] ? via params.no_intervals
+  in pon (pon): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[pon] ? via params.pon
+  in sentieon_dnascope_emit_mode (sentieon_dnascope_emit_mode): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[sentieon_dnascope_emit_mode] ? via params.sentieon_dnascope_emit_mode
+  in sentieon_haplotyper_emit_mode (sentieon_haplotyper_emit_mode): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[sentieon_haplotyper_emit_mode] ? via params.sentieon_haplotyper_emit_mode
+  in seq_center (seq_center): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[seq_center] ? via params.seq_center
+  in seq_platform (seq_platform): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[seq_platform] ? via params.seq_platform
+  in skip_tools (skip_tools): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[skip_tools] ? via params.skip_tools
+  in snpeff_cache (snpeff_cache): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[snpeff_cache] ? via params.snpeff_cache
+  in snpeff_db (snpeff_db): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[snpeff_db] ? via params.snpeff_db
+  in step (step): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[step] ? via params.step
+  in tools (tools): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[tools] ? via params.tools
+  in umi_length (umi_length): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[umi_length] ? via params.umi_length
+  in umi_location (umi_location): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[umi_location] ? via params.umi_location
+  in umi_in_read_header (umi_in_read_header): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[umi_in_read_header] ? via params.umi_in_read_header
+  in umi_read_structure (umi_read_structure): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[umi_read_structure] ? via params.umi_read_structure
+  in wes (wes): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:params[wes] ? via params.wes
+  out input_sample (input_sample): Channel<?>
+subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/:emit:samplesheet emit "samplesheet" @204:5
+  in in (in): -
+    <- subworkflows/local/utils_nfcore_sarek_pipeline/main.nf#PIPELINE_INITIALISATION/SAMPLESHEET_TO_CHANNEL@1[input_sample] Channel<?> via SAMPLESHEET_TO_CHANNEL.out.input_sample

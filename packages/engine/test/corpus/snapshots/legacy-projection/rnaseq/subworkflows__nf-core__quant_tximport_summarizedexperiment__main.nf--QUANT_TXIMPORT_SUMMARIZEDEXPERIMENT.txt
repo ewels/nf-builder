@@ -1,0 +1,148 @@
+workflow subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT legacy
+statements 12, modelled 12
+subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/:take:samplesheet take "samplesheet" @16:5
+  out out (out): -
+subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/:take:quant_results take "quant_results" @17:5
+  out out (out): -
+subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/:take:gtf take "gtf" @18:5
+  out out (out): -
+subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/:take:gtf_id_attribute take "gtf_id_attribute" @19:5
+  out out (out): -
+subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/:take:gtf_extra_attribute take "gtf_extra_attribute" @20:5
+  out out (out): -
+subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/:take:quant_type take "quant_type" @21:5
+  out out (out): -
+subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/:take:skip_merge take "skip_merge" @22:5
+  out out (out): -
+subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/ch_tx2gene_quants chain ".toSortedList.filter.map" steps=toSortedList,filter,map @41:25
+  in in (in): -
+    <- subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/:take:quant_results[out] ? via quant_results
+  out out (out): ?
+subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/.map@1 chain ".map" steps=map @47:9
+  in in (in): -
+    <- subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/:take:gtf[out] ? via gtf
+  out out (out): ?
+subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/CUSTOM_TX2GENE@1 call "CUSTOM_TX2GENE" callee=CUSTOM_TX2GENE:process:modelled:legacy @46:5
+  in $1 (tuple(meta, gtf)): Tuple
+    <- subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/.map@1[out] ?
+  in $2 (tuple(meta2, quants/*)): Tuple
+    <- subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/ch_tx2gene_quants[out] ? via ch_tx2gene_quants
+  in quant_type (quant_type): -
+    <- subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/:take:quant_type[out] ? via quant_type
+  in id (id): -
+    <- subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/:take:gtf_id_attribute[out] ? via gtf_id_attribute
+  in extra (extra): -
+    <- subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/:take:gtf_extra_attribute[out] ? via gtf_extra_attribute
+  out tx2gene (tx2gene): Channel<Tuple>
+  out versions (versions): Channel<Path>
+subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/ch_tximport_input chain ".toSortedList.filter.map" steps=toSortedList,filter,map @65:11
+  guards else of skip_merge
+  in in (in): -
+    <- subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/:take:quant_results[out] ? via quant_results
+  out out (out): ?
+subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/TXIMETA_TXIMPORT@1 call "TXIMETA_TXIMPORT" callee=TXIMETA_TXIMPORT:process:modelled:legacy @70:5
+  in $1 (tuple(meta, quants/*)): Tuple
+    <- subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/:take:quant_results[out] ? via ch_tximport_input indirect
+    <- subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/ch_tximport_input[out] ? via ch_tximport_input indirect
+  in $2 (tuple(meta2, tx2gene)): Tuple
+    <- subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/CUSTOM_TX2GENE@1[tx2gene] Channel<Tuple> via CUSTOM_TX2GENE.out.tx2gene
+  in quant_type (quant_type): -
+    <- subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/:take:quant_type[out] ? via quant_type
+  out tpm_gene (tpm_gene): Channel<Tuple>
+  out counts_gene (counts_gene): Channel<Tuple>
+  out counts_gene_length_scaled (counts_gene_length_scaled): Channel<Tuple>
+  out counts_gene_scaled (counts_gene_scaled): Channel<Tuple>
+  out lengths_gene (lengths_gene): Channel<Tuple>
+  out tpm_transcript (tpm_transcript): Channel<Tuple>
+  out counts_transcript (counts_transcript): Channel<Tuple>
+  out lengths_transcript (lengths_transcript): Channel<Tuple>
+  out tx2gene_augmented (tx2gene_augmented): Channel<Tuple>
+  out versions (versions): Channel<Path>
+subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/ch_merged_gene_rds factory "channel.empty" factory=channel.empty @79:32
+  out out (out): Channel<?>
+subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/ch_merged_transcript_rds factory "channel.empty" factory=channel.empty @80:32
+  out out (out): Channel<?>
+subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/ch_gene_unified chain ".join.join.join.join.map" steps=join,join,join,join,map @86:27
+  guards then of !skip_merge
+  in in (in): -
+    <- subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/TXIMETA_TXIMPORT@1[counts_gene] Channel<Tuple> via TXIMETA_TXIMPORT.out.counts_gene
+  in 1:1 (join(right)): -
+    <- subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/TXIMETA_TXIMPORT@1[counts_gene_length_scaled] Channel<Tuple> via TXIMETA_TXIMPORT.out.counts_gene_length_scaled
+  in 2:1 (join(right)): -
+    <- subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/TXIMETA_TXIMPORT@1[counts_gene_scaled] Channel<Tuple> via TXIMETA_TXIMPORT.out.counts_gene_scaled
+  in 3:1 (join(right)): -
+    <- subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/TXIMETA_TXIMPORT@1[lengths_gene] Channel<Tuple> via TXIMETA_TXIMPORT.out.lengths_gene
+  in 4:1 (join(right)): -
+    <- subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/TXIMETA_TXIMPORT@1[tpm_gene] Channel<Tuple> via TXIMETA_TXIMPORT.out.tpm_gene
+  out out (out): Channel<?>
+subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/SE_GENE_UNIFIED@1 call "SE_GENE_UNIFIED" callee=SE_GENE_UNIFIED:process:modelled:legacy @93:9
+  guards then of !skip_merge
+  in $1 (tuple(meta, matrix_files)): Tuple
+    <- subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/ch_gene_unified[out] Channel<?> via ch_gene_unified
+  in $2 (tuple(meta2, rowdata)): Tuple
+    <- subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/CUSTOM_TX2GENE@1[tx2gene] Channel<Tuple> via CUSTOM_TX2GENE.out.tx2gene
+  in $3 (tuple(meta3, coldata)): Tuple
+    <- subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/:take:samplesheet[out] ? via samplesheet
+  out rds (rds): Channel<Tuple>
+  out log (log): Channel<Tuple>
+  out versions (versions): Channel<Path>
+subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/ch_transcript_unified chain ".join.join.map" steps=join,join,map @102:33
+  guards then of !skip_merge
+  in in (in): -
+    <- subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/TXIMETA_TXIMPORT@1[counts_transcript] Channel<Tuple> via TXIMETA_TXIMPORT.out.counts_transcript
+  in 1:1 (join(right)): -
+    <- subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/TXIMETA_TXIMPORT@1[lengths_transcript] Channel<Tuple> via TXIMETA_TXIMPORT.out.lengths_transcript
+  in 2:1 (join(right)): -
+    <- subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/TXIMETA_TXIMPORT@1[tpm_transcript] Channel<Tuple> via TXIMETA_TXIMPORT.out.tpm_transcript
+  out out (out): Channel<?>
+subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/SE_TRANSCRIPT_UNIFIED@1 call "SE_TRANSCRIPT_UNIFIED" callee=SE_TRANSCRIPT_UNIFIED:process:modelled:legacy @107:9
+  guards then of !skip_merge
+  in $1 (tuple(meta, matrix_files)): Tuple
+    <- subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/ch_transcript_unified[out] Channel<?> via ch_transcript_unified
+  in $2 (tuple(meta2, rowdata)): Tuple
+    <- subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/TXIMETA_TXIMPORT@1[tx2gene_augmented] Channel<Tuple> via TXIMETA_TXIMPORT.out.tx2gene_augmented
+  in $3 (tuple(meta3, coldata)): Tuple
+    <- subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/:take:samplesheet[out] ? via samplesheet
+  out rds (rds): Channel<Tuple>
+  out log (log): Channel<Tuple>
+  out versions (versions): Channel<Path>
+subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/:emit:tx2gene emit "tx2gene" @118:5
+  in in (in): -
+    <- subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/CUSTOM_TX2GENE@1[tx2gene] Channel<Tuple> via CUSTOM_TX2GENE.out.tx2gene
+subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/:emit:tx2gene_augmented emit "tx2gene_augmented" @119:5
+  in in (in): -
+    <- subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/TXIMETA_TXIMPORT@1[tx2gene_augmented] Channel<Tuple> via TXIMETA_TXIMPORT.out.tx2gene_augmented
+subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/:emit:tpm_gene emit "tpm_gene" @121:5
+  in in (in): -
+    <- subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/TXIMETA_TXIMPORT@1[tpm_gene] Channel<Tuple> via TXIMETA_TXIMPORT.out.tpm_gene
+subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/:emit:counts_gene emit "counts_gene" @122:5
+  in in (in): -
+    <- subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/TXIMETA_TXIMPORT@1[counts_gene] Channel<Tuple> via TXIMETA_TXIMPORT.out.counts_gene
+subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/:emit:lengths_gene emit "lengths_gene" @123:5
+  in in (in): -
+    <- subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/TXIMETA_TXIMPORT@1[lengths_gene] Channel<Tuple> via TXIMETA_TXIMPORT.out.lengths_gene
+subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/:emit:counts_gene_length_scaled emit "counts_gene_length_scaled" @124:5
+  in in (in): -
+    <- subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/TXIMETA_TXIMPORT@1[counts_gene_length_scaled] Channel<Tuple> via TXIMETA_TXIMPORT.out.counts_gene_length_scaled
+subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/:emit:counts_gene_scaled emit "counts_gene_scaled" @125:5
+  in in (in): -
+    <- subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/TXIMETA_TXIMPORT@1[counts_gene_scaled] Channel<Tuple> via TXIMETA_TXIMPORT.out.counts_gene_scaled
+subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/:emit:tpm_transcript emit "tpm_transcript" @126:5
+  in in (in): -
+    <- subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/TXIMETA_TXIMPORT@1[tpm_transcript] Channel<Tuple> via TXIMETA_TXIMPORT.out.tpm_transcript
+subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/:emit:counts_transcript emit "counts_transcript" @127:5
+  in in (in): -
+    <- subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/TXIMETA_TXIMPORT@1[counts_transcript] Channel<Tuple> via TXIMETA_TXIMPORT.out.counts_transcript
+subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/:emit:lengths_transcript emit "lengths_transcript" @128:5
+  in in (in): -
+    <- subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/TXIMETA_TXIMPORT@1[lengths_transcript] Channel<Tuple> via TXIMETA_TXIMPORT.out.lengths_transcript
+subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/:emit:merged_gene_rds emit "merged_gene_rds" @130:5
+  in in (in): -
+    <- subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/ch_merged_gene_rds[out] Channel<?> via ch_merged_gene_rds indirect
+    <- subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/SE_GENE_UNIFIED@1[rds] Channel<Tuple> via ch_merged_gene_rds indirect
+subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/:emit:merged_transcript_rds emit "merged_transcript_rds" @131:5
+  in in (in): -
+    <- subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/ch_merged_transcript_rds[out] Channel<?> via ch_merged_transcript_rds indirect
+    <- subworkflows/nf-core/quant_tximport_summarizedexperiment/main.nf#QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT/SE_TRANSCRIPT_UNIFIED@1[rds] Channel<Tuple> via ch_merged_transcript_rds indirect
+bound @113:9 ch_merged_gene_rds
+bound @114:9 ch_merged_transcript_rds

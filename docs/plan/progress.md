@@ -353,6 +353,39 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - `CodeNode` gains `text`; no new dependency.
   - Upstream: lint reports some variable errors one column early (`docs/research/upstream-bugs.md` 22).
 - Blockers: #33.
+
+## 2026-11-22 · hosting · Claude (autonomous)
+- Did:
+  - merged F-106 (PR #32) and F-108 (PR #34);
+  - closed #33 (Actions runs again now that the repository is public), #31 (moot) and #27 (no hook needed);
+  - researched and planned the move to GitHub Pages: [research](../research/2026-11-22-github-pages.md), [plan F-011](handoff/plan-F-011.md);
+  - opened #35 for the maintainer: enable Pages with Source "GitHub Actions", and decide on a custom domain before F-202.
+- State: the Netlify production deploy serves `/registry/`, as the repository is public. F-011 is next, alongside F-107 and F-111.
+- Next: build F-011; merge it once #35's first step is done; then F-501 can pass on Pages.
+- Decisions:
+  - The maintainer chose GitHub Pages for production.
+  - [ADR 0040](../adr/0040-github-pages-hosting.md) supersedes ADR 0014 and amends ADR 0002's hosting line:
+    - the CSP moves into a meta element, without `frame-ancestors`, with a no-referrer meta;
+    - header-only protections are accepted risks;
+    - the app refuses to run inside a frame;
+    - workers make no cross-origin requests;
+    - no SPA fallback;
+    - preview mirrors Pages;
+    - Deploy check is replaced by a CI `site` job and a post-deploy `verify`;
+    - a minimal `netlify.toml` stays for development.
+  - [ADR 0041](../adr/0041-registry-snapshot-deploy.md) supersedes ADR 0035: the Pages workflow redeploys after each successful snapshot run through `workflow_run` and reads the branch without credentials. No secrets are needed.
+  - QA-30 amended to match.
+- Blockers: #35 (Pages source; custom domain before F-202).
+
+## 2026-11-22 · F-107 · Claude (autonomous)
+- Did: the legacy projection: ports from process qualifiers (also for typed callers), `.out` in every form, pipes and forks, `set`/`tap`, legacy operators and factories from the pack, legacy params, aliases, call-result properties, and transparent dataflow `if`s and ternaries with guards; `Projection.statements` and a coverage measure; 90.6% of corpus statements modelled.
+- State: passing.
+- Next: F-111 finishing; then F-112 and F-113.
+- Decisions:
+  - AR-14 amended: aliases, call-result properties and dataflow conditionals are needed for step 2's 90% ([ADR 0038](../adr/0038-legacy-projection.md)).
+  - Legacy operators as pack data (`LanguagePack.legacyOperators`); one `set`/`tap` rule matching nf-lang's `VariableScopeVisitor`, shared with F-108.
+  - Licences row for the 119 corpus-derived snapshots. No new dependency.
+- Blockers: none.
 ## 2026-11-22 · F-111 · Claude (autonomous)
 - Did: edit commands in `packages/engine/src/edit/` (types in lang-core): CreateProcess, AddCall, Connect, Disconnect, DeleteNode, RenameDeclaration and ReplaceFileText, applied as text patches with inverses behind the AR-24 and LA-13 guards. Property tests with fast-check over fixture trees, a corpus reprint check, and oracle cases that lint and stub-run edited trees. The printer now keeps multi-line string content verbatim.
 - State: passing.

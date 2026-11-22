@@ -17,7 +17,7 @@ Process: [0001](0001-record-decisions-as-adrs.md). Template: [template.md](templ
 | [0011](0011-testing-with-real-pipelines-and-nextflow.md) | Test against real pipelines, with real Nextflow and nf-docs as oracles | Accepted |
 | [0012](0012-agent-workflow.md) | Agents work one feature per session against a fixed feature list | Accepted |
 | [0013](0013-nf-docs-integration.md) | Write docs in nf-docs format, generate an nf-metro map, publish to GitHub Pages | Accepted |
-| [0014](0014-security-headers.md) | Serve a strict, one-line security header set from netlify.toml | Accepted (agent) |
+| [0014](0014-security-headers.md) | Serve a strict, one-line security header set from netlify.toml | Superseded by 0040 |
 | [0015](0015-ci-checks.md) | Run every check on each pull request in one CI workflow | Accepted (agent) |
 | [0016](0016-scope-guard-and-smoke.md) | Guard features.json scope in CI and keep a one-minute smoke run | Accepted (agent) |
 | [0017](0017-corpus-fetch.md) | Fetch the corpus by commit SHA with git and cache it in Actions | Accepted (agent) |
@@ -38,7 +38,10 @@ Process: [0001](0001-record-decisions-as-adrs.md). Template: [template.md](templ
 | [0032](0032-printer-known-differences.md) | Print as `nextflow lint -format` does, except where its output is broken | Accepted (agent) |
 | [0033](0033-declaration-fallback-and-source-file.md) | Fall back per declaration, print untouched code from its source, and load the parser lazily | Accepted (agent) |
 | [0034](0034-include-resolution-and-incremental-model.md) | Resolve includes as nf-lang 26.10 does, and re-model a changed file and its direct dependants | Accepted (agent) |
-| [0035](0035-registry-snapshot.md) | Build the registry snapshot in a scheduled workflow and publish it through a snapshot branch | Accepted (agent) |
+| [0035](0035-registry-snapshot.md) | Build the registry snapshot in a scheduled workflow and publish it through a snapshot branch | Superseded by 0041 |
 | [0036](0036-projection-node-keys-and-types.md) | Project typed workflows into plain-data graphs with name-based node keys and Channel/Value types | Accepted (agent) |
 | [0037](0037-code-nodes-and-free-variables.md) | Wire code nodes to the variables they read and write | Accepted (agent) |
+| [0038](0038-legacy-projection.md) | Project legacy dataflow forms, including aliases and dataflow conditionals | Accepted (agent) |
 | [0039](0039-edit-commands.md) | Apply edits as text patches with inverses, reprinting whole declarations, behind AR-24 and LA-13 guards | Accepted (agent) |
+| [0040](0040-github-pages-hosting.md) | Host on GitHub Pages, with the security policy in meta elements | Accepted |
+| [0041](0041-registry-snapshot-deploy.md) | Deploy the registry snapshot with the site from Actions | Accepted (agent) |

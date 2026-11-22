@@ -1,0 +1,227 @@
+workflow main.nf#NFCORE_RNASEQ legacy
+statements 6, modelled 5
+main.nf#NFCORE_RNASEQ/:params params "params" @60:1
+  out fasta (fasta): -
+  out gtf (gtf): -
+  out gff (gff): -
+  out additional_fasta (additional_fasta): -
+  out transcript_fasta (transcript_fasta): -
+  out gene_bed (gene_bed): -
+  out ribo_database_manifest (ribo_database_manifest): -
+  out kraken_db (kraken_db): -
+  out gencode (gencode): -
+  out gffread_transcript_fasta (gffread_transcript_fasta): -
+  out featurecounts_group_type (featurecounts_group_type): -
+  out aligner (aligner): -
+  out pseudo_aligner (pseudo_aligner): -
+  out skip_gtf_filter (skip_gtf_filter): -
+  out remove_ribo_rna (remove_ribo_rna): -
+  out ribo_removal_tool (ribo_removal_tool): -
+  out bowtie2_rrna_index (bowtie2_rrna_index): -
+  out skip_alignment (skip_alignment): -
+  out skip_pseudo_alignment (skip_pseudo_alignment): -
+  out use_sentieon_star (use_sentieon_star): -
+  out contaminant_screening (contaminant_screening): -
+  out prokaryotic (prokaryotic): -
+  out splicesites (splicesites): -
+  out bbsplit_fasta_list (bbsplit_fasta_list): -
+  out star_index (star_index): -
+  out rsem_index (rsem_index): -
+  out salmon_index (salmon_index): -
+  out kallisto_index (kallisto_index): -
+  out hisat2_index (hisat2_index): -
+  out bowtie2_index (bowtie2_index): -
+  out bbsplit_index (bbsplit_index): -
+  out sortmerna_index (sortmerna_index): -
+  out skip_bbsplit (skip_bbsplit): -
+  out use_parabricks_star (use_parabricks_star): -
+  out hisat2_build_memory (hisat2_build_memory): -
+  out bam_csi_index (bam_csi_index): -
+  out input (input): -
+  out fail_on_low_trimmed_reads (fail_on_low_trimmed_reads): -
+  out fail_on_low_mapped_reads (fail_on_low_mapped_reads): -
+  out fail_on_undetermined_strandedness (fail_on_undetermined_strandedness): -
+main.nf#NFCORE_RNASEQ/PREPARE_GENOME_REFERENCES@1 call "PREPARE_GENOME_REFERENCES" callee=PREPARE_GENOME_REFERENCES:workflow:modelled:legacy @67:5
+  in fasta (fasta): -
+    <- main.nf#NFCORE_RNASEQ/:params[fasta] ? via params.fasta
+  in gtf (gtf): -
+    <- main.nf#NFCORE_RNASEQ/:params[gtf] ? via params.gtf
+  in gff (gff): -
+    <- main.nf#NFCORE_RNASEQ/:params[gff] ? via params.gff
+  in additional_fasta (additional_fasta): -
+    <- main.nf#NFCORE_RNASEQ/:params[additional_fasta] ? via params.additional_fasta
+  in transcript_fasta (transcript_fasta): -
+    <- main.nf#NFCORE_RNASEQ/:params[transcript_fasta] ? via params.transcript_fasta
+  in gene_bed (gene_bed): -
+    <- main.nf#NFCORE_RNASEQ/:params[gene_bed] ? via params.gene_bed
+  in sortmerna_fasta_list (sortmerna_fasta_list): -
+    <- main.nf#NFCORE_RNASEQ/:params[ribo_database_manifest] ? via params.ribo_database_manifest
+  in kraken_db (kraken_db): -
+    <- main.nf#NFCORE_RNASEQ/:params[kraken_db] ? via params.kraken_db
+  in gencode (gencode): -
+    <- main.nf#NFCORE_RNASEQ/:params[gencode] ? via params.gencode
+  in gffread_transcript_fasta (gffread_transcript_fasta): -
+    <- main.nf#NFCORE_RNASEQ/:params[gffread_transcript_fasta] ? via params.gffread_transcript_fasta
+  in featurecounts_group_type (featurecounts_group_type): -
+    <- main.nf#NFCORE_RNASEQ/:params[featurecounts_group_type] ? via params.featurecounts_group_type
+  in aligner (aligner): -
+    <- main.nf#NFCORE_RNASEQ/:params[aligner] ? via params.aligner
+  in pseudo_aligner (pseudo_aligner): -
+    <- main.nf#NFCORE_RNASEQ/:params[pseudo_aligner] ? via params.pseudo_aligner
+  in skip_gtf_filter (skip_gtf_filter): -
+    <- main.nf#NFCORE_RNASEQ/:params[skip_gtf_filter] ? via params.skip_gtf_filter
+  in ribo_removal_tool (ribo_removal_tool): -
+    <- main.nf#NFCORE_RNASEQ/:params[remove_ribo_rna] ? via params.remove_ribo_rna indirect
+    <- main.nf#NFCORE_RNASEQ/:params[ribo_removal_tool] ? via params.ribo_removal_tool indirect
+    <- main.nf#NFCORE_RNASEQ/:params[bowtie2_rrna_index] ? via params.bowtie2_rrna_index indirect
+  in skip_alignment (skip_alignment): -
+    <- main.nf#NFCORE_RNASEQ/:params[skip_alignment] ? via params.skip_alignment
+  in skip_pseudo_alignment (skip_pseudo_alignment): -
+    <- main.nf#NFCORE_RNASEQ/:params[skip_pseudo_alignment] ? via params.skip_pseudo_alignment
+  in use_sentieon_star (use_sentieon_star): -
+    <- main.nf#NFCORE_RNASEQ/:params[use_sentieon_star] ? via params.use_sentieon_star
+  in contaminant_screening (contaminant_screening): -
+    <- main.nf#NFCORE_RNASEQ/:params[contaminant_screening] ? via params.contaminant_screening
+  in prokaryotic (prokaryotic): -
+    <- main.nf#NFCORE_RNASEQ/:params[prokaryotic] ? via params.prokaryotic indirect
+  out fasta_fai (fasta_fai): ?
+  out gtf (gtf): ?
+  out gene_bed (gene_bed): ?
+  out transcript_fasta (transcript_fasta): ?
+  out chrom_sizes (chrom_sizes): ?
+  out rrna_fastas (rrna_fastas): ?
+  out kraken_db (kraken_db): ?
+main.nf#NFCORE_RNASEQ/PREPARE_GENOME_INDICES@1 call "PREPARE_GENOME_INDICES" callee=PREPARE_GENOME_INDICES:workflow:modelled:legacy @93:5
+  in ch_fasta_fai (ch_fasta_fai): -
+    <- main.nf#NFCORE_RNASEQ/PREPARE_GENOME_REFERENCES@1[fasta_fai] ? via PREPARE_GENOME_REFERENCES.out.fasta_fai
+  in ch_gtf (ch_gtf): -
+    <- main.nf#NFCORE_RNASEQ/PREPARE_GENOME_REFERENCES@1[gtf] ? via PREPARE_GENOME_REFERENCES.out.gtf
+  in ch_transcript_fasta (ch_transcript_fasta): -
+    <- main.nf#NFCORE_RNASEQ/PREPARE_GENOME_REFERENCES@1[transcript_fasta] ? via PREPARE_GENOME_REFERENCES.out.transcript_fasta
+  in ch_rrna_fastas (ch_rrna_fastas): -
+    <- main.nf#NFCORE_RNASEQ/PREPARE_GENOME_REFERENCES@1[rrna_fastas] ? via PREPARE_GENOME_REFERENCES.out.rrna_fastas
+  in fasta_provided (fasta_provided): -
+    <- main.nf#NFCORE_RNASEQ/:params[fasta] ? via params.fasta indirect
+  in splicesites (splicesites): -
+    <- main.nf#NFCORE_RNASEQ/:params[splicesites] ? via params.splicesites
+  in bbsplit_fasta_list (bbsplit_fasta_list): -
+    <- main.nf#NFCORE_RNASEQ/:params[bbsplit_fasta_list] ? via params.bbsplit_fasta_list
+  in star_index (star_index): -
+    <- main.nf#NFCORE_RNASEQ/:params[star_index] ? via params.star_index
+  in rsem_index (rsem_index): -
+    <- main.nf#NFCORE_RNASEQ/:params[rsem_index] ? via params.rsem_index
+  in salmon_index (salmon_index): -
+    <- main.nf#NFCORE_RNASEQ/:params[salmon_index] ? via params.salmon_index
+  in kallisto_index (kallisto_index): -
+    <- main.nf#NFCORE_RNASEQ/:params[kallisto_index] ? via params.kallisto_index
+  in hisat2_index (hisat2_index): -
+    <- main.nf#NFCORE_RNASEQ/:params[hisat2_index] ? via params.hisat2_index
+  in bowtie2_index (bowtie2_index): -
+    <- main.nf#NFCORE_RNASEQ/:params[bowtie2_index] ? via params.bowtie2_index
+  in bbsplit_index (bbsplit_index): -
+    <- main.nf#NFCORE_RNASEQ/:params[bbsplit_index] ? via params.bbsplit_index
+  in sortmerna_index (sortmerna_index): -
+    <- main.nf#NFCORE_RNASEQ/:params[sortmerna_index] ? via params.sortmerna_index
+  in bowtie2_rrna_index (bowtie2_rrna_index): -
+    <- main.nf#NFCORE_RNASEQ/:params[bowtie2_rrna_index] ? via params.bowtie2_rrna_index
+  in aligner (aligner): -
+    <- main.nf#NFCORE_RNASEQ/:params[aligner] ? via params.aligner
+  in pseudo_aligner (pseudo_aligner): -
+    <- main.nf#NFCORE_RNASEQ/:params[pseudo_aligner] ? via params.pseudo_aligner
+  in skip_bbsplit (skip_bbsplit): -
+    <- main.nf#NFCORE_RNASEQ/:params[skip_bbsplit] ? via params.skip_bbsplit
+  in ribo_removal_tool (ribo_removal_tool): -
+    <- main.nf#NFCORE_RNASEQ/:params[remove_ribo_rna] ? via params.remove_ribo_rna indirect
+    <- main.nf#NFCORE_RNASEQ/:params[ribo_removal_tool] ? via params.ribo_removal_tool indirect
+  in skip_alignment (skip_alignment): -
+    <- main.nf#NFCORE_RNASEQ/:params[skip_alignment] ? via params.skip_alignment
+  in skip_pseudo_alignment (skip_pseudo_alignment): -
+    <- main.nf#NFCORE_RNASEQ/:params[skip_pseudo_alignment] ? via params.skip_pseudo_alignment
+  in use_sentieon_star (use_sentieon_star): -
+    <- main.nf#NFCORE_RNASEQ/:params[use_sentieon_star] ? via params.use_sentieon_star
+  in use_parabricks_star (use_parabricks_star): -
+    <- main.nf#NFCORE_RNASEQ/:params[use_parabricks_star] ? via params.use_parabricks_star
+  in star_index_legacy (star_index_legacy): -
+  in hisat2_build_memory (hisat2_build_memory): -
+    <- main.nf#NFCORE_RNASEQ/:params[hisat2_build_memory] ? via params.hisat2_build_memory
+  in any_auto_strandedness (any_auto_strandedness): -
+  out splicesites (splicesites): ?
+  out bbsplit_index (bbsplit_index): ?
+  out sortmerna_index (sortmerna_index): ?
+  out bowtie2_rrna_index (bowtie2_rrna_index): ?
+  out star_index (star_index): ?
+  out rsem_index (rsem_index): ?
+  out hisat2_index (hisat2_index): ?
+  out bowtie2_index (bowtie2_index): ?
+  out salmon_index (salmon_index): ?
+  out kallisto_index (kallisto_index): ?
+main.nf#NFCORE_RNASEQ/.map@1 chain ".map" steps=map @125:9
+  guards then of !params.skip_alignment && !params.bam_csi_index
+  in in (in): -
+    <- main.nf#NFCORE_RNASEQ/PREPARE_GENOME_REFERENCES@1[fasta_fai] ? via PREPARE_GENOME_REFERENCES.out.fasta_fai
+  out out (out): ?
+main.nf#NFCORE_RNASEQ/ch_samplesheet factory "channel.value" factory=channel.value @134:22
+  out out (out): Value<Path>
+main.nf#NFCORE_RNASEQ/qc_tools code "def qc_tools = defineQcTools(params)" @135:5
+  out qc_tools (qc_tools): -
+main.nf#NFCORE_RNASEQ/RNASEQ@1 call "RNASEQ" callee=RNASEQ:workflow:modelled:legacy @137:5
+  in ch_samplesheet (ch_samplesheet): -
+    <- main.nf#NFCORE_RNASEQ/ch_samplesheet[out] Value<Path> via ch_samplesheet
+  in ch_fasta_fai (ch_fasta_fai): -
+    <- main.nf#NFCORE_RNASEQ/PREPARE_GENOME_REFERENCES@1[fasta_fai] ? via PREPARE_GENOME_REFERENCES.out.fasta_fai
+  in ch_gtf (ch_gtf): -
+    <- main.nf#NFCORE_RNASEQ/PREPARE_GENOME_REFERENCES@1[gtf] ? via PREPARE_GENOME_REFERENCES.out.gtf
+  in ch_chrom_sizes (ch_chrom_sizes): -
+    <- main.nf#NFCORE_RNASEQ/PREPARE_GENOME_REFERENCES@1[chrom_sizes] ? via PREPARE_GENOME_REFERENCES.out.chrom_sizes
+  in ch_gene_bed (ch_gene_bed): -
+    <- main.nf#NFCORE_RNASEQ/PREPARE_GENOME_REFERENCES@1[gene_bed] ? via PREPARE_GENOME_REFERENCES.out.gene_bed
+  in ch_transcript_fasta (ch_transcript_fasta): -
+    <- main.nf#NFCORE_RNASEQ/PREPARE_GENOME_REFERENCES@1[transcript_fasta] ? via PREPARE_GENOME_REFERENCES.out.transcript_fasta
+  in ch_star_index (ch_star_index): -
+    <- main.nf#NFCORE_RNASEQ/PREPARE_GENOME_INDICES@1[star_index] ? via PREPARE_GENOME_INDICES.out.star_index
+  in ch_rsem_index (ch_rsem_index): -
+    <- main.nf#NFCORE_RNASEQ/PREPARE_GENOME_INDICES@1[rsem_index] ? via PREPARE_GENOME_INDICES.out.rsem_index
+  in ch_hisat2_index (ch_hisat2_index): -
+    <- main.nf#NFCORE_RNASEQ/PREPARE_GENOME_INDICES@1[hisat2_index] ? via PREPARE_GENOME_INDICES.out.hisat2_index
+  in ch_bowtie2_index (ch_bowtie2_index): -
+    <- main.nf#NFCORE_RNASEQ/PREPARE_GENOME_INDICES@1[bowtie2_index] ? via PREPARE_GENOME_INDICES.out.bowtie2_index
+  in ch_salmon_index (ch_salmon_index): -
+    <- main.nf#NFCORE_RNASEQ/PREPARE_GENOME_INDICES@1[salmon_index] ? via PREPARE_GENOME_INDICES.out.salmon_index
+  in ch_kallisto_index (ch_kallisto_index): -
+    <- main.nf#NFCORE_RNASEQ/PREPARE_GENOME_INDICES@1[kallisto_index] ? via PREPARE_GENOME_INDICES.out.kallisto_index
+  in ch_bbsplit_index (ch_bbsplit_index): -
+    <- main.nf#NFCORE_RNASEQ/PREPARE_GENOME_INDICES@1[bbsplit_index] ? via PREPARE_GENOME_INDICES.out.bbsplit_index
+  in ch_ribo_db (ch_ribo_db): -
+    <- main.nf#NFCORE_RNASEQ/PREPARE_GENOME_REFERENCES@1[rrna_fastas] ? via PREPARE_GENOME_REFERENCES.out.rrna_fastas
+  in ch_sortmerna_index (ch_sortmerna_index): -
+    <- main.nf#NFCORE_RNASEQ/PREPARE_GENOME_INDICES@1[sortmerna_index] ? via PREPARE_GENOME_INDICES.out.sortmerna_index
+  in ch_bowtie2_rrna_index (ch_bowtie2_rrna_index): -
+    <- main.nf#NFCORE_RNASEQ/PREPARE_GENOME_INDICES@1[bowtie2_rrna_index] ? via PREPARE_GENOME_INDICES.out.bowtie2_rrna_index
+  in ch_splicesites (ch_splicesites): -
+    <- main.nf#NFCORE_RNASEQ/PREPARE_GENOME_INDICES@1[splicesites] ? via PREPARE_GENOME_INDICES.out.splicesites
+  in ch_kraken_db (ch_kraken_db): -
+    <- main.nf#NFCORE_RNASEQ/PREPARE_GENOME_REFERENCES@1[kraken_db] ? via PREPARE_GENOME_REFERENCES.out.kraken_db
+  in qc_tools (qc_tools): -
+    <- main.nf#NFCORE_RNASEQ/qc_tools[qc_tools] ? via qc_tools
+  in fail_on_low_trimmed_reads (fail_on_low_trimmed_reads): -
+    <- main.nf#NFCORE_RNASEQ/:params[fail_on_low_trimmed_reads] ? via params.fail_on_low_trimmed_reads
+  in fail_on_low_mapped_reads (fail_on_low_mapped_reads): -
+    <- main.nf#NFCORE_RNASEQ/:params[fail_on_low_mapped_reads] ? via params.fail_on_low_mapped_reads
+  in fail_on_undetermined_strandedness (fail_on_undetermined_strandedness): -
+    <- main.nf#NFCORE_RNASEQ/:params[fail_on_undetermined_strandedness] ? via params.fail_on_undetermined_strandedness
+  out trim_status (trim_status): ?
+  out map_status (map_status): Channel<?>
+  out strand_status (strand_status): ?
+  out multiqc_report (multiqc_report): ?
+main.nf#NFCORE_RNASEQ/:emit:trim_status emit "trim_status" @163:5
+  in in (in): -
+    <- main.nf#NFCORE_RNASEQ/RNASEQ@1[trim_status] ? via RNASEQ.out.trim_status
+main.nf#NFCORE_RNASEQ/:emit:map_status emit "map_status" @164:5
+  in in (in): -
+    <- main.nf#NFCORE_RNASEQ/RNASEQ@1[map_status] Channel<?> via RNASEQ.out.map_status
+main.nf#NFCORE_RNASEQ/:emit:strand_status emit "strand_status" @165:5
+  in in (in): -
+    <- main.nf#NFCORE_RNASEQ/RNASEQ@1[strand_status] ? via RNASEQ.out.strand_status
+main.nf#NFCORE_RNASEQ/:emit:multiqc_report emit "multiqc_report" @166:5
+  in in (in): -
+    <- main.nf#NFCORE_RNASEQ/RNASEQ@1[multiqc_report] ? via RNASEQ.out.multiqc_report

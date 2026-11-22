@@ -24,7 +24,7 @@
 | ID | Requirement |
 |---|---|
 | LA-20 | **Typed process:** one input port per `input:` declaration, typed as declared. One output port per named output; a single unnamed output gives one port named `out`. Topic emissions are not ports; they are listed in details. |
-| LA-21 | **Legacy process:** one input port per input line. A `tuple` is one port whose label lists its components. One output port per output line, named by `emit:`, else by index. |
+| LA-21 | **Legacy process:** one input port per input line. A `tuple` is one port whose label lists its components. One output port per output line, named by `emit:`, else `out` when it is the only output, else by index (ADR 0038). |
 | LA-22 | **Workflow (either style):** ports from `take:` and `emit:`. Typed workflows carry declared types. |
 | LA-23 | **Registry module not yet in the project:** ports from `meta.yml` until inserted. After insertion, from its parsed source. |
 | LA-24 | **Operator chain:** input ports for the receiver and each channel argument. One output. |

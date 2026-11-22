@@ -1,4 +1,5 @@
 workflow subworkflows/local/prepare/main.nf#PREPARE typed
+statements 3, modelled 3
 subworkflows/local/prepare/main.nf#PREPARE/:take:samples take "samples" @12:5
   out out (out): Channel<Sample>
 subworkflows/local/prepare/main.nf#PREPARE/:take:fasta take "fasta" @13:5

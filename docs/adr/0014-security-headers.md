@@ -1,6 +1,6 @@
 # 0014. Serve a strict, one-line security header set from netlify.toml
 
-- Status: Accepted (agent)
+- Status: Superseded by 0040
 - Date: 2026-11-21
 
 ## Context

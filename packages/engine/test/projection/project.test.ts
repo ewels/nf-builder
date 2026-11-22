@@ -348,14 +348,16 @@ describe("F-106 AR-10 LA-20 projector", () => {
       "main.nf",
       "W",
     );
-    // v = src is a bare variable, not a dataflow expression: a code node binding v
-    expect(node(p, "main.nf#W/v").kind).toBe("code");
-    expect(node(p, "main.nf#W/v~2").kind).toBe("call");
-    expect(into(p, "main.nf#W/v~2", "x")[0]?.from.node).toBe("main.nf#W/v");
+    // F-107 AR-10: v = src is an alias of a graph value: it creates no node, so the first call assigned to v is keyed v
+    expect(node(p, "main.nf#W/v").kind).toBe("call");
+    expect(p.nodes.some((n) => n.id === "main.nf#W/v~2")).toBe(false);
+    expect(into(p, "main.nf#W/v", "x")).toMatchObject([
+      { from: { node: "main.nf#W/:take:src" }, variable: "v" },
+    ]);
     // the use after the reassignment reads the latest assignment
     expect(into(p, "main.nf#W/w", "x")).toMatchObject([
       {
-        from: { node: "main.nf#W/v~2", port: "a" },
+        from: { node: "main.nf#W/v", port: "a" },
         variable: "v",
         direct: true,
       },
@@ -448,7 +450,7 @@ describe("F-106 AR-10 LA-20 projector", () => {
     ]);
   });
 
-  it("F-106 LA-14: a typed workflow's call to a legacy process is a call node with argument ports", () => {
+  it("F-106 LA-14 F-107 LA-21: a typed workflow's call to a legacy process is a call node with its qualifier ports", () => {
     const main = must(projector, "main.nf", null);
     const counts = node(main, "main.nf#/counts") as CallNode;
     expect(counts.callee).toMatchObject({
@@ -456,10 +458,11 @@ describe("F-106 AR-10 LA-20 projector", () => {
       kind: "process",
       typed: false,
     });
-    expect(ports(counts, "inputs")).toEqual(["$1"]);
-    expect(ports(counts, "outputs")).toEqual(["out"]);
-    expect(type(counts, "out")).toBe("-");
-    expect(into(main, counts.id, "$1")).toMatchObject([
+    // F-107 LA-21: the ports come from the qualifiers, and the result kind from the arguments
+    expect(ports(counts, "inputs")).toEqual(["reads"]);
+    expect(ports(counts, "outputs")).toEqual(["txt"]);
+    expect(type(counts, "txt")).toBe("Channel<Path>");
+    expect(into(main, counts.id, "reads")).toMatchObject([
       { from: { node: "main.nf#/prepared", port: "bams" } },
     ]);
   });
@@ -541,18 +544,39 @@ describe("F-106 AR-10 LA-20 projector", () => {
     expect(type(node(p, "main.nf#/two"), "out")).toBe("Value<Bag<Path>>");
   });
 
-  it("F-106 LA-28: a copy of a graph value carries its type", async () => {
+  it("F-106 LA-28 F-107 AR-10: a copy of a graph value is an alias that carries its type", async () => {
     const p = must(
       await projectorForFiles({
         "main.nf":
-          "nextflow.enable.types = true\n\nparams {\n    names: List<String> = ['a']\n}\n\nworkflow {\n    main:\n    ch = channel.fromPath('x')\n    names = params.names\n    w = ch\n    w2 = w\n}\n",
+          "nextflow.enable.types = true\n\nparams {\n    names: List<String> = ['a']\n}\n\nworkflow {\n    main:\n    ch = channel.fromPath('x')\n    names = params.names\n    w = ch\n    w2 = w\n    w2.view()\n    names.size()\n}\n",
       }),
       "main.nf",
       null,
     );
-    expect(type(node(p, "main.nf#/names"), "names")).toBe("List<String>");
-    expect(type(node(p, "main.nf#/w"), "w")).toBe("Channel<Path>");
-    expect(type(node(p, "main.nf#/w2"), "w2")).toBe("Channel<Path>");
+    expect(p.nodes.map((n) => n.id)).toEqual([
+      "main.nf#/:params",
+      "main.nf#/ch",
+      "main.nf#/.view@1",
+      "main.nf#/:code@1",
+    ]);
+    expect(p.edges.find((e) => e.to.node === "main.nf#/.view@1")).toMatchObject(
+      {
+        from: { node: "main.nf#/ch", port: "out" },
+        variable: "w2",
+      },
+    );
+    expect(
+      formatFlowType(
+        p.edges.find((e) => e.to.node === "main.nf#/.view@1")?.type as never,
+      ),
+    ).toBe("Channel<Path>");
+    // `names.size()` reads the alias: its edge carries List<String> from the param
+    const read = p.edges.find((e) => e.to.node === "main.nf#/:code@1");
+    expect(read).toMatchObject({
+      from: { node: "main.nf#/:params", port: "names" },
+      variable: "names",
+    });
+    expect(formatFlowType(read?.type as never)).toBe("List<String>");
   });
 
   it("F-106 ADR-0004: calls to an Unparsed declaration or to an include with a missing target are call nodes marked unparsed or unresolved", async () => {
@@ -589,7 +613,7 @@ describe("F-106 AR-10 LA-20 projector", () => {
     expect(kinds(null)).toContain("output");
   });
 
-  it("F-106 AR-10 ADR-0004: every main statement is one top node or one code node, every emit an emit node, every publish item an edge or port of the output node", () => {
+  it("F-106 AR-10 ADR-0004 F-107: every main statement is listed once, with nodes it created, a name it bound, or one code node; every emit an emit node, every publish item an edge or port of the output node", () => {
     for (const ref of projector.workflows()) {
       const p = projector.project(ref.path, ref.name);
       if (p === null) continue;
@@ -600,21 +624,19 @@ describe("F-106 AR-10 LA-20 projector", () => {
       );
       if (def?.kind !== "Workflow") continue;
       const body = def.main?.items.filter((s) => s.kind !== "EmptyStatement");
-      // each statement's top node starts inside the statement's range; nested nodes are created before it
-      for (const statement of body ?? []) {
-        const tops = p.nodes.filter(
-          (n) =>
-            n.kind !== "take" &&
-            n.kind !== "emit" &&
-            n.kind !== "params" &&
-            n.kind !== "output" &&
-            n.range.start >= statement.range.start &&
-            n.range.end <= statement.range.end,
+      expect(p.statements.map((s) => s.range.start)).toEqual(
+        (body ?? []).map((s) => s.range.start),
+      );
+      for (const statement of p.statements) {
+        const codes = statement.nodes.filter(
+          (id) => p.nodes.find((n) => n.id === id)?.kind === "code",
         );
         expect(
-          tops.length,
+          statement.nodes.length + statement.binds.length,
           `${ref.path}:${statement.range.line}`,
         ).toBeGreaterThan(0);
+        expect(codes.length).toBeLessThanOrEqual(1);
+        expect(statement.modelled).toBe(codes.length === 0);
       }
       const emits = def.emits?.items.length ?? 0;
       expect(p.nodes.filter((n) => n.kind === "emit")).toHaveLength(emits);

@@ -67,6 +67,7 @@ function fake(load: (real: Catalogue) => Promise<Catalogue>): LanguagePack {
     },
     includes: {} as IncludeRules,
     scaffold: { process: () => "" },
+    legacyOperators: [],
     loadCatalogue: () => load({} as Catalogue),
     loadParser: () => Promise.reject(new Error("not used here")),
   };
