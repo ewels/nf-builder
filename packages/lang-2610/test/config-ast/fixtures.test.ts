@@ -1,5 +1,5 @@
 import { readdirSync, readFileSync } from "node:fs";
-import { join, relative } from "node:path";
+import { join } from "node:path";
 import { type ConfigAst, walk } from "@nf-builder/lang-core";
 import { describe, expect, it } from "vitest";
 import { parseConfigAst } from "../../src/ast/index.ts";
@@ -10,16 +10,8 @@ const root = join(
   import.meta.dirname,
   "../../../../tools/oracle/cases/config-constructs",
 );
-const files = (dir: string): string[] =>
-  readdirSync(dir, { withFileTypes: true }).flatMap((e) =>
-    e.isDirectory()
-      ? files(join(dir, e.name))
-      : e.name.endsWith(".config")
-        ? [join(dir, e.name)]
-        : [],
-  );
-const fixtures = files(root)
-  .map((f) => relative(root, f))
+const fixtures = readdirSync(root, { recursive: true, encoding: "utf8" })
+  .filter((f) => f.endsWith(".config"))
   .sort();
 const build = (text: string): ConfigAst => {
   const result = parseConfigAst(text);

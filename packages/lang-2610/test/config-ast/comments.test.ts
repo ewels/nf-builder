@@ -1,33 +1,27 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { type AstNode, type Comment, walk } from "@nf-builder/lang-core";
 import { describe, expect, it } from "vitest";
 import { parseConfigAst } from "../../src/ast/index.ts";
 import {
   type Attachment,
   anchors,
   attachments,
-  type Row,
-  type Slot,
+  type DumpRow,
+  toRow,
 } from "../ast/comment-anchors.ts";
-
-type Slotted = AstNode & {
-  leadingComments?: Comment[];
-  trailingComments?: Comment[];
-  danglingComments?: Comment[];
-};
 
 /** Each comment's slot and the kind and first line of the node it is attached to, by comment text. */
 function slots(text: string): Record<string, string> {
   const result = parseConfigAst(text);
   if (!result.ok) throw new Error(JSON.stringify(result.errors));
-  const out: Record<string, string> = {};
-  walk(result.ast, (node) => {
-    for (const slot of ["leading", "trailing", "dangling"] as const)
-      for (const c of (node as Slotted)[`${slot}Comments`] ?? [])
-        out[c.text] = `${slot} ${node.kind}@${node.range.line}`;
-  });
-  return out;
+  return Object.fromEntries(
+    [...attachments(result.ast).values()]
+      .flat()
+      .map((a) => [
+        a.comment.text,
+        `${a.slot} ${a.node.kind}@${a.node.range.line}`,
+      ]),
+  );
 }
 
 describe("F-103 AR-02: config comment slots", () => {
@@ -76,24 +70,7 @@ describe("F-103 AR-02: config comment slots", () => {
   });
 });
 
-type Upstream = {
-  files: {
-    file: string;
-    comments: {
-      line: number;
-      column: number;
-      text: string;
-      slot: Slot;
-      node: {
-        class: string;
-        line: number;
-        column: number;
-        endLine: number;
-        endColumn: number;
-      };
-    }[];
-  }[];
-};
+type Upstream = { files: { file: string; comments: DumpRow[] }[] };
 
 describe("F-103 AR-02: config comment attachment against nf-lang", () => {
   const root = join(
@@ -126,17 +103,8 @@ describe("F-103 AR-02: config comment attachment against nf-lang", () => {
         expect(list, `${file} ${key}`).toHaveLength(1);
         const [mine] = list as [Attachment];
         expect(mine.slot, `${file} ${key} ${c.text} slot`).toBe(c.slot);
-        const row: Row = {
-          line: c.line,
-          column: c.column,
-          slot: c.slot,
-          anchor: c.node.class,
-          from: [c.node.line, c.node.column],
-          to: [c.node.endLine, c.node.endColumn],
-          text: c.text,
-        };
         expect(
-          anchors(row, mine.node),
+          anchors(toRow(c), mine.node),
           `${file} ${key}: upstream anchor ${c.node.class}@${c.node.line}:${c.node.column}-${c.node.endLine}:${c.node.endColumn}, ours ${mine.node.kind}@${mine.node.range.line}:${mine.node.range.column}`,
         ).toBe(true);
         compared++;

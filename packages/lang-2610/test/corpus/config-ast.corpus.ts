@@ -5,10 +5,14 @@
 // Reads .cache/corpus by path; imports nothing from tools/.
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
-import type { AstNode } from "@nf-builder/lang-core";
 import { describe, expect, it } from "vitest";
 import { parseConfigAst } from "../../src/ast/index.ts";
-import { anchors, attachments, type Row } from "../ast/comment-anchors.ts";
+import {
+  anchors,
+  attachments,
+  type DumpRow,
+  toRow,
+} from "../ast/comment-anchors.ts";
 import { checkConfigRanges } from "../config-ast/check-config-ranges.ts";
 import { renderConfigAst, snapshotPath } from "./config-snapshot.ts";
 import { listSources } from "./corpus-files.ts";
@@ -35,19 +39,6 @@ const configs = ids.flatMap((id) =>
     : [],
 );
 const LINT = join(ROOT, ".cache/corpus-lint");
-type DumpRow = {
-  line: number;
-  column: number;
-  text: string;
-  slot: Row["slot"];
-  node: {
-    class: string;
-    line: number;
-    column: number;
-    endLine: number;
-    endColumn: number;
-  };
-};
 type Dump = {
   files: { file: string; comments?: DumpRow[]; error?: string }[];
 };
@@ -155,21 +146,13 @@ describe("F-103 step 2: ranges", () => {
       for (const dumped of file.comments) {
         const key = `${dumped.line}:${dumped.column}`;
         const mine = (ours.get(key) ?? [])[0];
-        const row: Row = {
-          line: dumped.line,
-          column: dumped.column,
-          slot: dumped.slot,
-          anchor: dumped.node.class,
-          from: [dumped.node.line, dumped.node.column],
-          to: [dumped.node.endLine, dumped.node.endColumn],
-          text: dumped.text,
-        };
+        const row = toRow(dumped);
         if (!mine) differences.push(`${where} ${key}: not attached`);
         else if (mine.slot !== row.slot)
           differences.push(
             `${where} ${key}: slot ${mine.slot}, nf-lang ${row.slot}`,
           );
-        else if (!anchors(row, mine.node as AstNode & Record<string, unknown>))
+        else if (!anchors(row, mine.node))
           differences.push(
             `${where} ${key}: anchor ${mine.node.kind}@${mine.node.range.line}:${mine.node.range.column}-${mine.node.range.endLine}:${mine.node.range.endColumn}, nf-lang ${row.anchor}@${row.from}-${row.to}`,
           );

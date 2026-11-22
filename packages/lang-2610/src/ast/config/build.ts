@@ -12,45 +12,38 @@ import type {
   ConfigName,
   ConfigSelector,
   ConfigStatement,
-  Identifier,
 } from "@nf-builder/lang-core";
-import {
-  type CompilationUnitContext,
-  ConfigApplyBlockBlockStmtAltContext,
-  type ConfigApplyBlockContext,
+import type {
+  CompilationUnitContext,
+  ConfigApplyBlockContext,
   ConfigApplyBlockStmtAltContext,
-  type ConfigApplyContext,
-  ConfigAssignBlockStmtAltContext,
-  type ConfigAssignContext,
+  ConfigApplyContext,
+  ConfigAssignContext,
   ConfigAssignStmtAltContext,
-  ConfigBlockBlockStmtAltContext,
-  type ConfigBlockContext,
-  type ConfigBlockStatementContext,
+  ConfigBlockContext,
+  ConfigBlockStatementContext,
   ConfigBlockStmtAltContext,
-  ConfigIncludeBlockStmtAltContext,
-  type ConfigIncludeContext,
+  ConfigIncludeContext,
   ConfigIncludeStmtAltContext,
-  ConfigIncompleteBlockStmtAltContext,
-  type ConfigIncompleteContext,
+  ConfigIncompleteContext,
   ConfigIncompleteStmtAltContext,
-  ConfigInvalidBlockStmtAltContext,
   ConfigInvalidStmtAltContext,
-  type ConfigPrimaryContext,
+  ConfigPrimaryContext,
   ConfigSelectorBlockStmtAltContext,
-  type ConfigSelectorContext,
-  type ConfigStatementContext,
-  type InvalidStatementContext,
+  ConfigSelectorContext,
+  ConfigStatementContext,
+  InvalidStatementContext,
 } from "../../generated/ConfigParser.ts";
 import type {
   ArgumentListContext,
   ExpressionContext,
   IdentifierContext,
   StatementContext,
-  StringLiteralContext,
 } from "../../generated/ScriptParser.ts";
+import { has } from "../build/alt.ts";
 import { type BuildContext, FatalBuildError } from "../build/context.ts";
 import { argumentList, expression } from "../build/expressions.ts";
-import { stringLiteral } from "../build/literals.ts";
+import { stringValue } from "../build/literals.ts";
 import { statement } from "../build/statements.ts";
 import { identifier } from "../build/types.ts";
 
@@ -59,30 +52,13 @@ const expr = (ctx: unknown, cx: BuildContext) =>
   expression(ctx as ExpressionContext, cx);
 
 function configName(ctx: ConfigPrimaryContext, cx: BuildContext): ConfigName {
-  const range = cx.range(ctx);
   const string = ctx.stringLiteral();
-  if (string)
-    return {
-      kind: "ConfigName",
-      // upstream's `configPrimary` decodes the name without checking its escapes
-      name: stringLiteral(string as unknown as StringLiteralContext, cx, false)
-        .value,
-      form: "string",
-      range,
-    };
-  const name = ctx.identifier();
-  if (name)
-    return {
-      kind: "ConfigName",
-      name: name.getText(),
-      form: "identifier",
-      range,
-    };
   return {
     kind: "ConfigName",
-    name: ctx.getText(),
-    form: "builtInType",
-    range,
+    // upstream's `configPrimary` decodes the name without checking its escapes
+    name: string ? stringValue(string.getText()) : ctx.getText(),
+    form: string ? "string" : ctx.identifier() ? "identifier" : "builtInType",
+    range: cx.range(ctx),
   };
 }
 
@@ -115,10 +91,7 @@ function configAssign(
 function configApply(ctx: ConfigApplyContext, cx: BuildContext): ConfigApply {
   return {
     kind: "ConfigApply",
-    name: identifier(
-      ctx.identifier() as unknown as IdentifierContext,
-      cx,
-    ) as Identifier,
+    name: identifier(ctx.identifier() as unknown as IdentifierContext, cx),
     args: argumentList(
       ctx.argumentList() as unknown as ArgumentListContext,
       cx,
@@ -157,6 +130,14 @@ function configIncomplete(
   return result;
 }
 
+const INVALID = {
+  ifElseStatement: "If statements cannot be mixed with config statements",
+  tryCatchStatement: "Try-catch blocks cannot be mixed with config statements",
+  variableDeclaration:
+    "Variable declarations cannot be mixed with config statements",
+} as const;
+const INVALID_ACCESSORS = Object.keys(INVALID) as (keyof typeof INVALID)[];
+
 /**
  * An if, try or `def`: reported, and kept (upstream drops it). Upstream's `invalidStatement` reports only its one message
  * and never builds the statement, so nothing inside it is checked: the kept statement is built, then the errors and the
@@ -167,22 +148,16 @@ function configInvalid(
   cx: BuildContext,
 ): ConfigInvalid {
   const range = cx.range(ctx);
-  const message = ctx.ifElseStatement()
-    ? "If statements cannot be mixed with config statements"
-    : ctx.tryCatchStatement()
-      ? "Try-catch blocks cannot be mixed with config statements"
-      : ctx.variableDeclaration()
-        ? "Variable declarations cannot be mixed with config statements"
-        : "Invalid config statement";
-  cx.error(message, range);
+  const accessor =
+    INVALID_ACCESSORS.find((a) => ctx[a]()) ?? "variableDeclaration";
+  cx.error(INVALID[accessor], range);
   // `statement` tells the alternatives apart by the accessors a context has; `invalidStatement` has all three, so hand it
   // a view with only the one that matched.
-  const only = ctx.ifElseStatement()
-    ? { ifElseStatement: () => ctx.ifElseStatement() }
-    : ctx.tryCatchStatement()
-      ? { tryCatchStatement: () => ctx.tryCatchStatement() }
-      : { variableDeclaration: () => ctx.variableDeclaration() };
-  const view = { start: ctx.start, stop: ctx.stop, ...only };
+  const view = {
+    start: ctx.start,
+    stop: ctx.stop,
+    [accessor]: () => ctx[accessor](),
+  };
   const errorCount = cx.errors.length;
   const held = cx.numberFormatError;
   try {
@@ -207,7 +182,7 @@ function configBlock(ctx: ConfigBlockContext, cx: BuildContext): ConfigBlock {
   return {
     kind: "ConfigBlock",
     name: configName(ctx.configPrimary(), cx),
-    statements: ctx.configBlockStatement().map((s) => blockStatement(s, cx)),
+    statements: ctx.configBlockStatement().map((s) => configStatement(s, cx)),
     range: cx.range(ctx),
   };
 }
@@ -226,52 +201,31 @@ function configSelector(
       range: cx.tokenRange(kind),
     },
     target: configName(ctx.configPrimary(), cx),
-    statements: ctx.configBlockStatement().map((s) => blockStatement(s, cx)),
+    statements: ctx.configBlockStatement().map((s) => configStatement(s, cx)),
     range: cx.range(ctx),
   };
 }
 
-function topStatement(
-  ctx: ConfigStatementContext,
+/** A statement at the top or in a block: the two rules have the same alternatives, and only a block has selectors. */
+function configStatement(
+  ctx: ConfigStatementContext | ConfigBlockStatementContext,
   cx: BuildContext,
 ): ConfigStatement {
-  if (ctx instanceof ConfigIncludeStmtAltContext)
+  if (has<ConfigIncludeStmtAltContext>(ctx, "configInclude"))
     return configInclude(ctx.configInclude(), cx);
-  if (ctx instanceof ConfigApplyBlockStmtAltContext)
+  if (has<ConfigApplyBlockStmtAltContext>(ctx, "configApplyBlock"))
     return configApplyBlock(ctx.configApplyBlock(), cx);
-  if (ctx instanceof ConfigAssignStmtAltContext)
+  if (has<ConfigAssignStmtAltContext>(ctx, "configAssign"))
     return configAssign(ctx.configAssign(), cx);
-  if (ctx instanceof ConfigBlockStmtAltContext)
+  if (has<ConfigBlockStmtAltContext>(ctx, "configBlock"))
     return configBlock(ctx.configBlock(), cx);
-  if (ctx instanceof ConfigIncompleteStmtAltContext)
+  if (has<ConfigSelectorBlockStmtAltContext>(ctx, "configSelector"))
+    return configSelector(ctx.configSelector(), cx);
+  if (has<ConfigIncompleteStmtAltContext>(ctx, "configIncomplete"))
     return configIncomplete(ctx.configIncomplete(), cx);
-  if (ctx instanceof ConfigInvalidStmtAltContext)
+  if (has<ConfigInvalidStmtAltContext>(ctx, "invalidStatement"))
     return configInvalid(ctx.invalidStatement(), cx);
   return cx.fatal(`Invalid statement: ${ctx.getText()}`, cx.range(ctx));
-}
-
-function blockStatement(
-  ctx: ConfigBlockStatementContext,
-  cx: BuildContext,
-): ConfigStatement {
-  if (ctx instanceof ConfigIncludeBlockStmtAltContext)
-    return configInclude(ctx.configInclude(), cx);
-  if (ctx instanceof ConfigApplyBlockBlockStmtAltContext)
-    return configApplyBlock(ctx.configApplyBlock(), cx);
-  if (ctx instanceof ConfigAssignBlockStmtAltContext)
-    return configAssign(ctx.configAssign(), cx);
-  if (ctx instanceof ConfigBlockBlockStmtAltContext)
-    return configBlock(ctx.configBlock(), cx);
-  if (ctx instanceof ConfigSelectorBlockStmtAltContext)
-    return configSelector(ctx.configSelector(), cx);
-  if (ctx instanceof ConfigIncompleteBlockStmtAltContext)
-    return configIncomplete(ctx.configIncomplete(), cx);
-  if (ctx instanceof ConfigInvalidBlockStmtAltContext)
-    return configInvalid(ctx.invalidStatement(), cx);
-  return cx.fatal(
-    `Invalid statement in config block: ${ctx.getText()}`,
-    cx.range(ctx),
-  );
 }
 
 /** The config root: its statements in source order. The comment list is filled by `parseConfigAst`. */
@@ -279,9 +233,12 @@ export function buildConfig(
   tree: CompilationUnitContext,
   cx: BuildContext,
 ): ConfigAst {
+  const statements = tree.configStatement().map((s) => configStatement(s, cx));
+  // upstream fails the build with the last number-format error, after everything else
+  cx.failOnNumberFormat();
   return {
     kind: "ConfigFile",
-    statements: tree.configStatement().map((s) => topStatement(s, cx)),
+    statements,
     comments: [],
     range: cx.index.range(0, cx.index.size),
   };

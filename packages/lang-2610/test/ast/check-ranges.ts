@@ -7,6 +7,7 @@ import {
   walk,
 } from "@nf-builder/lang-core";
 import { CharStream } from "antlr4ng";
+import type { ConfigLexer } from "../../src/generated/ConfigLexer.ts";
 import { ScriptLexer } from "../../src/generated/ScriptLexer.ts";
 import {
   DECLARATION_KINDS,
@@ -33,13 +34,16 @@ type Boundaries = {
 };
 
 /** The text's token boundaries (UTF-16 offsets) from a fresh lex, and its comment tokens. */
-function lexBoundaries(text: string): Boundaries {
+export function lexBoundaries(
+  text: string,
+  Lexer: typeof ScriptLexer | typeof ConfigLexer = ScriptLexer,
+): Boundaries {
   const offsets = [0];
   for (const ch of text)
     offsets.push((offsets[offsets.length - 1] as number) + ch.length);
-  const lexer = new ScriptLexer(CharStream.fromString(text));
+  const lexer = new Lexer(CharStream.fromString(text));
   lexer.removeErrorListeners();
-  const nl = ScriptLexer.NL;
+  const nl = Lexer.NL;
   const starts = new Set<number>();
   const ends = new Set<number>();
   const comments: Comment[] = [];
@@ -75,7 +79,7 @@ function lexBoundaries(text: string): Boundaries {
 }
 
 /** Line and column of a UTF-16 offset, counted from the text: lines end at "\n", columns count code points. */
-function naivePosition(text: string, offset: number) {
+export function naivePosition(text: string, offset: number) {
   const before = text.slice(0, offset);
   const lastNewline = before.lastIndexOf("\n");
   let line = 1;

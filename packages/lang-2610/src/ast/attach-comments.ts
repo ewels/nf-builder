@@ -91,25 +91,15 @@ class Container {
   }
 }
 
-export function attachComments(
-  script: ScriptAst,
-  comments: readonly Comment[],
-): void {
-  if (comments.length === 0) return;
-  new Attacher().run(script, comments);
-}
-
 /**
- * Attach the comments of a config file (upstream's `CommentAttacher` on a `ConfigNode`). The containers are the blocks
- * and selectors, and the `plugins` apply block; values and `includeConfig` sources go through the shared expression
- * walker. An incomplete or invalid statement takes no comments here: upstream's attacher would add the incomplete one, but it never runs, because `buildAST` throws on the collected errors.
+ * Attach the comments of a script or a config file (upstream's `CommentAttacher` on a `ScriptNode` or a `ConfigNode`).
  */
-export function attachConfigComments(
-  config: ConfigAst,
+export function attachComments(
+  ast: ScriptAst | ConfigAst,
   comments: readonly Comment[],
 ): void {
   if (comments.length === 0) return;
-  new Attacher().runConfig(config, comments);
+  new Attacher().run(ast, comments);
 }
 
 type Slots = Map<AstNode, Comment[]>;
@@ -119,31 +109,19 @@ class Attacher {
   private readonly trailing: Slots = new Map();
   private readonly dangling: Slots = new Map();
 
-  run(script: ScriptAst, comments: readonly Comment[]): void {
+  run(ast: ScriptAst | ConfigAst, comments: readonly Comment[]): void {
     const root = new Container(
-      script,
+      ast,
       Number.NEGATIVE_INFINITY,
       Number.POSITIVE_INFINITY,
       false,
     );
-    for (const item of script.body) {
-      this.addChild(root, item);
-      this.declaration(item as Node, root);
-    }
-    for (const comment of comments) this.attach(comment, root);
-    flush(this.leading, "leadingComments");
-    flush(this.trailing, "trailingComments");
-    flush(this.dangling, "danglingComments");
-  }
-
-  runConfig(config: ConfigAst, comments: readonly Comment[]): void {
-    const root = new Container(
-      config,
-      Number.NEGATIVE_INFINITY,
-      Number.POSITIVE_INFINITY,
-      false,
-    );
-    this.configStatements(config.statements, root);
+    if (ast.kind === "ConfigFile") this.configStatements(ast.statements, root);
+    else
+      for (const item of ast.body) {
+        this.addChild(root, item);
+        this.declaration(item as Node, root);
+      }
     for (const comment of comments) this.attach(comment, root);
     flush(this.leading, "leadingComments");
     flush(this.trailing, "trailingComments");
@@ -226,7 +204,8 @@ class Attacher {
       container.children.push({ node, start: from, end: to, trailing });
   }
 
-  // Config statements
+  // Config statements: the containers are the blocks, the selectors and the `plugins` apply block. An incomplete or invalid
+  // statement takes no comments: upstream's attacher would take the incomplete one, but `buildAST` throws on it first.
 
   private configStatements(
     statements: readonly ConfigStatement[],

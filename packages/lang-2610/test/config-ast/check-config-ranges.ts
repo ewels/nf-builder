@@ -7,9 +7,9 @@ import {
   type Range,
   walk,
 } from "@nf-builder/lang-core";
-import { CharStream } from "antlr4ng";
 import { parseConfigAst } from "../../src/ast/index.ts";
 import { ConfigLexer } from "../../src/generated/ConfigLexer.ts";
+import { lexBoundaries, naivePosition } from "../ast/check-ranges.ts";
 import { shape } from "../ast/shape.ts";
 
 // F-103 step 2: every config AST node's range slices back to its exact source text. `checkConfigRanges` returns the
@@ -19,53 +19,6 @@ export type CheckOptions = {
   /** Re-parse every statement and every value on its own and compare. */
   reparse?: boolean;
 };
-
-/** The text's token boundaries (UTF-16 offsets) and comment tokens, from a fresh lex. */
-function lexBoundaries(text: string) {
-  const offsets = [0];
-  for (const ch of text)
-    offsets.push((offsets[offsets.length - 1] as number) + ch.length);
-  const lexer = new ConfigLexer(CharStream.fromString(text));
-  lexer.removeErrorListeners();
-  const starts = new Set<number>();
-  const ends = new Set<number>();
-  const comments: string[] = [];
-  for (const token of lexer.getAllTokens()) {
-    const start = offsets[token.start] as number;
-    const end = offsets[token.stop + 1] as number;
-    const tokenText = token.text ?? "";
-    if (token.type === ConfigLexer.NL) {
-      const t = tokenText.trimEnd();
-      if (t.startsWith("//") || t.startsWith("/*"))
-        comments.push(`${start}:${t}`);
-      continue;
-    }
-    starts.add(start);
-    ends.add(end);
-    if (/^\$\w/.test(tokenText) && !tokenText.startsWith("${")) {
-      // a GString path `$a.b.c`: the names inside the token are nodes too
-      let at = start + 1;
-      for (const [i, name] of tokenText.slice(1).split(".").entries()) {
-        if (i > 0) at += 1;
-        starts.add(at);
-        at += name.length;
-        ends.add(at);
-      }
-    }
-  }
-  return { starts, ends, comments };
-}
-
-/** Line and column of a UTF-16 offset: lines end at "\n", columns count code points. */
-function naivePosition(text: string, offset: number) {
-  const before = text.slice(0, offset);
-  const lastNewline = before.lastIndexOf("\n");
-  let line = 1;
-  for (const ch of before) if (ch === "\n") line++;
-  let column = 1;
-  for (const _ of before.slice(lastNewline + 1)) column++;
-  return { line, column };
-}
 
 const describeNode = (node: AstNode) =>
   `${node.kind} at ${node.range.line}:${node.range.column}`;
@@ -110,7 +63,7 @@ export function checkConfigRanges(
   options: CheckOptions = {},
 ): string[] {
   const problems: string[] = [];
-  const { starts, ends, comments } = lexBoundaries(text);
+  const { starts, ends, comments } = lexBoundaries(text, ConfigLexer);
 
   const checkRange = (label: string, r: Range) => {
     const from = naivePosition(text, r.start);
@@ -279,7 +232,8 @@ export function checkConfigRanges(
         `comment ${JSON.stringify(c.text)} at ${c.range.line}:${c.range.column} does not slice back`,
       );
   const got = ast.comments.map((c) => `${c.range.start}:${c.text}`);
-  if (JSON.stringify(comments) !== JSON.stringify(got))
+  const wanted = comments.map((c) => `${c.range.start}:${c.text}`);
+  if (JSON.stringify(wanted) !== JSON.stringify(got))
     problems.push(
       "ast.comments is not the comment tokens of a fresh lex, in order",
     );

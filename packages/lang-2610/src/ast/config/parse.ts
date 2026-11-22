@@ -3,7 +3,7 @@
 // the engine through a worker (ADR 0027).
 import type { ConfigParseResult, ParseProblem } from "@nf-builder/lang-core";
 import { parseConfig } from "../../parser/parse.ts";
-import { attachConfigComments } from "../attach-comments.ts";
+import { attachComments } from "../attach-comments.ts";
 import { BuildContext, FatalBuildError } from "../build/context.ts";
 import { collectComments } from "../comments.ts";
 import { buildConfig } from "./build.ts";
@@ -26,7 +26,7 @@ export function parseConfigAst(text: string): ConfigParseResult {
     outcome.tokens.fill();
     const { comments } = collectComments(outcome.tokens.getTokens(), cx.index);
     const ast = { ...config, comments };
-    attachConfigComments(ast, comments);
+    attachComments(ast, comments);
     return { ok: true, ast, errors: cx.errors.sort(byPosition) };
   } catch (error) {
     if (!(error instanceof FatalBuildError)) throw error;

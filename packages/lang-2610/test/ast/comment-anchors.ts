@@ -3,8 +3,6 @@ import { type AstNode, type Comment, walk } from "@nf-builder/lang-core";
 // Shared by comments.test.ts (the fixtures) and test/corpus/ast.corpus.ts (the whole corpus): where our comment
 // attachment put each comment, and whether a node is the anchor nf-lang's CommentAttacher chose.
 
-type Built = AstNode;
-
 export type Slot = "leading" | "trailing" | "dangling";
 export type Attachment = {
   slot: Slot;
@@ -13,7 +11,7 @@ export type Attachment = {
 };
 
 /** Every attachment in the tree, by the comment's `line:column`. */
-export function attachments(ast: Built): Map<string, Attachment[]> {
+export function attachments(ast: AstNode): Map<string, Attachment[]> {
   const out = new Map<string, Attachment[]>();
   walk(ast, (node) => {
     for (const slot of ["leading", "trailing", "dangling"] as const) {
@@ -40,6 +38,31 @@ export type Row = {
   to: [number, number];
   text: string;
 };
+
+/** A row of CommentDump.java's output (`.cache/corpus-lint/<id>.comments.json`, `fixtures-comments.upstream.json`). */
+export type DumpRow = {
+  line: number;
+  column: number;
+  text: string;
+  slot: Slot;
+  node: {
+    class: string;
+    line: number;
+    column: number;
+    endLine: number;
+    endColumn: number;
+  };
+};
+
+export const toRow = (d: DumpRow): Row => ({
+  line: d.line,
+  column: d.column,
+  slot: d.slot,
+  anchor: d.node.class,
+  from: [d.node.line, d.node.column],
+  to: [d.node.endLine, d.node.endColumn],
+  text: d.text,
+});
 
 const STATEMENTS = new Set([
   "ExpressionStatement",
@@ -101,13 +124,12 @@ const PARAMETERS = new Set([
 ]);
 
 /** nf-lang's config node classes and the kinds of our config nodes that stand for them. */
-const CONFIG_ANCHORS: Record<string, readonly string[]> = {
-  ConfigNode: ["ConfigFile"],
-  ConfigAssignNode: ["ConfigAssign"],
-  ConfigBlockNode: ["ConfigBlock", "ConfigSelector"],
-  ConfigApplyBlockNode: ["ConfigApplyBlock"],
-  ConfigApplyNode: ["ConfigApply"],
-  ConfigIncludeNode: ["ConfigInclude"],
+const CONFIG_ANCHORS: Record<string, ReadonlySet<string>> = {
+  ConfigAssignNode: new Set(["ConfigAssign"]),
+  ConfigBlockNode: new Set(["ConfigBlock", "ConfigSelector"]),
+  ConfigApplyBlockNode: new Set(["ConfigApplyBlock"]),
+  ConfigApplyNode: new Set(["ConfigApply"]),
+  ConfigIncludeNode: new Set(["ConfigInclude"]),
 };
 
 /**
@@ -121,16 +143,7 @@ export function anchors(
   options: { allowLabelStart?: boolean } = {},
 ): boolean {
   if (row.anchor === "ScriptNode") return node.kind === "Script";
-  const config = CONFIG_ANCHORS[row.anchor];
-  if (config)
-    return (
-      config.includes(node.kind) &&
-      (node.kind === "ConfigFile" ||
-        (node.range.line === row.from[0] &&
-          node.range.column === row.from[1] &&
-          node.range.endLine === row.to[0] &&
-          node.range.endColumn === row.to[1]))
-    );
+  if (row.anchor === "ConfigNode") return node.kind === "ConfigFile";
   const r = node.range;
   if (row.anchor === "BlockStatement") {
     // upstream's block starts at its first statement; ours includes the braces
@@ -147,7 +160,8 @@ export function anchors(
     );
   }
   const family =
-    row.anchor.endsWith("Statement") && row.anchor !== "BlockStatement"
+    CONFIG_ANCHORS[row.anchor] ??
+    (row.anchor.endsWith("Statement") && row.anchor !== "BlockStatement"
       ? STATEMENTS
       : row.anchor.endsWith("Expression")
         ? EXPRESSIONS
@@ -155,7 +169,7 @@ export function anchors(
           ? PARAMETERS
           : row.anchor.endsWith("Node") || /^\w+Node(V\d)?$/.test(row.anchor)
             ? DECLARATIONS
-            : new Set<string>();
+            : new Set<string>());
   const labelled =
     options.allowLabelStart === true &&
     Array.isArray(node.labels) &&
