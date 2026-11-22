@@ -1,6 +1,6 @@
 # 0035. Build the registry snapshot in a scheduled workflow and publish it through a snapshot branch
 
-- Status: Accepted (agent)
+- Status: Superseded by 0041
 - Date: 2026-11-22
 
 ## Context
