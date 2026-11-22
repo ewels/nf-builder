@@ -9,5 +9,5 @@ Every vendored file and runtime dependency with terms beyond a standard permissi
 | Ported nf-lang classes (`packages/lang-2610/src/parser/`: `AbstractLexer`, `AbstractParser`, `SemanticPredicates`, Java character rules) | Parser runtime (ADR 0020) | Apache-2.0 | Attribution headers in each file |
 | Catalogue text (`packages/lang-2610/catalogue/*.json`) from the Nextflow language server | Palette and docs text (ADR 0005) | Apache-2.0 | Generated; `source` records the jar |
 | antlr4ng | ANTLR runtime for the generated parser (ADR 0020) | BSD-3-Clause | Runtime dependency of `@nf-builder/lang-2610`; a third-party notices page in the app is F-704's |
-| CheerpJ | Optional in-browser JVM for the language server (ADR 0010), if adopted | Commercial; free for FOSS projects | Pending open question Q3 |
+| CheerpJ | Spike S3 only (`e2e/s3-spike/`, loaded from its CDN in local test runs); not shipped (ADR 0026) | Commercial; free for FOSS projects | Q3 answered: not needed for v0.1 |
 | Nextflow TextMate grammar (via Shiki) | Syntax highlighting in Monaco (ADR 0003) | Check during F-304 | |

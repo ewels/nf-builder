@@ -151,8 +151,8 @@
         "Report records cold start, peak memory and diagnostics time against the ADR 0010 thresholds",
         "ADR 0010 updated with the outcome"
       ],
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Verified 2026-11-22 (local only, ADR 0022): step 1 by e2e/s3-spike/s3.spike.ts E1 (pnpm test:e2e -- --config e2e/s3-spike.config.ts), re-run against the pinned v26.10.2 jar after F-006 merged: the diagnostic under CheerpJ equals plain Java's; step 2 by E2/E3 (report table: default cold start 13.4 s, preload 9.6 s, 323 MB, 0.9 s; 'unsafe-eval' required); step 3 by ADR 0010's spike result and ADR 0026 (not shipped in v0.1). Report: docs/research/2026-11-22-spike-s3-language-server-cheerpj.md. The root config's --grep F-007 finds nothing by design."
     },
     {
       "id": "F-008",
