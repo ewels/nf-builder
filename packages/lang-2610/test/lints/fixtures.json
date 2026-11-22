@@ -111,6 +111,16 @@
       ]
     },
     {
+      "file": "deprecated-directive/negative/main.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "deprecated-directive/positive/main.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
       "file": "deprecated-shell/negative/main.nf",
       "lint": [],
       "warnings": []
@@ -345,6 +355,36 @@
       "warnings": []
     },
     {
+      "file": "legacy-params/negative/main.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "legacy-params/positive/main.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "legacy-process/negative/main.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "legacy-process/positive/main.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "legacy-workflow/negative/main.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "legacy-workflow/positive/main.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
       "file": "missing-type/negative/inputs.nf",
       "lint": [],
       "warnings": []
@@ -408,6 +448,16 @@
       "warnings": []
     },
     {
+      "file": "params-outside-entry/negative/main.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "params-outside-entry/positive/main.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
       "file": "pipeline-include-types/negative/main.nf",
       "lint": [],
       "warnings": []
@@ -430,6 +480,16 @@
     },
     {
       "file": "pipeline-include-types/positive/rnaseq.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "publish-dir/negative/main.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "publish-dir/positive/main.nf",
       "lint": [],
       "warnings": []
     },
@@ -468,6 +528,16 @@
           "message": "Groovy `import` declarations are not supported -- use fully-qualified name inline instead"
         }
       ],
+      "warnings": []
+    },
+    {
+      "file": "tuple-where-record/negative/main.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "tuple-where-record/positive/main.nf",
+      "lint": [],
       "warnings": []
     },
     {
@@ -554,6 +624,16 @@
           "message": "Typed process should have only one output -- consider combining outputs into a record"
         }
       ]
+    },
+    {
+      "file": "unused-output/negative/main.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "unused-output/positive/main.nf",
+      "lint": [],
+      "warnings": []
     }
   ]
 }
