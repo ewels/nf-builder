@@ -4,6 +4,7 @@ import type { IncludeRules } from "./includes.ts";
 import type { PackLints } from "./lint.ts";
 import type { PaletteDefinition } from "./palette.ts";
 import type { SourceParser } from "./source-file.ts";
+import type { TemplateSet } from "./templates.ts";
 
 /** An operator that legacy workflows call but the catalogue lacks (AR-14, F-107): its result kind from the docs. */
 export interface LegacyOperator {
@@ -29,6 +30,8 @@ export interface LanguagePack {
   loadParser(): Promise<SourceParser>;
   /** The diagnostic codes, advice and rules, loaded on first call (a dynamic import, so it stays out of the initial bundle; QA-01, F-112). */
   loadLints(): Promise<PackLints>;
+  /** The project templates (LA-02, F-203), loaded on first call (a dynamic import of a generated JSON chunk, so it stays out of the initial bundle). */
+  loadTemplates(): Promise<TemplateSet>;
 }
 
 export * from "./ast/index.ts";
@@ -161,3 +164,9 @@ export type {
   SourceParse,
   SourceParser,
 } from "./source-file.ts";
+export type {
+  ProjectTemplate,
+  TemplateFile,
+  TemplateInfo,
+  TemplateSet,
+} from "./templates.ts";

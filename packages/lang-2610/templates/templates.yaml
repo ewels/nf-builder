@@ -1,0 +1,8 @@
+# Hand-edited metadata for the project templates (F-203, LA-02). Each id is a directory next to this file, run by the
+# oracle as the case template-<id>. `pnpm gen:templates 26.10` bundles the trees into ../templates.json.
+# The template text is dedicated under MIT-0 (docs/licences.md).
+blank:
+  id: blank
+  name: Blank
+  description: An empty pipeline with an entry workflow and a params block, ready to build on.
+templates: []

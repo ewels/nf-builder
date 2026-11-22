@@ -1,0 +1,26 @@
+{
+  "blank": {
+    "id": "blank",
+    "name": "Blank",
+    "description": "An empty pipeline with an entry workflow and a params block, ready to build on.",
+    "files": [
+      {
+        "path": "README.md",
+        "text": "# Blank pipeline\n\nA Nextflow pipeline with nothing in it yet.\n\n- `main.nf` holds the entry workflow and the `params` block.\n- `nextflow.config` holds the manifest and, later, profiles.\n- `nextflow_schema.json` describes each parameter; add an entry when you add a parameter.\n\nAdd processes to the canvas to fill it in. Each one is saved in `modules/local/<name>/main.nf`.\n"
+      },
+      {
+        "path": "main.nf",
+        "text": "nextflow.enable.types = true\n\n/**\n * The pipeline's parameters. Add one here for each setting a user can change.\n */\nparams {\n}\n\n/**\n * The pipeline's entry workflow. Add processes and channels to the canvas to build it.\n */\nworkflow {\n}\n"
+      },
+      {
+        "path": "nextflow.config",
+        "text": "manifest {\n    description = 'A blank Nextflow pipeline'\n    nextflowVersion = '>=26.10.6'\n}\n"
+      },
+      {
+        "path": "nextflow_schema.json",
+        "text": "{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"Pipeline parameters\",\n  \"description\": \"The parameters of this pipeline.\",\n  \"type\": \"object\",\n  \"$defs\": {},\n  \"allOf\": []\n}\n"
+      }
+    ]
+  },
+  "templates": []
+}
