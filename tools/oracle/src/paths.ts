@@ -11,3 +11,5 @@ export const CACHE_DIR = `${REPO_ROOT}/.cache`;
 export const NEXTFLOW_CACHE = `${CACHE_DIR}/nextflow`;
 export const ORACLE_CACHE = `${CACHE_DIR}/oracle`;
 export const DEFAULT_MANIFEST = `${TOOL_DIR}/cases/cases.yaml`;
+/** Read by path, never imported: tools stay standalone. */
+export const FIXTURES_FILE = `${REPO_ROOT}/tools/corpus/fixtures/fixtures.yaml`;

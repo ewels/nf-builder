@@ -8,13 +8,19 @@ import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
 import { loadManifest } from "./cases.ts";
+import { loadFixtures, runFixtures } from "./fixtures.ts";
 import {
   type Exec,
   ensureNextflow,
   nextflowEnv,
   nextflowExec,
 } from "./nextflow.ts";
-import { DEFAULT_MANIFEST, ORACLE_CACHE, REPO_ROOT } from "./paths.ts";
+import {
+  DEFAULT_MANIFEST,
+  FIXTURES_FILE,
+  ORACLE_CACHE,
+  REPO_ROOT,
+} from "./paths.ts";
 import { loadPin, type NextflowPin } from "./pin.ts";
 import { annotations, formatReport } from "./report.ts";
 import { runOracle } from "./run.ts";
@@ -27,6 +33,8 @@ export type OracleDeps = {
   exec?: Exec;
   env?: NodeJS.ProcessEnv;
   oracleCache?: string;
+  /** The fixtures manifest to lint. Default: tools/corpus/fixtures/fixtures.yaml, unless --manifest is given; --case always skips fixtures. */
+  fixturesFile?: string;
   write?: (line: string) => void;
 };
 
@@ -53,11 +61,20 @@ export function main(argv: readonly string[], deps: OracleDeps = {}): number {
     return 2;
   }
 
+  const fixturesFile =
+    values.case !== undefined
+      ? undefined
+      : (deps.fixturesFile ??
+        (values.manifest === undefined ? FIXTURES_FILE : undefined));
+
   let pin: NextflowPin;
   let manifest: ReturnType<typeof loadManifest>;
+  let fixtures: ReturnType<typeof loadFixtures> | undefined;
   try {
     pin = deps.pin ?? loadPin();
     manifest = loadManifest(resolve(values.manifest ?? DEFAULT_MANIFEST));
+    fixtures =
+      fixturesFile === undefined ? undefined : loadFixtures(fixturesFile);
   } catch (error) {
     write((error as Error).message);
     return 2;
@@ -101,6 +118,15 @@ export function main(argv: readonly string[], deps: OracleDeps = {}): number {
   } catch (error) {
     write(`oracle: ${(error as Error).message}`);
     return 3;
+  }
+  if (fixtures !== undefined) {
+    run.results.push(
+      ...runFixtures(fixtures, {
+        exec,
+        fixturesDir: `${oracleCache}/fixtures`,
+        log: write,
+      }),
+    );
   }
   const report = formatReport(run);
   mkdirSync(oracleCache, { recursive: true });
