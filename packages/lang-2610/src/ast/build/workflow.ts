@@ -2,13 +2,14 @@
 // `workflowDef` and its sections (Apache-2.0; see ../../../grammar/NOTICE). Items that are invalid in the kind of
 // workflow they are in are dropped, as upstream does: a statement as a take, a typed take or typed emit in a legacy
 // workflow, a publisher that is not an assignment.
-import type {
-  ExpressionStatement,
-  NamedOutput,
-  Section,
-  Statement,
-  TypedName,
-  WorkflowDef,
+import {
+  type ExpressionStatement,
+  MIXED_DEFINITIONS,
+  type NamedOutput,
+  type Section,
+  type Statement,
+  type TypedName,
+  type WorkflowDef,
 } from "@nf-builder/lang-core";
 import type { Token } from "antlr4ng";
 import type {
@@ -41,6 +42,7 @@ function take(ctx: WorkflowTakeContext, cx: BuildContext): TypedName | null {
     cx.error(
       "Typed input is not allowed in legacy workflow -- set `nextflow.enable.types = true` to use typed workflows in this script",
       cx.range(ctx),
+      MIXED_DEFINITIONS,
     );
     return null;
   }
@@ -76,6 +78,7 @@ function emit(
     cx.error(
       "Typed output is not allowed in legacy workflow -- set `nextflow.enable.types = true` to use typed workflows in this script",
       cx.range(ctx),
+      MIXED_DEFINITIONS,
     );
     return null;
   }

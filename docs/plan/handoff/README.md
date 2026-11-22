@@ -12,15 +12,15 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-110 printer | merged, PR #25 | |
 | F-105 semantic model | merged, PR #30 | |
 | F-106 typed projection | merged, PR #32 | Plan deleted in its PR. |
-| F-107 legacy projection | `feat/F-107`, in PR | Plan deleted in its PR. |
+| F-107 legacy projection | merged, PR #36 | |
 | F-108 code nodes | merged, PR #34 | |
-| F-111 edit commands | `feat/F-111` | Review fixes building; then merge F-107 and add a legacy Connect test. PR after F-107. |
-| F-112 diagnostics | not started | [plan](plan-F-112.md). After F-106 (and F-111 for fixes). |
-| F-113 engine worker | not started | [plan](plan-F-113.md). After F-111. |
+| F-111 edit commands | merged, PR #38 | |
+| F-112 diagnostics | `feat/F-112` | Tasks 1–7 committed; task 8 (calls and types) building. [plan](plan-F-112.md). |
+| F-113 engine worker | `feat/F-113` | Task 1 building. [plan](plan-F-113.md). |
 | F-202 projects in IndexedDB | not started | [plan](plan-F-202.md). After F-113. |
 | F-205 canvas | not started | [plan](plan-F-205.md). After F-113 (and F-106); parallel with F-202. |
 | F-501 registry snapshot | merged, PR #29, **not passing** | Passes once the Pages deploy serves `/registry/` and `verify` passes (ADR 0041, F-011). F-502 to F-506, F-702, F-704 and F-705 depend on it. |
-| F-011 GitHub Pages hosting | `feat/F-011` | [plan](plan-F-011.md). Merge only after Pages is enabled (#35). |
+| F-011 GitHub Pages hosting | `feat/F-011`, PR #37 | Reviewed, CI green; merge once Pages is enabled (#35), after merging `main`. |
 
 ## Merge order
 
@@ -64,7 +64,7 @@ Next free ADR number: 0042 (0038 is F-107's, 0039 F-111's, 0040 and 0041 F-011's
 ### F-108 (merged with its PR)
 - Accept every recommendation in section 6: closure reads are code-node inputs; mutations are reads only; conditional writes replace the binding; no port for `params` as a whole; keys from the first output; a lint-only free-variable oracle tree. One ADR for the LA-27 readings.
 
-### F-111 — [plan](plan-F-111.md)
+### F-111 (merged with its PR)
 - Accept every recommendation in section 6: declaration-level reprint for workflow commands, identifier edits for renames, item-boundary include inserts; the command model of 2.2 (plain data, ids resolved at apply time, patches with inverses, `commit` separate); AR-24 read as "no problem the file didn't have"; our own LA-13 check (lint accepts positional mixing, upstream-bugs #20) with `ParseProblem.code` tags; `null` placeholders for missing positional inputs; variable introduction names; Connect moves a later source when safe; DeleteNode clears direct arguments; CreateProcess writes `modules/local/<lower>/main.nf` from `LanguagePack.scaffold`; the rename limits; `fast-check` 4.11.0 as an engine dev dependency (ADR 0011). One ADR at landing.
 
 ### F-112 — [plan](plan-F-112.md)

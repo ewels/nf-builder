@@ -1,9 +1,10 @@
 export * from "./config.ts";
-export type {
-  ConfigParseResult,
-  ParseProblem,
-  ParseResult,
-  ScriptParseResult,
+export {
+  type ConfigParseResult,
+  MIXED_DEFINITIONS,
+  type ParseProblem,
+  type ParseResult,
+  type ScriptParseResult,
 } from "./parse-result.ts";
 export {
   type Comment,
@@ -17,4 +18,10 @@ export {
 } from "./range.ts";
 export * from "./script.ts";
 export type { DeclarationHead, Unparsed } from "./unparsed.ts";
-export { type AstNode, childNodes, walk } from "./walk.ts";
+export {
+  type AstNode,
+  childFields,
+  childNodes,
+  isAstNode,
+  walk,
+} from "./walk.ts";

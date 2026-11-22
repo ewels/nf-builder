@@ -13,11 +13,16 @@ const NOT_CHILDREN = new Set([
   "shebang",
 ]);
 
-const isNode = (value: unknown): value is AstNode =>
+export const isAstNode = (value: unknown): value is AstNode =>
   typeof value === "object" &&
   value !== null &&
   typeof (value as { kind?: unknown }).kind === "string" &&
   typeof (value as { range?: unknown }).range === "object";
+
+/** The fields of `node` that can hold child nodes, in field order: everything but the comment slots. */
+export function childFields(node: AstNode): [string, unknown][] {
+  return Object.entries(node).filter(([key]) => !NOT_CHILDREN.has(key));
+}
 
 /**
  * Child nodes in field order (builders create fields in source order). Ranges, comment slots and
@@ -25,11 +30,10 @@ const isNode = (value: unknown): value is AstNode =>
  */
 export function childNodes<N extends AstNode>(node: N): AstNode[] {
   const out: AstNode[] = [];
-  for (const [key, value] of Object.entries(node)) {
-    if (NOT_CHILDREN.has(key)) continue;
+  for (const [, value] of childFields(node)) {
     if (Array.isArray(value)) {
-      for (const item of value) if (isNode(item)) out.push(item);
-    } else if (isNode(value)) {
+      for (const item of value) if (isAstNode(item)) out.push(item);
+    } else if (isAstNode(value)) {
       out.push(value);
     }
   }

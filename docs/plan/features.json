@@ -410,8 +410,8 @@
         "CreateProcess writes `modules/local/<name>/main.nf` with `nextflow.enable.types = true` and adds the include",
         "An edit that would mix typed and legacy definitions in one script is refused with a message"
       ],
-      "passes": false,
-      "notes": "From F-110: nodes an edit creates carry NO_RANGE and get the fresh layout (ADR 0032); synthesised triple-quoted strings carry their final indentation and StringLiteral.text must be set. Never write a print whose missingComments is non-empty. printDeclaration reprints and normalises the whole declaration (println 'x' becomes println('x')); decide whether AddCall needs statement-level printing (AR-22). From F-104: printSourceFile and equivalent (engine/src/source/) are the base for AR-22: replace an item's slice with printer output (SourceParser.printer) and check every other item stays equivalent. From F-106: Port.argument, ChainStep ranges, node range and GraphEdge.direct locate text to patch; node keys parse with parseNodeKey; only the entry workflow has an :output node. From F-108: CodeNode.text and range locate a code statement to move or delete; code-node inputs are indirect edges from the variables they read. From F-107: legacy process calls have declared ports from qualifiers, so Connect can pad a legacy call's next input; Projection.statements and node guards tell which statements a command may move. From F-107: pipe, set/tap, guard and alias feeds have no Port.argument range (null), so edits can't patch them in place yet."
+      "passes": true,
+      "notes": "From F-110: nodes an edit creates carry NO_RANGE and get the fresh layout (ADR 0032); synthesised triple-quoted strings carry their final indentation and StringLiteral.text must be set. Never write a print whose missingComments is non-empty. printDeclaration reprints and normalises the whole declaration (println 'x' becomes println('x')); decide whether AddCall needs statement-level printing (AR-22). From F-104: printSourceFile and equivalent (engine/src/source/) are the base for AR-22: replace an item's slice with printer output (SourceParser.printer) and check every other item stays equivalent. From F-106: Port.argument, ChainStep ranges, node range and GraphEdge.direct locate text to patch; node keys parse with parseNodeKey; only the entry workflow has an :output node. From F-108: CodeNode.text and range locate a code statement to move or delete; code-node inputs are indirect edges from the variables they read. From F-107: legacy process calls have declared ports from qualifiers, so Connect can pad a legacy call's next input; Projection.statements and node guards tell which statements a command may move. From F-107: pipe, set/tap, guard and alias feeds have no Port.argument range (null), so edits can't patch them in place yet. Verified 2026-11-22: step 1 by packages/engine/test/edit/properties.test.ts (fast-check over fixture trees: results parse, untouched declarations stay equivalent, undo restores exact bytes) and test/corpus/edit.corpus.ts (CI corpus-parse; reprinted workflows keep their structure exactly); step 2 by create-process.test.ts and oracle cases f111-edits-typed/f111-edits-legacy (lint and run -stub); step 3 by guards.test.ts, the LA-13 property and oracle case f111-mixed-after-flag. Decisions in ADR 0039 (also the sixth printer known difference, string-reindent, upstream bug 23). No Playwright test (Q13)."
     },
     {
       "id": "F-112",
@@ -437,7 +437,7 @@
         "Every message states what to do; mechanical cases carry a quick-fix command"
       ],
       "passes": false,
-      "notes": "From F-101: 8 ported AgentParserTest inputs (L485-L491, L518: agent output types, eval not defined) parse and are rejected only by name and type resolution (owner F-112 in packages/lang-2610/test/ported/cases.json). From F-102: AST-builder errors come with nf-lang wording in ScriptParseResult.errors (source builder or parser); warnings (ScriptAstBuilder.java #L597, #L619, #L634, #L695, #L824, #L836, #L977, #L1059) and resolver errors are F-112's. From F-103: selector placement, includeConfig placement and include resolution are resolver checks, not AST-builder errors (lint 26.10.7: a selector inside docker passes lint; includeConfig inside process gives 'Config includes are only allowed at the top-level or in a profile'); decimal number-format errors are not ported. From F-104: whole-script checks carry scope 'file' and never isolate a declaration; Unparsed.problems hold the chunk's own errors; source 'internal' marks caught exceptions and model-check failures. From F-105: Diagnostic (lang-core) with codes include-target, include-not-parsed and include-name at the include node; left to F-112: pipeline-include typing errors (ResolveIncludeVisitor L134-L137), alias rules (records and enums can't be aliased; workflow and params must be), duplicate names (scope keeps the first) and config include placement. From F-106: FlowType/TypeExpr on ports (declared) and edges (source type), and Port.argumentType for inline arguments (LA-29, LA-32). From F-108: free reads that resolve to nothing get no code-node port; F-112 can report them (statementVariables in packages/engine/src/projection/free-variables.ts). From F-107: legacy operators (LanguagePack.legacyOperators) are chain steps with known: false, candidates for LA-34 legacy-pattern suggestions; guards record the conditions dataflow branches depend on. From F-107: LA-14 tuple arity comes from the legacy declaration; flag `.out` read before the call it names. From F-107: typed workflows reject set and tap (26.10.7: \"Operator `set` is not supported in typed workflows -- use an assignment instead\"); the projection still models them, so report them as errors in typed scripts."
+      "notes": "From F-101: 8 ported AgentParserTest inputs (L485-L491, L518: agent output types, eval not defined) parse and are rejected only by name and type resolution (owner F-112 in packages/lang-2610/test/ported/cases.json). From F-102: AST-builder errors come with nf-lang wording in ScriptParseResult.errors (source builder or parser); warnings (ScriptAstBuilder.java #L597, #L619, #L634, #L695, #L824, #L836, #L977, #L1059) and resolver errors are F-112's. From F-103: selector placement, includeConfig placement and include resolution are resolver checks, not AST-builder errors (lint 26.10.7: a selector inside docker passes lint; includeConfig inside process gives 'Config includes are only allowed at the top-level or in a profile'); decimal number-format errors are not ported. From F-104: whole-script checks carry scope 'file' and never isolate a declaration; Unparsed.problems hold the chunk's own errors; source 'internal' marks caught exceptions and model-check failures. From F-105: Diagnostic (lang-core) with codes include-target, include-not-parsed and include-name at the include node; left to F-112: pipeline-include typing errors (ResolveIncludeVisitor L134-L137), alias rules (records and enums can't be aliased; workflow and params must be), duplicate names (scope keeps the first) and config include placement. From F-106: FlowType/TypeExpr on ports (declared) and edges (source type), and Port.argumentType for inline arguments (LA-29, LA-32). From F-108: free reads that resolve to nothing get no code-node port; F-112 can report them (statementVariables in packages/engine/src/projection/free-variables.ts). From F-107: legacy operators (LanguagePack.legacyOperators) are chain steps with known: false, candidates for LA-34 legacy-pattern suggestions; guards record the conditions dataflow branches depend on. From F-107: LA-14 tuple arity comes from the legacy declaration; flag `.out` read before the call it names. From F-107: typed workflows reject set and tap (26.10.7: \"Operator `set` is not supported in typed workflows -- use an assignment instead\"); the projection still models them, so report them as errors in typed scripts. From F-111: the pack tags nf-lang's mixing errors with ParseProblem.code mixed-definitions; a literal null argument is the placeholder for an unconnected input (LA-33). From F-111: report a process called twice in one workflow (lint 26.10.7 accepts it, the run fails, upstream bug 24); a `null` argument for a typed input that isn't nullable fails at run time, so report it as an unconnected input (LA-33)."
     },
     {
       "id": "F-113",
@@ -456,7 +456,7 @@
         "The main thread does no parsing (asserted in a Playwright performance trace)"
       ],
       "passes": false,
-      "notes": "From F-201's plan: the shell reads installed pack versions through engine on the main thread; once a pack's entry holds the parser, move that list behind the worker so the parser stays out of the initial bundle (QA-01 check will catch it). From F-006: QA-03 risk. Sarek parses in 1.1 s warm but 15.9 s cold in Node (first-use DFA construction for real grammar ambiguities; upstream Java pays it too). Measure in the worker, then consider parsing open or changed files first, warming the parser at worker start, or caching parse results. 2026-11-22, maintainer (ADR 0029): QA-03 no longer asks for 3 s. The worker must keep the UI responsive and report loading progress; sarek must finish within 30 s on the CI reference profile. The earlier cold-start note no longer needs lazy parsing or caching. From F-104: LanguagePack.loadParser() is a dynamic import (parser and printer in one chunk); call it in the worker. A failing file is parsed at most twice (whole, then per chunk); the whole-corpus round trip takes about 31 s in Node. From F-105: ProjectModel is synchronous; setFile/deleteFile return the re-modelled paths; the trace hook counts parse and model work; openProject(version, files) loads the pack's parser. From F-106: createProjector(model, catalogue) is a snapshot of the model with its own memo; re-project the re-modelled files' workflows and their dependants' after a change; projections are plain data."
+      "notes": "From F-201's plan: the shell reads installed pack versions through engine on the main thread; once a pack's entry holds the parser, move that list behind the worker so the parser stays out of the initial bundle (QA-01 check will catch it). From F-006: QA-03 risk. Sarek parses in 1.1 s warm but 15.9 s cold in Node (first-use DFA construction for real grammar ambiguities; upstream Java pays it too). Measure in the worker, then consider parsing open or changed files first, warming the parser at worker start, or caching parse results. 2026-11-22, maintainer (ADR 0029): QA-03 no longer asks for 3 s. The worker must keep the UI responsive and report loading progress; sarek must finish within 30 s on the CI reference profile. The earlier cold-start note no longer needs lazy parsing or caching. From F-104: LanguagePack.loadParser() is a dynamic import (parser and printer in one chunk); call it in the worker. A failing file is parsed at most twice (whole, then per chunk); the whole-corpus round trip takes about 31 s in Node. From F-105: ProjectModel is synchronous; setFile/deleteFile return the re-modelled paths; the trace hook counts parse and model work; openProject(version, files) loads the pack's parser. From F-106: createProjector(model, catalogue) is a snapshot of the model with its own memo; re-project the re-modelled files' workflows and their dependants' after a change; projections are plain data. From F-111: applyCommand is synchronous and pure; its cost is one projection, one reprint and one parse per changed file. commit re-parses through F-105; if QA-04 needs it, reuse the checked SourceFile. Run commands one at a time and drop a command built on an older projection (ids can be stale)."
     },
     {
       "id": "F-201",
@@ -605,7 +605,7 @@
         "Rename a process through the app: its position is kept"
       ],
       "passes": false,
-      "notes": ""
+      "notes": "From F-111: node ids can change after variable introduction, a statement move or a rename; diff the projections to carry layout keys (ADR 0008)."
     },
     {
       "id": "F-208",
@@ -625,7 +625,7 @@
         "Monaco is absent from the initial bundle (bundle report)"
       ],
       "passes": false,
-      "notes": ""
+      "notes": "From F-111: show a ReplaceFileText refusal's problems as diagnostics."
     },
     {
       "id": "F-209",
@@ -642,7 +642,7 @@
         "Redo five times: back to the edited state"
       ],
       "passes": false,
-      "notes": ""
+      "notes": "From F-111: keep the inverse lists from applyCommand; redo is the original patches."
     },
     {
       "id": "F-210",
@@ -662,7 +662,7 @@
         "A registry module folder shows the `registry` tag and a file with a syntax error shows an error badge"
       ],
       "passes": false,
-      "notes": "Added 2026-11-22 (F-204 PR, scope-change; Q16): UX-16 had no owning feature; F-301 step 1 relies on the Files view. Dropping a zip reuses F-403's zip import."
+      "notes": "Added 2026-11-22 (F-204 PR, scope-change; Q16): UX-16 had no owning feature; F-301 step 1 relies on the Files view. Dropping a zip reuses F-403's zip import. From F-111: there is no create, delete or rename file command yet."
     },
     {
       "id": "F-301",
@@ -684,7 +684,7 @@
         "Exported result passes `nextflow lint`"
       ],
       "passes": false,
-      "notes": "From F-204: palette item descriptions are only a title tooltip on non-focusable rows; making items focusable here must also expose descriptions to keyboard users (QA-11)."
+      "notes": "From F-204: palette item descriptions are only a title tooltip on non-focusable rows; making items focusable here must also expose descriptions to keyboard users (QA-11). From F-111: group several commands as one undo step by committing each and concatenating the inverses in reverse. From F-111: AddCall refuses a process the workflow already calls (Nextflow can call a process once per workflow); offer to include it again under an alias (`include { X as X_2 }`) instead."
     },
     {
       "id": "F-302",
@@ -704,7 +704,7 @@
         "Delete an edge: the call argument is removed and the code still parses"
       ],
       "passes": false,
-      "notes": "From F-005 (S1): nextflow lint doesn't check a legacy tuple input's arity, so connecting to a legacy tuple input compares arity with its declaration (LA-14)."
+      "notes": "From F-005 (S1): nextflow lint doesn't check a legacy tuple input's arity, so connecting to a legacy tuple input compares arity with its declaration (LA-14). From F-111: a refused Connect serves as the invalid-target dry run; type checks and LA-14 arity are F-112's. Disconnect writes null for a missing earlier positional input (ADR 0039)."
     },
     {
       "id": "F-303",
@@ -765,7 +765,7 @@
         "Operator closures are editable in a small Monaco field"
       ],
       "passes": false,
-      "notes": ""
+      "notes": "From F-111: takes, emits, params and outputs have no edit commands yet."
     },
     {
       "id": "F-306",
@@ -804,7 +804,7 @@
         "Breadcrumb back returns to main.nf"
       ],
       "passes": false,
-      "notes": ""
+      "notes": "From F-111: takes, emits, params and outputs have no edit commands yet."
     },
     {
       "id": "F-308",
@@ -865,7 +865,7 @@
         "Delete a multi-selection: one undo step restores all"
       ],
       "passes": false,
-      "notes": ""
+      "notes": "From F-111: group several commands as one undo step by committing each and concatenating the inverses in reverse."
     },
     {
       "id": "F-311",

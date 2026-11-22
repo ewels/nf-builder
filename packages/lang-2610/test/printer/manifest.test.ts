@@ -88,6 +88,7 @@ describe("printer fixture manifest", () => {
       "catch-package",
       "directive-comment",
       "named-args-comma",
+      "string-reindent",
       "type-rename",
     ]);
   });

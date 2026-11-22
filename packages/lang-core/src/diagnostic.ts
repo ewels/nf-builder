@@ -1,14 +1,8 @@
 // A diagnostic (AR-05, F-105, F-112). In memory only: plain data that crosses the worker boundary.
 import type { Range } from "./ast/range.ts";
+import type { TextEdit } from "./edit.ts";
 
 export type DiagnosticSeverity = "error" | "warning" | "suggestion";
-
-/** A replacement of `text.slice(start, end)` in the diagnosed text; offsets are UTF-16 offsets into that text. */
-export interface TextEdit {
-  readonly start: number;
-  readonly end: number;
-  readonly text: string;
-}
 
 /** A fix that edits one file's text. Offsets belong to the text that was diagnosed. */
 export interface QuickFix {

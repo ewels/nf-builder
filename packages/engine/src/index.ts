@@ -1,15 +1,23 @@
 export type {
+  AddCall,
   Callee,
   CallNode,
   ChainNode,
   ChainStep,
   CodeNode,
+  CommandResult,
   ConfigSourceFile,
+  Connect,
+  CreateProcess,
   Dataflow,
+  DeleteNode,
   Diagnostic,
   DiagnosticCode,
+  Disconnect,
+  EditCommand,
   EmitNode,
   FactoryNode,
+  FileText,
   FlowType,
   GraphEdge,
   GraphNode,
@@ -33,14 +41,19 @@ export type {
   PortRef,
   Projection,
   QuickFix,
+  RefusalCode,
+  RenameDeclaration,
+  ReplaceFileText,
   ScriptSourceFile,
   SourceFile,
   SourceLanguage,
   SourceParser,
   TakeNode,
   TextEdit,
+  TextPatch,
   TypeExpr,
   WorkflowRef,
+  WorkflowTarget,
 } from "@nf-builder/lang-core";
 export {
   applyTextEdits,
@@ -52,6 +65,13 @@ export {
   type DiagnosticCounts,
   loadLints,
 } from "./diagnostics/index";
+export {
+  applyCommand,
+  commit,
+  createEditState,
+  type EditState,
+} from "./edit/apply";
+export { applyPatches, PatchError } from "./edit/patches";
 export type {
   Binding,
   ConfigIncludeModel,

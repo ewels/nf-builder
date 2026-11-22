@@ -6,12 +6,14 @@ import type {
 import { includes } from "./includes/index.ts";
 import { legacyOperators } from "./legacy-operators.ts";
 import { palette } from "./palette.ts";
+import { scaffold } from "./scaffold.ts";
 
 // Import the catalogue JSON only dynamically here: it must stay lazy chunks that come straight from JSON (QA-01, ADR 0028).
 export const pack: LanguagePack = {
   version: "26.10",
   palette,
   includes,
+  scaffold,
   legacyOperators,
   loadCatalogue: async () => {
     const [script, config] = await Promise.all([

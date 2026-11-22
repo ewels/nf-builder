@@ -1,6 +1,46 @@
 [
   {
     "pipeline": "rnaseq",
+    "file": "modules/nf-core/ribodetector/main.nf",
+    "knownDifference": "string-reindent",
+    "cause": "lint -format shifts the interior lines of a multi-line string with the statement that holds it, changing its value (upstream bug 23).",
+    "differingLines": {
+      "formatted": [
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        49,
+        51,
+        52,
+        53,
+        54
+      ],
+      "printed": [
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        49,
+        51,
+        52,
+        53,
+        54
+      ]
+    }
+  },
+  {
+    "pipeline": "rnaseq",
     "file": "modules/nf-core/trimgalore/main.nf",
     "knownDifference": "type-rename",
     "cause": "lint -format renames the resolved type through the Java class hierarchy: `as int` becomes `as Integer`.",
@@ -111,14 +151,33 @@
     "pipeline": "sarek",
     "file": "subworkflows/local/samplesheet_to_channel/main.nf",
     "knownDifference": "catch-package",
-    "cause": "lint -format drops the package of every catch type: `catch (java.lang.reflect.InvocationTargetException ex)` loses its package, and `InvocationTargetException` is not defined (checked with nextflow lint on the formatted file).",
+    "cause": "lint -format drops the package of every catch type: `catch (java.lang.reflect.InvocationTargetException ex)` loses its package, and `InvocationTargetException` is not defined (checked with nextflow lint on the formatted file). It also re-indents the lines of a multi-line GString inside the catch (upstream bug 23).",
     "differingLines": {
       "formatted": [
-        359
+        359,
+        361,
+        362,
+        363,
+        364,
+        365,
+        366,
+        367,
+        368
       ],
       "printed": [
-        359
+        359,
+        361,
+        362,
+        363,
+        364,
+        365,
+        366,
+        367,
+        368
       ]
-    }
+    },
+    "alsoKnownDifferences": [
+      "string-reindent"
+    ]
   }
 ]
