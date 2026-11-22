@@ -1,0 +1,559 @@
+{
+  "fixtures": [
+    {
+      "file": "agent-output/negative/main.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "agent-output/positive/main.nf",
+      "lint": [
+        {
+          "line": 13,
+          "column": 5,
+          "message": "Agent output `q` should declare a type -- typed outputs are answered by the model"
+        },
+        {
+          "line": 24,
+          "column": 5,
+          "message": "Agent output `items` has unsupported type List -- supported types are Boolean, Float, Integer, List<E>, Path, String, or a record type"
+        },
+        {
+          "line": 35,
+          "column": 5,
+          "message": "Agent output `b` has unsupported field `meta` with type Map -- supported types are Boolean, Float, Integer, List<E>, Path, String, or a record type"
+        },
+        {
+          "line": 46,
+          "column": 5,
+          "message": "`eval` is not defined"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "file": "call-arity/negative/legacy.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "call-arity/negative/typed.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "call-arity/positive/legacy.nf",
+      "lint": [
+        {
+          "line": 12,
+          "column": 5,
+          "message": "Incorrect number of call arguments, expected 1 but received 2"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "file": "call-arity/positive/typed.nf",
+      "lint": [
+        {
+          "line": 18,
+          "column": 5,
+          "message": "Process `hello` expects 2 argument(s) but received 1"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "file": "config-include-placement/negative/extra.config",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "config-include-placement/negative/main.config",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "config-include-placement/positive/extra.config",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "config-include-placement/positive/main.config",
+      "lint": [
+        {
+          "line": 2,
+          "column": 5,
+          "message": "Config includes are only allowed at the top-level or in a profile"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "file": "deprecated-channel/fixed/main.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "deprecated-channel/negative/main.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "deprecated-channel/positive/main.nf",
+      "lint": [],
+      "warnings": [
+        {
+          "line": 2,
+          "column": 5,
+          "message": "The use of `Channel` to access channel factories is deprecated -- use `channel` instead"
+        }
+      ]
+    },
+    {
+      "file": "deprecated-shell/negative/main.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "deprecated-shell/positive/main.nf",
+      "lint": [],
+      "warnings": [
+        {
+          "line": 5,
+          "column": 5,
+          "message": "The `shell` block is deprecated, use `script` instead"
+        }
+      ]
+    },
+    {
+      "file": "deprecated-when/negative/main.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "deprecated-when/positive/main.nf",
+      "lint": [],
+      "warnings": [
+        {
+          "line": 5,
+          "column": 5,
+          "message": "The `when` section is deprecated -- use conditional logic in the calling workflow, or the `process.when` config option to disable a process at runtime"
+        }
+      ]
+    },
+    {
+      "file": "duplicate-name/fixed/hello.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "duplicate-name/fixed/main.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "duplicate-name/negative/hello.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "duplicate-name/negative/main.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "duplicate-name/positive/hello.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "duplicate-name/positive/main.nf",
+      "lint": [
+        {
+          "line": 2,
+          "column": 1,
+          "message": "`hello` is already included"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "file": "feature-flag/negative/main.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "feature-flag/positive/main.nf",
+      "lint": [
+        {
+          "line": 1,
+          "column": 1,
+          "message": "Unrecognized feature flag 'nextflow.enable.typess'"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "file": "implicit-it/fixed/main.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "implicit-it/negative/main.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "implicit-it/positive/main.nf",
+      "lint": [],
+      "warnings": [
+        {
+          "line": 2,
+          "column": 31,
+          "message": "Implicit closure parameter is deprecated, declare an explicit parameter instead"
+        }
+      ]
+    },
+    {
+      "file": "include-alias/negative/main.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "include-alias/negative/rnaseq.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "include-alias/negative/types.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "include-alias/positive/main.nf",
+      "lint": [
+        {
+          "line": 3,
+          "column": 11,
+          "message": "Included types cannot be aliased"
+        },
+        {
+          "line": 4,
+          "column": 11,
+          "message": "An included pipeline must be aliased, e.g. `params as MY_PIPELINE`"
+        },
+        {
+          "line": 4,
+          "column": 20,
+          "message": "An included pipeline must be aliased, e.g. `workflow as MY_PIPELINE`"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "file": "include-alias/positive/rnaseq.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "include-alias/positive/types.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "include-name/negative/hello.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "include-name/negative/main.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "include-name/positive/hello.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "include-name/positive/main.nf",
+      "lint": [
+        {
+          "line": 1,
+          "column": 1,
+          "message": "Included name 'goodbye' is not defined in module 'include-name/positive/hello.nf'"
+        },
+        {
+          "line": 4,
+          "column": 5,
+          "message": "`goodbye` is not defined"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "file": "include-not-parsed/negative/hello.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "include-not-parsed/negative/main.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "include-not-parsed/positive/broken.nf",
+      "lint": [
+        {
+          "line": 1,
+          "column": 1,
+          "message": "Groovy `import` declarations are not supported -- use fully-qualified name inline instead"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "file": "include-not-parsed/positive/main.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "include-target/negative/hello.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "include-target/negative/main.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "include-target/positive/main.nf",
+      "lint": [
+        {
+          "line": 1,
+          "column": 1,
+          "message": "Invalid include source: 'include-target/positive/missing.nf'"
+        },
+        {
+          "line": 4,
+          "column": 5,
+          "message": "`hello` is not defined"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "file": "missing-type/negative/inputs.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "missing-type/negative/main.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "missing-type/positive/inputs.nf",
+      "lint": [],
+      "warnings": [
+        {
+          "line": 5,
+          "column": 5,
+          "message": "Process input should have a type annotation"
+        },
+        {
+          "line": 16,
+          "column": 11,
+          "message": "Tuple component should have a type annotation"
+        },
+        {
+          "line": 16,
+          "column": 14,
+          "message": "Tuple component should have a type annotation"
+        }
+      ]
+    },
+    {
+      "file": "missing-type/positive/main.nf",
+      "lint": [],
+      "warnings": [
+        {
+          "line": 5,
+          "column": 5,
+          "message": "Process input should have a type annotation"
+        },
+        {
+          "line": 18,
+          "column": 5,
+          "message": "Typed workflow input should have a type annotation"
+        }
+      ]
+    },
+    {
+      "file": "multiple-channels/negative/main.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "multiple-channels/positive/main.nf",
+      "lint": [
+        {
+          "line": 18,
+          "column": 5,
+          "message": "Process `pair` was called with multiple channel arguments which can lead to non-deterministic behavior -- make sure that at most one argument is a channel and that all other arguments are dataflow values"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "file": "pipeline-include-types/negative/main.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "pipeline-include-types/negative/rnaseq.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "pipeline-include-types/positive/main.nf",
+      "lint": [
+        {
+          "line": 1,
+          "column": 1,
+          "message": "Including a pipeline requires `nextflow.enable.types = true` in the including script"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "file": "pipeline-include-types/positive/rnaseq.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "publish-type-ignored/fixed/main.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "publish-type-ignored/negative/main.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "publish-type-ignored/positive/main.nf",
+      "lint": [],
+      "warnings": [
+        {
+          "line": 8,
+          "column": 5,
+          "message": "Workflow output type should be declared in the output block -- the type annotation in the publish statement is ignored"
+        }
+      ]
+    },
+    {
+      "file": "syntax/negative/main.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "syntax/positive/main.nf",
+      "lint": [
+        {
+          "line": 1,
+          "column": 1,
+          "message": "Groovy `import` declarations are not supported -- use fully-qualified name inline instead"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "file": "type-mismatch/negative/emit.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "type-mismatch/negative/float.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "type-mismatch/negative/input.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "type-mismatch/negative/output.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "type-mismatch/negative/take.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "type-mismatch/positive/emit.nf",
+      "lint": [
+        {
+          "line": 11,
+          "column": 5,
+          "message": "Workflow emit `greeted` with type Channel<Integer> cannot be assigned to value with type Channel<String>"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "file": "type-mismatch/positive/input.nf",
+      "lint": [
+        {
+          "line": 17,
+          "column": 11,
+          "message": "Argument with type Integer is not compatible with process input of type String"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "file": "type-mismatch/positive/output.nf",
+      "lint": [
+        {
+          "line": 8,
+          "column": 5,
+          "message": "Workflow output `summary` with type Integer cannot be assigned to value with type Path"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "file": "type-mismatch/positive/take.nf",
+      "lint": [
+        {
+          "line": 15,
+          "column": 11,
+          "message": "Argument with type Channel<Integer> is not compatible with parameter of type Channel<String>"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "file": "typed-process-outputs/negative/main.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "typed-process-outputs/positive/main.nf",
+      "lint": [],
+      "warnings": [
+        {
+          "line": 7,
+          "column": 5,
+          "message": "Typed process should have only one output -- consider combining outputs into a record"
+        }
+      ]
+    }
+  ]
+}
