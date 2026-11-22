@@ -1,5 +1,8 @@
 // The response headers of the spike's `vite preview` (ADR 0024): the site policy headers (SITE_POLICY_HEADERS), plus one CSP token.
-import { SITE_POLICY_HEADERS } from "../../scripts/security-policy.ts";
+import {
+  CONTENT_SECURITY_POLICY,
+  SITE_POLICY_HEADERS,
+} from "../../scripts/security-policy.ts";
 
 export const WASM_UNSAFE_EVAL = "'wasm-unsafe-eval'";
 
@@ -21,8 +24,10 @@ export function spikeS5Headers(
   mode: "spike" | "production" = "spike",
 ): Record<string, string> {
   const headers = { ...SITE_POLICY_HEADERS };
-  const csp = headers["Content-Security-Policy"];
-  if (mode === "spike" && csp !== undefined)
-    headers["Content-Security-Policy"] = addToScriptSrc(csp, WASM_UNSAFE_EVAL);
+  if (mode === "spike")
+    headers["Content-Security-Policy"] = addToScriptSrc(
+      CONTENT_SECURITY_POLICY,
+      WASM_UNSAFE_EVAL,
+    );
   return headers;
 }
