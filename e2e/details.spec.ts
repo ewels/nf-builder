@@ -88,6 +88,26 @@ test("F-206 UX-24: edges touching the selected node are highlighted until the se
   await expect(page.locator(".react-flow__node.selected")).toHaveCount(0);
 });
 
+test("F-206 UX-30: selecting a node keeps the viewport", async ({ page }) => {
+  await page.goto("./");
+  await openFixture(page);
+  await canvasReady(page);
+  await page.getByRole("button", { name: "Zoom in" }).click();
+  await layoutSettled(page);
+  const transform = () =>
+    page
+      .locator(".react-flow__viewport")
+      .evaluate((el) => getComputedStyle(el).transform);
+  const before = await transform();
+  await selectNode(page, NODE.greeted);
+  await expect(node(page, NODE.greeted)).toHaveClass(/selected/);
+  await detailsReady(page);
+  expect(await transform()).toBe(before);
+  await selectNode(page, NODE.counted);
+  await expect(node(page, NODE.counted)).toHaveClass(/selected/);
+  expect(await transform()).toBe(before);
+});
+
 test("F-206 step 1 UX-30: clicking each node kind shows its name, kind, file, and ports with types and connections", async ({
   page,
 }) => {

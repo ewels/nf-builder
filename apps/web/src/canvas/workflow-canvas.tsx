@@ -70,23 +70,26 @@ function CanvasInner({
     [projection, portLabels],
   );
   const initialNodes = useMemo(
-    () => toFlowNodes(view, portLabels, selected),
-    [view, portLabels, selected],
+    () => toFlowNodes(view, portLabels, null),
+    [view, portLabels],
   );
   // controlled nodes: React Flow reports each node's measured size through onNodesChange
   const [nodes, setNodes, applyNodeChanges] = useNodesState(initialNodes);
-  // a refresh replaces the nodes but keeps the measured sizes, so the selection (held in the store) survives it
+  // a new view replaces the nodes, so they are measured and the view fitted again (F-205)
+  useEffect(() => setNodes(initialNodes), [initialNodes, setNodes]);
+  // the selection (held in the store) is applied apart from that, so it keeps the sizes and the viewport;
+  // it also runs after each new view, which has replaced the nodes unselected
+  // biome-ignore lint/correctness/useExhaustiveDependencies: initialNodes re-applies the selection to the new nodes
   useEffect(
     () =>
       setNodes((current) =>
-        initialNodes.map((n) => {
-          const old = current.find((c) => c.id === n.id);
-          return old?.measured === undefined
+        current.map((n) =>
+          n.selected === (n.id === selected)
             ? n
-            : { ...n, measured: old.measured };
-        }),
+            : { ...n, selected: n.id === selected },
+        ),
       ),
-    [initialNodes, setNodes],
+    [initialNodes, selected, setNodes],
   );
   // selection is the store's: only React Flow's keyboard select and deselect are forwarded (single select, UX-30)
   const onNodesChange: OnNodesChange<CanvasFlowNode> = (changes) => {
