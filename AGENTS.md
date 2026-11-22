@@ -35,6 +35,7 @@ This table lists every root `package.json` script that `pnpm check` doesn't alre
 | `pnpm check:budget` and `pnpm check:hosts` | After `pnpm build`, with the same `BASE_PATH`: QA-01 bundle budget and IO-41 host allow-list (ADR 0015) |
 | `pnpm check:site [<dir>]` | After `pnpm build` with `BASE_PATH=/nf-builder/` (as the CI `site` job does): every page starts `<head>` with the QA-30 policy meta, asset URLs sit under the base, `version.json` is valid; `--url <site> --commit <sha>` polls a deployed site (ADR 0040) |
 | `pnpm test:e2e -- --grep F-123` | The feature's end-to-end test |
+| `pnpm bench` | After `pnpm corpus:fetch`: sarek open time (QA-03) and edit p95 (QA-04) in the engine worker on Chromium; report in `.cache/reports/bench.{json,md}`; CI job `bench`, reported not gated |
 | `pnpm corpus:fetch` | Fetch the pinned pipeline corpus into `.cache/corpus/` (git over github.com; second run is a no-op) |
 | `pnpm spike:s5` | Spike S5 (F-010): fetch the pinned Pyodide and nf-metro files, render the CLI references, then serve the test page on http://localhost:4175 (needs Python 3.11+) |
 | `pnpm nextflow -- <args>` | Run the pinned Nextflow (`packages/lang-2610/upstream.json`, Java 17 to 26): downloads the release once into `.cache/nextflow/`, checks its SHA-256, runs offline |

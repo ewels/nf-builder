@@ -2,7 +2,8 @@
 // never fetched (scripts/non-fetched-urls.ts). Scans the code files in the build output (see SCANNED_EXTENSIONS).
 // JSON and other data are not scanned (the future registry snapshot is full of URLs that are data, not calls).
 // Vite turns imported JSON into a JavaScript chunk, so a chunk is skipped when its entry in .vite/manifest.json
-// has a `src` ending in `.json` (the pack catalogues, ADR 0028). A code chunk that merely imports JSON is scanned.
+// has a `src` ending in `.json` (the pack catalogues, ADR 0028). Worker chunks are absent from that manifest, so the
+// same rule reads .vite/worker-manifest.json (scripts/worker-manifest.ts, F-113). A code chunk that merely imports JSON is scanned.
 // A host built at runtime (`https://${h}`, "https://"+h) can't be checked statically and is skipped;
 // the CSP connect-src is the runtime guard for those.
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
@@ -16,6 +17,7 @@ import {
   WEB_DIST,
 } from "./check-common.ts";
 import { NON_FETCHED_URLS, type NonFetchedUrl } from "./non-fetched-urls.ts";
+import { readWorkerManifest } from "./worker-manifest.ts";
 
 const SCANNED_EXTENSIONS: readonly string[] = [
   ".js",
@@ -103,16 +105,14 @@ function hostsOf(origins: readonly string[]): string {
   return origins.map((o) => o.replace(/^[a-z]+:\/\//, "")).join(", ");
 }
 
-/** Absolute paths of the built chunks that come straight from a .json source, per the Vite manifest. */
+/** Absolute paths of the built chunks that come straight from a .json source, per the Vite and worker manifests. */
 function jsonChunks(distDir: string): Set<string> {
   const path = join(distDir, ".vite/manifest.json");
+  const vite: { src?: string; file: string }[] = existsSync(path)
+    ? Object.values(JSON.parse(readFileSync(path, "utf8")))
+    : [];
   const chunks = new Set<string>();
-  if (!existsSync(path)) return chunks;
-  const manifest = JSON.parse(readFileSync(path, "utf8")) as Record<
-    string,
-    { src?: string; file: string }
-  >;
-  for (const { src, file } of Object.values(manifest))
+  for (const { src, file } of [...vite, ...readWorkerManifest(distDir)])
     if (src?.endsWith(".json")) chunks.add(resolve(distDir, file));
   return chunks;
 }

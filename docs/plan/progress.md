@@ -386,6 +386,45 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - Legacy operators as pack data (`LanguagePack.legacyOperators`); one `set`/`tap` rule matching nf-lang's `VariableScopeVisitor`, shared with F-108.
   - Licences row for the 119 corpus-derived snapshots. No new dependency.
 - Blockers: none.
+## 2026-11-22 · F-111 · Claude (autonomous)
+- Did: edit commands in `packages/engine/src/edit/` (types in lang-core): CreateProcess, AddCall, Connect, Disconnect, DeleteNode, RenameDeclaration and ReplaceFileText, applied as text patches with inverses behind the AR-24 and LA-13 guards. Property tests with fast-check over fixture trees, a corpus reprint check, and oracle cases that lint and stub-run edited trees. The printer now keeps multi-line string content verbatim.
+- State: passing.
+- Next: F-112, then F-113.
+- Decisions:
+  - [ADR 0039](../adr/0039-edit-commands.md):
+    - declaration-level reprint, plain-data commands, and patches and inverses in memory only;
+    - AR-24 read as "no problem the file didn't have", with our own LA-13 check (lint misses positional mixing, upstream bug 20);
+    - `null` placeholders, variable names, Connect moving a later source, DeleteNode clearing direct arguments;
+    - CreateProcess at `modules/local/<lower>/main.nf` from `LanguagePack.scaffold`, plus the rename limits;
+    - `ParseProblem.code`.
+  - A sixth printer known difference, `string-reindent` (upstream bug 23, amends ADR 0032); the three ported nf-lang formatter cases that assert re-indentation are marked as known differences, with their inputs and outputs unchanged.
+  - Spec: AR-24 clarified; LA-12 and LA-13 cite ADR 0039; the architecture sketch gains `scaffold`.
+  - `fast-check` 4.11.0 as an engine dev dependency (ADR 0011).
+- Blockers: none new.
+
+## 2026-11-22 · F-113 · Claude (autonomous)
+- Did:
+  - The engine runs in a module Web Worker behind Comlink. A pure `EngineApi` service (`packages/engine/src/service/`) handles open with progress, apply, patches, writes, projections, diagnostics and the palette.
+  - The palette and the `window.nfBuilderEngine` test hook go through the worker. The main bundle no longer holds the parser or catalogues (75 kB initial JS).
+  - A worker manifest feeds `check:hosts`.
+  - A Chromium trace checks that no parsing happens on the main thread.
+  - `pnpm bench` and a CI `bench` job report QA-03 and QA-04.
+- State: passing.
+- Next: F-202 and F-205.
+- Decisions:
+  - [ADR 0043](../adr/0043-engine-worker.md):
+    - Comlink 4.4.2 is a runtime dependency of `@nf-builder/web` only;
+    - the service is pure;
+    - the main thread keeps only pack versions and palette search;
+    - worker chunks are recorded in `.vite/worker-manifest.json`, and `check:hosts` skips JSON worker chunks (amends ADR 0028's rule);
+    - worker chunks stay outside QA-01;
+    - the page is throttled 4× and the worker runs unthrottled (QA-02 and QA-03 clarified);
+    - F-702 gates QA-03, and QA-04 is reported.
+  - `.github/workflows/ci.yml` gains a `bench` job, and the `pnpm bench` script is new.
+  - First numbers (local): sarek cold open 18.6 s of 30 s; edit p95 271 ms of 100 ms. The cost of re-projection and the double parse is noted in F-702.
+  - The bench includes FASTQC under an alias to measure AddCall, since SAREK already calls FASTQC (a process is called once per workflow).
+- Blockers: none new.
+
 
 ## 2026-11-22 · F-011 · Claude (autonomous)
 - Did:

@@ -11,6 +11,8 @@ files (IndexedDB) ──► engine worker: parse ─► AST ─► semantic mode
   text patches ◄── edit command ◄── UI (canvas, popup, forms, Code tab) ◄── React Flow / panes
 ```
 
+The main thread keeps only pack versions and palette search; parsing, modelling, projection, edits and diagnostics run in the engine worker behind Comlink (AR-04, ADR 0043).
+
 - The UI never edits text or AST directly. It sends edit commands and renders projections.
 - The engine runs in a Web Worker behind a Comlink API. The UI keeps a read-only copy of the latest projection and diagnostics.
 
@@ -42,7 +44,7 @@ files (IndexedDB) ──► engine worker: parse ─► AST ─► semantic mode
 | AR-21 | Minimum set for v1: `CreateProcess`, `CreateWorkflow`, `CreateRecord`, `CreateFunction`, `AddCall`, `AddChain`, `AddFactory`, `Connect`, `Disconnect`, `DeleteNode`, `RenameDeclaration`, `UpdateDeclaration` (from the popup), `SetDirective`, `AddInclude`, `InsertRegistryModule`, `AddTake`, `AddEmit`, `UpdateParams`, `UpdateOutputs`, `ReplaceFileText` (from code editors). |
 | AR-22 | Applying a command leaves every declaration it doesn't target equivalent (see glossary), apart from added includes and new files. Whitespace next to the edit may change (property test, ADR 0011). |
 | AR-23 | Every command is one undo step. Undo restores exact bytes. |
-| AR-24 | A command that would produce code that fails to parse is rejected before it touches any file. |
+| AR-24 | A command that would produce code that fails to parse is rejected before it touches any file. A problem the file already had doesn't count, so partial imports stay editable (ADR 0039). |
 
 ## Language pack interface
 
@@ -55,6 +57,7 @@ interface LanguagePack {
   includes: IncludeRules;               // include resolution and includable names (ADR 0034)
   palette: PaletteDefinition;           // palette.json, ADR 0025
   loadCatalogue(): Promise<Catalogue>;  // generated, lazily loaded (ADR 0005, ADR 0028)
+  scaffold: Scaffold;                   // new-process and include text (ADR 0039)
   lints: LintRule[];
   templates: Template[];
   defaults: ProjectDefaults;

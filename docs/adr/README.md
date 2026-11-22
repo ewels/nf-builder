@@ -42,5 +42,7 @@ Process: [0001](0001-record-decisions-as-adrs.md). Template: [template.md](templ
 | [0036](0036-projection-node-keys-and-types.md) | Project typed workflows into plain-data graphs with name-based node keys and Channel/Value types | Accepted (agent) |
 | [0037](0037-code-nodes-and-free-variables.md) | Wire code nodes to the variables they read and write | Accepted (agent) |
 | [0038](0038-legacy-projection.md) | Project legacy dataflow forms, including aliases and dataflow conditionals | Accepted (agent) |
+| [0039](0039-edit-commands.md) | Apply edits as text patches with inverses, reprinting whole declarations, behind AR-24 and LA-13 guards | Accepted (agent) |
 | [0040](0040-github-pages-hosting.md) | Host on GitHub Pages, with the security policy in meta elements | Accepted |
 | [0041](0041-registry-snapshot-deploy.md) | Deploy the registry snapshot with the site from Actions | Accepted (agent) |
+| [0043](0043-engine-worker.md) | Run the engine in a module worker behind Comlink, and benchmark it in Chromium | Accepted (agent) |

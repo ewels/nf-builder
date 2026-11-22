@@ -21,6 +21,9 @@ type Case = {
   out?: string;
   contains?: string[];
   excluded?: string;
+  /** The printer deliberately differs from upstream here (ADR 0032, 0039); `printed` pins our own output. */
+  knownDifference?: string;
+  printed?: string;
 };
 type Manifest = {
   upstream: { repo: string; tag: string; commit: string; file: string };
@@ -46,7 +49,7 @@ function format(text: string): string {
 describe("ported nf-lang ScriptFormatterTest cases", () => {
   for (const c of manifest.cases) {
     if (c.excluded) continue;
-    it(`F-110 LA-45 ADR-0005: nf-lang ScriptFormatterTest "${c.test}" (L${c.line}) formats as upstream`, () => {
+    it(`F-110 LA-45 ADR-0005: nf-lang ScriptFormatterTest "${c.test}" (L${c.line}) ${c.knownDifference ? `keeps string content (known difference ${c.knownDifference}, ADR 0039)` : "formats as upstream"}`, () => {
       const input = read(c.in);
       if (c.kind === "format-contains") {
         const result = format(input);
@@ -55,6 +58,14 @@ describe("ported nf-lang ScriptFormatterTest cases", () => {
       }
       const output =
         c.kind === "format-equals-input" ? input : read(c.out as string);
+      if (c.knownDifference) {
+        // a known difference that no longer differs must be removed from cases.json
+        const printed = format(input);
+        expect(printed).not.toBe(output);
+        expect(printed).toBe(read(c.printed as string));
+        expect(format(printed)).toBe(printed);
+        return;
+      }
       expect(format(input)).toBe(output);
       if (c.kind === "check-format") expect(format(output)).toBe(output);
     });

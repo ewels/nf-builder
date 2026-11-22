@@ -61,6 +61,7 @@ describe("CI workflows", () => {
       "corpus",
       "oracle",
       "corpus-parse",
+      "bench",
       "catalogue",
     ]) {
       expect(ci, job).toMatch(new RegExp(`^  ${job}:`, "m"));
@@ -70,7 +71,7 @@ describe("CI workflows", () => {
     }
     const jobs = ci.split(/^jobs:/m)[1] ?? "";
     const blocks = jobs.split(/^ {2}(?=[\w-]+:\s*$)/m).slice(1);
-    expect(blocks.length).toBe(12);
+    expect(blocks.length).toBe(13);
     for (const block of blocks) expect(block).toContain("timeout-minutes:");
     for (const command of [
       "pnpm check",
@@ -84,6 +85,7 @@ describe("CI workflows", () => {
       "pnpm corpus:fetch --check",
       "pnpm oracle",
       "pnpm test:corpus",
+      "pnpm bench",
       "pnpm gen:catalogue 26.10 --check",
     ]) {
       expect(ci, command).toContain(`run: ${command}`);
@@ -189,6 +191,27 @@ describe("CI workflows", () => {
     expect(job).toContain("path: .cache/reports/");
     expect(job).toMatch(/if: always\(\)/);
     expect(job).toContain("timeout-minutes: 20");
+  });
+
+  it("F-113 step 1 ADR-0015 ADR-0030: ci.yml has a bench job that restores the corpus, installs Chromium, runs pnpm bench and uploads the report", () => {
+    const job = jobOf("bench");
+    const at = stepIndex(job);
+    const order = [
+      at("uses: ./.github/actions/setup"),
+      at("uses: ./.github/actions/corpus"),
+      at("run: pnpm exec playwright install --with-deps chromium"),
+      at("run: pnpm bench"),
+      at(/uses: actions\/upload-artifact@[0-9a-f]{40}/),
+    ];
+    expect(order).toEqual([...order].sort((a, b) => a - b));
+    expect(order[0]).toBeGreaterThanOrEqual(0);
+    expect(job).toContain("runs-on: ubuntu-24.04");
+    expect(job).toContain("timeout-minutes: 20");
+    expect(job).toContain("name: engine-bench");
+    expect(job).toContain("path: .cache/reports/bench.*");
+    expect(job).toMatch(/if: always\(\)/);
+    // reported, not gated: nothing in the job reads a budget verdict
+    expect(job).not.toMatch(/check:budget|exit 1/);
   });
 
   it("F-006 ADR-0005: the catalogue job sets up Java, caches the language server jar and fails on a catalogue diff", () => {

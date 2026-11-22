@@ -12,21 +12,24 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-110 printer | merged, PR #25 | |
 | F-105 semantic model | merged, PR #30 | |
 | F-106 typed projection | merged, PR #32 | Plan deleted in its PR. |
-| F-107 legacy projection | `feat/F-107`, in PR | Plan deleted in its PR. |
+| F-107 legacy projection | merged, PR #36 | |
 | F-108 code nodes | merged, PR #34 | |
-| F-111 edit commands | `feat/F-111` | Review fixes building; then merge F-107 and add a legacy Connect test. PR after F-107. |
-| F-112 diagnostics | not started | [plan](plan-F-112.md). After F-106 (and F-111 for fixes). |
-| F-113 engine worker | not started | [plan](plan-F-113.md). After F-111. |
+| F-111 edit commands | merged, PR #38 | |
+| F-112 diagnostics | `feat/F-112` | Tasks 1–7 committed; task 8 (calls and types) building. [plan](plan-F-112.md). |
+| F-113 engine worker | `feat/F-113`, in PR | Plan deleted in its PR. |
 | F-202 projects in IndexedDB | not started | [plan](plan-F-202.md). After F-113. |
 | F-205 canvas | not started | [plan](plan-F-205.md). After F-113 (and F-106); parallel with F-202. |
+| F-206 details pane | not started | [plan](plan-F-206.md). After F-205. |
+| F-207 layout sidecar | not started | [plan](plan-F-207.md). After F-205 and F-202. |
+| F-208 view modes and Code | not started | [plan](plan-F-208.md). After F-205. |
 | F-501 registry snapshot | merged, PR #29, **not passing** | Passes once the Pages deploy serves `/registry/` and `verify` passes (ADR 0041, F-011). F-502 to F-506, F-702, F-704 and F-705 depend on it. |
-| F-011 GitHub Pages hosting | `feat/F-011`, in PR | Merge only after Pages is enabled (#35). The plan stays: ADR 0040 links to it. |
+| F-011 GitHub Pages hosting | `feat/F-011`, in PR #37 | Pages enabled by the maintainer; the plan stays (ADR 0040 links it). |
 
 ## Merge order
 
 Branches are stacked: `feat/F-108` → `feat/F-107`; `feat/F-111` also merges F-107. Open PRs for F-108, F-107 and F-111 against `main` in that order (merge `main` into each first), each green before the next. Worktrees: `/home/user/wt-F-1xx`.
 
-Next free ADR number: 0042 (0038 is F-107's, 0039 F-111's, 0040 and 0041 F-011's).
+Next free ADR number: 0044 (0040 and 0041 are F-011's, 0042 F-112's, 0043 F-113's).
 
 ## Decisions already taken on the plans' open points
 
@@ -64,7 +67,7 @@ Next free ADR number: 0042 (0038 is F-107's, 0039 F-111's, 0040 and 0041 F-011's
 ### F-108 (merged with its PR)
 - Accept every recommendation in section 6: closure reads are code-node inputs; mutations are reads only; conditional writes replace the binding; no port for `params` as a whole; keys from the first output; a lint-only free-variable oracle tree. One ADR for the LA-27 readings.
 
-### F-111 — [plan](plan-F-111.md)
+### F-111 (merged with its PR)
 - Accept every recommendation in section 6: declaration-level reprint for workflow commands, identifier edits for renames, item-boundary include inserts; the command model of 2.2 (plain data, ids resolved at apply time, patches with inverses, `commit` separate); AR-24 read as "no problem the file didn't have"; our own LA-13 check (lint accepts positional mixing, upstream-bugs #20) with `ParseProblem.code` tags; `null` placeholders for missing positional inputs; variable introduction names; Connect moves a later source when safe; DeleteNode clears direct arguments; CreateProcess writes `modules/local/<lower>/main.nf` from `LanguagePack.scaffold`; the rename limits; `fast-check` 4.11.0 as an engine dev dependency (ADR 0011). One ADR at landing.
 
 ### F-112 — [plan](plan-F-112.md)
@@ -74,7 +77,7 @@ Next free ADR number: 0042 (0038 is F-107's, 0039 F-111's, 0040 and 0041 F-011's
 - LA-33 amended: a missing argument is an error (nf-lang rejects it), an unused output a warning. LA-31 and a new LA-37 row as in point 7. `Port.argumentType` is added to F-106 (point 13).
 - Rules behind a lazy `LanguagePack.loadLints()`, one ADR at landing.
 
-### F-113 — [plan](plan-F-113.md)
+### F-113 (merged with its PR)
 - Accept every recommendation in section 6: Comlink 4.4.2 as a runtime dependency of `@nf-builder/web` (ADR 0003 names it); pack versions from a pack-free `version` export, palette through the worker; Comlink only in apps/web; the page throttled 4× with worker timings reported unthrottled (Chromium can't throttle workers), clarified in `quality.md`; F-113 reports QA-03 and QA-04, F-702 gates QA-03; diagnostics from `ProjectModel.diagnostics()` until F-112 wires its diagnoser; `window.nfBuilderEngine` test hook; no double-parse optimisation yet; loading progress shown by F-202; the worker manifest and the `check:hosts` amendment; a `bench` job in `ci.yml` and `pnpm bench`. One ADR at landing.
 
 ### F-202 — [plan](plan-F-202.md)
@@ -110,3 +113,47 @@ Next free ADR number: 0042 (0038 is F-107's, 0039 F-111's, 0040 and 0041 F-011's
   - `passes` is set in the PR, and F-501 flips in a follow-up after a snapshot-triggered `verify` passes.
 - `smol-toml` stays (section 6).
 - The plan's mention of #33 is stale: Actions runs again.
+
+### F-206 — [plan](plan-F-206.md)
+- Accept every recommendation in section 6:
+  - Edit and Code are shown disabled while a node is selected;
+  - every directive is shown in source order;
+  - the 8-line preview;
+  - the doc-comment summary;
+  - containment scopes, with "No problems found";
+  - Parameters and Outputs in the entry summary;
+  - projection parts on the main thread, with `EngineApi.details` in the worker;
+  - single selection, with edges not selectable;
+  - the plan's wording.
+- Task 0, wiring the diagnoser into the service, is done in F-112's PR, since F-112 merges after F-113.
+
+### F-207 — [plan](plan-F-207.md)
+- Accept every recommendation in section 6:
+  - elkjs 0.12.1, pinned, as a web runtime dependency under its EPL-2.0 option, in its own lazily started worker;
+  - `setLayout` as the only writer of the sidecar, and layout writes don't advance the revision (clarifies ADR 0043);
+  - commands and patches never touch the sidecar;
+  - a session memo of removed positions;
+  - `layeredLayout` kept as the fallback when ELK fails;
+  - lazy layout per workflow;
+  - step 3 through `window.nfBuilderWorkspace.apply` until F-303;
+  - moves aren't undoable in v0.1;
+  - the invalid and newer policies;
+  - React Flow's own selection;
+  - sizes taken with port labels shown;
+  - the partial-placement rule.
+- Point 10: add F-202 to F-207's `depends_on`, with the `scope-change` label and the ADR.
+- One ADR at landing for the sidecar v1 format. It also records that history is F-209's and autosave F-202's, correcting ADR 0039's attribution.
+
+### F-208 — [plan](plan-F-208.md)
+- Accept every recommendation in section 6:
+  - `style-src 'self' 'unsafe-inline'` for Monaco, as ADR 0014 anticipated. It amends ADR 0040's policy line with a new ADR, and adds a `cspProblems` rule allowing only those two style sources. The probe found 31 violations under the strict policy and none with inline styles.
+  - `monaco-editor` 0.57.0, pinned, with lean imports and no React wrapper.
+  - Option A: Shiki 4.6.0 with `@shikijs/monaco`, the JavaScript regex engine and `github-light`.
+  - A refused draft is kept in the session model.
+  - A 300 ms debounce.
+  - A fixed 50/50 split.
+  - Modes kept per tab for the session.
+  - The shortcut scope.
+  - Only the refusal's problems are shown.
+  - A clean buffer follows external changes, and a dirty one wins.
+  - Step 3 evidence from the Node-side marker test and the budget job.

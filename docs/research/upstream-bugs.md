@@ -350,7 +350,7 @@ workflow {
 
 - **What happens:** `nextflow run main.nf` prints `  first` and `    second`. After `nextflow lint -format .`, the string's lines are re-indented (here to column 1, losing even their relative indentation), and the same run prints `first` and `second`. Formatting changed what the program does.
 - **Expected:** the formatter leaves string content alone, or re-indents only strings whose value can't change (for example those passed through `stripIndent()` or `stripMargin()`).
-- **nf-builder:** the printer matches upstream here (F-110 parity) and only reprints declarations an edit touches (ADR 0032); F-111's reprint test lists the workflows whose strings are re-indented. A known difference may be added if this is confirmed as a bug.
+- **nf-builder:** the printer keeps multi-line string content verbatim, a known difference `string-reindent` (ADR 0039, amending ADR 0032), so reprinting a declaration never changes a string's value.
 
 ### 24. Lint accepts a process called twice in one workflow
 

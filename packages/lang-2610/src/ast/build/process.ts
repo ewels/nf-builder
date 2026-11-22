@@ -4,17 +4,18 @@
 // A process is typed when `nextflow.enable.types = true` appeared before it (`cx.typesEnabled`). Like upstream, items
 // that are invalid in the kind of process they are in are dropped: a legacy input in a typed process, a typed input in
 // a legacy process, an invalid emit. `stage:` and `topic:` sections of a legacy process are dropped as well.
-import type {
-  AgentDef,
-  Expression,
-  ExpressionStatement,
-  NamedOutput,
-  ProcessDef,
-  ProcessInput,
-  RecordInput,
-  Section,
-  Statement,
-  TupleInput,
+import {
+  type AgentDef,
+  type Expression,
+  type ExpressionStatement,
+  MIXED_DEFINITIONS,
+  type NamedOutput,
+  type ProcessDef,
+  type ProcessInput,
+  type RecordInput,
+  type Section,
+  type Statement,
+  type TupleInput,
 } from "@nf-builder/lang-core";
 import {
   type AgentDefContext,
@@ -152,7 +153,11 @@ export function processInput(
   if (single) {
     // built first, so that its own errors are reported too
     const stmt = statement(single, cx);
-    cx.error("Invalid input declaration in typed process", stmt.range);
+    cx.error(
+      "Invalid input declaration in typed process",
+      stmt.range,
+      MIXED_DEFINITIONS,
+    );
     return null;
   }
   const ident = ctx.identifier();
@@ -244,7 +249,7 @@ function legacyInput(
       cx.range(ctx),
     );
   }
-  cx.error(TYPED_INPUT_IN_LEGACY, cx.range(ctx));
+  cx.error(TYPED_INPUT_IN_LEGACY, cx.range(ctx), MIXED_DEFINITIONS);
   return null;
 }
 
@@ -350,7 +355,7 @@ function legacyOutput(
       cx.range(ctx),
     );
   }
-  cx.error(TYPED_OUTPUT_IN_LEGACY, cx.range(ctx));
+  cx.error(TYPED_OUTPUT_IN_LEGACY, cx.range(ctx), MIXED_DEFINITIONS);
   return null;
 }
 

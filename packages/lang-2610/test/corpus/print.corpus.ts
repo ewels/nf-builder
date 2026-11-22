@@ -25,6 +25,8 @@ type Known = {
   pipeline: string;
   file: string;
   knownDifference: string;
+  /** Further known differences the same file hits. */
+  alsoKnownDifferences?: string[];
   cause: string;
   /** The lines (1-based) where our output and nf-lang's differ: what the known bug changes and nothing else. */
   differingLines: { formatted: number[]; printed: number[] };
@@ -133,7 +135,9 @@ describe("corpus printer parity", () => {
         !different.some((r) => r.pipeline === k.pipeline && r.file === k.file),
     );
     expect(stale.map((k) => `${k.pipeline}/${k.file}`)).toEqual([]);
-    for (const k of known) expect(KNOWN_IDS).toContain(k.knownDifference);
+    for (const k of known)
+      for (const id of [k.knownDifference, ...(k.alsoKnownDifferences ?? [])])
+        expect(KNOWN_IDS).toContain(id);
     // and only on the lines the known bug changes
     for (const r of different) {
       const k = knownFor(r.pipeline, r.file);
