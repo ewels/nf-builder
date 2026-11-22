@@ -177,6 +177,9 @@ test(
   async ({ page }, testInfo) => {
     await page.goto("/");
     await page.getByRole("contentinfo").waitFor();
+    await page
+      .getByRole("button", { name: "Processes", exact: true })
+      .waitFor();
     const guidance =
       "No approved baseline, or the shell changed: download the playwright-chromium artifact, view the -actual.png and commit it as the baseline (ADR 0021)";
     // With updateSnapshots "none" Playwright writes no -actual.png for a missing baseline, so write it here.

@@ -204,3 +204,43 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - Q4 answered: `agent` stays in the palette with a `preview` badge; `fromLineage` and pipeline includes, documented as experimental, carry no badge.
   - F-204's search example (`groupTuple`) is legacy-only; noted on F-204.
 - Blockers: none.
+
+## 2026-11-22 · F-204 · Claude (autonomous)
+- Did: the left column's Components and Files tabs; the palette from the pack in UX-12's accordions with operator groups, search and preview badges; open categories persist; the catalogue loads lazily; the app shell baseline re-approved. PR #20.
+- State: passing.
+- Next: F-102 and F-103, then F-104, F-110.
+- Decisions:
+  - `LanguagePack` gains `palette` and `loadCatalogue()`; the engine resolves a serialisable palette view; open categories persist under `nf-builder:palette` version 1 ([ADR 0028](../adr/0028-palette-data-path.md)).
+  - IO-41 skips built chunks whose manifest source is a `.json` file, amending ADR 0015's scan (ADR 0028); palette docs links join the never-fetched list.
+  - Q15 answered: step 2's intent is checked with `groupBy`.
+  - Q16 answered: new feature F-210 (Files view, UX-16); F-301 depends on it (`scope-change`).
+  - Tests: the remaining Playwright listing test gets a 30 s timeout.
+- Blockers: none.
+
+## 2026-11-22 · QA-03 · Claude with Phil Ewels
+- Did: QA-03 relaxed at the maintainer's request: a responsive UI with loading progress, and a 30 s regression ceiling for sarek instead of 3 s ([ADR 0029](../adr/0029-relax-qa-03.md)).
+- State: no feature status changed.
+- Next: F-102, F-103, then F-104 and F-110.
+- Decisions: the maintainer's own (ADR 0029).
+- Blockers: none.
+
+## 2026-11-22 · scope · Claude with Phil Ewels
+- Did: at the maintainer's request, F-402 (private GitHub import) moved to milestone M8, deferred past v0.1; QA-02, QA-04 and QA-05 become reported measurements rather than CI gates; F-702's step updated ([ADR 0030](../adr/0030-trim-v0-1-scope-and-gates.md)).
+- State: no feature status changed.
+- Next: F-102, F-103, then F-104 and F-110.
+- Decisions: the maintainer's own (ADR 0030). Other simplifications offered (deferring docs publishing, the metro map, schema editors and registry extras; narrowing legacy editing, forms and diagnostics) were declined.
+- Blockers: none.
+
+## 2026-11-22 · process · Claude with Phil Ewels
+- Did: docs-only changes (`docs/`, `AGENTS.md`, `CLAUDE.md`, package READMEs) may be pushed straight to `main` after `pnpm check`; code, tests, workflows, configuration, dependencies, generated files and `features.json` still go through PRs ([ADR 0031](../adr/0031-docs-only-changes-to-main.md)).
+- State: no feature status changed.
+- Next: finish F-102's current builder run, then hand off.
+- Decisions: the maintainer's own (ADR 0031).
+- Blockers: none.
+
+## 2026-11-22 · hand-off · Claude (autonomous)
+- Did: this session merged F-201, F-005, F-008, F-010, F-006, F-007, F-101, F-109 and F-204 (PRs #12–#20), plus the maintainer's spec and process changes (ADRs 0029–0031). 14 of 69 features pass; M0 is complete.
+- State: F-102 (`feat/F-102`, tasks 1–4 committed, 5–6 in progress) and F-103 (`feat/F-103`, built, stacked on F-102) are open branches; F-104 and F-110 are planned. Plans and settled open points are in `docs/plan/handoff/`.
+- Next: finish F-102 (tasks 5–7), merge it, then F-103, then F-104 and F-110 in parallel.
+- Decisions: see the entries above and `docs/plan/handoff/README.md`.
+- Blockers: none. Open maintainer issues: #6 (Renovate), #7 (required checks).

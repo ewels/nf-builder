@@ -59,7 +59,11 @@ Config, schema, `meta.yml` and other file editors, plus docs publishing to GitHu
 
 ## M7: Polish and first release
 
-**Exit:** all performance and accessibility checks green; read-only small-screen mode; user docs; `v0.1.0` tagged and live on Netlify; build-time scaffolding (vendored skills, mockup) removed (F-705).
+**Exit:** the gated performance budgets (QA-01, QA-03, QA-06) and accessibility checks green, the other budgets reported (ADR 0030); read-only small-screen mode; user docs; `v0.1.0` tagged and live on Netlify; build-time scaffolding (vendored skills, mockup) removed (F-705).
+
+## M8: Deferred past v0.1
+
+Features the maintainer moved out of v0.1 (ADR 0030). They stay in `features.json` with milestone M8 and aren't built in the v0.1 run: F-402 (private GitHub repositories with a token).
 
 ## After v0.1
 

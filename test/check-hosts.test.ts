@@ -149,6 +149,43 @@ describe("IO-41 host scan", () => {
       expect(text).toContain(`${host}.example`);
   });
 
+  describe("chunks built from JSON data", () => {
+    const manifest = (src: string, file: string) =>
+      JSON.stringify({ [src]: { file, src, isDynamicEntry: true } });
+    const code = `x="https://docs.example.com/x"`;
+
+    it("F-204 IO-41: a chunk whose manifest source is a .json file is data and is not scanned", () => {
+      const dist = makeDist({
+        ".vite/manifest.json": manifest(
+          "../pack/catalogue/script.json",
+          "assets/script-1.js",
+        ),
+        "assets/script-1.js": code,
+      });
+      expect(scanDist(dist).problems).toEqual([]);
+    });
+
+    it("F-204 IO-41: the same host in a chunk from a .ts source still fails", () => {
+      const dist = makeDist({
+        ".vite/manifest.json": manifest(
+          "../pack/src/catalogue.ts",
+          "assets/catalogue-1.js",
+        ),
+        "assets/catalogue-1.js": code,
+      });
+      expect(scanDist(dist).problems).toHaveLength(1);
+    });
+
+    it("F-204 IO-41: a .ts chunk that imports JSON is still scanned, and so is a chunk missing from the manifest", () => {
+      const dist = makeDist({
+        ".vite/manifest.json": manifest("src/index.ts", "assets/index-1.js"),
+        "assets/index-1.js": `import d from "./script-1.js";${code}`,
+        "assets/other-1.js": code,
+      });
+      expect(scanDist(dist).problems).toHaveLength(2);
+    });
+  });
+
   it("IO-41: notes ignore-list entries that matched nothing without failing", () => {
     const dist = makeDist({ "a.js": `"https://api.github.com/x"` });
     const { problems, unusedIgnores } = scanDist(dist);
