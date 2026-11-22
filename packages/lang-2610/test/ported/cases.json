@@ -1,0 +1,1564 @@
+{
+  "about": "Parse cases ported from nf-lang's parser tests for F-101 step 1 (see open-questions.md). Each file is the upstream test input after Groovy unescaping and stripIndent. expect: what parseScript or parseConfig returns. lint: the errors nextflow lint reported for the file alone (warnings ignored). layer: where nf-lang reports the error: lexer or parser (buildCST, our grammar level), reparse or ast-builder (ScriptAstBuilder, ConfigAstBuilder), resolve (later visitors). owner: the feature that must reproduce errors above the grammar; producer: the upstream source line.",
+  "upstream": {
+    "repo": "nextflow-io/nextflow",
+    "tag": "v26.10.7",
+    "commit": "0ad848ef3c3a22824cd9eb2ca14568385867702d",
+    "dir": "modules/nf-lang/src/test/groovy/nextflow",
+    "sourceDir": "modules/nf-lang/src/main/java/nextflow"
+  },
+  "lintCheckedWith": "nextflow lint -o json, Nextflow 26.10.7, NXF_SYNTAX_PARSER=v2, 2026-11-22",
+  "cases": [
+    {
+      "id": "ScriptAstBuilderTest-L048",
+      "file": "cases/ScriptAstBuilderTest-L048.nf",
+      "upstream": "script/parser/ScriptAstBuilderTest.groovy#L48-L62",
+      "test": "should report an error for invalid syntax",
+      "layer": "parser",
+      "expect": {
+        "ok": false,
+        "source": "parser",
+        "message": "Unexpected input: '3'",
+        "line": 2,
+        "column": 14,
+        "endLine": 2,
+        "endColumn": 15
+      },
+      "lint": [
+        {
+          "line": 2,
+          "column": 14,
+          "message": "Unexpected input: '3'"
+        }
+      ]
+    },
+    {
+      "id": "ScriptAstBuilderTest-L064",
+      "file": "cases/ScriptAstBuilderTest-L064.nf",
+      "upstream": "script/parser/ScriptAstBuilderTest.groovy#L64-L83",
+      "test": "should report an error for invalid syntax",
+      "layer": "parser",
+      "expect": {
+        "ok": false,
+        "source": "parser",
+        "message": "Unexpected input: '\\n'",
+        "line": 2,
+        "column": 16,
+        "endLine": 2,
+        "endColumn": 17
+      },
+      "lint": [
+        {
+          "line": 2,
+          "column": 16,
+          "message": "Unexpected input: '\\n'"
+        }
+      ]
+    },
+    {
+      "id": "ScriptAstBuilderTest-L085",
+      "file": "cases/ScriptAstBuilderTest-L085.nf",
+      "upstream": "script/parser/ScriptAstBuilderTest.groovy#L85-L105",
+      "test": "should report an error for invalid syntax",
+      "layer": "parser",
+      "expect": {
+        "ok": false,
+        "source": "parser",
+        "message": "Unexpected input: 'val'",
+        "line": 3,
+        "column": 24,
+        "endLine": 3,
+        "endColumn": 27
+      },
+      "lint": [
+        {
+          "line": 3,
+          "column": 24,
+          "message": "Unexpected input: 'val'"
+        }
+      ]
+    },
+    {
+      "id": "ScriptAstBuilderTest-L107",
+      "file": "cases/ScriptAstBuilderTest-L107.nf",
+      "upstream": "script/parser/ScriptAstBuilderTest.groovy#L107-L127",
+      "test": "should report an error for invalid syntax",
+      "layer": "parser",
+      "expect": {
+        "ok": false,
+        "source": "parser",
+        "message": "Unexpected input: 'emit'",
+        "line": 3,
+        "column": 40,
+        "endLine": 3,
+        "endColumn": 44
+      },
+      "lint": [
+        {
+          "line": 3,
+          "column": 40,
+          "message": "Unexpected input: 'emit'"
+        }
+      ]
+    },
+    {
+      "id": "ScriptAstBuilderTest-L129",
+      "file": "cases/ScriptAstBuilderTest-L129.nf",
+      "upstream": "script/parser/ScriptAstBuilderTest.groovy#L129-L149",
+      "test": "should report an error for invalid syntax",
+      "layer": "parser",
+      "expect": {
+        "ok": false,
+        "source": "parser",
+        "message": "Unexpected input: ','",
+        "line": 4,
+        "column": 6,
+        "endLine": 4,
+        "endColumn": 7
+      },
+      "lint": [
+        {
+          "line": 4,
+          "column": 6,
+          "message": "Unexpected input: ','"
+        }
+      ]
+    },
+    {
+      "id": "ScriptAstBuilderTest-L153",
+      "file": "cases/ScriptAstBuilderTest-L153.nf",
+      "upstream": "script/parser/ScriptAstBuilderTest.groovy#L153-L165",
+      "test": "should report an error for unexpected end of file",
+      "layer": "parser",
+      "expect": {
+        "ok": false,
+        "source": "parser",
+        "message": "Unexpected end of file -- check for an unclosed brace, bracket, parenthesis, or string",
+        "line": 5,
+        "column": 1,
+        "endLine": 5,
+        "endColumn": 2
+      },
+      "lint": [
+        {
+          "line": 5,
+          "column": 1,
+          "message": "Unexpected end of file -- check for an unclosed brace, bracket, parenthesis, or string"
+        }
+      ]
+    },
+    {
+      "id": "ScriptAstBuilderTest-L167",
+      "file": "cases/ScriptAstBuilderTest-L167.nf",
+      "upstream": "script/parser/ScriptAstBuilderTest.groovy#L167-L178",
+      "test": "should report an error for unexpected end of file",
+      "layer": "parser",
+      "expect": {
+        "ok": false,
+        "source": "parser",
+        "message": "Unexpected end of file -- check for an unclosed brace, bracket, parenthesis, or string",
+        "line": 5,
+        "column": 1,
+        "endLine": 5,
+        "endColumn": 2
+      },
+      "lint": [
+        {
+          "line": 5,
+          "column": 1,
+          "message": "Unexpected end of file -- check for an unclosed brace, bracket, parenthesis, or string"
+        }
+      ]
+    },
+    {
+      "id": "ScriptAstBuilderTest-L180",
+      "file": "cases/ScriptAstBuilderTest-L180.nf",
+      "upstream": "script/parser/ScriptAstBuilderTest.groovy#L180-L190",
+      "test": "should report an error for unexpected end of file",
+      "layer": "parser",
+      "expect": {
+        "ok": false,
+        "source": "parser",
+        "message": "Unexpected end of file -- check for an unclosed brace, bracket, parenthesis, or string",
+        "line": 4,
+        "column": 1,
+        "endLine": 4,
+        "endColumn": 2
+      },
+      "lint": [
+        {
+          "line": 4,
+          "column": 1,
+          "message": "Unexpected end of file -- check for an unclosed brace, bracket, parenthesis, or string"
+        }
+      ]
+    },
+    {
+      "id": "ScriptAstBuilderTest-L194",
+      "file": "cases/ScriptAstBuilderTest-L194.nf",
+      "upstream": "script/parser/ScriptAstBuilderTest.groovy#L194-L207",
+      "test": "should report the syntax error in an invalid definition",
+      "layer": "reparse",
+      "owner": "F-102",
+      "producer": "ScriptAstBuilder.java#L251-L260 and #L304-L320 (reparse as a declaration)",
+      "expect": {
+        "ok": true
+      },
+      "lint": [
+        {
+          "line": 1,
+          "column": 9,
+          "message": "Unexpected input: ''MY-PROC''"
+        }
+      ]
+    },
+    {
+      "id": "ScriptAstBuilderTest-L209",
+      "file": "cases/ScriptAstBuilderTest-L209.nf",
+      "upstream": "script/parser/ScriptAstBuilderTest.groovy#L209-L222",
+      "test": "should report the syntax error in an invalid definition",
+      "layer": "reparse",
+      "owner": "F-102",
+      "producer": "ScriptAstBuilder.java#L251-L260 and #L304-L320 (reparse as a declaration)",
+      "expect": {
+        "ok": true
+      },
+      "lint": [
+        {
+          "line": 3,
+          "column": 6,
+          "message": "Unexpected input: ':'"
+        }
+      ]
+    },
+    {
+      "id": "ScriptAstBuilderTest-L224",
+      "file": "cases/ScriptAstBuilderTest-L224.nf",
+      "upstream": "script/parser/ScriptAstBuilderTest.groovy#L224-L241",
+      "test": "should report the syntax error in an invalid definition",
+      "layer": "reparse",
+      "owner": "F-102",
+      "producer": "ScriptAstBuilder.java#L251-L260 and #L304-L320 (reparse as a declaration)",
+      "expect": {
+        "ok": true
+      },
+      "lint": [
+        {
+          "line": 5,
+          "column": 11,
+          "message": "Unexpected input: '\\n'"
+        }
+      ]
+    },
+    {
+      "id": "ScriptAstBuilderTest-L245",
+      "file": "cases/ScriptAstBuilderTest-L245.nf",
+      "upstream": "script/parser/ScriptAstBuilderTest.groovy#L245-L258",
+      "test": "should report an error for mixing script declarations with statements",
+      "layer": "ast-builder",
+      "owner": "F-102",
+      "producer": "ScriptAstBuilder.java#L267",
+      "expect": {
+        "ok": true
+      },
+      "lint": [
+        {
+          "line": 1,
+          "column": 1,
+          "message": "Statements cannot be mixed with script declarations -- move statements into a process, workflow, or function"
+        }
+      ]
+    },
+    {
+      "id": "ScriptAstBuilderTest-L262",
+      "file": "cases/ScriptAstBuilderTest-L262.nf",
+      "upstream": "script/parser/ScriptAstBuilderTest.groovy#L262-L274",
+      "test": "should report an error for params block without an entry workflow",
+      "layer": "ast-builder",
+      "owner": "F-102",
+      "producer": "ScriptAstBuilder.java#L272",
+      "expect": {
+        "ok": true
+      },
+      "lint": [
+        {
+          "line": 1,
+          "column": 1,
+          "message": "Params block cannot be defined without an entry workflow"
+        }
+      ]
+    },
+    {
+      "id": "ScriptAstBuilderTest-L276",
+      "file": "cases/ScriptAstBuilderTest-L276.nf",
+      "upstream": "script/parser/ScriptAstBuilderTest.groovy#L276-L288",
+      "test": "should report an error for params block without an entry workflow",
+      "layer": "parser",
+      "expect": {
+        "ok": true
+      },
+      "lint": []
+    },
+    {
+      "id": "ScriptAstBuilderTest-L292",
+      "file": "cases/ScriptAstBuilderTest-L292.nf",
+      "upstream": "script/parser/ScriptAstBuilderTest.groovy#L292-L303",
+      "test": "should report an error for output block without an entry workflow",
+      "layer": "ast-builder",
+      "owner": "F-102",
+      "producer": "ScriptAstBuilder.java#L275",
+      "expect": {
+        "ok": true
+      },
+      "lint": [
+        {
+          "line": 1,
+          "column": 1,
+          "message": "Output block cannot be defined without an entry workflow"
+        }
+      ]
+    },
+    {
+      "id": "ScriptAstBuilderTest-L305",
+      "file": "cases/ScriptAstBuilderTest-L305.nf",
+      "upstream": "script/parser/ScriptAstBuilderTest.groovy#L305-L316",
+      "test": "should report an error for output block without an entry workflow",
+      "layer": "parser",
+      "expect": {
+        "ok": true
+      },
+      "lint": []
+    },
+    {
+      "id": "ScriptAstBuilderTest-L320",
+      "file": "cases/ScriptAstBuilderTest-L320.nf",
+      "upstream": "script/parser/ScriptAstBuilderTest.groovy#L320-L337",
+      "test": "should report an error for implicit process script section",
+      "layer": "ast-builder",
+      "owner": "F-102",
+      "producer": "ScriptAstBuilder.java#L544",
+      "expect": {
+        "ok": true
+      },
+      "lint": [
+        {
+          "line": 5,
+          "column": 5,
+          "message": "The `script:` or `exec:` label is required when other sections are present"
+        }
+      ]
+    },
+    {
+      "id": "ScriptAstBuilderTest-L341",
+      "file": "cases/ScriptAstBuilderTest-L341.nf",
+      "upstream": "script/parser/ScriptAstBuilderTest.groovy#L341-L356",
+      "test": "should report an error for invalid process directive",
+      "layer": "ast-builder",
+      "owner": "F-102",
+      "producer": "ScriptAstBuilder.java#L567",
+      "expect": {
+        "ok": true
+      },
+      "lint": [
+        {
+          "line": 2,
+          "column": 5,
+          "message": "Invalid process directive"
+        }
+      ]
+    },
+    {
+      "id": "ScriptAstBuilderTest-L358",
+      "file": "cases/ScriptAstBuilderTest-L358.nf",
+      "upstream": "script/parser/ScriptAstBuilderTest.groovy#L358-L376",
+      "test": "should report an error for invalid process directive",
+      "layer": "ast-builder",
+      "owner": "F-102",
+      "producer": "ScriptAstBuilder.java#L567",
+      "expect": {
+        "ok": true
+      },
+      "lint": [
+        {
+          "line": 2,
+          "column": 5,
+          "message": "Invalid process directive"
+        }
+      ]
+    },
+    {
+      "id": "ScriptAstBuilderTest-L380",
+      "file": "cases/ScriptAstBuilderTest-L380.nf",
+      "upstream": "script/parser/ScriptAstBuilderTest.groovy#L380-L394",
+      "test": "should report an error for invalid workflow emits",
+      "layer": "ast-builder",
+      "owner": "F-102",
+      "producer": "ScriptAstBuilder.java#L999",
+      "expect": {
+        "ok": true
+      },
+      "lint": [
+        {
+          "line": 3,
+          "column": 5,
+          "message": "Every emit must be assigned to a name when there are multiple emits"
+        }
+      ]
+    },
+    {
+      "id": "ScriptAstBuilderTest-L396",
+      "file": "cases/ScriptAstBuilderTest-L396.nf",
+      "upstream": "script/parser/ScriptAstBuilderTest.groovy#L396-L412",
+      "test": "should report an error for invalid workflow emits",
+      "layer": "ast-builder",
+      "owner": "F-102",
+      "producer": "ScriptAstBuilder.java#L1008",
+      "expect": {
+        "ok": true
+      },
+      "lint": [
+        {
+          "line": 3,
+          "column": 5,
+          "message": "Invalid workflow emit -- must be a name, assignment, or expression"
+        }
+      ]
+    },
+    {
+      "id": "ScriptAstBuilderTest-L416",
+      "file": "cases/ScriptAstBuilderTest-L416.nf",
+      "upstream": "script/parser/ScriptAstBuilderTest.groovy#L416-L438",
+      "test": "should report an error for invalid workflow publish statements",
+      "layer": "ast-builder",
+      "owner": "F-102",
+      "producer": "ScriptAstBuilder.java#L1050",
+      "expect": {
+        "ok": true
+      },
+      "lint": [
+        {
+          "line": 6,
+          "column": 5,
+          "message": "Invalid workflow publish statement -- must be an assignment"
+        }
+      ]
+    },
+    {
+      "id": "ScriptAstBuilderTest-L442",
+      "file": "cases/ScriptAstBuilderTest-L442.nf",
+      "upstream": "script/parser/ScriptAstBuilderTest.groovy#L442-L460",
+      "test": "should report an error for an invalid output assignment",
+      "layer": "ast-builder",
+      "owner": "F-102",
+      "producer": "ScriptAstBuilder.java#L705",
+      "expect": {
+        "ok": true
+      },
+      "lint": [
+        {
+          "line": 5,
+          "column": 5,
+          "message": "Invalid output declaration in typed process -- must be a name, assignment, or expression"
+        }
+      ]
+    },
+    {
+      "id": "ScriptAstBuilderTest-L462",
+      "file": "cases/ScriptAstBuilderTest-L462.nf",
+      "upstream": "script/parser/ScriptAstBuilderTest.groovy#L462-L480",
+      "test": "should report an error for an invalid output assignment",
+      "layer": "ast-builder",
+      "owner": "F-102",
+      "producer": "ScriptAstBuilder.java#L705",
+      "expect": {
+        "ok": true
+      },
+      "lint": [
+        {
+          "line": 5,
+          "column": 5,
+          "message": "Invalid output declaration in typed process -- must be a name, assignment, or expression"
+        }
+      ]
+    },
+    {
+      "id": "ScriptAstBuilderTest-L482",
+      "file": "cases/ScriptAstBuilderTest-L482.nf",
+      "upstream": "script/parser/ScriptAstBuilderTest.groovy#L482-L495",
+      "test": "should report an error for an invalid output assignment",
+      "layer": "ast-builder",
+      "owner": "F-102",
+      "producer": "ScriptAstBuilder.java#L1008",
+      "expect": {
+        "ok": true
+      },
+      "lint": [
+        {
+          "line": 3,
+          "column": 5,
+          "message": "Invalid workflow emit -- must be a name, assignment, or expression"
+        }
+      ]
+    },
+    {
+      "id": "ScriptAstBuilderTest-L499",
+      "file": "cases/ScriptAstBuilderTest-L499.nf",
+      "upstream": "script/parser/ScriptAstBuilderTest.groovy#L499-L521",
+      "test": "should report error for defining a typed process without preview flag",
+      "layer": "ast-builder",
+      "owner": "F-102",
+      "producer": "ScriptAstBuilder.java#L664 and #L741",
+      "expect": {
+        "ok": true
+      },
+      "lint": [
+        {
+          "line": 3,
+          "column": 5,
+          "message": "Typed input declaration is not allowed in legacy process -- set `nextflow.enable.types = true` to use typed processes in this script"
+        },
+        {
+          "line": 6,
+          "column": 5,
+          "message": "Typed output declaration is not allowed in legacy process -- set `nextflow.enable.types = true` to use typed processes in this script"
+        },
+        {
+          "line": 9,
+          "column": 14,
+          "message": "`message` is not defined"
+        }
+      ]
+    },
+    {
+      "id": "ScriptAstBuilderTest-L523",
+      "file": "cases/ScriptAstBuilderTest-L523.nf",
+      "upstream": "script/parser/ScriptAstBuilderTest.groovy#L523-L541",
+      "test": "should report error for defining a typed process without preview flag",
+      "layer": "parser",
+      "expect": {
+        "ok": true
+      },
+      "lint": []
+    },
+    {
+      "id": "ScriptAstBuilderTest-L545",
+      "file": "cases/ScriptAstBuilderTest-L545.nf",
+      "upstream": "script/parser/ScriptAstBuilderTest.groovy#L545-L566",
+      "test": "should report error for defining a legacy process with preview flag enabled",
+      "layer": "ast-builder",
+      "owner": "F-102",
+      "producer": "ScriptAstBuilder.java#L585",
+      "expect": {
+        "ok": true
+      },
+      "lint": [
+        {
+          "line": 5,
+          "column": 5,
+          "message": "Invalid input declaration in typed process"
+        },
+        {
+          "line": 8,
+          "column": 5,
+          "message": "`val` is not defined"
+        },
+        {
+          "line": 11,
+          "column": 14,
+          "message": "`message` is not defined"
+        }
+      ]
+    },
+    {
+      "id": "ScriptAstBuilderTest-L568",
+      "file": "cases/ScriptAstBuilderTest-L568.nf",
+      "upstream": "script/parser/ScriptAstBuilderTest.groovy#L568-L584",
+      "test": "should report error for defining a legacy process with preview flag enabled",
+      "layer": "parser",
+      "expect": {
+        "ok": true
+      },
+      "lint": []
+    },
+    {
+      "id": "ScriptAstBuilderTest-L588",
+      "file": "cases/ScriptAstBuilderTest-L588.nf",
+      "upstream": "script/parser/ScriptAstBuilderTest.groovy#L588-L606",
+      "test": "should report an error for invalid process tuple input",
+      "layer": "ast-builder",
+      "owner": "F-102",
+      "producer": "ScriptAstBuilder.java#L640",
+      "expect": {
+        "ok": true
+      },
+      "lint": [
+        {
+          "line": 5,
+          "column": 5,
+          "message": "Process tuple input must have more than one component"
+        }
+      ]
+    },
+    {
+      "id": "ScriptAstBuilderTest-L608",
+      "file": "cases/ScriptAstBuilderTest-L608.nf",
+      "upstream": "script/parser/ScriptAstBuilderTest.groovy#L608-L623",
+      "test": "should report an error for invalid process tuple input",
+      "layer": "parser",
+      "expect": {
+        "ok": true
+      },
+      "lint": []
+    },
+    {
+      "id": "ScriptAstBuilderTest-L627",
+      "file": "cases/ScriptAstBuilderTest-L627.nf",
+      "upstream": "script/parser/ScriptAstBuilderTest.groovy#L627-L645",
+      "test": "should report an error for invalid process record input",
+      "layer": "parser",
+      "expect": {
+        "ok": true
+      },
+      "lint": []
+    },
+    {
+      "id": "ScriptAstBuilderTest-L649",
+      "file": "cases/ScriptAstBuilderTest-L649.nf",
+      "upstream": "script/parser/ScriptAstBuilderTest.groovy#L649-L667",
+      "test": "should report error for invalid topic statement",
+      "layer": "ast-builder",
+      "owner": "F-102",
+      "producer": "ScriptAstBuilder.java#L758",
+      "expect": {
+        "ok": true
+      },
+      "lint": [
+        {
+          "line": 5,
+          "column": 5,
+          "message": "Invalid process topic statement"
+        }
+      ]
+    },
+    {
+      "id": "ScriptAstBuilderTest-L669",
+      "file": "cases/ScriptAstBuilderTest-L669.nf",
+      "upstream": "script/parser/ScriptAstBuilderTest.groovy#L669-L684",
+      "test": "should report error for invalid topic statement",
+      "layer": "parser",
+      "expect": {
+        "ok": true
+      },
+      "lint": []
+    },
+    {
+      "id": "ScriptAstBuilderTest-L688",
+      "file": "cases/ScriptAstBuilderTest-L688.nf",
+      "upstream": "script/parser/ScriptAstBuilderTest.groovy#L688-L698",
+      "test": "should report error for invalid record definition",
+      "layer": "ast-builder",
+      "owner": "F-102",
+      "producer": "ScriptAstBuilder.java#L481",
+      "expect": {
+        "ok": true
+      },
+      "lint": [
+        {
+          "line": 1,
+          "column": 1,
+          "message": "Missing record body"
+        }
+      ]
+    },
+    {
+      "id": "ScriptAstBuilderTest-L700",
+      "file": "cases/ScriptAstBuilderTest-L700.nf",
+      "upstream": "script/parser/ScriptAstBuilderTest.groovy#L700-L712",
+      "test": "should report error for invalid record definition",
+      "layer": "ast-builder",
+      "owner": "F-102",
+      "producer": "ScriptAstBuilder.java#L490",
+      "expect": {
+        "ok": true
+      },
+      "lint": [
+        {
+          "line": 2,
+          "column": 5,
+          "message": "Missing field type"
+        }
+      ]
+    },
+    {
+      "id": "ScriptAstBuilderTest-L716",
+      "file": "cases/ScriptAstBuilderTest-L716.nf",
+      "upstream": "script/parser/ScriptAstBuilderTest.groovy#L716-L729",
+      "test": "should report an error for an unexpected character in a gstring",
+      "layer": "lexer",
+      "expect": {
+        "ok": false,
+        "source": "lexer",
+        "message": "Unexpected character: '$'",
+        "line": 2,
+        "column": 7,
+        "endLine": 2,
+        "endColumn": 8
+      },
+      "lint": [
+        {
+          "line": 2,
+          "column": 7,
+          "message": "Unexpected character: '$'"
+        }
+      ]
+    },
+    {
+      "id": "ScriptAstBuilderTest-L731",
+      "file": "cases/ScriptAstBuilderTest-L731.nf",
+      "upstream": "script/parser/ScriptAstBuilderTest.groovy#L731-L742",
+      "test": "should report an error for an unexpected character in a gstring",
+      "layer": "lexer",
+      "expect": {
+        "ok": false,
+        "source": "lexer",
+        "message": "Unexpected character: '$'",
+        "line": 1,
+        "column": 6,
+        "endLine": 1,
+        "endColumn": 7
+      },
+      "lint": [
+        {
+          "line": 1,
+          "column": 6,
+          "message": "Unexpected character: '$'"
+        }
+      ]
+    },
+    {
+      "id": "ScriptAstBuilderTest-L744",
+      "file": "cases/ScriptAstBuilderTest-L744.nf",
+      "upstream": "script/parser/ScriptAstBuilderTest.groovy#L744-L755",
+      "test": "should report an error for an unexpected character in a gstring",
+      "layer": "ast-builder",
+      "owner": "F-102",
+      "producer": "EscapeUtils.java#L66 (from ScriptAstBuilder.java#L1693 and #L1796)",
+      "expect": {
+        "ok": true
+      },
+      "lint": [
+        {
+          "line": 1,
+          "column": 6,
+          "message": "Invalid escape sequence: '\\q'"
+        }
+      ]
+    },
+    {
+      "id": "ScriptAstBuilderTest-L759",
+      "file": "cases/ScriptAstBuilderTest-L759.nf",
+      "upstream": "script/parser/ScriptAstBuilderTest.groovy#L759-L772",
+      "test": "should report an invalid escape sequence at the exact position",
+      "layer": "ast-builder",
+      "owner": "F-102",
+      "producer": "EscapeUtils.java#L66 (from ScriptAstBuilder.java#L1693 and #L1796)",
+      "expect": {
+        "ok": true
+      },
+      "lint": [
+        {
+          "line": 2,
+          "column": 11,
+          "message": "Invalid escape sequence: '\\.'"
+        }
+      ]
+    },
+    {
+      "id": "ScriptAstBuilderTest-L774",
+      "file": "cases/ScriptAstBuilderTest-L774.nf",
+      "upstream": "script/parser/ScriptAstBuilderTest.groovy#L774-L784",
+      "test": "should report an invalid escape sequence at the exact position",
+      "layer": "ast-builder",
+      "owner": "F-102",
+      "producer": "EscapeUtils.java#L66 (from ScriptAstBuilder.java#L1693 and #L1796)",
+      "expect": {
+        "ok": true
+      },
+      "lint": [
+        {
+          "line": 1,
+          "column": 7,
+          "message": "Invalid escape sequence: '\\.'"
+        }
+      ]
+    },
+    {
+      "id": "ScriptAstBuilderTest-L786",
+      "file": "cases/ScriptAstBuilderTest-L786.nf",
+      "upstream": "script/parser/ScriptAstBuilderTest.groovy#L786-L796",
+      "test": "should report an invalid escape sequence at the exact position",
+      "layer": "ast-builder",
+      "owner": "F-102",
+      "producer": "EscapeUtils.java#L66 (from ScriptAstBuilder.java#L1693 and #L1796)",
+      "expect": {
+        "ok": true
+      },
+      "lint": [
+        {
+          "line": 1,
+          "column": 6,
+          "message": "Invalid escape sequence: '\\u'"
+        },
+        {
+          "line": 2,
+          "column": 6,
+          "message": "Invalid escape sequence: '\\u'"
+        }
+      ]
+    },
+    {
+      "id": "ScriptAstBuilderTest-L798",
+      "file": "cases/ScriptAstBuilderTest-L798.nf",
+      "upstream": "script/parser/ScriptAstBuilderTest.groovy#L798-L809",
+      "test": "should report an invalid escape sequence at the exact position",
+      "layer": "ast-builder",
+      "owner": "F-102",
+      "producer": "EscapeUtils.java#L66 (from ScriptAstBuilder.java#L1693 and #L1796)",
+      "expect": {
+        "ok": true
+      },
+      "lint": [
+        {
+          "line": 1,
+          "column": 10,
+          "message": "Invalid escape sequence: '\\q'"
+        }
+      ]
+    },
+    {
+      "id": "ScriptAstBuilderTest-L811",
+      "file": "cases/ScriptAstBuilderTest-L811.nf",
+      "upstream": "script/parser/ScriptAstBuilderTest.groovy#L811-L822",
+      "test": "should report an invalid escape sequence at the exact position",
+      "layer": "ast-builder",
+      "owner": "F-102",
+      "producer": "EscapeUtils.java#L66 (from ScriptAstBuilder.java#L1693 and #L1796)",
+      "expect": {
+        "ok": true
+      },
+      "lint": [
+        {
+          "line": 1,
+          "column": 27,
+          "message": "Invalid escape sequence: '\\q'"
+        }
+      ]
+    },
+    {
+      "id": "ScriptAstBuilderTest-L824",
+      "file": "cases/ScriptAstBuilderTest-L824.nf",
+      "upstream": "script/parser/ScriptAstBuilderTest.groovy#L824-L837",
+      "test": "should report an invalid escape sequence at the exact position",
+      "layer": "ast-builder",
+      "owner": "F-102",
+      "producer": "EscapeUtils.java#L66 (from ScriptAstBuilder.java#L1693 and #L1796)",
+      "expect": {
+        "ok": true
+      },
+      "lint": [
+        {
+          "line": 1,
+          "column": 7,
+          "message": "Invalid escape sequence: '\\.'"
+        },
+        {
+          "line": 2,
+          "column": 7,
+          "message": "Invalid escape sequence: '\\,'"
+        }
+      ]
+    },
+    {
+      "id": "ScriptAstBuilderTest-L839",
+      "file": "cases/ScriptAstBuilderTest-L839.nf",
+      "upstream": "script/parser/ScriptAstBuilderTest.groovy#L839-L848",
+      "test": "should report an invalid escape sequence at the exact position",
+      "layer": "lexer",
+      "expect": {
+        "ok": true
+      },
+      "lint": []
+    },
+    {
+      "id": "ScriptAstBuilderTest-L852",
+      "file": "cases/ScriptAstBuilderTest-L852.nf",
+      "upstream": "script/parser/ScriptAstBuilderTest.groovy#L852-L866",
+      "test": "should report an invalid escape sequence after a line continuation",
+      "layer": "ast-builder",
+      "owner": "F-102",
+      "producer": "EscapeUtils.java#L66 (from ScriptAstBuilder.java#L1693 and #L1796)",
+      "expect": {
+        "ok": true
+      },
+      "lint": [
+        {
+          "line": 2,
+          "column": 2,
+          "message": "Invalid escape sequence: '\\.'"
+        }
+      ]
+    },
+    {
+      "id": "ScriptAstBuilderTest-L870",
+      "file": "cases/ScriptAstBuilderTest-L870.nf",
+      "upstream": "script/parser/ScriptAstBuilderTest.groovy#L870-L880",
+      "test": "should allow escaped and interpolated gstring characters",
+      "layer": "lexer",
+      "expect": {
+        "ok": true
+      },
+      "lint": []
+    },
+    {
+      "id": "ScriptAstBuilderTest-L882",
+      "file": "cases/ScriptAstBuilderTest-L882.nf",
+      "upstream": "script/parser/ScriptAstBuilderTest.groovy#L882-L892",
+      "test": "should allow escaped and interpolated gstring characters",
+      "layer": "lexer",
+      "expect": {
+        "ok": true
+      },
+      "lint": []
+    },
+    {
+      "id": "ConfigAstBuilderTest-L044",
+      "file": "cases/ConfigAstBuilderTest-L044.config",
+      "upstream": "config/parser/ConfigAstBuilderTest.groovy#L44-L57",
+      "test": "should report an error for invalid syntax",
+      "layer": "parser",
+      "expect": {
+        "ok": false,
+        "source": "parser",
+        "message": "Unexpected input: '8'",
+        "line": 3,
+        "column": 12,
+        "endLine": 3,
+        "endColumn": 13
+      },
+      "lint": [
+        {
+          "line": 3,
+          "column": 12,
+          "message": "Unexpected input: '8'"
+        }
+      ]
+    },
+    {
+      "id": "ConfigAstBuilderTest-L059",
+      "file": "cases/ConfigAstBuilderTest-L059.config",
+      "upstream": "config/parser/ConfigAstBuilderTest.groovy#L59-L74",
+      "test": "should report an error for invalid syntax",
+      "layer": "ast-builder",
+      "owner": "F-103",
+      "producer": "ConfigAstBuilder.java#L348-L359",
+      "expect": {
+        "ok": true
+      },
+      "lint": [
+        {
+          "line": 1,
+          "column": 1,
+          "message": "If statements cannot be mixed with config statements"
+        }
+      ]
+    },
+    {
+      "id": "ConfigAstBuilderTest-L076",
+      "file": "cases/ConfigAstBuilderTest-L076.config",
+      "upstream": "config/parser/ConfigAstBuilderTest.groovy#L76-L95",
+      "test": "should report an error for invalid syntax",
+      "layer": "ast-builder",
+      "owner": "F-103",
+      "producer": "ConfigAstBuilder.java#L348-L359",
+      "expect": {
+        "ok": true
+      },
+      "lint": [
+        {
+          "line": 3,
+          "column": 9,
+          "message": "If statements cannot be mixed with config statements"
+        }
+      ]
+    },
+    {
+      "id": "ConfigAstBuilderTest-L097",
+      "file": "cases/ConfigAstBuilderTest-L097.config",
+      "upstream": "config/parser/ConfigAstBuilderTest.groovy#L97-L111",
+      "test": "should report an error for invalid syntax",
+      "layer": "ast-builder",
+      "owner": "F-103",
+      "producer": "ConfigAstBuilder.java#L348-L359",
+      "expect": {
+        "ok": true
+      },
+      "lint": [
+        {
+          "line": 1,
+          "column": 1,
+          "message": "Try-catch blocks cannot be mixed with config statements"
+        }
+      ]
+    },
+    {
+      "id": "ConfigAstBuilderTest-L113",
+      "file": "cases/ConfigAstBuilderTest-L113.config",
+      "upstream": "config/parser/ConfigAstBuilderTest.groovy#L113-L127",
+      "test": "should report an error for invalid syntax",
+      "layer": "ast-builder",
+      "owner": "F-103",
+      "producer": "ConfigAstBuilder.java#L348-L359",
+      "expect": {
+        "ok": true
+      },
+      "lint": [
+        {
+          "line": 1,
+          "column": 1,
+          "message": "Try-catch blocks cannot be mixed with config statements"
+        }
+      ]
+    },
+    {
+      "id": "ConfigAstBuilderTest-L129",
+      "file": "cases/ConfigAstBuilderTest-L129.config",
+      "upstream": "config/parser/ConfigAstBuilderTest.groovy#L129-L139",
+      "test": "should report an error for invalid syntax",
+      "layer": "ast-builder",
+      "owner": "F-103",
+      "producer": "ConfigAstBuilder.java#L348-L359",
+      "expect": {
+        "ok": true
+      },
+      "lint": [
+        {
+          "line": 1,
+          "column": 1,
+          "message": "Variable declarations cannot be mixed with config statements"
+        }
+      ]
+    },
+    {
+      "id": "ConfigAstBuilderTest-L143",
+      "file": "cases/ConfigAstBuilderTest-L143.config",
+      "upstream": "config/parser/ConfigAstBuilderTest.groovy#L143-L159",
+      "test": "should report an error for unexpected end of file",
+      "layer": "parser",
+      "expect": {
+        "ok": false,
+        "source": "parser",
+        "message": "Unexpected end of file -- check for an unclosed brace, bracket, parenthesis, or string",
+        "line": 9,
+        "column": 1,
+        "endLine": 9,
+        "endColumn": 2
+      },
+      "lint": [
+        {
+          "line": 9,
+          "column": 1,
+          "message": "Unexpected end of file -- check for an unclosed brace, bracket, parenthesis, or string"
+        }
+      ]
+    },
+    {
+      "id": "ConfigAstBuilderTest-L163",
+      "file": "cases/ConfigAstBuilderTest-L163.config",
+      "upstream": "config/parser/ConfigAstBuilderTest.groovy#L163-L173",
+      "test": "should report an invalid escape sequence at the exact position",
+      "layer": "ast-builder",
+      "owner": "F-103",
+      "producer": "EscapeUtils.java#L66 (from ConfigAstBuilder)",
+      "expect": {
+        "ok": true
+      },
+      "lint": [
+        {
+          "line": 1,
+          "column": 14,
+          "message": "Invalid escape sequence: '\\.'"
+        }
+      ]
+    },
+    {
+      "id": "ConfigAstBuilderTest-L175",
+      "file": "cases/ConfigAstBuilderTest-L175.config",
+      "upstream": "config/parser/ConfigAstBuilderTest.groovy#L175-L186",
+      "test": "should report an invalid escape sequence at the exact position",
+      "layer": "ast-builder",
+      "owner": "F-103",
+      "producer": "EscapeUtils.java#L66 (from ConfigAstBuilder)",
+      "expect": {
+        "ok": true
+      },
+      "lint": [
+        {
+          "line": 1,
+          "column": 28,
+          "message": "Invalid escape sequence: '\\q'"
+        }
+      ]
+    },
+    {
+      "id": "ConfigAstBuilderTest-L188",
+      "file": "cases/ConfigAstBuilderTest-L188.config",
+      "upstream": "config/parser/ConfigAstBuilderTest.groovy#L188-L197",
+      "test": "should report an invalid escape sequence at the exact position",
+      "layer": "lexer",
+      "expect": {
+        "ok": true
+      },
+      "lint": []
+    },
+    {
+      "id": "AgentParserTest-L065",
+      "file": "cases/AgentParserTest-L065.nf",
+      "upstream": "script/parser/AgentParserTest.groovy#L65-L95",
+      "test": "should capture params.* prompt globals as prompt valRefs (excluding declared inputs)",
+      "layer": "parser",
+      "expect": {
+        "ok": true
+      },
+      "lint": [
+        {
+          "line": 15,
+          "column": 54,
+          "message": "`task` is not defined"
+        }
+      ],
+      "lintNote": "lint also runs name resolution, which reports `task` in the prompt; upstream's test checks syntax-phase errors only"
+    },
+    {
+      "id": "AgentParserTest-L098",
+      "file": "cases/AgentParserTest-L098.nf",
+      "upstream": "script/parser/AgentParserTest.groovy#L98-L125",
+      "test": "should capture no prompt valRefs when the prompt references only declared inputs",
+      "layer": "parser",
+      "expect": {
+        "ok": true
+      },
+      "lint": []
+    },
+    {
+      "id": "AgentParserTest-L128",
+      "file": "cases/AgentParserTest-L128.nf",
+      "upstream": "script/parser/AgentParserTest.groovy#L128-L165",
+      "test": "should parse a minimal agent definition",
+      "layer": "parser",
+      "expect": {
+        "ok": true
+      },
+      "lint": []
+    },
+    {
+      "id": "AgentParserTest-L168",
+      "file": "cases/AgentParserTest-L168.nf",
+      "upstream": "script/parser/AgentParserTest.groovy#L168-L190",
+      "test": "should report an error for agent without prompt section",
+      "layer": "reparse",
+      "owner": "F-102",
+      "producer": "ScriptAstBuilder.java#L251-L260 and #L304-L320 (reparse as a declaration)",
+      "expect": {
+        "ok": true
+      },
+      "lint": [
+        {
+          "line": 14,
+          "column": 1,
+          "message": "Unexpected input: '}'"
+        }
+      ]
+    },
+    {
+      "id": "AgentParserTest-L193",
+      "file": "cases/AgentParserTest-L193.nf",
+      "upstream": "script/parser/AgentParserTest.groovy#L193-L232",
+      "test": "should resolve an agent reference from a workflow",
+      "layer": "parser",
+      "expect": {
+        "ok": true
+      },
+      "lint": [
+        {
+          "line": 29,
+          "column": 24,
+          "message": "Agent `eval_agent` cannot be used as a variable"
+        },
+        {
+          "line": 29,
+          "column": 37,
+          "message": "`view` is not defined"
+        }
+      ],
+      "lintNote": "lint also runs name resolution (agent used as a variable, `view`); upstream's test checks syntax-phase errors only"
+    },
+    {
+      "id": "AgentParserTest-L235",
+      "file": "cases/AgentParserTest-L235.nf",
+      "upstream": "script/parser/AgentParserTest.groovy#L235-L268",
+      "test": "should resolve directives and prompt variables in an agent body",
+      "layer": "parser",
+      "expect": {
+        "ok": true
+      },
+      "lint": []
+    },
+    {
+      "id": "AgentParserTest-L271",
+      "file": "cases/AgentParserTest-L271.nf",
+      "upstream": "script/parser/AgentParserTest.groovy#L271-L295",
+      "test": "should resolve the repeatable label directive in an agent body",
+      "layer": "parser",
+      "expect": {
+        "ok": true
+      },
+      "lint": []
+    },
+    {
+      "id": "AgentParserTest-L298",
+      "file": "cases/AgentParserTest-L298.nf",
+      "upstream": "script/parser/AgentParserTest.groovy#L298-L330",
+      "test": "should accept record-typed agent I/O",
+      "layer": "parser",
+      "expect": {
+        "ok": true
+      },
+      "lint": []
+    },
+    {
+      "id": "AgentParserTest-L333",
+      "file": "cases/AgentParserTest-L333.nf",
+      "upstream": "script/parser/AgentParserTest.groovy#L333-L357",
+      "test": "should accept val agent I/O",
+      "layer": "parser",
+      "expect": {
+        "ok": true
+      },
+      "lint": []
+    },
+    {
+      "id": "AgentParserTest-L360",
+      "file": "cases/AgentParserTest-L360.nf",
+      "upstream": "script/parser/AgentParserTest.groovy#L360-L379",
+      "test": "should accept destructured agent inputs",
+      "layer": "parser",
+      "expect": {
+        "ok": true
+      },
+      "lint": []
+    },
+    {
+      "id": "AgentParserTest-L382",
+      "file": "cases/AgentParserTest-L382.nf",
+      "upstream": "script/parser/AgentParserTest.groovy#L382-L400",
+      "test": "should accept a composed agent output",
+      "layer": "parser",
+      "expect": {
+        "ok": true
+      },
+      "lint": []
+    },
+    {
+      "id": "AgentParserTest-L403",
+      "file": "cases/AgentParserTest-L403.nf",
+      "upstream": "script/parser/AgentParserTest.groovy#L403-L422",
+      "test": "should reject multiple agent outputs",
+      "layer": "ast-builder",
+      "owner": "F-102",
+      "producer": "ScriptAstBuilder.java#L900",
+      "expect": {
+        "ok": true
+      },
+      "lint": [
+        {
+          "line": 7,
+          "column": 5,
+          "message": "Agent should have only one output -- combine outputs into a record"
+        }
+      ]
+    },
+    {
+      "id": "AgentParserTest-L425",
+      "file": "cases/AgentParserTest-L425.nf",
+      "upstream": "script/parser/AgentParserTest.groovy#L425-L443",
+      "test": "should allow a named output when it is the only agent output",
+      "layer": "parser",
+      "expect": {
+        "ok": true
+      },
+      "lint": []
+    },
+    {
+      "id": "AgentParserTest-L476",
+      "file": "cases/AgentParserTest-L476.nf",
+      "upstream": "script/parser/AgentParserTest.groovy#L447-L472,L476",
+      "test": "should check the types of model-answered agent outputs (where row L476)",
+      "layer": "parser",
+      "expect": {
+        "ok": true
+      },
+      "lint": []
+    },
+    {
+      "id": "AgentParserTest-L477",
+      "file": "cases/AgentParserTest-L477.nf",
+      "upstream": "script/parser/AgentParserTest.groovy#L447-L472,L477",
+      "test": "should check the types of model-answered agent outputs (where row L477)",
+      "layer": "parser",
+      "expect": {
+        "ok": true
+      },
+      "lint": []
+    },
+    {
+      "id": "AgentParserTest-L478",
+      "file": "cases/AgentParserTest-L478.nf",
+      "upstream": "script/parser/AgentParserTest.groovy#L447-L472,L478",
+      "test": "should check the types of model-answered agent outputs (where row L478)",
+      "layer": "parser",
+      "expect": {
+        "ok": true
+      },
+      "lint": []
+    },
+    {
+      "id": "AgentParserTest-L479",
+      "file": "cases/AgentParserTest-L479.nf",
+      "upstream": "script/parser/AgentParserTest.groovy#L447-L472,L479",
+      "test": "should check the types of model-answered agent outputs (where row L479)",
+      "layer": "parser",
+      "expect": {
+        "ok": true
+      },
+      "lint": []
+    },
+    {
+      "id": "AgentParserTest-L480",
+      "file": "cases/AgentParserTest-L480.nf",
+      "upstream": "script/parser/AgentParserTest.groovy#L447-L472,L480",
+      "test": "should check the types of model-answered agent outputs (where row L480)",
+      "layer": "parser",
+      "expect": {
+        "ok": true
+      },
+      "lint": []
+    },
+    {
+      "id": "AgentParserTest-L481",
+      "file": "cases/AgentParserTest-L481.nf",
+      "upstream": "script/parser/AgentParserTest.groovy#L447-L472,L481",
+      "test": "should check the types of model-answered agent outputs (where row L481)",
+      "layer": "parser",
+      "expect": {
+        "ok": true
+      },
+      "lint": []
+    },
+    {
+      "id": "AgentParserTest-L482",
+      "file": "cases/AgentParserTest-L482.nf",
+      "upstream": "script/parser/AgentParserTest.groovy#L447-L472,L482",
+      "test": "should check the types of model-answered agent outputs (where row L482)",
+      "layer": "parser",
+      "expect": {
+        "ok": true
+      },
+      "lint": []
+    },
+    {
+      "id": "AgentParserTest-L483",
+      "file": "cases/AgentParserTest-L483.nf",
+      "upstream": "script/parser/AgentParserTest.groovy#L447-L472,L483",
+      "test": "should check the types of model-answered agent outputs (where row L483)",
+      "layer": "parser",
+      "expect": {
+        "ok": true
+      },
+      "lint": []
+    },
+    {
+      "id": "AgentParserTest-L484",
+      "file": "cases/AgentParserTest-L484.nf",
+      "upstream": "script/parser/AgentParserTest.groovy#L447-L472,L484",
+      "test": "should check the types of model-answered agent outputs (where row L484)",
+      "layer": "parser",
+      "expect": {
+        "ok": true
+      },
+      "lint": []
+    },
+    {
+      "id": "AgentParserTest-L485",
+      "file": "cases/AgentParserTest-L485.nf",
+      "upstream": "script/parser/AgentParserTest.groovy#L447-L472,L485",
+      "test": "should check the types of model-answered agent outputs (where row L485)",
+      "layer": "resolve",
+      "owner": "F-112",
+      "producer": "ScriptResolveVisitor.java#L179",
+      "expect": {
+        "ok": true
+      },
+      "lint": [
+        {
+          "line": 17,
+          "column": 5,
+          "message": "Agent output `items` has unsupported type List -- supported types are Boolean, Float, Integer, List<E>, Path, String, or a record type"
+        }
+      ]
+    },
+    {
+      "id": "AgentParserTest-L486",
+      "file": "cases/AgentParserTest-L486.nf",
+      "upstream": "script/parser/AgentParserTest.groovy#L447-L472,L486",
+      "test": "should check the types of model-answered agent outputs (where row L486)",
+      "layer": "resolve",
+      "owner": "F-112",
+      "producer": "ScriptResolveVisitor.java#L179",
+      "expect": {
+        "ok": true
+      },
+      "lint": [
+        {
+          "line": 17,
+          "column": 5,
+          "message": "Agent output `items` has unsupported type List<Map> -- supported types are Boolean, Float, Integer, List<E>, Path, String, or a record type"
+        }
+      ]
+    },
+    {
+      "id": "AgentParserTest-L487",
+      "file": "cases/AgentParserTest-L487.nf",
+      "upstream": "script/parser/AgentParserTest.groovy#L447-L472,L487",
+      "test": "should check the types of model-answered agent outputs (where row L487)",
+      "layer": "resolve",
+      "owner": "F-112",
+      "producer": "ScriptResolveVisitor.java#L179",
+      "expect": {
+        "ok": true
+      },
+      "lint": [
+        {
+          "line": 17,
+          "column": 5,
+          "message": "Agent output `d` has unsupported type Double -- supported types are Boolean, Float, Integer, List<E>, Path, String, or a record type"
+        }
+      ]
+    },
+    {
+      "id": "AgentParserTest-L488",
+      "file": "cases/AgentParserTest-L488.nf",
+      "upstream": "script/parser/AgentParserTest.groovy#L447-L472,L488",
+      "test": "should check the types of model-answered agent outputs (where row L488)",
+      "layer": "resolve",
+      "owner": "F-112",
+      "producer": "ScriptResolveVisitor.java#L179",
+      "expect": {
+        "ok": true
+      },
+      "lint": [
+        {
+          "line": 17,
+          "column": 5,
+          "message": "Agent output `m` has unsupported type Map -- supported types are Boolean, Float, Integer, List<E>, Path, String, or a record type"
+        }
+      ]
+    },
+    {
+      "id": "AgentParserTest-L489",
+      "file": "cases/AgentParserTest-L489.nf",
+      "upstream": "script/parser/AgentParserTest.groovy#L447-L472,L489",
+      "test": "should check the types of model-answered agent outputs (where row L489)",
+      "layer": "resolve",
+      "owner": "F-112",
+      "producer": "ScriptResolveVisitor.java#L179",
+      "expect": {
+        "ok": true
+      },
+      "lint": [
+        {
+          "line": 17,
+          "column": 5,
+          "message": "Agent output `b` has unsupported field `meta` with type Map -- supported types are Boolean, Float, Integer, List<E>, Path, String, or a record type"
+        }
+      ]
+    },
+    {
+      "id": "AgentParserTest-L490",
+      "file": "cases/AgentParserTest-L490.nf",
+      "upstream": "script/parser/AgentParserTest.groovy#L447-L472,L490",
+      "test": "should check the types of model-answered agent outputs (where row L490)",
+      "layer": "resolve",
+      "owner": "F-112",
+      "producer": "ScriptResolveVisitor.java#L179",
+      "expect": {
+        "ok": true
+      },
+      "lint": [
+        {
+          "line": 17,
+          "column": 5,
+          "message": "Agent output `bs` has unsupported field `meta` with type Map -- supported types are Boolean, Float, Integer, List<E>, Path, String, or a record type"
+        }
+      ]
+    },
+    {
+      "id": "AgentParserTest-L491",
+      "file": "cases/AgentParserTest-L491.nf",
+      "upstream": "script/parser/AgentParserTest.groovy#L447-L472,L491",
+      "test": "should check the types of model-answered agent outputs (where row L491)",
+      "layer": "resolve",
+      "owner": "F-112",
+      "producer": "ScriptResolveVisitor.java#L174",
+      "expect": {
+        "ok": true
+      },
+      "lint": [
+        {
+          "line": 17,
+          "column": 5,
+          "message": "Agent output `q` should declare a type -- typed outputs are answered by the model"
+        }
+      ]
+    },
+    {
+      "id": "AgentParserTest-L495",
+      "file": "cases/AgentParserTest-L495.nf",
+      "upstream": "script/parser/AgentParserTest.groovy#L495-L516",
+      "test": "should resolve file/files/stdout in an agent output but not the process-only directives",
+      "layer": "parser",
+      "expect": {
+        "ok": true
+      },
+      "lint": []
+    },
+    {
+      "id": "AgentParserTest-L518",
+      "file": "cases/AgentParserTest-L518.nf",
+      "upstream": "script/parser/AgentParserTest.groovy#L518-L535",
+      "test": "should resolve file/files/stdout in an agent output but not the process-only directives",
+      "layer": "resolve",
+      "owner": "F-112",
+      "producer": "VariableScopeVisitor.java#L803",
+      "expect": {
+        "ok": true
+      },
+      "lint": [
+        {
+          "line": 8,
+          "column": 5,
+          "message": "`eval` is not defined"
+        }
+      ]
+    }
+  ]
+}

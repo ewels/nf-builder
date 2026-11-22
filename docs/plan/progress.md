@@ -181,3 +181,14 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - Q3 answered: not needed for v0.1 ([open-questions](open-questions.md)); `docs/licences.md` marks CheerpJ as spike-only.
   - The known-error fixture is also an oracle case; the S1 oracle and docs tests now filter to `s1-` cases.
 - Blockers: none.
+
+## 2026-11-22 · F-101 · Claude (autonomous)
+- Did: ported nf-lang's `DescriptiveErrorStrategy` (parse errors get upstream's messages and ranges) and the 90 parse-level inputs of `ScriptAstBuilderTest`, `ConfigAstBuilderTest` and `AgentParserTest` as 94 tests; steps 2 and 3 were delivered by F-006.
+- State: passing.
+- Next: F-109 in review, F-007 in review, then F-102 and F-103.
+- Decisions:
+  - Q14 answered: the ported "lexer cases" are those parse-level inputs; the 46 the grammar accepts are owned by F-102, F-103 and F-112 (notes).
+  - AGENTS.md: the ported inputs are exempt from "must pass the oracle"; their lint results are recorded and checked for consistency, not re-run (an oracle re-check was more than this feature needed).
+  - `docs/licences.md`: the upstream test inputs (Apache-2.0).
+  - `.gitattributes`: the ported inputs are byte-exact (`-text`).
+- Blockers: none.
