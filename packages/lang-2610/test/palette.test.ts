@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import type {
   OperatorGroupId,
   PaletteDefinition,
@@ -15,10 +16,21 @@ import {
   paletteProblems,
 } from "./palette-problems.ts";
 
+/** The alternatives of `scriptDeclaration` in the vendored grammar (`| ruleName #label`). */
+const declarationRules = (() => {
+  const g4 = readFileSync(
+    new URL("../grammar/ScriptParser.g4", import.meta.url),
+    "utf8",
+  );
+  const body = /^scriptDeclaration\s*\n([\s\S]*?)^\s*;/m.exec(g4)?.[1] ?? "";
+  return [...body.matchAll(/^\s*[:|]\s*(\w+)/gm)].map((m) => m[1] as string);
+})();
+
 const ctx: PaletteContext = {
   script: scriptCatalogue,
   config: configCatalogue,
   scriptRules: ScriptParser.ruleNames,
+  declarationRules,
 };
 
 const items = (def: PaletteDefinition): PaletteItem[] =>
@@ -93,6 +105,15 @@ describe("26.10 palette", () => {
       "paramDeclarationV1",
       "processWhen",
     ]);
+  });
+
+  it("F-109 step 1 UX-12: construct items must name a scriptDeclaration alternative, not any grammar rule", () => {
+    expect(declarationRules).toContain("includeDeclaration");
+    expect(declarationRules).toContain("processDef");
+    expect(declarationRules).not.toContain("expression");
+    const problems = rulesOf(synthetic(construct("expression")), "shape");
+    expect(problems.map((p) => p.key)).toEqual(["expression"]);
+    expect(rulesOf(palette, "shape")).toEqual([]);
   });
 
   it("F-109 step 3 LA-34: every legacy-only grammar rule exists in the 26.10 ScriptParser", () => {

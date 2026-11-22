@@ -2,7 +2,6 @@
 // then moves to lang-core.
 import type {
   ConfigCatalogue,
-  PaletteCategory,
   PaletteDefinition,
   PaletteItem,
   ScriptCatalogue,
@@ -13,6 +12,8 @@ export type PaletteContext = {
   config: ConfigCatalogue;
   /** ScriptParser.ruleNames. */
   scriptRules: readonly string[];
+  /** The rules that are alternatives of `scriptDeclaration`; construct items must name one. */
+  declarationRules: readonly string[];
 };
 
 export type PaletteProblem = {
@@ -81,6 +82,12 @@ export function paletteProblems(
         if (!item[field]) add(key, "shape", `construct without ${field}`);
       if (!ctx.scriptRules.includes(item.name))
         add(key, "unknown-name", `no grammar rule "${item.name}"`);
+      else if (!ctx.declarationRules.includes(item.name))
+        add(
+          key,
+          "shape",
+          `"${item.name}" is not a scriptDeclaration alternative`,
+        );
     } else if (catalogueEntries(item, ctx).length === 0) {
       add(
         key,
@@ -98,14 +105,14 @@ export function paletteProblems(
     seen.add(key);
   };
 
-  const checkCategory = (category: PaletteCategory) => {
+  for (const category of palette.categories) {
     const hasItems = category.items !== undefined;
     const hasGroups = category.groups !== undefined;
     if (hasItems === hasGroups)
       add(category.id, "shape", "needs exactly one of items or groups");
-    if (hasItems && category.items?.length === 0)
+    if (category.items?.length === 0)
       add(category.id, "empty", "category has no items");
-    if (hasGroups && category.groups?.length === 0)
+    if (category.groups?.length === 0)
       add(category.id, "empty", "category has no groups");
     for (const item of category.items ?? []) checkItem(item);
     for (const group of category.groups ?? []) {
@@ -113,8 +120,6 @@ export function paletteProblems(
         add(group.id, "empty", "group has no items");
       for (const item of group.items) checkItem(item);
     }
-  };
-
-  for (const category of palette.categories) checkCategory(category);
+  }
   return problems;
 }

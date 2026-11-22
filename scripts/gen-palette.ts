@@ -2,41 +2,23 @@
 // palette.yaml to the committed palette.json that the pack imports (the browser can't parse YAML without a
 // runtime dependency). Names are not validated here: the pack's palette test does that against the catalogue.
 
-import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { parseDocument } from "yaml";
-import { isMain, REPO_ROOT } from "./check-common.ts";
-
-const packsWithPalette = (repoRoot: string): string[] => {
-  const dir = join(repoRoot, "packages");
-  return existsSync(dir)
-    ? readdirSync(dir)
-        .filter((name) => existsSync(join(dir, name, "palette.yaml")))
-        .sort()
-    : [];
-};
+import { isMain, packFor, REPO_ROOT } from "./check-common.ts";
 
 /** "26.10" -> packages/lang-2610/palette.{yaml,json}. A version without a palette.yaml lists the packs that have one. */
 export function palettePaths(
   version: string,
   repoRoot: string = REPO_ROOT,
 ): { yaml: string; json: string } {
-  const match = /^(\d+)\.(\d+)$/.exec(version);
-  const name = match ? `lang-${match[1]}${match[2]}` : undefined;
-  const packs = packsWithPalette(repoRoot);
-  if (name === undefined || !packs.includes(name)) {
-    const known = packs.map((p) => p.replace(/^lang-(\d+)(\d{2})$/, "$1.$2"));
-    throw new Error(
-      `No language pack with a palette.yaml for version "${version}". Packs with one: ${known.join(", ") || "none"}.`,
-    );
-  }
-  const dir = join(repoRoot, "packages", name);
+  const dir = packFor(version, "palette.yaml", "palette.yaml", repoRoot);
   return { yaml: join(dir, "palette.yaml"), json: join(dir, "palette.json") };
 }
 
 /** The YAML as two-space JSON with a trailing newline, keys in YAML order. Throws "<file>:<line>: ..." on YAML errors. */
 export function paletteJson(yamlText: string, file: string): string {
-  const doc = parseDocument(yamlText, { schema: "core", uniqueKeys: true });
+  const doc = parseDocument(yamlText, { schema: "core" });
   const [error] = doc.errors;
   if (error !== undefined) {
     const line = error.linePos?.[0].line ?? 1;
@@ -52,7 +34,7 @@ export function genPalette(opts: {
 }): { status: 0 | 1; message: string } {
   const paths = palettePaths(opts.version, opts.repoRoot);
   const json = paletteJson(readFileSync(paths.yaml, "utf8"), paths.yaml);
-  if (opts.check === true) {
+  if (opts.check) {
     const current = existsSync(paths.json)
       ? readFileSync(paths.json, "utf8")
       : undefined;
