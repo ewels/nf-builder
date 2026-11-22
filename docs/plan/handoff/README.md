@@ -11,10 +11,10 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-104 round trip | merged, PR #26 | |
 | F-110 printer | merged, PR #25 | |
 | F-105 semantic model | merged, PR #30 | |
-| F-106 typed projection | `feat/F-106` | Tasks 1–2 committed; 3–4 building. [plan](plan-F-106.md). |
-| F-107 legacy projection | not started | [plan](plan-F-107.md). After F-106; parallel with F-108. |
-| F-108 code nodes | not started | [plan](plan-F-108.md). After F-106; parallel with F-107. |
-| F-111 edit commands | not started | [plan](plan-F-111.md). Tasks 1–6 need only F-105; 7 onwards need F-106. |
+| F-106 typed projection | `feat/F-106`, PR #32 | Built and reviewed; waiting for CI (#33). |
+| F-107 legacy projection | `feat/F-107` (stacked on F-106) | Tasks 1–3 building. [plan](plan-F-107.md). |
+| F-108 code nodes | `feat/F-108` (stacked on F-106) | Tasks 1–2 building. [plan](plan-F-108.md). |
+| F-111 edit commands | `feat/F-111` (stacked on F-106) | Tasks 1–3 building. [plan](plan-F-111.md). |
 | F-112 diagnostics | not started | [plan](plan-F-112.md). After F-106 (and F-111 for fixes). |
 | F-113 engine worker | not started | [plan](plan-F-113.md). After F-111. |
 | F-202 projects in IndexedDB | not started | [plan](plan-F-202.md). After F-113. |
