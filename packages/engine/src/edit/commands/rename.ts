@@ -57,7 +57,7 @@ export function renameDeclaration(
   const { path, name, newName } = command;
   const { model } = state;
   const declaring = model.file(path);
-  if (!declaring || declaring.source.language !== "nextflow")
+  if (declaring?.source.language !== "nextflow")
     throw new EditRefusal("not-found", `There is no script ${path}.`, path);
   const found = declaring.declarations.get(name);
   if (!found)
@@ -107,7 +107,7 @@ export function renameDeclaration(
 
   for (const dependant of model.dependants(path)) {
     const file = model.file(dependant);
-    if (!file || file.source.language !== "nextflow") continue;
+    if (file?.source.language !== "nextflow") continue;
     let unaliased = false;
     const entryEdits: TextEdit[] = [];
     for (const include of file.includes) {

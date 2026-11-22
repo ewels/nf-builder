@@ -19,7 +19,7 @@ import { parseNodeKey } from "../projection/keys";
 import { createProjector } from "../projection/project";
 import type { EditState } from "./apply";
 import { freshName } from "./names";
-import { nullLiteral, property, replaceNode, variable } from "./nodes";
+import { indexAt, nullLiteral, property, replaceNode, variable } from "./nodes";
 import { EditRefusal } from "./refusal";
 
 function findDefinition(
@@ -248,6 +248,8 @@ export function referenceTo(
     node.outputs.length > 1
       ? property(variable(base), port.id)
       : variable(base);
+  // a legacy output with no name (`[1]`) is read as `CALLEE.out[1]`: the projection resolves that form, not `g[1]`
+  const positional = /^\[(\d+)\]$/.exec(port.id);
   switch (node.kind) {
     case "take":
       return {
@@ -286,6 +288,16 @@ export function referenceTo(
           "invalid",
           `${node.label} is nested inside another expression, so it can't be connected from. Connect from the node that contains it.`,
         );
+      if (positional && node.kind === "call")
+        return {
+          expression: indexAt(
+            property(variable(node.label), "out"),
+            Number(positional[1]),
+          ),
+          variable: null,
+          statement: s,
+          introduce: false,
+        };
       const local = parseNodeKey(node.id)?.local;
       if (local?.kind === "assigned")
         return {

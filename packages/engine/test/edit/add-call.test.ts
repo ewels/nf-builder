@@ -72,10 +72,10 @@ describe("F-111 AddCall", () => {
     commit(state, onlyTake);
     expect(state.model.file("main.nf")?.source.problems).toEqual([]);
     const typed = await stateFor({
-      "main.nf": `nextflow.enable.types = true\n\n${proc("B")}\nworkflow {\n    B()\n}\n`,
+      "main.nf": `nextflow.enable.types = true\n\n${proc("B")}\n${proc("C")}\nworkflow {\n    C()\n}\n`,
     });
     const t = accepted(typed, { kind: "addCall", target, callee: "B" });
-    expect(t.files[0]?.text).toContain("    B()\n    B()\n}");
+    expect(t.files[0]?.text).toContain("    C()\n    B()\n}");
   });
 
   it("F-111: AddCall refuses names that aren't callable in scope, and a self-call", async () => {
@@ -102,6 +102,63 @@ describe("F-111 AddCall", () => {
       }).code,
     ).toBe("not-found");
     expect(texts(state)["main.nf"]).toContain("include { helper }");
+  });
+});
+
+describe("F-111 AddCall twice in one workflow", () => {
+  const add = (callee: string) =>
+    ({ kind: "addCall", target, callee }) as const;
+
+  it("F-111 AR-22: AddCall refuses a process the workflow already calls, with a plain message (oracle case f111-addcall-twice)", async () => {
+    // a local process, an included one, a call inside an if, and one used in a pipe
+    const state = await stateFor({
+      ...files,
+      "main.nf": `${main}\nworkflow V {\n    main:\n    if (true) {\n        B()\n    }\n}\n\nworkflow P {\n    main:\n    channel.of(1) | B\n}\n`,
+    });
+    const r = refused(state, add("A"));
+    expect(r.code).toBe("invalid");
+    expect(r.message).toBe(
+      "`A` is already called in the entry workflow; Nextflow can call a process only once per workflow. Include it again under another name (`include { A as A_2 }`) to call it twice.",
+    );
+    for (const workflow of ["V", "P"]) {
+      const again = refused(state, {
+        kind: "addCall",
+        target: { path: "main.nf", workflow },
+        callee: "B",
+      });
+      expect(again.code).toBe("invalid");
+      expect(again.message).toContain(`workflow \`${workflow}\``);
+    }
+    expect(texts(state)["main.nf"]).toContain("A()");
+  });
+
+  it("F-111 AR-22: AddCall still allows another workflow's process, an alias of a called process, and a workflow called twice", async () => {
+    const state = await stateFor({
+      "a.nf": proc("A"),
+      "main.nf": [
+        "include { A } from './a.nf'",
+        "include { A as A_2 } from './a.nf'",
+        "",
+        "workflow SUB {",
+        "    A()",
+        "}",
+        "",
+        "workflow {",
+        "    A()",
+        "    SUB()",
+        "}",
+        "",
+      ].join("\n"),
+    });
+    accepted(state, add("A_2"));
+    // a workflow can be called twice (probe: run succeeds)
+    accepted(state, add("SUB"));
+    // a different workflow of the same file may call A again
+    accepted(state, {
+      kind: "addCall",
+      target: { path: "main.nf", workflow: "SUB" },
+      callee: "A_2",
+    });
   });
 });
 

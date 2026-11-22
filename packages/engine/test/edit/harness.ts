@@ -10,6 +10,7 @@ import {
   type TextEdit,
   type TextPatch,
   type WorkflowDef,
+  type WorkflowTarget,
 } from "@nf-builder/lang-core";
 import * as fc from "fast-check";
 import { expect } from "vitest";
@@ -76,13 +77,16 @@ export function buildCommand(state: EditState, c: Choice): EditCommand | null {
   );
   const projector = createProjector(state.model, state.catalogue);
   // the workflow at `a`; with `needs`, the first of the next few that offers something to act on
-  const workflow = (needs: (p: Projection) => boolean = () => true) => {
+  const workflow = (
+    needs: (p: Projection, target: WorkflowTarget) => boolean = () => true,
+  ) => {
     const all = projector.workflows().filter((x) => x.modelled);
     for (let i = 0; i < Math.min(all.length, 12); i++) {
       const w = all[(c.a + i) % all.length];
       const projection = w && projector.project(w.path, w.name);
-      if (w && projection && needs(projection))
-        return { target: { path: w.path, workflow: w.name }, projection };
+      const target = w && { path: w.path, workflow: w.name };
+      if (w && target && projection && needs(projection, target))
+        return { target, projection };
     }
     return null;
   };
@@ -92,12 +96,35 @@ export function buildCommand(state: EditState, c: Choice): EditCommand | null {
       return caller ? { kind, name: c.name, caller } : null;
     }
     case "addCall": {
-      const w = workflow();
+      // Usually a callee that is fine to add: a workflow (Nextflow runs one called twice) or a process the target doesn't
+      // call yet (AddCall refuses a second call of a process: `invalid`). One choice in four takes any name in scope, to
+      // keep the refusals covered.
+      const scopeOf = (path: string) =>
+        [...(state.model.file(path)?.scope.keys() ?? [])].sort();
+      const addable = (p: Projection, target: WorkflowTarget, n: string) => {
+        const called = new Set(p.nodes.map((x) => x.label));
+        const b = state.model.lookup(target.path, n);
+        const d =
+          b?.kind === "declaration" ? b.declaration : b?.entry.declaration;
+        return (
+          (d?.kind === "Workflow" && n !== target.workflow) ||
+          (d?.kind === "Process" && !called.has(n))
+        );
+      };
+      const plain = c.b % 4 === 0;
+      const w = workflow(
+        plain
+          ? undefined
+          : (p, target) =>
+              scopeOf(target.path).some((n) => addable(p, target, n)),
+      );
       if (!w) return null;
-      const scope = [
-        ...(state.model.file(w.target.path)?.scope.keys() ?? []),
-      ].sort();
-      const callee = pick(scope, c.b);
+      const scope = scopeOf(w.target.path);
+      const fresh = scope.filter((n) => addable(w.projection, w.target, n));
+      const callee = pick(
+        !plain && fresh.length > 0 ? fresh : scope,
+        Math.floor(c.b / 4),
+      );
       return callee ? { kind, target: w.target, callee } : null;
     }
     case "connect": {

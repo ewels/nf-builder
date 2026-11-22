@@ -44,20 +44,20 @@ describe("F-111 guards", () => {
 
   it("F-111 AR-24 ADR-0004: problems the file already had don't block an edit elsewhere", async () => {
     const state = await stateFor({
-      "main.nf": `${legacy}\nworkflow {\n    L(1)\n}\n\nprocess {\n`,
+      "main.nf": `${legacy}\nprocess M {\n    script:\n    'm'\n}\n\nworkflow {\n    L(1)\n}\n\nprocess {\n`,
     });
     expect(state.model.file("main.nf")?.source.status).toBe("partial");
     const ok = accepted(state, {
       kind: "addCall",
       target: { path: "main.nf", workflow: null },
-      callee: "L",
+      callee: "M",
     });
-    expect(ok.files[0]?.text).toContain("L()");
+    expect(ok.files[0]?.text).toContain("M()");
     // and a repair that removes the problem is accepted too
     accepted(state, {
       kind: "replaceFileText",
       path: "main.nf",
-      text: `${legacy}\nworkflow {\n    L(1)\n}\n`,
+      text: `${legacy}\nprocess M {\n    script:\n    'm'\n}\n\nworkflow {\n    L(1)\n}\n`,
     });
   });
 
@@ -133,7 +133,13 @@ describe("F-111 guards", () => {
   });
 
   it("F-111 LA-13 ADR-0004: a script that was already mixed can still be edited", async () => {
-    const state = await stateFor({ "main.nf": mixedAfterFlag });
+    // without its existing call: a process is called once per workflow
+    const state = await stateFor({
+      "main.nf": mixedAfterFlag.replace(
+        "    TYPED_HELLO(channel.of('hello'))\n",
+        "",
+      ),
+    });
     const ok = accepted(state, {
       kind: "addCall",
       target: { path: "main.nf", workflow: null },

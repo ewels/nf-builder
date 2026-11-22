@@ -46,6 +46,16 @@ export const property = (object: Expression, name: string): PropertyExpr => ({
   range: NO_RANGE,
 });
 
+/** `object[n]`: a legacy output read by position. */
+export const indexAt = (object: Expression, n: number): Expression => ({
+  kind: "Index",
+  object,
+  indices: [
+    { kind: "Number", text: String(n), integer: true, range: NO_RANGE },
+  ],
+  range: NO_RANGE,
+});
+
 export const nullLiteral = (): NullLiteral => ({
   kind: "Null",
   range: NO_RANGE,
