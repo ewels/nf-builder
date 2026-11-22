@@ -343,3 +343,19 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - A type-probe oracle tree (`packages/engine/test/projection/fixtures.json`) ties the projection's kinds to lint.
   - In memory only; no new dependency.
 - Blockers: none new.
+
+## 2026-11-22 · F-111 · Claude (autonomous)
+- Did: edit commands in `packages/engine/src/edit/` (types in lang-core): CreateProcess, AddCall, Connect, Disconnect, DeleteNode, RenameDeclaration and ReplaceFileText, applied as text patches with inverses behind the AR-24 and LA-13 guards. Property tests with fast-check over fixture trees, a corpus reprint check, and oracle cases that lint and stub-run edited trees. The printer now keeps multi-line string content verbatim.
+- State: passing.
+- Next: F-112, then F-113.
+- Decisions:
+  - [ADR 0039](../adr/0039-edit-commands.md):
+    - declaration-level reprint, plain-data commands, and patches and inverses in memory only;
+    - AR-24 read as "no problem the file didn't have", with our own LA-13 check (lint misses positional mixing, upstream bug 20);
+    - `null` placeholders, variable names, Connect moving a later source, DeleteNode clearing direct arguments;
+    - CreateProcess at `modules/local/<lower>/main.nf` from `LanguagePack.scaffold`, plus the rename limits;
+    - `ParseProblem.code`.
+  - A sixth printer known difference, `string-reindent` (upstream bug 23, amends ADR 0032); the three ported nf-lang formatter cases that assert re-indentation are marked as known differences, with their inputs and outputs unchanged.
+  - Spec: AR-24 clarified; LA-12 and LA-13 cite ADR 0039; the architecture sketch gains `scaffold`.
+  - `fast-check` 4.11.0 as an engine dev dependency (ADR 0011).
+- Blockers: none new.

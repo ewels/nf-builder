@@ -40,3 +40,4 @@ Process: [0001](0001-record-decisions-as-adrs.md). Template: [template.md](templ
 | [0034](0034-include-resolution-and-incremental-model.md) | Resolve includes as nf-lang 26.10 does, and re-model a changed file and its direct dependants | Accepted (agent) |
 | [0035](0035-registry-snapshot.md) | Build the registry snapshot in a scheduled workflow and publish it through a snapshot branch | Accepted (agent) |
 | [0036](0036-projection-node-keys-and-types.md) | Project typed workflows into plain-data graphs with name-based node keys and Channel/Value types | Accepted (agent) |
+| [0039](0039-edit-commands.md) | Apply edits as text patches with inverses, reprinting whole declarations, behind AR-24 and LA-13 guards | Accepted (agent) |
