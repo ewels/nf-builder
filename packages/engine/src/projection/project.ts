@@ -600,7 +600,7 @@ class Projecting {
       const ref = this.#reference(e.receiver);
       const target = setTarget(e);
       if (ref === null || target === null) return false;
-      this.#bindValues(target.variable, this.#valuesOf(ref.resolved));
+      this.#bindValues(target.variable.name, this.#valuesOf(ref.resolved));
       return true;
     }
     if (variable === null) return false;
@@ -1102,7 +1102,7 @@ class Projecting {
   /** The variable of a pipe's `set { v }` step. */
   #pipeSet(call: MethodCall): string | null {
     return methodName(call) === "set"
-      ? (setTarget(call)?.variable ?? null)
+      ? (setTarget(call)?.variable.name ?? null)
       : null;
   }
 
@@ -1263,10 +1263,10 @@ class Projecting {
     const target = setTarget(call) as NonNullable<ReturnType<typeof setTarget>>;
     const receiver = unwrap(call.receiver as Expression);
     const value = this.#isDataflow(receiver)
-      ? this.#build(receiver, target.variable)
+      ? this.#build(receiver, target.variable.name)
       : (this.#nested(receiver)?.value ??
-        this.#build(receiver, target.variable));
-    this.#bindValues(target.variable, [value]);
+        this.#build(receiver, target.variable.name));
+    this.#bindValues(target.variable.name, [value]);
     return value;
   }
 

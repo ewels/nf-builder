@@ -1,0 +1,151 @@
+workflow subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE legacy
+statements 19, modelled 19
+subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/:take:ch_cram take "ch_cram" @13:5
+  out out (out): -
+subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/:take:ch_fasta take "ch_fasta" @14:5
+  out out (out): -
+subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/:take:ch_fasta_fai take "ch_fasta_fai" @15:5
+  out out (out): -
+subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/:take:ch_scenario take "ch_scenario" @16:5
+  out out (out): -
+subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/:take:ch_vcf take "ch_vcf" @17:5
+  out out (out): -
+subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/:take:val_num_chunks take "val_num_chunks" @18:5
+  out out (out): -
+subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/:take:val_sampletype take "val_sampletype" @19:5
+  out out (out): -
+subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/:take:val_events take "val_events" @20:5
+  out out (out): -
+subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/:take:val_fdr take "val_fdr" @21:5
+  out out (out): -
+subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/meta_map chain ".map" steps=map @24:16
+  in in (in): -
+    <- subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/:take:ch_cram[out] ? via ch_cram
+  out out (out): ?
+subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/.combine@1 chain ".combine.map" steps=combine,map @27:9
+  in in (in): -
+    <- subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/meta_map[out] ? via meta_map
+  in 1:1 (combine(right)): -
+    <- subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/:take:ch_scenario[out] ? via ch_scenario
+  out out (out): ?
+subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/FILL_SCENARIO_FILE@1 call "FILL_SCENARIO_FILE" callee=FILL_SCENARIO_FILE:process:modelled:legacy @26:5
+  in $1 (tuple(meta, template, map_file, map)): Tuple
+    <- subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/.combine@1[out] ?
+  out rendered (rendered): Channel<Tuple>
+  out versions_yte (versions_yte): Channel<Tuple>
+subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/.combine@2 chain ".combine.combine.map" steps=combine,combine,map @33:9
+  in in (in): -
+    <- subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/:take:ch_cram[out] ? via ch_cram
+  in 1:1 (combine(right)): -
+    <- subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/:take:ch_fasta[out] ? via ch_fasta
+  in 2:1 (combine(right)): -
+    <- subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/:take:ch_fasta_fai[out] ? via ch_fasta_fai
+  out out (out): ?
+subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/VARLOCIRAPTOR_ESTIMATEALIGNMENTPROPERTIES@1 call "VARLOCIRAPTOR_ESTIMATEALIGNMENTPROPERTIES" callee=VARLOCIRAPTOR_ESTIMATEALIGNMENTPROPERTIES:process:modelled:legacy @32:5
+  in $1 (tuple(meta, bam, bai, fasta, fai)): Tuple
+    <- subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/.combine@2[out] ?
+  out alignment_properties_json (alignment_properties_json): Channel<Tuple>
+  out versions_varlociraptor (versions_varlociraptor): Channel<Tuple>
+subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/RBT_VCFSPLIT@1 call "RBT_VCFSPLIT" callee=RBT_VCFSPLIT:process:modelled:legacy @41:5
+  in $1 (tuple(meta, vcf)): Tuple
+    <- subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/:take:ch_vcf[out] ? via ch_vcf
+  in numchunks (numchunks): -
+    <- subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/:take:val_num_chunks[out] ? via val_num_chunks
+  out bcfchunks (bcfchunks): Channel<Tuple>
+  out versions_rbt (versions_rbt): Channel<Tuple>
+subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/ch_chunked_vcfs chain ".transpose.map" steps=transpose,map @46:23
+  in in (in): -
+    <- subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/RBT_VCFSPLIT@1[bcfchunks] Channel<Tuple> via RBT_VCFSPLIT.out.bcfchunks
+  out out (out): Channel<?>
+subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/ch_cram_alignment chain ".join.map" steps=join,map @56:25
+  in in (in): -
+    <- subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/:take:ch_cram[out] ? via ch_cram
+  in 1:1 (join(right)): -
+    <- subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/VARLOCIRAPTOR_ESTIMATEALIGNMENTPROPERTIES@1[alignment_properties_json] Channel<Tuple> via VARLOCIRAPTOR_ESTIMATEALIGNMENTPROPERTIES.out.alignment_properties_json
+  out out (out): Channel<?>
+subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/ch_input_preprocess_chunked chain ".map.combine.combine.combine.map" steps=map,combine,combine,combine,map @61:35
+  in in (in): -
+    <- subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/ch_chunked_vcfs[out] Channel<?> via ch_chunked_vcfs
+  in 2:1 (combine(1)): -
+    <- subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/ch_cram_alignment[out] Channel<?> via ch_cram_alignment
+  in 3:1 (combine(right)): -
+    <- subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/:take:ch_fasta[out] ? via ch_fasta
+  in 4:1 (combine(right)): -
+    <- subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/:take:ch_fasta_fai[out] ? via ch_fasta_fai
+  out out (out): Channel<?>
+subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/VARLOCIRAPTOR_PREPROCESS@1 call "VARLOCIRAPTOR_PREPROCESS" callee=VARLOCIRAPTOR_PREPROCESS:process:modelled:legacy @82:5
+  in $1 (tuple(meta, bam, bai, candidates, alignment_json, fasta, fai)): Tuple
+    <- subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/ch_input_preprocess_chunked[out] Channel<?> via ch_input_preprocess_chunked
+  out bcf (bcf): Channel<Tuple>
+  out versions_varlociraptor (versions_varlociraptor): Channel<Tuple>
+subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/.map@1 chain ".map" steps=map @94:13
+  in in (in): -
+    <- subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/FILL_SCENARIO_FILE@1[rendered] Channel<Tuple> via ch_scenario_file
+  out out (out): Channel<?>
+subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/ch_vcfs_for_callvariants chain ".map.combine.map" steps=map,combine,map @89:32
+  in in (in): -
+    <- subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/VARLOCIRAPTOR_PREPROCESS@1[bcf] Channel<Tuple> via VARLOCIRAPTOR_PREPROCESS.out.bcf
+  in 2:1 (combine(1)): -
+    <- subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/.map@1[out] Channel<?>
+  out out (out): Channel<?>
+subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/VARLOCIRAPTOR_CALLVARIANTS@1 call "VARLOCIRAPTOR_CALLVARIANTS" callee=VARLOCIRAPTOR_CALLVARIANTS:process:modelled:legacy @101:5
+  in $1 (tuple(meta, vcfs, scenario, scenario_aliases)): Tuple
+    <- subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/ch_vcfs_for_callvariants[out] Channel<?> via ch_vcfs_for_callvariants
+  out bcf (bcf): Channel<Tuple>
+  out versions_varlociraptor (versions_varlociraptor): Channel<Tuple>
+subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/SORT_CALLED_CHUNKS@1 call "SORT_CALLED_CHUNKS" callee=SORT_CALLED_CHUNKS:process:modelled:legacy @108:5
+  in $1 (tuple(meta, vcf)): Tuple
+    <- subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/VARLOCIRAPTOR_CALLVARIANTS@1[bcf] Channel<Tuple> via VARLOCIRAPTOR_CALLVARIANTS.out.bcf
+  out vcf (vcf): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out versions_bcftools (versions_bcftools): Channel<Tuple>
+subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/ch_sort_called_chunks_vcf chain ".branch" steps=branch @112:33
+  in in (in): -
+    <- subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/SORT_CALLED_CHUNKS@1[vcf] Channel<Tuple> via SORT_CALLED_CHUNKS.out.vcf
+  out out (out): Record
+subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/ch_sort_called_chunks_tbi chain ".branch" steps=branch @117:33
+  in in (in): -
+    <- subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/SORT_CALLED_CHUNKS@1[index] Channel<Tuple> via SORT_CALLED_CHUNKS.out.index
+  out out (out): Record
+subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/ch_vcf_tbi_chunks chain ".join.map.groupTuple" steps=join,map,groupTuple @122:25
+  in in (in): -
+    <- subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/ch_sort_called_chunks_vcf[out] Record via ch_sort_called_chunks_vcf indirect
+  in 1:1 (join(right)): -
+    <- subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/ch_sort_called_chunks_tbi[out] Record via ch_sort_called_chunks_tbi indirect
+  in 3:1 (groupTuple(opts)): -
+    <- subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/:take:val_num_chunks[out] ? via val_num_chunks
+  out out (out): Channel<?>
+subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/CONCAT_CALLED_CHUNKS@1 call "CONCAT_CALLED_CHUNKS" callee=CONCAT_CALLED_CHUNKS:process:modelled:legacy @129:5
+  in $1 (tuple(meta, vcfs, tbi)): Tuple
+    <- subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/ch_vcf_tbi_chunks[out] Channel<?> via ch_vcf_tbi_chunks
+  out vcf (vcf): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out versions_bcftools (versions_bcftools): Channel<Tuple>
+subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/ch_final_vcf chain ".mix" steps=mix @131:20
+  in in (in): -
+    <- subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/ch_sort_called_chunks_vcf[out] Record via ch_sort_called_chunks_vcf indirect
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/CONCAT_CALLED_CHUNKS@1[vcf] Channel<Tuple> via CONCAT_CALLED_CHUNKS.out.vcf
+  out out (out): Channel<?>
+subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/.map@2 chain ".map" steps=map @134:9
+  in in (in): -
+    <- subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/ch_final_vcf[out] Channel<?> via ch_final_vcf
+  out out (out): Channel<?>
+subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/VARLOCIRAPTOR_FILTERFDR@1 call "VARLOCIRAPTOR_FILTERFDR" callee=VARLOCIRAPTOR_FILTERFDR:process:modelled:legacy @133:5
+  in $1 (tuple(meta, vcf, events, fdr)): Tuple
+    <- subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/.map@2[out] Channel<?>
+  out bcf (bcf): Channel<Tuple>
+  out versions_varlociraptor (versions_varlociraptor): Channel<Tuple>
+subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/SORT_FINAL_VCF@1 call "SORT_FINAL_VCF" callee=SORT_FINAL_VCF:process:modelled:legacy @137:5
+  in $1 (tuple(meta, vcf)): Tuple
+    <- subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/VARLOCIRAPTOR_FILTERFDR@1[bcf] Channel<Tuple> via VARLOCIRAPTOR_FILTERFDR.out.bcf
+  out vcf (vcf): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out versions_bcftools (versions_bcftools): Channel<Tuple>
+subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/:emit:vcf emit "vcf" @140:5
+  in in (in): -
+    <- subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/SORT_FINAL_VCF@1[vcf] Channel<Tuple> via SORT_FINAL_VCF.out.vcf
+subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/:emit:tbi emit "tbi" @141:5
+  in in (in): -
+    <- subworkflows/local/vcf_varlociraptor_single/main.nf#VCF_VARLOCIRAPTOR_SINGLE/SORT_FINAL_VCF@1[index] Channel<Tuple> via SORT_FINAL_VCF.out.index
+bound @29:5 ch_scenario_file

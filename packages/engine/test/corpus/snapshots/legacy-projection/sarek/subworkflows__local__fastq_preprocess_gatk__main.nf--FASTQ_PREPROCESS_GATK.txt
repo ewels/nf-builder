@@ -1,0 +1,755 @@
+workflow subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK legacy
+statements 84, modelled 78
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:params params "params" @48:1
+  out step (step): -
+  out umi_read_structure (umi_read_structure): -
+  out trim_fastq (trim_fastq): -
+  out split_fastq (split_fastq): -
+  out umi_location (umi_location): -
+  out tools (tools): -
+  out umi_in_read_header (umi_in_read_header): -
+  out save_mapped (save_mapped): -
+  out skip_tools (skip_tools): -
+  out outdir (outdir): -
+  out use_gatk_spark (use_gatk_spark): -
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:input_fastq take "input_fastq" @50:5
+  out out (out): -
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:input_sample take "input_sample" @51:5
+  out out (out): -
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:dict take "dict" @52:5
+  out out (out): -
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:fasta take "fasta" @53:5
+  out out (out): -
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:fasta_fai take "fasta_fai" @54:5
+  out out (out): -
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:index_alignment take "index_alignment" @55:5
+  out out (out): -
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:intervals_and_num_intervals take "intervals_and_num_intervals" @56:5
+  out out (out): -
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:intervals_for_preprocessing take "intervals_for_preprocessing" @57:5
+  out out (out): -
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:known_sites_indels take "known_sites_indels" @58:5
+  out out (out): -
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:known_sites_indels_tbi take "known_sites_indels_tbi" @59:5
+  out out (out): -
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:bbsplit_index take "bbsplit_index" @60:5
+  out out (out): -
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:save_output_as_bam take "save_output_as_bam" @61:5
+  out out (out): -
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:aligner take "aligner" @62:5
+  out out (out): -
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:group_by_umi_strategy take "group_by_umi_strategy" @63:5
+  out out (out): -
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/reports factory "channel.empty" factory=channel.empty @68:15
+  out out (out): Channel<?>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/FASTQ_CREATE_UMI_CONSENSUS_FGBIO@1 call "FASTQ_CREATE_UMI_CONSENSUS_FGBIO" callee=FASTQ_CREATE_UMI_CONSENSUS_FGBIO:workflow:modelled:legacy @80:13
+  guards then of params.step == 'mapping'; then of params.umi_read_structure
+  in reads (reads): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:input_fastq[out] ? via input_fastq
+  in fasta (fasta): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:fasta[out] ? via fasta
+  in fai (fai): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:fasta_fai[out] ? via fasta_fai
+  in map_index (map_index): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:index_alignment[out] ? via index_alignment
+  in groupreadsbyumi_strategy (groupreadsbyumi_strategy): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:group_by_umi_strategy[out] ? via group_by_umi_strategy
+  in aligner (aligner): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:aligner[out] ? via aligner
+  out umibam (umibam): Channel<Tuple>
+  out groupbam (groupbam): Channel<Tuple>
+  out consensusbam (consensusbam): Channel<Tuple>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/bam_converted_from_fastq chain ".map" steps=map @89:40
+  guards then of params.step == 'mapping'; then of params.umi_read_structure
+  in in (in): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/FASTQ_CREATE_UMI_CONSENSUS_FGBIO@1[consensusbam] Channel<Tuple> via FASTQ_CREATE_UMI_CONSENSUS_FGBIO.out.consensusbam
+  out out (out): Channel<?>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/interleave_input code "interleave_input = false" @95:13
+  guards then of params.step == 'mapping'; then of params.umi_read_structure
+  out interleave_input (interleave_input): Boolean
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/CONVERT_FASTQ_UMI@1 call "CONVERT_FASTQ_UMI" callee=CONVERT_FASTQ_UMI:workflow:modelled:legacy @96:13
+  guards then of params.step == 'mapping'; then of params.umi_read_structure
+  in input (input): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/bam_converted_from_fastq[out] Channel<?> via bam_converted_from_fastq
+  in fasta (fasta): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:fasta[out] ? via fasta
+  in fasta_fai (fasta_fai): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:fasta_fai[out] ? via fasta_fai
+  in interleaved (interleaved): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/interleave_input[interleave_input] Boolean via interleave_input
+  out reads (reads): Channel<Tuple>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/save_trimmed_fail code "save_trimmed_fail = false" @112:13
+  guards then of params.step == 'mapping'; then of params.trim_fastq || params.split_fastq > 0 || params.umi_location
+  out save_trimmed_fail (save_trimmed_fail): Boolean
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/save_merged code "save_merged = false" @113:13
+  guards then of params.step == 'mapping'; then of params.trim_fastq || params.split_fastq > 0 || params.umi_location
+  out save_merged (save_merged): Boolean
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/.map@1 chain ".map" steps=map @115:17
+  guards then of params.step == 'mapping'; then of params.trim_fastq || params.split_fastq > 0 || params.umi_location
+  in in (in): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:input_fastq[out] ? via reads_for_fastp indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/CONVERT_FASTQ_UMI@1[reads] Channel<Tuple> via reads_for_fastp indirect
+  out out (out): ?
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/FASTP@1 call "FASTP" callee=FASTP:process:modelled:legacy @114:13
+  guards then of params.step == 'mapping'; then of params.trim_fastq || params.split_fastq > 0 || params.umi_location
+  in $1 (tuple(meta, reads, adapter_fasta)): Tuple
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/.map@1[out] ?
+  in discard_trimmed_pass (discard_trimmed_pass): -
+    = false : Boolean
+  in save_trimmed_fail (save_trimmed_fail): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/save_trimmed_fail[save_trimmed_fail] Boolean via save_trimmed_fail
+  in save_merged (save_merged): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/save_merged[save_merged] Boolean via save_merged
+  out reads (reads): Channel<Tuple>
+  out json (json): Channel<Tuple>
+  out html (html): Channel<Tuple>
+  out log (log): Channel<Tuple>
+  out reads_fail (reads_fail): Channel<Tuple>
+  out reads_merged (reads_merged): Channel<Tuple>
+  out versions_fastp (versions_fastp): Channel<Tuple>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/.collect@1 chain ".collect" steps=collect @121:35
+  guards then of params.step == 'mapping'; then of params.trim_fastq || params.split_fastq > 0 || params.umi_location
+  in in (in): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/FASTP@1[json] Channel<Tuple> via FASTP.out.json
+  out out (out): Value<?>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/reports~2 chain ".mix" steps=mix @121:23
+  guards then of params.step == 'mapping'; then of params.trim_fastq || params.split_fastq > 0 || params.umi_location
+  in in (in): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/reports[out] Channel<?> via reports
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/.collect@1[out] Value<?>
+  out out (out): Channel<?>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/.collect@2 chain ".collect" steps=collect @122:35
+  guards then of params.step == 'mapping'; then of params.trim_fastq || params.split_fastq > 0 || params.umi_location
+  in in (in): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/FASTP@1[html] Channel<Tuple> via FASTP.out.html
+  out out (out): Value<?>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/reports~3 chain ".mix" steps=mix @122:23
+  guards then of params.step == 'mapping'; then of params.trim_fastq || params.split_fastq > 0 || params.umi_location
+  in in (in): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/reports~2[out] Channel<?> via reports
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/.collect@2[out] Value<?>
+  out out (out): Channel<?>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/reads_for_bbsplit chain ".map.transpose" steps=map,transpose @125:37
+  guards then of params.step == 'mapping'; then of params.trim_fastq || params.split_fastq > 0 || params.umi_location; then of params.split_fastq
+  in in (in): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/FASTP@1[reads] Channel<Tuple> via FASTP.out.reads
+  out out (out): Channel<?>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/BBMAP_BBSPLIT@1 call "BBMAP_BBSPLIT" callee=BBMAP_BBSPLIT:process:modelled:legacy @145:35
+  guards then of params.step == 'mapping'; then of params.tools && params.tools.split(',').contains('bbsplit')
+  in $1 (tuple(meta, reads)): Tuple
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:input_fastq[out] ? via reads_for_bbsplit indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/CONVERT_FASTQ_UMI@1[reads] Channel<Tuple> via reads_for_bbsplit indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/FASTP@1[reads] Channel<Tuple> via reads_for_bbsplit indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/reads_for_bbsplit[out] Channel<?> via reads_for_bbsplit indirect
+  in index (index): Path
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:bbsplit_index[out] ? via bbsplit_index
+  in primary_ref (primary_ref): Path
+    = [] : List
+  in $4 (tuple(other_ref_names, other_ref_paths)): Tuple
+    = [[], []] : List
+  in only_build_index (only_build_index): -
+    = false : Boolean
+  out index (index): Channel<Path>
+  out primary_fastq (primary_fastq): Channel<Tuple>
+  out all_fastq (all_fastq): Channel<Tuple>
+  out stats (stats): Channel<Tuple>
+  out log (log): Channel<Tuple>
+  out versions_bbmap (versions_bbmap): Channel<Tuple>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/.collect@3 chain ".collect" steps=collect @153:35
+  guards then of params.step == 'mapping'; then of params.tools && params.tools.split(',').contains('bbsplit')
+  in in (in): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/BBMAP_BBSPLIT@1[stats] Channel<Tuple> via BBMAP_BBSPLIT.out.stats
+  out out (out): Value<?>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/reports~4 chain ".mix" steps=mix @153:23
+  guards then of params.step == 'mapping'; then of params.tools && params.tools.split(',').contains('bbsplit')
+  in in (in): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/reports[out] Channel<?> via reports indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/reports~3[out] Channel<?> via reports indirect
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/.collect@3[out] Value<?>
+  out out (out): Channel<?>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/reads_grouping_key chain ".map.groupTuple.map" steps=map,groupTuple,map @163:30
+  guards then of params.step == 'mapping'
+  in in (in): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:input_fastq[out] ? via reads_for_alignment indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/CONVERT_FASTQ_UMI@1[reads] Channel<Tuple> via reads_for_alignment indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/FASTP@1[reads] Channel<Tuple> via reads_for_alignment indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/reads_for_bbsplit[out] Channel<?> via reads_for_alignment indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/BBMAP_BBSPLIT@1[primary_fastq] Channel<Tuple> via reads_for_alignment indirect
+  out out (out): Channel<?>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/reads_for_alignment chain ".map" steps=map @172:31
+  guards then of params.step == 'mapping'
+  in in (in): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:input_fastq[out] ? via reads_for_alignment indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/CONVERT_FASTQ_UMI@1[reads] Channel<Tuple> via reads_for_alignment indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/FASTP@1[reads] Channel<Tuple> via reads_for_alignment indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/reads_for_bbsplit[out] Channel<?> via reads_for_alignment indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/BBMAP_BBSPLIT@1[primary_fastq] Channel<Tuple> via reads_for_alignment indirect
+  out out (out): ?
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/sort_bam code "sort_bam = true" @183:9
+  guards then of params.step == 'mapping'
+  out sort_bam (sort_bam): Boolean
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/FASTQ_ALIGN@1 call "FASTQ_ALIGN" callee=FASTQ_ALIGN:workflow:modelled:legacy @184:9
+  guards then of params.step == 'mapping'
+  in reads (reads): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/reads_for_alignment[out] ? via reads_for_alignment
+  in index (index): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:index_alignment[out] ? via index_alignment
+  in sort (sort): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/sort_bam[sort_bam] Boolean via sort_bam
+  in fasta (fasta): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:fasta[out] ? via fasta
+  in fasta_fai (fasta_fai): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:fasta_fai[out] ? via fasta_fai
+  out bam (bam): Channel<?>
+  out bai (bai): Channel<?>
+  out reports (reports): Channel<?>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/aligned_bam factory "channel.empty" factory=channel.empty @186:23
+  guards then of params.step == 'mapping'
+  out out (out): Channel<?>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/aligned_bai factory "channel.empty" factory=channel.empty @187:23
+  guards then of params.step == 'mapping'
+  out out (out): Channel<?>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/.map@2 chain ".map" steps=map @190:39
+  guards then of params.step == 'mapping'; then of params.umi_in_read_header || params.umi_location
+  in in (in): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/FASTQ_ALIGN@1[bam] Channel<?> via FASTQ_ALIGN.out.bam
+  out out (out): Channel<?>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/FGBIO_COPYUMIFROMREADNAME@1 call "FGBIO_COPYUMIFROMREADNAME" callee=FGBIO_COPYUMIFROMREADNAME:process:modelled:legacy @190:13
+  guards then of params.step == 'mapping'; then of params.umi_in_read_header || params.umi_location
+  in $1 (tuple(meta, bam, bai)): Tuple
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/.map@2[out] Channel<?>
+  out bam (bam): Channel<Tuple>
+  out bai (bai): Channel<Tuple>
+  out versions_fgbio (versions_fgbio): Channel<Tuple>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/bam_mapped chain ".combine.filter.map.map.map.groupTuple" steps=combine,filter,map,map,map,groupTuple @202:22
+  guards then of params.step == 'mapping'
+  in in (in): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/FASTQ_ALIGN@1[bam] Channel<?> via aligned_bam indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/FGBIO_COPYUMIFROMREADNAME@1[bam] Channel<Tuple> via aligned_bam indirect
+  in 1:1 (combine(right)): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/reads_grouping_key[out] Channel<?> via reads_grouping_key
+  out out (out): Channel<?>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/bai_mapped chain ".combine.filter.map.map.map.groupTuple" steps=combine,filter,map,map,map,groupTuple @218:22
+  guards then of params.step == 'mapping'
+  in in (in): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/FASTQ_ALIGN@1[bai] Channel<?> via aligned_bai indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/FGBIO_COPYUMIFROMREADNAME@1[bai] Channel<Tuple> via aligned_bai indirect
+  in 1:1 (combine(right)): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/reads_grouping_key[out] Channel<?> via reads_grouping_key
+  out out (out): Channel<?>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/BAM_MERGE_INDEX_SAMTOOLS@1 call "BAM_MERGE_INDEX_SAMTOOLS" callee=BAM_MERGE_INDEX_SAMTOOLS:workflow:modelled:legacy @239:13
+  guards then of params.step == 'mapping'; then of params.save_mapped || ((params.skip_tools && params.skip_tools.split(',').contains('markduplicates')) && !(params.tools && params.tools.split(',').contains('sentieon_dedup')))
+  in bam (bam): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/bam_mapped[out] Channel<?> via bam_mapped
+  out bam_bai (bam_bai): Channel<Record>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/.combine@1 chain ".combine.map.collect" steps=combine,map,collect @241:71
+  guards then of params.step == 'mapping'; then of params.save_mapped || ((params.skip_tools && params.skip_tools.split(',').contains('markduplicates')) && !(params.tools && params.tools.split(',').contains('sentieon_dedup')))
+  in in (in): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:fasta[out] ? via fasta
+  in 1:1 (combine(right)): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:fasta_fai[out] ? via fasta_fai
+  out out (out): Value<Bag<?>>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/BAM_TO_CRAM_MAPPING@1 call "BAM_TO_CRAM_MAPPING" callee=BAM_TO_CRAM_MAPPING:process:modelled:legacy @241:13
+  guards then of params.step == 'mapping'; then of params.save_mapped || ((params.skip_tools && params.skip_tools.split(',').contains('markduplicates')) && !(params.tools && params.tools.split(',').contains('sentieon_dedup')))
+  in $1 (tuple(meta, input, index)): Tuple
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/BAM_MERGE_INDEX_SAMTOOLS@1[bam_bai] Channel<Record> via BAM_MERGE_INDEX_SAMTOOLS.out.bam_bai
+  in $2 (tuple(meta2, fasta, fai)): Tuple
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/.combine@1[out] Value<Bag<?>>
+  out bam (bam): Channel<Tuple>
+  out cram (cram): Channel<Tuple>
+  out bai (bai): Channel<Tuple>
+  out crai (crai): Channel<Tuple>
+  out versions_samtools (versions_samtools): Channel<Tuple>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/CHANNEL_ALIGN_CREATE_CSV@1 call "CHANNEL_ALIGN_CREATE_CSV" callee=CHANNEL_ALIGN_CREATE_CSV:workflow:modelled:legacy @244:17
+  guards then of params.step == 'mapping'; then of params.save_mapped || ((params.skip_tools && params.skip_tools.split(',').contains('markduplicates')) && !(params.tools && params.tools.split(',').contains('sentieon_dedup'))); then of save_output_as_bam
+  in bam_indexed (bam_indexed): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/BAM_MERGE_INDEX_SAMTOOLS@1[bam_bai] Channel<Record> via BAM_MERGE_INDEX_SAMTOOLS.out.bam_bai
+  in outdir (outdir): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:params[outdir] ? via params.outdir
+  in save_output_as_bam (save_output_as_bam): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:save_output_as_bam[out] ? via save_output_as_bam
+  in parabricks (parabricks): -
+    = false : Boolean
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/.join@1 chain ".join" steps=join @247:42
+  guards then of params.step == 'mapping'; then of params.save_mapped || ((params.skip_tools && params.skip_tools.split(',').contains('markduplicates')) && !(params.tools && params.tools.split(',').contains('sentieon_dedup'))); else of save_output_as_bam
+  in in (in): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/BAM_TO_CRAM_MAPPING@1[cram] Channel<Tuple> via BAM_TO_CRAM_MAPPING.out.cram
+  in 1:1 (join(right)): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/BAM_TO_CRAM_MAPPING@1[crai] Channel<Tuple> via BAM_TO_CRAM_MAPPING.out.crai
+  out out (out): Channel<Record>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/CHANNEL_ALIGN_CREATE_CSV@2 call "CHANNEL_ALIGN_CREATE_CSV" callee=CHANNEL_ALIGN_CREATE_CSV:workflow:modelled:legacy @247:17
+  guards then of params.step == 'mapping'; then of params.save_mapped || ((params.skip_tools && params.skip_tools.split(',').contains('markduplicates')) && !(params.tools && params.tools.split(',').contains('sentieon_dedup'))); else of save_output_as_bam
+  in bam_indexed (bam_indexed): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/.join@1[out] Channel<Record>
+  in outdir (outdir): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:params[outdir] ? via params.outdir
+  in save_output_as_bam (save_output_as_bam): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:save_output_as_bam[out] ? via save_output_as_bam
+  in parabricks (parabricks): -
+    = false : Boolean
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/cram_markduplicates_no_spark factory "channel.empty" factory=channel.empty @255:40
+  guards then of params.step in ['mapping', 'markduplicates']
+  out out (out): Channel<?>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/cram_sentieon_dedup factory "channel.empty" factory=channel.empty @256:31
+  guards then of params.step in ['mapping', 'markduplicates']
+  out out (out): Channel<?>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/cram_markduplicates_spark factory "channel.empty" factory=channel.empty @257:37
+  guards then of params.step in ['mapping', 'markduplicates']
+  out out (out): Channel<?>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/cram_for_markduplicates chain ".map" steps=map @263:75
+  guards then of params.step in ['mapping', 'markduplicates']; else of params.step == 'mapping'
+  in in (in): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:input_sample[out] ? via input_sample
+  out out (out): ?
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/.map@3 chain ".map" steps=map @266:39
+  guards then of params.step in ['mapping', 'markduplicates']; then of params.step == 'markduplicates' && params.umi_in_read_header
+  in in (in): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/bam_mapped[out] Channel<?> via cram_for_markduplicates indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/cram_for_markduplicates[out] ? via cram_for_markduplicates indirect
+  out out (out): ?
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/FGBIO_COPYUMIFROMREADNAME@2 call "FGBIO_COPYUMIFROMREADNAME" callee=FGBIO_COPYUMIFROMREADNAME:process:modelled:legacy @266:13
+  guards then of params.step in ['mapping', 'markduplicates']; then of params.step == 'markduplicates' && params.umi_in_read_header
+  in $1 (tuple(meta, bam, bai)): Tuple
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/.map@3[out] ?
+  out bam (bam): Channel<Tuple>
+  out bai (bai): Channel<Tuple>
+  out versions_fgbio (versions_fgbio): Channel<Tuple>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/cram_skip_markduplicates factory "channel.empty" factory=channel.empty @272:36
+  guards then of params.step in ['mapping', 'markduplicates']
+  out out (out): Channel<?>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/cram_skip_markduplicates~2 chain ".join" steps=join @279:44
+  guards then of params.step in ['mapping', 'markduplicates']; then of params.skip_tools && params.skip_tools.split(',').contains('markduplicates') && !(params.tools && params.tools.split(',').contains('sentieon_dedup')); then of params.step == 'mapping'
+  in in (in): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/BAM_TO_CRAM_MAPPING@1[cram] Channel<Tuple> via BAM_TO_CRAM_MAPPING.out.cram
+  in 1:1 (join(right)): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/BAM_TO_CRAM_MAPPING@1[crai] Channel<Tuple> via BAM_TO_CRAM_MAPPING.out.crai
+  out out (out): Channel<Record>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/channel.empty@1 factory "channel.empty" factory=channel.empty @282:44
+  guards then of params.step in ['mapping', 'markduplicates']; then of params.skip_tools && params.skip_tools.split(',').contains('markduplicates') && !(params.tools && params.tools.split(',').contains('sentieon_dedup')); else of params.step == 'mapping'
+  out out (out): Channel<?>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/cram_skip_markduplicates~3 chain ".mix" steps=mix @282:44
+  guards then of params.step in ['mapping', 'markduplicates']; then of params.skip_tools && params.skip_tools.split(',').contains('markduplicates') && !(params.tools && params.tools.split(',').contains('sentieon_dedup')); else of params.step == 'mapping'
+  in in (in): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/channel.empty@1[out] Channel<?>
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:input_sample[out] ? via input_sample
+  out out (out): Channel<?>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/CRAM_QC_NO_MD@1 call "CRAM_QC_NO_MD" callee=CRAM_QC_NO_MD:workflow:modelled:legacy @285:13
+  guards then of params.step in ['mapping', 'markduplicates']; then of params.skip_tools && params.skip_tools.split(',').contains('markduplicates') && !(params.tools && params.tools.split(',').contains('sentieon_dedup'))
+  in cram (cram): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/cram_skip_markduplicates~2[out] Channel<Record> via cram_skip_markduplicates indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/cram_skip_markduplicates~3[out] Channel<?> via cram_skip_markduplicates indirect
+  in fasta (fasta): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:fasta[out] ? via fasta
+  in fasta_fai (fasta_fai): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:fasta_fai[out] ? via fasta_fai
+  in intervals (intervals): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:intervals_for_preprocessing[out] ? via intervals_for_preprocessing
+  out reports (reports): Channel<?>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/.collect@4 chain ".collect" steps=collect @288:35
+  guards then of params.step in ['mapping', 'markduplicates']; then of params.skip_tools && params.skip_tools.split(',').contains('markduplicates') && !(params.tools && params.tools.split(',').contains('sentieon_dedup'))
+  in in (in): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/CRAM_QC_NO_MD@1[reports] Channel<?> via CRAM_QC_NO_MD.out.reports
+  out out (out): Value<?>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/reports~5 chain ".mix" steps=mix @288:23
+  guards then of params.step in ['mapping', 'markduplicates']; then of params.skip_tools && params.skip_tools.split(',').contains('markduplicates') && !(params.tools && params.tools.split(',').contains('sentieon_dedup'))
+  in in (in): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/reports[out] Channel<?> via reports indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/reports~3[out] Channel<?> via reports indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/reports~4[out] Channel<?> via reports indirect
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/.collect@4[out] Value<?>
+  out out (out): Channel<?>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/BAM_MARKDUPLICATES_SPARK@1 call "BAM_MARKDUPLICATES_SPARK" callee=BAM_MARKDUPLICATES_SPARK:workflow:modelled:legacy @291:13
+  guards then of params.step in ['mapping', 'markduplicates']; else of params.skip_tools && params.skip_tools.split(',').contains('markduplicates') && !(params.tools && params.tools.split(',').contains('sentieon_dedup')); then of params.use_gatk_spark && params.use_gatk_spark.contains('markduplicates')
+  in bam (bam): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/bam_mapped[out] Channel<?> via cram_for_markduplicates indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/cram_for_markduplicates[out] ? via cram_for_markduplicates indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/FGBIO_COPYUMIFROMREADNAME@2[bam] Channel<Tuple> via cram_for_markduplicates indirect
+  in dict (dict): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:dict[out] ? via dict
+  in fasta (fasta): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:fasta[out] ? via fasta
+  in fasta_fai (fasta_fai): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:fasta_fai[out] ? via fasta_fai
+  in intervals_bed_combined (intervals_bed_combined): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:intervals_for_preprocessing[out] ? via intervals_for_preprocessing
+  out alignment (alignment): Channel<Record>
+  out reports (reports): Channel<?>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/.collect@5 chain ".collect" steps=collect @301:35
+  guards then of params.step in ['mapping', 'markduplicates']; else of params.skip_tools && params.skip_tools.split(',').contains('markduplicates') && !(params.tools && params.tools.split(',').contains('sentieon_dedup')); then of params.use_gatk_spark && params.use_gatk_spark.contains('markduplicates')
+  in in (in): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/BAM_MARKDUPLICATES_SPARK@1[reports] Channel<?> via BAM_MARKDUPLICATES_SPARK.out.reports
+  out out (out): Value<?>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/reports~6 chain ".mix" steps=mix @301:23
+  guards then of params.step in ['mapping', 'markduplicates']; else of params.skip_tools && params.skip_tools.split(',').contains('markduplicates') && !(params.tools && params.tools.split(',').contains('sentieon_dedup')); then of params.use_gatk_spark && params.use_gatk_spark.contains('markduplicates')
+  in in (in): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/reports[out] Channel<?> via reports indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/reports~3[out] Channel<?> via reports indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/reports~4[out] Channel<?> via reports indirect
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/.collect@5[out] Value<?>
+  out out (out): Channel<?>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/crai_for_markduplicates code "crai_for_markduplicates = params.step == 'mapping'" @304:13
+  guards then of params.step in ['mapping', 'markduplicates']; else of params.skip_tools && params.skip_tools.split(',').contains('markduplicates') && !(params.tools && params.tools.split(',').contains('sentieon_dedup')); else of params.use_gatk_spark && params.use_gatk_spark.contains('markduplicates'); then of params.tools && params.tools.split(',').contains('sentieon_dedup')
+  in params.step (params.step): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:params[step] ? via params.step indirect
+  in bai_mapped (bai_mapped): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/bai_mapped[out] Channel<?> via bai_mapped indirect
+  in params.umi_in_read_header (params.umi_in_read_header): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:params[umi_in_read_header] ? via params.umi_in_read_header indirect
+  in FGBIO_COPYUMIFROMREADNAME.out.bai (FGBIO_COPYUMIFROMREADNAME.out.bai): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/FGBIO_COPYUMIFROMREADNAME@1[bai] Channel<Tuple> via FGBIO_COPYUMIFROMREADNAME.out.bai indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/FGBIO_COPYUMIFROMREADNAME@2[bai] Channel<Tuple> via FGBIO_COPYUMIFROMREADNAME.out.bai indirect
+  in input_sample (input_sample): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:input_sample[out] ? via input_sample indirect
+  out crai_for_markduplicates (crai_for_markduplicates): -
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/BAM_SENTIEON_DEDUP@1 call "BAM_SENTIEON_DEDUP" callee=BAM_SENTIEON_DEDUP:workflow:modelled:legacy @307:13
+  guards then of params.step in ['mapping', 'markduplicates']; else of params.skip_tools && params.skip_tools.split(',').contains('markduplicates') && !(params.tools && params.tools.split(',').contains('sentieon_dedup')); else of params.use_gatk_spark && params.use_gatk_spark.contains('markduplicates'); then of params.tools && params.tools.split(',').contains('sentieon_dedup')
+  in bam (bam): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/bam_mapped[out] Channel<?> via cram_for_markduplicates indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/cram_for_markduplicates[out] ? via cram_for_markduplicates indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/FGBIO_COPYUMIFROMREADNAME@2[bam] Channel<Tuple> via cram_for_markduplicates indirect
+  in bai (bai): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/crai_for_markduplicates[crai_for_markduplicates] ? via crai_for_markduplicates
+  in fasta (fasta): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:fasta[out] ? via fasta
+  in fasta_fai (fasta_fai): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:fasta_fai[out] ? via fasta_fai
+  in intervals_bed_combined (intervals_bed_combined): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:intervals_for_preprocessing[out] ? via intervals_for_preprocessing
+  out alignment (alignment): ?
+  out reports (reports): Channel<?>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/.collect@6 chain ".collect" steps=collect @318:35
+  guards then of params.step in ['mapping', 'markduplicates']; else of params.skip_tools && params.skip_tools.split(',').contains('markduplicates') && !(params.tools && params.tools.split(',').contains('sentieon_dedup')); else of params.use_gatk_spark && params.use_gatk_spark.contains('markduplicates'); then of params.tools && params.tools.split(',').contains('sentieon_dedup')
+  in in (in): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/BAM_SENTIEON_DEDUP@1[reports] Channel<?> via BAM_SENTIEON_DEDUP.out.reports
+  out out (out): Value<?>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/reports~7 chain ".mix" steps=mix @318:23
+  guards then of params.step in ['mapping', 'markduplicates']; else of params.skip_tools && params.skip_tools.split(',').contains('markduplicates') && !(params.tools && params.tools.split(',').contains('sentieon_dedup')); else of params.use_gatk_spark && params.use_gatk_spark.contains('markduplicates'); then of params.tools && params.tools.split(',').contains('sentieon_dedup')
+  in in (in): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/reports[out] Channel<?> via reports indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/reports~3[out] Channel<?> via reports indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/reports~4[out] Channel<?> via reports indirect
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/.collect@6[out] Value<?>
+  out out (out): Channel<?>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/BAM_MARKDUPLICATES@1 call "BAM_MARKDUPLICATES" callee=BAM_MARKDUPLICATES:workflow:modelled:legacy @322:13
+  guards then of params.step in ['mapping', 'markduplicates']; else of params.skip_tools && params.skip_tools.split(',').contains('markduplicates') && !(params.tools && params.tools.split(',').contains('sentieon_dedup')); else of params.use_gatk_spark && params.use_gatk_spark.contains('markduplicates'); else of params.tools && params.tools.split(',').contains('sentieon_dedup')
+  in bam (bam): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/bam_mapped[out] Channel<?> via cram_for_markduplicates indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/cram_for_markduplicates[out] ? via cram_for_markduplicates indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/FGBIO_COPYUMIFROMREADNAME@2[bam] Channel<Tuple> via cram_for_markduplicates indirect
+  in fasta (fasta): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:fasta[out] ? via fasta
+  in fasta_fai (fasta_fai): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:fasta_fai[out] ? via fasta_fai
+  in intervals_bed_combined (intervals_bed_combined): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:intervals_for_preprocessing[out] ? via intervals_for_preprocessing
+  in save_output_as_bam (save_output_as_bam): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:save_output_as_bam[out] ? via save_output_as_bam
+  out alignment (alignment): ?
+  out reports (reports): Channel<?>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/.collect@7 chain ".collect" steps=collect @333:35
+  guards then of params.step in ['mapping', 'markduplicates']; else of params.skip_tools && params.skip_tools.split(',').contains('markduplicates') && !(params.tools && params.tools.split(',').contains('sentieon_dedup')); else of params.use_gatk_spark && params.use_gatk_spark.contains('markduplicates'); else of params.tools && params.tools.split(',').contains('sentieon_dedup')
+  in in (in): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/BAM_MARKDUPLICATES@1[reports] Channel<?> via BAM_MARKDUPLICATES.out.reports
+  out out (out): Value<?>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/reports~8 chain ".mix" steps=mix @333:23
+  guards then of params.step in ['mapping', 'markduplicates']; else of params.skip_tools && params.skip_tools.split(',').contains('markduplicates') && !(params.tools && params.tools.split(',').contains('sentieon_dedup')); else of params.use_gatk_spark && params.use_gatk_spark.contains('markduplicates'); else of params.tools && params.tools.split(',').contains('sentieon_dedup')
+  in in (in): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/reports[out] Channel<?> via reports indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/reports~3[out] Channel<?> via reports indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/reports~4[out] Channel<?> via reports indirect
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/.collect@7[out] Value<?>
+  out out (out): Channel<?>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/channel.empty@2 factory "channel.empty" factory=channel.empty @340:34
+  guards then of params.step in ['mapping', 'markduplicates']
+  out out (out): Channel<?>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/ch_md_cram_for_restart chain ".mix.map" steps=mix,map @340:34
+  guards then of params.step in ['mapping', 'markduplicates']
+  in in (in): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/channel.empty@2[out] Channel<?>
+  in 1:1 (mix(1)): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/cram_markduplicates_no_spark[out] Channel<?> via cram_markduplicates_no_spark indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/BAM_MARKDUPLICATES@1[alignment] ? via cram_markduplicates_no_spark indirect
+  in 1:2 (mix(2)): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/cram_markduplicates_spark[out] Channel<?> via cram_markduplicates_spark indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/BAM_MARKDUPLICATES_SPARK@1[alignment] Channel<Record> via cram_markduplicates_spark indirect
+  in 1:3 (mix(3)): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/cram_sentieon_dedup[out] Channel<?> via cram_sentieon_dedup indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/BAM_SENTIEON_DEDUP@1[alignment] ? via cram_sentieon_dedup indirect
+  out out (out): Channel<?>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/csv_subfolder code "csv_subfolder = (params.tools && params.tools.split(',').co…" @346:9
+  guards then of params.step in ['mapping', 'markduplicates']
+  in params.tools (params.tools): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:params[tools] ? via params.tools indirect
+  out csv_subfolder (csv_subfolder): -
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/CHANNEL_MARKDUPLICATES_CREATE_CSV@1 call "CHANNEL_MARKDUPLICATES_CREATE_CSV" callee=CHANNEL_MARKDUPLICATES_CREATE_CSV:workflow:modelled:legacy @348:9
+  guards then of params.step in ['mapping', 'markduplicates']
+  in cram_markduplicates (cram_markduplicates): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/ch_md_cram_for_restart[out] Channel<?> via ch_md_cram_for_restart
+  in csv_subfolder (csv_subfolder): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/csv_subfolder[csv_subfolder] ? via csv_subfolder
+  in outdir (outdir): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:params[outdir] ? via params.outdir
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/channel.empty@3 factory "channel.empty" factory=channel.empty @356:48
+  guards then of params.step in ['mapping', 'markduplicates', 'prepare_recalibration']; then of params.step == 'prepare_recalibration'
+  out out (out): Channel<?>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/ch_cram_for_bam_baserecalibrator chain ".mix" steps=mix @356:48
+  guards then of params.step in ['mapping', 'markduplicates', 'prepare_recalibration']; then of params.step == 'prepare_recalibration'
+  in in (in): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/channel.empty@3[out] Channel<?>
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:input_sample[out] ? via input_sample
+  out out (out): Channel<?>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/channel.empty@4 factory "channel.empty" factory=channel.empty @368:48
+  guards then of params.step in ['mapping', 'markduplicates', 'prepare_recalibration']; else of params.step == 'prepare_recalibration'
+  out out (out): Channel<?>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/ch_cram_for_bam_baserecalibrator~2 chain ".mix.map" steps=mix,map @368:48
+  guards then of params.step in ['mapping', 'markduplicates', 'prepare_recalibration']; else of params.step == 'prepare_recalibration'
+  in in (in): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/channel.empty@4[out] Channel<?>
+  in 1:1 (mix(1)): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/ch_md_cram_for_restart[out] Channel<?> via ch_md_cram_for_restart
+  in 1:2 (mix(2)): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/cram_skip_markduplicates[out] Channel<?> via cram_skip_markduplicates indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/cram_skip_markduplicates~2[out] Channel<Record> via cram_skip_markduplicates indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/cram_skip_markduplicates~3[out] Channel<?> via cram_skip_markduplicates indirect
+  out out (out): Channel<?>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/ch_table_bqsr_no_spark factory "channel.empty" factory=channel.empty @376:38
+  guards then of params.step in ['mapping', 'markduplicates', 'prepare_recalibration']; then of !(params.skip_tools && params.skip_tools.split(',').contains('baserecalibrator'))
+  out out (out): Channel<?>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/ch_table_bqsr_spark factory "channel.empty" factory=channel.empty @377:35
+  guards then of params.step in ['mapping', 'markduplicates', 'prepare_recalibration']; then of !(params.skip_tools && params.skip_tools.split(',').contains('baserecalibrator'))
+  out out (out): Channel<?>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/BAM_BASERECALIBRATOR_SPARK@1 call "BAM_BASERECALIBRATOR_SPARK" callee=BAM_BASERECALIBRATOR_SPARK:workflow:modelled:legacy @380:17
+  guards then of params.step in ['mapping', 'markduplicates', 'prepare_recalibration']; then of !(params.skip_tools && params.skip_tools.split(',').contains('baserecalibrator')); then of params.use_gatk_spark && params.use_gatk_spark.contains('baserecalibrator')
+  in cram (cram): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/ch_cram_for_bam_baserecalibrator[out] Channel<?> via ch_cram_for_bam_baserecalibrator indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/ch_cram_for_bam_baserecalibrator~2[out] Channel<?> via ch_cram_for_bam_baserecalibrator indirect
+  in dict (dict): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:dict[out] ? via dict
+  in fasta (fasta): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:fasta[out] ? via fasta
+  in fasta_fai (fasta_fai): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:fasta_fai[out] ? via fasta_fai
+  in intervals (intervals): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:intervals_and_num_intervals[out] ? via intervals_and_num_intervals
+  in known_sites (known_sites): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:known_sites_indels[out] ? via known_sites_indels
+  in known_sites_tbi (known_sites_tbi): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:known_sites_indels_tbi[out] ? via known_sites_indels_tbi
+  out table_bqsr (table_bqsr): Channel<?>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/BAM_BASERECALIBRATOR@1 call "BAM_BASERECALIBRATOR" callee=BAM_BASERECALIBRATOR:workflow:modelled:legacy @394:17
+  guards then of params.step in ['mapping', 'markduplicates', 'prepare_recalibration']; then of !(params.skip_tools && params.skip_tools.split(',').contains('baserecalibrator')); else of params.use_gatk_spark && params.use_gatk_spark.contains('baserecalibrator')
+  in cram (cram): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/ch_cram_for_bam_baserecalibrator[out] Channel<?> via ch_cram_for_bam_baserecalibrator indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/ch_cram_for_bam_baserecalibrator~2[out] Channel<?> via ch_cram_for_bam_baserecalibrator indirect
+  in dict (dict): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:dict[out] ? via dict
+  in fasta (fasta): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:fasta[out] ? via fasta
+  in fasta_fai (fasta_fai): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:fasta_fai[out] ? via fasta_fai
+  in intervals (intervals): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:intervals_and_num_intervals[out] ? via intervals_and_num_intervals
+  in known_sites (known_sites): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:known_sites_indels[out] ? via known_sites_indels
+  in known_sites_tbi (known_sites_tbi): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:known_sites_indels_tbi[out] ? via known_sites_indels_tbi
+  out table_bqsr (table_bqsr): Channel<?>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/channel.empty@5 factory "channel.empty" factory=channel.empty @410:29
+  guards then of params.step in ['mapping', 'markduplicates', 'prepare_recalibration']; then of !(params.skip_tools && params.skip_tools.split(',').contains('baserecalibrator'))
+  out out (out): Channel<?>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/ch_table_bqsr chain ".mix" steps=mix @410:29
+  guards then of params.step in ['mapping', 'markduplicates', 'prepare_recalibration']; then of !(params.skip_tools && params.skip_tools.split(',').contains('baserecalibrator'))
+  in in (in): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/channel.empty@5[out] Channel<?>
+  in 1:1 (mix(1)): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/ch_table_bqsr_no_spark[out] Channel<?> via ch_table_bqsr_no_spark indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/BAM_BASERECALIBRATOR@1[table_bqsr] Channel<?> via ch_table_bqsr_no_spark indirect
+  in 1:2 (mix(2)): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/ch_table_bqsr_spark[out] Channel<?> via ch_table_bqsr_spark indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/BAM_BASERECALIBRATOR_SPARK@1[table_bqsr] Channel<?> via ch_table_bqsr_spark indirect
+  out out (out): Channel<?>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/.collect@8 chain ".collect" steps=collect @416:35
+  guards then of params.step in ['mapping', 'markduplicates', 'prepare_recalibration']; then of !(params.skip_tools && params.skip_tools.split(',').contains('baserecalibrator'))
+  in in (in): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/ch_table_bqsr[out] Channel<?> via ch_table_bqsr
+  out out (out): Value<?>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/reports~9 chain ".mix" steps=mix @416:23
+  guards then of params.step in ['mapping', 'markduplicates', 'prepare_recalibration']; then of !(params.skip_tools && params.skip_tools.split(',').contains('baserecalibrator'))
+  in in (in): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/reports[out] Channel<?> via reports indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/reports~3[out] Channel<?> via reports indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/reports~4[out] Channel<?> via reports indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/reports~5[out] Channel<?> via reports indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/reports~6[out] Channel<?> via reports indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/reports~7[out] Channel<?> via reports indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/reports~8[out] Channel<?> via reports indirect
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/.collect@8[out] Value<?>
+  out out (out): Channel<?>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/cram_applybqsr chain ".join" steps=join @418:30
+  guards then of params.step in ['mapping', 'markduplicates', 'prepare_recalibration']; then of !(params.skip_tools && params.skip_tools.split(',').contains('baserecalibrator'))
+  in in (in): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/ch_cram_for_bam_baserecalibrator[out] Channel<?> via ch_cram_for_bam_baserecalibrator indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/ch_cram_for_bam_baserecalibrator~2[out] Channel<?> via ch_cram_for_bam_baserecalibrator indirect
+  in 1:1 (join(right)): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/ch_table_bqsr[out] Channel<?> via ch_table_bqsr
+  out out (out): Channel<Record>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/.join@2 chain ".join" steps=join @421:49
+  guards then of params.step in ['mapping', 'markduplicates', 'prepare_recalibration']; then of !(params.skip_tools && params.skip_tools.split(',').contains('baserecalibrator'))
+  in in (in): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/ch_md_cram_for_restart[out] Channel<?> via ch_md_cram_for_restart indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/ch_cram_for_bam_baserecalibrator[out] Channel<?> via ch_md_cram_for_restart indirect
+  in 1:1 (join(right)): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/ch_table_bqsr[out] Channel<?> via ch_table_bqsr
+  out out (out): Channel<Record>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/CHANNEL_BASERECALIBRATOR_CREATE_CSV@1 call "CHANNEL_BASERECALIBRATOR_CREATE_CSV" callee=CHANNEL_BASERECALIBRATOR_CREATE_CSV:workflow:modelled:legacy @421:13
+  guards then of params.step in ['mapping', 'markduplicates', 'prepare_recalibration']; then of !(params.skip_tools && params.skip_tools.split(',').contains('baserecalibrator'))
+  in cram_table_bqsr (cram_table_bqsr): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/.join@2[out] Channel<Record>
+  in tools (tools): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:params[tools] ? via params.tools
+  in skip_tools (skip_tools): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:params[skip_tools] ? via params.skip_tools
+  in outdir (outdir): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:params[outdir] ? via params.outdir
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/channel.empty@6 factory "channel.empty" factory=channel.empty @431:30
+  guards then of params.step in ['mapping', 'markduplicates', 'prepare_recalibration', 'recalibrate']; then of params.step == 'recalibrate'
+  out out (out): Channel<?>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/cram_applybqsr~2 chain ".mix" steps=mix @431:30
+  guards then of params.step in ['mapping', 'markduplicates', 'prepare_recalibration', 'recalibrate']; then of params.step == 'recalibrate'
+  in in (in): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/channel.empty@6[out] Channel<?>
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:input_sample[out] ? via input_sample
+  out out (out): Channel<?>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/cram_variant_calling_no_spark factory "channel.empty" factory=channel.empty @435:45
+  guards then of params.step in ['mapping', 'markduplicates', 'prepare_recalibration', 'recalibrate']; then of !(params.skip_tools && params.skip_tools.split(',').contains('baserecalibrator'))
+  out out (out): Channel<?>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/cram_variant_calling_spark factory "channel.empty" factory=channel.empty @436:42
+  guards then of params.step in ['mapping', 'markduplicates', 'prepare_recalibration', 'recalibrate']; then of !(params.skip_tools && params.skip_tools.split(',').contains('baserecalibrator'))
+  out out (out): Channel<?>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/BAM_APPLYBQSR_SPARK@1 call "BAM_APPLYBQSR_SPARK" callee=BAM_APPLYBQSR_SPARK:workflow:modelled:legacy @440:17
+  guards then of params.step in ['mapping', 'markduplicates', 'prepare_recalibration', 'recalibrate']; then of !(params.skip_tools && params.skip_tools.split(',').contains('baserecalibrator')); then of params.use_gatk_spark && params.use_gatk_spark.contains('baserecalibrator')
+  in cram (cram): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/cram_applybqsr[out] Channel<Record> via cram_applybqsr indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/cram_applybqsr~2[out] Channel<?> via cram_applybqsr indirect
+  in dict (dict): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:dict[out] ? via dict
+  in fasta (fasta): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:fasta[out] ? via fasta
+  in fasta_fai (fasta_fai): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:fasta_fai[out] ? via fasta_fai
+  in intervals (intervals): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:intervals_and_num_intervals[out] ? via intervals_and_num_intervals
+  in save_output_as_bam (save_output_as_bam): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:save_output_as_bam[out] ? via save_output_as_bam
+  out alignment (alignment): Channel<?>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/references chain ".combine.combine.map.collect" steps=combine,combine,map,collect @453:30
+  guards then of params.step in ['mapping', 'markduplicates', 'prepare_recalibration', 'recalibrate']; then of !(params.skip_tools && params.skip_tools.split(',').contains('baserecalibrator')); else of params.use_gatk_spark && params.use_gatk_spark.contains('baserecalibrator')
+  in in (in): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:fasta[out] ? via fasta
+  in 1:1 (combine(right)): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:fasta_fai[out] ? via fasta_fai
+  in 2:1 (combine(right)): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:dict[out] ? via dict
+  out out (out): Value<Bag<?>>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/BAM_APPLYBQSR@1 call "BAM_APPLYBQSR" callee=BAM_APPLYBQSR:workflow:modelled:legacy @459:17
+  guards then of params.step in ['mapping', 'markduplicates', 'prepare_recalibration', 'recalibrate']; then of !(params.skip_tools && params.skip_tools.split(',').contains('baserecalibrator')); else of params.use_gatk_spark && params.use_gatk_spark.contains('baserecalibrator')
+  in input (input): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/cram_applybqsr[out] Channel<Record> via cram_applybqsr indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/cram_applybqsr~2[out] Channel<?> via cram_applybqsr indirect
+  in references (references): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/references[out] Value<Bag<?>> via references
+  in intervals (intervals): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:intervals_and_num_intervals[out] ? via intervals_and_num_intervals
+  in output_format (output_format): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:save_output_as_bam[out] ? via save_output_as_bam indirect
+  out recal_out (recal_out): Channel<?>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/channel.empty@7 factory "channel.empty" factory=channel.empty @469:36
+  guards then of params.step in ['mapping', 'markduplicates', 'prepare_recalibration', 'recalibrate']; then of !(params.skip_tools && params.skip_tools.split(',').contains('baserecalibrator'))
+  out out (out): Channel<?>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/cram_variant_calling chain ".mix" steps=mix @469:36
+  guards then of params.step in ['mapping', 'markduplicates', 'prepare_recalibration', 'recalibrate']; then of !(params.skip_tools && params.skip_tools.split(',').contains('baserecalibrator'))
+  in in (in): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/channel.empty@7[out] Channel<?>
+  in 1:1 (mix(1)): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/cram_variant_calling_no_spark[out] Channel<?> via cram_variant_calling_no_spark indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/BAM_APPLYBQSR@1[recal_out] Channel<?> via cram_variant_calling_no_spark indirect
+  in 1:2 (mix(2)): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/cram_variant_calling_spark[out] Channel<?> via cram_variant_calling_spark indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/BAM_APPLYBQSR_SPARK@1[alignment] Channel<?> via cram_variant_calling_spark indirect
+  out out (out): Channel<?>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/CHANNEL_APPLYBQSR_CREATE_CSV@1 call "CHANNEL_APPLYBQSR_CREATE_CSV" callee=CHANNEL_APPLYBQSR_CREATE_CSV:workflow:modelled:legacy @476:13
+  guards then of params.step in ['mapping', 'markduplicates', 'prepare_recalibration', 'recalibrate']; then of !(params.skip_tools && params.skip_tools.split(',').contains('baserecalibrator'))
+  in cram_recalibrated_index (cram_recalibrated_index): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/cram_variant_calling[out] Channel<?> via cram_variant_calling
+  in outdir (outdir): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:params[outdir] ? via params.outdir
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/channel.empty@8 factory "channel.empty" factory=channel.empty @482:36
+  guards then of params.step in ['mapping', 'markduplicates', 'prepare_recalibration', 'recalibrate']; else of !(params.skip_tools && params.skip_tools.split(',').contains('baserecalibrator')); then of params.step == 'recalibrate'
+  out out (out): Channel<?>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/.map@4 chain ".map" steps=map @482:56
+  guards then of params.step in ['mapping', 'markduplicates', 'prepare_recalibration', 'recalibrate']; else of !(params.skip_tools && params.skip_tools.split(',').contains('baserecalibrator')); then of params.step == 'recalibrate'
+  in in (in): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:take:input_sample[out] ? via input_sample
+  out out (out): ?
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/cram_variant_calling~2 chain ".mix" steps=mix @482:36
+  guards then of params.step in ['mapping', 'markduplicates', 'prepare_recalibration', 'recalibrate']; else of !(params.skip_tools && params.skip_tools.split(',').contains('baserecalibrator')); then of params.step == 'recalibrate'
+  in in (in): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/channel.empty@8[out] Channel<?>
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/.map@4[out] ?
+  out out (out): Channel<?>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/channel.empty@9 factory "channel.empty" factory=channel.empty @487:36
+  guards then of params.step in ['mapping', 'markduplicates', 'prepare_recalibration', 'recalibrate']; else of !(params.skip_tools && params.skip_tools.split(',').contains('baserecalibrator')); else of params.step == 'recalibrate'
+  out out (out): Channel<?>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/cram_variant_calling~3 chain ".mix" steps=mix @487:36
+  guards then of params.step in ['mapping', 'markduplicates', 'prepare_recalibration', 'recalibrate']; else of !(params.skip_tools && params.skip_tools.split(',').contains('baserecalibrator')); else of params.step == 'recalibrate'
+  in in (in): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/channel.empty@9[out] Channel<?>
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/ch_cram_for_bam_baserecalibrator[out] Channel<?> via ch_cram_for_bam_baserecalibrator indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/ch_cram_for_bam_baserecalibrator~2[out] Channel<?> via ch_cram_for_bam_baserecalibrator indirect
+  out out (out): Channel<?>
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:emit:cram_variant_calling emit "cram_variant_calling" @492:5
+  in in (in): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/cram_variant_calling[out] Channel<?> via cram_variant_calling indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/cram_variant_calling~2[out] Channel<?> via cram_variant_calling indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/cram_variant_calling~3[out] Channel<?> via cram_variant_calling indirect
+subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/:emit:reports emit "reports" @493:5
+  in in (in): -
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/reports[out] Channel<?> via reports indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/reports~3[out] Channel<?> via reports indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/reports~4[out] Channel<?> via reports indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/reports~5[out] Channel<?> via reports indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/reports~6[out] Channel<?> via reports indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/reports~7[out] Channel<?> via reports indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/reports~8[out] Channel<?> via reports indirect
+    <- subworkflows/local/fastq_preprocess_gatk/main.nf#FASTQ_PREPROCESS_GATK/reports~9[out] Channel<?> via reports indirect
+bound @103:13 reads_for_fastp
+bound @106:13 reads_for_fastp
+bound @133:17 reads_for_bbsplit
+bound @137:13 reads_for_bbsplit
+bound @156:13 reads_for_alignment
+bound @191:13 aligned_bam
+bound @192:13 aligned_bai
+bound @195:13 aligned_bam
+bound @196:13 aligned_bai
+bound @267:13 cram_for_markduplicates
+bound @298:13 cram_markduplicates_spark
+bound @315:13 cram_sentieon_dedup
+bound @330:13 cram_markduplicates_no_spark
+bound @359:13 ch_md_cram_for_restart
+bound @390:17 ch_table_bqsr_spark
+bound @404:17 ch_table_bqsr_no_spark
+bound @449:17 cram_variant_calling_spark
+bound @466:17 cram_variant_calling_no_spark

@@ -1,4 +1,5 @@
 workflow output-block.nf# typed
+statements 2, modelled 1
 output-block.nf#/samples factory "channel.of" factory=channel.of @10:15
   out out (out): Channel<Record>
 output-block.nf#/summary_report code "summary_report = file('report.html')" @11:5

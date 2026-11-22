@@ -1,0 +1,162 @@
+workflow subworkflows/local/bam_convert_samtools/main.nf#BAM_CONVERT_SAMTOOLS legacy
+statements 12, modelled 12
+subworkflows/local/bam_convert_samtools/main.nf#BAM_CONVERT_SAMTOOLS/:take:input take "input" @16:5
+  out out (out): -
+subworkflows/local/bam_convert_samtools/main.nf#BAM_CONVERT_SAMTOOLS/:take:fasta take "fasta" @17:5
+  out out (out): -
+subworkflows/local/bam_convert_samtools/main.nf#BAM_CONVERT_SAMTOOLS/:take:fasta_fai take "fasta_fai" @18:5
+  out out (out): -
+subworkflows/local/bam_convert_samtools/main.nf#BAM_CONVERT_SAMTOOLS/:take:interleaved take "interleaved" @19:5
+  out out (out): -
+subworkflows/local/bam_convert_samtools/main.nf#BAM_CONVERT_SAMTOOLS/fasta_and_fai chain ".combine.map.collect" steps=combine,map,collect @24:21
+  in in (in): -
+    <- subworkflows/local/bam_convert_samtools/main.nf#BAM_CONVERT_SAMTOOLS/:take:fasta[out] ? via fasta
+  in 1:1 (combine(right)): -
+    <- subworkflows/local/bam_convert_samtools/main.nf#BAM_CONVERT_SAMTOOLS/:take:fasta_fai[out] ? via fasta_fai
+  out out (out): Value<Bag<?>>
+subworkflows/local/bam_convert_samtools/main.nf#BAM_CONVERT_SAMTOOLS/SAMTOOLS_VIEW_MAP_MAP@1 call "SAMTOOLS_VIEW_MAP_MAP" callee=SAMTOOLS_VIEW_MAP_MAP:process:modelled:legacy @27:5
+  in $1 (tuple(meta, input, index)): Tuple
+    <- subworkflows/local/bam_convert_samtools/main.nf#BAM_CONVERT_SAMTOOLS/:take:input[out] ? via input
+  in $2 (tuple(meta2, fasta, fai)): Tuple
+    <- subworkflows/local/bam_convert_samtools/main.nf#BAM_CONVERT_SAMTOOLS/fasta_and_fai[out] Value<Bag<?>> via fasta_and_fai
+  in $3 (tuple(meta3, qname)): Tuple
+    = [[], []] : List
+  in $4 (tuple(meta4, bed)): Tuple
+    = [[], []] : List
+  in index_format (index_format): -
+    = [] : List
+  out bam (bam): Channel<Tuple>
+  out cram (cram): Channel<Tuple>
+  out sam (sam): Channel<Tuple>
+  out bai (bai): Channel<Tuple>
+  out csi (csi): Channel<Tuple>
+  out crai (crai): Channel<Tuple>
+  out unselected (unselected): Channel<Tuple>
+  out unselected_index (unselected_index): Channel<Tuple>
+  out versions_samtools (versions_samtools): Channel<Tuple>
+subworkflows/local/bam_convert_samtools/main.nf#BAM_CONVERT_SAMTOOLS/SAMTOOLS_VIEW_UNMAP_UNMAP@1 call "SAMTOOLS_VIEW_UNMAP_UNMAP" callee=SAMTOOLS_VIEW_UNMAP_UNMAP:process:modelled:legacy @30:5
+  in $1 (tuple(meta, input, index)): Tuple
+    <- subworkflows/local/bam_convert_samtools/main.nf#BAM_CONVERT_SAMTOOLS/:take:input[out] ? via input
+  in $2 (tuple(meta2, fasta, fai)): Tuple
+    <- subworkflows/local/bam_convert_samtools/main.nf#BAM_CONVERT_SAMTOOLS/fasta_and_fai[out] Value<Bag<?>> via fasta_and_fai
+  in $3 (tuple(meta3, qname)): Tuple
+    = [[], []] : List
+  in $4 (tuple(meta4, bed)): Tuple
+    = [[], []] : List
+  in index_format (index_format): -
+    = [] : List
+  out bam (bam): Channel<Tuple>
+  out cram (cram): Channel<Tuple>
+  out sam (sam): Channel<Tuple>
+  out bai (bai): Channel<Tuple>
+  out csi (csi): Channel<Tuple>
+  out crai (crai): Channel<Tuple>
+  out unselected (unselected): Channel<Tuple>
+  out unselected_index (unselected_index): Channel<Tuple>
+  out versions_samtools (versions_samtools): Channel<Tuple>
+subworkflows/local/bam_convert_samtools/main.nf#BAM_CONVERT_SAMTOOLS/SAMTOOLS_VIEW_UNMAP_MAP@1 call "SAMTOOLS_VIEW_UNMAP_MAP" callee=SAMTOOLS_VIEW_UNMAP_MAP:process:modelled:legacy @33:5
+  in $1 (tuple(meta, input, index)): Tuple
+    <- subworkflows/local/bam_convert_samtools/main.nf#BAM_CONVERT_SAMTOOLS/:take:input[out] ? via input
+  in $2 (tuple(meta2, fasta, fai)): Tuple
+    <- subworkflows/local/bam_convert_samtools/main.nf#BAM_CONVERT_SAMTOOLS/fasta_and_fai[out] Value<Bag<?>> via fasta_and_fai
+  in $3 (tuple(meta3, qname)): Tuple
+    = [[], []] : List
+  in $4 (tuple(meta4, bed)): Tuple
+    = [[], []] : List
+  in index_format (index_format): -
+    = [] : List
+  out bam (bam): Channel<Tuple>
+  out cram (cram): Channel<Tuple>
+  out sam (sam): Channel<Tuple>
+  out bai (bai): Channel<Tuple>
+  out csi (csi): Channel<Tuple>
+  out crai (crai): Channel<Tuple>
+  out unselected (unselected): Channel<Tuple>
+  out unselected_index (unselected_index): Channel<Tuple>
+  out versions_samtools (versions_samtools): Channel<Tuple>
+subworkflows/local/bam_convert_samtools/main.nf#BAM_CONVERT_SAMTOOLS/SAMTOOLS_VIEW_MAP_UNMAP@1 call "SAMTOOLS_VIEW_MAP_UNMAP" callee=SAMTOOLS_VIEW_MAP_UNMAP:process:modelled:legacy @36:5
+  in $1 (tuple(meta, input, index)): Tuple
+    <- subworkflows/local/bam_convert_samtools/main.nf#BAM_CONVERT_SAMTOOLS/:take:input[out] ? via input
+  in $2 (tuple(meta2, fasta, fai)): Tuple
+    <- subworkflows/local/bam_convert_samtools/main.nf#BAM_CONVERT_SAMTOOLS/fasta_and_fai[out] Value<Bag<?>> via fasta_and_fai
+  in $3 (tuple(meta3, qname)): Tuple
+    = [[], []] : List
+  in $4 (tuple(meta4, bed)): Tuple
+    = [[], []] : List
+  in index_format (index_format): -
+    = [] : List
+  out bam (bam): Channel<Tuple>
+  out cram (cram): Channel<Tuple>
+  out sam (sam): Channel<Tuple>
+  out bai (bai): Channel<Tuple>
+  out csi (csi): Channel<Tuple>
+  out crai (crai): Channel<Tuple>
+  out unselected (unselected): Channel<Tuple>
+  out unselected_index (unselected_index): Channel<Tuple>
+  out versions_samtools (versions_samtools): Channel<Tuple>
+subworkflows/local/bam_convert_samtools/main.nf#BAM_CONVERT_SAMTOOLS/all_unmapped_bam chain ".join.join.map" steps=join,join,map @39:24
+  in in (in): -
+    <- subworkflows/local/bam_convert_samtools/main.nf#BAM_CONVERT_SAMTOOLS/SAMTOOLS_VIEW_UNMAP_UNMAP@1[bam] Channel<Tuple> via SAMTOOLS_VIEW_UNMAP_UNMAP.out.bam
+  in 1:1 (join(right)): -
+    <- subworkflows/local/bam_convert_samtools/main.nf#BAM_CONVERT_SAMTOOLS/SAMTOOLS_VIEW_UNMAP_MAP@1[bam] Channel<Tuple> via SAMTOOLS_VIEW_UNMAP_MAP.out.bam
+  in 2:1 (join(right)): -
+    <- subworkflows/local/bam_convert_samtools/main.nf#BAM_CONVERT_SAMTOOLS/SAMTOOLS_VIEW_MAP_UNMAP@1[bam] Channel<Tuple> via SAMTOOLS_VIEW_MAP_UNMAP.out.bam
+  out out (out): Channel<?>
+subworkflows/local/bam_convert_samtools/main.nf#BAM_CONVERT_SAMTOOLS/.map@1 chain ".map" steps=map @44:26
+  in in (in): -
+    <- subworkflows/local/bam_convert_samtools/main.nf#BAM_CONVERT_SAMTOOLS/all_unmapped_bam[out] Channel<?> via all_unmapped_bam
+  out out (out): Channel<?>
+subworkflows/local/bam_convert_samtools/main.nf#BAM_CONVERT_SAMTOOLS/.map@2 chain ".map" steps=map @44:85
+  in in (in): -
+    <- subworkflows/local/bam_convert_samtools/main.nf#BAM_CONVERT_SAMTOOLS/fasta_and_fai[out] Value<Bag<?>> via fasta_and_fai
+  out out (out): Value<?>
+subworkflows/local/bam_convert_samtools/main.nf#BAM_CONVERT_SAMTOOLS/SAMTOOLS_MERGE_UNMAP@1 call "SAMTOOLS_MERGE_UNMAP" callee=SAMTOOLS_MERGE_UNMAP:process:modelled:legacy @44:5
+  in $1 (tuple(meta, input_files, index_files)): Tuple
+    <- subworkflows/local/bam_convert_samtools/main.nf#BAM_CONVERT_SAMTOOLS/.map@1[out] Channel<?>
+  in $2 (tuple(meta2, fasta, fai, gzi)): Tuple
+    <- subworkflows/local/bam_convert_samtools/main.nf#BAM_CONVERT_SAMTOOLS/.map@2[out] Value<?>
+  in index_format (index_format): -
+    = '' : String
+  out bam (bam): Channel<Tuple>
+  out cram (cram): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out versions_samtools (versions_samtools): Channel<Tuple>
+subworkflows/local/bam_convert_samtools/main.nf#BAM_CONVERT_SAMTOOLS/COLLATE_FASTQ_UNMAP@1 call "COLLATE_FASTQ_UNMAP" callee=COLLATE_FASTQ_UNMAP:process:modelled:legacy @47:5
+  in $1 (tuple(meta, input)): Tuple
+    <- subworkflows/local/bam_convert_samtools/main.nf#BAM_CONVERT_SAMTOOLS/SAMTOOLS_MERGE_UNMAP@1[bam] Channel<Tuple> via SAMTOOLS_MERGE_UNMAP.out.bam
+  in $2 (tuple(meta2, fasta, fai)): Tuple
+    <- subworkflows/local/bam_convert_samtools/main.nf#BAM_CONVERT_SAMTOOLS/fasta_and_fai[out] Value<Bag<?>> via fasta_and_fai
+  in interleave (interleave): -
+    <- subworkflows/local/bam_convert_samtools/main.nf#BAM_CONVERT_SAMTOOLS/:take:interleaved[out] ? via interleaved
+  out fastq (fastq): Channel<Tuple>
+  out fastq_interleaved (fastq_interleaved): Channel<Tuple>
+  out fastq_other (fastq_other): Channel<Tuple>
+  out fastq_singleton (fastq_singleton): Channel<Tuple>
+  out versions_samtools (versions_samtools): Channel<Tuple>
+subworkflows/local/bam_convert_samtools/main.nf#BAM_CONVERT_SAMTOOLS/COLLATE_FASTQ_MAP@1 call "COLLATE_FASTQ_MAP" callee=COLLATE_FASTQ_MAP:process:modelled:legacy @50:5
+  in $1 (tuple(meta, input)): Tuple
+    <- subworkflows/local/bam_convert_samtools/main.nf#BAM_CONVERT_SAMTOOLS/SAMTOOLS_VIEW_MAP_MAP@1[bam] Channel<Tuple> via SAMTOOLS_VIEW_MAP_MAP.out.bam
+  in $2 (tuple(meta2, fasta, fai)): Tuple
+    <- subworkflows/local/bam_convert_samtools/main.nf#BAM_CONVERT_SAMTOOLS/fasta_and_fai[out] Value<Bag<?>> via fasta_and_fai
+  in interleave (interleave): -
+    <- subworkflows/local/bam_convert_samtools/main.nf#BAM_CONVERT_SAMTOOLS/:take:interleaved[out] ? via interleaved
+  out fastq (fastq): Channel<Tuple>
+  out fastq_interleaved (fastq_interleaved): Channel<Tuple>
+  out fastq_other (fastq_other): Channel<Tuple>
+  out fastq_singleton (fastq_singleton): Channel<Tuple>
+  out versions_samtools (versions_samtools): Channel<Tuple>
+subworkflows/local/bam_convert_samtools/main.nf#BAM_CONVERT_SAMTOOLS/reads_to_concat chain ".join.map" steps=join,map @54:23
+  in in (in): -
+    <- subworkflows/local/bam_convert_samtools/main.nf#BAM_CONVERT_SAMTOOLS/COLLATE_FASTQ_MAP@1[fastq] Channel<Tuple> via COLLATE_FASTQ_MAP.out.fastq
+  in 1:1 (join(right)): -
+    <- subworkflows/local/bam_convert_samtools/main.nf#BAM_CONVERT_SAMTOOLS/COLLATE_FASTQ_UNMAP@1[fastq] Channel<Tuple> via COLLATE_FASTQ_UNMAP.out.fastq
+  out out (out): Channel<?>
+subworkflows/local/bam_convert_samtools/main.nf#BAM_CONVERT_SAMTOOLS/CAT_FASTQ@1 call "CAT_FASTQ" callee=CAT_FASTQ:process:modelled:legacy @59:5
+  in $1 (tuple(meta, reads)): Tuple
+    <- subworkflows/local/bam_convert_samtools/main.nf#BAM_CONVERT_SAMTOOLS/reads_to_concat[out] Channel<?> via reads_to_concat
+  out reads (reads): Channel<Tuple>
+  out versions_cat (versions_cat): Channel<Tuple>
+subworkflows/local/bam_convert_samtools/main.nf#BAM_CONVERT_SAMTOOLS/:emit:reads emit "reads" @63:5
+  in in (in): -
+    <- subworkflows/local/bam_convert_samtools/main.nf#BAM_CONVERT_SAMTOOLS/CAT_FASTQ@1[reads] Channel<Tuple> via reads
+bound @60:5 reads

@@ -1,0 +1,53 @@
+workflow subworkflows/local/cram_merge_index_samtools/main.nf#CRAM_MERGE_INDEX_SAMTOOLS legacy
+statements 5, modelled 5
+subworkflows/local/cram_merge_index_samtools/main.nf#CRAM_MERGE_INDEX_SAMTOOLS/:take:cram take "cram" @12:5
+  out out (out): -
+subworkflows/local/cram_merge_index_samtools/main.nf#CRAM_MERGE_INDEX_SAMTOOLS/:take:fasta take "fasta" @13:5
+  out out (out): -
+subworkflows/local/cram_merge_index_samtools/main.nf#CRAM_MERGE_INDEX_SAMTOOLS/:take:fasta_fai take "fasta_fai" @14:5
+  out out (out): -
+subworkflows/local/cram_merge_index_samtools/main.nf#CRAM_MERGE_INDEX_SAMTOOLS/cram_to_merge chain ".branch" steps=branch @19:21
+  in in (in): -
+    <- subworkflows/local/cram_merge_index_samtools/main.nf#CRAM_MERGE_INDEX_SAMTOOLS/:take:cram[out] ? via cram
+  out out (out): Record
+subworkflows/local/cram_merge_index_samtools/main.nf#CRAM_MERGE_INDEX_SAMTOOLS/.map@1 chain ".map" steps=map @26:16
+  in in (in): -
+    <- subworkflows/local/cram_merge_index_samtools/main.nf#CRAM_MERGE_INDEX_SAMTOOLS/cram_to_merge[out] Record via cram_to_merge indirect
+  out out (out): ?
+subworkflows/local/cram_merge_index_samtools/main.nf#CRAM_MERGE_INDEX_SAMTOOLS/.combine@1 chain ".combine.map.collect" steps=combine,map,collect @26:83
+  in in (in): -
+    <- subworkflows/local/cram_merge_index_samtools/main.nf#CRAM_MERGE_INDEX_SAMTOOLS/:take:fasta[out] ? via fasta
+  in 1:1 (combine(right)): -
+    <- subworkflows/local/cram_merge_index_samtools/main.nf#CRAM_MERGE_INDEX_SAMTOOLS/:take:fasta_fai[out] ? via fasta_fai
+  out out (out): Value<Bag<?>>
+subworkflows/local/cram_merge_index_samtools/main.nf#CRAM_MERGE_INDEX_SAMTOOLS/MERGE_CRAM@1 call "MERGE_CRAM" callee=MERGE_CRAM:process:modelled:legacy @26:5
+  in $1 (tuple(meta, input_files, index_files)): Tuple
+    <- subworkflows/local/cram_merge_index_samtools/main.nf#CRAM_MERGE_INDEX_SAMTOOLS/.map@1[out] ?
+  in $2 (tuple(meta2, fasta, fai, gzi)): Tuple
+    <- subworkflows/local/cram_merge_index_samtools/main.nf#CRAM_MERGE_INDEX_SAMTOOLS/.combine@1[out] Value<Bag<?>>
+  in index_format (index_format): -
+    = '' : String
+  out bam (bam): Channel<Tuple>
+  out cram (cram): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out versions_samtools (versions_samtools): Channel<Tuple>
+subworkflows/local/cram_merge_index_samtools/main.nf#CRAM_MERGE_INDEX_SAMTOOLS/cram_all chain ".mix" steps=mix @29:16
+  in in (in): -
+    <- subworkflows/local/cram_merge_index_samtools/main.nf#CRAM_MERGE_INDEX_SAMTOOLS/MERGE_CRAM@1[cram] Channel<Tuple> via MERGE_CRAM.out.cram
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/cram_merge_index_samtools/main.nf#CRAM_MERGE_INDEX_SAMTOOLS/cram_to_merge[out] Record via cram_to_merge indirect
+  out out (out): Channel<Tuple>
+subworkflows/local/cram_merge_index_samtools/main.nf#CRAM_MERGE_INDEX_SAMTOOLS/INDEX_CRAM@1 call "INDEX_CRAM" callee=INDEX_CRAM:process:modelled:legacy @32:5
+  in $1 (tuple(meta, input)): Tuple
+    <- subworkflows/local/cram_merge_index_samtools/main.nf#CRAM_MERGE_INDEX_SAMTOOLS/cram_all[out] Channel<Tuple> via cram_all
+  out index (index): Channel<Tuple>
+  out versions_samtools (versions_samtools): Channel<Tuple>
+subworkflows/local/cram_merge_index_samtools/main.nf#CRAM_MERGE_INDEX_SAMTOOLS/cram_crai chain ".join" steps=join @35:17
+  in in (in): -
+    <- subworkflows/local/cram_merge_index_samtools/main.nf#CRAM_MERGE_INDEX_SAMTOOLS/cram_all[out] Channel<Tuple> via cram_all
+  in 1:1 (join(right)): -
+    <- subworkflows/local/cram_merge_index_samtools/main.nf#CRAM_MERGE_INDEX_SAMTOOLS/INDEX_CRAM@1[index] Channel<Tuple> via INDEX_CRAM.out.index
+  out out (out): Channel<Record>
+subworkflows/local/cram_merge_index_samtools/main.nf#CRAM_MERGE_INDEX_SAMTOOLS/:emit:cram_crai emit "cram_crai" @38:5
+  in in (in): -
+    <- subworkflows/local/cram_merge_index_samtools/main.nf#CRAM_MERGE_INDEX_SAMTOOLS/cram_crai[out] Channel<Record> via cram_crai

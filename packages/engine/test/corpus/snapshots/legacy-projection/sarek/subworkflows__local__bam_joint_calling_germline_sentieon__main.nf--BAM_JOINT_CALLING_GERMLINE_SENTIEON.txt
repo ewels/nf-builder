@@ -1,0 +1,249 @@
+workflow subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON legacy
+statements 22, modelled 22
+subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/:take:input take "input" @17:5
+  out out (out): -
+subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/:take:fasta take "fasta" @18:5
+  out out (out): -
+subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/:take:fai take "fai" @19:5
+  out out (out): -
+subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/:take:dict take "dict" @20:5
+  out out (out): -
+subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/:take:dbsnp take "dbsnp" @21:5
+  out out (out): -
+subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/:take:dbsnp_tbi take "dbsnp_tbi" @22:5
+  out out (out): -
+subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/:take:dbsnp_vqsr take "dbsnp_vqsr" @23:5
+  out out (out): -
+subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/:take:resource_indels_vcf take "resource_indels_vcf" @24:5
+  out out (out): -
+subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/:take:resource_indels_tbi take "resource_indels_tbi" @25:5
+  out out (out): -
+subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/:take:known_indels_vqsr take "known_indels_vqsr" @26:5
+  out out (out): -
+subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/:take:resource_snps_vcf take "resource_snps_vcf" @27:5
+  out out (out): -
+subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/:take:resource_snps_tbi take "resource_snps_tbi" @28:5
+  out out (out): -
+subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/:take:known_snps_vqsr take "known_snps_vqsr" @29:5
+  out out (out): -
+subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/:take:variant_caller take "variant_caller" @30:5
+  out out (out): -
+subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/sentieon_input chain ".map.groupTuple" steps=map,groupTuple @33:22
+  in in (in): -
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/:take:input[out] ? via input
+  out out (out): Channel<?>
+subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/.map@1 chain ".map" steps=map @41:9
+  in in (in): -
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/:take:dbsnp[out] ? via dbsnp
+  out out (out): ?
+subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/.map@2 chain ".map" steps=map @42:9
+  in in (in): -
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/:take:dbsnp_tbi[out] ? via dbsnp_tbi
+  out out (out): ?
+subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/SENTIEON_GVCFTYPER@1 call "SENTIEON_GVCFTYPER" callee=SENTIEON_GVCFTYPER:process:modelled:legacy @37:5
+  in $1 (tuple(meta, gvcfs, tbis, intervals)): Tuple
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/sentieon_input[out] Channel<?> via sentieon_input
+  in $2 (tuple(meta2, fasta)): Tuple
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/:take:fasta[out] ? via fasta
+  in $3 (tuple(meta3, fai)): Tuple
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/:take:fai[out] ? via fai
+  in $4 (tuple(meta4, dbsnp)): Tuple
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/.map@1[out] ?
+  in $5 (tuple(meta5, dbsnp_tbi)): Tuple
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/.map@2[out] ?
+  out vcf_gz (vcf_gz): Channel<Tuple>
+  out vcf_gz_tbi (vcf_gz_tbi): Channel<Tuple>
+  out versions_sentieon (versions_sentieon): Channel<Tuple>
+subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/BCFTOOLS_SORT@1 call "BCFTOOLS_SORT" callee=BCFTOOLS_SORT:process:modelled:legacy @44:5
+  in $1 (tuple(meta, vcf)): Tuple
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/SENTIEON_GVCFTYPER@1[vcf_gz] Channel<Tuple> via SENTIEON_GVCFTYPER.out.vcf_gz
+  out vcf (vcf): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out versions_bcftools (versions_bcftools): Channel<Tuple>
+subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/gvcf_to_merge chain ".map.groupTuple" steps=map,groupTuple @46:21
+  in in (in): -
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/BCFTOOLS_SORT@1[vcf] Channel<Tuple> via BCFTOOLS_SORT.out.vcf
+  out out (out): Channel<?>
+subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/MERGE_GENOTYPEGVCFS@1 call "MERGE_GENOTYPEGVCFS" callee=MERGE_GENOTYPEGVCFS:process:modelled:legacy @50:5
+  in $1 (tuple(meta, vcf)): Tuple
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/gvcf_to_merge[out] Channel<?> via gvcf_to_merge
+  in $2 (tuple(meta2, dict)): Tuple
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/:take:dict[out] ? via dict
+  out vcf (vcf): Channel<Tuple>
+  out tbi (tbi): Channel<Tuple>
+  out versions_gatk4 (versions_gatk4): Channel<Tuple>
+subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/merged_vcf chain ".map" steps=map @52:18
+  in in (in): -
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/MERGE_GENOTYPEGVCFS@1[vcf] Channel<Tuple> via MERGE_GENOTYPEGVCFS.out.vcf
+  out out (out): Channel<?>
+subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/merged_tbi chain ".map" steps=map @53:18
+  in in (in): -
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/MERGE_GENOTYPEGVCFS@1[tbi] Channel<Tuple> via MERGE_GENOTYPEGVCFS.out.tbi
+  out out (out): Channel<?>
+subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/genotype_vcf chain ".map" steps=map @57:26
+  guards then of variant_caller == 'sentieon_dnascope'
+  in in (in): -
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/merged_vcf[out] Channel<?> via merged_vcf
+  out out (out): Channel<?>
+subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/genotype_index chain ".map" steps=map @60:26
+  guards then of variant_caller == 'sentieon_dnascope'
+  in in (in): -
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/merged_tbi[out] Channel<?> via merged_tbi
+  out out (out): Channel<?>
+subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/vqsr_input chain ".join" steps=join @64:22
+  guards else of variant_caller == 'sentieon_dnascope'
+  in in (in): -
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/MERGE_GENOTYPEGVCFS@1[vcf] Channel<Tuple> via MERGE_GENOTYPEGVCFS.out.vcf
+  in 1:1 (join(right)): -
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/MERGE_GENOTYPEGVCFS@1[tbi] Channel<Tuple> via MERGE_GENOTYPEGVCFS.out.tbi
+  out out (out): Channel<Record>
+subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/indels_resource_label chain ".mix.collect" steps=mix,collect @65:33
+  guards else of variant_caller == 'sentieon_dnascope'
+  in in (in): -
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/:take:known_indels_vqsr[out] ? via known_indels_vqsr
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/:take:dbsnp_vqsr[out] ? via dbsnp_vqsr
+  out out (out): Value<Bag<?>>
+subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/snps_resource_label chain ".mix.collect" steps=mix,collect @66:31
+  guards else of variant_caller == 'sentieon_dnascope'
+  in in (in): -
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/:take:known_snps_vqsr[out] ? via known_snps_vqsr
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/:take:dbsnp_vqsr[out] ? via dbsnp_vqsr
+  out out (out): Value<Bag<?>>
+subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/.map@3 chain ".map" steps=map @74:13
+  guards else of variant_caller == 'sentieon_dnascope'
+  in in (in): -
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/:take:fasta[out] ? via fasta
+  out out (out): ?
+subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/.map@4 chain ".map" steps=map @75:13
+  guards else of variant_caller == 'sentieon_dnascope'
+  in in (in): -
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/:take:fai[out] ? via fai
+  out out (out): ?
+subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/SENTIEON_VARCAL_INDEL@1 call "SENTIEON_VARCAL_INDEL" callee=SENTIEON_VARCAL_INDEL:process:modelled:legacy @69:9
+  guards else of variant_caller == 'sentieon_dnascope'
+  in $1 (tuple(meta, vcf, tbi)): Tuple
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/vqsr_input[out] Channel<Record> via vqsr_input
+  in resource_vcf (resource_vcf): Path
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/:take:resource_indels_vcf[out] ? via resource_indels_vcf
+  in resource_tbi (resource_tbi): Path
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/:take:resource_indels_tbi[out] ? via resource_indels_tbi
+  in labels (labels): -
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/indels_resource_label[out] Value<Bag<?>> via indels_resource_label
+  in fasta (fasta): Path
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/.map@3[out] ?
+  in fai (fai): Path
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/.map@4[out] ?
+  out recal (recal): Channel<Tuple>
+  out idx (idx): Channel<Tuple>
+  out tranches (tranches): Channel<Tuple>
+  out plots (plots): Channel<Tuple>
+  out versions_sentieon (versions_sentieon): Channel<Tuple>
+subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/.map@5 chain ".map" steps=map @82:13
+  guards else of variant_caller == 'sentieon_dnascope'
+  in in (in): -
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/:take:fasta[out] ? via fasta
+  out out (out): ?
+subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/.map@6 chain ".map" steps=map @83:13
+  guards else of variant_caller == 'sentieon_dnascope'
+  in in (in): -
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/:take:fai[out] ? via fai
+  out out (out): ?
+subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/SENTIEON_VARCAL_SNP@1 call "SENTIEON_VARCAL_SNP" callee=SENTIEON_VARCAL_SNP:process:modelled:legacy @77:9
+  guards else of variant_caller == 'sentieon_dnascope'
+  in $1 (tuple(meta, vcf, tbi)): Tuple
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/vqsr_input[out] Channel<Record> via vqsr_input
+  in resource_vcf (resource_vcf): Path
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/:take:resource_snps_vcf[out] ? via resource_snps_vcf
+  in resource_tbi (resource_tbi): Path
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/:take:resource_snps_tbi[out] ? via resource_snps_tbi
+  in labels (labels): -
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/snps_resource_label[out] Value<Bag<?>> via snps_resource_label
+  in fasta (fasta): Path
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/.map@5[out] ?
+  in fai (fai): Path
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/.map@6[out] ?
+  out recal (recal): Channel<Tuple>
+  out idx (idx): Channel<Tuple>
+  out tranches (tranches): Channel<Tuple>
+  out plots (plots): Channel<Tuple>
+  out versions_sentieon (versions_sentieon): Channel<Tuple>
+subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/vqsr_input_snp chain ".join.join.join.map" steps=join,join,join,map @91:26
+  guards else of variant_caller == 'sentieon_dnascope'
+  in in (in): -
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/vqsr_input[out] Channel<Record> via vqsr_input
+  in 1:1 (join(right)): -
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/SENTIEON_VARCAL_SNP@1[recal] Channel<Tuple> via SENTIEON_VARCAL_SNP.out.recal
+  in 2:1 (join(right)): -
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/SENTIEON_VARCAL_SNP@1[idx] Channel<Tuple> via SENTIEON_VARCAL_SNP.out.idx
+  in 3:1 (join(right)): -
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/SENTIEON_VARCAL_SNP@1[tranches] Channel<Tuple> via SENTIEON_VARCAL_SNP.out.tranches
+  out out (out): Channel<?>
+subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/SENTIEON_APPLYVARCAL_SNP@1 call "SENTIEON_APPLYVARCAL_SNP" callee=SENTIEON_APPLYVARCAL_SNP:process:modelled:legacy @96:9
+  guards else of variant_caller == 'sentieon_dnascope'
+  in $1 (tuple(meta, vcf, vcf_tbi, recal, recal_index, tranches)): Tuple
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/vqsr_input_snp[out] Channel<?> via vqsr_input_snp
+  in $2 (tuple(meta2, fasta)): Tuple
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/:take:fasta[out] ? via fasta
+  in $3 (tuple(meta3, fai)): Tuple
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/:take:fai[out] ? via fai
+  out vcf (vcf): Channel<Tuple>
+  out tbi (tbi): Channel<Tuple>
+  out versions_sentieon (versions_sentieon): Channel<Tuple>
+subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/vqsr_input_indel chain ".join.map.join.join.join.map" steps=join,map,join,join,join,map @100:28
+  guards else of variant_caller == 'sentieon_dnascope'
+  in in (in): -
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/SENTIEON_APPLYVARCAL_SNP@1[vcf] Channel<Tuple> via SENTIEON_APPLYVARCAL_SNP.out.vcf
+  in 1:1 (join(1)): -
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/SENTIEON_APPLYVARCAL_SNP@1[tbi] Channel<Tuple> via SENTIEON_APPLYVARCAL_SNP.out.tbi
+  in 3:1 (join(right)): -
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/SENTIEON_VARCAL_INDEL@1[recal] Channel<Tuple> via SENTIEON_VARCAL_INDEL.out.recal
+  in 4:1 (join(right)): -
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/SENTIEON_VARCAL_INDEL@1[idx] Channel<Tuple> via SENTIEON_VARCAL_INDEL.out.idx
+  in 5:1 (join(right)): -
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/SENTIEON_VARCAL_INDEL@1[tranches] Channel<Tuple> via SENTIEON_VARCAL_INDEL.out.tranches
+  out out (out): Channel<?>
+subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/SENTIEON_APPLYVARCAL_INDEL@1 call "SENTIEON_APPLYVARCAL_INDEL" callee=SENTIEON_APPLYVARCAL_INDEL:process:modelled:legacy @106:9
+  guards else of variant_caller == 'sentieon_dnascope'
+  in $1 (tuple(meta, vcf, vcf_tbi, recal, recal_index, tranches)): Tuple
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/vqsr_input_indel[out] Channel<?> via vqsr_input_indel
+  in $2 (tuple(meta2, fasta)): Tuple
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/:take:fasta[out] ? via fasta
+  in $3 (tuple(meta3, fai)): Tuple
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/:take:fai[out] ? via fai
+  out vcf (vcf): Channel<Tuple>
+  out tbi (tbi): Channel<Tuple>
+  out versions_sentieon (versions_sentieon): Channel<Tuple>
+subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/vqsr_vcf_for_join chain ".ifEmpty.map" steps=ifEmpty,map @113:29
+  guards else of variant_caller == 'sentieon_dnascope'
+  in in (in): -
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/SENTIEON_APPLYVARCAL_INDEL@1[vcf] Channel<Tuple> via SENTIEON_APPLYVARCAL_INDEL.out.vcf
+  out out (out): Channel<?>
+subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/vqsr_tbi_for_join chain ".ifEmpty.map" steps=ifEmpty,map @114:29
+  guards else of variant_caller == 'sentieon_dnascope'
+  in in (in): -
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/SENTIEON_APPLYVARCAL_INDEL@1[tbi] Channel<Tuple> via SENTIEON_APPLYVARCAL_INDEL.out.tbi
+  out out (out): Channel<?>
+subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/genotype_vcf~2 chain ".join.map" steps=join,map @120:24
+  guards else of variant_caller == 'sentieon_dnascope'
+  in in (in): -
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/merged_vcf[out] Channel<?> via merged_vcf
+  in 1:1 (join(right)): -
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/vqsr_vcf_for_join[out] Channel<?> via vqsr_vcf_for_join
+  out out (out): Channel<?>
+subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/genotype_index~2 chain ".join.map" steps=join,map @128:26
+  guards else of variant_caller == 'sentieon_dnascope'
+  in in (in): -
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/merged_tbi[out] Channel<?> via merged_tbi
+  in 1:1 (join(right)): -
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/vqsr_tbi_for_join[out] Channel<?> via vqsr_tbi_for_join
+  out out (out): Channel<?>
+subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/:emit:genotype_index emit "genotype_index" @138:5
+  in in (in): -
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/genotype_index[out] Channel<?> via genotype_index indirect
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/genotype_index~2[out] Channel<?> via genotype_index indirect
+subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/:emit:genotype_vcf emit "genotype_vcf" @139:5
+  in in (in): -
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/genotype_vcf[out] Channel<?> via genotype_vcf indirect
+    <- subworkflows/local/bam_joint_calling_germline_sentieon/main.nf#BAM_JOINT_CALLING_GERMLINE_SENTIEON/genotype_vcf~2[out] Channel<?> via genotype_vcf indirect

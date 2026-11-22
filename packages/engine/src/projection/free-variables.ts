@@ -21,6 +21,7 @@ import {
   type Variable,
   type VariableDeclaration,
 } from "@nf-builder/lang-core";
+import { setTarget } from "./legacy";
 
 export interface FreeRead {
   readonly name: string;
@@ -46,8 +47,6 @@ export interface StatementVariables {
   /** The variables the statement assigns at workflow scope, once each, in first-write order. */
   readonly writes: readonly Write[];
 }
-
-const SET_METHODS = new Set(["set", "tap"]);
 
 /** The variables `statement` reads that nothing in it declares, and the workflow-scope variables it assigns. */
 export function statementVariables(statement: Statement): StatementVariables {
@@ -97,28 +96,6 @@ export function statementVariables(statement: Statement): StatementVariables {
     for (const s of closure.body) visit(s);
     closures -= 1;
     scopes.pop();
-  };
-
-  /** `x.set { v }` and `x.tap { v }`: the closure names a variable to declare. */
-  const setTarget = (call: MethodCall): Variable | null => {
-    if (
-      call.receiver === null ||
-      call.method.kind !== "Identifier" ||
-      !SET_METHODS.has(call.method.name) ||
-      call.args.length > 0 ||
-      call.closures.length !== 1
-    )
-      return null;
-    const closure = call.closures[0] as Closure;
-    const only = closure.body[0];
-    if (
-      closure.params !== null ||
-      closure.body.length !== 1 ||
-      only?.kind !== "ExpressionStatement" ||
-      only.expression.kind !== "Variable"
-    )
-      return null;
-    return only.expression;
   };
 
   /** The variable at the root of `a.b.c` and the names after it, when every step is a plain `.` or `?.` property. */
@@ -189,7 +166,7 @@ export function statementVariables(statement: Statement): StatementVariables {
         visitClosure(n);
         return;
       case "MethodCall": {
-        const target = setTarget(n);
+        const target = setTarget(n)?.variable ?? null;
         if (target !== null && n.receiver !== null) {
           visit(n.receiver);
           write(target.name, target.range, true);

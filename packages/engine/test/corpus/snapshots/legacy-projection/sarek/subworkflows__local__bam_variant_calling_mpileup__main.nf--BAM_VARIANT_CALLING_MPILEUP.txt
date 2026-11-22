@@ -1,0 +1,117 @@
+workflow subworkflows/local/bam_variant_calling_mpileup/main.nf#BAM_VARIANT_CALLING_MPILEUP legacy
+statements 17, modelled 16
+subworkflows/local/bam_variant_calling_mpileup/main.nf#BAM_VARIANT_CALLING_MPILEUP/:take:cram take "cram" @14:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_mpileup/main.nf#BAM_VARIANT_CALLING_MPILEUP/:take:dict take "dict" @15:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_mpileup/main.nf#BAM_VARIANT_CALLING_MPILEUP/:take:fasta take "fasta" @16:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_mpileup/main.nf#BAM_VARIANT_CALLING_MPILEUP/:take:fai take "fai" @17:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_mpileup/main.nf#BAM_VARIANT_CALLING_MPILEUP/:take:intervals take "intervals" @18:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_mpileup/main.nf#BAM_VARIANT_CALLING_MPILEUP/cram_intervals chain ".combine.map" steps=combine,map @23:22
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_mpileup/main.nf#BAM_VARIANT_CALLING_MPILEUP/:take:cram[out] ? via cram
+  in 1:1 (combine(right)): -
+    <- subworkflows/local/bam_variant_calling_mpileup/main.nf#BAM_VARIANT_CALLING_MPILEUP/:take:intervals[out] ? via intervals
+  out out (out): ?
+subworkflows/local/bam_variant_calling_mpileup/main.nf#BAM_VARIANT_CALLING_MPILEUP/cram_intervals_bcftools chain ".map" steps=map @28:31
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_mpileup/main.nf#BAM_VARIANT_CALLING_MPILEUP/cram_intervals[out] ? via cram_intervals
+  out out (out): ?
+subworkflows/local/bam_variant_calling_mpileup/main.nf#BAM_VARIANT_CALLING_MPILEUP/cram_crai_intervals chain ".combine.map" steps=combine,map @31:27
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_mpileup/main.nf#BAM_VARIANT_CALLING_MPILEUP/:take:cram[out] ? via cram
+  in 1:1 (combine(right)): -
+    <- subworkflows/local/bam_variant_calling_mpileup/main.nf#BAM_VARIANT_CALLING_MPILEUP/:take:intervals[out] ? via intervals
+  out out (out): ?
+subworkflows/local/bam_variant_calling_mpileup/main.nf#BAM_VARIANT_CALLING_MPILEUP/fasta_fai chain ".combine.map.collect" steps=combine,map,collect @33:17
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_mpileup/main.nf#BAM_VARIANT_CALLING_MPILEUP/:take:fasta[out] ? via fasta
+  in 1:1 (combine(right)): -
+    <- subworkflows/local/bam_variant_calling_mpileup/main.nf#BAM_VARIANT_CALLING_MPILEUP/:take:fai[out] ? via fai
+  out out (out): Value<Bag<?>>
+subworkflows/local/bam_variant_calling_mpileup/main.nf#BAM_VARIANT_CALLING_MPILEUP/keep_bcftools_mpileup code "keep_bcftools_mpileup = false" @36:5
+  out keep_bcftools_mpileup (keep_bcftools_mpileup): Boolean
+subworkflows/local/bam_variant_calling_mpileup/main.nf#BAM_VARIANT_CALLING_MPILEUP/BCFTOOLS_MPILEUP@1 call "BCFTOOLS_MPILEUP" callee=BCFTOOLS_MPILEUP:process:modelled:legacy @37:5
+  in $1 (tuple(meta, bam, intervals_mpileup, intervals_call)): Tuple
+    <- subworkflows/local/bam_variant_calling_mpileup/main.nf#BAM_VARIANT_CALLING_MPILEUP/cram_intervals_bcftools[out] ? via cram_intervals_bcftools
+  in $2 (tuple(meta2, fasta, fai)): Tuple
+    <- subworkflows/local/bam_variant_calling_mpileup/main.nf#BAM_VARIANT_CALLING_MPILEUP/fasta_fai[out] Value<Bag<?>> via fasta_fai
+  in save_mpileup (save_mpileup): -
+    <- subworkflows/local/bam_variant_calling_mpileup/main.nf#BAM_VARIANT_CALLING_MPILEUP/keep_bcftools_mpileup[keep_bcftools_mpileup] Boolean via keep_bcftools_mpileup
+  out vcf (vcf): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out stats (stats): Channel<Tuple>
+  out mpileup (mpileup): Channel<Tuple>
+  out versions_bcftools (versions_bcftools): Channel<Tuple>
+subworkflows/local/bam_variant_calling_mpileup/main.nf#BAM_VARIANT_CALLING_MPILEUP/SAMTOOLS_MPILEUP@1 call "SAMTOOLS_MPILEUP" callee=SAMTOOLS_MPILEUP:process:modelled:legacy @40:5
+  in $1 (tuple(meta, input, index, intervals)): Tuple
+    <- subworkflows/local/bam_variant_calling_mpileup/main.nf#BAM_VARIANT_CALLING_MPILEUP/cram_crai_intervals[out] ? via cram_crai_intervals
+  in $2 (tuple(meta2, fasta, fai)): Tuple
+    <- subworkflows/local/bam_variant_calling_mpileup/main.nf#BAM_VARIANT_CALLING_MPILEUP/fasta_fai[out] Value<Bag<?>> via fasta_fai
+  out mpileup (mpileup): Channel<Tuple>
+  out versions_samtools (versions_samtools): Channel<Tuple>
+subworkflows/local/bam_variant_calling_mpileup/main.nf#BAM_VARIANT_CALLING_MPILEUP/vcf_mpileup chain ".branch" steps=branch @43:19
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_mpileup/main.nf#BAM_VARIANT_CALLING_MPILEUP/BCFTOOLS_MPILEUP@1[vcf] Channel<Tuple> via BCFTOOLS_MPILEUP.out.vcf
+  out out (out): Record
+subworkflows/local/bam_variant_calling_mpileup/main.nf#BAM_VARIANT_CALLING_MPILEUP/tbi_mpileup chain ".branch" steps=branch @49:19
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_mpileup/main.nf#BAM_VARIANT_CALLING_MPILEUP/BCFTOOLS_MPILEUP@1[index] Channel<Tuple> via BCFTOOLS_MPILEUP.out.index
+  out out (out): Record
+subworkflows/local/bam_variant_calling_mpileup/main.nf#BAM_VARIANT_CALLING_MPILEUP/mpileup_samtools chain ".branch" steps=branch @55:24
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_mpileup/main.nf#BAM_VARIANT_CALLING_MPILEUP/SAMTOOLS_MPILEUP@1[mpileup] Channel<Tuple> via SAMTOOLS_MPILEUP.out.mpileup
+  out out (out): Record
+subworkflows/local/bam_variant_calling_mpileup/main.nf#BAM_VARIANT_CALLING_MPILEUP/mpileup_to_merge chain ".map.groupTuple" steps=map,groupTuple @61:24
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_mpileup/main.nf#BAM_VARIANT_CALLING_MPILEUP/mpileup_samtools[out] Record via mpileup_samtools indirect
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_mpileup/main.nf#BAM_VARIANT_CALLING_MPILEUP/CAT_MPILEUP@1 call "CAT_MPILEUP" callee=CAT_MPILEUP:process:modelled:legacy @62:5
+  in $1 (tuple(meta, files_in)): Tuple
+    <- subworkflows/local/bam_variant_calling_mpileup/main.nf#BAM_VARIANT_CALLING_MPILEUP/mpileup_to_merge[out] Channel<?> via mpileup_to_merge
+  out file_out (file_out): Channel<Tuple>
+  out versions_find (versions_find): Channel<Tuple>
+  out versions_pigz (versions_pigz): Channel<Tuple>
+  out versions_coreutils (versions_coreutils): Channel<Tuple>
+subworkflows/local/bam_variant_calling_mpileup/main.nf#BAM_VARIANT_CALLING_MPILEUP/vcf_to_merge chain ".map.groupTuple" steps=map,groupTuple @65:20
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_mpileup/main.nf#BAM_VARIANT_CALLING_MPILEUP/vcf_mpileup[out] Record via vcf_mpileup indirect
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_mpileup/main.nf#BAM_VARIANT_CALLING_MPILEUP/MERGE_BCFTOOLS_MPILEUP@1 call "MERGE_BCFTOOLS_MPILEUP" callee=MERGE_BCFTOOLS_MPILEUP:process:modelled:legacy @66:5
+  in $1 (tuple(meta, vcf)): Tuple
+    <- subworkflows/local/bam_variant_calling_mpileup/main.nf#BAM_VARIANT_CALLING_MPILEUP/vcf_to_merge[out] Channel<?> via vcf_to_merge
+  in $2 (tuple(meta2, dict)): Tuple
+    <- subworkflows/local/bam_variant_calling_mpileup/main.nf#BAM_VARIANT_CALLING_MPILEUP/:take:dict[out] ? via dict
+  out vcf (vcf): Channel<Tuple>
+  out tbi (tbi): Channel<Tuple>
+  out versions_gatk4 (versions_gatk4): Channel<Tuple>
+subworkflows/local/bam_variant_calling_mpileup/main.nf#BAM_VARIANT_CALLING_MPILEUP/mpileup chain ".mix.map" steps=mix,map @69:15
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_mpileup/main.nf#BAM_VARIANT_CALLING_MPILEUP/CAT_MPILEUP@1[file_out] Channel<Tuple> via CAT_MPILEUP.out.file_out
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/bam_variant_calling_mpileup/main.nf#BAM_VARIANT_CALLING_MPILEUP/mpileup_samtools[out] Record via mpileup_samtools indirect
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_mpileup/main.nf#BAM_VARIANT_CALLING_MPILEUP/vcf chain ".mix.map" steps=mix,map @72:11
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_mpileup/main.nf#BAM_VARIANT_CALLING_MPILEUP/MERGE_BCFTOOLS_MPILEUP@1[vcf] Channel<Tuple> via MERGE_BCFTOOLS_MPILEUP.out.vcf
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/bam_variant_calling_mpileup/main.nf#BAM_VARIANT_CALLING_MPILEUP/vcf_mpileup[out] Record via vcf_mpileup indirect
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_mpileup/main.nf#BAM_VARIANT_CALLING_MPILEUP/tbi chain ".mix.map" steps=mix,map @75:11
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_mpileup/main.nf#BAM_VARIANT_CALLING_MPILEUP/MERGE_BCFTOOLS_MPILEUP@1[tbi] Channel<Tuple> via MERGE_BCFTOOLS_MPILEUP.out.tbi
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/bam_variant_calling_mpileup/main.nf#BAM_VARIANT_CALLING_MPILEUP/tbi_mpileup[out] Record via tbi_mpileup indirect
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_mpileup/main.nf#BAM_VARIANT_CALLING_MPILEUP/:emit:mpileup emit "mpileup" @80:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_mpileup/main.nf#BAM_VARIANT_CALLING_MPILEUP/mpileup[out] Channel<?> via mpileup
+subworkflows/local/bam_variant_calling_mpileup/main.nf#BAM_VARIANT_CALLING_MPILEUP/:emit:vcf emit "vcf" @81:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_mpileup/main.nf#BAM_VARIANT_CALLING_MPILEUP/vcf[out] Channel<?> via vcf
+subworkflows/local/bam_variant_calling_mpileup/main.nf#BAM_VARIANT_CALLING_MPILEUP/:emit:tbi emit "tbi" @82:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_mpileup/main.nf#BAM_VARIANT_CALLING_MPILEUP/tbi[out] Channel<?> via tbi

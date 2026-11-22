@@ -1,0 +1,197 @@
+workflow subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE legacy
+statements 23, modelled 20
+subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/:take:cram take "cram" @13:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/:take:fasta take "fasta" @14:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/:take:fasta_fai take "fasta_fai" @15:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/:take:dict take "dict" @16:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/:take:dbsnp take "dbsnp" @17:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/:take:dbsnp_tbi take "dbsnp_tbi" @18:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/:take:intervals take "intervals" @19:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/:take:joint_germline take "joint_germline" @20:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/:take:sentieon_dnascope_emit_mode take "sentieon_dnascope_emit_mode" @21:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/:take:sentieon_dnascope_pcr_indel_model take "sentieon_dnascope_pcr_indel_model" @22:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/:take:sentieon_dnascope_model take "sentieon_dnascope_model" @23:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/gvcf factory "channel.empty" factory=channel.empty @26:26
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/vcf factory "channel.empty" factory=channel.empty @27:26
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/genotype_intervals factory "channel.empty" factory=channel.empty @28:26
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/cram_intervals_for_sentieon chain ".combine.map" steps=combine,map @31:35
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/:take:cram[out] ? via cram
+  in 1:1 (combine(right)): -
+    <- subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/:take:intervals[out] ? via intervals
+  out out (out): ?
+subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/emit_mode_items code "emit_mode_items = sentieon_dnascope_emit_mode.split(',').ea…" @44:5
+  in sentieon_dnascope_emit_mode (sentieon_dnascope_emit_mode): -
+    <- subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/:take:sentieon_dnascope_emit_mode[out] ? via sentieon_dnascope_emit_mode indirect
+  out emit_mode_items (emit_mode_items): -
+subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/lst code "lst = emit_mode_items - 'gvcf'" @45:5
+  in emit_mode_items (emit_mode_items): -
+    <- subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/emit_mode_items[emit_mode_items] ? via emit_mode_items indirect
+  out lst (lst): -
+subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/emit_vcf code "emit_vcf = lst.size() > 0 ? lst[0] : ''" @46:5
+  in lst (lst): -
+    <- subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/lst[lst] ? via lst indirect
+  out emit_vcf (emit_vcf): -
+subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/.map@1 chain ".map" steps=map @52:9
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/:take:dbsnp[out] ? via dbsnp
+  out out (out): ?
+subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/.map@2 chain ".map" steps=map @53:9
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/:take:dbsnp_tbi[out] ? via dbsnp_tbi
+  out out (out): ?
+subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/.map@3 chain ".map" steps=map @54:9
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/:take:sentieon_dnascope_model[out] ? via sentieon_dnascope_model
+  out out (out): ?
+subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/SENTIEON_DNASCOPE@1 call "SENTIEON_DNASCOPE" callee=SENTIEON_DNASCOPE:process:modelled:legacy @48:5
+  in $1 (tuple(meta, bam, bai, intervals)): Tuple
+    <- subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/cram_intervals_for_sentieon[out] ? via cram_intervals_for_sentieon
+  in $2 (tuple(meta2, fasta)): Tuple
+    <- subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/:take:fasta[out] ? via fasta
+  in $3 (tuple(meta3, fai)): Tuple
+    <- subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/:take:fasta_fai[out] ? via fasta_fai
+  in $4 (tuple(meta4, dbsnp)): Tuple
+    <- subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/.map@1[out] ?
+  in $5 (tuple(meta5, dbsnp_tbi)): Tuple
+    <- subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/.map@2[out] ?
+  in $6 (tuple(meta6, ml_model)): Tuple
+    <- subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/.map@3[out] ?
+  in pcr_indel_model (pcr_indel_model): -
+    <- subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/:take:sentieon_dnascope_pcr_indel_model[out] ? via sentieon_dnascope_pcr_indel_model
+  in emit_vcf (emit_vcf): -
+    <- subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/emit_vcf[emit_vcf] ? via emit_vcf
+  in emit_gvcf (emit_gvcf): -
+    <- subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/emit_mode_items[emit_mode_items] ? via emit_mode_items indirect
+  out vcf (vcf): Channel<Tuple>
+  out vcf_tbi (vcf_tbi): Channel<Tuple>
+  out gvcf (gvcf): Channel<Tuple>
+  out gvcf_tbi (gvcf_tbi): Channel<Tuple>
+  out versions_sentieon (versions_sentieon): Channel<Tuple>
+subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/genotype_intervals~2 chain ".join.join.map" steps=join,join,map @60:30
+  guards then of joint_germline
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/SENTIEON_DNASCOPE@1[gvcf] Channel<Tuple> via SENTIEON_DNASCOPE.out.gvcf
+  in 1:1 (join(right)): -
+    <- subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/SENTIEON_DNASCOPE@1[gvcf_tbi] Channel<Tuple> via SENTIEON_DNASCOPE.out.gvcf_tbi
+  in 2:1 (join(right)): -
+    <- subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/cram_intervals_for_sentieon[out] ? via cram_intervals_for_sentieon
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/dnascope_vcf_branch chain ".map.branch" steps=map,branch @69:27
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/SENTIEON_DNASCOPE@1[vcf] Channel<Tuple> via SENTIEON_DNASCOPE.out.vcf
+  out out (out): Record
+subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/dnascope_vcf_tbi_branch chain ".map.branch" steps=map,branch @77:31
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/SENTIEON_DNASCOPE@1[vcf_tbi] Channel<Tuple> via SENTIEON_DNASCOPE.out.vcf_tbi
+  out out (out): Record
+subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/haplotyper_gvcf_branch chain ".map.branch" steps=map,branch @85:30
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/SENTIEON_DNASCOPE@1[gvcf] Channel<Tuple> via SENTIEON_DNASCOPE.out.gvcf
+  out out (out): Record
+subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/haplotyper_gvcf_tbi_branch chain ".map.branch" steps=map,branch @93:34
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/SENTIEON_DNASCOPE@1[gvcf_tbi] Channel<Tuple> via SENTIEON_DNASCOPE.out.gvcf_tbi
+  out out (out): Record
+subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/vcfs_for_merging chain ".map.groupTuple" steps=map,groupTuple @106:24
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/dnascope_vcf_branch[out] Record via dnascope_vcf_branch indirect
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/MERGE_SENTIEON_DNASCOPE_VCFS@1 call "MERGE_SENTIEON_DNASCOPE_VCFS" callee=MERGE_SENTIEON_DNASCOPE_VCFS:process:modelled:legacy @112:5
+  in $1 (tuple(meta, vcf)): Tuple
+    <- subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/vcfs_for_merging[out] Channel<?> via vcfs_for_merging
+  in $2 (tuple(meta2, dict)): Tuple
+    <- subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/:take:dict[out] ? via dict
+  out vcf (vcf): Channel<Tuple>
+  out tbi (tbi): Channel<Tuple>
+  out versions_gatk4 (versions_gatk4): Channel<Tuple>
+subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/channel.empty@1 factory "channel.empty" factory=channel.empty @114:20
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/dnascope_vcf chain ".mix" steps=mix @114:20
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/channel.empty@1[out] Channel<?>
+  in 1:1 (mix(1)): -
+    <- subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/MERGE_SENTIEON_DNASCOPE_VCFS@1[vcf] Channel<Tuple> via MERGE_SENTIEON_DNASCOPE_VCFS.out.vcf
+  in 1:2 (mix(2)): -
+    <- subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/dnascope_vcf_branch[out] Record via dnascope_vcf_branch indirect
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/channel.empty@2 factory "channel.empty" factory=channel.empty @118:22
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/haplotyper_tbi chain ".mix" steps=mix @118:22
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/channel.empty@2[out] Channel<?>
+  in 1:1 (mix(1)): -
+    <- subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/MERGE_SENTIEON_DNASCOPE_VCFS@1[tbi] Channel<Tuple> via MERGE_SENTIEON_DNASCOPE_VCFS.out.tbi
+  in 1:2 (mix(2)): -
+    <- subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/dnascope_vcf_tbi_branch[out] Record via dnascope_vcf_tbi_branch indirect
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/vcf~2 chain ".map" steps=map @123:11
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/dnascope_vcf[out] Channel<?> via dnascope_vcf
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/vcf_tbi chain ".map" steps=map @124:15
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/haplotyper_tbi[out] Channel<?> via haplotyper_tbi
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/gvcfs_for_merging chain ".map.groupTuple" steps=map,groupTuple @128:25
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/haplotyper_gvcf_branch[out] Record via haplotyper_gvcf_branch indirect
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/MERGE_SENTIEON_DNASCOPE_GVCFS@1 call "MERGE_SENTIEON_DNASCOPE_GVCFS" callee=MERGE_SENTIEON_DNASCOPE_GVCFS:process:modelled:legacy @132:5
+  in $1 (tuple(meta, vcf)): Tuple
+    <- subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/gvcfs_for_merging[out] Channel<?> via gvcfs_for_merging
+  in $2 (tuple(meta2, dict)): Tuple
+    <- subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/:take:dict[out] ? via dict
+  out vcf (vcf): Channel<Tuple>
+  out tbi (tbi): Channel<Tuple>
+  out versions_gatk4 (versions_gatk4): Channel<Tuple>
+subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/channel.empty@3 factory "channel.empty" factory=channel.empty @134:12
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/gvcf~2 chain ".mix" steps=mix @134:12
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/channel.empty@3[out] Channel<?>
+  in 1:1 (mix(1)): -
+    <- subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/MERGE_SENTIEON_DNASCOPE_GVCFS@1[vcf] Channel<Tuple> via MERGE_SENTIEON_DNASCOPE_GVCFS.out.vcf
+  in 1:2 (mix(2)): -
+    <- subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/haplotyper_gvcf_branch[out] Record via haplotyper_gvcf_branch indirect
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/channel.empty@4 factory "channel.empty" factory=channel.empty @138:16
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/gvcf_tbi chain ".mix" steps=mix @138:16
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/channel.empty@4[out] Channel<?>
+  in 1:1 (mix(1)): -
+    <- subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/MERGE_SENTIEON_DNASCOPE_GVCFS@1[tbi] Channel<Tuple> via MERGE_SENTIEON_DNASCOPE_GVCFS.out.tbi
+  in 1:2 (mix(2)): -
+    <- subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/haplotyper_gvcf_tbi_branch[out] Record via haplotyper_gvcf_tbi_branch indirect
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/:emit:vcf emit "vcf" @144:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/vcf~2[out] Channel<?> via vcf
+subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/:emit:vcf_tbi emit "vcf_tbi" @145:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/vcf_tbi[out] Channel<?> via vcf_tbi
+subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/:emit:gvcf emit "gvcf" @146:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/gvcf~2[out] Channel<?> via gvcf
+subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/:emit:gvcf_tbi emit "gvcf_tbi" @147:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/gvcf_tbi[out] Channel<?> via gvcf_tbi
+subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/:emit:genotype_intervals emit "genotype_intervals" @148:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/genotype_intervals[out] Channel<?> via genotype_intervals indirect
+    <- subworkflows/local/bam_variant_calling_sentieon_dnascope/main.nf#BAM_VARIANT_CALLING_SENTIEON_DNASCOPE/genotype_intervals~2[out] Channel<?> via genotype_intervals indirect

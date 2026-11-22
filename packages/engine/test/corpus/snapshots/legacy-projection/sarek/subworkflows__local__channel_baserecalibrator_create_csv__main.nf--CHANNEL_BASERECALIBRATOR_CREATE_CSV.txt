@@ -1,0 +1,31 @@
+workflow subworkflows/local/channel_baserecalibrator_create_csv/main.nf#CHANNEL_BASERECALIBRATOR_CREATE_CSV legacy
+statements 3, modelled 3
+subworkflows/local/channel_baserecalibrator_create_csv/main.nf#CHANNEL_BASERECALIBRATOR_CREATE_CSV/:take:cram_table_bqsr take "cram_table_bqsr" @7:9
+  out out (out): -
+subworkflows/local/channel_baserecalibrator_create_csv/main.nf#CHANNEL_BASERECALIBRATOR_CREATE_CSV/:take:tools take "tools" @8:9
+  out out (out): -
+subworkflows/local/channel_baserecalibrator_create_csv/main.nf#CHANNEL_BASERECALIBRATOR_CREATE_CSV/:take:skip_tools take "skip_tools" @9:9
+  out out (out): -
+subworkflows/local/channel_baserecalibrator_create_csv/main.nf#CHANNEL_BASERECALIBRATOR_CREATE_CSV/:take:outdir take "outdir" @10:9
+  out out (out): -
+subworkflows/local/channel_baserecalibrator_create_csv/main.nf#CHANNEL_BASERECALIBRATOR_CREATE_CSV/.collectFile@1 chain ".collectFile" steps=collectFile @15:13
+  guards then of tools && tools.split(',').contains('sentieon_dedup')
+  in in (in): -
+    <- subworkflows/local/channel_baserecalibrator_create_csv/main.nf#CHANNEL_BASERECALIBRATOR_CREATE_CSV/:take:cram_table_bqsr[out] ? via cram_table_bqsr
+  in 1:4 (collectFile(opts)): -
+    <- subworkflows/local/channel_baserecalibrator_create_csv/main.nf#CHANNEL_BASERECALIBRATOR_CREATE_CSV/:take:outdir[out] ? via outdir indirect
+  out out (out): Channel<?>
+subworkflows/local/channel_baserecalibrator_create_csv/main.nf#CHANNEL_BASERECALIBRATOR_CREATE_CSV/.collectFile@2 chain ".collectFile" steps=collectFile @30:13
+  guards else of tools && tools.split(',').contains('sentieon_dedup'); then of !(skip_tools && (skip_tools.split(',').contains('markduplicates')))
+  in in (in): -
+    <- subworkflows/local/channel_baserecalibrator_create_csv/main.nf#CHANNEL_BASERECALIBRATOR_CREATE_CSV/:take:cram_table_bqsr[out] ? via cram_table_bqsr
+  in 1:4 (collectFile(opts)): -
+    <- subworkflows/local/channel_baserecalibrator_create_csv/main.nf#CHANNEL_BASERECALIBRATOR_CREATE_CSV/:take:outdir[out] ? via outdir indirect
+  out out (out): Channel<?>
+subworkflows/local/channel_baserecalibrator_create_csv/main.nf#CHANNEL_BASERECALIBRATOR_CREATE_CSV/.collectFile@3 chain ".collectFile" steps=collectFile @45:13
+  guards else of tools && tools.split(',').contains('sentieon_dedup'); else of !(skip_tools && (skip_tools.split(',').contains('markduplicates')))
+  in in (in): -
+    <- subworkflows/local/channel_baserecalibrator_create_csv/main.nf#CHANNEL_BASERECALIBRATOR_CREATE_CSV/:take:cram_table_bqsr[out] ? via cram_table_bqsr
+  in 1:4 (collectFile(opts)): -
+    <- subworkflows/local/channel_baserecalibrator_create_csv/main.nf#CHANNEL_BASERECALIBRATOR_CREATE_CSV/:take:outdir[out] ? via outdir indirect
+  out out (out): Channel<?>

@@ -1,0 +1,80 @@
+workflow subworkflows/local/bam_markduplicates/main.nf#BAM_MARKDUPLICATES legacy
+statements 6, modelled 6
+subworkflows/local/bam_markduplicates/main.nf#BAM_MARKDUPLICATES/:take:bam take "bam" @12:5
+  out out (out): -
+subworkflows/local/bam_markduplicates/main.nf#BAM_MARKDUPLICATES/:take:fasta take "fasta" @13:5
+  out out (out): -
+subworkflows/local/bam_markduplicates/main.nf#BAM_MARKDUPLICATES/:take:fasta_fai take "fasta_fai" @14:5
+  out out (out): -
+subworkflows/local/bam_markduplicates/main.nf#BAM_MARKDUPLICATES/:take:intervals_bed_combined take "intervals_bed_combined" @15:5
+  out out (out): -
+subworkflows/local/bam_markduplicates/main.nf#BAM_MARKDUPLICATES/:take:save_output_as_bam take "save_output_as_bam" @16:5
+  out out (out): -
+subworkflows/local/bam_markduplicates/main.nf#BAM_MARKDUPLICATES/reports factory "channel.empty" factory=channel.empty @19:16
+  out out (out): Channel<?>
+subworkflows/local/bam_markduplicates/main.nf#BAM_MARKDUPLICATES/.map@1 chain ".map" steps=map @24:31
+  in in (in): -
+    <- subworkflows/local/bam_markduplicates/main.nf#BAM_MARKDUPLICATES/:take:fasta[out] ? via fasta
+  out out (out): ?
+subworkflows/local/bam_markduplicates/main.nf#BAM_MARKDUPLICATES/.map@2 chain ".map" steps=map @24:73
+  in in (in): -
+    <- subworkflows/local/bam_markduplicates/main.nf#BAM_MARKDUPLICATES/:take:fasta_fai[out] ? via fasta_fai
+  out out (out): ?
+subworkflows/local/bam_markduplicates/main.nf#BAM_MARKDUPLICATES/GATK4_MARKDUPLICATES@1 call "GATK4_MARKDUPLICATES" callee=GATK4_MARKDUPLICATES:process:modelled:legacy @24:5
+  in $1 (tuple(meta, bam)): Tuple
+    <- subworkflows/local/bam_markduplicates/main.nf#BAM_MARKDUPLICATES/:take:bam[out] ? via bam
+  in fasta (fasta): Path
+    <- subworkflows/local/bam_markduplicates/main.nf#BAM_MARKDUPLICATES/.map@1[out] ?
+  in fasta_fai (fasta_fai): Path
+    <- subworkflows/local/bam_markduplicates/main.nf#BAM_MARKDUPLICATES/.map@2[out] ?
+  out cram (cram): Channel<Tuple>
+  out bam (bam): Channel<Tuple>
+  out crai (crai): Channel<Tuple>
+  out bai (bai): Channel<Tuple>
+  out metrics (metrics): Channel<Tuple>
+  out versions_gatk4 (versions_gatk4): Channel<Tuple>
+  out versions_samtools (versions_samtools): Channel<Tuple>
+subworkflows/local/bam_markduplicates/main.nf#BAM_MARKDUPLICATES/alignment chain ".join" steps=join @31:11
+  guards then of save_output_as_bam
+  in in (in): -
+    <- subworkflows/local/bam_markduplicates/main.nf#BAM_MARKDUPLICATES/GATK4_MARKDUPLICATES@1[bam] Channel<Tuple> via GATK4_MARKDUPLICATES.out.bam
+  in 1:1 (join(right)): -
+    <- subworkflows/local/bam_markduplicates/main.nf#BAM_MARKDUPLICATES/GATK4_MARKDUPLICATES@1[bai] Channel<Tuple> via GATK4_MARKDUPLICATES.out.bai
+  out out (out): Channel<Record>
+subworkflows/local/bam_markduplicates/main.nf#BAM_MARKDUPLICATES/alignment~2 chain ".join" steps=join @32:11
+  guards else of save_output_as_bam
+  in in (in): -
+    <- subworkflows/local/bam_markduplicates/main.nf#BAM_MARKDUPLICATES/GATK4_MARKDUPLICATES@1[cram] Channel<Tuple> via GATK4_MARKDUPLICATES.out.cram
+  in 1:1 (join(right)): -
+    <- subworkflows/local/bam_markduplicates/main.nf#BAM_MARKDUPLICATES/GATK4_MARKDUPLICATES@1[crai] Channel<Tuple> via GATK4_MARKDUPLICATES.out.crai
+  out out (out): Channel<Record>
+subworkflows/local/bam_markduplicates/main.nf#BAM_MARKDUPLICATES/CRAM_QC_MOSDEPTH_SAMTOOLS@1 call "CRAM_QC_MOSDEPTH_SAMTOOLS" callee=CRAM_QC_MOSDEPTH_SAMTOOLS:workflow:modelled:legacy @35:5
+  in cram (cram): -
+    <- subworkflows/local/bam_markduplicates/main.nf#BAM_MARKDUPLICATES/alignment[out] Channel<Record> via alignment indirect
+    <- subworkflows/local/bam_markduplicates/main.nf#BAM_MARKDUPLICATES/alignment~2[out] Channel<Record> via alignment indirect
+  in fasta (fasta): -
+    <- subworkflows/local/bam_markduplicates/main.nf#BAM_MARKDUPLICATES/:take:fasta[out] ? via fasta
+  in fasta_fai (fasta_fai): -
+    <- subworkflows/local/bam_markduplicates/main.nf#BAM_MARKDUPLICATES/:take:fasta_fai[out] ? via fasta_fai
+  in intervals (intervals): -
+    <- subworkflows/local/bam_markduplicates/main.nf#BAM_MARKDUPLICATES/:take:intervals_bed_combined[out] ? via intervals_bed_combined
+  out reports (reports): Channel<?>
+subworkflows/local/bam_markduplicates/main.nf#BAM_MARKDUPLICATES/reports~2 chain ".mix" steps=mix @38:15
+  in in (in): -
+    <- subworkflows/local/bam_markduplicates/main.nf#BAM_MARKDUPLICATES/reports[out] Channel<?> via reports
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/bam_markduplicates/main.nf#BAM_MARKDUPLICATES/GATK4_MARKDUPLICATES@1[metrics] Channel<Tuple> via GATK4_MARKDUPLICATES.out.metrics
+  out out (out): Channel<?>
+subworkflows/local/bam_markduplicates/main.nf#BAM_MARKDUPLICATES/reports~3 chain ".mix" steps=mix @39:15
+  in in (in): -
+    <- subworkflows/local/bam_markduplicates/main.nf#BAM_MARKDUPLICATES/reports~2[out] Channel<?> via reports
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/bam_markduplicates/main.nf#BAM_MARKDUPLICATES/CRAM_QC_MOSDEPTH_SAMTOOLS@1[reports] Channel<?> via CRAM_QC_MOSDEPTH_SAMTOOLS.out.reports
+  out out (out): Channel<?>
+subworkflows/local/bam_markduplicates/main.nf#BAM_MARKDUPLICATES/:emit:alignment emit "alignment" @42:5
+  in in (in): -
+    <- subworkflows/local/bam_markduplicates/main.nf#BAM_MARKDUPLICATES/alignment[out] Channel<Record> via alignment indirect
+    <- subworkflows/local/bam_markduplicates/main.nf#BAM_MARKDUPLICATES/alignment~2[out] Channel<Record> via alignment indirect
+subworkflows/local/bam_markduplicates/main.nf#BAM_MARKDUPLICATES/:emit:reports emit "reports" @43:5
+  in in (in): -
+    <- subworkflows/local/bam_markduplicates/main.nf#BAM_MARKDUPLICATES/reports~3[out] Channel<?> via reports

@@ -104,18 +104,6 @@ interface Stats {
   code: number;
 }
 
-/** Non-empty statements of a workflow's main section, from its file's AST. */
-function mainStatements(pinned: Pin, path: string, name: string | null) {
-  const source = pinned.model.file(path)?.source;
-  const ast = source?.language === "nextflow" ? source.ast : null;
-  const def = ast?.body.find(
-    (i) => i.kind === "Workflow" && (i.name?.name ?? null) === name,
-  );
-  return def?.kind === "Workflow"
-    ? (def.main?.items.filter((s) => s.kind !== "EmptyStatement") ?? [])
-    : [];
-}
-
 describe("F-106 IO-14 AR-10 corpus projection", () => {
   it("F-106 IO-14 AR-10: every workflow of every pinned pipeline projects without throwing, with unique ids and every statement represented", () => {
     expect(pins.length).toBeGreaterThan(0);
@@ -147,18 +135,13 @@ describe("F-106 IO-14 AR-10 corpus projection", () => {
           seen.add(n.id);
           stats.nodes[n.kind] = (stats.nodes[n.kind] ?? 0) + 1;
         }
-        const statements = mainStatements(pinned, ref.path, ref.name);
-        stats.statements += statements.length;
-        for (const s of statements)
+        // F-107: every statement is listed once, with the nodes it made or the names it bound (a transparent `if` by its branches)
+        stats.statements += p.statements.length;
+        for (const s of p.statements)
           expect(
-            p.nodes.some(
-              (n) =>
-                !["take", "emit", "params", "output"].includes(n.kind) &&
-                n.range.start >= s.range.start &&
-                n.range.end <= s.range.end,
-            ),
+            s.nodes.length + s.binds.length,
             `${pinned.id}:${ref.path}:${s.range.line}`,
-          ).toBe(true);
+          ).toBeGreaterThan(0);
         for (const e of p.edges) {
           expect(p.nodes.some((n) => n.id === e.from.node)).toBe(true);
           expect(p.nodes.some((n) => n.id === e.to.node)).toBe(true);

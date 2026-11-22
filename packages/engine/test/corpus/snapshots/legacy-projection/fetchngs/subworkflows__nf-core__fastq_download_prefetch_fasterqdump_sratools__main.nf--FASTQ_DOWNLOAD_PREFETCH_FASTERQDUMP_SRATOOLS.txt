@@ -1,0 +1,39 @@
+workflow subworkflows/nf-core/fastq_download_prefetch_fasterqdump_sratools/main.nf#FASTQ_DOWNLOAD_PREFETCH_FASTERQDUMP_SRATOOLS legacy
+statements 4, modelled 4
+subworkflows/nf-core/fastq_download_prefetch_fasterqdump_sratools/main.nf#FASTQ_DOWNLOAD_PREFETCH_FASTERQDUMP_SRATOOLS/:take:ch_sra_ids take "ch_sra_ids" @10:5
+  out out (out): -
+subworkflows/nf-core/fastq_download_prefetch_fasterqdump_sratools/main.nf#FASTQ_DOWNLOAD_PREFETCH_FASTERQDUMP_SRATOOLS/:take:ch_dbgap_key take "ch_dbgap_key" @11:5
+  out out (out): -
+subworkflows/nf-core/fastq_download_prefetch_fasterqdump_sratools/main.nf#FASTQ_DOWNLOAD_PREFETCH_FASTERQDUMP_SRATOOLS/.collect@1 chain ".collect" steps=collect @18:35
+  in in (in): -
+    <- subworkflows/nf-core/fastq_download_prefetch_fasterqdump_sratools/main.nf#FASTQ_DOWNLOAD_PREFETCH_FASTERQDUMP_SRATOOLS/:take:ch_sra_ids[out] ? via ch_sra_ids
+  out out (out): Value<Bag<?>>
+subworkflows/nf-core/fastq_download_prefetch_fasterqdump_sratools/main.nf#FASTQ_DOWNLOAD_PREFETCH_FASTERQDUMP_SRATOOLS/CUSTOM_SRATOOLSNCBISETTINGS@1 call "CUSTOM_SRATOOLSNCBISETTINGS" callee=CUSTOM_SRATOOLSNCBISETTINGS:process:modelled:legacy @18:5
+  in ids (ids): -
+    <- subworkflows/nf-core/fastq_download_prefetch_fasterqdump_sratools/main.nf#FASTQ_DOWNLOAD_PREFETCH_FASTERQDUMP_SRATOOLS/.collect@1[out] Value<Bag<?>>
+  out ncbi_settings (ncbi_settings): Value<Path>
+  out versions_sratools (versions_sratools): Value<Tuple>
+subworkflows/nf-core/fastq_download_prefetch_fasterqdump_sratools/main.nf#FASTQ_DOWNLOAD_PREFETCH_FASTERQDUMP_SRATOOLS/SRATOOLS_PREFETCH@1 call "SRATOOLS_PREFETCH" callee=SRATOOLS_PREFETCH:process:modelled:legacy @24:5
+  in $1 (tuple(meta, id)): Tuple
+    <- subworkflows/nf-core/fastq_download_prefetch_fasterqdump_sratools/main.nf#FASTQ_DOWNLOAD_PREFETCH_FASTERQDUMP_SRATOOLS/:take:ch_sra_ids[out] ? via ch_sra_ids
+  in ncbi_settings (ncbi_settings): Path
+    <- subworkflows/nf-core/fastq_download_prefetch_fasterqdump_sratools/main.nf#FASTQ_DOWNLOAD_PREFETCH_FASTERQDUMP_SRATOOLS/CUSTOM_SRATOOLSNCBISETTINGS@1[ncbi_settings] Value<Path> via ch_ncbi_settings
+  in certificate (certificate): Path
+    <- subworkflows/nf-core/fastq_download_prefetch_fasterqdump_sratools/main.nf#FASTQ_DOWNLOAD_PREFETCH_FASTERQDUMP_SRATOOLS/:take:ch_dbgap_key[out] ? via ch_dbgap_key
+  out sra (sra): Channel<Tuple>
+  out versions_sratools (versions_sratools): Channel<Tuple>
+  out versions_curl (versions_curl): Channel<Tuple>
+subworkflows/nf-core/fastq_download_prefetch_fasterqdump_sratools/main.nf#FASTQ_DOWNLOAD_PREFETCH_FASTERQDUMP_SRATOOLS/SRATOOLS_FASTERQDUMP@1 call "SRATOOLS_FASTERQDUMP" callee=SRATOOLS_FASTERQDUMP:process:modelled:legacy @29:5
+  in $1 (tuple(meta, sra)): Tuple
+    <- subworkflows/nf-core/fastq_download_prefetch_fasterqdump_sratools/main.nf#FASTQ_DOWNLOAD_PREFETCH_FASTERQDUMP_SRATOOLS/SRATOOLS_PREFETCH@1[sra] Channel<Tuple> via SRATOOLS_PREFETCH.out.sra
+  in ncbi_settings (ncbi_settings): Path
+    <- subworkflows/nf-core/fastq_download_prefetch_fasterqdump_sratools/main.nf#FASTQ_DOWNLOAD_PREFETCH_FASTERQDUMP_SRATOOLS/CUSTOM_SRATOOLSNCBISETTINGS@1[ncbi_settings] Value<Path> via ch_ncbi_settings
+  in certificate (certificate): Path
+    <- subworkflows/nf-core/fastq_download_prefetch_fasterqdump_sratools/main.nf#FASTQ_DOWNLOAD_PREFETCH_FASTERQDUMP_SRATOOLS/:take:ch_dbgap_key[out] ? via ch_dbgap_key
+  out reads (reads): Channel<Tuple>
+  out versions_sratools (versions_sratools): Channel<Tuple>
+  out versions_pigz (versions_pigz): Channel<Tuple>
+subworkflows/nf-core/fastq_download_prefetch_fasterqdump_sratools/main.nf#FASTQ_DOWNLOAD_PREFETCH_FASTERQDUMP_SRATOOLS/:emit:reads emit "reads" @32:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_download_prefetch_fasterqdump_sratools/main.nf#FASTQ_DOWNLOAD_PREFETCH_FASTERQDUMP_SRATOOLS/SRATOOLS_FASTERQDUMP@1[reads] Channel<Tuple> via SRATOOLS_FASTERQDUMP.out.reads
+bound @19:5 ch_ncbi_settings

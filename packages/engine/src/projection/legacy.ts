@@ -12,32 +12,34 @@ import type {
   MethodCall,
   Range,
   TypeExpr,
+  Variable,
 } from "@nf-builder/lang-core";
 import { wrapFlow } from "./types";
 
 const unwrap = (e: Expression): Expression =>
   e.kind === "Parenthesized" ? unwrap(e.expression) : e;
 
-/** `E.set { v }` or `E.tap { v }` (or a pipe's `set { v }`, which has no receiver) with a closure that is exactly one bare variable. */
-export function setTarget(
-  call: MethodCall,
-): { readonly form: "set" | "tap"; readonly variable: string } | null {
+/**
+ * `set` and `tap` as nf-lang v26.10.7 reads them (VariableScopeVisitor L773-L786, ASTUtils `asDslBlock`, checked with
+ * `nextflow lint`): the call's only argument is a closure, in parentheses or trailing, whose body is exactly one bare
+ * variable; the closure's parameters are not looked at, so `set { v -> v }` declares `v` too. A pipe's `set { v }` has
+ * no receiver, so callers that need one check it. The one shared reading of this shape (F-107 and F-108).
+ */
+export function setTarget(call: MethodCall): {
+  readonly form: "set" | "tap";
+  readonly variable: Variable;
+} | null {
   if (call.method.kind !== "Identifier") return null;
   const form = call.method.name;
   if (form !== "set" && form !== "tap") return null;
-  const closures = [
-    ...call.closures,
-    ...call.args.filter((a) => a.kind === "Closure"),
-  ];
-  const [closure] = closures;
-  if (closures.length !== 1 || closure === undefined || closure.params !== null)
-    return null;
-  if (call.args.some((a) => a.kind !== "Closure")) return null;
+  const all = [...call.args, ...call.closures];
+  const [closure] = all;
+  if (all.length !== 1 || closure?.kind !== "Closure") return null;
   const [only] = closure.body;
   if (closure.body.length !== 1 || only?.kind !== "ExpressionStatement")
     return null;
   return only.expression.kind === "Variable"
-    ? { form, variable: only.expression.name }
+    ? { form, variable: only.expression }
     : null;
 }
 

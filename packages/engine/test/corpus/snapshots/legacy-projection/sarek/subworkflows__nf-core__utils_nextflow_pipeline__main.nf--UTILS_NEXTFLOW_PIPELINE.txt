@@ -1,0 +1,24 @@
+workflow subworkflows/nf-core/utils_nextflow_pipeline/main.nf#UTILS_NEXTFLOW_PIPELINE legacy
+statements 3, modelled 0
+subworkflows/nf-core/utils_nextflow_pipeline/main.nf#UTILS_NEXTFLOW_PIPELINE/:take:print_version take "print_version" @13:5
+  out out (out): -
+subworkflows/nf-core/utils_nextflow_pipeline/main.nf#UTILS_NEXTFLOW_PIPELINE/:take:dump_parameters take "dump_parameters" @14:5
+  out out (out): -
+subworkflows/nf-core/utils_nextflow_pipeline/main.nf#UTILS_NEXTFLOW_PIPELINE/:take:outdir take "outdir" @15:5
+  out out (out): -
+subworkflows/nf-core/utils_nextflow_pipeline/main.nf#UTILS_NEXTFLOW_PIPELINE/:take:check_conda_channels take "check_conda_channels" @16:5
+  out out (out): -
+subworkflows/nf-core/utils_nextflow_pipeline/main.nf#UTILS_NEXTFLOW_PIPELINE/:code@1 code "if (print_version) {" @23:5
+  in print_version (print_version): -
+    <- subworkflows/nf-core/utils_nextflow_pipeline/main.nf#UTILS_NEXTFLOW_PIPELINE/:take:print_version[out] ? via print_version indirect
+subworkflows/nf-core/utils_nextflow_pipeline/main.nf#UTILS_NEXTFLOW_PIPELINE/:code@2 code "if (dump_parameters && outdir) {" @31:5
+  in dump_parameters (dump_parameters): -
+    <- subworkflows/nf-core/utils_nextflow_pipeline/main.nf#UTILS_NEXTFLOW_PIPELINE/:take:dump_parameters[out] ? via dump_parameters indirect
+  in outdir (outdir): -
+    <- subworkflows/nf-core/utils_nextflow_pipeline/main.nf#UTILS_NEXTFLOW_PIPELINE/:take:outdir[out] ? via outdir indirect
+subworkflows/nf-core/utils_nextflow_pipeline/main.nf#UTILS_NEXTFLOW_PIPELINE/:code@3 code "if (check_conda_channels) {" @38:5
+  in check_conda_channels (check_conda_channels): -
+    <- subworkflows/nf-core/utils_nextflow_pipeline/main.nf#UTILS_NEXTFLOW_PIPELINE/:take:check_conda_channels[out] ? via check_conda_channels indirect
+subworkflows/nf-core/utils_nextflow_pipeline/main.nf#UTILS_NEXTFLOW_PIPELINE/:emit:dummy_emit emit "dummy_emit" @43:5
+  in in (in): -
+    = true : Boolean

@@ -79,13 +79,23 @@ workflow {
     ).toEqual(["map"]);
     expect(into(p, k("end"), "in")).toEqual(["mid[out]"]);
     expect(p.statements.every((s) => s.modelled)).toBe(true);
-    // a closure that is not exactly one variable is not an assignment
+    // nf-lang's shape (checked with nextflow lint): the closure's only statement is a bare variable, with or without
+    // parameters, and the closure may be in parentheses; anything else is not an assignment
     const q = await projectMain(`workflow {
     ch = channel.of(1)
+    ch.set({ a })
     ch.set { v -> v }
+    ch.set { 1 }
+    ch.set { w; x }
 }
 `);
-    expect(q.nodes.map((n) => n.kind)).toEqual(["factory", "code"]);
+    expect(q.statements.map((s) => [s.binds, s.modelled])).toEqual([
+      [["ch"], true],
+      [["a"], true],
+      [["v"], true],
+      [[], false],
+      [[], false],
+    ]);
   });
 
   it("F-107 AR-14: legacy-only operators are chain steps with known false and the documented result kind, and unknown channel factories are factories; typed workflows model neither", async () => {

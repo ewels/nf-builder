@@ -1,4 +1,5 @@
 workflow main.nf# legacy
+statements 23, modelled 9
 main.nf#/:params params "params" @40:1
   out reads (reads): -
   out threshold (threshold): -

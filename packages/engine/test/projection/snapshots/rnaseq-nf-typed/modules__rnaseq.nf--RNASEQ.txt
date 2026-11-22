@@ -1,4 +1,5 @@
 workflow modules/rnaseq.nf#RNASEQ typed
+statements 4, modelled 4
 modules/rnaseq.nf#RNASEQ/:take:read_pairs_ch take "read_pairs_ch" @10:5
   out out (out): Channel<Sample>
 modules/rnaseq.nf#RNASEQ/:take:transcriptome take "transcriptome" @11:5

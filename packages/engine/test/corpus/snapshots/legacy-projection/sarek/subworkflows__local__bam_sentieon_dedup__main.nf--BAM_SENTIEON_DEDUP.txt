@@ -1,0 +1,101 @@
+workflow subworkflows/local/bam_sentieon_dedup/main.nf#BAM_SENTIEON_DEDUP legacy
+statements 11, modelled 11
+subworkflows/local/bam_sentieon_dedup/main.nf#BAM_SENTIEON_DEDUP/:params params "params" @7:1
+  out save_output_as_bam (save_output_as_bam): -
+subworkflows/local/bam_sentieon_dedup/main.nf#BAM_SENTIEON_DEDUP/:take:bam take "bam" @9:5
+  out out (out): -
+subworkflows/local/bam_sentieon_dedup/main.nf#BAM_SENTIEON_DEDUP/:take:bai take "bai" @10:5
+  out out (out): -
+subworkflows/local/bam_sentieon_dedup/main.nf#BAM_SENTIEON_DEDUP/:take:fasta take "fasta" @11:5
+  out out (out): -
+subworkflows/local/bam_sentieon_dedup/main.nf#BAM_SENTIEON_DEDUP/:take:fasta_fai take "fasta_fai" @12:5
+  out out (out): -
+subworkflows/local/bam_sentieon_dedup/main.nf#BAM_SENTIEON_DEDUP/:take:intervals_bed_combined take "intervals_bed_combined" @13:5
+  out out (out): -
+subworkflows/local/bam_sentieon_dedup/main.nf#BAM_SENTIEON_DEDUP/reports factory "channel.empty" factory=channel.empty @16:16
+  out out (out): Channel<?>
+subworkflows/local/bam_sentieon_dedup/main.nf#BAM_SENTIEON_DEDUP/bam chain ".map" steps=map @18:11
+  in in (in): -
+    <- subworkflows/local/bam_sentieon_dedup/main.nf#BAM_SENTIEON_DEDUP/:take:bam[out] ? via bam
+  out out (out): ?
+subworkflows/local/bam_sentieon_dedup/main.nf#BAM_SENTIEON_DEDUP/bai chain ".map" steps=map @19:11
+  in in (in): -
+    <- subworkflows/local/bam_sentieon_dedup/main.nf#BAM_SENTIEON_DEDUP/:take:bai[out] ? via bai
+  out out (out): ?
+subworkflows/local/bam_sentieon_dedup/main.nf#BAM_SENTIEON_DEDUP/bam_bai chain ".join" steps=join @20:15
+  in in (in): -
+    <- subworkflows/local/bam_sentieon_dedup/main.nf#BAM_SENTIEON_DEDUP/bam[out] ? via bam
+  in 1:1 (join(right)): -
+    <- subworkflows/local/bam_sentieon_dedup/main.nf#BAM_SENTIEON_DEDUP/bai[out] ? via bai
+  out out (out): Channel<Record>
+subworkflows/local/bam_sentieon_dedup/main.nf#BAM_SENTIEON_DEDUP/SENTIEON_DEDUP@1 call "SENTIEON_DEDUP" callee=SENTIEON_DEDUP:process:modelled:legacy @21:5
+  in $1 (tuple(meta, bam, bai)): Tuple
+    <- subworkflows/local/bam_sentieon_dedup/main.nf#BAM_SENTIEON_DEDUP/bam_bai[out] Channel<Record> via bam_bai
+  in $2 (tuple(meta2, fasta)): Tuple
+    <- subworkflows/local/bam_sentieon_dedup/main.nf#BAM_SENTIEON_DEDUP/:take:fasta[out] ? via fasta
+  in $3 (tuple(meta3, fasta_fai)): Tuple
+    <- subworkflows/local/bam_sentieon_dedup/main.nf#BAM_SENTIEON_DEDUP/:take:fasta_fai[out] ? via fasta_fai
+  out cram (cram): Channel<Tuple>
+  out crai (crai): Channel<Tuple>
+  out bam (bam): Channel<Tuple>
+  out bai (bai): Channel<Tuple>
+  out score (score): Channel<Tuple>
+  out metrics (metrics): Channel<Tuple>
+  out metrics_multiqc_tsv (metrics_multiqc_tsv): Channel<Tuple>
+  out versions_sentieon (versions_sentieon): Channel<Tuple>
+subworkflows/local/bam_sentieon_dedup/main.nf#BAM_SENTIEON_DEDUP/alignment chain ".join" steps=join @28:11
+  guards then of params.save_output_as_bam
+  in in (in): -
+    <- subworkflows/local/bam_sentieon_dedup/main.nf#BAM_SENTIEON_DEDUP/SENTIEON_DEDUP@1[bam] Channel<Tuple> via SENTIEON_DEDUP.out.bam
+  in 1:1 (join(right)): -
+    <- subworkflows/local/bam_sentieon_dedup/main.nf#BAM_SENTIEON_DEDUP/SENTIEON_DEDUP@1[bai] Channel<Tuple> via SENTIEON_DEDUP.out.bai
+  out out (out): Channel<Record>
+subworkflows/local/bam_sentieon_dedup/main.nf#BAM_SENTIEON_DEDUP/alignment~2 chain ".join" steps=join @29:11
+  guards else of params.save_output_as_bam
+  in in (in): -
+    <- subworkflows/local/bam_sentieon_dedup/main.nf#BAM_SENTIEON_DEDUP/SENTIEON_DEDUP@1[cram] Channel<Tuple> via SENTIEON_DEDUP.out.cram
+  in 1:1 (join(right)): -
+    <- subworkflows/local/bam_sentieon_dedup/main.nf#BAM_SENTIEON_DEDUP/SENTIEON_DEDUP@1[crai] Channel<Tuple> via SENTIEON_DEDUP.out.crai
+  out out (out): Channel<Record>
+subworkflows/local/bam_sentieon_dedup/main.nf#BAM_SENTIEON_DEDUP/CRAM_QC_MOSDEPTH_SAMTOOLS@1 call "CRAM_QC_MOSDEPTH_SAMTOOLS" callee=CRAM_QC_MOSDEPTH_SAMTOOLS:workflow:modelled:legacy @32:5
+  in cram (cram): -
+    <- subworkflows/local/bam_sentieon_dedup/main.nf#BAM_SENTIEON_DEDUP/alignment[out] Channel<Record> via alignment indirect
+    <- subworkflows/local/bam_sentieon_dedup/main.nf#BAM_SENTIEON_DEDUP/alignment~2[out] Channel<Record> via alignment indirect
+  in fasta (fasta): -
+    <- subworkflows/local/bam_sentieon_dedup/main.nf#BAM_SENTIEON_DEDUP/:take:fasta[out] ? via fasta
+  in fasta_fai (fasta_fai): -
+    <- subworkflows/local/bam_sentieon_dedup/main.nf#BAM_SENTIEON_DEDUP/:take:fasta_fai[out] ? via fasta_fai
+  in intervals (intervals): -
+    <- subworkflows/local/bam_sentieon_dedup/main.nf#BAM_SENTIEON_DEDUP/:take:intervals_bed_combined[out] ? via intervals_bed_combined
+  out reports (reports): Channel<?>
+subworkflows/local/bam_sentieon_dedup/main.nf#BAM_SENTIEON_DEDUP/reports~2 chain ".mix" steps=mix @35:15
+  in in (in): -
+    <- subworkflows/local/bam_sentieon_dedup/main.nf#BAM_SENTIEON_DEDUP/reports[out] Channel<?> via reports
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/bam_sentieon_dedup/main.nf#BAM_SENTIEON_DEDUP/SENTIEON_DEDUP@1[metrics] Channel<Tuple> via SENTIEON_DEDUP.out.metrics
+  out out (out): Channel<?>
+subworkflows/local/bam_sentieon_dedup/main.nf#BAM_SENTIEON_DEDUP/reports~3 chain ".mix" steps=mix @36:15
+  in in (in): -
+    <- subworkflows/local/bam_sentieon_dedup/main.nf#BAM_SENTIEON_DEDUP/reports~2[out] Channel<?> via reports
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/bam_sentieon_dedup/main.nf#BAM_SENTIEON_DEDUP/SENTIEON_DEDUP@1[metrics_multiqc_tsv] Channel<Tuple> via SENTIEON_DEDUP.out.metrics_multiqc_tsv
+  out out (out): Channel<?>
+subworkflows/local/bam_sentieon_dedup/main.nf#BAM_SENTIEON_DEDUP/reports~4 chain ".mix" steps=mix @37:15
+  in in (in): -
+    <- subworkflows/local/bam_sentieon_dedup/main.nf#BAM_SENTIEON_DEDUP/reports~3[out] Channel<?> via reports
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/bam_sentieon_dedup/main.nf#BAM_SENTIEON_DEDUP/SENTIEON_DEDUP@1[score] Channel<Tuple> via SENTIEON_DEDUP.out.score
+  out out (out): Channel<?>
+subworkflows/local/bam_sentieon_dedup/main.nf#BAM_SENTIEON_DEDUP/reports~5 chain ".mix" steps=mix @38:15
+  in in (in): -
+    <- subworkflows/local/bam_sentieon_dedup/main.nf#BAM_SENTIEON_DEDUP/reports~4[out] Channel<?> via reports
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/bam_sentieon_dedup/main.nf#BAM_SENTIEON_DEDUP/CRAM_QC_MOSDEPTH_SAMTOOLS@1[reports] Channel<?> via CRAM_QC_MOSDEPTH_SAMTOOLS.out.reports
+  out out (out): Channel<?>
+subworkflows/local/bam_sentieon_dedup/main.nf#BAM_SENTIEON_DEDUP/:emit:alignment emit "alignment" @41:5
+  in in (in): -
+    <- subworkflows/local/bam_sentieon_dedup/main.nf#BAM_SENTIEON_DEDUP/alignment[out] Channel<Record> via alignment indirect
+    <- subworkflows/local/bam_sentieon_dedup/main.nf#BAM_SENTIEON_DEDUP/alignment~2[out] Channel<Record> via alignment indirect
+subworkflows/local/bam_sentieon_dedup/main.nf#BAM_SENTIEON_DEDUP/:emit:reports emit "reports" @42:5
+  in in (in): -
+    <- subworkflows/local/bam_sentieon_dedup/main.nf#BAM_SENTIEON_DEDUP/reports~5[out] Channel<?> via reports

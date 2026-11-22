@@ -1,0 +1,12 @@
+workflow subworkflows/nf-core/utils_nfcore_pipeline/main.nf#UTILS_NFCORE_PIPELINE legacy
+statements 2, modelled 0
+subworkflows/nf-core/utils_nfcore_pipeline/main.nf#UTILS_NFCORE_PIPELINE/:take:nextflow_cli_args take "nextflow_cli_args" @13:5
+  out out (out): -
+subworkflows/nf-core/utils_nfcore_pipeline/main.nf#UTILS_NFCORE_PIPELINE/valid_config code "valid_config = checkConfigProvided()" @16:5
+  out valid_config (valid_config): -
+subworkflows/nf-core/utils_nfcore_pipeline/main.nf#UTILS_NFCORE_PIPELINE/:code@1 code "checkProfileProvided(nextflow_cli_args)" @17:5
+  in nextflow_cli_args (nextflow_cli_args): -
+    <- subworkflows/nf-core/utils_nfcore_pipeline/main.nf#UTILS_NFCORE_PIPELINE/:take:nextflow_cli_args[out] ? via nextflow_cli_args indirect
+subworkflows/nf-core/utils_nfcore_pipeline/main.nf#UTILS_NFCORE_PIPELINE/:emit:valid_config emit "valid_config" @20:5
+  in in (in): -
+    <- subworkflows/nf-core/utils_nfcore_pipeline/main.nf#UTILS_NFCORE_PIPELINE/valid_config[valid_config] ? via valid_config

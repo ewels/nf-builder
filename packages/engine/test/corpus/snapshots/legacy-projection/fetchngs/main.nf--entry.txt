@@ -1,0 +1,50 @@
+workflow main.nf# legacy
+statements 3, modelled 3
+main.nf#/:params params "params" @57:1
+  out version (version): -
+  out validate_params (validate_params): -
+  out monochrome_logs (monochrome_logs): -
+  out outdir (outdir): -
+  out input (input): -
+  out ena_metadata_fields (ena_metadata_fields): -
+  out help (help): -
+  out help_full (help_full): -
+  out show_hidden (show_hidden): -
+  out email (email): -
+  out email_on_fail (email_on_fail): -
+  out plaintext_email (plaintext_email): -
+main.nf#/PIPELINE_INITIALISATION@1 call "PIPELINE_INITIALISATION" callee=PIPELINE_INITIALISATION:workflow:modelled:legacy @61:5
+  in version (version): -
+    <- main.nf#/:params[version] ? via params.version
+  in validate_params (validate_params): -
+    <- main.nf#/:params[validate_params] ? via params.validate_params
+  in monochrome_logs (monochrome_logs): -
+    <- main.nf#/:params[monochrome_logs] ? via params.monochrome_logs
+  in nextflow_cli_args (nextflow_cli_args): -
+  in outdir (outdir): -
+    <- main.nf#/:params[outdir] ? via params.outdir
+  in input (input): -
+    <- main.nf#/:params[input] ? via params.input
+  in ena_metadata_fields (ena_metadata_fields): -
+    <- main.nf#/:params[ena_metadata_fields] ? via params.ena_metadata_fields
+  in help (help): -
+    <- main.nf#/:params[help] ? via params.help
+  in help_full (help_full): -
+    <- main.nf#/:params[help_full] ? via params.help_full
+  in show_hidden (show_hidden): -
+    <- main.nf#/:params[show_hidden] ? via params.show_hidden
+  out ids (ids): Channel<?>
+main.nf#/NFCORE_FETCHNGS@1 call "NFCORE_FETCHNGS" callee=NFCORE_FETCHNGS:workflow:modelled:legacy @77:5
+  in ids (ids): -
+    <- main.nf#/PIPELINE_INITIALISATION@1[ids] Channel<?> via PIPELINE_INITIALISATION.out.ids
+main.nf#/PIPELINE_COMPLETION@1 call "PIPELINE_COMPLETION" callee=PIPELINE_COMPLETION:workflow:modelled:legacy @82:5
+  in email (email): -
+    <- main.nf#/:params[email] ? via params.email
+  in email_on_fail (email_on_fail): -
+    <- main.nf#/:params[email_on_fail] ? via params.email_on_fail
+  in plaintext_email (plaintext_email): -
+    <- main.nf#/:params[plaintext_email] ? via params.plaintext_email
+  in outdir (outdir): -
+    <- main.nf#/:params[outdir] ? via params.outdir
+  in monochrome_logs (monochrome_logs): -
+    <- main.nf#/:params[monochrome_logs] ? via params.monochrome_logs

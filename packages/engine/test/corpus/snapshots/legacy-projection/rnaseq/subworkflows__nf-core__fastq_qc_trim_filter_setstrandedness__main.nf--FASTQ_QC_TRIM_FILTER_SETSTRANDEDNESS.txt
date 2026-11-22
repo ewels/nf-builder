@@ -1,0 +1,681 @@
+workflow subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS legacy
+statements 97, modelled 96
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:take:ch_reads take "ch_reads" @93:5
+  out out (out): -
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:take:ch_fasta take "ch_fasta" @94:5
+  out out (out): -
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:take:ch_transcript_fasta take "ch_transcript_fasta" @95:5
+  out out (out): -
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:take:ch_gtf take "ch_gtf" @96:5
+  out out (out): -
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:take:ch_salmon_index take "ch_salmon_index" @97:5
+  out out (out): -
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:take:ch_sortmerna_index take "ch_sortmerna_index" @98:5
+  out out (out): -
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:take:ch_bowtie2_index take "ch_bowtie2_index" @99:5
+  out out (out): -
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:take:ch_bbsplit_index take "ch_bbsplit_index" @100:5
+  out out (out): -
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:take:ch_rrna_fastas take "ch_rrna_fastas" @101:5
+  out out (out): -
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:take:skip_bbsplit take "skip_bbsplit" @104:5
+  out out (out): -
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:take:skip_fastqc take "skip_fastqc" @105:5
+  out out (out): -
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:take:skip_trimming take "skip_trimming" @106:5
+  out out (out): -
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:take:skip_umi_extract take "skip_umi_extract" @107:5
+  out out (out): -
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:take:skip_linting take "skip_linting" @108:5
+  out out (out): -
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:take:make_salmon_index take "make_salmon_index" @111:5
+  out out (out): -
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:take:make_sortmerna_index take "make_sortmerna_index" @112:5
+  out out (out): -
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:take:make_bowtie2_index take "make_bowtie2_index" @113:5
+  out out (out): -
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:take:trimmer take "trimmer" @116:5
+  out out (out): -
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:take:min_trimmed_reads take "min_trimmed_reads" @117:5
+  out out (out): -
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:take:save_trimmed take "save_trimmed" @118:5
+  out out (out): -
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:take:fastp_merge take "fastp_merge" @119:5
+  out out (out): -
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:take:remove_ribo_rna take "remove_ribo_rna" @122:5
+  out out (out): -
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:take:ribo_removal_tool take "ribo_removal_tool" @123:5
+  out out (out): -
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:take:with_umi take "with_umi" @126:5
+  out out (out): -
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:take:umi_discard_read take "umi_discard_read" @127:5
+  out out (out): -
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:take:save_merged_fastq take "save_merged_fastq" @130:5
+  out out (out): -
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:take:stranded_threshold take "stranded_threshold" @133:5
+  out out (out): -
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:take:unstranded_threshold take "unstranded_threshold" @134:5
+  out out (out): -
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_filtered_reads factory "channel.empty" factory=channel.empty @138:25
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_trim_read_count factory "channel.empty" factory=channel.empty @139:26
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_trim_reads_merged factory "channel.empty" factory=channel.empty @140:28
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_multiqc_files factory "channel.empty" factory=channel.empty @141:24
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_lint_log_raw factory "channel.empty" factory=channel.empty @142:23
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_lint_log_trimmed factory "channel.empty" factory=channel.empty @143:27
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_lint_log_bbsplit factory "channel.empty" factory=channel.empty @144:27
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_lint_log_ribo factory "channel.empty" factory=channel.empty @145:24
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_fastqc_raw_html factory "channel.empty" factory=channel.empty @148:29
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_fastqc_raw_zip factory "channel.empty" factory=channel.empty @149:29
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_fastqc_trim_html factory "channel.empty" factory=channel.empty @150:29
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_fastqc_trim_zip factory "channel.empty" factory=channel.empty @151:29
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_trim_html factory "channel.empty" factory=channel.empty @152:29
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_trim_zip factory "channel.empty" factory=channel.empty @153:29
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_trim_log factory "channel.empty" factory=channel.empty @154:29
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_trim_json factory "channel.empty" factory=channel.empty @155:29
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_trim_unpaired factory "channel.empty" factory=channel.empty @156:29
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_umi_log factory "channel.empty" factory=channel.empty @157:29
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_umi_reads factory "channel.empty" factory=channel.empty @158:29
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_bbsplit_stats factory "channel.empty" factory=channel.empty @159:29
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_sortmerna_log factory "channel.empty" factory=channel.empty @160:29
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_ribodetector_log factory "channel.empty" factory=channel.empty @161:29
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_seqkit_stats factory "channel.empty" factory=channel.empty @162:29
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_bowtie2_log factory "channel.empty" factory=channel.empty @163:29
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_seqkit_prefixed factory "channel.empty" factory=channel.empty @164:29
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_seqkit_converted factory "channel.empty" factory=channel.empty @165:29
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_fastqc_filtered_html factory "channel.empty" factory=channel.empty @166:31
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_fastqc_filtered_zip factory "channel.empty" factory=channel.empty @167:31
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_fastq chain ".branch" steps=branch @169:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:take:ch_reads[out] ? via ch_reads
+  out out (out): Record
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/CAT_FASTQ@1 call "CAT_FASTQ" callee=CAT_FASTQ:process:modelled:legacy @181:5
+  in $1 (tuple(meta, reads)): Tuple
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_fastq[out] Record via ch_fastq indirect
+  out reads (reads): Channel<Tuple>
+  out versions_cat (versions_cat): Channel<Tuple>
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_filtered_reads~2 chain ".mix" steps=mix @181:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/CAT_FASTQ@1[reads] Channel<Tuple>
+  in 1:1 (mix(other)): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_fastq[out] Record via ch_fastq indirect
+  out out (out): Channel<Tuple>
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FQ_LINT@1 call "FQ_LINT" callee=FQ_LINT:process:modelled:legacy @190:9
+  guards then of !skip_linting
+  in $1 (tuple(meta, fastq)): Tuple
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_filtered_reads~2[out] Channel<Tuple> via ch_filtered_reads
+  out lint (lint): Channel<Tuple>
+  out versions_fq (versions_fq): Channel<Tuple>
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/.map@1 chain ".map" steps=map @194:52
+  guards then of !skip_linting
+  in in (in): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FQ_LINT@1[lint] Channel<Tuple> via FQ_LINT.out.lint
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_filtered_reads~3 chain ".join" steps=join @194:29
+  guards then of !skip_linting
+  in in (in): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_filtered_reads~2[out] Channel<Tuple> via ch_filtered_reads
+  in 1:1 (join(1)): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/.map@1[out] Channel<?>
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_FASTQC_UMITOOLS_TRIMGALORE@1 call "FASTQ_FASTQC_UMITOOLS_TRIMGALORE" callee=FASTQ_FASTQC_UMITOOLS_TRIMGALORE:workflow:modelled:legacy @203:9
+  guards then of trimmer == 'trimgalore'
+  in reads (reads): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_filtered_reads~2[out] Channel<Tuple> via ch_filtered_reads indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_filtered_reads~3[out] Channel<?> via ch_filtered_reads indirect
+  in skip_fastqc (skip_fastqc): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:take:skip_fastqc[out] ? via skip_fastqc
+  in with_umi (with_umi): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:take:with_umi[out] ? via with_umi
+  in skip_umi_extract (skip_umi_extract): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:take:skip_umi_extract[out] ? via skip_umi_extract
+  in skip_trimming (skip_trimming): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:take:skip_trimming[out] ? via skip_trimming
+  in umi_discard_read (umi_discard_read): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:take:umi_discard_read[out] ? via umi_discard_read
+  in min_trimmed_reads (min_trimmed_reads): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:take:min_trimmed_reads[out] ? via min_trimmed_reads
+  out reads (reads): ?
+  out fastqc_html (fastqc_html): ?
+  out fastqc_zip (fastqc_zip): ?
+  out umi_log (umi_log): ?
+  out umi_reads (umi_reads): ?
+  out trim_unpaired (trim_unpaired): ?
+  out trim_html (trim_html): ?
+  out trim_zip (trim_zip): ?
+  out trim_log (trim_log): ?
+  out trim_json (trim_json): ?
+  out trim_read_count (trim_read_count): ?
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_multiqc_files~2 chain ".mix.mix.mix.mix.mix" steps=mix,mix,mix,mix,mix @226:28
+  guards then of trimmer == 'trimgalore'
+  in in (in): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_FASTQC_UMITOOLS_TRIMGALORE@1[fastqc_zip] ? via FASTQ_FASTQC_UMITOOLS_TRIMGALORE.out.fastqc_zip
+  in 1:1 (mix(other)): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_FASTQC_UMITOOLS_TRIMGALORE@1[trim_zip] ? via FASTQ_FASTQC_UMITOOLS_TRIMGALORE.out.trim_zip
+  in 2:1 (mix(other)): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_FASTQC_UMITOOLS_TRIMGALORE@1[trim_log] ? via FASTQ_FASTQC_UMITOOLS_TRIMGALORE.out.trim_log
+  in 3:1 (mix(other)): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_FASTQC_UMITOOLS_TRIMGALORE@1[trim_json] ? via FASTQ_FASTQC_UMITOOLS_TRIMGALORE.out.trim_json
+  in 4:1 (mix(other)): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_FASTQC_UMITOOLS_TRIMGALORE@1[umi_log] ? via FASTQ_FASTQC_UMITOOLS_TRIMGALORE.out.umi_log
+  in 5:1 (mix(other)): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_multiqc_files[out] Channel<?> via ch_multiqc_files
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/.map@2 chain ".map" steps=map @239:13
+  guards then of trimmer == 'fastp'
+  in in (in): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_filtered_reads~2[out] Channel<Tuple> via ch_filtered_reads indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_filtered_reads~3[out] Channel<?> via ch_filtered_reads indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_FASTQC_UMITOOLS_TRIMGALORE@1[reads] ? via ch_filtered_reads indirect
+  out out (out): ?
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_FASTQC_UMITOOLS_FASTP@1 call "FASTQ_FASTQC_UMITOOLS_FASTP" callee=FASTQ_FASTQC_UMITOOLS_FASTP:workflow:modelled:legacy @238:9
+  guards then of trimmer == 'fastp'
+  in reads (reads): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/.map@2[out] ?
+  in skip_fastqc (skip_fastqc): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:take:skip_fastqc[out] ? via skip_fastqc
+  in with_umi (with_umi): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:take:with_umi[out] ? via with_umi
+  in skip_umi_extract (skip_umi_extract): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:take:skip_umi_extract[out] ? via skip_umi_extract
+  in umi_discard_read (umi_discard_read): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:take:umi_discard_read[out] ? via umi_discard_read
+  in skip_trimming (skip_trimming): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:take:skip_trimming[out] ? via skip_trimming
+  in save_trimmed_fail (save_trimmed_fail): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:take:save_trimmed[out] ? via save_trimmed
+  in save_merged (save_merged): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:take:fastp_merge[out] ? via fastp_merge
+  in min_trimmed_reads (min_trimmed_reads): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:take:min_trimmed_reads[out] ? via min_trimmed_reads
+  out reads (reads): ?
+  out fastqc_raw_html (fastqc_raw_html): ?
+  out fastqc_raw_zip (fastqc_raw_zip): ?
+  out umi_log (umi_log): ?
+  out umi_reads (umi_reads): ?
+  out adapter_seq (adapter_seq): ?
+  out trim_json (trim_json): ?
+  out trim_html (trim_html): ?
+  out trim_log (trim_log): ?
+  out trim_reads_fail (trim_reads_fail): ?
+  out trim_reads_merged (trim_reads_merged): ?
+  out trim_read_count (trim_read_count): ?
+  out fastqc_trim_html (fastqc_trim_html): ?
+  out fastqc_trim_zip (fastqc_trim_zip): ?
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_multiqc_files~3 chain ".mix.mix.mix.mix" steps=mix,mix,mix,mix @264:28
+  guards then of trimmer == 'fastp'
+  in in (in): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_FASTQC_UMITOOLS_FASTP@1[fastqc_raw_zip] ? via FASTQ_FASTQC_UMITOOLS_FASTP.out.fastqc_raw_zip
+  in 1:1 (mix(other)): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_FASTQC_UMITOOLS_FASTP@1[fastqc_trim_zip] ? via FASTQ_FASTQC_UMITOOLS_FASTP.out.fastqc_trim_zip
+  in 2:1 (mix(other)): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_FASTQC_UMITOOLS_FASTP@1[trim_json] ? via FASTQ_FASTQC_UMITOOLS_FASTP.out.trim_json
+  in 3:1 (mix(other)): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_FASTQC_UMITOOLS_FASTP@1[umi_log] ? via FASTQ_FASTQC_UMITOOLS_FASTP.out.umi_log
+  in 4:1 (mix(other)): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_multiqc_files[out] Channel<?> via ch_multiqc_files indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_multiqc_files~2[out] Channel<?> via ch_multiqc_files indirect
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/pass_trimmed_reads code "def pass_trimmed_reads = [:]" @271:5
+  out pass_trimmed_reads (pass_trimmed_reads): Map
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_fail_trimming_multiqc chain ".map.collect.map" steps=map,collect,map @277:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_trim_read_count[out] Channel<?> via ch_trim_read_count indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_FASTQC_UMITOOLS_TRIMGALORE@1[trim_read_count] ? via ch_trim_read_count indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_FASTQC_UMITOOLS_FASTP@1[trim_read_count] ? via ch_trim_read_count indirect
+  out out (out): Value<?>
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_multiqc_files~4 chain ".mix" steps=mix @292:24
+  in in (in): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_multiqc_files[out] Channel<?> via ch_multiqc_files indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_multiqc_files~2[out] Channel<?> via ch_multiqc_files indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_multiqc_files~3[out] Channel<?> via ch_multiqc_files indirect
+  in 1:1 (mix(other)): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_fail_trimming_multiqc[out] Value<?> via ch_fail_trimming_multiqc indirect
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FQ_LINT_AFTER_TRIMMING@1 call "FQ_LINT_AFTER_TRIMMING" callee=FQ_LINT_AFTER_TRIMMING:process:modelled:legacy @297:9
+  guards then of (!skip_linting) && (!skip_trimming)
+  in $1 (tuple(meta, fastq)): Tuple
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_filtered_reads~2[out] Channel<Tuple> via ch_filtered_reads indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_filtered_reads~3[out] Channel<?> via ch_filtered_reads indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_FASTQC_UMITOOLS_TRIMGALORE@1[reads] ? via ch_filtered_reads indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_FASTQC_UMITOOLS_FASTP@1[reads] ? via ch_filtered_reads indirect
+  out lint (lint): Channel<Tuple>
+  out versions_fq (versions_fq): Channel<Tuple>
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/.map@3 chain ".map" steps=map @301:52
+  guards then of (!skip_linting) && (!skip_trimming)
+  in in (in): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FQ_LINT_AFTER_TRIMMING@1[lint] Channel<Tuple> via FQ_LINT_AFTER_TRIMMING.out.lint
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_filtered_reads~4 chain ".join" steps=join @301:29
+  guards then of (!skip_linting) && (!skip_trimming)
+  in in (in): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_filtered_reads~2[out] Channel<Tuple> via ch_filtered_reads indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_filtered_reads~3[out] Channel<?> via ch_filtered_reads indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_FASTQC_UMITOOLS_TRIMGALORE@1[reads] ? via ch_filtered_reads indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_FASTQC_UMITOOLS_FASTP@1[reads] ? via ch_filtered_reads indirect
+  in 1:1 (join(1)): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/.map@3[out] Channel<?>
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/BBMAP_BBSPLIT@1 call "BBMAP_BBSPLIT" callee=BBMAP_BBSPLIT:process:modelled:legacy @310:9
+  guards then of !skip_bbsplit
+  in $1 (tuple(meta, reads)): Tuple
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_filtered_reads~2[out] Channel<Tuple> via ch_filtered_reads indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_filtered_reads~3[out] Channel<?> via ch_filtered_reads indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_FASTQC_UMITOOLS_TRIMGALORE@1[reads] ? via ch_filtered_reads indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_FASTQC_UMITOOLS_FASTP@1[reads] ? via ch_filtered_reads indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_filtered_reads~4[out] Channel<?> via ch_filtered_reads indirect
+  in index (index): Path
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:take:ch_bbsplit_index[out] ? via ch_bbsplit_index
+  in primary_ref (primary_ref): Path
+    = [] : List
+  in $4 (tuple(other_ref_names, other_ref_paths)): Tuple
+    = [[], []] : List
+  in only_build_index (only_build_index): -
+    = false : Boolean
+  out index (index): Channel<Path>
+  out primary_fastq (primary_fastq): Channel<Tuple>
+  out all_fastq (all_fastq): Channel<Tuple>
+  out stats (stats): Channel<Tuple>
+  out log (log): Channel<Tuple>
+  out versions_bbmap (versions_bbmap): Channel<Tuple>
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_multiqc_files~5 chain ".mix" steps=mix @321:28
+  guards then of !skip_bbsplit
+  in in (in): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_multiqc_files~4[out] Channel<?> via ch_multiqc_files
+  in 1:1 (mix(other)): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/BBMAP_BBSPLIT@1[stats] Channel<Tuple> via BBMAP_BBSPLIT.out.stats
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FQ_LINT_AFTER_BBSPLIT@1 call "FQ_LINT_AFTER_BBSPLIT" callee=FQ_LINT_AFTER_BBSPLIT:process:modelled:legacy @324:13
+  guards then of !skip_bbsplit; then of !skip_linting
+  in $1 (tuple(meta, fastq)): Tuple
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/BBMAP_BBSPLIT@1[primary_fastq] Channel<Tuple> via ch_filtered_reads
+  out lint (lint): Channel<Tuple>
+  out versions_fq (versions_fq): Channel<Tuple>
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/.map@4 chain ".map" steps=map @328:56
+  guards then of !skip_bbsplit; then of !skip_linting
+  in in (in): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FQ_LINT_AFTER_BBSPLIT@1[lint] Channel<Tuple> via FQ_LINT_AFTER_BBSPLIT.out.lint
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_filtered_reads~5 chain ".join" steps=join @328:33
+  guards then of !skip_bbsplit; then of !skip_linting
+  in in (in): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/BBMAP_BBSPLIT@1[primary_fastq] Channel<Tuple> via ch_filtered_reads
+  in 1:1 (join(1)): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/.map@4[out] Channel<?>
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_REMOVE_RRNA@1 call "FASTQ_REMOVE_RRNA" callee=FASTQ_REMOVE_RRNA:workflow:modelled:legacy @336:9
+  guards then of remove_ribo_rna
+  in ch_reads (ch_reads): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_filtered_reads~2[out] Channel<Tuple> via ch_filtered_reads indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_filtered_reads~3[out] Channel<?> via ch_filtered_reads indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_FASTQC_UMITOOLS_TRIMGALORE@1[reads] ? via ch_filtered_reads indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_FASTQC_UMITOOLS_FASTP@1[reads] ? via ch_filtered_reads indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_filtered_reads~4[out] Channel<?> via ch_filtered_reads indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/BBMAP_BBSPLIT@1[primary_fastq] Channel<Tuple> via ch_filtered_reads indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_filtered_reads~5[out] Channel<?> via ch_filtered_reads indirect
+  in ch_rrna_fastas (ch_rrna_fastas): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:take:ch_rrna_fastas[out] ? via ch_rrna_fastas
+  in ch_sortmerna_index (ch_sortmerna_index): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:take:ch_sortmerna_index[out] ? via ch_sortmerna_index
+  in ch_bowtie2_index (ch_bowtie2_index): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:take:ch_bowtie2_index[out] ? via ch_bowtie2_index
+  in ribo_removal_tool (ribo_removal_tool): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:take:ribo_removal_tool[out] ? via ribo_removal_tool
+  in make_sortmerna_index (make_sortmerna_index): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:take:make_sortmerna_index[out] ? via make_sortmerna_index
+  in make_bowtie2_index (make_bowtie2_index): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:take:make_bowtie2_index[out] ? via make_bowtie2_index
+  out reads (reads): ?
+  out multiqc_files (multiqc_files): ?
+  out sortmerna_log (sortmerna_log): ?
+  out ribodetector_log (ribodetector_log): ?
+  out seqkit_stats (seqkit_stats): ?
+  out bowtie2_log (bowtie2_log): ?
+  out bowtie2_index (bowtie2_index): ?
+  out seqkit_prefixed (seqkit_prefixed): ?
+  out seqkit_converted (seqkit_converted): ?
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_multiqc_files~6 chain ".mix" steps=mix @354:28
+  guards then of remove_ribo_rna
+  in in (in): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_multiqc_files~4[out] Channel<?> via ch_multiqc_files indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_multiqc_files~5[out] Channel<?> via ch_multiqc_files indirect
+  in 1:1 (mix(other)): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_REMOVE_RRNA@1[multiqc_files] ? via FASTQ_REMOVE_RRNA.out.multiqc_files
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FQ_LINT_AFTER_RIBO_REMOVAL@1 call "FQ_LINT_AFTER_RIBO_REMOVAL" callee=FQ_LINT_AFTER_RIBO_REMOVAL:process:modelled:legacy @357:13
+  guards then of remove_ribo_rna; then of !skip_linting
+  in $1 (tuple(meta, fastq)): Tuple
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_REMOVE_RRNA@1[reads] ? via ch_filtered_reads
+  out lint (lint): Channel<Tuple>
+  out versions_fq (versions_fq): Channel<Tuple>
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/.map@5 chain ".map" steps=map @361:56
+  guards then of remove_ribo_rna; then of !skip_linting
+  in in (in): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FQ_LINT_AFTER_RIBO_REMOVAL@1[lint] Channel<Tuple> via FQ_LINT_AFTER_RIBO_REMOVAL.out.lint
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_filtered_reads~6 chain ".join" steps=join @361:33
+  guards then of remove_ribo_rna; then of !skip_linting
+  in in (in): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_REMOVE_RRNA@1[reads] ? via ch_filtered_reads
+  in 1:1 (join(1)): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/.map@5[out] Channel<?>
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQC_FILTERED@1 call "FASTQC_FILTERED" callee=FASTQC_FILTERED:process:modelled:legacy @369:9
+  guards then of !skip_fastqc && (!skip_bbsplit || remove_ribo_rna)
+  in $1 (tuple(meta, reads)): Tuple
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_filtered_reads~2[out] Channel<Tuple> via ch_filtered_reads indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_filtered_reads~3[out] Channel<?> via ch_filtered_reads indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_FASTQC_UMITOOLS_TRIMGALORE@1[reads] ? via ch_filtered_reads indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_FASTQC_UMITOOLS_FASTP@1[reads] ? via ch_filtered_reads indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_filtered_reads~4[out] Channel<?> via ch_filtered_reads indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/BBMAP_BBSPLIT@1[primary_fastq] Channel<Tuple> via ch_filtered_reads indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_filtered_reads~5[out] Channel<?> via ch_filtered_reads indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_REMOVE_RRNA@1[reads] ? via ch_filtered_reads indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_filtered_reads~6[out] Channel<?> via ch_filtered_reads indirect
+  out html (html): Channel<Tuple>
+  out zip (zip): Channel<Tuple>
+  out versions_fastqc (versions_fastqc): Channel<Tuple>
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_multiqc_files~7 chain ".mix" steps=mix @374:28
+  guards then of !skip_fastqc && (!skip_bbsplit || remove_ribo_rna)
+  in in (in): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_multiqc_files~4[out] Channel<?> via ch_multiqc_files indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_multiqc_files~5[out] Channel<?> via ch_multiqc_files indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_multiqc_files~6[out] Channel<?> via ch_multiqc_files indirect
+  in 1:1 (mix(other)): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQC_FILTERED@1[zip] Channel<Tuple> via FASTQC_FILTERED.out.zip
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_strand_fastq chain ".branch" steps=branch @378:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_filtered_reads~2[out] Channel<Tuple> via ch_filtered_reads indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_filtered_reads~3[out] Channel<?> via ch_filtered_reads indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_FASTQC_UMITOOLS_TRIMGALORE@1[reads] ? via ch_filtered_reads indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_FASTQC_UMITOOLS_FASTP@1[reads] ? via ch_filtered_reads indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_filtered_reads~4[out] Channel<?> via ch_filtered_reads indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/BBMAP_BBSPLIT@1[primary_fastq] Channel<Tuple> via ch_filtered_reads indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_filtered_reads~5[out] Channel<?> via ch_filtered_reads indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_REMOVE_RRNA@1[reads] ? via ch_filtered_reads indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_filtered_reads~6[out] Channel<?> via ch_filtered_reads indirect
+  out out (out): Record
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_genome_fasta chain ".map.combine.map.first" steps=map,combine,map,first @391:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:take:ch_fasta[out] ? via ch_fasta
+  in 2:1 (combine(right)): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_strand_fastq[out] Record via ch_strand_fastq indirect
+  out out (out): Value<?>
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_SUBSAMPLE_FQ_SALMON@1 call "FASTQ_SUBSAMPLE_FQ_SALMON" callee=FASTQ_SUBSAMPLE_FQ_SALMON:workflow:modelled:legacy @398:5
+  in ch_reads (ch_reads): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_strand_fastq[out] Record via ch_strand_fastq indirect
+  in ch_genome_fasta (ch_genome_fasta): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_genome_fasta[out] Value<?> via ch_genome_fasta
+  in ch_transcript_fasta (ch_transcript_fasta): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:take:ch_transcript_fasta[out] ? via ch_transcript_fasta
+  in ch_gtf (ch_gtf): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:take:ch_gtf[out] ? via ch_gtf
+  in ch_index (ch_index): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:take:ch_salmon_index[out] ? via ch_salmon_index
+  in make_index (make_index): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:take:make_salmon_index[out] ? via make_salmon_index
+  out index (index): ?
+  out reads (reads): Channel<Tuple>
+  out results (results): Channel<Tuple>
+  out json_info (json_info): Channel<Tuple>
+  out lib_format_counts (lib_format_counts): Channel<Tuple>
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_strand_inferred_fastq chain ".join.map.mix" steps=join,map,mix @407:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_SUBSAMPLE_FQ_SALMON@1[lib_format_counts] Channel<Tuple> via FASTQ_SUBSAMPLE_FQ_SALMON.out.lib_format_counts
+  in 1:1 (join(right)): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_strand_fastq[out] Record via ch_strand_fastq indirect
+  in 3:1 (mix(other)): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_strand_fastq[out] Record via ch_strand_fastq indirect
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_per_sample_mqc_bundle chain ".join.join.join.join.join.join.join.join.join.join.map" steps=join,join,join,join,join,join,join,join,join,join,map @427:32
+  in in (in): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_fastqc_raw_zip[out] Channel<?> via ch_fastqc_raw_zip indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_FASTQC_UMITOOLS_TRIMGALORE@1[fastqc_zip] ? via ch_fastqc_raw_zip indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_FASTQC_UMITOOLS_FASTP@1[fastqc_raw_zip] ? via ch_fastqc_raw_zip indirect
+  in 1:1 (join(right)): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_fastqc_trim_zip[out] Channel<?> via ch_fastqc_trim_zip indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_FASTQC_UMITOOLS_TRIMGALORE@1[trim_zip] ? via ch_fastqc_trim_zip indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_FASTQC_UMITOOLS_FASTP@1[fastqc_trim_zip] ? via ch_fastqc_trim_zip indirect
+  in 2:1 (join(right)): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_trim_log[out] Channel<?> via ch_trim_log indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_FASTQC_UMITOOLS_TRIMGALORE@1[trim_log] ? via ch_trim_log indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_FASTQC_UMITOOLS_FASTP@1[trim_log] ? via ch_trim_log indirect
+  in 3:1 (join(right)): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_trim_json[out] Channel<?> via ch_trim_json indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_FASTQC_UMITOOLS_TRIMGALORE@1[trim_json] ? via ch_trim_json indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_FASTQC_UMITOOLS_FASTP@1[trim_json] ? via ch_trim_json indirect
+  in 4:1 (join(right)): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_umi_log[out] Channel<?> via ch_umi_log indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_FASTQC_UMITOOLS_TRIMGALORE@1[umi_log] ? via ch_umi_log indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_FASTQC_UMITOOLS_FASTP@1[umi_log] ? via ch_umi_log indirect
+  in 5:1 (join(right)): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_bbsplit_stats[out] Channel<?> via ch_bbsplit_stats indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/BBMAP_BBSPLIT@1[stats] Channel<Tuple> via ch_bbsplit_stats indirect
+  in 6:1 (join(right)): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_sortmerna_log[out] Channel<?> via ch_sortmerna_log indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_REMOVE_RRNA@1[sortmerna_log] ? via ch_sortmerna_log indirect
+  in 7:1 (join(right)): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_ribodetector_log[out] Channel<?> via ch_ribodetector_log indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_REMOVE_RRNA@1[ribodetector_log] ? via ch_ribodetector_log indirect
+  in 8:1 (join(right)): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_seqkit_stats[out] Channel<?> via ch_seqkit_stats indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_REMOVE_RRNA@1[seqkit_stats] ? via ch_seqkit_stats indirect
+  in 9:1 (join(right)): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_bowtie2_log[out] Channel<?> via ch_bowtie2_log indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_REMOVE_RRNA@1[bowtie2_log] ? via ch_bowtie2_log indirect
+  in 10:1 (join(right)): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_fastqc_filtered_zip[out] Channel<?> via ch_fastqc_filtered_zip indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQC_FILTERED@1[zip] Channel<Tuple> via ch_fastqc_filtered_zip indirect
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:emit:reads emit "reads" @441:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_strand_inferred_fastq[out] Channel<?> via ch_strand_inferred_fastq
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:emit:reads_cat emit "reads_cat" @442:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_filtered_reads~2[out] Channel<Tuple> via ch_reads_cat indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_filtered_reads~3[out] Channel<?> via ch_reads_cat indirect
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:emit:reads_trimmed emit "reads_trimmed" @443:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_filtered_reads~2[out] Channel<Tuple> via ch_reads_trimmed indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_filtered_reads~3[out] Channel<?> via ch_reads_trimmed indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_FASTQC_UMITOOLS_TRIMGALORE@1[reads] ? via ch_reads_trimmed indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_FASTQC_UMITOOLS_FASTP@1[reads] ? via ch_reads_trimmed indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_filtered_reads~4[out] Channel<?> via ch_reads_trimmed indirect
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:emit:trim_read_count emit "trim_read_count" @444:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_trim_read_count[out] Channel<?> via ch_trim_read_count indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_FASTQC_UMITOOLS_TRIMGALORE@1[trim_read_count] ? via ch_trim_read_count indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_FASTQC_UMITOOLS_FASTP@1[trim_read_count] ? via ch_trim_read_count indirect
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:emit:trim_reads_merged emit "trim_reads_merged" @445:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_trim_reads_merged[out] Channel<?> via ch_trim_reads_merged indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_FASTQC_UMITOOLS_FASTP@1[trim_reads_merged] ? via ch_trim_reads_merged indirect
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/.transpose@1 chain ".transpose" steps=transpose @446:25
+  in in (in): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_multiqc_files~4[out] Channel<?> via ch_multiqc_files indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_multiqc_files~5[out] Channel<?> via ch_multiqc_files indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_multiqc_files~6[out] Channel<?> via ch_multiqc_files indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_multiqc_files~7[out] Channel<?> via ch_multiqc_files indirect
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:emit:multiqc_files emit "multiqc_files" @446:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/.transpose@1[out] Channel<?>
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:emit:lint_log_raw emit "lint_log_raw" @449:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_lint_log_raw[out] Channel<?> via ch_lint_log_raw indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FQ_LINT@1[lint] Channel<Tuple> via ch_lint_log_raw indirect
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:emit:lint_log_trimmed emit "lint_log_trimmed" @450:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_lint_log_trimmed[out] Channel<?> via ch_lint_log_trimmed indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FQ_LINT_AFTER_TRIMMING@1[lint] Channel<Tuple> via ch_lint_log_trimmed indirect
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:emit:lint_log_bbsplit emit "lint_log_bbsplit" @451:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_lint_log_bbsplit[out] Channel<?> via ch_lint_log_bbsplit indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FQ_LINT_AFTER_BBSPLIT@1[lint] Channel<Tuple> via ch_lint_log_bbsplit indirect
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:emit:lint_log_ribo emit "lint_log_ribo" @452:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_lint_log_ribo[out] Channel<?> via ch_lint_log_ribo indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FQ_LINT_AFTER_RIBO_REMOVAL@1[lint] Channel<Tuple> via ch_lint_log_ribo indirect
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:emit:fastqc_raw_html emit "fastqc_raw_html" @453:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_fastqc_raw_html[out] Channel<?> via ch_fastqc_raw_html indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_FASTQC_UMITOOLS_TRIMGALORE@1[fastqc_html] ? via ch_fastqc_raw_html indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_FASTQC_UMITOOLS_FASTP@1[fastqc_raw_html] ? via ch_fastqc_raw_html indirect
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:emit:fastqc_raw_zip emit "fastqc_raw_zip" @454:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_fastqc_raw_zip[out] Channel<?> via ch_fastqc_raw_zip indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_FASTQC_UMITOOLS_TRIMGALORE@1[fastqc_zip] ? via ch_fastqc_raw_zip indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_FASTQC_UMITOOLS_FASTP@1[fastqc_raw_zip] ? via ch_fastqc_raw_zip indirect
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:emit:fastqc_trim_html emit "fastqc_trim_html" @455:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_fastqc_trim_html[out] Channel<?> via ch_fastqc_trim_html indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_FASTQC_UMITOOLS_TRIMGALORE@1[trim_html] ? via ch_fastqc_trim_html indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_FASTQC_UMITOOLS_FASTP@1[fastqc_trim_html] ? via ch_fastqc_trim_html indirect
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:emit:fastqc_trim_zip emit "fastqc_trim_zip" @456:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_fastqc_trim_zip[out] Channel<?> via ch_fastqc_trim_zip indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_FASTQC_UMITOOLS_TRIMGALORE@1[trim_zip] ? via ch_fastqc_trim_zip indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_FASTQC_UMITOOLS_FASTP@1[fastqc_trim_zip] ? via ch_fastqc_trim_zip indirect
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:emit:trim_html emit "trim_html" @457:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_trim_html[out] Channel<?> via ch_trim_html indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_FASTQC_UMITOOLS_FASTP@1[trim_html] ? via ch_trim_html indirect
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:emit:trim_zip emit "trim_zip" @458:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_trim_zip[out] Channel<?> via ch_trim_zip
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:emit:trim_log emit "trim_log" @459:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_trim_log[out] Channel<?> via ch_trim_log indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_FASTQC_UMITOOLS_TRIMGALORE@1[trim_log] ? via ch_trim_log indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_FASTQC_UMITOOLS_FASTP@1[trim_log] ? via ch_trim_log indirect
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:emit:trim_json emit "trim_json" @460:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_trim_json[out] Channel<?> via ch_trim_json indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_FASTQC_UMITOOLS_TRIMGALORE@1[trim_json] ? via ch_trim_json indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_FASTQC_UMITOOLS_FASTP@1[trim_json] ? via ch_trim_json indirect
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:emit:trim_unpaired emit "trim_unpaired" @461:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_trim_unpaired[out] Channel<?> via ch_trim_unpaired indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_FASTQC_UMITOOLS_TRIMGALORE@1[trim_unpaired] ? via ch_trim_unpaired indirect
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:emit:umi_log emit "umi_log" @462:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_umi_log[out] Channel<?> via ch_umi_log indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_FASTQC_UMITOOLS_TRIMGALORE@1[umi_log] ? via ch_umi_log indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_FASTQC_UMITOOLS_FASTP@1[umi_log] ? via ch_umi_log indirect
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:emit:umi_reads emit "umi_reads" @463:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_umi_reads[out] Channel<?> via ch_umi_reads indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_FASTQC_UMITOOLS_TRIMGALORE@1[umi_reads] ? via ch_umi_reads indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_FASTQC_UMITOOLS_FASTP@1[umi_reads] ? via ch_umi_reads indirect
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:emit:bbsplit_stats emit "bbsplit_stats" @464:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_bbsplit_stats[out] Channel<?> via ch_bbsplit_stats indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/BBMAP_BBSPLIT@1[stats] Channel<Tuple> via ch_bbsplit_stats indirect
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:emit:sortmerna_log emit "sortmerna_log" @465:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_sortmerna_log[out] Channel<?> via ch_sortmerna_log indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_REMOVE_RRNA@1[sortmerna_log] ? via ch_sortmerna_log indirect
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:emit:ribodetector_log emit "ribodetector_log" @466:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_ribodetector_log[out] Channel<?> via ch_ribodetector_log indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_REMOVE_RRNA@1[ribodetector_log] ? via ch_ribodetector_log indirect
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:emit:seqkit_stats emit "seqkit_stats" @467:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_seqkit_stats[out] Channel<?> via ch_seqkit_stats indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_REMOVE_RRNA@1[seqkit_stats] ? via ch_seqkit_stats indirect
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:emit:bowtie2_log emit "bowtie2_log" @468:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_bowtie2_log[out] Channel<?> via ch_bowtie2_log indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_REMOVE_RRNA@1[bowtie2_log] ? via ch_bowtie2_log indirect
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:emit:bowtie2_index emit "bowtie2_index" @469:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:take:ch_bowtie2_index[out] ? via ch_bowtie2_index indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_REMOVE_RRNA@1[bowtie2_index] ? via ch_bowtie2_index indirect
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:emit:fastqc_filtered_html emit "fastqc_filtered_html" @470:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_fastqc_filtered_html[out] Channel<?> via ch_fastqc_filtered_html indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQC_FILTERED@1[html] Channel<Tuple> via ch_fastqc_filtered_html indirect
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:emit:fastqc_filtered_zip emit "fastqc_filtered_zip" @471:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_fastqc_filtered_zip[out] Channel<?> via ch_fastqc_filtered_zip indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQC_FILTERED@1[zip] Channel<Tuple> via ch_fastqc_filtered_zip indirect
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:emit:seqkit_prefixed emit "seqkit_prefixed" @472:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_seqkit_prefixed[out] Channel<?> via ch_seqkit_prefixed indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_REMOVE_RRNA@1[seqkit_prefixed] ? via ch_seqkit_prefixed indirect
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:emit:seqkit_converted emit "seqkit_converted" @473:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_seqkit_converted[out] Channel<?> via ch_seqkit_converted indirect
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/FASTQ_REMOVE_RRNA@1[seqkit_converted] ? via ch_seqkit_converted indirect
+subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/:emit:per_sample_mqc_bundle emit "per_sample_mqc_bundle" @474:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf#FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS/ch_per_sample_mqc_bundle[out] Channel<?> via ch_per_sample_mqc_bundle
+bound @193:9 ch_lint_log_raw
+bound @197:5 ch_reads_cat
+bound @212:9 ch_filtered_reads
+bound @213:9 ch_trim_read_count
+bound @216:9 ch_fastqc_raw_html
+bound @217:9 ch_fastqc_raw_zip
+bound @218:9 ch_fastqc_trim_html
+bound @219:9 ch_fastqc_trim_zip
+bound @220:9 ch_trim_json
+bound @221:9 ch_trim_log
+bound @222:9 ch_trim_unpaired
+bound @223:9 ch_umi_log
+bound @224:9 ch_umi_reads
+bound @249:9 ch_filtered_reads
+bound @250:9 ch_trim_read_count
+bound @251:9 ch_trim_reads_merged
+bound @254:9 ch_fastqc_raw_html
+bound @255:9 ch_fastqc_raw_zip
+bound @256:9 ch_fastqc_trim_html
+bound @257:9 ch_fastqc_trim_zip
+bound @258:9 ch_trim_json
+bound @259:9 ch_trim_html
+bound @260:9 ch_trim_log
+bound @261:9 ch_umi_log
+bound @262:9 ch_umi_reads
+bound @300:9 ch_lint_log_trimmed
+bound @304:5 ch_reads_trimmed
+bound @318:9 ch_filtered_reads
+bound @320:9 ch_bbsplit_stats
+bound @327:13 ch_lint_log_bbsplit
+bound @346:9 ch_filtered_reads
+bound @347:9 ch_sortmerna_log
+bound @348:9 ch_ribodetector_log
+bound @349:9 ch_seqkit_stats
+bound @350:9 ch_bowtie2_log
+bound @351:9 ch_bowtie2_index
+bound @352:9 ch_seqkit_prefixed
+bound @353:9 ch_seqkit_converted
+bound @360:13 ch_lint_log_ribo
+bound @372:9 ch_fastqc_filtered_html
+bound @373:9 ch_fastqc_filtered_zip

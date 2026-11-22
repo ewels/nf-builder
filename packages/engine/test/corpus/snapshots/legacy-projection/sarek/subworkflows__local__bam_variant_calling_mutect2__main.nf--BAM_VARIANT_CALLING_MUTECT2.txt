@@ -1,0 +1,181 @@
+workflow subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2 legacy
+statements 9, modelled 8
+subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/:take:cram take "cram" @14:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/:take:fasta take "fasta" @15:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/:take:fai take "fai" @16:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/:take:dict take "dict" @17:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/:take:force_call_alleles take "force_call_alleles" @18:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/:take:force_call_alleles_tbi take "force_call_alleles_tbi" @19:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/:take:germline_resource take "germline_resource" @20:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/:take:germline_resource_tbi take "germline_resource_tbi" @21:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/:take:contamination_resource take "contamination_resource" @22:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/:take:contamination_resource_tbi take "contamination_resource_tbi" @23:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/:take:panel_of_normals take "panel_of_normals" @24:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/:take:panel_of_normals_tbi take "panel_of_normals_tbi" @25:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/:take:intervals take "intervals" @26:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/:take:joint_mutect2 take "joint_mutect2" @27:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/:take:contamination_resource_provided take "contamination_resource_provided" @28:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/input chain ".flatMap.unique.groupTuple" steps=flatMap,unique,groupTuple @34:17
+  guards then of joint_mutect2
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/:take:cram[out] ? via cram
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/input~2 chain ".map" steps=map @43:17
+  guards else of joint_mutect2
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/:take:cram[out] ? via cram
+  out out (out): ?
+subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/input_intervals chain ".combine.map" steps=combine,map @49:23
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/input[out] Channel<?> via input indirect
+    <- subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/input~2[out] ? via input indirect
+  in 1:1 (combine(right)): -
+    <- subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/:take:intervals[out] ? via intervals
+  out out (out): ?
+subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/.map@1 chain ".map" steps=map @53:37
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/:take:fai[out] ? via fai
+  out out (out): ?
+subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/MUTECT2@1 call "MUTECT2" callee=MUTECT2:process:modelled:legacy @53:5
+  in $1 (tuple(meta, input, input_index, intervals)): Tuple
+    <- subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/input_intervals[out] ? via input_intervals
+  in $2 (tuple(meta2, fasta)): Tuple
+    <- subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/:take:fasta[out] ? via fasta
+  in $3 (tuple(meta3, fai, gzi)): Tuple
+    <- subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/.map@1[out] ?
+  in $4 (tuple(meta4, dict)): Tuple
+    <- subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/:take:dict[out] ? via dict
+  in alleles (alleles): Path
+    <- subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/:take:force_call_alleles[out] ? via force_call_alleles
+  in alleles_tbi (alleles_tbi): Path
+    <- subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/:take:force_call_alleles_tbi[out] ? via force_call_alleles_tbi
+  in germline_resource (germline_resource): Path
+    <- subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/:take:germline_resource[out] ? via germline_resource
+  in germline_resource_tbi (germline_resource_tbi): Path
+    <- subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/:take:germline_resource_tbi[out] ? via germline_resource_tbi
+  in panel_of_normals (panel_of_normals): Path
+    <- subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/:take:panel_of_normals[out] ? via panel_of_normals
+  in panel_of_normals_tbi (panel_of_normals_tbi): Path
+    <- subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/:take:panel_of_normals_tbi[out] ? via panel_of_normals_tbi
+  out vcf (vcf): Channel<Tuple>
+  out stats (stats): Channel<Tuple>
+  out tbi (tbi): Channel<Tuple>
+  out f1r2 (f1r2): Channel<Tuple>
+  out versions_gatk4 (versions_gatk4): Channel<Tuple>
+subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/mutect2_out code "mutect2_out = groupByIntervals(MUTECT2.out.vcf)" @56:5
+  in MUTECT2.out.vcf (MUTECT2.out.vcf): -
+    <- subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/MUTECT2@1[vcf] Channel<Tuple> via MUTECT2.out.vcf indirect
+  in MUTECT2.out.tbi (MUTECT2.out.tbi): -
+    <- subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/MUTECT2@1[tbi] Channel<Tuple> via MUTECT2.out.tbi indirect
+  in MUTECT2.out.stats (MUTECT2.out.stats): -
+    <- subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/MUTECT2@1[stats] Channel<Tuple> via MUTECT2.out.stats indirect
+  in MUTECT2.out.f1r2 (MUTECT2.out.f1r2): -
+    <- subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/MUTECT2@1[f1r2] Channel<Tuple> via MUTECT2.out.f1r2 indirect
+  out mutect2_out (mutect2_out): -
+subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/.map@2 chain ".map" steps=map @68:19
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/mutect2_out[mutect2_out] ? via mutect2_out indirect
+  out out (out): ?
+subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/MERGE_MUTECT2@1 call "MERGE_MUTECT2" callee=MERGE_MUTECT2:process:modelled:legacy @68:5
+  in $1 (tuple(meta, vcf)): Tuple
+    <- subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/.map@2[out] ?
+  in $2 (tuple(meta2, dict)): Tuple
+    <- subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/:take:dict[out] ? via dict
+  out vcf (vcf): Channel<Tuple>
+  out tbi (tbi): Channel<Tuple>
+  out versions_gatk4 (versions_gatk4): Channel<Tuple>
+subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/.map@3 chain ".map" steps=map @69:22
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/mutect2_out[mutect2_out] ? via mutect2_out indirect
+  out out (out): ?
+subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/MERGEMUTECTSTATS@1 call "MERGEMUTECTSTATS" callee=MERGEMUTECTSTATS:process:modelled:legacy @69:5
+  in $1 (tuple(meta, stats)): Tuple
+    <- subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/.map@3[out] ?
+  out stats (stats): Channel<Tuple>
+  out versions_gatk4 (versions_gatk4): Channel<Tuple>
+subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/.map@4 chain ".map" steps=map @78:15
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/mutect2_out[mutect2_out] ? via mutect2_out indirect
+  out out (out): ?
+subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/calls chain ".join.join.join.mix.map" steps=join,join,join,mix,map @75:13
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/MERGE_MUTECT2@1[vcf] Channel<Tuple> via MERGE_MUTECT2.out.vcf
+  in 1:1 (join(right)): -
+    <- subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/MERGE_MUTECT2@1[tbi] Channel<Tuple> via MERGE_MUTECT2.out.tbi
+  in 2:1 (join(right)): -
+    <- subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/MERGEMUTECTSTATS@1[stats] Channel<Tuple> via MERGEMUTECTSTATS.out.stats
+  in 3:1 (join(right)): -
+    <- subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/.map@4[out] ?
+  in 4:1 (mix(other)): -
+    <- subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/mutect2_out[mutect2_out] ? via mutect2_out indirect
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/VCF_VARIANT_FILTERING_MUTECT2@1 call "VCF_VARIANT_FILTERING_MUTECT2" callee=VCF_VARIANT_FILTERING_MUTECT2:workflow:modelled:legacy @84:5
+  in calls_in (calls_in): -
+    <- subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/calls[out] Channel<?> via calls
+  in cram_in (cram_in): -
+    <- subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/:take:cram[out] ? via cram
+  in intervals (intervals): -
+    <- subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/:take:intervals[out] ? via intervals
+  in fasta (fasta): -
+    <- subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/:take:fasta[out] ? via fasta
+  in fai (fai): -
+    <- subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/:take:fai[out] ? via fai
+  in dict (dict): -
+    <- subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/:take:dict[out] ? via dict
+  in contamination_resource (contamination_resource): -
+    <- subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/:take:contamination_resource[out] ? via contamination_resource
+  in contamination_resource_tbi (contamination_resource_tbi): -
+    <- subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/:take:contamination_resource_tbi[out] ? via contamination_resource_tbi
+  in contamination_resource_provided (contamination_resource_provided): -
+    <- subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/:take:contamination_resource_provided[out] ? via contamination_resource_provided
+  in joint (joint): -
+    <- subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/:take:joint_mutect2[out] ? via joint_mutect2
+  in variantcaller (variantcaller): -
+    = 'mutect2' : String
+  out vcf (vcf): Channel<Tuple>
+  out tbi (tbi): Channel<Tuple>
+  out stats_filtered (stats_filtered): Channel<Tuple>
+  out artifact_priors (artifact_priors): Channel<Tuple>
+  out contamination_table (contamination_table): ?
+  out segmentation_table (segmentation_table): ?
+  out pileup_table_normal (pileup_table_normal): ?
+  out pileup_table_tumor (pileup_table_tumor): ?
+subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/:emit:vcf emit "vcf" @99:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/VCF_VARIANT_FILTERING_MUTECT2@1[vcf] Channel<Tuple> via VCF_VARIANT_FILTERING_MUTECT2.out.vcf
+subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/:emit:tbi emit "tbi" @100:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/VCF_VARIANT_FILTERING_MUTECT2@1[tbi] Channel<Tuple> via VCF_VARIANT_FILTERING_MUTECT2.out.tbi
+subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/:emit:stats_filtered emit "stats_filtered" @101:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/VCF_VARIANT_FILTERING_MUTECT2@1[stats_filtered] Channel<Tuple> via VCF_VARIANT_FILTERING_MUTECT2.out.stats_filtered
+subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/:emit:artifact_priors emit "artifact_priors" @102:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/VCF_VARIANT_FILTERING_MUTECT2@1[artifact_priors] Channel<Tuple> via VCF_VARIANT_FILTERING_MUTECT2.out.artifact_priors
+subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/:emit:pileup_table_normal emit "pileup_table_normal" @103:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/VCF_VARIANT_FILTERING_MUTECT2@1[pileup_table_normal] ? via VCF_VARIANT_FILTERING_MUTECT2.out.pileup_table_normal
+subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/:emit:pileup_table_tumor emit "pileup_table_tumor" @104:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/VCF_VARIANT_FILTERING_MUTECT2@1[pileup_table_tumor] ? via VCF_VARIANT_FILTERING_MUTECT2.out.pileup_table_tumor
+subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/:emit:contamination_table emit "contamination_table" @105:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/VCF_VARIANT_FILTERING_MUTECT2@1[contamination_table] ? via VCF_VARIANT_FILTERING_MUTECT2.out.contamination_table
+subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/:emit:segmentation_table emit "segmentation_table" @106:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_mutect2/main.nf#BAM_VARIANT_CALLING_MUTECT2/VCF_VARIANT_FILTERING_MUTECT2@1[segmentation_table] ? via VCF_VARIANT_FILTERING_MUTECT2.out.segmentation_table

@@ -1,0 +1,32 @@
+workflow subworkflows/nf-core/bam_stats_samtools/main.nf#BAM_STATS_SAMTOOLS legacy
+statements 3, modelled 3
+subworkflows/nf-core/bam_stats_samtools/main.nf#BAM_STATS_SAMTOOLS/:take:ch_bam_bai take "ch_bam_bai" @14:5
+  out out (out): -
+subworkflows/nf-core/bam_stats_samtools/main.nf#BAM_STATS_SAMTOOLS/:take:ch_fasta_fai take "ch_fasta_fai" @15:5
+  out out (out): -
+subworkflows/nf-core/bam_stats_samtools/main.nf#BAM_STATS_SAMTOOLS/SAMTOOLS_STATS@1 call "SAMTOOLS_STATS" callee=SAMTOOLS_STATS:process:modelled:legacy @18:5
+  in $1 (tuple(meta, input, input_index)): Tuple
+    <- subworkflows/nf-core/bam_stats_samtools/main.nf#BAM_STATS_SAMTOOLS/:take:ch_bam_bai[out] ? via ch_bam_bai
+  in $2 (tuple(meta2, fasta, fai)): Tuple
+    <- subworkflows/nf-core/bam_stats_samtools/main.nf#BAM_STATS_SAMTOOLS/:take:ch_fasta_fai[out] ? via ch_fasta_fai
+  out stats (stats): Channel<Tuple>
+  out versions_samtools (versions_samtools): Channel<Tuple>
+subworkflows/nf-core/bam_stats_samtools/main.nf#BAM_STATS_SAMTOOLS/SAMTOOLS_FLAGSTAT@1 call "SAMTOOLS_FLAGSTAT" callee=SAMTOOLS_FLAGSTAT:process:modelled:legacy @20:5
+  in $1 (tuple(meta, bam, bai)): Tuple
+    <- subworkflows/nf-core/bam_stats_samtools/main.nf#BAM_STATS_SAMTOOLS/:take:ch_bam_bai[out] ? via ch_bam_bai
+  out flagstat (flagstat): Channel<Tuple>
+  out versions_samtools (versions_samtools): Channel<Tuple>
+subworkflows/nf-core/bam_stats_samtools/main.nf#BAM_STATS_SAMTOOLS/SAMTOOLS_IDXSTATS@1 call "SAMTOOLS_IDXSTATS" callee=SAMTOOLS_IDXSTATS:process:modelled:legacy @22:5
+  in $1 (tuple(meta, bam, bai)): Tuple
+    <- subworkflows/nf-core/bam_stats_samtools/main.nf#BAM_STATS_SAMTOOLS/:take:ch_bam_bai[out] ? via ch_bam_bai
+  out idxstats (idxstats): Channel<Tuple>
+  out versions_samtools (versions_samtools): Channel<Tuple>
+subworkflows/nf-core/bam_stats_samtools/main.nf#BAM_STATS_SAMTOOLS/:emit:stats emit "stats" @25:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_stats_samtools/main.nf#BAM_STATS_SAMTOOLS/SAMTOOLS_STATS@1[stats] Channel<Tuple> via SAMTOOLS_STATS.out.stats
+subworkflows/nf-core/bam_stats_samtools/main.nf#BAM_STATS_SAMTOOLS/:emit:flagstat emit "flagstat" @26:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_stats_samtools/main.nf#BAM_STATS_SAMTOOLS/SAMTOOLS_FLAGSTAT@1[flagstat] Channel<Tuple> via SAMTOOLS_FLAGSTAT.out.flagstat
+subworkflows/nf-core/bam_stats_samtools/main.nf#BAM_STATS_SAMTOOLS/:emit:idxstats emit "idxstats" @27:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_stats_samtools/main.nf#BAM_STATS_SAMTOOLS/SAMTOOLS_IDXSTATS@1[idxstats] Channel<Tuple> via SAMTOOLS_IDXSTATS.out.idxstats

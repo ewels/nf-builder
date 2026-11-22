@@ -1,0 +1,113 @@
+workflow subworkflows/local/bam_variant_calling_tumor_only_tnscope/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_TNSCOPE legacy
+statements 8, modelled 8
+subworkflows/local/bam_variant_calling_tumor_only_tnscope/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_TNSCOPE/:take:input take "input" @11:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_tumor_only_tnscope/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_TNSCOPE/:take:fasta take "fasta" @12:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_tumor_only_tnscope/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_TNSCOPE/:take:fai take "fai" @13:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_tumor_only_tnscope/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_TNSCOPE/:take:dict take "dict" @14:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_tumor_only_tnscope/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_TNSCOPE/:take:germline_resource take "germline_resource" @15:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_tumor_only_tnscope/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_TNSCOPE/:take:germline_resource_tbi take "germline_resource_tbi" @16:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_tumor_only_tnscope/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_TNSCOPE/:take:panel_of_normals take "panel_of_normals" @17:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_tumor_only_tnscope/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_TNSCOPE/:take:panel_of_normals_tbi take "panel_of_normals_tbi" @18:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_tumor_only_tnscope/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_TNSCOPE/:take:intervals take "intervals" @19:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_tumor_only_tnscope/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_TNSCOPE/input_intervals chain ".combine.map" steps=combine,map @23:23
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_tnscope/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_TNSCOPE/:take:input[out] ? via input
+  in 1:1 (combine(right)): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_tnscope/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_TNSCOPE/:take:intervals[out] ? via intervals
+  out out (out): ?
+subworkflows/local/bam_variant_calling_tumor_only_tnscope/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_TNSCOPE/.map@1 chain ".map" steps=map @31:9
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_tnscope/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_TNSCOPE/:take:germline_resource[out] ? via germline_resource
+  out out (out): ?
+subworkflows/local/bam_variant_calling_tumor_only_tnscope/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_TNSCOPE/.map@2 chain ".map" steps=map @32:9
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_tnscope/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_TNSCOPE/:take:germline_resource_tbi[out] ? via germline_resource_tbi
+  out out (out): ?
+subworkflows/local/bam_variant_calling_tumor_only_tnscope/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_TNSCOPE/.map@3 chain ".map" steps=map @33:9
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_tnscope/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_TNSCOPE/:take:panel_of_normals[out] ? via panel_of_normals
+  out out (out): ?
+subworkflows/local/bam_variant_calling_tumor_only_tnscope/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_TNSCOPE/.map@4 chain ".map" steps=map @34:9
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_tnscope/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_TNSCOPE/:take:panel_of_normals_tbi[out] ? via panel_of_normals_tbi
+  out out (out): ?
+subworkflows/local/bam_variant_calling_tumor_only_tnscope/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_TNSCOPE/SENTIEON_TNSCOPE@1 call "SENTIEON_TNSCOPE" callee=SENTIEON_TNSCOPE:process:modelled:legacy @27:5
+  in $1 (tuple(meta, input, input_index, intervals)): Tuple
+    <- subworkflows/local/bam_variant_calling_tumor_only_tnscope/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_TNSCOPE/input_intervals[out] ? via input_intervals
+  in $2 (tuple(meta2, fasta)): Tuple
+    <- subworkflows/local/bam_variant_calling_tumor_only_tnscope/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_TNSCOPE/:take:fasta[out] ? via fasta
+  in $3 (tuple(meta3, fai)): Tuple
+    <- subworkflows/local/bam_variant_calling_tumor_only_tnscope/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_TNSCOPE/:take:fai[out] ? via fai
+  in $4 (tuple(meta4, dbsnp)): Tuple
+    <- subworkflows/local/bam_variant_calling_tumor_only_tnscope/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_TNSCOPE/.map@1[out] ?
+  in $5 (tuple(meta5, dbsnp_tbi)): Tuple
+    <- subworkflows/local/bam_variant_calling_tumor_only_tnscope/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_TNSCOPE/.map@2[out] ?
+  in $6 (tuple(meta6, pon)): Tuple
+    <- subworkflows/local/bam_variant_calling_tumor_only_tnscope/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_TNSCOPE/.map@3[out] ?
+  in $7 (tuple(meta7, pon_tbi)): Tuple
+    <- subworkflows/local/bam_variant_calling_tumor_only_tnscope/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_TNSCOPE/.map@4[out] ?
+  in $8 (tuple(meta8, cosmic)): Tuple
+    = [[],[]] : List
+  in $9 (tuple(meta9, cosmic_tbi)): Tuple
+    = [[],[]] : List
+  out vcf (vcf): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out versions_sentieon (versions_sentieon): Channel<Tuple>
+subworkflows/local/bam_variant_calling_tumor_only_tnscope/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_TNSCOPE/vcf_branch chain ".branch" steps=branch @39:18
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_tnscope/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_TNSCOPE/SENTIEON_TNSCOPE@1[vcf] Channel<Tuple> via SENTIEON_TNSCOPE.out.vcf
+  out out (out): Record
+subworkflows/local/bam_variant_calling_tumor_only_tnscope/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_TNSCOPE/tbi_branch chain ".branch" steps=branch @45:18
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_tnscope/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_TNSCOPE/SENTIEON_TNSCOPE@1[index] Channel<Tuple> via SENTIEON_TNSCOPE.out.index
+  out out (out): Record
+subworkflows/local/bam_variant_calling_tumor_only_tnscope/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_TNSCOPE/vcf_to_merge chain ".map.groupTuple" steps=map,groupTuple @51:20
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_tnscope/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_TNSCOPE/vcf_branch[out] Record via vcf_branch indirect
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_tumor_only_tnscope/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_TNSCOPE/MERGE_TNSCOPE@1 call "MERGE_TNSCOPE" callee=MERGE_TNSCOPE:process:modelled:legacy @54:5
+  in $1 (tuple(meta, vcf)): Tuple
+    <- subworkflows/local/bam_variant_calling_tumor_only_tnscope/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_TNSCOPE/vcf_to_merge[out] Channel<?> via vcf_to_merge
+  in $2 (tuple(meta2, dict)): Tuple
+    <- subworkflows/local/bam_variant_calling_tumor_only_tnscope/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_TNSCOPE/:take:dict[out] ? via dict
+  out vcf (vcf): Channel<Tuple>
+  out tbi (tbi): Channel<Tuple>
+  out versions_gatk4 (versions_gatk4): Channel<Tuple>
+subworkflows/local/bam_variant_calling_tumor_only_tnscope/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_TNSCOPE/channel.empty@1 factory "channel.empty" factory=channel.empty @58:13
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_tumor_only_tnscope/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_TNSCOPE/vcf chain ".mix.map" steps=mix,map @58:13
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_tnscope/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_TNSCOPE/channel.empty@1[out] Channel<?>
+  in 1:1 (mix(1)): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_tnscope/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_TNSCOPE/MERGE_TNSCOPE@1[vcf] Channel<Tuple> via MERGE_TNSCOPE.out.vcf
+  in 1:2 (mix(2)): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_tnscope/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_TNSCOPE/vcf_branch[out] Record via vcf_branch indirect
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_tumor_only_tnscope/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_TNSCOPE/channel.empty@2 factory "channel.empty" factory=channel.empty @62:13
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_tumor_only_tnscope/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_TNSCOPE/index chain ".mix.map" steps=mix,map @62:13
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_tnscope/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_TNSCOPE/channel.empty@2[out] Channel<?>
+  in 1:1 (mix(1)): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_tnscope/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_TNSCOPE/MERGE_TNSCOPE@1[tbi] Channel<Tuple> via MERGE_TNSCOPE.out.tbi
+  in 1:2 (mix(2)): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_tnscope/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_TNSCOPE/tbi_branch[out] Record via tbi_branch indirect
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_tumor_only_tnscope/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_TNSCOPE/:emit:vcf emit "vcf" @67:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_tnscope/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_TNSCOPE/vcf[out] Channel<?> via vcf
+subworkflows/local/bam_variant_calling_tumor_only_tnscope/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_TNSCOPE/:emit:tbi emit "tbi" @68:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_tnscope/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_TNSCOPE/index[out] Channel<?> via index
+subworkflows/local/bam_variant_calling_tumor_only_tnscope/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_TNSCOPE/:emit:index emit "index" @69:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_tumor_only_tnscope/main.nf#BAM_VARIANT_CALLING_TUMOR_ONLY_TNSCOPE/index[out] Channel<?> via index

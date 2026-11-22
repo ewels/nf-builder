@@ -1,0 +1,74 @@
+workflow subworkflows/local/bam_variant_calling_germline_manta/main.nf#BAM_VARIANT_CALLING_GERMLINE_MANTA legacy
+statements 8, modelled 8
+subworkflows/local/bam_variant_calling_germline_manta/main.nf#BAM_VARIANT_CALLING_GERMLINE_MANTA/:take:cram take "cram" @12:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_germline_manta/main.nf#BAM_VARIANT_CALLING_GERMLINE_MANTA/:take:fasta take "fasta" @13:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_germline_manta/main.nf#BAM_VARIANT_CALLING_GERMLINE_MANTA/:take:fasta_fai take "fasta_fai" @14:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_germline_manta/main.nf#BAM_VARIANT_CALLING_GERMLINE_MANTA/:take:intervals take "intervals" @15:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_germline_manta/main.nf#BAM_VARIANT_CALLING_GERMLINE_MANTA/cram_intervals chain ".combine.map" steps=combine,map @20:22
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_manta/main.nf#BAM_VARIANT_CALLING_GERMLINE_MANTA/:take:cram[out] ? via cram
+  in 1:1 (combine(right)): -
+    <- subworkflows/local/bam_variant_calling_germline_manta/main.nf#BAM_VARIANT_CALLING_GERMLINE_MANTA/:take:intervals[out] ? via intervals
+  out out (out): ?
+subworkflows/local/bam_variant_calling_germline_manta/main.nf#BAM_VARIANT_CALLING_GERMLINE_MANTA/MANTA_GERMLINE@1 call "MANTA_GERMLINE" callee=MANTA_GERMLINE:process:modelled:legacy @27:5
+  in $1 (tuple(meta, input, index, target_bed, target_bed_tbi)): Tuple
+    <- subworkflows/local/bam_variant_calling_germline_manta/main.nf#BAM_VARIANT_CALLING_GERMLINE_MANTA/cram_intervals[out] ? via cram_intervals
+  in $2 (tuple(meta2, fasta)): Tuple
+    <- subworkflows/local/bam_variant_calling_germline_manta/main.nf#BAM_VARIANT_CALLING_GERMLINE_MANTA/:take:fasta[out] ? via fasta
+  in $3 (tuple(meta3, fai)): Tuple
+    <- subworkflows/local/bam_variant_calling_germline_manta/main.nf#BAM_VARIANT_CALLING_GERMLINE_MANTA/:take:fasta_fai[out] ? via fasta_fai
+  in config (config): Path
+    = [] : List
+  out candidate_small_indels_vcf (candidate_small_indels_vcf): Channel<Tuple>
+  out candidate_small_indels_vcf_tbi (candidate_small_indels_vcf_tbi): Channel<Tuple>
+  out candidate_sv_vcf (candidate_sv_vcf): Channel<Tuple>
+  out candidate_sv_vcf_tbi (candidate_sv_vcf_tbi): Channel<Tuple>
+  out diploid_sv_vcf (diploid_sv_vcf): Channel<Tuple>
+  out diploid_sv_vcf_tbi (diploid_sv_vcf_tbi): Channel<Tuple>
+  out versions_manta (versions_manta): Channel<Tuple>
+subworkflows/local/bam_variant_calling_germline_manta/main.nf#BAM_VARIANT_CALLING_GERMLINE_MANTA/candidate_small_indels_vcf chain ".map" steps=map @30:38
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_manta/main.nf#BAM_VARIANT_CALLING_GERMLINE_MANTA/MANTA_GERMLINE@1[candidate_small_indels_vcf] Channel<Tuple> via MANTA_GERMLINE.out.candidate_small_indels_vcf
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_germline_manta/main.nf#BAM_VARIANT_CALLING_GERMLINE_MANTA/candidate_small_indels_vcf_tbi chain ".map" steps=map @31:38
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_manta/main.nf#BAM_VARIANT_CALLING_GERMLINE_MANTA/MANTA_GERMLINE@1[candidate_small_indels_vcf_tbi] Channel<Tuple> via MANTA_GERMLINE.out.candidate_small_indels_vcf_tbi
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_germline_manta/main.nf#BAM_VARIANT_CALLING_GERMLINE_MANTA/candidate_sv_vcf chain ".map" steps=map @32:38
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_manta/main.nf#BAM_VARIANT_CALLING_GERMLINE_MANTA/MANTA_GERMLINE@1[candidate_sv_vcf] Channel<Tuple> via MANTA_GERMLINE.out.candidate_sv_vcf
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_germline_manta/main.nf#BAM_VARIANT_CALLING_GERMLINE_MANTA/candidate_sv_vcf_tbi chain ".map" steps=map @33:38
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_manta/main.nf#BAM_VARIANT_CALLING_GERMLINE_MANTA/MANTA_GERMLINE@1[candidate_sv_vcf_tbi] Channel<Tuple> via MANTA_GERMLINE.out.candidate_sv_vcf_tbi
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_germline_manta/main.nf#BAM_VARIANT_CALLING_GERMLINE_MANTA/diploid_sv_vcf chain ".map" steps=map @34:38
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_manta/main.nf#BAM_VARIANT_CALLING_GERMLINE_MANTA/MANTA_GERMLINE@1[diploid_sv_vcf] Channel<Tuple> via MANTA_GERMLINE.out.diploid_sv_vcf
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_germline_manta/main.nf#BAM_VARIANT_CALLING_GERMLINE_MANTA/diploid_sv_vcf_tbi chain ".map" steps=map @35:38
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_manta/main.nf#BAM_VARIANT_CALLING_GERMLINE_MANTA/MANTA_GERMLINE@1[diploid_sv_vcf_tbi] Channel<Tuple> via MANTA_GERMLINE.out.diploid_sv_vcf_tbi
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_germline_manta/main.nf#BAM_VARIANT_CALLING_GERMLINE_MANTA/:emit:candidate_small_indels_vcf emit "candidate_small_indels_vcf" @38:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_manta/main.nf#BAM_VARIANT_CALLING_GERMLINE_MANTA/candidate_small_indels_vcf[out] Channel<?> via candidate_small_indels_vcf
+subworkflows/local/bam_variant_calling_germline_manta/main.nf#BAM_VARIANT_CALLING_GERMLINE_MANTA/:emit:candidate_small_indels_vcf_tbi emit "candidate_small_indels_vcf_tbi" @39:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_manta/main.nf#BAM_VARIANT_CALLING_GERMLINE_MANTA/candidate_small_indels_vcf_tbi[out] Channel<?> via candidate_small_indels_vcf_tbi
+subworkflows/local/bam_variant_calling_germline_manta/main.nf#BAM_VARIANT_CALLING_GERMLINE_MANTA/:emit:candidate_sv_vcf emit "candidate_sv_vcf" @40:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_manta/main.nf#BAM_VARIANT_CALLING_GERMLINE_MANTA/candidate_sv_vcf[out] Channel<?> via candidate_sv_vcf
+subworkflows/local/bam_variant_calling_germline_manta/main.nf#BAM_VARIANT_CALLING_GERMLINE_MANTA/:emit:candidate_sv_vcf_tbi emit "candidate_sv_vcf_tbi" @41:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_manta/main.nf#BAM_VARIANT_CALLING_GERMLINE_MANTA/candidate_sv_vcf_tbi[out] Channel<?> via candidate_sv_vcf_tbi
+subworkflows/local/bam_variant_calling_germline_manta/main.nf#BAM_VARIANT_CALLING_GERMLINE_MANTA/:emit:diploid_sv_vcf emit "diploid_sv_vcf" @42:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_manta/main.nf#BAM_VARIANT_CALLING_GERMLINE_MANTA/diploid_sv_vcf[out] Channel<?> via diploid_sv_vcf
+subworkflows/local/bam_variant_calling_germline_manta/main.nf#BAM_VARIANT_CALLING_GERMLINE_MANTA/:emit:diploid_sv_vcf_tbi emit "diploid_sv_vcf_tbi" @43:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_germline_manta/main.nf#BAM_VARIANT_CALLING_GERMLINE_MANTA/diploid_sv_vcf_tbi[out] Channel<?> via diploid_sv_vcf_tbi

@@ -1,0 +1,179 @@
+workflow main.nf# legacy
+statements 30, modelled 30
+main.nf#/:params params "params" @13:1
+  out flag (flag): -
+  out greeting (greeting): -
+main.nf#/channel.of@1 factory "channel.of" factory=channel.of @15:5
+  out out (out): Channel<?>
+main.nf#/.map@1 chain ".map" steps=map @15:46
+  in in (in): -
+    <- main.nf#/channel.of@1[out] Channel<?>
+  out out (out): Channel<?>
+main.nf#/GREET@1 call "GREET" callee=GREET:process:modelled:legacy @15:70
+  in x (x): -
+    <- main.nf#/.map@1[out] Channel<?>
+  out out (out): Channel<String>
+main.nf#/TO_UPPER@1 call "TO_UPPER" callee=TO_UPPER:process:modelled:legacy @15:70
+  in x (x): -
+    <- main.nf#/.map@1[out] Channel<?>
+  out out (out): Channel<String>
+main.nf#/.mix@1 chain ".mix.view" steps=mix,view @15:91
+  in in (in): -
+    <- main.nf#/GREET@1[out] Channel<String>
+  in 1:1 (mix(other)): -
+    <- main.nf#/TO_UPPER@1[out] Channel<String>
+  out out (out): Channel<String>
+main.nf#/channel.of@2 factory "channel.of" factory=channel.of @18:5
+  out out (out): Channel<String>
+main.nf#/ch_copy chain ".map" steps=map @18:5
+  in in (in): -
+    <- main.nf#/channel.of@2[out] Channel<String>
+  out out (out): Channel<?>
+main.nf#/.view@1 chain ".view" steps=view @19:5
+  in in (in): -
+    <- main.nf#/ch_copy[out] Channel<?> via ch_copy
+  out out (out): Channel<?>
+main.nf#/.view@2 chain ".view" steps=view @20:5
+  in in (in): -
+    <- main.nf#/ch_copy[out] Channel<?> via ch_original
+  out out (out): Channel<?>
+main.nf#/ch_reads factory "channel.fromPath" factory=channel.fromPath @23:16
+  out out (out): Channel<Path>
+main.nf#/channel.of@3 factory "channel.of" factory=channel.of @25:9
+  out out (out): Channel<String>
+main.nf#/channel.of@4 factory "channel.of" factory=channel.of @28:9
+  out out (out): Channel<Map>
+main.nf#/.map@2 chain ".map" steps=map @28:9
+  in in (in): -
+    <- main.nf#/channel.of@4[out] Channel<Map>
+  out out (out): Channel<?>
+main.nf#/channel.of@5 factory "channel.of" factory=channel.of @29:9
+  out out (out): Channel<String>
+main.nf#/channel.of@6 factory "channel.of" factory=channel.of @30:9
+  out out (out): Channel<String>
+main.nf#/channel.of@7 factory "channel.of" factory=channel.of @31:9
+  out out (out): Channel<String>
+main.nf#/ALL_INPUTS@1 call "ALL_INPUTS" callee=ALL_INPUTS:process:modelled:legacy @24:5
+  in sample (sample): -
+    <- main.nf#/channel.of@3[out] Channel<String>
+  in reads (reads): Path
+    <- main.nf#/ch_reads[out] Channel<Path> via ch_reads
+  in extra (extra): Path
+    <- main.nf#/ch_reads[out] Channel<Path> via ch_reads
+  in $4 (tuple(meta, bam, tag)): Tuple
+    <- main.nf#/.map@2[out] Channel<?>
+  in flag (flag): -
+    <- main.nf#/channel.of@5[out] Channel<String>
+  in $6 (GREETING): String
+    <- main.nf#/channel.of@6[out] Channel<String>
+  in $7 (stdin): String
+    <- main.nf#/channel.of@7[out] Channel<String>
+  out result (result): Channel<Tuple>
+  out versions (versions): Channel<Path>
+  out maybe (maybe): Channel<Path>
+  out sample (sample): Channel<?>
+  out [4] ([4]): Channel<Tuple>
+main.nf#/.view@3 chain ".view" steps=view @33:5
+  in in (in): -
+    <- main.nf#/ALL_INPUTS@1[result] Channel<Tuple> via ALL_INPUTS.out.result
+  out out (out): Channel<Tuple>
+main.nf#/.view@4 chain ".view" steps=view @34:5
+  in in (in): -
+    <- main.nf#/ALL_INPUTS@1[versions] Channel<Path> via ALL_INPUTS.out.versions
+  out out (out): Channel<Path>
+main.nf#/.view@5 chain ".view" steps=view @35:5
+  in in (in): -
+    <- main.nf#/ALL_INPUTS@1[result] Channel<Tuple> via ALL_INPUTS.out[0]
+  out out (out): Channel<Tuple>
+main.nf#/.view@6 chain ".view" steps=view @36:5
+  in in (in): -
+    <- main.nf#/ALL_INPUTS@1[sample] Channel<?> via ALL_INPUTS.out.sample
+  out out (out): Channel<?>
+main.nf#/channel.of@8 factory "channel.of" factory=channel.of @39:17
+  out out (out): Channel<Integer>
+main.nf#/ONE_UNNAMED@1 call "ONE_UNNAMED" callee=ONE_UNNAMED:process:modelled:legacy @39:5
+  in x (x): -
+    <- main.nf#/channel.of@8[out] Channel<Integer>
+  out out (out): Channel<Path>
+main.nf#/.view@7 chain ".view" steps=view @40:5
+  in in (in): -
+    <- main.nf#/ONE_UNNAMED@1[out] Channel<Path> via ONE_UNNAMED.out
+  out out (out): Channel<Path>
+main.nf#/channel.of@9 factory "channel.of" factory=channel.of @41:18
+  out out (out): Channel<String>
+main.nf#/MANY_UNNAMED@1 call "MANY_UNNAMED" callee=MANY_UNNAMED:process:modelled:legacy @41:5
+  in x (x): -
+    <- main.nf#/channel.of@9[out] Channel<String>
+  out [0] ([0]): Channel<Path>
+  out [1] ([1]): Channel<?>
+  out [2] ([2]): Channel<Tuple>
+main.nf#/.view@8 chain ".view" steps=view @42:5
+  in in (in): -
+    <- main.nf#/MANY_UNNAMED@1[[0]] Channel<Path> via MANY_UNNAMED.out[0]
+  out out (out): Channel<Path>
+main.nf#/.view@9 chain ".view" steps=view @43:5
+  in in (in): -
+    <- main.nf#/MANY_UNNAMED@1[[2]] Channel<Tuple> via MANY_UNNAMED.out[2]
+  out out (out): Channel<Tuple>
+main.nf#/.view@10 chain ".view" steps=view @52:5
+  in in (in): -
+    <- main.nf#/ONE_UNNAMED@1[out] Channel<Path> via runner.out[0] indirect
+    <- main.nf#/MANY_UNNAMED@1[[0]] Channel<Path> via runner.out[0] indirect
+  out out (out): ?
+main.nf#/.view@11 chain ".view" steps=view @54:5
+  in in (in): -
+    <- main.nf#/ONE_UNNAMED@1[out] Channel<Path> via ch_pick indirect
+    <- main.nf#/MANY_UNNAMED@1[[0]] Channel<Path> via ch_pick indirect
+  out out (out): ?
+main.nf#/ch_nums factory "channel.of" factory=channel.of @57:15
+  out out (out): Channel<Integer>
+main.nf#/.first@1 chain ".first.view" steps=first,view @58:5
+  in in (in): -
+    <- main.nf#/ch_nums[out] Channel<Integer> via ch_nums
+  out out (out): Value<Integer>
+main.nf#/.last@1 chain ".last.view" steps=last,view @59:5
+  in in (in): -
+    <- main.nf#/ch_nums[out] Channel<Integer> via ch_nums
+  out out (out): Value<Integer>
+main.nf#/channel.of@10 factory "channel.of" factory=channel.of @60:20
+  out out (out): Channel<Integer>
+main.nf#/.concat@1 chain ".concat.view" steps=concat,view @60:5
+  in in (in): -
+    <- main.nf#/ch_nums[out] Channel<Integer> via ch_nums
+  in 1:1 (concat(1)): -
+    <- main.nf#/channel.of@10[out] Channel<Integer>
+  out out (out): Channel<Integer>
+main.nf#/.collate@1 chain ".collate.view" steps=collate,view @61:5
+  in in (in): -
+    <- main.nf#/ch_nums[out] Channel<Integer> via ch_nums
+  out out (out): Channel<?>
+main.nf#/.distinct@1 chain ".distinct.view" steps=distinct,view @62:5
+  in in (in): -
+    <- main.nf#/ch_nums[out] Channel<Integer> via ch_nums
+  out out (out): Channel<Integer>
+main.nf#/channel.from@1 factory "channel.from" factory=channel.from @63:5
+  out out (out): ?
+main.nf#/.view@12 chain ".view" steps=view @63:5
+  in in (in): -
+    <- main.nf#/channel.from@1[out] ?
+  out out (out): ?
+main.nf#/channel.of@11 factory "channel.of" factory=channel.of @66:9
+  out out (out): Channel<String>
+main.nf#/SUB@1 call "SUB" callee=SUB:workflow:modelled:legacy @66:5
+  in ch_names (ch_names): -
+    <- main.nf#/channel.of@11[out] Channel<String>
+  in do_upper (do_upper): -
+    <- main.nf#/:params[flag] ? via params.flag
+  out merged (merged): ?
+  out greeted (greeted): Channel<String>
+main.nf#/.view@13 chain ".view" steps=view @67:5
+  in in (in): -
+    <- main.nf#/SUB@1[merged] ? via SUB.out.merged
+  out out (out): ?
+main.nf#/.view@14 chain ".view" steps=view @68:5
+  in in (in): -
+    <- main.nf#/SUB@1[greeted] Channel<String> via SUB.out.greeted
+  out out (out): Channel<String>
+bound @47:9 runner
+bound @50:9 runner
+bound @53:5 ch_pick

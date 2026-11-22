@@ -1,0 +1,314 @@
+workflow subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ legacy
+statements 11, modelled 10
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/:take:ch_bam_bai take "ch_bam_bai" @19:5
+  out out (out): -
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/:take:ch_gtf take "ch_gtf" @20:5
+  out out (out): -
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/:take:ch_gene_bed take "ch_gene_bed" @21:5
+  out out (out): -
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/:take:ch_fasta_fai take "ch_fasta_fai" @22:5
+  out out (out): -
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/:take:ch_biotypes_header take "ch_biotypes_header" @23:5
+  out out (out): -
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/:take:tools take "tools" @24:5
+  out out (out): -
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/:take:biotype take "biotype" @25:5
+  out out (out): -
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/rseqc_modules code "def rseqc_modules = tools.findAll { tool -> tool.startsWith…" @28:5
+  in tools (tools): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/:take:tools[out] ? via tools indirect
+  out rseqc_modules (rseqc_modules): -
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/ch_genome_bam chain ".map" steps=map @30:21
+  in in (in): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/:take:ch_bam_bai[out] ? via ch_bam_bai
+  out out (out): ?
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/.filter@1 chain ".filter" steps=filter @36:9
+  in in (in): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/ch_genome_bam[out] ? via ch_genome_bam
+  out out (out): Channel<?>
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/PRESEQ_LCEXTRAP@1 call "PRESEQ_LCEXTRAP" callee=PRESEQ_LCEXTRAP:process:modelled:legacy @35:5
+  in $1 (tuple(meta, bam)): Tuple
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/.filter@1[out] Channel<?>
+  out lc_extrap (lc_extrap): Channel<Tuple>
+  out log (log): Channel<Tuple>
+  out versions_preseq (versions_preseq): Channel<Tuple>
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/.map@1 chain ".map" steps=map @44:22
+  in in (in): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/:take:ch_gtf[out] ? via ch_gtf
+  out out (out): ?
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/.combine@1 chain ".combine.filter" steps=combine,filter @43:9
+  in in (in): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/ch_genome_bam[out] ? via ch_genome_bam
+  in 1:1 (combine(right)): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/.map@1[out] ?
+  out out (out): Channel<?>
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/SUBREAD_FEATURECOUNTS@1 call "SUBREAD_FEATURECOUNTS" callee=SUBREAD_FEATURECOUNTS:process:modelled:legacy @42:5
+  in $1 (tuple(meta, bams, annotation)): Tuple
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/.combine@1[out] Channel<?>
+  out counts (counts): Channel<Tuple>
+  out summary (summary): Channel<Tuple>
+  out versions_subread (versions_subread): Channel<Tuple>
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/CUSTOM_MULTIQCCUSTOMBIOTYPE@1 call "CUSTOM_MULTIQCCUSTOMBIOTYPE" callee=CUSTOM_MULTIQCCUSTOMBIOTYPE:process:modelled:legacy @48:5
+  in $1 (tuple(meta, count)): Tuple
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/SUBREAD_FEATURECOUNTS@1[counts] Channel<Tuple> via SUBREAD_FEATURECOUNTS.out.counts
+  in $2 (tuple(meta2, header)): Tuple
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/:take:ch_biotypes_header[out] ? via ch_biotypes_header
+  out tsv (tsv): Channel<Tuple>
+  out rrna (rrna): Channel<Tuple>
+  out versions (versions): Channel<Path>
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/.filter@2 chain ".filter" steps=filter @58:9
+  in in (in): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/ch_genome_bam[out] ? via ch_genome_bam
+  out out (out): Channel<?>
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/SAMTOOLS_SORT_QUALIMAP@1 call "SAMTOOLS_SORT_QUALIMAP" callee=SAMTOOLS_SORT_QUALIMAP:process:modelled:legacy @57:5
+  in $1 (tuple(meta, bam)): Tuple
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/.filter@2[out] Channel<?>
+  in $2 (tuple(meta2, fasta, fai)): Tuple
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/:take:ch_fasta_fai[out] ? via ch_fasta_fai
+  in index_format (index_format): -
+    = '' : String
+  out bam (bam): Channel<Tuple>
+  out cram (cram): Channel<Tuple>
+  out sam (sam): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out versions_samtools (versions_samtools): Channel<Tuple>
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/QUALIMAP_RNASEQ@1 call "QUALIMAP_RNASEQ" callee=QUALIMAP_RNASEQ:process:modelled:legacy @63:5
+  in $1 (tuple(meta, bam)): Tuple
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/SAMTOOLS_SORT_QUALIMAP@1[bam] Channel<Tuple> via SAMTOOLS_SORT_QUALIMAP.out.bam
+  in $2 (tuple(meta2, gtf)): Tuple
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/:take:ch_gtf[out] ? via ch_gtf
+  out results (results): Channel<Tuple>
+  out versions_qualimap (versions_qualimap): Channel<Tuple>
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/.filter@3 chain ".filter" steps=filter @72:9
+  in in (in): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/ch_genome_bam[out] ? via ch_genome_bam
+  out out (out): Channel<?>
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/DUPRADAR@1 call "DUPRADAR" callee=DUPRADAR:process:modelled:legacy @71:5
+  in $1 (tuple(meta, bam)): Tuple
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/.filter@3[out] Channel<?>
+  in $2 (tuple(meta2, gtf)): Tuple
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/:take:ch_gtf[out] ? via ch_gtf
+  out scatter2d (scatter2d): Channel<Tuple>
+  out boxplot (boxplot): Channel<Tuple>
+  out hist (hist): Channel<Tuple>
+  out dupmatrix (dupmatrix): Channel<Tuple>
+  out intercept_slope (intercept_slope): Channel<Tuple>
+  out multiqc (multiqc): Channel<Tuple>
+  out session_info (session_info): Channel<Tuple>
+  out versions (versions): Channel<Path>
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/.map@2 chain ".map.filter" steps=map,filter @80:9
+  in in (in): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/:take:ch_bam_bai[out] ? via ch_bam_bai
+  out out (out): Channel<?>
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/BAM_RSEQC@1 call "BAM_RSEQC" callee=BAM_RSEQC:workflow:modelled:legacy @79:5
+  in bam_bai (bam_bai): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/.map@2[out] Channel<?>
+  in bed (bed): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/:take:ch_gene_bed[out] ? via ch_gene_bed
+  in rseqc_modules (rseqc_modules): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/rseqc_modules[rseqc_modules] ? via rseqc_modules
+  out bamstat_txt (bamstat_txt): ?
+  out innerdistance_all (innerdistance_all): ?
+  out innerdistance_distance (innerdistance_distance): ?
+  out innerdistance_freq (innerdistance_freq): ?
+  out innerdistance_mean (innerdistance_mean): ?
+  out innerdistance_pdf (innerdistance_pdf): ?
+  out innerdistance_rscript (innerdistance_rscript): ?
+  out inferexperiment_txt (inferexperiment_txt): ?
+  out junctionannotation_all (junctionannotation_all): ?
+  out junctionannotation_bed (junctionannotation_bed): ?
+  out junctionannotation_interact_bed (junctionannotation_interact_bed): ?
+  out junctionannotation_xls (junctionannotation_xls): ?
+  out junctionannotation_pdf (junctionannotation_pdf): ?
+  out junctionannotation_events_pdf (junctionannotation_events_pdf): ?
+  out junctionannotation_rscript (junctionannotation_rscript): ?
+  out junctionannotation_log (junctionannotation_log): ?
+  out junctionsaturation_all (junctionsaturation_all): ?
+  out junctionsaturation_pdf (junctionsaturation_pdf): ?
+  out junctionsaturation_rscript (junctionsaturation_rscript): ?
+  out readdistribution_txt (readdistribution_txt): ?
+  out readduplication_all (readduplication_all): ?
+  out readduplication_seq_xls (readduplication_seq_xls): ?
+  out readduplication_pos_xls (readduplication_pos_xls): ?
+  out readduplication_pdf (readduplication_pdf): ?
+  out readduplication_rscript (readduplication_rscript): ?
+  out tin_txt (tin_txt): ?
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/channel.empty@1 factory "channel.empty" factory=channel.empty @88:24
+  out out (out): Channel<?>
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/ch_multiqc_files chain ".mix.mix.mix.mix.mix.mix.mix.mix.mix.mix.mix.mix" steps=mix,mix,mix,mix,mix,mix,mix,mix,mix,mix,mix,mix @88:24
+  in in (in): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/channel.empty@1[out] Channel<?>
+  in 1:1 (mix(other)): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/PRESEQ_LCEXTRAP@1[lc_extrap] Channel<Tuple> via PRESEQ_LCEXTRAP.out.lc_extrap
+  in 2:1 (mix(other)): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/CUSTOM_MULTIQCCUSTOMBIOTYPE@1[tsv] Channel<Tuple> via CUSTOM_MULTIQCCUSTOMBIOTYPE.out.tsv
+  in 3:1 (mix(other)): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/QUALIMAP_RNASEQ@1[results] Channel<Tuple> via QUALIMAP_RNASEQ.out.results
+  in 4:1 (mix(other)): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/DUPRADAR@1[multiqc] Channel<Tuple> via DUPRADAR.out.multiqc
+  in 5:1 (mix(other)): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/BAM_RSEQC@1[bamstat_txt] ? via BAM_RSEQC.out.bamstat_txt
+  in 6:1 (mix(other)): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/BAM_RSEQC@1[inferexperiment_txt] ? via BAM_RSEQC.out.inferexperiment_txt
+  in 7:1 (mix(other)): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/BAM_RSEQC@1[innerdistance_freq] ? via BAM_RSEQC.out.innerdistance_freq
+  in 8:1 (mix(other)): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/BAM_RSEQC@1[junctionannotation_log] ? via BAM_RSEQC.out.junctionannotation_log
+  in 9:1 (mix(other)): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/BAM_RSEQC@1[junctionsaturation_rscript] ? via BAM_RSEQC.out.junctionsaturation_rscript
+  in 10:1 (mix(other)): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/BAM_RSEQC@1[readdistribution_txt] ? via BAM_RSEQC.out.readdistribution_txt
+  in 11:1 (mix(other)): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/BAM_RSEQC@1[readduplication_pos_xls] ? via BAM_RSEQC.out.readduplication_pos_xls
+  in 12:1 (mix(other)): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/BAM_RSEQC@1[tin_txt] ? via BAM_RSEQC.out.tin_txt
+  out out (out): Channel<?>
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/ch_per_sample_mqc_bundle chain ".join.join.join.join.join.join.join.join.join.join.join.map" steps=join,join,join,join,join,join,join,join,join,join,join,map @104:32
+  in in (in): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/PRESEQ_LCEXTRAP@1[lc_extrap] Channel<Tuple> via PRESEQ_LCEXTRAP.out.lc_extrap
+  in 1:1 (join(right)): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/CUSTOM_MULTIQCCUSTOMBIOTYPE@1[tsv] Channel<Tuple> via CUSTOM_MULTIQCCUSTOMBIOTYPE.out.tsv
+  in 2:1 (join(right)): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/QUALIMAP_RNASEQ@1[results] Channel<Tuple> via QUALIMAP_RNASEQ.out.results
+  in 3:1 (join(right)): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/DUPRADAR@1[multiqc] Channel<Tuple> via DUPRADAR.out.multiqc
+  in 4:1 (join(right)): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/BAM_RSEQC@1[bamstat_txt] ? via BAM_RSEQC.out.bamstat_txt
+  in 5:1 (join(right)): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/BAM_RSEQC@1[inferexperiment_txt] ? via BAM_RSEQC.out.inferexperiment_txt
+  in 6:1 (join(right)): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/BAM_RSEQC@1[innerdistance_freq] ? via BAM_RSEQC.out.innerdistance_freq
+  in 7:1 (join(right)): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/BAM_RSEQC@1[junctionannotation_log] ? via BAM_RSEQC.out.junctionannotation_log
+  in 8:1 (join(right)): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/BAM_RSEQC@1[junctionsaturation_rscript] ? via BAM_RSEQC.out.junctionsaturation_rscript
+  in 9:1 (join(right)): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/BAM_RSEQC@1[readdistribution_txt] ? via BAM_RSEQC.out.readdistribution_txt
+  in 10:1 (join(right)): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/BAM_RSEQC@1[readduplication_pos_xls] ? via BAM_RSEQC.out.readduplication_pos_xls
+  in 11:1 (join(right)): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/BAM_RSEQC@1[tin_txt] ? via BAM_RSEQC.out.tin_txt
+  out out (out): Channel<?>
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/:emit:multiqc_files emit "multiqc_files" @120:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/ch_multiqc_files[out] Channel<?> via ch_multiqc_files
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/:emit:preseq_lc_extrap emit "preseq_lc_extrap" @123:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/PRESEQ_LCEXTRAP@1[lc_extrap] Channel<Tuple> via PRESEQ_LCEXTRAP.out.lc_extrap
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/:emit:preseq_log emit "preseq_log" @124:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/PRESEQ_LCEXTRAP@1[log] Channel<Tuple> via PRESEQ_LCEXTRAP.out.log
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/:emit:featurecounts_counts emit "featurecounts_counts" @127:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/SUBREAD_FEATURECOUNTS@1[counts] Channel<Tuple> via SUBREAD_FEATURECOUNTS.out.counts
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/:emit:featurecounts_summary emit "featurecounts_summary" @128:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/SUBREAD_FEATURECOUNTS@1[summary] Channel<Tuple> via SUBREAD_FEATURECOUNTS.out.summary
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/:emit:biotype_tsv emit "biotype_tsv" @129:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/CUSTOM_MULTIQCCUSTOMBIOTYPE@1[tsv] Channel<Tuple> via CUSTOM_MULTIQCCUSTOMBIOTYPE.out.tsv
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/:emit:biotype_rrna emit "biotype_rrna" @130:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/CUSTOM_MULTIQCCUSTOMBIOTYPE@1[rrna] Channel<Tuple> via CUSTOM_MULTIQCCUSTOMBIOTYPE.out.rrna
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/:emit:qualimap_results emit "qualimap_results" @133:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/QUALIMAP_RNASEQ@1[results] Channel<Tuple> via QUALIMAP_RNASEQ.out.results
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/:emit:dupradar_scatter2d emit "dupradar_scatter2d" @136:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/DUPRADAR@1[scatter2d] Channel<Tuple> via DUPRADAR.out.scatter2d
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/:emit:dupradar_boxplot emit "dupradar_boxplot" @137:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/DUPRADAR@1[boxplot] Channel<Tuple> via DUPRADAR.out.boxplot
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/:emit:dupradar_hist emit "dupradar_hist" @138:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/DUPRADAR@1[hist] Channel<Tuple> via DUPRADAR.out.hist
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/:emit:dupradar_dupmatrix emit "dupradar_dupmatrix" @139:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/DUPRADAR@1[dupmatrix] Channel<Tuple> via DUPRADAR.out.dupmatrix
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/:emit:dupradar_intercept_slope emit "dupradar_intercept_slope" @140:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/DUPRADAR@1[intercept_slope] Channel<Tuple> via DUPRADAR.out.intercept_slope
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/:emit:dupradar_multiqc emit "dupradar_multiqc" @141:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/DUPRADAR@1[multiqc] Channel<Tuple> via DUPRADAR.out.multiqc
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/:emit:inferexperiment_txt emit "inferexperiment_txt" @144:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/BAM_RSEQC@1[inferexperiment_txt] ? via BAM_RSEQC.out.inferexperiment_txt
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/:emit:bamstat_txt emit "bamstat_txt" @145:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/BAM_RSEQC@1[bamstat_txt] ? via BAM_RSEQC.out.bamstat_txt
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/:emit:innerdistance_all emit "innerdistance_all" @146:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/BAM_RSEQC@1[innerdistance_all] ? via BAM_RSEQC.out.innerdistance_all
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/:emit:innerdistance_distance emit "innerdistance_distance" @147:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/BAM_RSEQC@1[innerdistance_distance] ? via BAM_RSEQC.out.innerdistance_distance
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/:emit:innerdistance_freq emit "innerdistance_freq" @148:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/BAM_RSEQC@1[innerdistance_freq] ? via BAM_RSEQC.out.innerdistance_freq
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/:emit:innerdistance_mean emit "innerdistance_mean" @149:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/BAM_RSEQC@1[innerdistance_mean] ? via BAM_RSEQC.out.innerdistance_mean
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/:emit:innerdistance_pdf emit "innerdistance_pdf" @150:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/BAM_RSEQC@1[innerdistance_pdf] ? via BAM_RSEQC.out.innerdistance_pdf
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/:emit:innerdistance_rscript emit "innerdistance_rscript" @151:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/BAM_RSEQC@1[innerdistance_rscript] ? via BAM_RSEQC.out.innerdistance_rscript
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/:emit:junctionannotation_all emit "junctionannotation_all" @152:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/BAM_RSEQC@1[junctionannotation_all] ? via BAM_RSEQC.out.junctionannotation_all
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/:emit:junctionannotation_bed emit "junctionannotation_bed" @153:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/BAM_RSEQC@1[junctionannotation_bed] ? via BAM_RSEQC.out.junctionannotation_bed
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/:emit:junctionannotation_interact_bed emit "junctionannotation_interact_bed" @154:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/BAM_RSEQC@1[junctionannotation_interact_bed] ? via BAM_RSEQC.out.junctionannotation_interact_bed
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/:emit:junctionannotation_xls emit "junctionannotation_xls" @155:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/BAM_RSEQC@1[junctionannotation_xls] ? via BAM_RSEQC.out.junctionannotation_xls
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/:emit:junctionannotation_pdf emit "junctionannotation_pdf" @156:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/BAM_RSEQC@1[junctionannotation_pdf] ? via BAM_RSEQC.out.junctionannotation_pdf
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/:emit:junctionannotation_events_pdf emit "junctionannotation_events_pdf" @157:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/BAM_RSEQC@1[junctionannotation_events_pdf] ? via BAM_RSEQC.out.junctionannotation_events_pdf
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/:emit:junctionannotation_rscript emit "junctionannotation_rscript" @158:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/BAM_RSEQC@1[junctionannotation_rscript] ? via BAM_RSEQC.out.junctionannotation_rscript
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/:emit:junctionannotation_log emit "junctionannotation_log" @159:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/BAM_RSEQC@1[junctionannotation_log] ? via BAM_RSEQC.out.junctionannotation_log
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/:emit:junctionsaturation_all emit "junctionsaturation_all" @160:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/BAM_RSEQC@1[junctionsaturation_all] ? via BAM_RSEQC.out.junctionsaturation_all
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/:emit:junctionsaturation_pdf emit "junctionsaturation_pdf" @161:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/BAM_RSEQC@1[junctionsaturation_pdf] ? via BAM_RSEQC.out.junctionsaturation_pdf
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/:emit:junctionsaturation_rscript emit "junctionsaturation_rscript" @162:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/BAM_RSEQC@1[junctionsaturation_rscript] ? via BAM_RSEQC.out.junctionsaturation_rscript
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/:emit:readdistribution_txt emit "readdistribution_txt" @163:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/BAM_RSEQC@1[readdistribution_txt] ? via BAM_RSEQC.out.readdistribution_txt
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/:emit:readduplication_all emit "readduplication_all" @164:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/BAM_RSEQC@1[readduplication_all] ? via BAM_RSEQC.out.readduplication_all
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/:emit:readduplication_seq_xls emit "readduplication_seq_xls" @165:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/BAM_RSEQC@1[readduplication_seq_xls] ? via BAM_RSEQC.out.readduplication_seq_xls
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/:emit:readduplication_pos_xls emit "readduplication_pos_xls" @166:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/BAM_RSEQC@1[readduplication_pos_xls] ? via BAM_RSEQC.out.readduplication_pos_xls
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/:emit:readduplication_pdf emit "readduplication_pdf" @167:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/BAM_RSEQC@1[readduplication_pdf] ? via BAM_RSEQC.out.readduplication_pdf
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/:emit:readduplication_rscript emit "readduplication_rscript" @168:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/BAM_RSEQC@1[readduplication_rscript] ? via BAM_RSEQC.out.readduplication_rscript
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/:emit:tin_txt emit "tin_txt" @169:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/BAM_RSEQC@1[tin_txt] ? via BAM_RSEQC.out.tin_txt
+subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/:emit:per_sample_mqc_bundle emit "per_sample_mqc_bundle" @170:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_qc_rnaseq/main.nf#BAM_QC_RNASEQ/ch_per_sample_mqc_bundle[out] Channel<?> via ch_per_sample_mqc_bundle

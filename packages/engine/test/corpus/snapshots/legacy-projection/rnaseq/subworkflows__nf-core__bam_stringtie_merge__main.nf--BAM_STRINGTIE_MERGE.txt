@@ -1,0 +1,38 @@
+workflow subworkflows/nf-core/bam_stringtie_merge/main.nf#BAM_STRINGTIE_MERGE legacy
+statements 3, modelled 3
+subworkflows/nf-core/bam_stringtie_merge/main.nf#BAM_STRINGTIE_MERGE/:take:ch_bams take "ch_bams" @10:5
+  out out (out): -
+subworkflows/nf-core/bam_stringtie_merge/main.nf#BAM_STRINGTIE_MERGE/:take:ch_mode take "ch_mode" @11:5
+  out out (out): -
+subworkflows/nf-core/bam_stringtie_merge/main.nf#BAM_STRINGTIE_MERGE/:take:ch_chrgtf take "ch_chrgtf" @12:5
+  out out (out): -
+subworkflows/nf-core/bam_stringtie_merge/main.nf#BAM_STRINGTIE_MERGE/.map@1 chain ".map" steps=map @19:9
+  in in (in): -
+    <- subworkflows/nf-core/bam_stringtie_merge/main.nf#BAM_STRINGTIE_MERGE/:take:ch_chrgtf[out] ? via ch_chrgtf
+  out out (out): ?
+subworkflows/nf-core/bam_stringtie_merge/main.nf#BAM_STRINGTIE_MERGE/STRINGTIE_STRINGTIE@1 call "STRINGTIE_STRINGTIE" callee=STRINGTIE_STRINGTIE:process:modelled:legacy @16:5
+  in $1 (tuple(meta, srbam, lrbam)): Tuple
+    <- subworkflows/nf-core/bam_stringtie_merge/main.nf#BAM_STRINGTIE_MERGE/:take:ch_bams[out] ? via ch_bams
+  in mode (mode): -
+    <- subworkflows/nf-core/bam_stringtie_merge/main.nf#BAM_STRINGTIE_MERGE/:take:ch_mode[out] ? via ch_mode
+  in annotation_gtf (annotation_gtf): Path
+    <- subworkflows/nf-core/bam_stringtie_merge/main.nf#BAM_STRINGTIE_MERGE/.map@1[out] ?
+  out transcript_gtf (transcript_gtf): Channel<Tuple>
+  out abundance (abundance): Channel<Tuple>
+  out coverage_gtf (coverage_gtf): Channel<Tuple>
+  out ballgown (ballgown): Channel<Tuple>
+  out versions_stringtie (versions_stringtie): Channel<Tuple>
+subworkflows/nf-core/bam_stringtie_merge/main.nf#BAM_STRINGTIE_MERGE/collected_gtfs chain ".map.toSortedList.filter.map" steps=map,toSortedList,filter,map @22:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_stringtie_merge/main.nf#BAM_STRINGTIE_MERGE/STRINGTIE_STRINGTIE@1[transcript_gtf] Channel<Tuple> via STRINGTIE_STRINGTIE.out.transcript_gtf
+  out out (out): ?
+subworkflows/nf-core/bam_stringtie_merge/main.nf#BAM_STRINGTIE_MERGE/STRINGTIE_MERGE@1 call "STRINGTIE_MERGE" callee=STRINGTIE_MERGE:process:modelled:legacy @29:5
+  in $1 (tuple(meta, gtf)): Tuple
+    <- subworkflows/nf-core/bam_stringtie_merge/main.nf#BAM_STRINGTIE_MERGE/collected_gtfs[out] ? via collected_gtfs
+  in $2 (tuple(meta2, annotation_gtf)): Tuple
+    <- subworkflows/nf-core/bam_stringtie_merge/main.nf#BAM_STRINGTIE_MERGE/:take:ch_chrgtf[out] ? via ch_chrgtf
+  out merged_gtf (merged_gtf): Channel<Tuple>
+  out versions_stringtie (versions_stringtie): Channel<Tuple>
+subworkflows/nf-core/bam_stringtie_merge/main.nf#BAM_STRINGTIE_MERGE/:emit:stringtie_gtf emit "stringtie_gtf" @35:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_stringtie_merge/main.nf#BAM_STRINGTIE_MERGE/STRINGTIE_MERGE@1[merged_gtf] Channel<Tuple> via STRINGTIE_MERGE.out.merged_gtf

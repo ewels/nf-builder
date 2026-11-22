@@ -1,0 +1,1133 @@
+workflow workflows/sarek.nf#SAREK legacy
+statements 85, modelled 79
+workflows/sarek.nf#SAREK/:params params "params" @63:1
+  out save_mapped (save_mapped): -
+  out save_output_as_bam (save_output_as_bam): -
+  out outdir (outdir): -
+  out only_paired_variant_calling (only_paired_variant_calling): -
+  out joint_germline (joint_germline): -
+  out sentieon_haplotyper_emit_mode (sentieon_haplotyper_emit_mode): -
+  out sentieon_dnascope_emit_mode (sentieon_dnascope_emit_mode): -
+  out sentieon_dnascope_pcr_indel_model (sentieon_dnascope_pcr_indel_model): -
+  out joint_mutect2 (joint_mutect2): -
+  out concatenate_vcfs (concatenate_vcfs): -
+  out filter_vcfs (filter_vcfs): -
+  out snv_consensus_calling (snv_consensus_calling): -
+  out normalize_vcfs (normalize_vcfs): -
+  out vep_include_fasta (vep_include_fasta): -
+  out multiqc_methods_description (multiqc_methods_description): -
+workflows/sarek.nf#SAREK/:take:input_sample take "input_sample" @65:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:aligner take "aligner" @66:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:group_by_umi_strategy take "group_by_umi_strategy" @67:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:skip_tools take "skip_tools" @68:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:step take "step" @69:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:tools take "tools" @70:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:wes take "wes" @71:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:ascat_alleles take "ascat_alleles" @72:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:ascat_loci take "ascat_loci" @73:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:ascat_loci_gc take "ascat_loci_gc" @74:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:ascat_loci_rt take "ascat_loci_rt" @75:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:bbsplit_index take "bbsplit_index" @76:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:bcftools_annotations take "bcftools_annotations" @77:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:bcftools_annotations_tbi take "bcftools_annotations_tbi" @78:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:bcftools_columns take "bcftools_columns" @79:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:bcftools_header_lines take "bcftools_header_lines" @80:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:cf_chrom_len take "cf_chrom_len" @81:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:chr_files take "chr_files" @82:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:cnvkit_reference take "cnvkit_reference" @83:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:dbsnp take "dbsnp" @84:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:dbsnp_tbi take "dbsnp_tbi" @85:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:dbsnp_vqsr take "dbsnp_vqsr" @86:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:dict take "dict" @87:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:fasta take "fasta" @88:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:fasta_fai take "fasta_fai" @89:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:force_call_alleles take "force_call_alleles" @90:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:force_call_alleles_tbi take "force_call_alleles_tbi" @91:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:germline_resource take "germline_resource" @92:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:germline_resource_tbi take "germline_resource_tbi" @93:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:contamination_resource take "contamination_resource" @94:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:contamination_resource_tbi take "contamination_resource_tbi" @95:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:contamination_resource_provided take "contamination_resource_provided" @96:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:index_alignment take "index_alignment" @97:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:intervals_and_num_intervals take "intervals_and_num_intervals" @98:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:intervals_bed_combined take "intervals_bed_combined" @99:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:intervals_bed_combined_for_variant_calling take "intervals_bed_combined_for_variant_calling" @100:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:intervals_bed_gz_tbi_and_num_intervals take "intervals_bed_gz_tbi_and_num_intervals" @101:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:intervals_bed_gz_tbi_combined take "intervals_bed_gz_tbi_combined" @102:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:intervals_for_preprocessing take "intervals_for_preprocessing" @103:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:known_indels_vqsr take "known_indels_vqsr" @104:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:known_sites_indels take "known_sites_indels" @105:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:known_sites_indels_tbi take "known_sites_indels_tbi" @106:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:known_sites_snps take "known_sites_snps" @107:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:known_sites_snps_tbi take "known_sites_snps_tbi" @108:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:known_snps_vqsr take "known_snps_vqsr" @109:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:mappability take "mappability" @110:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:msisensor2_models take "msisensor2_models" @111:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:msisensorpro_scan take "msisensorpro_scan" @112:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:ngscheckmate_bed take "ngscheckmate_bed" @113:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:pon take "pon" @114:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:pon_tbi take "pon_tbi" @115:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:sentieon_dnascope_model take "sentieon_dnascope_model" @116:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:varlociraptor_chunk_size take "varlociraptor_chunk_size" @117:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:varlociraptor_events_germline take "varlociraptor_events_germline" @118:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:varlociraptor_events_somatic take "varlociraptor_events_somatic" @119:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:varlociraptor_events_tumor_only take "varlociraptor_events_tumor_only" @120:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:varlociraptor_fdr take "varlociraptor_fdr" @121:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:varlociraptor_scenario_germline take "varlociraptor_scenario_germline" @122:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:varlociraptor_scenario_somatic take "varlociraptor_scenario_somatic" @123:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:varlociraptor_scenario_tumor_only take "varlociraptor_scenario_tumor_only" @124:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:snpeff_cache take "snpeff_cache" @125:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:snpeff_db take "snpeff_db" @126:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:vep_cache take "vep_cache" @127:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:vep_cache_version take "vep_cache_version" @128:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:vep_extra_files take "vep_extra_files" @129:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:vep_fasta take "vep_fasta" @130:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:vep_genome take "vep_genome" @131:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:vep_species take "vep_species" @132:5
+  out out (out): -
+workflows/sarek.nf#SAREK/:take:snpsift_db take "snpsift_db" @133:5
+  out out (out): -
+workflows/sarek.nf#SAREK/reports factory "channel.empty" factory=channel.empty @137:15
+  out out (out): Channel<?>
+workflows/sarek.nf#SAREK/input_sample_type chain ".branch" steps=branch @148:29
+  guards then of step == 'mapping'
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/:take:input_sample[out] ? via input_sample
+  out out (out): Record
+workflows/sarek.nf#SAREK/fastq_gz chain ".map" steps=map @156:20
+  guards then of step == 'mapping'
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/input_sample_type[out] Record via input_sample_type indirect
+  out out (out): ?
+workflows/sarek.nf#SAREK/fastq_gz_pair_from_spring call "SPRING_DECOMPRESS_TO_FQ_PAIR" callee=SPRING_DECOMPRESS_TO_FQ_PAIR:process:modelled:legacy @159:37
+  guards then of step == 'mapping'
+  in $1 (tuple(meta, spring)): Tuple
+    <- workflows/sarek.nf#SAREK/input_sample_type[out] Record via input_sample_type indirect
+  in write_one_fastq_gz (write_one_fastq_gz): -
+    = false : Boolean
+  out fastq (fastq): Channel<Tuple>
+  out versions_spring (versions_spring): Channel<Tuple>
+workflows/sarek.nf#SAREK/one_fastq_gz_from_spring chain ".map" steps=map @161:36
+  guards then of step == 'mapping'
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/fastq_gz_pair_from_spring[fastq] Channel<Tuple> via fastq_gz_pair_from_spring.fastq
+  out out (out): Channel<?>
+workflows/sarek.nf#SAREK/.map@1 chain ".map" steps=map @165:13
+  guards then of step == 'mapping'
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/input_sample_type[out] Record via input_sample_type indirect
+  out out (out): ?
+workflows/sarek.nf#SAREK/r1_fastq_gz_from_spring call "SPRING_DECOMPRESS_TO_R1_FQ" callee=SPRING_DECOMPRESS_TO_R1_FQ:process:modelled:legacy @164:35
+  guards then of step == 'mapping'
+  in $1 (tuple(meta, spring)): Tuple
+    <- workflows/sarek.nf#SAREK/.map@1[out] ?
+  in write_one_fastq_gz (write_one_fastq_gz): -
+    = true : Boolean
+  out fastq (fastq): Channel<Tuple>
+  out versions_spring (versions_spring): Channel<Tuple>
+workflows/sarek.nf#SAREK/.map@2 chain ".map" steps=map @171:13
+  guards then of step == 'mapping'
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/input_sample_type[out] Record via input_sample_type indirect
+  out out (out): ?
+workflows/sarek.nf#SAREK/r2_fastq_gz_from_spring call "SPRING_DECOMPRESS_TO_R2_FQ" callee=SPRING_DECOMPRESS_TO_R2_FQ:process:modelled:legacy @170:35
+  guards then of step == 'mapping'
+  in $1 (tuple(meta, spring)): Tuple
+    <- workflows/sarek.nf#SAREK/.map@2[out] ?
+  in write_one_fastq_gz (write_one_fastq_gz): -
+    = true : Boolean
+  out fastq (fastq): Channel<Tuple>
+  out versions_spring (versions_spring): Channel<Tuple>
+workflows/sarek.nf#SAREK/two_fastq_gz_from_spring chain ".join.map" steps=join,map @177:36
+  guards then of step == 'mapping'
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/r1_fastq_gz_from_spring[fastq] Channel<Tuple> via r1_fastq_gz_from_spring.fastq
+  in 1:1 (join(1)): -
+    <- workflows/sarek.nf#SAREK/r2_fastq_gz_from_spring[fastq] Channel<Tuple> via r2_fastq_gz_from_spring.fastq
+  out out (out): Channel<?>
+workflows/sarek.nf#SAREK/two_fastq_gz_from_spring~2 chain ".map" steps=map @179:36
+  guards then of step == 'mapping'
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/two_fastq_gz_from_spring[out] Channel<?> via two_fastq_gz_from_spring
+  out out (out): Channel<?>
+workflows/sarek.nf#SAREK/interleave_input code "interleave_input = false" @185:9
+  guards then of step == 'mapping'
+  out interleave_input (interleave_input): Boolean
+workflows/sarek.nf#SAREK/CONVERT_FASTQ_INPUT@1 call "CONVERT_FASTQ_INPUT" callee=CONVERT_FASTQ_INPUT:workflow:modelled:legacy @186:9
+  guards then of step == 'mapping'
+  in input (input): -
+    <- workflows/sarek.nf#SAREK/input_sample_type[out] Record via input_sample_type indirect
+  in fasta (fasta): -
+    <- workflows/sarek.nf#SAREK/:take:fasta[out] ? via fasta
+  in fasta_fai (fasta_fai): -
+    <- workflows/sarek.nf#SAREK/:take:fasta_fai[out] ? via fasta_fai
+  in interleaved (interleaved): -
+    <- workflows/sarek.nf#SAREK/interleave_input[interleave_input] Boolean via interleave_input
+  out reads (reads): Channel<Tuple>
+workflows/sarek.nf#SAREK/input_fastq chain ".mix.mix.mix" steps=mix,mix,mix @197:23
+  guards then of step == 'mapping'
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/fastq_gz[out] ? via fastq_gz
+  in 1:1 (mix(other)): -
+    <- workflows/sarek.nf#SAREK/CONVERT_FASTQ_INPUT@1[reads] Channel<Tuple> via CONVERT_FASTQ_INPUT.out.reads
+  in 2:1 (mix(other)): -
+    <- workflows/sarek.nf#SAREK/one_fastq_gz_from_spring[out] Channel<?> via one_fastq_gz_from_spring
+  in 3:1 (mix(other)): -
+    <- workflows/sarek.nf#SAREK/two_fastq_gz_from_spring~2[out] Channel<?> via two_fastq_gz_from_spring
+  out out (out): Channel<?>
+workflows/sarek.nf#SAREK/FASTQC@1 call "FASTQC" callee=FASTQC:process:modelled:legacy @202:13
+  guards then of step == 'mapping'; then of !(skip_tools.split(',').contains('fastqc'))
+  in $1 (tuple(meta, reads)): Tuple
+    <- workflows/sarek.nf#SAREK/input_fastq[out] Channel<?> via input_fastq
+  out html (html): Channel<Tuple>
+  out zip (zip): Channel<Tuple>
+  out versions_fastqc (versions_fastqc): Channel<Tuple>
+workflows/sarek.nf#SAREK/.collect@1 chain ".collect" steps=collect @204:35
+  guards then of step == 'mapping'; then of !(skip_tools.split(',').contains('fastqc'))
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/FASTQC@1[zip] Channel<Tuple> via FASTQC.out.zip
+  out out (out): Value<?>
+workflows/sarek.nf#SAREK/reports~2 chain ".mix" steps=mix @204:23
+  guards then of step == 'mapping'; then of !(skip_tools.split(',').contains('fastqc'))
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/reports[out] Channel<?> via reports
+  in 1:1 (mix(other)): -
+    <- workflows/sarek.nf#SAREK/.collect@1[out] Value<?>
+  out out (out): Channel<?>
+workflows/sarek.nf#SAREK/channel.empty@1 factory "channel.empty" factory=channel.empty @208:23
+  guards else of step == 'mapping'
+  out out (out): Channel<?>
+workflows/sarek.nf#SAREK/input_fastq~2 chain ".mix" steps=mix @208:23
+  guards else of step == 'mapping'
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/channel.empty@1[out] Channel<?>
+  in 1:1 (mix(other)): -
+    <- workflows/sarek.nf#SAREK/:take:input_sample[out] ? via input_sample
+  out out (out): Channel<?>
+workflows/sarek.nf#SAREK/FASTQ_PREPROCESS_PARABRICKS@1 call "FASTQ_PREPROCESS_PARABRICKS" callee=FASTQ_PREPROCESS_PARABRICKS:workflow:modelled:legacy @215:13
+  guards then of step in ['mapping', 'markduplicates', 'prepare_recalibration', 'recalibrate']; then of aligner == 'parabricks'
+  in ch_reads (ch_reads): -
+    <- workflows/sarek.nf#SAREK/input_fastq[out] Channel<?> via input_fastq indirect
+    <- workflows/sarek.nf#SAREK/input_fastq~2[out] Channel<?> via input_fastq indirect
+  in ch_fasta (ch_fasta): -
+    <- workflows/sarek.nf#SAREK/:take:fasta[out] ? via fasta
+  in ch_fasta_fai (ch_fasta_fai): -
+    <- workflows/sarek.nf#SAREK/:take:fasta_fai[out] ? via fasta_fai
+  in ch_index (ch_index): -
+    <- workflows/sarek.nf#SAREK/:take:index_alignment[out] ? via index_alignment
+  in ch_interval_file (ch_interval_file): -
+    <- workflows/sarek.nf#SAREK/:take:intervals_bed_combined[out] ? via intervals_bed_combined
+  in ch_known_sites (ch_known_sites): -
+    <- workflows/sarek.nf#SAREK/:take:known_sites_indels[out] ? via known_sites_indels
+  in ch_known_sites_tbi (ch_known_sites_tbi): -
+    <- workflows/sarek.nf#SAREK/:take:known_sites_indels_tbi[out] ? via known_sites_indels_tbi
+  in val_skip_applybqsr (val_skip_applybqsr): -
+    <- workflows/sarek.nf#SAREK/:take:skip_tools[out] ? via skip_tools indirect
+  in val_save_mapped (val_save_mapped): -
+    <- workflows/sarek.nf#SAREK/:params[save_mapped] ? via params.save_mapped
+  in val_save_output_as_bam (val_save_output_as_bam): -
+    <- workflows/sarek.nf#SAREK/:params[save_output_as_bam] ? via params.save_output_as_bam
+  in val_outdir (val_outdir): -
+    <- workflows/sarek.nf#SAREK/:params[outdir] ? via params.outdir
+  out cram (cram): ?
+  out reports (reports): Channel<?>
+workflows/sarek.nf#SAREK/cram_variant_calling factory "channel.empty" factory=channel.empty @230:36
+  guards then of step in ['mapping', 'markduplicates', 'prepare_recalibration', 'recalibrate']; then of aligner == 'parabricks'
+  out out (out): Channel<?>
+workflows/sarek.nf#SAREK/cram_variant_calling~2 chain ".mix" steps=mix @231:36
+  guards then of step in ['mapping', 'markduplicates', 'prepare_recalibration', 'recalibrate']; then of aligner == 'parabricks'
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/cram_variant_calling[out] Channel<?> via cram_variant_calling
+  in 1:1 (mix(other)): -
+    <- workflows/sarek.nf#SAREK/FASTQ_PREPROCESS_PARABRICKS@1[cram] ? via FASTQ_PREPROCESS_PARABRICKS.out.cram
+  out out (out): Channel<?>
+workflows/sarek.nf#SAREK/reports~3 chain ".mix" steps=mix @234:23
+  guards then of step in ['mapping', 'markduplicates', 'prepare_recalibration', 'recalibrate']; then of aligner == 'parabricks'
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/reports[out] Channel<?> via reports indirect
+    <- workflows/sarek.nf#SAREK/reports~2[out] Channel<?> via reports indirect
+  in 1:1 (mix(other)): -
+    <- workflows/sarek.nf#SAREK/FASTQ_PREPROCESS_PARABRICKS@1[reports] Channel<?> via FASTQ_PREPROCESS_PARABRICKS.out.reports
+  out out (out): Channel<?>
+workflows/sarek.nf#SAREK/FASTQ_PREPROCESS_GATK@1 call "FASTQ_PREPROCESS_GATK" callee=FASTQ_PREPROCESS_GATK:workflow:modelled:legacy @238:13
+  guards then of step in ['mapping', 'markduplicates', 'prepare_recalibration', 'recalibrate']; else of aligner == 'parabricks'
+  in input_fastq (input_fastq): -
+    <- workflows/sarek.nf#SAREK/input_fastq[out] Channel<?> via input_fastq indirect
+    <- workflows/sarek.nf#SAREK/input_fastq~2[out] Channel<?> via input_fastq indirect
+  in input_sample (input_sample): -
+    <- workflows/sarek.nf#SAREK/:take:input_sample[out] ? via input_sample
+  in dict (dict): -
+    <- workflows/sarek.nf#SAREK/:take:dict[out] ? via dict
+  in fasta (fasta): -
+    <- workflows/sarek.nf#SAREK/:take:fasta[out] ? via fasta
+  in fasta_fai (fasta_fai): -
+    <- workflows/sarek.nf#SAREK/:take:fasta_fai[out] ? via fasta_fai
+  in index_alignment (index_alignment): -
+    <- workflows/sarek.nf#SAREK/:take:index_alignment[out] ? via index_alignment
+  in intervals_and_num_intervals (intervals_and_num_intervals): -
+    <- workflows/sarek.nf#SAREK/:take:intervals_and_num_intervals[out] ? via intervals_and_num_intervals
+  in intervals_for_preprocessing (intervals_for_preprocessing): -
+    <- workflows/sarek.nf#SAREK/:take:intervals_for_preprocessing[out] ? via intervals_for_preprocessing
+  in known_sites_indels (known_sites_indels): -
+    <- workflows/sarek.nf#SAREK/:take:known_sites_indels[out] ? via known_sites_indels
+  in known_sites_indels_tbi (known_sites_indels_tbi): -
+    <- workflows/sarek.nf#SAREK/:take:known_sites_indels_tbi[out] ? via known_sites_indels_tbi
+  in bbsplit_index (bbsplit_index): -
+    <- workflows/sarek.nf#SAREK/:take:bbsplit_index[out] ? via bbsplit_index
+  in save_output_as_bam (save_output_as_bam): -
+    <- workflows/sarek.nf#SAREK/:params[save_output_as_bam] ? via params.save_output_as_bam
+  in aligner (aligner): -
+    <- workflows/sarek.nf#SAREK/:take:aligner[out] ? via aligner
+  in group_by_umi_strategy (group_by_umi_strategy): -
+    <- workflows/sarek.nf#SAREK/:take:group_by_umi_strategy[out] ? via group_by_umi_strategy
+  out cram_variant_calling (cram_variant_calling): ?
+  out reports (reports): ?
+workflows/sarek.nf#SAREK/cram_variant_calling~3 factory "channel.empty" factory=channel.empty @256:36
+  guards then of step in ['mapping', 'markduplicates', 'prepare_recalibration', 'recalibrate']; else of aligner == 'parabricks'
+  out out (out): Channel<?>
+workflows/sarek.nf#SAREK/cram_variant_calling~4 chain ".mix" steps=mix @257:36
+  guards then of step in ['mapping', 'markduplicates', 'prepare_recalibration', 'recalibrate']; else of aligner == 'parabricks'
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/cram_variant_calling~3[out] Channel<?> via cram_variant_calling
+  in 1:1 (mix(other)): -
+    <- workflows/sarek.nf#SAREK/FASTQ_PREPROCESS_GATK@1[cram_variant_calling] ? via FASTQ_PREPROCESS_GATK.out.cram_variant_calling
+  out out (out): Channel<?>
+workflows/sarek.nf#SAREK/reports~4 chain ".mix" steps=mix @260:23
+  guards then of step in ['mapping', 'markduplicates', 'prepare_recalibration', 'recalibrate']; else of aligner == 'parabricks'
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/reports[out] Channel<?> via reports indirect
+    <- workflows/sarek.nf#SAREK/reports~2[out] Channel<?> via reports indirect
+  in 1:1 (mix(other)): -
+    <- workflows/sarek.nf#SAREK/FASTQ_PREPROCESS_GATK@1[reports] ? via FASTQ_PREPROCESS_GATK.out.reports
+  out out (out): Channel<?>
+workflows/sarek.nf#SAREK/channel.empty@2 factory "channel.empty" factory=channel.empty @266:32
+  guards then of step == 'variant_calling'
+  out out (out): Channel<?>
+workflows/sarek.nf#SAREK/cram_variant_calling~5 chain ".mix" steps=mix @266:32
+  guards then of step == 'variant_calling'
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/channel.empty@2[out] Channel<?>
+  in 1:1 (mix(other)): -
+    <- workflows/sarek.nf#SAREK/:take:input_sample[out] ? via input_sample
+  out out (out): Channel<?>
+workflows/sarek.nf#SAREK/cram_variant_calling~6 factory "channel.empty" factory=channel.empty @271:32
+  guards then of step == 'annotate'
+  out out (out): Channel<?>
+workflows/sarek.nf#SAREK/.combine@1 chain ".combine.map.collect" steps=combine,map,collect @278:9
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/:take:fasta[out] ? via fasta
+  in 1:1 (combine(right)): -
+    <- workflows/sarek.nf#SAREK/:take:fasta_fai[out] ? via fasta_fai
+  out out (out): Value<Bag<?>>
+workflows/sarek.nf#SAREK/CRAM_SAMPLEQC@1 call "CRAM_SAMPLEQC" callee=CRAM_SAMPLEQC:workflow:modelled:legacy @275:5
+  in cram (cram): -
+    <- workflows/sarek.nf#SAREK/cram_variant_calling~2[out] Channel<?> via cram_variant_calling indirect
+    <- workflows/sarek.nf#SAREK/cram_variant_calling~4[out] Channel<?> via cram_variant_calling indirect
+    <- workflows/sarek.nf#SAREK/cram_variant_calling~5[out] Channel<?> via cram_variant_calling indirect
+    <- workflows/sarek.nf#SAREK/cram_variant_calling~6[out] Channel<?> via cram_variant_calling indirect
+  in ngscheckmate_bed (ngscheckmate_bed): -
+    <- workflows/sarek.nf#SAREK/:take:ngscheckmate_bed[out] ? via ngscheckmate_bed
+  in fasta_fai (fasta_fai): -
+    <- workflows/sarek.nf#SAREK/.combine@1[out] Value<Bag<?>>
+  in skip_baserecalibration (skip_baserecalibration): -
+    <- workflows/sarek.nf#SAREK/:take:skip_tools[out] ? via skip_tools indirect
+  in intervals_for_preprocessing (intervals_for_preprocessing): -
+    <- workflows/sarek.nf#SAREK/:take:intervals_for_preprocessing[out] ? via intervals_for_preprocessing
+  out corr_matrix (corr_matrix): Channel<Tuple>
+  out matched (matched): Channel<Tuple>
+  out all (all): Channel<Tuple>
+  out vcf (vcf): Channel<Tuple>
+  out pdf (pdf): Channel<Tuple>
+  out reports (reports): ?
+workflows/sarek.nf#SAREK/reports~5 chain ".mix" steps=mix @283:15
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/reports[out] Channel<?> via reports indirect
+    <- workflows/sarek.nf#SAREK/reports~2[out] Channel<?> via reports indirect
+    <- workflows/sarek.nf#SAREK/reports~3[out] Channel<?> via reports indirect
+    <- workflows/sarek.nf#SAREK/reports~4[out] Channel<?> via reports indirect
+  in 1:1 (mix(other)): -
+    <- workflows/sarek.nf#SAREK/CRAM_SAMPLEQC@1[reports] ? via CRAM_SAMPLEQC.out.reports
+  out out (out): Channel<?>
+workflows/sarek.nf#SAREK/bam_variant_calling factory "channel.empty" factory=channel.empty @287:31
+  guards then of tools
+  out out (out): Channel<?>
+workflows/sarek.nf#SAREK/cram_variant_calling_status_tmp chain ".branch" steps=branch @293:47
+  guards then of tools; then of tools.split(',').contains('cnvkit') || tools.split(',').contains('msisensor2') || tools.split(',').contains('muse')
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/cram_variant_calling~2[out] Channel<?> via cram_variant_calling indirect
+    <- workflows/sarek.nf#SAREK/cram_variant_calling~4[out] Channel<?> via cram_variant_calling indirect
+    <- workflows/sarek.nf#SAREK/cram_variant_calling~5[out] Channel<?> via cram_variant_calling indirect
+    <- workflows/sarek.nf#SAREK/cram_variant_calling~6[out] Channel<?> via cram_variant_calling indirect
+  out out (out): Record
+workflows/sarek.nf#SAREK/.combine@2 chain ".combine.map.collect" steps=combine,map,collect @299:63
+  guards then of tools; then of tools.split(',').contains('cnvkit') || tools.split(',').contains('msisensor2') || tools.split(',').contains('muse')
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/:take:fasta[out] ? via fasta
+  in 1:1 (combine(right)): -
+    <- workflows/sarek.nf#SAREK/:take:fasta_fai[out] ? via fasta_fai
+  out out (out): Value<Bag<?>>
+workflows/sarek.nf#SAREK/CRAM_TO_BAM@1 call "CRAM_TO_BAM" callee=CRAM_TO_BAM:process:modelled:legacy @299:13
+  guards then of tools; then of tools.split(',').contains('cnvkit') || tools.split(',').contains('msisensor2') || tools.split(',').contains('muse')
+  in $1 (tuple(meta, input, index)): Tuple
+    <- workflows/sarek.nf#SAREK/cram_variant_calling_status_tmp[out] Record via cram_variant_calling_status_tmp indirect
+  in $2 (tuple(meta2, fasta, fai)): Tuple
+    <- workflows/sarek.nf#SAREK/.combine@2[out] Value<Bag<?>>
+  out bam (bam): Channel<Tuple>
+  out cram (cram): Channel<Tuple>
+  out bai (bai): Channel<Tuple>
+  out crai (crai): Channel<Tuple>
+  out versions_samtools (versions_samtools): Channel<Tuple>
+workflows/sarek.nf#SAREK/bam_variant_calling~2 chain ".join.mix.map" steps=join,mix,map @302:35
+  guards then of tools; then of tools.split(',').contains('cnvkit') || tools.split(',').contains('msisensor2') || tools.split(',').contains('muse')
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/CRAM_TO_BAM@1[bam] Channel<Tuple> via CRAM_TO_BAM.out.bam
+  in 1:1 (join(right)): -
+    <- workflows/sarek.nf#SAREK/CRAM_TO_BAM@1[bai] Channel<Tuple> via CRAM_TO_BAM.out.bai
+  in 2:1 (mix(other)): -
+    <- workflows/sarek.nf#SAREK/cram_variant_calling_status_tmp[out] Record via cram_variant_calling_status_tmp indirect
+  out out (out): Channel<?>
+workflows/sarek.nf#SAREK/cram_variant_calling_status chain ".branch" steps=branch @311:39
+  guards then of tools
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/cram_variant_calling~2[out] Channel<?> via cram_variant_calling indirect
+    <- workflows/sarek.nf#SAREK/cram_variant_calling~4[out] Channel<?> via cram_variant_calling indirect
+    <- workflows/sarek.nf#SAREK/cram_variant_calling~5[out] Channel<?> via cram_variant_calling indirect
+    <- workflows/sarek.nf#SAREK/cram_variant_calling~6[out] Channel<?> via cram_variant_calling indirect
+  out out (out): Record
+workflows/sarek.nf#SAREK/bam_variant_calling_status chain ".branch" steps=branch @317:38
+  guards then of tools
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/bam_variant_calling[out] Channel<?> via bam_variant_calling indirect
+    <- workflows/sarek.nf#SAREK/bam_variant_calling~2[out] Channel<?> via bam_variant_calling indirect
+  out out (out): Record
+workflows/sarek.nf#SAREK/cram_variant_calling_normal_to_cross chain ".map" steps=map @323:48
+  guards then of tools
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/cram_variant_calling_status[out] Record via cram_variant_calling_status indirect
+  out out (out): ?
+workflows/sarek.nf#SAREK/bam_variant_calling_normal_to_cross chain ".map" steps=map @324:47
+  guards then of tools
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/bam_variant_calling_status[out] Record via bam_variant_calling_status indirect
+  out out (out): ?
+workflows/sarek.nf#SAREK/cram_variant_calling_pair_to_cross chain ".map" steps=map @327:46
+  guards then of tools
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/cram_variant_calling_status[out] Record via cram_variant_calling_status indirect
+  out out (out): ?
+workflows/sarek.nf#SAREK/bam_variant_calling_pair_to_cross chain ".map" steps=map @328:45
+  guards then of tools
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/bam_variant_calling_status[out] Record via bam_variant_calling_status indirect
+  out out (out): ?
+workflows/sarek.nf#SAREK/cram_variant_calling_tumor_grouped chain ".groupTuple" steps=groupTuple @334:46
+  guards then of tools
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/cram_variant_calling_pair_to_cross[out] ? via cram_variant_calling_pair_to_cross
+  out out (out): Channel<?>
+workflows/sarek.nf#SAREK/bam_variant_calling_tumor_grouped chain ".groupTuple" steps=groupTuple @335:45
+  guards then of tools
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/bam_variant_calling_pair_to_cross[out] ? via bam_variant_calling_pair_to_cross
+  out out (out): Channel<?>
+workflows/sarek.nf#SAREK/cram_variant_calling_tumor_joined chain ".join" steps=join @338:45
+  guards then of tools
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/cram_variant_calling_tumor_grouped[out] Channel<?> via cram_variant_calling_tumor_grouped
+  in 1:1 (join(right)): -
+    <- workflows/sarek.nf#SAREK/cram_variant_calling_normal_to_cross[out] ? via cram_variant_calling_normal_to_cross
+  out out (out): Channel<Record>
+workflows/sarek.nf#SAREK/bam_variant_calling_tumor_joined chain ".join" steps=join @339:44
+  guards then of tools
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/bam_variant_calling_tumor_grouped[out] Channel<?> via bam_variant_calling_tumor_grouped
+  in 1:1 (join(right)): -
+    <- workflows/sarek.nf#SAREK/bam_variant_calling_normal_to_cross[out] ? via bam_variant_calling_normal_to_cross
+  out out (out): Channel<Record>
+workflows/sarek.nf#SAREK/cram_variant_calling_tumor_filtered chain ".filter" steps=filter @342:47
+  guards then of tools
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/cram_variant_calling_tumor_joined[out] Channel<Record> via cram_variant_calling_tumor_joined
+  out out (out): Channel<Record>
+workflows/sarek.nf#SAREK/bam_variant_calling_tumor_filtered chain ".filter" steps=filter @343:46
+  guards then of tools
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/bam_variant_calling_tumor_joined[out] Channel<Record> via bam_variant_calling_tumor_joined
+  out out (out): Channel<Record>
+workflows/sarek.nf#SAREK/cram_variant_calling_tumor_only chain ".transpose.map" steps=transpose,map @347:43
+  guards then of tools
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/cram_variant_calling_tumor_filtered[out] Channel<Record> via cram_variant_calling_tumor_filtered
+  out out (out): Channel<?>
+workflows/sarek.nf#SAREK/bam_variant_calling_tumor_only chain ".transpose.map" steps=transpose,map @348:42
+  guards then of tools
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/bam_variant_calling_tumor_filtered[out] Channel<Record> via bam_variant_calling_tumor_filtered
+  out out (out): Channel<?>
+workflows/sarek.nf#SAREK/cram_variant_calling_normal_joined chain ".join" steps=join @354:50
+  guards then of tools; then of params.only_paired_variant_calling
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/cram_variant_calling_normal_to_cross[out] ? via cram_variant_calling_normal_to_cross
+  in 1:1 (join(right)): -
+    <- workflows/sarek.nf#SAREK/cram_variant_calling_tumor_grouped[out] Channel<?> via cram_variant_calling_tumor_grouped
+  out out (out): Channel<Record>
+workflows/sarek.nf#SAREK/bam_variant_calling_normal_joined chain ".join" steps=join @355:49
+  guards then of tools; then of params.only_paired_variant_calling
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/bam_variant_calling_normal_to_cross[out] ? via bam_variant_calling_normal_to_cross
+  in 1:1 (join(right)): -
+    <- workflows/sarek.nf#SAREK/bam_variant_calling_tumor_grouped[out] Channel<?> via bam_variant_calling_tumor_grouped
+  out out (out): Channel<Record>
+workflows/sarek.nf#SAREK/cram_variant_calling_normal_filtered chain ".filter" steps=filter @358:52
+  guards then of tools; then of params.only_paired_variant_calling
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/cram_variant_calling_normal_joined[out] Channel<Record> via cram_variant_calling_normal_joined
+  out out (out): Channel<Record>
+workflows/sarek.nf#SAREK/bam_variant_calling_normal_filtered chain ".filter" steps=filter @359:51
+  guards then of tools; then of params.only_paired_variant_calling
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/bam_variant_calling_normal_joined[out] Channel<Record> via bam_variant_calling_normal_joined
+  out out (out): Channel<Record>
+workflows/sarek.nf#SAREK/cram_variant_calling_status_normal chain ".map" steps=map @362:50
+  guards then of tools; then of params.only_paired_variant_calling
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/cram_variant_calling_normal_filtered[out] Channel<Record> via cram_variant_calling_normal_filtered
+  out out (out): Channel<?>
+workflows/sarek.nf#SAREK/bam_variant_calling_status_normal chain ".map" steps=map @363:49
+  guards then of tools; then of params.only_paired_variant_calling
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/bam_variant_calling_normal_filtered[out] Channel<Record> via bam_variant_calling_normal_filtered
+  out out (out): Channel<?>
+workflows/sarek.nf#SAREK/cram_variant_calling_status_normal~2 code "cram_variant_calling_status_normal = cram_variant_calling_s…" @366:13
+  guards then of tools; else of params.only_paired_variant_calling
+  in cram_variant_calling_status (cram_variant_calling_status): -
+    <- workflows/sarek.nf#SAREK/cram_variant_calling_status[out] Record via cram_variant_calling_status indirect
+  out cram_variant_calling_status_normal (cram_variant_calling_status_normal): -
+workflows/sarek.nf#SAREK/bam_variant_calling_status_normal~2 code "bam_variant_calling_status_normal = bam_variant_calling_sta…" @367:13
+  guards then of tools; else of params.only_paired_variant_calling
+  in bam_variant_calling_status (bam_variant_calling_status): -
+    <- workflows/sarek.nf#SAREK/bam_variant_calling_status[out] Record via bam_variant_calling_status indirect
+  out bam_variant_calling_status_normal (bam_variant_calling_status_normal): -
+workflows/sarek.nf#SAREK/cram_variant_calling_pair chain ".cross.map" steps=cross,map @372:37
+  guards then of tools
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/cram_variant_calling_normal_to_cross[out] ? via cram_variant_calling_normal_to_cross
+  in 1:1 (cross(right)): -
+    <- workflows/sarek.nf#SAREK/cram_variant_calling_pair_to_cross[out] ? via cram_variant_calling_pair_to_cross
+  out out (out): Channel<?>
+workflows/sarek.nf#SAREK/bam_variant_calling_pair chain ".cross.map" steps=cross,map @386:36
+  guards then of tools
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/bam_variant_calling_normal_to_cross[out] ? via bam_variant_calling_normal_to_cross
+  in 1:1 (cross(right)): -
+    <- workflows/sarek.nf#SAREK/bam_variant_calling_pair_to_cross[out] ? via bam_variant_calling_pair_to_cross
+  out out (out): Channel<?>
+workflows/sarek.nf#SAREK/BAM_VARIANT_CALLING_GERMLINE_ALL@1 call "BAM_VARIANT_CALLING_GERMLINE_ALL" callee=BAM_VARIANT_CALLING_GERMLINE_ALL:workflow:modelled:legacy @407:9
+  guards then of tools
+  in tools (tools): -
+    <- workflows/sarek.nf#SAREK/:take:tools[out] ? via tools
+  in skip_tools (skip_tools): -
+    <- workflows/sarek.nf#SAREK/:take:skip_tools[out] ? via skip_tools
+  in bam (bam): -
+    <- workflows/sarek.nf#SAREK/bam_variant_calling_status_normal[out] Channel<?> via bam_variant_calling_status_normal indirect
+    <- workflows/sarek.nf#SAREK/bam_variant_calling_status_normal~2[bam_variant_calling_status_normal] ? via bam_variant_calling_status_normal indirect
+  in cram (cram): -
+    <- workflows/sarek.nf#SAREK/cram_variant_calling_status_normal[out] Channel<?> via cram_variant_calling_status_normal indirect
+    <- workflows/sarek.nf#SAREK/cram_variant_calling_status_normal~2[cram_variant_calling_status_normal] ? via cram_variant_calling_status_normal indirect
+  in bwa (bwa): -
+    = [[id: 'bwa'], []] : List
+  in cnvkit_reference (cnvkit_reference): -
+    <- workflows/sarek.nf#SAREK/:take:cnvkit_reference[out] ? via cnvkit_reference
+  in dbsnp (dbsnp): -
+    <- workflows/sarek.nf#SAREK/:take:dbsnp[out] ? via dbsnp
+  in dbsnp_tbi (dbsnp_tbi): -
+    <- workflows/sarek.nf#SAREK/:take:dbsnp_tbi[out] ? via dbsnp_tbi
+  in dbsnp_vqsr (dbsnp_vqsr): -
+    <- workflows/sarek.nf#SAREK/:take:dbsnp_vqsr[out] ? via dbsnp_vqsr
+  in dict (dict): -
+    <- workflows/sarek.nf#SAREK/:take:dict[out] ? via dict
+  in fasta (fasta): -
+    <- workflows/sarek.nf#SAREK/:take:fasta[out] ? via fasta
+  in fasta_fai (fasta_fai): -
+    <- workflows/sarek.nf#SAREK/:take:fasta_fai[out] ? via fasta_fai
+  in intervals (intervals): -
+    <- workflows/sarek.nf#SAREK/:take:intervals_and_num_intervals[out] ? via intervals_and_num_intervals
+  in intervals_bed_combined (intervals_bed_combined): -
+    <- workflows/sarek.nf#SAREK/:take:intervals_bed_combined[out] ? via intervals_bed_combined
+  in intervals_bed_gz_tbi_combined (intervals_bed_gz_tbi_combined): -
+    <- workflows/sarek.nf#SAREK/:take:intervals_bed_gz_tbi_combined[out] ? via intervals_bed_gz_tbi_combined
+  in intervals_bed_combined_haplotypec (intervals_bed_combined_haplotypec): -
+    <- workflows/sarek.nf#SAREK/:take:intervals_bed_combined_for_variant_calling[out] ? via intervals_bed_combined_for_variant_calling
+  in intervals_bed_gz_tbi (intervals_bed_gz_tbi): -
+    <- workflows/sarek.nf#SAREK/:take:intervals_bed_gz_tbi_and_num_intervals[out] ? via intervals_bed_gz_tbi_and_num_intervals
+  in known_indels_vqsr (known_indels_vqsr): -
+    <- workflows/sarek.nf#SAREK/:take:known_indels_vqsr[out] ? via known_indels_vqsr
+  in known_sites_indels (known_sites_indels): -
+    <- workflows/sarek.nf#SAREK/:take:known_sites_indels[out] ? via known_sites_indels
+  in known_sites_indels_tbi (known_sites_indels_tbi): -
+    <- workflows/sarek.nf#SAREK/:take:known_sites_indels_tbi[out] ? via known_sites_indels_tbi
+  in known_sites_snps (known_sites_snps): -
+    <- workflows/sarek.nf#SAREK/:take:known_sites_snps[out] ? via known_sites_snps
+  in known_sites_snps_tbi (known_sites_snps_tbi): -
+    <- workflows/sarek.nf#SAREK/:take:known_sites_snps_tbi[out] ? via known_sites_snps_tbi
+  in known_snps_vqsr (known_snps_vqsr): -
+    <- workflows/sarek.nf#SAREK/:take:known_snps_vqsr[out] ? via known_snps_vqsr
+  in joint_germline (joint_germline): -
+    <- workflows/sarek.nf#SAREK/:params[joint_germline] ? via params.joint_germline
+  in wes (wes): -
+    <- workflows/sarek.nf#SAREK/:take:wes[out] ? via wes
+  in skip_haplotypecaller_filter (skip_haplotypecaller_filter): -
+    <- workflows/sarek.nf#SAREK/:take:skip_tools[out] ? via skip_tools indirect
+  in sentieon_haplotyper_emit_mode (sentieon_haplotyper_emit_mode): -
+    <- workflows/sarek.nf#SAREK/:params[sentieon_haplotyper_emit_mode] ? via params.sentieon_haplotyper_emit_mode
+  in sentieon_dnascope_emit_mode (sentieon_dnascope_emit_mode): -
+    <- workflows/sarek.nf#SAREK/:params[sentieon_dnascope_emit_mode] ? via params.sentieon_dnascope_emit_mode
+  in sentieon_dnascope_pcr_indel_model (sentieon_dnascope_pcr_indel_model): -
+    <- workflows/sarek.nf#SAREK/:params[sentieon_dnascope_pcr_indel_model] ? via params.sentieon_dnascope_pcr_indel_model
+  in sentieon_dnascope_model (sentieon_dnascope_model): -
+    <- workflows/sarek.nf#SAREK/:take:sentieon_dnascope_model[out] ? via sentieon_dnascope_model
+  out gvcf_parabricks_haplotypecaller (gvcf_parabricks_haplotypecaller): ?
+  out gvcf_sentieon_dnascope (gvcf_sentieon_dnascope): ?
+  out gvcf_sentieon_haplotyper (gvcf_sentieon_haplotyper): ?
+  out gvcf_tbi_parabricks_haplotypecaller (gvcf_tbi_parabricks_haplotypecaller): ?
+  out gvcf_tbi_sentieon_dnascope (gvcf_tbi_sentieon_dnascope): ?
+  out gvcf_tbi_sentieon_haplotyper (gvcf_tbi_sentieon_haplotyper): ?
+  out out_indexcov (out_indexcov): ?
+  out vcf_all (vcf_all): Channel<?>
+  out vcf_deepvariant (vcf_deepvariant): ?
+  out vcf_parabricks_deepvariant (vcf_parabricks_deepvariant): ?
+  out vcf_freebayes (vcf_freebayes): ?
+  out vcf_haplotypecaller (vcf_haplotypecaller): ?
+  out vcf_manta (vcf_manta): ?
+  out vcf_mpileup (vcf_mpileup): ?
+  out vcf_parabricks_haplotypecaller (vcf_parabricks_haplotypecaller): ?
+  out vcf_strelka (vcf_strelka): ?
+  out vcf_sentieon_dnascope (vcf_sentieon_dnascope): ?
+  out vcf_sentieon_haplotyper (vcf_sentieon_haplotyper): ?
+  out vcf_tiddit (vcf_tiddit): ?
+  out tbi_all (tbi_all): Channel<?>
+  out tbi_deepvariant (tbi_deepvariant): ?
+  out tbi_parabricks_deepvariant (tbi_parabricks_deepvariant): ?
+  out tbi_freebayes (tbi_freebayes): ?
+  out tbi_haplotypecaller (tbi_haplotypecaller): ?
+  out tbi_manta (tbi_manta): ?
+  out tbi_mpileup (tbi_mpileup): ?
+  out tbi_parabricks_haplotypecaller (tbi_parabricks_haplotypecaller): ?
+  out tbi_sentieon_dnascope (tbi_sentieon_dnascope): ?
+  out tbi_sentieon_haplotyper (tbi_sentieon_haplotyper): ?
+  out tbi_strelka (tbi_strelka): ?
+  out tbi_tiddit (tbi_tiddit): ?
+workflows/sarek.nf#SAREK/BAM_VARIANT_CALLING_TUMOR_ONLY_ALL@1 call "BAM_VARIANT_CALLING_TUMOR_ONLY_ALL" callee=BAM_VARIANT_CALLING_TUMOR_ONLY_ALL:workflow:modelled:legacy @445:9
+  guards then of tools
+  in tools (tools): -
+    <- workflows/sarek.nf#SAREK/:take:tools[out] ? via tools
+  in bam (bam): -
+    <- workflows/sarek.nf#SAREK/bam_variant_calling_tumor_only[out] Channel<?> via bam_variant_calling_tumor_only
+  in cram (cram): -
+    <- workflows/sarek.nf#SAREK/cram_variant_calling_tumor_only[out] Channel<?> via cram_variant_calling_tumor_only
+  in bwa (bwa): -
+    = [[id: 'bwa'], []] : List
+  in cf_chrom_len (cf_chrom_len): -
+    <- workflows/sarek.nf#SAREK/:take:cf_chrom_len[out] ? via cf_chrom_len
+  in chr_files (chr_files): -
+    <- workflows/sarek.nf#SAREK/:take:chr_files[out] ? via chr_files
+  in cnvkit_reference (cnvkit_reference): -
+    <- workflows/sarek.nf#SAREK/:take:cnvkit_reference[out] ? via cnvkit_reference
+  in dbsnp (dbsnp): -
+    <- workflows/sarek.nf#SAREK/:take:dbsnp[out] ? via dbsnp
+  in dbsnp_tbi (dbsnp_tbi): -
+    <- workflows/sarek.nf#SAREK/:take:dbsnp_tbi[out] ? via dbsnp_tbi
+  in dict (dict): -
+    <- workflows/sarek.nf#SAREK/:take:dict[out] ? via dict
+  in fasta (fasta): -
+    <- workflows/sarek.nf#SAREK/:take:fasta[out] ? via fasta
+  in fasta_fai (fasta_fai): -
+    <- workflows/sarek.nf#SAREK/:take:fasta_fai[out] ? via fasta_fai
+  in force_call_alleles (force_call_alleles): -
+    <- workflows/sarek.nf#SAREK/:take:force_call_alleles[out] ? via force_call_alleles
+  in force_call_alleles_tbi (force_call_alleles_tbi): -
+    <- workflows/sarek.nf#SAREK/:take:force_call_alleles_tbi[out] ? via force_call_alleles_tbi
+  in germline_resource (germline_resource): -
+    <- workflows/sarek.nf#SAREK/:take:germline_resource[out] ? via germline_resource
+  in germline_resource_tbi (germline_resource_tbi): -
+    <- workflows/sarek.nf#SAREK/:take:germline_resource_tbi[out] ? via germline_resource_tbi
+  in contamination_resource (contamination_resource): -
+    <- workflows/sarek.nf#SAREK/:take:contamination_resource[out] ? via contamination_resource
+  in contamination_resource_tbi (contamination_resource_tbi): -
+    <- workflows/sarek.nf#SAREK/:take:contamination_resource_tbi[out] ? via contamination_resource_tbi
+  in intervals (intervals): -
+    <- workflows/sarek.nf#SAREK/:take:intervals_and_num_intervals[out] ? via intervals_and_num_intervals
+  in intervals_bed_combined (intervals_bed_combined): -
+    <- workflows/sarek.nf#SAREK/:take:intervals_bed_combined[out] ? via intervals_bed_combined
+  in intervals_bed_gz_tbi_combined (intervals_bed_gz_tbi_combined): -
+    <- workflows/sarek.nf#SAREK/:take:intervals_bed_gz_tbi_combined[out] ? via intervals_bed_gz_tbi_combined
+  in mappability (mappability): -
+    <- workflows/sarek.nf#SAREK/:take:mappability[out] ? via mappability
+  in msisensor2_models (msisensor2_models): -
+    <- workflows/sarek.nf#SAREK/:take:msisensor2_models[out] ? via msisensor2_models
+  in panel_of_normals (panel_of_normals): -
+    <- workflows/sarek.nf#SAREK/:take:pon[out] ? via pon
+  in panel_of_normals_tbi (panel_of_normals_tbi): -
+    <- workflows/sarek.nf#SAREK/:take:pon_tbi[out] ? via pon_tbi
+  in joint_mutect2 (joint_mutect2): -
+    <- workflows/sarek.nf#SAREK/:params[joint_mutect2] ? via params.joint_mutect2
+  in wes (wes): -
+    <- workflows/sarek.nf#SAREK/:take:wes[out] ? via wes
+  in contamination_resource_provided (contamination_resource_provided): -
+    <- workflows/sarek.nf#SAREK/:take:contamination_resource_provided[out] ? via contamination_resource_provided
+  out out_msisensor2 (out_msisensor2): ?
+  out vcf_all (vcf_all): Channel<?>
+  out tbi_all (tbi_all): Channel<?>
+  out vcf_freebayes (vcf_freebayes): ?
+  out vcf_lofreq (vcf_lofreq): ?
+  out vcf_manta (vcf_manta): ?
+  out vcf_mpileup (vcf_mpileup): ?
+  out vcf_mutect2 (vcf_mutect2): ?
+  out vcf_parabricks_mutectcaller (vcf_parabricks_mutectcaller): Channel<Tuple>
+  out vcf_tiddit (vcf_tiddit): ?
+  out vcf_tnscope (vcf_tnscope): ?
+  out tbi_freebayes (tbi_freebayes): ?
+  out tbi_lofreq (tbi_lofreq): ?
+  out tbi_manta (tbi_manta): ?
+  out tbi_mpileup (tbi_mpileup): ?
+  out tbi_mutect2 (tbi_mutect2): ?
+  out tbi_parabricks_mutectcaller (tbi_parabricks_mutectcaller): Channel<Tuple>
+  out tbi_tiddit (tbi_tiddit): ?
+  out tbi_tnscope (tbi_tnscope): ?
+workflows/sarek.nf#SAREK/BAM_VARIANT_CALLING_SOMATIC_ALL@1 call "BAM_VARIANT_CALLING_SOMATIC_ALL" callee=BAM_VARIANT_CALLING_SOMATIC_ALL:workflow:modelled:legacy @481:9
+  guards then of tools
+  in tools (tools): -
+    <- workflows/sarek.nf#SAREK/:take:tools[out] ? via tools
+  in bam (bam): -
+    <- workflows/sarek.nf#SAREK/bam_variant_calling_pair[out] Channel<?> via bam_variant_calling_pair
+  in cram (cram): -
+    <- workflows/sarek.nf#SAREK/cram_variant_calling_pair[out] Channel<?> via cram_variant_calling_pair
+  in bwa (bwa): -
+    = [[id: 'bwa'], []] : List
+  in cf_chrom_len (cf_chrom_len): -
+    <- workflows/sarek.nf#SAREK/:take:cf_chrom_len[out] ? via cf_chrom_len
+  in chr_files (chr_files): -
+    <- workflows/sarek.nf#SAREK/:take:chr_files[out] ? via chr_files
+  in dbsnp (dbsnp): -
+    <- workflows/sarek.nf#SAREK/:take:dbsnp[out] ? via dbsnp
+  in dbsnp_tbi (dbsnp_tbi): -
+    <- workflows/sarek.nf#SAREK/:take:dbsnp_tbi[out] ? via dbsnp_tbi
+  in dict (dict): -
+    <- workflows/sarek.nf#SAREK/:take:dict[out] ? via dict
+  in fasta (fasta): -
+    <- workflows/sarek.nf#SAREK/:take:fasta[out] ? via fasta
+  in fasta_fai (fasta_fai): -
+    <- workflows/sarek.nf#SAREK/:take:fasta_fai[out] ? via fasta_fai
+  in force_call_alleles (force_call_alleles): -
+    <- workflows/sarek.nf#SAREK/:take:force_call_alleles[out] ? via force_call_alleles
+  in force_call_alleles_tbi (force_call_alleles_tbi): -
+    <- workflows/sarek.nf#SAREK/:take:force_call_alleles_tbi[out] ? via force_call_alleles_tbi
+  in germline_resource (germline_resource): -
+    <- workflows/sarek.nf#SAREK/:take:germline_resource[out] ? via germline_resource
+  in germline_resource_tbi (germline_resource_tbi): -
+    <- workflows/sarek.nf#SAREK/:take:germline_resource_tbi[out] ? via germline_resource_tbi
+  in contamination_resource (contamination_resource): -
+    <- workflows/sarek.nf#SAREK/:take:contamination_resource[out] ? via contamination_resource
+  in contamination_resource_tbi (contamination_resource_tbi): -
+    <- workflows/sarek.nf#SAREK/:take:contamination_resource_tbi[out] ? via contamination_resource_tbi
+  in intervals (intervals): -
+    <- workflows/sarek.nf#SAREK/:take:intervals_and_num_intervals[out] ? via intervals_and_num_intervals
+  in intervals_bed_gz_tbi (intervals_bed_gz_tbi): -
+    <- workflows/sarek.nf#SAREK/:take:intervals_bed_gz_tbi_and_num_intervals[out] ? via intervals_bed_gz_tbi_and_num_intervals
+  in intervals_bed_combined (intervals_bed_combined): -
+    <- workflows/sarek.nf#SAREK/:take:intervals_bed_combined[out] ? via intervals_bed_combined
+  in intervals_bed_gz_tbi_combined (intervals_bed_gz_tbi_combined): -
+    <- workflows/sarek.nf#SAREK/:take:intervals_bed_gz_tbi_combined[out] ? via intervals_bed_gz_tbi_combined
+  in mappability (mappability): -
+    <- workflows/sarek.nf#SAREK/:take:mappability[out] ? via mappability
+  in msisensorpro_scan (msisensorpro_scan): -
+    <- workflows/sarek.nf#SAREK/:take:msisensorpro_scan[out] ? via msisensorpro_scan
+  in panel_of_normals (panel_of_normals): -
+    <- workflows/sarek.nf#SAREK/:take:pon[out] ? via pon
+  in panel_of_normals_tbi (panel_of_normals_tbi): -
+    <- workflows/sarek.nf#SAREK/:take:pon_tbi[out] ? via pon_tbi
+  in allele_files (allele_files): -
+    <- workflows/sarek.nf#SAREK/:take:ascat_alleles[out] ? via ascat_alleles
+  in loci_files (loci_files): -
+    <- workflows/sarek.nf#SAREK/:take:ascat_loci[out] ? via ascat_loci
+  in gc_file (gc_file): -
+    <- workflows/sarek.nf#SAREK/:take:ascat_loci_gc[out] ? via ascat_loci_gc
+  in rt_file (rt_file): -
+    <- workflows/sarek.nf#SAREK/:take:ascat_loci_rt[out] ? via ascat_loci_rt
+  in joint_mutect2 (joint_mutect2): -
+    <- workflows/sarek.nf#SAREK/:params[joint_mutect2] ? via params.joint_mutect2
+  in wes (wes): -
+    <- workflows/sarek.nf#SAREK/:take:wes[out] ? via wes
+  in contamination_resource_provided (contamination_resource_provided): -
+    <- workflows/sarek.nf#SAREK/:take:contamination_resource_provided[out] ? via contamination_resource_provided
+  out out_indexcov (out_indexcov): ?
+  out out_msisensorpro (out_msisensorpro): ?
+  out vcf_all (vcf_all): Channel<?>
+  out vcf_freebayes (vcf_freebayes): ?
+  out vcf_deepsomatic (vcf_deepsomatic): Channel<?>
+  out vcf_manta (vcf_manta): ?
+  out vcf_muse (vcf_muse): ?
+  out vcf_mutect2 (vcf_mutect2): ?
+  out vcf_parabricks_deepsomatic (vcf_parabricks_deepsomatic): Channel<?>
+  out vcf_parabricks_mutectcaller (vcf_parabricks_mutectcaller): Channel<Tuple>
+  out vcf_strelka (vcf_strelka): ?
+  out vcf_tiddit (vcf_tiddit): ?
+  out vcf_tnscope (vcf_tnscope): ?
+  out tbi_all (tbi_all): Channel<?>
+  out tbi_freebayes (tbi_freebayes): ?
+  out tbi_deepsomatic (tbi_deepsomatic): Channel<?>
+  out tbi_manta (tbi_manta): ?
+  out tbi_muse (tbi_muse): ?
+  out tbi_mutect2 (tbi_mutect2): ?
+  out tbi_parabricks_deepsomatic (tbi_parabricks_deepsomatic): Channel<?>
+  out tbi_parabricks_mutectcaller (tbi_parabricks_mutectcaller): Channel<Tuple>
+  out tbi_strelka (tbi_strelka): ?
+  out tbi_tiddit (tbi_tiddit): ?
+  out tbi_tnscope (tbi_tnscope): ?
+workflows/sarek.nf#SAREK/.mix@1 chain ".mix.mix" steps=mix,mix @518:13
+  guards then of tools
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/BAM_VARIANT_CALLING_GERMLINE_ALL@1[vcf_all] Channel<?> via BAM_VARIANT_CALLING_GERMLINE_ALL.out.vcf_all
+  in 1:1 (mix(other)): -
+    <- workflows/sarek.nf#SAREK/BAM_VARIANT_CALLING_TUMOR_ONLY_ALL@1[vcf_all] Channel<?> via BAM_VARIANT_CALLING_TUMOR_ONLY_ALL.out.vcf_all
+  in 2:1 (mix(other)): -
+    <- workflows/sarek.nf#SAREK/BAM_VARIANT_CALLING_SOMATIC_ALL@1[vcf_all] Channel<?> via BAM_VARIANT_CALLING_SOMATIC_ALL.out.vcf_all
+  out out (out): Channel<?>
+workflows/sarek.nf#SAREK/VCF_QC_BCFTOOLS_VCFTOOLS@1 call "VCF_QC_BCFTOOLS_VCFTOOLS" callee=VCF_QC_BCFTOOLS_VCFTOOLS:workflow:modelled:legacy @517:9
+  guards then of tools
+  in vcf (vcf): -
+    <- workflows/sarek.nf#SAREK/.mix@1[out] Channel<?>
+  in target_bed (target_bed): -
+    <- workflows/sarek.nf#SAREK/:take:intervals_bed_combined[out] ? via intervals_bed_combined
+  out bcftools_stats (bcftools_stats): Channel<Tuple>
+  out vcftools_tstv_counts (vcftools_tstv_counts): Channel<Tuple>
+  out vcftools_tstv_qual (vcftools_tstv_qual): Channel<Tuple>
+  out vcftools_filter_summary (vcftools_filter_summary): Channel<Tuple>
+workflows/sarek.nf#SAREK/.collect@2 chain ".collect" steps=collect @522:31
+  guards then of tools
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/VCF_QC_BCFTOOLS_VCFTOOLS@1[bcftools_stats] Channel<Tuple> via VCF_QC_BCFTOOLS_VCFTOOLS.out.bcftools_stats
+  out out (out): Value<?>
+workflows/sarek.nf#SAREK/reports~6 chain ".mix" steps=mix @522:19
+  guards then of tools
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/reports~5[out] Channel<?> via reports
+  in 1:1 (mix(other)): -
+    <- workflows/sarek.nf#SAREK/.collect@2[out] Value<?>
+  out out (out): Channel<?>
+workflows/sarek.nf#SAREK/.collect@3 chain ".collect" steps=collect @523:31
+  guards then of tools
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/VCF_QC_BCFTOOLS_VCFTOOLS@1[vcftools_tstv_counts] Channel<Tuple> via VCF_QC_BCFTOOLS_VCFTOOLS.out.vcftools_tstv_counts
+  out out (out): Value<?>
+workflows/sarek.nf#SAREK/reports~7 chain ".mix" steps=mix @523:19
+  guards then of tools
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/reports~6[out] Channel<?> via reports
+  in 1:1 (mix(other)): -
+    <- workflows/sarek.nf#SAREK/.collect@3[out] Value<?>
+  out out (out): Channel<?>
+workflows/sarek.nf#SAREK/.collect@4 chain ".collect" steps=collect @524:31
+  guards then of tools
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/VCF_QC_BCFTOOLS_VCFTOOLS@1[vcftools_tstv_qual] Channel<Tuple> via VCF_QC_BCFTOOLS_VCFTOOLS.out.vcftools_tstv_qual
+  out out (out): Value<?>
+workflows/sarek.nf#SAREK/reports~8 chain ".mix" steps=mix @524:19
+  guards then of tools
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/reports~7[out] Channel<?> via reports
+  in 1:1 (mix(other)): -
+    <- workflows/sarek.nf#SAREK/.collect@4[out] Value<?>
+  out out (out): Channel<?>
+workflows/sarek.nf#SAREK/.collect@5 chain ".collect" steps=collect @525:31
+  guards then of tools
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/VCF_QC_BCFTOOLS_VCFTOOLS@1[vcftools_filter_summary] Channel<Tuple> via VCF_QC_BCFTOOLS_VCFTOOLS.out.vcftools_filter_summary
+  out out (out): Value<?>
+workflows/sarek.nf#SAREK/reports~9 chain ".mix" steps=mix @525:19
+  guards then of tools
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/reports~8[out] Channel<?> via reports
+  in 1:1 (mix(other)): -
+    <- workflows/sarek.nf#SAREK/.collect@5[out] Value<?>
+  out out (out): Channel<?>
+workflows/sarek.nf#SAREK/.collect@6 chain ".collect" steps=collect @526:31
+  guards then of tools
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/BAM_VARIANT_CALLING_GERMLINE_ALL@1[out_indexcov] ? via BAM_VARIANT_CALLING_GERMLINE_ALL.out.out_indexcov
+  out out (out): Value<?>
+workflows/sarek.nf#SAREK/reports~10 chain ".mix" steps=mix @526:19
+  guards then of tools
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/reports~9[out] Channel<?> via reports
+  in 1:1 (mix(other)): -
+    <- workflows/sarek.nf#SAREK/.collect@6[out] Value<?>
+  out out (out): Channel<?>
+workflows/sarek.nf#SAREK/.collect@7 chain ".collect" steps=collect @527:31
+  guards then of tools
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/BAM_VARIANT_CALLING_SOMATIC_ALL@1[out_indexcov] ? via BAM_VARIANT_CALLING_SOMATIC_ALL.out.out_indexcov
+  out out (out): Value<?>
+workflows/sarek.nf#SAREK/reports~11 chain ".mix" steps=mix @527:19
+  guards then of tools
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/reports~10[out] Channel<?> via reports
+  in 1:1 (mix(other)): -
+    <- workflows/sarek.nf#SAREK/.collect@7[out] Value<?>
+  out out (out): Channel<?>
+workflows/sarek.nf#SAREK/POST_VARIANTCALLING@1 call "POST_VARIANTCALLING" callee=POST_VARIANTCALLING:workflow:modelled:legacy @530:9
+  guards then of tools
+  in tools (tools): -
+    <- workflows/sarek.nf#SAREK/:take:tools[out] ? via tools
+  in cram_germline (cram_germline): -
+    <- workflows/sarek.nf#SAREK/cram_variant_calling_status_normal[out] Channel<?> via cram_variant_calling_status_normal indirect
+    <- workflows/sarek.nf#SAREK/cram_variant_calling_status_normal~2[cram_variant_calling_status_normal] ? via cram_variant_calling_status_normal indirect
+  in germline_vcfs (germline_vcfs): -
+    <- workflows/sarek.nf#SAREK/BAM_VARIANT_CALLING_GERMLINE_ALL@1[vcf_all] Channel<?> via BAM_VARIANT_CALLING_GERMLINE_ALL.out.vcf_all
+  in germline_tbis (germline_tbis): -
+    <- workflows/sarek.nf#SAREK/BAM_VARIANT_CALLING_GERMLINE_ALL@1[tbi_all] Channel<?> via BAM_VARIANT_CALLING_GERMLINE_ALL.out.tbi_all
+  in cram_tumor_only (cram_tumor_only): -
+    <- workflows/sarek.nf#SAREK/cram_variant_calling_tumor_only[out] Channel<?> via cram_variant_calling_tumor_only
+  in tumor_only_vcfs (tumor_only_vcfs): -
+    <- workflows/sarek.nf#SAREK/BAM_VARIANT_CALLING_TUMOR_ONLY_ALL@1[vcf_all] Channel<?> via BAM_VARIANT_CALLING_TUMOR_ONLY_ALL.out.vcf_all
+  in tumor_only_tbis (tumor_only_tbis): -
+    <- workflows/sarek.nf#SAREK/BAM_VARIANT_CALLING_TUMOR_ONLY_ALL@1[tbi_all] Channel<?> via BAM_VARIANT_CALLING_TUMOR_ONLY_ALL.out.tbi_all
+  in cram_somatic (cram_somatic): -
+    <- workflows/sarek.nf#SAREK/cram_variant_calling_pair[out] Channel<?> via cram_variant_calling_pair
+  in somatic_vcfs (somatic_vcfs): -
+    <- workflows/sarek.nf#SAREK/BAM_VARIANT_CALLING_SOMATIC_ALL@1[vcf_all] Channel<?> via BAM_VARIANT_CALLING_SOMATIC_ALL.out.vcf_all
+  in somatic_tbis (somatic_tbis): -
+    <- workflows/sarek.nf#SAREK/BAM_VARIANT_CALLING_SOMATIC_ALL@1[tbi_all] Channel<?> via BAM_VARIANT_CALLING_SOMATIC_ALL.out.tbi_all
+  in fasta (fasta): -
+    <- workflows/sarek.nf#SAREK/:take:fasta[out] ? via fasta
+  in fai (fai): -
+    <- workflows/sarek.nf#SAREK/:take:fasta_fai[out] ? via fasta_fai
+  in concatenate_vcfs (concatenate_vcfs): -
+    <- workflows/sarek.nf#SAREK/:params[concatenate_vcfs] ? via params.concatenate_vcfs
+  in filter_vcfs (filter_vcfs): -
+    <- workflows/sarek.nf#SAREK/:params[filter_vcfs] ? via params.filter_vcfs
+  in snv_consensus_calling (snv_consensus_calling): -
+    <- workflows/sarek.nf#SAREK/:params[snv_consensus_calling] ? via params.snv_consensus_calling
+  in normalize_vcfs (normalize_vcfs): -
+    <- workflows/sarek.nf#SAREK/:params[normalize_vcfs] ? via params.normalize_vcfs
+  in varlociraptor_chunk_size (varlociraptor_chunk_size): -
+    <- workflows/sarek.nf#SAREK/:take:varlociraptor_chunk_size[out] ? via varlociraptor_chunk_size
+  in varlociraptor_events_germline (varlociraptor_events_germline): -
+    <- workflows/sarek.nf#SAREK/:take:varlociraptor_events_germline[out] ? via varlociraptor_events_germline
+  in varlociraptor_events_somatic (varlociraptor_events_somatic): -
+    <- workflows/sarek.nf#SAREK/:take:varlociraptor_events_somatic[out] ? via varlociraptor_events_somatic
+  in varlociraptor_events_tumor_only (varlociraptor_events_tumor_only): -
+    <- workflows/sarek.nf#SAREK/:take:varlociraptor_events_tumor_only[out] ? via varlociraptor_events_tumor_only
+  in varlociraptor_fdr (varlociraptor_fdr): -
+    <- workflows/sarek.nf#SAREK/:take:varlociraptor_fdr[out] ? via varlociraptor_fdr
+  in varlociraptor_scenario_germline (varlociraptor_scenario_germline): -
+    <- workflows/sarek.nf#SAREK/:take:varlociraptor_scenario_germline[out] ? via varlociraptor_scenario_germline
+  in varlociraptor_scenario_somatic (varlociraptor_scenario_somatic): -
+    <- workflows/sarek.nf#SAREK/:take:varlociraptor_scenario_somatic[out] ? via varlociraptor_scenario_somatic
+  in varlociraptor_scenario_tumor_only (varlociraptor_scenario_tumor_only): -
+    <- workflows/sarek.nf#SAREK/:take:varlociraptor_scenario_tumor_only[out] ? via varlociraptor_scenario_tumor_only
+  out vcfs (vcfs): Channel<?>
+  out tbis (tbis): ?
+workflows/sarek.nf#SAREK/CHANNEL_VARIANT_CALLING_CREATE_CSV@1 call "CHANNEL_VARIANT_CALLING_CREATE_CSV" callee=CHANNEL_VARIANT_CALLING_CREATE_CSV:workflow:modelled:legacy @561:9
+  guards then of tools
+  in vcf_to_annotate (vcf_to_annotate): -
+    <- workflows/sarek.nf#SAREK/POST_VARIANTCALLING@1[vcfs] Channel<?> via vcf_to_annotate
+  in outdir (outdir): -
+    <- workflows/sarek.nf#SAREK/:params[outdir] ? via params.outdir
+workflows/sarek.nf#SAREK/.map@3 chain ".map" steps=map @573:17
+  guards then of tools; then of tools.split(',').contains('merge') || tools.split(',').contains('snpeff') || tools.split(',').contains('vep') || tools.split(',').contains('bcfann') || tools.split(',').contains('snpsift')
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/:take:input_sample[out] ? via vcf_to_annotate indirect
+    <- workflows/sarek.nf#SAREK/POST_VARIANTCALLING@1[vcfs] Channel<?> via vcf_to_annotate indirect
+  out out (out): ?
+workflows/sarek.nf#SAREK/VCF_ANNOTATE_ALL@1 call "VCF_ANNOTATE_ALL" callee=VCF_ANNOTATE_ALL:workflow:modelled:legacy @572:13
+  guards then of tools; then of tools.split(',').contains('merge') || tools.split(',').contains('snpeff') || tools.split(',').contains('vep') || tools.split(',').contains('bcfann') || tools.split(',').contains('snpsift')
+  in vcf (vcf): -
+    <- workflows/sarek.nf#SAREK/.map@3[out] ?
+  in fasta (fasta): -
+    <- workflows/sarek.nf#SAREK/:take:fasta[out] ? via vep_fasta
+  in tools (tools): -
+    <- workflows/sarek.nf#SAREK/:take:tools[out] ? via tools
+  in snpeff_db (snpeff_db): -
+    <- workflows/sarek.nf#SAREK/:take:snpeff_db[out] ? via snpeff_db
+  in snpeff_cache (snpeff_cache): -
+    <- workflows/sarek.nf#SAREK/:take:snpeff_cache[out] ? via snpeff_cache
+  in vep_genome (vep_genome): -
+    <- workflows/sarek.nf#SAREK/:take:vep_genome[out] ? via vep_genome
+  in vep_species (vep_species): -
+    <- workflows/sarek.nf#SAREK/:take:vep_species[out] ? via vep_species
+  in vep_cache_version (vep_cache_version): -
+    <- workflows/sarek.nf#SAREK/:take:vep_cache_version[out] ? via vep_cache_version
+  in vep_cache (vep_cache): -
+    <- workflows/sarek.nf#SAREK/:take:vep_cache[out] ? via vep_cache
+  in vep_extra_files (vep_extra_files): -
+    <- workflows/sarek.nf#SAREK/:take:vep_extra_files[out] ? via vep_extra_files
+  in bcftools_annotations (bcftools_annotations): -
+    <- workflows/sarek.nf#SAREK/:take:bcftools_annotations[out] ? via bcftools_annotations
+  in bcftools_annotations_index (bcftools_annotations_index): -
+    <- workflows/sarek.nf#SAREK/:take:bcftools_annotations_tbi[out] ? via bcftools_annotations_tbi
+  in bcftools_columns (bcftools_columns): -
+    <- workflows/sarek.nf#SAREK/:take:bcftools_columns[out] ? via bcftools_columns
+  in bcftools_header_lines (bcftools_header_lines): -
+    <- workflows/sarek.nf#SAREK/:take:bcftools_header_lines[out] ? via bcftools_header_lines
+  in snpsift_db (snpsift_db): -
+    <- workflows/sarek.nf#SAREK/:take:snpsift_db[out] ? via snpsift_db
+  out vcf_ann (vcf_ann): ?
+  out tab_ann (tab_ann): ?
+  out json_ann (json_ann): ?
+workflows/sarek.nf#SAREK/collated_versions factory "channel.empty" factory=channel.empty @595:29
+  out out (out): Channel<?>
+workflows/sarek.nf#SAREK/collated_versions~2 code "if (!(skip_tools.split(',').contains('versions'))) {" @596:5
+  in skip_tools (skip_tools): -
+    <- workflows/sarek.nf#SAREK/:take:skip_tools[out] ? via skip_tools indirect
+  in params.outdir (params.outdir): -
+    <- workflows/sarek.nf#SAREK/:params[outdir] ? via params.outdir indirect
+  out collated_versions (collated_versions): -
+workflows/sarek.nf#SAREK/channel.topic@1 factory "channel.topic" factory=channel.topic @611:28
+  out out (out): Channel<?>
+workflows/sarek.nf#SAREK/collated_reports chain ".map" steps=map @611:28
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/channel.topic@1[out] Channel<?>
+  out out (out): Channel<?>
+workflows/sarek.nf#SAREK/ch_multiqc_files factory "channel.empty" factory=channel.empty @615:28
+  out out (out): Channel<?>
+workflows/sarek.nf#SAREK/ch_multiqc_files~2 chain ".mix" steps=mix @617:24
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/ch_multiqc_files[out] Channel<?> via ch_multiqc_files
+  in 1:1 (mix(other)): -
+    <- workflows/sarek.nf#SAREK/collated_versions~2[collated_versions] ? via collated_versions
+  out out (out): Channel<?>
+workflows/sarek.nf#SAREK/ch_multiqc_files~3 chain ".mix" steps=mix @618:24
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/ch_multiqc_files~2[out] Channel<?> via ch_multiqc_files
+  in 1:1 (mix(other)): -
+    <- workflows/sarek.nf#SAREK/collated_reports[out] Channel<?> via collated_reports
+  out out (out): Channel<?>
+workflows/sarek.nf#SAREK/ch_multiqc_files~4 chain ".mix" steps=mix @619:24
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/ch_multiqc_files~3[out] Channel<?> via ch_multiqc_files
+  in 1:1 (mix(other)): -
+    <- workflows/sarek.nf#SAREK/reports~5[out] Channel<?> via reports indirect
+    <- workflows/sarek.nf#SAREK/reports~11[out] Channel<?> via reports indirect
+  out out (out): Channel<?>
+workflows/sarek.nf#SAREK/summary_params code "def summary_params = paramsSummaryMap(workflow, parameters_…" @621:5
+  out summary_params (summary_params): -
+workflows/sarek.nf#SAREK/workflow_summary factory "channel.value" factory=channel.value @622:28
+  out out (out): Value<?>
+workflows/sarek.nf#SAREK/multiqc_custom_methods_description code "def multiqc_custom_methods_description = params.multiqc_met…" @623:5
+  in params.multiqc_methods_description (params.multiqc_methods_description): -
+    <- workflows/sarek.nf#SAREK/:params[multiqc_methods_description] ? via params.multiqc_methods_description indirect
+  out multiqc_custom_methods_description (multiqc_custom_methods_description): -
+workflows/sarek.nf#SAREK/methods_description factory "channel.value" factory=channel.value @624:31
+  out out (out): Value<?>
+workflows/sarek.nf#SAREK/ch_multiqc_files~5 chain ".mix" steps=mix @626:24
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/ch_multiqc_files~4[out] Channel<?> via ch_multiqc_files
+  in 1:1 (mix(other)): -
+    <- workflows/sarek.nf#SAREK/workflow_summary[out] Value<?> via workflow_summary indirect
+  out out (out): Channel<?>
+workflows/sarek.nf#SAREK/ch_multiqc_files~6 chain ".mix" steps=mix @627:24
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/ch_multiqc_files~5[out] Channel<?> via ch_multiqc_files
+  in 1:1 (mix(other)): -
+    <- workflows/sarek.nf#SAREK/methods_description[out] Value<?> via methods_description indirect
+  out out (out): Channel<?>
+workflows/sarek.nf#SAREK/.flatten@1 chain ".flatten.collect.map.filter" steps=flatten,collect,map,filter @630:9
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/ch_multiqc_files~6[out] Channel<?> via ch_multiqc_files
+  out out (out): ?
+workflows/sarek.nf#SAREK/MULTIQC@1 call "MULTIQC" callee=MULTIQC:process:modelled:legacy @629:5
+  in $1 (tuple(meta, multiqc_files, multiqc_config, multiqc_logo, replace_names, sample_names)): Tuple
+    <- workflows/sarek.nf#SAREK/.flatten@1[out] ?
+  out report (report): Channel<Tuple>
+  out data (data): Channel<Tuple>
+  out plots (plots): Channel<Tuple>
+  out versions (versions): Channel<Tuple>
+workflows/sarek.nf#SAREK/.map@4 chain ".map.toList" steps=map,toList @645:23
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/MULTIQC@1[report] Channel<Tuple> via MULTIQC.out.report
+  out out (out): Value<?>
+workflows/sarek.nf#SAREK/:emit:multiqc_report emit "multiqc_report" @645:5
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/.map@4[out] Value<?>
+workflows/sarek.nf#SAREK/.mix@2 chain ".mix" steps=mix @646:23
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/MULTIQC@1[data] Channel<Tuple> via MULTIQC.out.data
+  in 1:1 (mix(1)): -
+    <- workflows/sarek.nf#SAREK/MULTIQC@1[plots] Channel<Tuple> via MULTIQC.out.plots
+  in 1:2 (mix(2)): -
+    <- workflows/sarek.nf#SAREK/MULTIQC@1[report] Channel<Tuple> via MULTIQC.out.report
+  out out (out): Channel<?>
+workflows/sarek.nf#SAREK/:emit:multiqc_publish emit "multiqc_publish" @646:5
+  in in (in): -
+    <- workflows/sarek.nf#SAREK/.mix@2[out] Channel<?>
+bound @559:9 vcf_to_annotate
+bound @565:13 vcf_to_annotate
+bound @570:13 vep_fasta

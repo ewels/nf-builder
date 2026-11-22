@@ -1,0 +1,201 @@
+workflow subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP legacy
+statements 38, modelled 38
+subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/:take:reads take "reads" @43:5
+  out out (out): -
+subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/:take:skip_fastqc take "skip_fastqc" @44:5
+  out out (out): -
+subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/:take:with_umi take "with_umi" @45:5
+  out out (out): -
+subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/:take:skip_umi_extract take "skip_umi_extract" @46:5
+  out out (out): -
+subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/:take:umi_discard_read take "umi_discard_read" @47:5
+  out out (out): -
+subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/:take:skip_trimming take "skip_trimming" @48:5
+  out out (out): -
+subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/:take:save_trimmed_fail take "save_trimmed_fail" @49:5
+  out out (out): -
+subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/:take:save_merged take "save_merged" @50:5
+  out out (out): -
+subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/:take:min_trimmed_reads take "min_trimmed_reads" @51:5
+  out out (out): -
+subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/fastqc_raw_html factory "channel.empty" factory=channel.empty @54:23
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/fastqc_raw_zip factory "channel.empty" factory=channel.empty @55:22
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/umi_log factory "channel.empty" factory=channel.empty @56:15
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/trim_json factory "channel.empty" factory=channel.empty @57:17
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/trim_html factory "channel.empty" factory=channel.empty @58:17
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/trim_log factory "channel.empty" factory=channel.empty @59:16
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/trim_reads_fail factory "channel.empty" factory=channel.empty @60:23
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/trim_reads_merged factory "channel.empty" factory=channel.empty @61:25
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/fastqc_trim_html factory "channel.empty" factory=channel.empty @62:24
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/fastqc_trim_zip factory "channel.empty" factory=channel.empty @63:23
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/trim_read_count factory "channel.empty" factory=channel.empty @64:23
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/adapter_seq factory "channel.empty" factory=channel.empty @65:19
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/reads_only chain ".map" steps=map @68:18
+  in in (in): -
+    <- subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/:take:reads[out] ? via reads
+  out out (out): ?
+subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/FASTQC_RAW@1 call "FASTQC_RAW" callee=FASTQC_RAW:process:modelled:legacy @71:9
+  guards then of !skip_fastqc
+  in $1 (tuple(meta, reads)): Tuple
+    <- subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/reads_only[out] ? via reads_only
+  out html (html): Channel<Tuple>
+  out zip (zip): Channel<Tuple>
+  out versions_fastqc (versions_fastqc): Channel<Tuple>
+subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/umi_reads factory "channel.empty" factory=channel.empty @79:17
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/UMITOOLS_EXTRACT@1 call "UMITOOLS_EXTRACT" callee=UMITOOLS_EXTRACT:process:modelled:legacy @81:9
+  guards then of with_umi && !skip_umi_extract
+  in $1 (tuple(meta, reads)): Tuple
+    <- subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/reads_only[out] ? via reads_only
+  out reads (reads): Channel<Tuple>
+  out log (log): Channel<Tuple>
+  out versions_umitools (versions_umitools): Channel<Tuple>
+subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/trimmer_reads chain ".map" steps=map @90:13
+  guards then of with_umi && !skip_umi_extract; then of umi_discard_read in [1, 2]
+  in in (in): -
+    <- subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/UMITOOLS_EXTRACT@1[reads] Channel<Tuple> via UMITOOLS_EXTRACT.out.reads
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/.map@1 chain ".map" steps=map @105:17
+  guards then of !skip_trimming
+  in in (in): -
+    <- subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/:take:reads[out] ? via reads
+  out out (out): ?
+subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/umi_reads_with_adapters chain ".map.join.map" steps=map,join,map @102:35
+  guards then of !skip_trimming
+  in in (in): -
+    <- subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/reads_only[out] ? via trimmer_reads indirect
+    <- subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/UMITOOLS_EXTRACT@1[reads] Channel<Tuple> via trimmer_reads indirect
+    <- subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/trimmer_reads[out] Channel<?> via trimmer_reads indirect
+  in 2:1 (join(1)): -
+    <- subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/.map@1[out] ?
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/FASTP@1 call "FASTP" callee=FASTP:process:modelled:legacy @109:9
+  guards then of !skip_trimming
+  in $1 (tuple(meta, reads, adapter_fasta)): Tuple
+    <- subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/umi_reads_with_adapters[out] Channel<?> via umi_reads_with_adapters
+  in discard_trimmed_pass (discard_trimmed_pass): -
+    = false : Boolean
+  in save_trimmed_fail (save_trimmed_fail): -
+    <- subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/:take:save_trimmed_fail[out] ? via save_trimmed_fail
+  in save_merged (save_merged): -
+    <- subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/:take:save_merged[out] ? via save_merged
+  out reads (reads): Channel<Tuple>
+  out json (json): Channel<Tuple>
+  out html (html): Channel<Tuple>
+  out log (log): Channel<Tuple>
+  out reads_fail (reads_fail): Channel<Tuple>
+  out reads_merged (reads_merged): Channel<Tuple>
+  out versions_fastp (versions_fastp): Channel<Tuple>
+subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/ch_num_trimmed_reads chain ".join.map" steps=join,map @124:9
+  guards then of !skip_trimming
+  in in (in): -
+    <- subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/FASTP@1[reads] Channel<Tuple> via FASTP.out.reads
+  in 1:1 (join(1)): -
+    <- subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/FASTP@1[json] Channel<Tuple> via trim_json
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/trim_reads chain ".filter.map" steps=filter,map @126:9
+  guards then of !skip_trimming
+  in in (in): -
+    <- subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/ch_num_trimmed_reads[out] Channel<?> via ch_num_trimmed_reads
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/trim_read_count~2 chain ".map" steps=map @131:9
+  guards then of !skip_trimming
+  in in (in): -
+    <- subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/ch_num_trimmed_reads[out] Channel<?> via ch_num_trimmed_reads
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/adapter_seq~2 chain ".map" steps=map @135:9
+  guards then of !skip_trimming
+  in in (in): -
+    <- subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/FASTP@1[json] Channel<Tuple> via trim_json
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/FASTQC_TRIM@1 call "FASTQC_TRIM" callee=FASTQC_TRIM:process:modelled:legacy @140:13
+  guards then of !skip_trimming; then of !skip_fastqc
+  in $1 (tuple(meta, reads)): Tuple
+    <- subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/trim_reads[out] Channel<?> via trim_reads
+  out html (html): Channel<Tuple>
+  out zip (zip): Channel<Tuple>
+  out versions_fastqc (versions_fastqc): Channel<Tuple>
+subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/:emit:reads emit "reads" @149:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/reads_only[out] ? via trim_reads indirect
+    <- subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/UMITOOLS_EXTRACT@1[reads] Channel<Tuple> via trim_reads indirect
+    <- subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/trimmer_reads[out] Channel<?> via trim_reads indirect
+    <- subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/trim_reads[out] Channel<?> via trim_reads indirect
+subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/:emit:fastqc_raw_html emit "fastqc_raw_html" @150:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/fastqc_raw_html[out] Channel<?> via fastqc_raw_html indirect
+    <- subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/FASTQC_RAW@1[html] Channel<Tuple> via fastqc_raw_html indirect
+subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/:emit:fastqc_raw_zip emit "fastqc_raw_zip" @151:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/fastqc_raw_zip[out] Channel<?> via fastqc_raw_zip indirect
+    <- subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/FASTQC_RAW@1[zip] Channel<Tuple> via fastqc_raw_zip indirect
+subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/:emit:umi_log emit "umi_log" @152:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/umi_log[out] Channel<?> via umi_log indirect
+    <- subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/UMITOOLS_EXTRACT@1[log] Channel<Tuple> via umi_log indirect
+subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/:emit:umi_reads emit "umi_reads" @153:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/umi_reads[out] Channel<?> via umi_reads indirect
+    <- subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/UMITOOLS_EXTRACT@1[reads] Channel<Tuple> via umi_reads indirect
+subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/:emit:adapter_seq emit "adapter_seq" @154:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/adapter_seq[out] Channel<?> via adapter_seq indirect
+    <- subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/adapter_seq~2[out] Channel<?> via adapter_seq indirect
+subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/:emit:trim_json emit "trim_json" @155:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/trim_json[out] Channel<?> via trim_json indirect
+    <- subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/FASTP@1[json] Channel<Tuple> via trim_json indirect
+subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/:emit:trim_html emit "trim_html" @156:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/trim_html[out] Channel<?> via trim_html indirect
+    <- subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/FASTP@1[html] Channel<Tuple> via trim_html indirect
+subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/:emit:trim_log emit "trim_log" @157:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/trim_log[out] Channel<?> via trim_log indirect
+    <- subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/FASTP@1[log] Channel<Tuple> via trim_log indirect
+subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/:emit:trim_reads_fail emit "trim_reads_fail" @158:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/trim_reads_fail[out] Channel<?> via trim_reads_fail indirect
+    <- subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/FASTP@1[reads_fail] Channel<Tuple> via trim_reads_fail indirect
+subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/:emit:trim_reads_merged emit "trim_reads_merged" @159:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/trim_reads_merged[out] Channel<?> via trim_reads_merged indirect
+    <- subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/FASTP@1[reads_merged] Channel<Tuple> via trim_reads_merged indirect
+subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/:emit:trim_read_count emit "trim_read_count" @160:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/trim_read_count[out] Channel<?> via trim_read_count indirect
+    <- subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/trim_read_count~2[out] Channel<?> via trim_read_count indirect
+subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/:emit:fastqc_trim_html emit "fastqc_trim_html" @161:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/fastqc_trim_html[out] Channel<?> via fastqc_trim_html indirect
+    <- subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/FASTQC_TRIM@1[html] Channel<Tuple> via fastqc_trim_html indirect
+subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/:emit:fastqc_trim_zip emit "fastqc_trim_zip" @162:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/fastqc_trim_zip[out] Channel<?> via fastqc_trim_zip indirect
+    <- subworkflows/nf-core/fastq_fastqc_umitools_fastp/main.nf#FASTQ_FASTQC_UMITOOLS_FASTP/FASTQC_TRIM@1[zip] Channel<Tuple> via fastqc_trim_zip indirect
+bound @74:9 fastqc_raw_html
+bound @75:9 fastqc_raw_zip
+bound @78:5 trimmer_reads
+bound @84:9 trimmer_reads
+bound @85:9 umi_reads
+bound @86:9 umi_log
+bound @98:5 trim_reads
+bound @115:9 trim_json
+bound @116:9 trim_html
+bound @117:9 trim_log
+bound @118:9 trim_reads_fail
+bound @119:9 trim_reads_merged
+bound @143:13 fastqc_trim_html
+bound @144:13 fastqc_trim_zip

@@ -1,0 +1,315 @@
+workflow subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA legacy
+statements 44, modelled 44
+subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/:take:ch_reads take "ch_reads" @41:5
+  out out (out): -
+subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/:take:ch_rrna_fastas take "ch_rrna_fastas" @42:5
+  out out (out): -
+subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/:take:ch_sortmerna_index take "ch_sortmerna_index" @43:5
+  out out (out): -
+subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/:take:ch_bowtie2_index take "ch_bowtie2_index" @44:5
+  out out (out): -
+subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/:take:ribo_removal_tool take "ribo_removal_tool" @45:5
+  out out (out): -
+subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/:take:make_sortmerna_index take "make_sortmerna_index" @46:5
+  out out (out): -
+subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/:take:make_bowtie2_index take "make_bowtie2_index" @47:5
+  out out (out): -
+subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/ch_multiqc_files factory "channel.empty" factory=channel.empty @51:24
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/ch_sortmerna_log factory "channel.empty" factory=channel.empty @55:24
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/ch_ribodetector_log factory "channel.empty" factory=channel.empty @56:27
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/ch_seqkit_stats factory "channel.empty" factory=channel.empty @57:23
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/ch_bowtie2_log factory "channel.empty" factory=channel.empty @58:22
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/ch_bowtie2_index_out factory "channel.empty" factory=channel.empty @59:28
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/ch_seqkit_prefixed factory "channel.empty" factory=channel.empty @60:26
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/ch_seqkit_converted factory "channel.empty" factory=channel.empty @61:27
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/ch_sortmerna_fastas chain ".collect.map" steps=collect,map @64:31
+  guards then of ribo_removal_tool == 'sortmerna'
+  in in (in): -
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/:take:ch_rrna_fastas[out] ? via ch_rrna_fastas
+  out out (out): Value<?>
+subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/SORTMERNA_INDEX@1 call "SORTMERNA_INDEX" callee=SORTMERNA_INDEX:process:modelled:legacy @69:13
+  guards then of ribo_removal_tool == 'sortmerna'; then of make_sortmerna_index
+  in $1 (tuple(meta, reads)): Tuple
+    = [[], []] : List
+  in $2 (tuple(meta2, fastas)): Tuple
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/ch_sortmerna_fastas[out] Value<?> via ch_sortmerna_fastas
+  in $3 (tuple(meta3, index)): Tuple
+    = [[], []] : List
+  out reads (reads): Value<Tuple>
+  out log (log): Value<Tuple>
+  out index (index): Value<Tuple>
+  out versions_sortmerna (versions_sortmerna): Value<Tuple>
+subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/SORTMERNA@1 call "SORTMERNA" callee=SORTMERNA:process:modelled:legacy @77:9
+  guards then of ribo_removal_tool == 'sortmerna'
+  in $1 (tuple(meta, reads)): Tuple
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/:take:ch_reads[out] ? via ch_filtered_reads
+  in $2 (tuple(meta2, fastas)): Tuple
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/ch_sortmerna_fastas[out] Value<?> via ch_sortmerna_fastas
+  in $3 (tuple(meta3, index)): Tuple
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/:take:ch_sortmerna_index[out] ? via ch_sortmerna_index indirect
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/SORTMERNA_INDEX@1[index] Value<Tuple> via ch_sortmerna_index indirect
+  out reads (reads): Channel<Tuple>
+  out log (log): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out versions_sortmerna (versions_sortmerna): Channel<Tuple>
+subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/ch_multiqc_files~2 chain ".mix" steps=mix @85:28
+  guards then of ribo_removal_tool == 'sortmerna'
+  in in (in): -
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/ch_multiqc_files[out] Channel<?> via ch_multiqc_files
+  in 1:1 (mix(other)): -
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/SORTMERNA@1[log] Channel<Tuple> via SORTMERNA.out.log
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/SEQKIT_STATS@1 call "SEQKIT_STATS" callee=SEQKIT_STATS:process:modelled:legacy @89:9
+  guards else of ribo_removal_tool == 'sortmerna'; then of ribo_removal_tool == 'ribodetector'
+  in $1 (tuple(meta, reads)): Tuple
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/:take:ch_reads[out] ? via ch_filtered_reads
+  out stats (stats): Channel<Tuple>
+  out versions_seqkit (versions_seqkit): Channel<Tuple>
+subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/ch_multiqc_files~3 chain ".mix" steps=mix @92:28
+  guards else of ribo_removal_tool == 'sortmerna'; then of ribo_removal_tool == 'ribodetector'
+  in in (in): -
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/ch_multiqc_files[out] Channel<?> via ch_multiqc_files
+  in 1:1 (mix(other)): -
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/SEQKIT_STATS@1[stats] Channel<Tuple> via SEQKIT_STATS.out.stats
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/ch_reads_with_length chain ".join.multiMap" steps=join,multiMap @95:9
+  guards else of ribo_removal_tool == 'sortmerna'; then of ribo_removal_tool == 'ribodetector'
+  in in (in): -
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/:take:ch_reads[out] ? via ch_filtered_reads
+  in 1:1 (join(1)): -
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/SEQKIT_STATS@1[stats] Channel<Tuple> via SEQKIT_STATS.out.stats
+  out out (out): Record
+subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/RIBODETECTOR@1 call "RIBODETECTOR" callee=RIBODETECTOR:process:modelled:legacy @104:9
+  guards else of ribo_removal_tool == 'sortmerna'; then of ribo_removal_tool == 'ribodetector'
+  in $1 (tuple(meta, fastq)): Tuple
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/ch_reads_with_length[out] Record via ch_reads_with_length indirect
+  in length (length): -
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/ch_reads_with_length[out] Record via ch_reads_with_length indirect
+  out fastq (fastq): Channel<Tuple>
+  out log (log): Channel<Tuple>
+  out versions_ribodetector (versions_ribodetector): Channel<Tuple>
+  out versions_cuda (versions_cuda): Channel<Tuple>
+subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/ch_multiqc_files~4 chain ".mix" steps=mix @111:28
+  guards else of ribo_removal_tool == 'sortmerna'; then of ribo_removal_tool == 'ribodetector'
+  in in (in): -
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/ch_multiqc_files~3[out] Channel<?> via ch_multiqc_files
+  in 1:1 (mix(other)): -
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/RIBODETECTOR@1[log] Channel<Tuple> via RIBODETECTOR.out.log
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/ch_rrna_with_meta chain ".map" steps=map @117:13
+  guards else of ribo_removal_tool == 'sortmerna'; else of ribo_removal_tool == 'ribodetector'; then of ribo_removal_tool == 'bowtie2'; then of make_bowtie2_index
+  in in (in): -
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/:take:ch_rrna_fastas[out] ? via ch_rrna_fastas
+  out out (out): ?
+subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/SEQKIT_REPLACE@1 call "SEQKIT_REPLACE" callee=SEQKIT_REPLACE:process:modelled:legacy @122:13
+  guards else of ribo_removal_tool == 'sortmerna'; else of ribo_removal_tool == 'ribodetector'; then of ribo_removal_tool == 'bowtie2'; then of make_bowtie2_index
+  in $1 (tuple(meta, fastx)): Tuple
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/ch_rrna_with_meta[out] ? via ch_rrna_with_meta
+  in out_ext (out_ext): -
+    = '' : String
+  out fastx (fastx): Channel<Tuple>
+  out versions_seqkit (versions_seqkit): Channel<Tuple>
+subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/ch_prefixed_fastas chain ".map" steps=map @126:13
+  guards else of ribo_removal_tool == 'sortmerna'; else of ribo_removal_tool == 'ribodetector'; then of ribo_removal_tool == 'bowtie2'; then of make_bowtie2_index
+  in in (in): -
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/SEQKIT_REPLACE@1[fastx] Channel<Tuple> via SEQKIT_REPLACE.out.fastx
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/SEQKIT_REPLACE_U2T@1 call "SEQKIT_REPLACE_U2T" callee=SEQKIT_REPLACE_U2T:process:modelled:legacy @130:13
+  guards else of ribo_removal_tool == 'sortmerna'; else of ribo_removal_tool == 'ribodetector'; then of ribo_removal_tool == 'bowtie2'; then of make_bowtie2_index
+  in $1 (tuple(meta, fastx)): Tuple
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/ch_prefixed_fastas[out] Channel<?> via ch_prefixed_fastas
+  in out_ext (out_ext): -
+    = '' : String
+  out fastx (fastx): Channel<Tuple>
+  out versions_seqkit (versions_seqkit): Channel<Tuple>
+subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/ch_combined_fasta chain ".map.collectFile.map" steps=map,collectFile,map @134:13
+  guards else of ribo_removal_tool == 'sortmerna'; else of ribo_removal_tool == 'ribodetector'; then of ribo_removal_tool == 'bowtie2'; then of make_bowtie2_index
+  in in (in): -
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/SEQKIT_REPLACE_U2T@1[fastx] Channel<Tuple> via SEQKIT_REPLACE_U2T.out.fastx
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/BOWTIE2_BUILD@1 call "BOWTIE2_BUILD" callee=BOWTIE2_BUILD:process:modelled:legacy @140:13
+  guards else of ribo_removal_tool == 'sortmerna'; else of ribo_removal_tool == 'ribodetector'; then of ribo_removal_tool == 'bowtie2'; then of make_bowtie2_index
+  in $1 (tuple(meta, fasta)): Tuple
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/ch_combined_fasta[out] Channel<?> via ch_combined_fasta
+  out index (index): Channel<Tuple>
+  out versions_bowtie2 (versions_bowtie2): Channel<Tuple>
+subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/ch_bowtie2_index chain ".first" steps=first @141:32
+  guards else of ribo_removal_tool == 'sortmerna'; else of ribo_removal_tool == 'ribodetector'; then of ribo_removal_tool == 'bowtie2'; then of make_bowtie2_index
+  in in (in): -
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/BOWTIE2_BUILD@1[index] Channel<Tuple> via BOWTIE2_BUILD.out.index
+  out out (out): Value<Tuple>
+subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/ch_reads_for_bowtie2 chain ".branch" steps=branch @146:9
+  guards else of ribo_removal_tool == 'sortmerna'; else of ribo_removal_tool == 'ribodetector'; then of ribo_removal_tool == 'bowtie2'
+  in in (in): -
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/:take:ch_reads[out] ? via ch_filtered_reads
+  out out (out): Record
+subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/BOWTIE2_ALIGN@1 call "BOWTIE2_ALIGN" callee=BOWTIE2_ALIGN:process:modelled:legacy @155:9
+  guards else of ribo_removal_tool == 'sortmerna'; else of ribo_removal_tool == 'ribodetector'; then of ribo_removal_tool == 'bowtie2'
+  in $1 (tuple(meta, reads)): Tuple
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/ch_reads_for_bowtie2[out] Record via ch_reads_for_bowtie2 indirect
+  in $2 (tuple(meta2, index)): Tuple
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/:take:ch_bowtie2_index[out] ? via ch_bowtie2_index indirect
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/ch_bowtie2_index[out] Value<Tuple> via ch_bowtie2_index indirect
+  in $3 (tuple(meta3, fasta)): Tuple
+    = [[], []] : List
+  in save_unaligned (save_unaligned): -
+    = true : Boolean
+  in sort_bam (sort_bam): -
+    = false : Boolean
+  out sam (sam): Channel<Tuple>
+  out bam (bam): Channel<Tuple>
+  out cram (cram): Channel<Tuple>
+  out csi (csi): Channel<Tuple>
+  out crai (crai): Channel<Tuple>
+  out log (log): Channel<Tuple>
+  out fastq (fastq): Channel<Tuple>
+  out versions_bowtie2 (versions_bowtie2): Channel<Tuple>
+  out versions_samtools (versions_samtools): Channel<Tuple>
+  out versions_pigz (versions_pigz): Channel<Tuple>
+subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/ch_multiqc_files~5 chain ".mix" steps=mix @164:28
+  guards else of ribo_removal_tool == 'sortmerna'; else of ribo_removal_tool == 'ribodetector'; then of ribo_removal_tool == 'bowtie2'
+  in in (in): -
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/ch_multiqc_files[out] Channel<?> via ch_multiqc_files
+  in 1:1 (mix(other)): -
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/BOWTIE2_ALIGN@1[log] Channel<Tuple> via BOWTIE2_ALIGN.out.log
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/BOWTIE2_ALIGN_PE@1 call "BOWTIE2_ALIGN_PE" callee=BOWTIE2_ALIGN_PE:process:modelled:legacy @169:9
+  guards else of ribo_removal_tool == 'sortmerna'; else of ribo_removal_tool == 'ribodetector'; then of ribo_removal_tool == 'bowtie2'
+  in $1 (tuple(meta, reads)): Tuple
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/ch_reads_for_bowtie2[out] Record via ch_reads_for_bowtie2 indirect
+  in $2 (tuple(meta2, index)): Tuple
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/:take:ch_bowtie2_index[out] ? via ch_bowtie2_index indirect
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/ch_bowtie2_index[out] Value<Tuple> via ch_bowtie2_index indirect
+  in $3 (tuple(meta3, fasta)): Tuple
+    = [[], []] : List
+  in save_unaligned (save_unaligned): -
+    = false : Boolean
+  in sort_bam (sort_bam): -
+    = false : Boolean
+  out sam (sam): Channel<Tuple>
+  out bam (bam): Channel<Tuple>
+  out cram (cram): Channel<Tuple>
+  out csi (csi): Channel<Tuple>
+  out crai (crai): Channel<Tuple>
+  out log (log): Channel<Tuple>
+  out fastq (fastq): Channel<Tuple>
+  out versions_bowtie2 (versions_bowtie2): Channel<Tuple>
+  out versions_samtools (versions_samtools): Channel<Tuple>
+  out versions_pigz (versions_pigz): Channel<Tuple>
+subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/ch_bowtie2_log~2 chain ".mix" steps=mix @177:26
+  guards else of ribo_removal_tool == 'sortmerna'; else of ribo_removal_tool == 'ribodetector'; then of ribo_removal_tool == 'bowtie2'
+  in in (in): -
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/BOWTIE2_ALIGN@1[log] Channel<Tuple> via ch_bowtie2_log
+  in 1:1 (mix(other)): -
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/BOWTIE2_ALIGN_PE@1[log] Channel<Tuple> via BOWTIE2_ALIGN_PE.out.log
+  out out (out): Channel<Tuple>
+subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/ch_multiqc_files~6 chain ".mix" steps=mix @178:28
+  guards else of ribo_removal_tool == 'sortmerna'; else of ribo_removal_tool == 'ribodetector'; then of ribo_removal_tool == 'bowtie2'
+  in in (in): -
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/ch_multiqc_files~5[out] Channel<?> via ch_multiqc_files
+  in 1:1 (mix(other)): -
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/BOWTIE2_ALIGN_PE@1[log] Channel<Tuple> via BOWTIE2_ALIGN_PE.out.log
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/.map@1 chain ".map" steps=map @183:13
+  guards else of ribo_removal_tool == 'sortmerna'; else of ribo_removal_tool == 'ribodetector'; then of ribo_removal_tool == 'bowtie2'
+  in in (in): -
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/BOWTIE2_ALIGN_PE@1[bam] Channel<Tuple> via BOWTIE2_ALIGN_PE.out.bam
+  out out (out): Channel<?>
+subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/SAMTOOLS_VIEW_BOWTIE2@1 call "SAMTOOLS_VIEW_BOWTIE2" callee=SAMTOOLS_VIEW_BOWTIE2:process:modelled:legacy @182:9
+  guards else of ribo_removal_tool == 'sortmerna'; else of ribo_removal_tool == 'ribodetector'; then of ribo_removal_tool == 'bowtie2'
+  in $1 (tuple(meta, input, index)): Tuple
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/.map@1[out] Channel<?>
+  in $2 (tuple(meta2, fasta, fai)): Tuple
+    = [[], [], []] : List
+  in $3 (tuple(meta3, qname)): Tuple
+    = [[], []] : List
+  in $4 (tuple(meta4, bed)): Tuple
+    = [[], []] : List
+  in index_format (index_format): -
+    = [] : List
+  out bam (bam): Channel<Tuple>
+  out cram (cram): Channel<Tuple>
+  out sam (sam): Channel<Tuple>
+  out bai (bai): Channel<Tuple>
+  out csi (csi): Channel<Tuple>
+  out crai (crai): Channel<Tuple>
+  out unselected (unselected): Channel<Tuple>
+  out unselected_index (unselected_index): Channel<Tuple>
+  out versions_samtools (versions_samtools): Channel<Tuple>
+subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/SAMTOOLS_FASTQ_BOWTIE2@1 call "SAMTOOLS_FASTQ_BOWTIE2" callee=SAMTOOLS_FASTQ_BOWTIE2:process:modelled:legacy @192:9
+  guards else of ribo_removal_tool == 'sortmerna'; else of ribo_removal_tool == 'ribodetector'; then of ribo_removal_tool == 'bowtie2'
+  in $1 (tuple(meta, input)): Tuple
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/SAMTOOLS_VIEW_BOWTIE2@1[bam] Channel<Tuple> via SAMTOOLS_VIEW_BOWTIE2.out.bam
+  in interleave (interleave): -
+    = false : Boolean
+  out fastq (fastq): Channel<Tuple>
+  out interleaved (interleaved): Channel<Tuple>
+  out singleton (singleton): Channel<Tuple>
+  out other (other): Channel<Tuple>
+  out versions_samtools (versions_samtools): Channel<Tuple>
+subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/ch_filtered_reads chain ".mix" steps=mix @198:9
+  guards else of ribo_removal_tool == 'sortmerna'; else of ribo_removal_tool == 'ribodetector'; then of ribo_removal_tool == 'bowtie2'
+  in in (in): -
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/BOWTIE2_ALIGN@1[fastq] Channel<Tuple> via BOWTIE2_ALIGN.out.fastq
+  in 1:1 (mix(other)): -
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/SAMTOOLS_FASTQ_BOWTIE2@1[fastq] Channel<Tuple> via SAMTOOLS_FASTQ_BOWTIE2.out.fastq
+  out out (out): Channel<Tuple>
+subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/:emit:reads emit "reads" @204:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/:take:ch_reads[out] ? via ch_filtered_reads indirect
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/SORTMERNA@1[reads] Channel<Tuple> via ch_filtered_reads indirect
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/RIBODETECTOR@1[fastq] Channel<Tuple> via ch_filtered_reads indirect
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/ch_filtered_reads[out] Channel<Tuple> via ch_filtered_reads indirect
+subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/:emit:multiqc_files emit "multiqc_files" @205:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/ch_multiqc_files[out] Channel<?> via ch_multiqc_files indirect
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/ch_multiqc_files~2[out] Channel<?> via ch_multiqc_files indirect
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/ch_multiqc_files~4[out] Channel<?> via ch_multiqc_files indirect
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/ch_multiqc_files~6[out] Channel<?> via ch_multiqc_files indirect
+subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/:emit:sortmerna_log emit "sortmerna_log" @206:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/ch_sortmerna_log[out] Channel<?> via ch_sortmerna_log indirect
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/SORTMERNA@1[log] Channel<Tuple> via ch_sortmerna_log indirect
+subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/:emit:ribodetector_log emit "ribodetector_log" @207:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/ch_ribodetector_log[out] Channel<?> via ch_ribodetector_log indirect
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/RIBODETECTOR@1[log] Channel<Tuple> via ch_ribodetector_log indirect
+subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/:emit:seqkit_stats emit "seqkit_stats" @208:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/ch_seqkit_stats[out] Channel<?> via ch_seqkit_stats indirect
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/SEQKIT_STATS@1[stats] Channel<Tuple> via ch_seqkit_stats indirect
+subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/:emit:bowtie2_log emit "bowtie2_log" @209:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/ch_bowtie2_log[out] Channel<?> via ch_bowtie2_log indirect
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/ch_bowtie2_log~2[out] Channel<Tuple> via ch_bowtie2_log indirect
+subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/:emit:bowtie2_index emit "bowtie2_index" @210:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/ch_bowtie2_index_out[out] Channel<?> via ch_bowtie2_index_out indirect
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/BOWTIE2_BUILD@1[index] Channel<Tuple> via ch_bowtie2_index_out indirect
+subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/:emit:seqkit_prefixed emit "seqkit_prefixed" @211:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/ch_seqkit_prefixed[out] Channel<?> via ch_seqkit_prefixed indirect
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/SEQKIT_REPLACE@1[fastx] Channel<Tuple> via ch_seqkit_prefixed indirect
+subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/:emit:seqkit_converted emit "seqkit_converted" @212:5
+  in in (in): -
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/ch_seqkit_converted[out] Channel<?> via ch_seqkit_converted indirect
+    <- subworkflows/nf-core/fastq_remove_rrna/main.nf#FASTQ_REMOVE_RRNA/SEQKIT_REPLACE_U2T@1[fastx] Channel<Tuple> via ch_seqkit_converted indirect
+bound @52:5 ch_filtered_reads
+bound @74:13 ch_sortmerna_index
+bound @83:9 ch_filtered_reads
+bound @84:9 ch_sortmerna_log
+bound @91:9 ch_seqkit_stats
+bound @109:9 ch_filtered_reads
+bound @110:9 ch_ribodetector_log
+bound @123:13 ch_seqkit_prefixed
+bound @131:13 ch_seqkit_converted
+bound @142:13 ch_bowtie2_index_out
+bound @163:9 ch_bowtie2_log

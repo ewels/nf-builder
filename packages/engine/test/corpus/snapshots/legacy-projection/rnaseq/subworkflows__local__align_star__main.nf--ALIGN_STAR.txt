@@ -1,0 +1,200 @@
+workflow subworkflows/local/align_star/main.nf#ALIGN_STAR legacy
+statements 17, modelled 17
+subworkflows/local/align_star/main.nf#ALIGN_STAR/:take:reads take "reads" @28:5
+  out out (out): -
+subworkflows/local/align_star/main.nf#ALIGN_STAR/:take:index take "index" @29:5
+  out out (out): -
+subworkflows/local/align_star/main.nf#ALIGN_STAR/:take:gtf take "gtf" @30:5
+  out out (out): -
+subworkflows/local/align_star/main.nf#ALIGN_STAR/:take:star_ignore_sjdbgtf take "star_ignore_sjdbgtf" @31:5
+  out out (out): -
+subworkflows/local/align_star/main.nf#ALIGN_STAR/:take:fasta_fai take "fasta_fai" @32:5
+  out out (out): -
+subworkflows/local/align_star/main.nf#ALIGN_STAR/:take:use_sentieon_star take "use_sentieon_star" @33:5
+  out out (out): -
+subworkflows/local/align_star/main.nf#ALIGN_STAR/:take:use_parabricks_star take "use_parabricks_star" @34:5
+  out out (out): -
+subworkflows/local/align_star/main.nf#ALIGN_STAR/:take:skip_markduplicates take "skip_markduplicates" @35:5
+  out out (out): -
+subworkflows/local/align_star/main.nf#ALIGN_STAR/SENTIEON_STAR_ALIGN@1 call "SENTIEON_STAR_ALIGN" callee=SENTIEON_STAR_ALIGN:process:modelled:legacy @45:9
+  guards then of use_sentieon_star
+  in $1 (tuple(meta, reads)): Tuple
+    <- subworkflows/local/align_star/main.nf#ALIGN_STAR/:take:reads[out] ? via reads
+  in $2 (tuple(meta2, index)): Tuple
+    <- subworkflows/local/align_star/main.nf#ALIGN_STAR/:take:index[out] ? via index
+  in $3 (tuple(meta3, gtf)): Tuple
+    <- subworkflows/local/align_star/main.nf#ALIGN_STAR/:take:gtf[out] ? via gtf
+  in star_ignore_sjdbgtf (star_ignore_sjdbgtf): -
+    <- subworkflows/local/align_star/main.nf#ALIGN_STAR/:take:star_ignore_sjdbgtf[out] ? via star_ignore_sjdbgtf
+  out log_final (log_final): Channel<Tuple>
+  out log_out (log_out): Channel<Tuple>
+  out log_progress (log_progress): Channel<Tuple>
+  out bam (bam): Channel<Tuple>
+  out bam_sorted (bam_sorted): Channel<Tuple>
+  out bam_sorted_aligned (bam_sorted_aligned): Channel<Tuple>
+  out bam_transcript (bam_transcript): Channel<Tuple>
+  out bam_unsorted (bam_unsorted): Channel<Tuple>
+  out fastq (fastq): Channel<Tuple>
+  out tab (tab): Channel<Tuple>
+  out spl_junc_tab (spl_junc_tab): Channel<Tuple>
+  out read_per_gene_tab (read_per_gene_tab): Channel<Tuple>
+  out junction (junction): Channel<Tuple>
+  out sam (sam): Channel<Tuple>
+  out wig (wig): Channel<Tuple>
+  out bedgraph (bedgraph): Channel<Tuple>
+  out versions_star (versions_star): Channel<Tuple>
+  out versions_sentieon (versions_sentieon): Channel<Tuple>
+subworkflows/local/align_star/main.nf#ALIGN_STAR/.map@1 chain ".map" steps=map @51:38
+  guards else of use_sentieon_star; then of use_parabricks_star
+  in in (in): -
+    <- subworkflows/local/align_star/main.nf#ALIGN_STAR/:take:fasta_fai[out] ? via fasta_fai
+  out out (out): ?
+subworkflows/local/align_star/main.nf#ALIGN_STAR/PARABRICKS_RNA_FQ2BAM@1 call "PARABRICKS_RNA_FQ2BAM" callee=PARABRICKS_RNA_FQ2BAM:process:modelled:legacy @51:9
+  guards else of use_sentieon_star; then of use_parabricks_star
+  in $1 (tuple(meta, reads)): Tuple
+    <- subworkflows/local/align_star/main.nf#ALIGN_STAR/:take:reads[out] ? via reads
+  in $2 (tuple(meta2, fasta)): Tuple
+    <- subworkflows/local/align_star/main.nf#ALIGN_STAR/.map@1[out] ?
+  in $3 (tuple(meta3, index)): Tuple
+    <- subworkflows/local/align_star/main.nf#ALIGN_STAR/:take:index[out] ? via index
+  in qc_metrics (qc_metrics): -
+    = true : Boolean
+  in mark_duplicates (mark_duplicates): -
+    <- subworkflows/local/align_star/main.nf#ALIGN_STAR/:take:skip_markduplicates[out] ? via skip_markduplicates indirect
+  out log_final (log_final): Channel<Tuple>
+  out log_out (log_out): Channel<Tuple>
+  out log_progress (log_progress): Channel<Tuple>
+  out bam (bam): Channel<Tuple>
+  out bai (bai): Channel<Tuple>
+  out bam_sorted (bam_sorted): Channel<Tuple>
+  out bam_sorted_aligned (bam_sorted_aligned): Channel<Tuple>
+  out bam_transcript (bam_transcript): Channel<Tuple>
+  out bam_unsorted (bam_unsorted): Channel<Tuple>
+  out fastq (fastq): Channel<Tuple>
+  out tab (tab): Channel<Tuple>
+  out spl_junc_tab (spl_junc_tab): Channel<Tuple>
+  out read_per_gene_tab (read_per_gene_tab): Channel<Tuple>
+  out junction (junction): Channel<Tuple>
+  out sam (sam): Channel<Tuple>
+  out wig (wig): Channel<Tuple>
+  out bedgraph (bedgraph): Channel<Tuple>
+  out qc_metrics (qc_metrics): Channel<Tuple>
+  out duplicate_metrics (duplicate_metrics): Channel<Tuple>
+  out versions_parabricks (versions_parabricks): Channel<Tuple>
+subworkflows/local/align_star/main.nf#ALIGN_STAR/STAR_ALIGN@1 call "STAR_ALIGN" callee=STAR_ALIGN:process:modelled:legacy @56:9
+  guards else of use_sentieon_star; else of use_parabricks_star
+  in $1 (tuple(meta, reads)): Tuple
+    <- subworkflows/local/align_star/main.nf#ALIGN_STAR/:take:reads[out] ? via reads
+  in $2 (tuple(meta2, index)): Tuple
+    <- subworkflows/local/align_star/main.nf#ALIGN_STAR/:take:index[out] ? via index
+  in $3 (tuple(meta3, gtf)): Tuple
+    <- subworkflows/local/align_star/main.nf#ALIGN_STAR/:take:gtf[out] ? via gtf
+  in star_ignore_sjdbgtf (star_ignore_sjdbgtf): -
+    <- subworkflows/local/align_star/main.nf#ALIGN_STAR/:take:star_ignore_sjdbgtf[out] ? via star_ignore_sjdbgtf
+  out log_final (log_final): Channel<Tuple>
+  out log_out (log_out): Channel<Tuple>
+  out log_progress (log_progress): Channel<Tuple>
+  out versions_star (versions_star): Channel<Tuple>
+  out versions_samtools (versions_samtools): Channel<Tuple>
+  out versions_gawk (versions_gawk): Channel<Tuple>
+  out bam (bam): Channel<Tuple>
+  out bam_sorted (bam_sorted): Channel<Tuple>
+  out bam_sorted_aligned (bam_sorted_aligned): Channel<Tuple>
+  out bam_transcript (bam_transcript): Channel<Tuple>
+  out bam_unsorted (bam_unsorted): Channel<Tuple>
+  out fastq (fastq): Channel<Tuple>
+  out tab (tab): Channel<Tuple>
+  out spl_junc_tab (spl_junc_tab): Channel<Tuple>
+  out read_per_gene_tab (read_per_gene_tab): Channel<Tuple>
+  out junction (junction): Channel<Tuple>
+  out sam (sam): Channel<Tuple>
+  out wig (wig): Channel<Tuple>
+  out bedgraph (bedgraph): Channel<Tuple>
+subworkflows/local/align_star/main.nf#ALIGN_STAR/ch_percent_mapped chain ".map" steps=map @69:25
+  in in (in): -
+    <- subworkflows/local/align_star/main.nf#ALIGN_STAR/SENTIEON_STAR_ALIGN@1[log_final] Channel<Tuple> via ch_log_final indirect
+    <- subworkflows/local/align_star/main.nf#ALIGN_STAR/PARABRICKS_RNA_FQ2BAM@1[log_final] Channel<Tuple> via ch_log_final indirect
+    <- subworkflows/local/align_star/main.nf#ALIGN_STAR/STAR_ALIGN@1[log_final] Channel<Tuple> via ch_log_final indirect
+  out out (out): ?
+subworkflows/local/align_star/main.nf#ALIGN_STAR/BAM_SORT_STATS_SAMTOOLS@1 call "BAM_SORT_STATS_SAMTOOLS" callee=BAM_SORT_STATS_SAMTOOLS:workflow:modelled:legacy @74:5
+  in ch_bam (ch_bam): -
+    <- subworkflows/local/align_star/main.nf#ALIGN_STAR/SENTIEON_STAR_ALIGN@1[bam] Channel<Tuple> via ch_orig_bam indirect
+    <- subworkflows/local/align_star/main.nf#ALIGN_STAR/PARABRICKS_RNA_FQ2BAM@1[bam] Channel<Tuple> via ch_orig_bam indirect
+    <- subworkflows/local/align_star/main.nf#ALIGN_STAR/STAR_ALIGN@1[bam] Channel<Tuple> via ch_orig_bam indirect
+  in ch_fasta_fai (ch_fasta_fai): -
+    <- subworkflows/local/align_star/main.nf#ALIGN_STAR/:take:fasta_fai[out] ? via fasta_fai
+  out bam (bam): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out stats (stats): Channel<Tuple>
+  out flagstat (flagstat): Channel<Tuple>
+  out idxstats (idxstats): Channel<Tuple>
+subworkflows/local/align_star/main.nf#ALIGN_STAR/:emit:orig_bam emit "orig_bam" @77:5
+  in in (in): -
+    <- subworkflows/local/align_star/main.nf#ALIGN_STAR/SENTIEON_STAR_ALIGN@1[bam] Channel<Tuple> via ch_orig_bam indirect
+    <- subworkflows/local/align_star/main.nf#ALIGN_STAR/PARABRICKS_RNA_FQ2BAM@1[bam] Channel<Tuple> via ch_orig_bam indirect
+    <- subworkflows/local/align_star/main.nf#ALIGN_STAR/STAR_ALIGN@1[bam] Channel<Tuple> via ch_orig_bam indirect
+subworkflows/local/align_star/main.nf#ALIGN_STAR/:emit:log_final emit "log_final" @78:5
+  in in (in): -
+    <- subworkflows/local/align_star/main.nf#ALIGN_STAR/SENTIEON_STAR_ALIGN@1[log_final] Channel<Tuple> via ch_log_final indirect
+    <- subworkflows/local/align_star/main.nf#ALIGN_STAR/PARABRICKS_RNA_FQ2BAM@1[log_final] Channel<Tuple> via ch_log_final indirect
+    <- subworkflows/local/align_star/main.nf#ALIGN_STAR/STAR_ALIGN@1[log_final] Channel<Tuple> via ch_log_final indirect
+subworkflows/local/align_star/main.nf#ALIGN_STAR/:emit:log_out emit "log_out" @79:5
+  in in (in): -
+    <- subworkflows/local/align_star/main.nf#ALIGN_STAR/SENTIEON_STAR_ALIGN@1[log_out] Channel<Tuple> via ch_log_out indirect
+    <- subworkflows/local/align_star/main.nf#ALIGN_STAR/PARABRICKS_RNA_FQ2BAM@1[log_out] Channel<Tuple> via ch_log_out indirect
+    <- subworkflows/local/align_star/main.nf#ALIGN_STAR/STAR_ALIGN@1[log_out] Channel<Tuple> via ch_log_out indirect
+subworkflows/local/align_star/main.nf#ALIGN_STAR/:emit:log_progress emit "log_progress" @80:5
+  in in (in): -
+    <- subworkflows/local/align_star/main.nf#ALIGN_STAR/SENTIEON_STAR_ALIGN@1[log_progress] Channel<Tuple> via ch_log_progress indirect
+    <- subworkflows/local/align_star/main.nf#ALIGN_STAR/PARABRICKS_RNA_FQ2BAM@1[log_progress] Channel<Tuple> via ch_log_progress indirect
+    <- subworkflows/local/align_star/main.nf#ALIGN_STAR/STAR_ALIGN@1[log_progress] Channel<Tuple> via ch_log_progress indirect
+subworkflows/local/align_star/main.nf#ALIGN_STAR/:emit:bam_sorted emit "bam_sorted" @81:5
+  in in (in): -
+    <- subworkflows/local/align_star/main.nf#ALIGN_STAR/SENTIEON_STAR_ALIGN@1[bam_sorted] Channel<Tuple> via ch_bam_sorted indirect
+    <- subworkflows/local/align_star/main.nf#ALIGN_STAR/PARABRICKS_RNA_FQ2BAM@1[bam_sorted] Channel<Tuple> via ch_bam_sorted indirect
+    <- subworkflows/local/align_star/main.nf#ALIGN_STAR/STAR_ALIGN@1[bam_sorted] Channel<Tuple> via ch_bam_sorted indirect
+subworkflows/local/align_star/main.nf#ALIGN_STAR/:emit:bam_transcript emit "bam_transcript" @82:5
+  in in (in): -
+    <- subworkflows/local/align_star/main.nf#ALIGN_STAR/SENTIEON_STAR_ALIGN@1[bam_transcript] Channel<Tuple> via ch_bam_transcript indirect
+    <- subworkflows/local/align_star/main.nf#ALIGN_STAR/PARABRICKS_RNA_FQ2BAM@1[bam_transcript] Channel<Tuple> via ch_bam_transcript indirect
+    <- subworkflows/local/align_star/main.nf#ALIGN_STAR/STAR_ALIGN@1[bam_transcript] Channel<Tuple> via ch_bam_transcript indirect
+subworkflows/local/align_star/main.nf#ALIGN_STAR/:emit:fastq emit "fastq" @83:5
+  in in (in): -
+    <- subworkflows/local/align_star/main.nf#ALIGN_STAR/SENTIEON_STAR_ALIGN@1[fastq] Channel<Tuple> via ch_fastq indirect
+    <- subworkflows/local/align_star/main.nf#ALIGN_STAR/PARABRICKS_RNA_FQ2BAM@1[fastq] Channel<Tuple> via ch_fastq indirect
+    <- subworkflows/local/align_star/main.nf#ALIGN_STAR/STAR_ALIGN@1[fastq] Channel<Tuple> via ch_fastq indirect
+subworkflows/local/align_star/main.nf#ALIGN_STAR/:emit:tab emit "tab" @84:5
+  in in (in): -
+    <- subworkflows/local/align_star/main.nf#ALIGN_STAR/SENTIEON_STAR_ALIGN@1[tab] Channel<Tuple> via ch_tab indirect
+    <- subworkflows/local/align_star/main.nf#ALIGN_STAR/PARABRICKS_RNA_FQ2BAM@1[tab] Channel<Tuple> via ch_tab indirect
+    <- subworkflows/local/align_star/main.nf#ALIGN_STAR/STAR_ALIGN@1[tab] Channel<Tuple> via ch_tab indirect
+subworkflows/local/align_star/main.nf#ALIGN_STAR/:emit:bam emit "bam" @85:5
+  in in (in): -
+    <- subworkflows/local/align_star/main.nf#ALIGN_STAR/BAM_SORT_STATS_SAMTOOLS@1[bam] Channel<Tuple> via BAM_SORT_STATS_SAMTOOLS.out.bam
+subworkflows/local/align_star/main.nf#ALIGN_STAR/:emit:index emit "index" @86:5
+  in in (in): -
+    <- subworkflows/local/align_star/main.nf#ALIGN_STAR/BAM_SORT_STATS_SAMTOOLS@1[index] Channel<Tuple> via BAM_SORT_STATS_SAMTOOLS.out.index
+subworkflows/local/align_star/main.nf#ALIGN_STAR/:emit:stats emit "stats" @87:5
+  in in (in): -
+    <- subworkflows/local/align_star/main.nf#ALIGN_STAR/BAM_SORT_STATS_SAMTOOLS@1[stats] Channel<Tuple> via BAM_SORT_STATS_SAMTOOLS.out.stats
+subworkflows/local/align_star/main.nf#ALIGN_STAR/:emit:flagstat emit "flagstat" @88:5
+  in in (in): -
+    <- subworkflows/local/align_star/main.nf#ALIGN_STAR/BAM_SORT_STATS_SAMTOOLS@1[flagstat] Channel<Tuple> via BAM_SORT_STATS_SAMTOOLS.out.flagstat
+subworkflows/local/align_star/main.nf#ALIGN_STAR/:emit:idxstats emit "idxstats" @89:5
+  in in (in): -
+    <- subworkflows/local/align_star/main.nf#ALIGN_STAR/BAM_SORT_STATS_SAMTOOLS@1[idxstats] Channel<Tuple> via BAM_SORT_STATS_SAMTOOLS.out.idxstats
+subworkflows/local/align_star/main.nf#ALIGN_STAR/:emit:percent_mapped emit "percent_mapped" @90:5
+  in in (in): -
+    <- subworkflows/local/align_star/main.nf#ALIGN_STAR/ch_percent_mapped[out] ? via ch_percent_mapped
+bound @42:5 ch_star_out
+bound @46:9 ch_star_out
+bound @52:9 ch_star_out
+bound @57:9 ch_star_out
+bound @61:5 ch_orig_bam
+bound @62:5 ch_log_final
+bound @63:5 ch_log_out
+bound @64:5 ch_log_progress
+bound @65:5 ch_bam_sorted
+bound @66:5 ch_bam_transcript
+bound @67:5 ch_fastq
+bound @68:5 ch_tab

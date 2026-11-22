@@ -1,0 +1,325 @@
+workflow subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC legacy
+statements 43, modelled 43
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/:take:ch_cram take "ch_cram" @19:5
+  out out (out): -
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/:take:ch_fasta take "ch_fasta" @20:5
+  out out (out): -
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/:take:ch_fasta_fai take "ch_fasta_fai" @21:5
+  out out (out): -
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/:take:ch_scenario take "ch_scenario" @22:5
+  out out (out): -
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/:take:ch_somatic_vcf take "ch_somatic_vcf" @23:5
+  out out (out): -
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/:take:ch_germline_vcf take "ch_germline_vcf" @24:5
+  out out (out): -
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/:take:val_num_chunks take "val_num_chunks" @25:5
+  out out (out): -
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/:take:val_events take "val_events" @26:5
+  out out (out): -
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/:take:val_fdr take "val_fdr" @27:5
+  out out (out): -
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/meta_map chain ".map" steps=map @31:16
+  in in (in): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/:take:ch_cram[out] ? via ch_cram
+  out out (out): ?
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/.combine@1 chain ".combine.map" steps=combine,map @36:9
+  in in (in): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/meta_map[out] ? via meta_map
+  in 1:1 (combine(right)): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/:take:ch_scenario[out] ? via ch_scenario
+  out out (out): ?
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/FILL_SCENARIO_FILE@1 call "FILL_SCENARIO_FILE" callee=FILL_SCENARIO_FILE:process:modelled:legacy @35:5
+  in $1 (tuple(meta, template, map_file, map)): Tuple
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/.combine@1[out] ?
+  out rendered (rendered): Channel<Tuple>
+  out versions_yte (versions_yte): Channel<Tuple>
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/cram_normal chain ".map" steps=map @40:19
+  in in (in): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/:take:ch_cram[out] ? via ch_cram
+  out out (out): ?
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/cram_tumor chain ".map" steps=map @41:18
+  in in (in): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/:take:ch_cram[out] ? via ch_cram
+  out out (out): ?
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/.combine@2 chain ".combine.combine.map" steps=combine,combine,map @45:9
+  in in (in): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/cram_tumor[out] ? via cram_tumor
+  in 1:1 (combine(right)): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/:take:ch_fasta[out] ? via ch_fasta
+  in 2:1 (combine(right)): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/:take:ch_fasta_fai[out] ? via ch_fasta_fai
+  out out (out): ?
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/ALIGNMENTPROPERTIES_TUMOR@1 call "ALIGNMENTPROPERTIES_TUMOR" callee=ALIGNMENTPROPERTIES_TUMOR:process:modelled:legacy @44:5
+  in $1 (tuple(meta, bam, bai, fasta, fai)): Tuple
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/.combine@2[out] ?
+  out alignment_properties_json (alignment_properties_json): Channel<Tuple>
+  out versions_varlociraptor (versions_varlociraptor): Channel<Tuple>
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/.combine@3 chain ".combine.combine.map" steps=combine,combine,map @51:9
+  in in (in): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/cram_normal[out] ? via cram_normal
+  in 1:1 (combine(right)): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/:take:ch_fasta[out] ? via ch_fasta
+  in 2:1 (combine(right)): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/:take:ch_fasta_fai[out] ? via ch_fasta_fai
+  out out (out): ?
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/ALIGNMENTPROPERTIES_NORMAL@1 call "ALIGNMENTPROPERTIES_NORMAL" callee=ALIGNMENTPROPERTIES_NORMAL:process:modelled:legacy @50:5
+  in $1 (tuple(meta, bam, bai, fasta, fai)): Tuple
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/.combine@3[out] ?
+  out alignment_properties_json (alignment_properties_json): Channel<Tuple>
+  out versions_varlociraptor (versions_varlociraptor): Channel<Tuple>
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/.map@1 chain ".map" steps=map @59:19
+  in in (in): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/:take:ch_somatic_vcf[out] ? via ch_somatic_vcf
+  out out (out): ?
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/TABIX_SOMATIC@1 call "TABIX_SOMATIC" callee=TABIX_SOMATIC:process:modelled:legacy @59:5
+  in $1 (tuple(meta, infile, infile_tbi, regions)): Tuple
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/.map@1[out] ?
+  in action (action): -
+    = 'compress' : String
+  in make_index (make_index): -
+    = true : Boolean
+  in out_ext (out_ext): -
+    = '' : String
+  out output (output): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out versions_htslib (versions_htslib): Channel<Tuple>
+  out versions_xz (versions_xz): Channel<Tuple>
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/ch_somatic_vcf_tbi chain ".join" steps=join @60:26
+  in in (in): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/:take:ch_somatic_vcf[out] ? via ch_somatic_vcf
+  in 1:1 (join(right)): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/TABIX_SOMATIC@1[index] Channel<Tuple> via TABIX_SOMATIC.out.index
+  out out (out): Channel<Record>
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/ch_somatic_branched chain ".branch" steps=branch @63:27
+  in in (in): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/ch_somatic_vcf_tbi[out] Channel<Record> via ch_somatic_vcf_tbi
+  out out (out): Record
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/ch_somatic_strelka_grouped chain ".map.groupTuple.map" steps=map,groupTuple,map @69:34
+  in in (in): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/ch_somatic_branched[out] Record via ch_somatic_branched indirect
+  out out (out): Channel<?>
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/CONCAT_SOMATIC_STRELKA@1 call "CONCAT_SOMATIC_STRELKA" callee=CONCAT_SOMATIC_STRELKA:process:modelled:legacy @76:5
+  in $1 (tuple(meta, vcfs, tbi)): Tuple
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/ch_somatic_strelka_grouped[out] Channel<?> via ch_somatic_strelka_grouped
+  out vcf (vcf): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out versions_bcftools (versions_bcftools): Channel<Tuple>
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/ch_somatic_vcf_conc chain ".join.mix" steps=join,mix @79:27
+  in in (in): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/CONCAT_SOMATIC_STRELKA@1[vcf] Channel<Tuple> via CONCAT_SOMATIC_STRELKA.out.vcf
+  in 1:1 (join(right)): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/CONCAT_SOMATIC_STRELKA@1[index] Channel<Tuple> via CONCAT_SOMATIC_STRELKA.out.index
+  in 2:1 (mix(other)): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/ch_somatic_branched[out] Record via ch_somatic_branched indirect
+  out out (out): Channel<Record>
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/.map@2 chain ".map" steps=map @86:20
+  in in (in): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/:take:ch_germline_vcf[out] ? via ch_germline_vcf
+  out out (out): ?
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/TABIX_GERMLINE@1 call "TABIX_GERMLINE" callee=TABIX_GERMLINE:process:modelled:legacy @86:5
+  in $1 (tuple(meta, infile, infile_tbi, regions)): Tuple
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/.map@2[out] ?
+  in action (action): -
+    = 'compress' : String
+  in make_index (make_index): -
+    = true : Boolean
+  in out_ext (out_ext): -
+    = '' : String
+  out output (output): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out versions_htslib (versions_htslib): Channel<Tuple>
+  out versions_xz (versions_xz): Channel<Tuple>
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/ch_germline_vcf_tbi chain ".join" steps=join @87:27
+  in in (in): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/:take:ch_germline_vcf[out] ? via ch_germline_vcf
+  in 1:1 (join(right)): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/TABIX_GERMLINE@1[index] Channel<Tuple> via TABIX_GERMLINE.out.index
+  out out (out): Channel<Record>
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/somatic_with_key chain ".map" steps=map @89:28
+  in in (in): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/ch_somatic_vcf_conc[out] Channel<Record> via ch_somatic_vcf_conc
+  out out (out): Channel<?>
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/germline_with_key chain ".map" steps=map @93:29
+  in in (in): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/ch_germline_vcf_tbi[out] Channel<Record> via ch_germline_vcf_tbi
+  out out (out): Channel<?>
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/matching_pairs chain ".join" steps=join @97:26
+  in in (in): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/somatic_with_key[out] Channel<?> via somatic_with_key
+  in 1:1 (join(right)): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/germline_with_key[out] Channel<?> via germline_with_key
+  out out (out): Channel<Record>
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/branched chain ".branch" steps=branch @100:20
+  in in (in): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/matching_pairs[out] Channel<Record> via matching_pairs
+  out out (out): Record
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/.map@3 chain ".map" steps=map @106:9
+  in in (in): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/branched[out] Record via branched indirect
+  out out (out): ?
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/.combine@4 chain ".combine.map.collect" steps=combine,map,collect @109:9
+  in in (in): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/:take:ch_fasta[out] ? via ch_fasta
+  in 1:1 (combine(right)): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/:take:ch_fasta_fai[out] ? via ch_fasta_fai
+  out out (out): Value<Bag<?>>
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/MERGE_GERMLINE_SOMATIC_VCFS@1 call "MERGE_GERMLINE_SOMATIC_VCFS" callee=MERGE_GERMLINE_SOMATIC_VCFS:process:modelled:legacy @105:5
+  in $1 (tuple(meta, vcfs, tbis, bed)): Tuple
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/.map@3[out] ?
+  in $2 (tuple(meta2, fasta, fai)): Tuple
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/.combine@4[out] Value<Bag<?>>
+  out vcf (vcf): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out versions_bcftools (versions_bcftools): Channel<Tuple>
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/.map@4 chain ".map" steps=map @114:9
+  in in (in): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/branched[out] Record via branched indirect
+  out out (out): ?
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/ch_vcf chain ".mix" steps=mix @113:14
+  in in (in): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/MERGE_GERMLINE_SOMATIC_VCFS@1[vcf] Channel<Tuple> via MERGE_GERMLINE_SOMATIC_VCFS.out.vcf
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/.map@4[out] ?
+  out out (out): Channel<Tuple>
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/RBT_VCFSPLIT@1 call "RBT_VCFSPLIT" callee=RBT_VCFSPLIT:process:modelled:legacy @120:5
+  in $1 (tuple(meta, vcf)): Tuple
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/ch_vcf[out] Channel<Tuple> via ch_vcf
+  in numchunks (numchunks): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/:take:val_num_chunks[out] ? via val_num_chunks
+  out bcfchunks (bcfchunks): Channel<Tuple>
+  out versions_rbt (versions_rbt): Channel<Tuple>
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/ch_chunked_tumor_vcfs chain ".transpose.map" steps=transpose,map @128:29
+  in in (in): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/RBT_VCFSPLIT@1[bcfchunks] Channel<Tuple> via RBT_VCFSPLIT.out.bcfchunks
+  out out (out): Channel<?>
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/ch_chunked_normal_vcfs chain ".transpose.map" steps=transpose,map @138:30
+  in in (in): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/RBT_VCFSPLIT@1[bcfchunks] Channel<Tuple> via RBT_VCFSPLIT.out.bcfchunks
+  out out (out): Channel<?>
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/ch_cram_tumor chain ".join.map" steps=join,map @152:21
+  in in (in): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/cram_tumor[out] ? via cram_tumor
+  in 1:1 (join(right)): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/ALIGNMENTPROPERTIES_TUMOR@1[alignment_properties_json] Channel<Tuple> via ALIGNMENTPROPERTIES_TUMOR.out.alignment_properties_json
+  out out (out): Channel<?>
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/ch_input_tumor_preprocess_chunked chain ".map.combine.combine.combine.map" steps=map,combine,combine,combine,map @156:41
+  in in (in): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/ch_chunked_tumor_vcfs[out] Channel<?> via ch_chunked_tumor_vcfs
+  in 2:1 (combine(1)): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/ch_cram_tumor[out] Channel<?> via ch_cram_tumor
+  in 3:1 (combine(right)): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/:take:ch_fasta[out] ? via ch_fasta
+  in 4:1 (combine(right)): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/:take:ch_fasta_fai[out] ? via ch_fasta_fai
+  out out (out): Channel<?>
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/PREPROCESS_TUMOR@1 call "PREPROCESS_TUMOR" callee=PREPROCESS_TUMOR:process:modelled:legacy @177:5
+  in $1 (tuple(meta, bam, bai, candidates, alignment_json, fasta, fai)): Tuple
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/ch_input_tumor_preprocess_chunked[out] Channel<?> via ch_input_tumor_preprocess_chunked
+  out bcf (bcf): Channel<Tuple>
+  out versions_varlociraptor (versions_varlociraptor): Channel<Tuple>
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/ch_cram_alignment chain ".join.map" steps=join,map @186:25
+  in in (in): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/cram_normal[out] ? via cram_normal
+  in 1:1 (join(right)): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/ALIGNMENTPROPERTIES_NORMAL@1[alignment_properties_json] Channel<Tuple> via ALIGNMENTPROPERTIES_NORMAL.out.alignment_properties_json
+  out out (out): Channel<?>
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/ch_input_normal_preprocess_chunked chain ".map.combine.combine.combine.map" steps=map,combine,combine,combine,map @190:42
+  in in (in): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/ch_chunked_normal_vcfs[out] Channel<?> via ch_chunked_normal_vcfs
+  in 2:1 (combine(1)): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/ch_cram_alignment[out] Channel<?> via ch_cram_alignment
+  in 3:1 (combine(right)): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/:take:ch_fasta[out] ? via ch_fasta
+  in 4:1 (combine(right)): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/:take:ch_fasta_fai[out] ? via ch_fasta_fai
+  out out (out): Channel<?>
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/PREPROCESS_NORMAL@1 call "PREPROCESS_NORMAL" callee=PREPROCESS_NORMAL:process:modelled:legacy @210:5
+  in $1 (tuple(meta, bam, bai, candidates, alignment_json, fasta, fai)): Tuple
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/ch_input_normal_preprocess_chunked[out] Channel<?> via ch_input_normal_preprocess_chunked
+  out bcf (bcf): Channel<Tuple>
+  out versions_varlociraptor (versions_varlociraptor): Channel<Tuple>
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/ch_normal_for_join chain ".map" steps=map @217:26
+  in in (in): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/PREPROCESS_NORMAL@1[bcf] Channel<Tuple> via PREPROCESS_NORMAL.out.bcf
+  out out (out): Channel<?>
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/ch_tumor_for_join chain ".map" steps=map @220:25
+  in in (in): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/PREPROCESS_TUMOR@1[bcf] Channel<Tuple> via PREPROCESS_TUMOR.out.bcf
+  out out (out): Channel<?>
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/ch_normal_tumor_for_join chain ".join.map" steps=join,map @224:32
+  in in (in): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/ch_normal_for_join[out] Channel<?> via ch_normal_for_join
+  in 1:1 (join(right)): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/ch_tumor_for_join[out] Channel<?> via ch_tumor_for_join
+  out out (out): Channel<?>
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/.map@5 chain ".map" steps=map @240:13
+  in in (in): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/FILL_SCENARIO_FILE@1[rendered] Channel<Tuple> via ch_scenario_file
+  out out (out): Channel<?>
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/ch_vcf_for_callvariants chain ".map.combine.map" steps=map,combine,map @235:31
+  in in (in): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/ch_normal_tumor_for_join[out] Channel<?> via ch_normal_tumor_for_join
+  in 2:1 (combine(1)): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/.map@5[out] Channel<?>
+  out out (out): Channel<?>
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/VARLOCIRAPTOR_CALLVARIANTS@1 call "VARLOCIRAPTOR_CALLVARIANTS" callee=VARLOCIRAPTOR_CALLVARIANTS:process:modelled:legacy @247:5
+  in $1 (tuple(meta, vcfs, scenario, scenario_aliases)): Tuple
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/ch_vcf_for_callvariants[out] Channel<?> via ch_vcf_for_callvariants
+  out bcf (bcf): Channel<Tuple>
+  out versions_varlociraptor (versions_varlociraptor): Channel<Tuple>
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/SORT_CALLED_CHUNKS@1 call "SORT_CALLED_CHUNKS" callee=SORT_CALLED_CHUNKS:process:modelled:legacy @254:5
+  in $1 (tuple(meta, vcf)): Tuple
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/VARLOCIRAPTOR_CALLVARIANTS@1[bcf] Channel<Tuple> via VARLOCIRAPTOR_CALLVARIANTS.out.bcf
+  out vcf (vcf): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out versions_bcftools (versions_bcftools): Channel<Tuple>
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/ch_sort_called_chunks_vcf chain ".branch" steps=branch @258:33
+  in in (in): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/SORT_CALLED_CHUNKS@1[vcf] Channel<Tuple> via SORT_CALLED_CHUNKS.out.vcf
+  out out (out): Record
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/ch_sort_called_chunks_tbi chain ".branch" steps=branch @263:33
+  in in (in): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/SORT_CALLED_CHUNKS@1[index] Channel<Tuple> via SORT_CALLED_CHUNKS.out.index
+  out out (out): Record
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/ch_vcf_tbi_chunks chain ".join.map.groupTuple" steps=join,map,groupTuple @268:25
+  in in (in): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/ch_sort_called_chunks_vcf[out] Record via ch_sort_called_chunks_vcf indirect
+  in 1:1 (join(right)): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/ch_sort_called_chunks_tbi[out] Record via ch_sort_called_chunks_tbi indirect
+  in 3:1 (groupTuple(opts)): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/:take:val_num_chunks[out] ? via val_num_chunks
+  out out (out): Channel<?>
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/CONCAT_CALLED_CHUNKS@1 call "CONCAT_CALLED_CHUNKS" callee=CONCAT_CALLED_CHUNKS:process:modelled:legacy @275:5
+  in $1 (tuple(meta, vcfs, tbi)): Tuple
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/ch_vcf_tbi_chunks[out] Channel<?> via ch_vcf_tbi_chunks
+  out vcf (vcf): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out versions_bcftools (versions_bcftools): Channel<Tuple>
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/ch_final_vcf chain ".mix" steps=mix @277:20
+  in in (in): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/ch_sort_called_chunks_vcf[out] Record via ch_sort_called_chunks_vcf indirect
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/CONCAT_CALLED_CHUNKS@1[vcf] Channel<Tuple> via CONCAT_CALLED_CHUNKS.out.vcf
+  out out (out): Channel<?>
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/.map@6 chain ".map" steps=map @280:9
+  in in (in): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/ch_final_vcf[out] Channel<?> via ch_final_vcf
+  out out (out): Channel<?>
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/VARLOCIRAPTOR_FILTERFDR@1 call "VARLOCIRAPTOR_FILTERFDR" callee=VARLOCIRAPTOR_FILTERFDR:process:modelled:legacy @279:5
+  in $1 (tuple(meta, vcf, events, fdr)): Tuple
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/.map@6[out] Channel<?>
+  out bcf (bcf): Channel<Tuple>
+  out versions_varlociraptor (versions_varlociraptor): Channel<Tuple>
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/SORT_FINAL_VCF@1 call "SORT_FINAL_VCF" callee=SORT_FINAL_VCF:process:modelled:legacy @283:5
+  in $1 (tuple(meta, vcf)): Tuple
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/VARLOCIRAPTOR_FILTERFDR@1[bcf] Channel<Tuple> via VARLOCIRAPTOR_FILTERFDR.out.bcf
+  out vcf (vcf): Channel<Tuple>
+  out index (index): Channel<Tuple>
+  out versions_bcftools (versions_bcftools): Channel<Tuple>
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/:emit:vcf emit "vcf" @286:5
+  in in (in): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/SORT_FINAL_VCF@1[vcf] Channel<Tuple> via SORT_FINAL_VCF.out.vcf
+subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/:emit:tbi emit "tbi" @287:5
+  in in (in): -
+    <- subworkflows/local/vcf_varlociraptor_somatic/main.nf#VCF_VARLOCIRAPTOR_SOMATIC/SORT_FINAL_VCF@1[index] Channel<Tuple> via SORT_FINAL_VCF.out.index
+bound @38:5 ch_scenario_file

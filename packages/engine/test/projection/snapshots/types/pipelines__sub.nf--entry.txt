@@ -1,4 +1,5 @@
 workflow pipelines/sub.nf# typed
+statements 1, modelled 1
 pipelines/sub.nf#/:params params "params" @3:1
   out input (input): Channel<String>
 pipelines/sub.nf#/upper chain ".map" steps=map @9:13

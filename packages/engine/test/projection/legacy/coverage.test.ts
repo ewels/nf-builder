@@ -47,4 +47,16 @@ describe("F-107 step 2 ADR-0004 coverage", () => {
     const p = await projectMain(SOURCE);
     expect(projectionCoverage(p)).toEqual({ statements: 7, modelled: 5 });
   });
+
+  it("F-107 step 2: a multi-output code node records every name it writes in the statement's binds", async () => {
+    const p = await projectMain(`workflow {
+    def (a, b) = ['x', 'y']
+    c = 1
+}
+`);
+    expect(p.statements.map((s) => [s.binds, s.modelled])).toEqual([
+      [["a", "b"], false],
+      [["c"], false],
+    ]);
+  });
 });

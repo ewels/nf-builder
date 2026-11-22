@@ -1,0 +1,71 @@
+workflow subworkflows/local/bam_baserecalibrator_spark/main.nf#BAM_BASERECALIBRATOR_SPARK legacy
+statements 5, modelled 5
+subworkflows/local/bam_baserecalibrator_spark/main.nf#BAM_BASERECALIBRATOR_SPARK/:take:cram take "cram" @12:5
+  out out (out): -
+subworkflows/local/bam_baserecalibrator_spark/main.nf#BAM_BASERECALIBRATOR_SPARK/:take:dict take "dict" @13:5
+  out out (out): -
+subworkflows/local/bam_baserecalibrator_spark/main.nf#BAM_BASERECALIBRATOR_SPARK/:take:fasta take "fasta" @14:5
+  out out (out): -
+subworkflows/local/bam_baserecalibrator_spark/main.nf#BAM_BASERECALIBRATOR_SPARK/:take:fasta_fai take "fasta_fai" @15:5
+  out out (out): -
+subworkflows/local/bam_baserecalibrator_spark/main.nf#BAM_BASERECALIBRATOR_SPARK/:take:intervals take "intervals" @16:5
+  out out (out): -
+subworkflows/local/bam_baserecalibrator_spark/main.nf#BAM_BASERECALIBRATOR_SPARK/:take:known_sites take "known_sites" @17:5
+  out out (out): -
+subworkflows/local/bam_baserecalibrator_spark/main.nf#BAM_BASERECALIBRATOR_SPARK/:take:known_sites_tbi take "known_sites_tbi" @18:5
+  out out (out): -
+subworkflows/local/bam_baserecalibrator_spark/main.nf#BAM_BASERECALIBRATOR_SPARK/cram_intervals chain ".combine.map" steps=combine,map @23:22
+  in in (in): -
+    <- subworkflows/local/bam_baserecalibrator_spark/main.nf#BAM_BASERECALIBRATOR_SPARK/:take:cram[out] ? via cram
+  in 1:1 (combine(right)): -
+    <- subworkflows/local/bam_baserecalibrator_spark/main.nf#BAM_BASERECALIBRATOR_SPARK/:take:intervals[out] ? via intervals
+  out out (out): ?
+subworkflows/local/bam_baserecalibrator_spark/main.nf#BAM_BASERECALIBRATOR_SPARK/.map@1 chain ".map" steps=map @28:49
+  in in (in): -
+    <- subworkflows/local/bam_baserecalibrator_spark/main.nf#BAM_BASERECALIBRATOR_SPARK/:take:fasta[out] ? via fasta
+  out out (out): ?
+subworkflows/local/bam_baserecalibrator_spark/main.nf#BAM_BASERECALIBRATOR_SPARK/.map@2 chain ".map" steps=map @28:91
+  in in (in): -
+    <- subworkflows/local/bam_baserecalibrator_spark/main.nf#BAM_BASERECALIBRATOR_SPARK/:take:fasta_fai[out] ? via fasta_fai
+  out out (out): ?
+subworkflows/local/bam_baserecalibrator_spark/main.nf#BAM_BASERECALIBRATOR_SPARK/.map@3 chain ".map" steps=map @28:145
+  in in (in): -
+    <- subworkflows/local/bam_baserecalibrator_spark/main.nf#BAM_BASERECALIBRATOR_SPARK/:take:dict[out] ? via dict
+  out out (out): ?
+subworkflows/local/bam_baserecalibrator_spark/main.nf#BAM_BASERECALIBRATOR_SPARK/GATK4SPARK_BASERECALIBRATOR@1 call "GATK4SPARK_BASERECALIBRATOR" callee=GATK4SPARK_BASERECALIBRATOR:process:modelled:legacy @28:5
+  in $1 (tuple(meta, input, input_index, intervals)): Tuple
+    <- subworkflows/local/bam_baserecalibrator_spark/main.nf#BAM_BASERECALIBRATOR_SPARK/cram_intervals[out] ? via cram_intervals
+  in fasta (fasta): Path
+    <- subworkflows/local/bam_baserecalibrator_spark/main.nf#BAM_BASERECALIBRATOR_SPARK/.map@1[out] ?
+  in fai (fai): Path
+    <- subworkflows/local/bam_baserecalibrator_spark/main.nf#BAM_BASERECALIBRATOR_SPARK/.map@2[out] ?
+  in dict (dict): Path
+    <- subworkflows/local/bam_baserecalibrator_spark/main.nf#BAM_BASERECALIBRATOR_SPARK/.map@3[out] ?
+  in known_sites (known_sites): Path
+    <- subworkflows/local/bam_baserecalibrator_spark/main.nf#BAM_BASERECALIBRATOR_SPARK/:take:known_sites[out] ? via known_sites
+  in known_sites_tbi (known_sites_tbi): Path
+    <- subworkflows/local/bam_baserecalibrator_spark/main.nf#BAM_BASERECALIBRATOR_SPARK/:take:known_sites_tbi[out] ? via known_sites_tbi
+  out table (table): Channel<Tuple>
+  out versions_gatk4 (versions_gatk4): Channel<Tuple>
+subworkflows/local/bam_baserecalibrator_spark/main.nf#BAM_BASERECALIBRATOR_SPARK/table_to_merge chain ".map.groupTuple.branch" steps=map,groupTuple,branch @31:22
+  in in (in): -
+    <- subworkflows/local/bam_baserecalibrator_spark/main.nf#BAM_BASERECALIBRATOR_SPARK/GATK4SPARK_BASERECALIBRATOR@1[table] Channel<Tuple> via GATK4SPARK_BASERECALIBRATOR.out.table
+  out out (out): Record
+subworkflows/local/bam_baserecalibrator_spark/main.nf#BAM_BASERECALIBRATOR_SPARK/GATK4_GATHERBQSRREPORTS@1 call "GATK4_GATHERBQSRREPORTS" callee=GATK4_GATHERBQSRREPORTS:process:modelled:legacy @38:5
+  in $1 (tuple(meta, table)): Tuple
+    <- subworkflows/local/bam_baserecalibrator_spark/main.nf#BAM_BASERECALIBRATOR_SPARK/table_to_merge[out] Record via table_to_merge indirect
+  out table (table): Channel<Tuple>
+  out versions_gatk4 (versions_gatk4): Channel<Tuple>
+subworkflows/local/bam_baserecalibrator_spark/main.nf#BAM_BASERECALIBRATOR_SPARK/.map@4 chain ".map" steps=map @41:56
+  in in (in): -
+    <- subworkflows/local/bam_baserecalibrator_spark/main.nf#BAM_BASERECALIBRATOR_SPARK/table_to_merge[out] Record via table_to_merge indirect
+  out out (out): ?
+subworkflows/local/bam_baserecalibrator_spark/main.nf#BAM_BASERECALIBRATOR_SPARK/table_bqsr chain ".mix.map" steps=mix,map @41:18
+  in in (in): -
+    <- subworkflows/local/bam_baserecalibrator_spark/main.nf#BAM_BASERECALIBRATOR_SPARK/GATK4_GATHERBQSRREPORTS@1[table] Channel<Tuple> via GATK4_GATHERBQSRREPORTS.out.table
+  in 1:1 (mix(other)): -
+    <- subworkflows/local/bam_baserecalibrator_spark/main.nf#BAM_BASERECALIBRATOR_SPARK/.map@4[out] ?
+  out out (out): Channel<?>
+subworkflows/local/bam_baserecalibrator_spark/main.nf#BAM_BASERECALIBRATOR_SPARK/:emit:table_bqsr emit "table_bqsr" @47:5
+  in in (in): -
+    <- subworkflows/local/bam_baserecalibrator_spark/main.nf#BAM_BASERECALIBRATOR_SPARK/table_bqsr[out] Channel<?> via table_bqsr

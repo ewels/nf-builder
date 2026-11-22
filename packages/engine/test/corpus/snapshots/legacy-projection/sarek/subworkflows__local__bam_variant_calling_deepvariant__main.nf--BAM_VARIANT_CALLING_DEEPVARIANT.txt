@@ -1,0 +1,110 @@
+workflow subworkflows/local/bam_variant_calling_deepvariant/main.nf#BAM_VARIANT_CALLING_DEEPVARIANT legacy
+statements 12, modelled 12
+subworkflows/local/bam_variant_calling_deepvariant/main.nf#BAM_VARIANT_CALLING_DEEPVARIANT/:take:cram take "cram" @14:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_deepvariant/main.nf#BAM_VARIANT_CALLING_DEEPVARIANT/:take:dict take "dict" @15:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_deepvariant/main.nf#BAM_VARIANT_CALLING_DEEPVARIANT/:take:fasta take "fasta" @16:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_deepvariant/main.nf#BAM_VARIANT_CALLING_DEEPVARIANT/:take:fasta_fai take "fasta_fai" @17:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_deepvariant/main.nf#BAM_VARIANT_CALLING_DEEPVARIANT/:take:intervals take "intervals" @18:5
+  out out (out): -
+subworkflows/local/bam_variant_calling_deepvariant/main.nf#BAM_VARIANT_CALLING_DEEPVARIANT/cram_intervals chain ".combine.map" steps=combine,map @23:22
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_deepvariant/main.nf#BAM_VARIANT_CALLING_DEEPVARIANT/:take:cram[out] ? via cram
+  in 1:1 (combine(right)): -
+    <- subworkflows/local/bam_variant_calling_deepvariant/main.nf#BAM_VARIANT_CALLING_DEEPVARIANT/:take:intervals[out] ? via intervals
+  out out (out): ?
+subworkflows/local/bam_variant_calling_deepvariant/main.nf#BAM_VARIANT_CALLING_DEEPVARIANT/DEEPVARIANT_RUNDEEPVARIANT@1 call "DEEPVARIANT_RUNDEEPVARIANT" callee=DEEPVARIANT_RUNDEEPVARIANT:process:modelled:legacy @27:5
+  in $1 (tuple(meta, input, index, intervals)): Tuple
+    <- subworkflows/local/bam_variant_calling_deepvariant/main.nf#BAM_VARIANT_CALLING_DEEPVARIANT/cram_intervals[out] ? via cram_intervals
+  in $2 (tuple(meta2, fasta)): Tuple
+    <- subworkflows/local/bam_variant_calling_deepvariant/main.nf#BAM_VARIANT_CALLING_DEEPVARIANT/:take:fasta[out] ? via fasta
+  in $3 (tuple(meta3, fai)): Tuple
+    <- subworkflows/local/bam_variant_calling_deepvariant/main.nf#BAM_VARIANT_CALLING_DEEPVARIANT/:take:fasta_fai[out] ? via fasta_fai
+  in $4 (tuple(meta4, gzi)): Tuple
+    = [ [ id:'null' ], [] ] : List
+  in $5 (tuple(meta5, par_bed)): Tuple
+    = [ [ id:'null' ], [] ] : List
+  out vcf (vcf): Channel<Tuple>
+  out vcf_index (vcf_index): Channel<Tuple>
+  out gvcf (gvcf): Channel<Tuple>
+  out gvcf_index (gvcf_index): Channel<Tuple>
+  out report (report): Channel<Tuple>
+  out versions_deepvariant (versions_deepvariant): Channel<Tuple>
+subworkflows/local/bam_variant_calling_deepvariant/main.nf#BAM_VARIANT_CALLING_DEEPVARIANT/vcf_out chain ".branch" steps=branch @30:15
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_deepvariant/main.nf#BAM_VARIANT_CALLING_DEEPVARIANT/DEEPVARIANT_RUNDEEPVARIANT@1[vcf] Channel<Tuple> via DEEPVARIANT_RUNDEEPVARIANT.out.vcf
+  out out (out): Record
+subworkflows/local/bam_variant_calling_deepvariant/main.nf#BAM_VARIANT_CALLING_DEEPVARIANT/gvcf_out chain ".branch" steps=branch @37:16
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_deepvariant/main.nf#BAM_VARIANT_CALLING_DEEPVARIANT/DEEPVARIANT_RUNDEEPVARIANT@1[gvcf] Channel<Tuple> via DEEPVARIANT_RUNDEEPVARIANT.out.gvcf
+  out out (out): Record
+subworkflows/local/bam_variant_calling_deepvariant/main.nf#BAM_VARIANT_CALLING_DEEPVARIANT/gvcf_to_merge chain ".map.groupTuple" steps=map,groupTuple @44:21
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_deepvariant/main.nf#BAM_VARIANT_CALLING_DEEPVARIANT/gvcf_out[out] Record via gvcf_out indirect
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_deepvariant/main.nf#BAM_VARIANT_CALLING_DEEPVARIANT/vcf_to_merge chain ".map.groupTuple" steps=map,groupTuple @45:20
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_deepvariant/main.nf#BAM_VARIANT_CALLING_DEEPVARIANT/vcf_out[out] Record via vcf_out indirect
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_deepvariant/main.nf#BAM_VARIANT_CALLING_DEEPVARIANT/MERGE_DEEPVARIANT_GVCF@1 call "MERGE_DEEPVARIANT_GVCF" callee=MERGE_DEEPVARIANT_GVCF:process:modelled:legacy @47:5
+  in $1 (tuple(meta, vcf)): Tuple
+    <- subworkflows/local/bam_variant_calling_deepvariant/main.nf#BAM_VARIANT_CALLING_DEEPVARIANT/gvcf_to_merge[out] Channel<?> via gvcf_to_merge
+  in $2 (tuple(meta2, dict)): Tuple
+    <- subworkflows/local/bam_variant_calling_deepvariant/main.nf#BAM_VARIANT_CALLING_DEEPVARIANT/:take:dict[out] ? via dict
+  out vcf (vcf): Channel<Tuple>
+  out tbi (tbi): Channel<Tuple>
+  out versions_gatk4 (versions_gatk4): Channel<Tuple>
+subworkflows/local/bam_variant_calling_deepvariant/main.nf#BAM_VARIANT_CALLING_DEEPVARIANT/MERGE_DEEPVARIANT_VCF@1 call "MERGE_DEEPVARIANT_VCF" callee=MERGE_DEEPVARIANT_VCF:process:modelled:legacy @48:5
+  in $1 (tuple(meta, vcf)): Tuple
+    <- subworkflows/local/bam_variant_calling_deepvariant/main.nf#BAM_VARIANT_CALLING_DEEPVARIANT/vcf_to_merge[out] Channel<?> via vcf_to_merge
+  in $2 (tuple(meta2, dict)): Tuple
+    <- subworkflows/local/bam_variant_calling_deepvariant/main.nf#BAM_VARIANT_CALLING_DEEPVARIANT/:take:dict[out] ? via dict
+  out vcf (vcf): Channel<Tuple>
+  out tbi (tbi): Channel<Tuple>
+  out versions_gatk4 (versions_gatk4): Channel<Tuple>
+subworkflows/local/bam_variant_calling_deepvariant/main.nf#BAM_VARIANT_CALLING_DEEPVARIANT/tbi_out chain ".branch" steps=branch @51:15
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_deepvariant/main.nf#BAM_VARIANT_CALLING_DEEPVARIANT/DEEPVARIANT_RUNDEEPVARIANT@1[vcf_index] Channel<Tuple> via DEEPVARIANT_RUNDEEPVARIANT.out.vcf_index
+  out out (out): Record
+subworkflows/local/bam_variant_calling_deepvariant/main.nf#BAM_VARIANT_CALLING_DEEPVARIANT/channel.empty@1 factory "channel.empty" factory=channel.empty @58:12
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_deepvariant/main.nf#BAM_VARIANT_CALLING_DEEPVARIANT/gvcf chain ".mix.map" steps=mix,map @58:12
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_deepvariant/main.nf#BAM_VARIANT_CALLING_DEEPVARIANT/channel.empty@1[out] Channel<?>
+  in 1:1 (mix(1)): -
+    <- subworkflows/local/bam_variant_calling_deepvariant/main.nf#BAM_VARIANT_CALLING_DEEPVARIANT/MERGE_DEEPVARIANT_GVCF@1[vcf] Channel<Tuple> via MERGE_DEEPVARIANT_GVCF.out.vcf
+  in 1:2 (mix(2)): -
+    <- subworkflows/local/bam_variant_calling_deepvariant/main.nf#BAM_VARIANT_CALLING_DEEPVARIANT/gvcf_out[out] Record via gvcf_out indirect
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_deepvariant/main.nf#BAM_VARIANT_CALLING_DEEPVARIANT/channel.empty@2 factory "channel.empty" factory=channel.empty @63:11
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_deepvariant/main.nf#BAM_VARIANT_CALLING_DEEPVARIANT/vcf chain ".mix.map" steps=mix,map @63:11
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_deepvariant/main.nf#BAM_VARIANT_CALLING_DEEPVARIANT/channel.empty@2[out] Channel<?>
+  in 1:1 (mix(1)): -
+    <- subworkflows/local/bam_variant_calling_deepvariant/main.nf#BAM_VARIANT_CALLING_DEEPVARIANT/MERGE_DEEPVARIANT_VCF@1[vcf] Channel<Tuple> via MERGE_DEEPVARIANT_VCF.out.vcf
+  in 1:2 (mix(2)): -
+    <- subworkflows/local/bam_variant_calling_deepvariant/main.nf#BAM_VARIANT_CALLING_DEEPVARIANT/vcf_out[out] Record via vcf_out indirect
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_deepvariant/main.nf#BAM_VARIANT_CALLING_DEEPVARIANT/channel.empty@3 factory "channel.empty" factory=channel.empty @67:11
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_deepvariant/main.nf#BAM_VARIANT_CALLING_DEEPVARIANT/tbi chain ".mix.map" steps=mix,map @67:11
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_deepvariant/main.nf#BAM_VARIANT_CALLING_DEEPVARIANT/channel.empty@3[out] Channel<?>
+  in 1:1 (mix(1)): -
+    <- subworkflows/local/bam_variant_calling_deepvariant/main.nf#BAM_VARIANT_CALLING_DEEPVARIANT/MERGE_DEEPVARIANT_VCF@1[tbi] Channel<Tuple> via MERGE_DEEPVARIANT_VCF.out.tbi
+  in 1:2 (mix(2)): -
+    <- subworkflows/local/bam_variant_calling_deepvariant/main.nf#BAM_VARIANT_CALLING_DEEPVARIANT/tbi_out[out] Record via tbi_out indirect
+  out out (out): Channel<?>
+subworkflows/local/bam_variant_calling_deepvariant/main.nf#BAM_VARIANT_CALLING_DEEPVARIANT/:emit:gvcf emit "gvcf" @73:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_deepvariant/main.nf#BAM_VARIANT_CALLING_DEEPVARIANT/gvcf[out] Channel<?> via gvcf
+subworkflows/local/bam_variant_calling_deepvariant/main.nf#BAM_VARIANT_CALLING_DEEPVARIANT/:emit:vcf emit "vcf" @74:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_deepvariant/main.nf#BAM_VARIANT_CALLING_DEEPVARIANT/vcf[out] Channel<?> via vcf
+subworkflows/local/bam_variant_calling_deepvariant/main.nf#BAM_VARIANT_CALLING_DEEPVARIANT/:emit:tbi emit "tbi" @75:5
+  in in (in): -
+    <- subworkflows/local/bam_variant_calling_deepvariant/main.nf#BAM_VARIANT_CALLING_DEEPVARIANT/tbi[out] Channel<?> via tbi

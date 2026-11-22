@@ -1,0 +1,313 @@
+workflow subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC legacy
+statements 61, modelled 61
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/:take:bam_bai take "bam_bai" @19:5
+  out out (out): -
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/:take:bed take "bed" @20:5
+  out out (out): -
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/:take:rseqc_modules take "rseqc_modules" @21:5
+  out out (out): -
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/bam chain ".map" steps=map @26:11
+  in in (in): -
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/:take:bam_bai[out] ? via bam_bai
+  out out (out): ?
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/bamstat_txt factory "channel.empty" factory=channel.empty @31:19
+  out out (out): Channel<?>
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/RSEQC_BAMSTAT@1 call "RSEQC_BAMSTAT" callee=RSEQC_BAMSTAT:process:modelled:legacy @34:9
+  guards then of 'bam_stat' in rseqc_modules
+  in $1 (tuple(meta, bam, bai)): Tuple
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/bam[out] ? via bam
+  out txt (txt): Channel<Tuple>
+  out versions_rseqc (versions_rseqc): Channel<Tuple>
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/innerdistance_all factory "channel.empty" factory=channel.empty @41:30
+  out out (out): Channel<?>
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/innerdistance_distance factory "channel.empty" factory=channel.empty @42:30
+  out out (out): Channel<?>
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/innerdistance_freq factory "channel.empty" factory=channel.empty @43:30
+  out out (out): Channel<?>
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/innerdistance_mean factory "channel.empty" factory=channel.empty @44:30
+  out out (out): Channel<?>
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/innerdistance_pdf factory "channel.empty" factory=channel.empty @45:30
+  out out (out): Channel<?>
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/innerdistance_rscript factory "channel.empty" factory=channel.empty @46:30
+  out out (out): Channel<?>
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/RSEQC_INNERDISTANCE@1 call "RSEQC_INNERDISTANCE" callee=RSEQC_INNERDISTANCE:process:modelled:legacy @49:9
+  guards then of 'inner_distance' in rseqc_modules
+  in $1 (tuple(meta, bam, bai)): Tuple
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/bam[out] ? via bam
+  in bed (bed): Path
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/:take:bed[out] ? via bed
+  out distance (distance): Channel<Tuple>
+  out freq (freq): Channel<Tuple>
+  out mean (mean): Channel<Tuple>
+  out pdf (pdf): Channel<Tuple>
+  out rscript (rscript): Channel<Tuple>
+  out versions_rseqc (versions_rseqc): Channel<Tuple>
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/innerdistance_all~2 chain ".mix" steps=mix @55:34
+  guards then of 'inner_distance' in rseqc_modules
+  in in (in): -
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/RSEQC_INNERDISTANCE@1[distance] Channel<Tuple> via innerdistance_distance
+  in 1:1 (mix(1)): -
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/RSEQC_INNERDISTANCE@1[freq] Channel<Tuple> via innerdistance_freq
+  in 1:2 (mix(2)): -
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/RSEQC_INNERDISTANCE@1[mean] Channel<Tuple> via innerdistance_mean
+  in 1:3 (mix(3)): -
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/RSEQC_INNERDISTANCE@1[pdf] Channel<Tuple> via innerdistance_pdf
+  in 1:4 (mix(4)): -
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/RSEQC_INNERDISTANCE@1[rscript] Channel<Tuple> via innerdistance_rscript
+  out out (out): Channel<?>
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/inferexperiment_txt factory "channel.empty" factory=channel.empty @61:27
+  out out (out): Channel<?>
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/RSEQC_INFEREXPERIMENT@1 call "RSEQC_INFEREXPERIMENT" callee=RSEQC_INFEREXPERIMENT:process:modelled:legacy @63:9
+  guards then of 'infer_experiment' in rseqc_modules
+  in $1 (tuple(meta, bam, bai)): Tuple
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/bam[out] ? via bam
+  in bed (bed): Path
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/:take:bed[out] ? via bed
+  out txt (txt): Channel<Tuple>
+  out versions_rseqc (versions_rseqc): Channel<Tuple>
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/junctionannotation_all factory "channel.empty" factory=channel.empty @70:39
+  out out (out): Channel<?>
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/junctionannotation_bed factory "channel.empty" factory=channel.empty @71:39
+  out out (out): Channel<?>
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/junctionannotation_interact_bed factory "channel.empty" factory=channel.empty @72:39
+  out out (out): Channel<?>
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/junctionannotation_xls factory "channel.empty" factory=channel.empty @73:39
+  out out (out): Channel<?>
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/junctionannotation_pdf factory "channel.empty" factory=channel.empty @74:39
+  out out (out): Channel<?>
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/junctionannotation_events_pdf factory "channel.empty" factory=channel.empty @75:39
+  out out (out): Channel<?>
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/junctionannotation_rscript factory "channel.empty" factory=channel.empty @76:39
+  out out (out): Channel<?>
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/junctionannotation_log factory "channel.empty" factory=channel.empty @77:39
+  out out (out): Channel<?>
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/RSEQC_JUNCTIONANNOTATION@1 call "RSEQC_JUNCTIONANNOTATION" callee=RSEQC_JUNCTIONANNOTATION:process:modelled:legacy @80:9
+  guards then of 'junction_annotation' in rseqc_modules
+  in $1 (tuple(meta, bam, bai)): Tuple
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/bam[out] ? via bam
+  in bed (bed): Path
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/:take:bed[out] ? via bed
+  out xls (xls): Channel<Tuple>
+  out rscript (rscript): Channel<Tuple>
+  out log (log): Channel<Tuple>
+  out bed (bed): Channel<Tuple>
+  out interact_bed (interact_bed): Channel<Tuple>
+  out pdf (pdf): Channel<Tuple>
+  out events_pdf (events_pdf): Channel<Tuple>
+  out versions_rseqc (versions_rseqc): Channel<Tuple>
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/junctionannotation_all~2 chain ".mix" steps=mix @88:43
+  guards then of 'junction_annotation' in rseqc_modules
+  in in (in): -
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/RSEQC_JUNCTIONANNOTATION@1[bed] Channel<Tuple> via junctionannotation_bed
+  in 1:1 (mix(1)): -
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/RSEQC_JUNCTIONANNOTATION@1[interact_bed] Channel<Tuple> via junctionannotation_interact_bed
+  in 1:2 (mix(2)): -
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/RSEQC_JUNCTIONANNOTATION@1[xls] Channel<Tuple> via junctionannotation_xls
+  in 1:3 (mix(3)): -
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/RSEQC_JUNCTIONANNOTATION@1[pdf] Channel<Tuple> via junctionannotation_pdf
+  in 1:4 (mix(4)): -
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/RSEQC_JUNCTIONANNOTATION@1[events_pdf] Channel<Tuple> via junctionannotation_events_pdf
+  in 1:5 (mix(5)): -
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/RSEQC_JUNCTIONANNOTATION@1[rscript] Channel<Tuple> via junctionannotation_rscript
+  in 1:6 (mix(6)): -
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/RSEQC_JUNCTIONANNOTATION@1[log] Channel<Tuple> via junctionannotation_log
+  out out (out): Channel<?>
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/junctionsaturation_all factory "channel.empty" factory=channel.empty @94:34
+  out out (out): Channel<?>
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/junctionsaturation_pdf factory "channel.empty" factory=channel.empty @95:34
+  out out (out): Channel<?>
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/junctionsaturation_rscript factory "channel.empty" factory=channel.empty @96:34
+  out out (out): Channel<?>
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/RSEQC_JUNCTIONSATURATION@1 call "RSEQC_JUNCTIONSATURATION" callee=RSEQC_JUNCTIONSATURATION:process:modelled:legacy @99:9
+  guards then of 'junction_saturation' in rseqc_modules
+  in $1 (tuple(meta, bam, bai)): Tuple
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/bam[out] ? via bam
+  in bed (bed): Path
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/:take:bed[out] ? via bed
+  out pdf (pdf): Channel<Tuple>
+  out rscript (rscript): Channel<Tuple>
+  out versions_rseqc (versions_rseqc): Channel<Tuple>
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/junctionsaturation_all~2 chain ".mix" steps=mix @102:38
+  guards then of 'junction_saturation' in rseqc_modules
+  in in (in): -
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/RSEQC_JUNCTIONSATURATION@1[pdf] Channel<Tuple> via junctionsaturation_pdf
+  in 1:1 (mix(other)): -
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/RSEQC_JUNCTIONSATURATION@1[rscript] Channel<Tuple> via junctionsaturation_rscript
+  out out (out): Channel<Tuple>
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/readdistribution_txt factory "channel.empty" factory=channel.empty @108:28
+  out out (out): Channel<?>
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/RSEQC_READDISTRIBUTION@1 call "RSEQC_READDISTRIBUTION" callee=RSEQC_READDISTRIBUTION:process:modelled:legacy @111:9
+  guards then of 'read_distribution' in rseqc_modules
+  in $1 (tuple(meta, bam, bai)): Tuple
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/bam[out] ? via bam
+  in bed (bed): Path
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/:take:bed[out] ? via bed
+  out txt (txt): Channel<Tuple>
+  out versions_rseqc (versions_rseqc): Channel<Tuple>
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/readduplication_all factory "channel.empty" factory=channel.empty @118:31
+  out out (out): Channel<?>
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/readduplication_seq_xls factory "channel.empty" factory=channel.empty @119:31
+  out out (out): Channel<?>
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/readduplication_pos_xls factory "channel.empty" factory=channel.empty @120:31
+  out out (out): Channel<?>
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/readduplication_pdf factory "channel.empty" factory=channel.empty @121:31
+  out out (out): Channel<?>
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/readduplication_rscript factory "channel.empty" factory=channel.empty @122:31
+  out out (out): Channel<?>
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/RSEQC_READDUPLICATION@1 call "RSEQC_READDUPLICATION" callee=RSEQC_READDUPLICATION:process:modelled:legacy @125:9
+  guards then of 'read_duplication' in rseqc_modules
+  in $1 (tuple(meta, bam, bai)): Tuple
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/bam[out] ? via bam
+  out seq_xls (seq_xls): Channel<Tuple>
+  out pos_xls (pos_xls): Channel<Tuple>
+  out pdf (pdf): Channel<Tuple>
+  out rscript (rscript): Channel<Tuple>
+  out versions_rseqc (versions_rseqc): Channel<Tuple>
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/readduplication_all~2 chain ".mix" steps=mix @130:35
+  guards then of 'read_duplication' in rseqc_modules
+  in in (in): -
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/RSEQC_READDUPLICATION@1[seq_xls] Channel<Tuple> via readduplication_seq_xls
+  in 1:1 (mix(1)): -
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/RSEQC_READDUPLICATION@1[pos_xls] Channel<Tuple> via readduplication_pos_xls
+  in 1:2 (mix(2)): -
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/RSEQC_READDUPLICATION@1[pdf] Channel<Tuple> via readduplication_pdf
+  in 1:3 (mix(3)): -
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/RSEQC_READDUPLICATION@1[rscript] Channel<Tuple> via readduplication_rscript
+  out out (out): Channel<?>
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/tin_txt factory "channel.empty" factory=channel.empty @136:15
+  out out (out): Channel<?>
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/RSEQC_TIN@1 call "RSEQC_TIN" callee=RSEQC_TIN:process:modelled:legacy @139:9
+  guards then of 'tin' in rseqc_modules
+  in $1 (tuple(meta, bam, bai)): Tuple
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/bam[out] ? via bam
+  in bed (bed): Path
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/:take:bed[out] ? via bed
+  out txt (txt): Channel<Tuple>
+  out xls (xls): Channel<Tuple>
+  out versions_rseqc (versions_rseqc): Channel<Tuple>
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/:emit:bamstat_txt emit "bamstat_txt" @144:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/bamstat_txt[out] Channel<?> via bamstat_txt indirect
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/RSEQC_BAMSTAT@1[txt] Channel<Tuple> via bamstat_txt indirect
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/:emit:innerdistance_all emit "innerdistance_all" @146:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/innerdistance_all[out] Channel<?> via innerdistance_all indirect
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/innerdistance_all~2[out] Channel<?> via innerdistance_all indirect
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/:emit:innerdistance_distance emit "innerdistance_distance" @147:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/innerdistance_distance[out] Channel<?> via innerdistance_distance indirect
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/RSEQC_INNERDISTANCE@1[distance] Channel<Tuple> via innerdistance_distance indirect
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/:emit:innerdistance_freq emit "innerdistance_freq" @148:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/innerdistance_freq[out] Channel<?> via innerdistance_freq indirect
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/RSEQC_INNERDISTANCE@1[freq] Channel<Tuple> via innerdistance_freq indirect
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/:emit:innerdistance_mean emit "innerdistance_mean" @149:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/innerdistance_mean[out] Channel<?> via innerdistance_mean indirect
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/RSEQC_INNERDISTANCE@1[mean] Channel<Tuple> via innerdistance_mean indirect
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/:emit:innerdistance_pdf emit "innerdistance_pdf" @150:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/innerdistance_pdf[out] Channel<?> via innerdistance_pdf indirect
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/RSEQC_INNERDISTANCE@1[pdf] Channel<Tuple> via innerdistance_pdf indirect
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/:emit:innerdistance_rscript emit "innerdistance_rscript" @151:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/innerdistance_rscript[out] Channel<?> via innerdistance_rscript indirect
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/RSEQC_INNERDISTANCE@1[rscript] Channel<Tuple> via innerdistance_rscript indirect
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/:emit:inferexperiment_txt emit "inferexperiment_txt" @153:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/inferexperiment_txt[out] Channel<?> via inferexperiment_txt indirect
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/RSEQC_INFEREXPERIMENT@1[txt] Channel<Tuple> via inferexperiment_txt indirect
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/:emit:junctionannotation_all emit "junctionannotation_all" @155:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/junctionannotation_all[out] Channel<?> via junctionannotation_all indirect
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/junctionannotation_all~2[out] Channel<?> via junctionannotation_all indirect
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/:emit:junctionannotation_bed emit "junctionannotation_bed" @156:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/junctionannotation_bed[out] Channel<?> via junctionannotation_bed indirect
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/RSEQC_JUNCTIONANNOTATION@1[bed] Channel<Tuple> via junctionannotation_bed indirect
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/:emit:junctionannotation_interact_bed emit "junctionannotation_interact_bed" @157:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/junctionannotation_interact_bed[out] Channel<?> via junctionannotation_interact_bed indirect
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/RSEQC_JUNCTIONANNOTATION@1[interact_bed] Channel<Tuple> via junctionannotation_interact_bed indirect
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/:emit:junctionannotation_xls emit "junctionannotation_xls" @158:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/junctionannotation_xls[out] Channel<?> via junctionannotation_xls indirect
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/RSEQC_JUNCTIONANNOTATION@1[xls] Channel<Tuple> via junctionannotation_xls indirect
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/:emit:junctionannotation_pdf emit "junctionannotation_pdf" @159:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/junctionannotation_pdf[out] Channel<?> via junctionannotation_pdf indirect
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/RSEQC_JUNCTIONANNOTATION@1[pdf] Channel<Tuple> via junctionannotation_pdf indirect
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/:emit:junctionannotation_events_pdf emit "junctionannotation_events_pdf" @160:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/junctionannotation_events_pdf[out] Channel<?> via junctionannotation_events_pdf indirect
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/RSEQC_JUNCTIONANNOTATION@1[events_pdf] Channel<Tuple> via junctionannotation_events_pdf indirect
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/:emit:junctionannotation_rscript emit "junctionannotation_rscript" @161:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/junctionannotation_rscript[out] Channel<?> via junctionannotation_rscript indirect
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/RSEQC_JUNCTIONANNOTATION@1[rscript] Channel<Tuple> via junctionannotation_rscript indirect
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/:emit:junctionannotation_log emit "junctionannotation_log" @162:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/junctionannotation_log[out] Channel<?> via junctionannotation_log indirect
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/RSEQC_JUNCTIONANNOTATION@1[log] Channel<Tuple> via junctionannotation_log indirect
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/:emit:junctionsaturation_all emit "junctionsaturation_all" @164:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/junctionsaturation_all[out] Channel<?> via junctionsaturation_all indirect
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/junctionsaturation_all~2[out] Channel<Tuple> via junctionsaturation_all indirect
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/:emit:junctionsaturation_pdf emit "junctionsaturation_pdf" @165:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/junctionsaturation_pdf[out] Channel<?> via junctionsaturation_pdf indirect
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/RSEQC_JUNCTIONSATURATION@1[pdf] Channel<Tuple> via junctionsaturation_pdf indirect
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/:emit:junctionsaturation_rscript emit "junctionsaturation_rscript" @166:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/junctionsaturation_rscript[out] Channel<?> via junctionsaturation_rscript indirect
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/RSEQC_JUNCTIONSATURATION@1[rscript] Channel<Tuple> via junctionsaturation_rscript indirect
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/:emit:readdistribution_txt emit "readdistribution_txt" @168:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/readdistribution_txt[out] Channel<?> via readdistribution_txt indirect
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/RSEQC_READDISTRIBUTION@1[txt] Channel<Tuple> via readdistribution_txt indirect
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/:emit:readduplication_all emit "readduplication_all" @170:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/readduplication_all[out] Channel<?> via readduplication_all indirect
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/readduplication_all~2[out] Channel<?> via readduplication_all indirect
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/:emit:readduplication_seq_xls emit "readduplication_seq_xls" @171:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/readduplication_seq_xls[out] Channel<?> via readduplication_seq_xls indirect
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/RSEQC_READDUPLICATION@1[seq_xls] Channel<Tuple> via readduplication_seq_xls indirect
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/:emit:readduplication_pos_xls emit "readduplication_pos_xls" @172:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/readduplication_pos_xls[out] Channel<?> via readduplication_pos_xls indirect
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/RSEQC_READDUPLICATION@1[pos_xls] Channel<Tuple> via readduplication_pos_xls indirect
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/:emit:readduplication_pdf emit "readduplication_pdf" @173:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/readduplication_pdf[out] Channel<?> via readduplication_pdf indirect
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/RSEQC_READDUPLICATION@1[pdf] Channel<Tuple> via readduplication_pdf indirect
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/:emit:readduplication_rscript emit "readduplication_rscript" @174:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/readduplication_rscript[out] Channel<?> via readduplication_rscript indirect
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/RSEQC_READDUPLICATION@1[rscript] Channel<Tuple> via readduplication_rscript indirect
+subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/:emit:tin_txt emit "tin_txt" @176:5
+  in in (in): -
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/tin_txt[out] Channel<?> via tin_txt indirect
+    <- subworkflows/nf-core/bam_rseqc/main.nf#BAM_RSEQC/RSEQC_TIN@1[txt] Channel<Tuple> via tin_txt indirect
+bound @35:9 bamstat_txt
+bound @50:9 innerdistance_distance
+bound @51:9 innerdistance_freq
+bound @52:9 innerdistance_mean
+bound @53:9 innerdistance_pdf
+bound @54:9 innerdistance_rscript
+bound @64:9 inferexperiment_txt
+bound @81:9 junctionannotation_bed
+bound @82:9 junctionannotation_interact_bed
+bound @83:9 junctionannotation_xls
+bound @84:9 junctionannotation_pdf
+bound @85:9 junctionannotation_events_pdf
+bound @86:9 junctionannotation_rscript
+bound @87:9 junctionannotation_log
+bound @100:9 junctionsaturation_pdf
+bound @101:9 junctionsaturation_rscript
+bound @112:9 readdistribution_txt
+bound @126:9 readduplication_seq_xls
+bound @127:9 readduplication_pos_xls
+bound @128:9 readduplication_pdf
+bound @129:9 readduplication_rscript
+bound @140:9 tin_txt

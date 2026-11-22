@@ -1,0 +1,38 @@
+workflow main.nf# legacy
+statements 5, modelled 4
+main.nf#/:params params "params" @24:1
+  out reads (reads): -
+  out transcriptome (transcriptome): -
+  out multiqc (multiqc): -
+main.nf#/:code@1 code "log.info """\" @26:5
+  in params.transcriptome (params.transcriptome): -
+    <- main.nf#/:params[transcriptome] ? via params.transcriptome indirect
+  in params.reads (params.reads): -
+    <- main.nf#/:params[reads] ? via params.reads indirect
+main.nf#/read_pairs_ch factory "channel.fromFilePairs" factory=channel.fromFilePairs @38:21
+  out out (out): Channel<?>
+main.nf#/samples_ch call "RNASEQ" callee=RNASEQ:workflow:modelled:legacy @45:18
+  in read_pairs_ch (read_pairs_ch): -
+    <- main.nf#/read_pairs_ch[out] Channel<?> via read_pairs_ch
+  in transcriptome (transcriptome): -
+    <- main.nf#/:params[transcriptome] ? via params.transcriptome
+  out samples (samples): Channel<?>
+main.nf#/multiqc_files_ch chain ".flatMap.collect" steps=flatMap,collect @50:24
+  in in (in): -
+    <- main.nf#/samples_ch[samples] Channel<?> via samples_ch
+  out out (out): Value<Bag<?>>
+main.nf#/multiqc_report call "MULTIQC" callee=MULTIQC:process:modelled:legacy @56:22
+  in $1 (*): Path
+    <- main.nf#/multiqc_files_ch[out] Value<Bag<?>> via multiqc_files_ch
+  in config (config): Path
+    <- main.nf#/:params[multiqc] ? via params.multiqc
+  out out (out): Channel<Path>
+main.nf#/.map@1 chain ".map" steps=map @61:15
+  in in (in): -
+    <- main.nf#/samples_ch[samples] Channel<?> via samples_ch
+  out out (out): Channel<?>
+main.nf#/:output output "output" @75:1
+  in samples (samples): -
+    <- main.nf#/.map@1[out] Channel<?>
+  in multiqc_report (multiqc_report): -
+    <- main.nf#/multiqc_report[out] Channel<Path> via multiqc_report
