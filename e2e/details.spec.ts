@@ -79,7 +79,7 @@ test("F-206 UX-24: edges touching the selected node are highlighted until the se
       getComputedStyle(el).stroke,
       getComputedStyle(el).strokeWidth,
     ]);
-  expect(stroke).toEqual(["rgb(47, 95, 208)", "2px"]);
+  expect(stroke).toEqual(["rgb(47, 95, 208)", "3px"]);
   await selectNode(page, NODE.counted);
   await expect(node(page, NODE.greeted)).not.toHaveClass(/selected/);
   await expect(node(page, NODE.counted)).toHaveClass(/selected/);

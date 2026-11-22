@@ -136,6 +136,7 @@ function CanvasInner({
         nodes={nodes}
         onNodesChange={onNodesChange}
         edges={edges}
+        elevateEdgesOnSelect={false}
         nodeTypes={NODE_TYPES}
         edgeTypes={EDGE_TYPES}
         forceColorMode="light"

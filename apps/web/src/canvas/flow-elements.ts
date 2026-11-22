@@ -42,14 +42,12 @@ export function toFlowNodes(
   }));
 }
 
-/** A highlighted edge is drawn above the others. */
-const HIGHLIGHTED_Z = 1000;
-
+/** Edges touching the selected node (highlighted) come last, so they paint above other edges but, with no z-index, below nodes (UX-24). */
 export function toFlowEdges(
   view: CanvasView,
   selected: string | null,
 ): CanvasFlowEdge[] {
-  return view.edges.map((e) => {
+  const edges = view.edges.map((e): CanvasFlowEdge => {
     const highlighted =
       selected !== null && (e.source === selected || e.target === selected);
     return {
@@ -62,7 +60,10 @@ export function toFlowEdges(
       data: { dataflow: e.dataflow, tooltip: e.tooltip, highlighted },
       ariaLabel: e.tooltip,
       selectable: false,
-      ...(highlighted ? { zIndex: HIGHLIGHTED_Z } : {}),
     };
   });
+  return [
+    ...edges.filter((e) => e.data?.highlighted !== true),
+    ...edges.filter((e) => e.data?.highlighted === true),
+  ];
 }

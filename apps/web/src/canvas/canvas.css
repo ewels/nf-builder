@@ -179,9 +179,10 @@
   stroke-width: 1;
 }
 
-.react-flow__edge-path.is-highlighted {
+/* Thicker as well as coloured (QA-12). The extra class beats the unknown-type and hover rules; a mismatch rule (F-302) goes after this one. */
+.react-flow__edge .react-flow__edge-path.is-highlighted {
   stroke: var(--color-accent);
-  stroke-width: 2;
+  stroke-width: 3;
 }
 
 .react-flow__node.selected .canvas-node {
