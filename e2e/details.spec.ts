@@ -108,6 +108,25 @@ test("F-206 UX-30: selecting a node keeps the viewport", async ({ page }) => {
   expect(await transform()).toBe(before);
 });
 
+test("F-206 UX-30 QA-11: Enter on a focused node selects it, Escape clears", async ({
+  page,
+}) => {
+  await page.goto("./");
+  await openFixture(page);
+  await canvasReady(page);
+  await node(page, NODE.greeted).focus();
+  await page.keyboard.press("Enter");
+  await expect(node(page, NODE.greeted)).toHaveClass(/selected/);
+  await expect(detailsPane(page).locator(".details-name")).toHaveText("GREET");
+  await detailsReady(page);
+  await page.keyboard.press("Escape");
+  await expect(page.locator(".react-flow__node.selected")).toHaveCount(0);
+  await expect(detailsPane(page)).toHaveAttribute(
+    "data-details-state",
+    "summary",
+  );
+});
+
 test("F-206 step 1 UX-30: clicking each node kind shows its name, kind, file, and ports with types and connections", async ({
   page,
 }) => {
