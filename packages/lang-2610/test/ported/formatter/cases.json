@@ -1,0 +1,885 @@
+{
+  "about": "Format cases ported from nf-lang's ScriptFormatterTest for F-110 (ADR 0005, LA-45). Each file is the upstream test string after Groovy unescaping and stripIndent. kind: check-format (format(in) == out and format(out) == out; a single-argument call has out equal to in), format-equals (format(in) == out), format-equals-input, format-contains (the output holds every string of `contains`). The cases marked excluded use options the printer does not implement. Regenerate with transcribe.py; never edit.",
+  "upstream": {
+    "repo": "nextflow-io/nextflow",
+    "tag": "v26.10.7",
+    "commit": "0ad848ef3c3a22824cd9eb2ca14568385867702d",
+    "file": "modules/nf-lang/src/test/groovy/nextflow/script/formatter/ScriptFormatterTest.groovy"
+  },
+  "cases": [
+    {
+      "id": "ScriptFormatterTest-L071",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L71",
+      "line": 71,
+      "test": "should format a code snippet",
+      "section": "CODE SNIPPET",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L071.in.nf",
+      "out": "cases/ScriptFormatterTest-L071.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L085",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L85",
+      "line": 85,
+      "test": "should format an include declaration",
+      "section": "SCRIPT DECLARATIONS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L085.in.nf",
+      "out": "cases/ScriptFormatterTest-L085.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L093",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L93",
+      "line": 93,
+      "test": "should format an include declaration",
+      "section": "SCRIPT DECLARATIONS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L093.in.nf",
+      "out": "cases/ScriptFormatterTest-L093.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L110",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L110",
+      "line": 110,
+      "test": "should format a parameter declaration",
+      "section": "SCRIPT DECLARATIONS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L110.in.nf",
+      "out": "cases/ScriptFormatterTest-L110.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L122",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L122",
+      "line": 122,
+      "test": "should format a legacy workflow definition",
+      "section": "SCRIPT DECLARATIONS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L122.in.nf",
+      "out": "cases/ScriptFormatterTest-L122.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L143",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L143",
+      "line": 143,
+      "test": "should format a legacy workflow definition",
+      "section": "SCRIPT DECLARATIONS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L143.in.nf",
+      "out": "cases/ScriptFormatterTest-L143.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L164",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L164",
+      "line": 164,
+      "test": "should format a typed workflow definition",
+      "section": "SCRIPT DECLARATIONS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L164.in.nf",
+      "out": "cases/ScriptFormatterTest-L164.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L213",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L213",
+      "line": 213,
+      "test": "should not copy the output type into a publish target",
+      "section": "SCRIPT DECLARATIONS",
+      "kind": "format-contains",
+      "in": "cases/ScriptFormatterTest-L213.in.nf",
+      "contains": [
+        "    a = ch\n",
+        "    b = ch\n"
+      ],
+      "typeCheck": true
+    },
+    {
+      "id": "ScriptFormatterTest-L221",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L221",
+      "line": 221,
+      "test": "should format a legacy process definition",
+      "section": "SCRIPT DECLARATIONS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L221.in.nf",
+      "out": "cases/ScriptFormatterTest-L221.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L247",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L247",
+      "line": 247,
+      "test": "should format a typed process definition",
+      "section": "SCRIPT DECLARATIONS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L247.in.nf",
+      "out": "cases/ScriptFormatterTest-L247.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L277",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L277",
+      "line": 277,
+      "test": "should format a typed process definition",
+      "section": "SCRIPT DECLARATIONS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L277.in.nf",
+      "out": "cases/ScriptFormatterTest-L277.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L307",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L307",
+      "line": 307,
+      "test": "should format an agent definition",
+      "section": "SCRIPT DECLARATIONS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L307.in.nf",
+      "out": "cases/ScriptFormatterTest-L307.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L334",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L334",
+      "line": 334,
+      "test": "should format a function definition",
+      "section": "SCRIPT DECLARATIONS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L334.in.nf",
+      "out": "cases/ScriptFormatterTest-L334.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L347",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L347",
+      "line": 347,
+      "test": "should format a function definition",
+      "section": "SCRIPT DECLARATIONS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L347.in.nf",
+      "out": "cases/ScriptFormatterTest-L347.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L360",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L360",
+      "line": 360,
+      "test": "should format a function definition",
+      "section": "SCRIPT DECLARATIONS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L360.in.nf",
+      "out": "cases/ScriptFormatterTest-L360.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L373",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L373",
+      "line": 373,
+      "test": "should format a function definition",
+      "section": "SCRIPT DECLARATIONS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L373.in.nf",
+      "out": "cases/ScriptFormatterTest-L373.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L390",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L390",
+      "line": 390,
+      "test": "should format an enum definition",
+      "section": "SCRIPT DECLARATIONS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L390.in.nf",
+      "out": "cases/ScriptFormatterTest-L390.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L406",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L406",
+      "line": 406,
+      "test": "should format a record definition",
+      "section": "SCRIPT DECLARATIONS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L406.in.nf",
+      "out": "cases/ScriptFormatterTest-L406.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L422",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L422",
+      "line": 422,
+      "test": "should format an output block",
+      "section": "SCRIPT DECLARATIONS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L422.in.nf",
+      "out": "cases/ScriptFormatterTest-L422.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L448",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L448",
+      "line": 448,
+      "test": "should format an output block",
+      "section": "SCRIPT DECLARATIONS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L448.in.nf",
+      "out": "cases/ScriptFormatterTest-L448.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L474",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L474",
+      "line": 474,
+      "test": "should format an output block",
+      "section": "SCRIPT DECLARATIONS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L474.in.nf",
+      "out": "cases/ScriptFormatterTest-L474.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L522",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L522",
+      "line": 522,
+      "test": "should not sort script declarations by default",
+      "section": "SCRIPT DECLARATIONS",
+      "kind": "format-equals-input",
+      "in": "cases/ScriptFormatterTest-L522.in.nf",
+      "out": "cases/ScriptFormatterTest-L522.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L529",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L529",
+      "line": 529,
+      "test": "should format an assert statement",
+      "section": "STATEMENTS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L529.in.nf",
+      "out": "cases/ScriptFormatterTest-L529.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L541",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L541",
+      "line": 541,
+      "test": "should format a variable declaration",
+      "section": "STATEMENTS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L541.in.nf",
+      "out": "cases/ScriptFormatterTest-L541.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L556",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L556",
+      "line": 556,
+      "test": "should format a variable declaration",
+      "section": "STATEMENTS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L556.in.nf",
+      "out": "cases/ScriptFormatterTest-L556.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L564",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L564",
+      "line": 564,
+      "test": "should format a variable declaration",
+      "section": "STATEMENTS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L564.in.nf",
+      "out": "cases/ScriptFormatterTest-L564.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L578",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L578",
+      "line": 578,
+      "test": "should format an assignment",
+      "section": "STATEMENTS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L578.in.nf",
+      "out": "cases/ScriptFormatterTest-L578.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L601",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L601",
+      "line": 601,
+      "test": "should format an if-else statement",
+      "section": "STATEMENTS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L601.in.nf",
+      "out": "cases/ScriptFormatterTest-L601.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L621",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L621",
+      "line": 621,
+      "test": "should format a throw statement",
+      "section": "STATEMENTS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L621.in.nf",
+      "out": "cases/ScriptFormatterTest-L621.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L630",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L630",
+      "line": 630,
+      "test": "should format a try-catch statement",
+      "section": "STATEMENTS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L630.in.nf",
+      "out": "cases/ScriptFormatterTest-L630.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L643",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L643",
+      "line": 643,
+      "test": "should format a try-catch statement",
+      "section": "STATEMENTS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L643.in.nf",
+      "out": "cases/ScriptFormatterTest-L643.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L660",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L660",
+      "line": 660,
+      "test": "should format a method chain",
+      "section": "STATEMENTS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L660.in.nf",
+      "out": "cases/ScriptFormatterTest-L660.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L677",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L677",
+      "line": 677,
+      "test": "should format a numeric literal",
+      "section": "EXPRESSIONS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L677.in.nf",
+      "out": "cases/ScriptFormatterTest-L677.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L694",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L694",
+      "line": 694,
+      "test": "should format a keyword literal",
+      "section": "EXPRESSIONS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L694.in.nf",
+      "out": "cases/ScriptFormatterTest-L694.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L705",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L705",
+      "line": 705,
+      "test": "should format a string literal",
+      "section": "EXPRESSIONS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L705.in.nf",
+      "out": "cases/ScriptFormatterTest-L705.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L728",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L728",
+      "line": 728,
+      "test": "should format a dynamic string",
+      "section": "EXPRESSIONS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L728.in.nf",
+      "out": "cases/ScriptFormatterTest-L728.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L733",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L733",
+      "line": 733,
+      "test": "should format a dynamic string",
+      "section": "EXPRESSIONS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L733.in.nf",
+      "out": "cases/ScriptFormatterTest-L733.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L741",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L741",
+      "line": 741,
+      "test": "should format a dynamic string",
+      "section": "EXPRESSIONS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L741.in.nf",
+      "out": "cases/ScriptFormatterTest-L741.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L752",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L752",
+      "line": 752,
+      "test": "should format a dynamic string",
+      "section": "EXPRESSIONS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L752.in.nf",
+      "out": "cases/ScriptFormatterTest-L752.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L761",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L761",
+      "line": 761,
+      "test": "should format a list literal",
+      "section": "EXPRESSIONS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L761.in.nf",
+      "out": "cases/ScriptFormatterTest-L761.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L775",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L775",
+      "line": 775,
+      "test": "should format a map literal",
+      "section": "EXPRESSIONS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L775.in.nf",
+      "out": "cases/ScriptFormatterTest-L775.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L785",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L785",
+      "line": 785,
+      "test": "should format a map literal",
+      "section": "EXPRESSIONS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L785.in.nf",
+      "out": "cases/ScriptFormatterTest-L785.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L793",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L793",
+      "line": 793,
+      "test": "should format a map literal",
+      "section": "EXPRESSIONS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L793.in.nf",
+      "out": "cases/ScriptFormatterTest-L793.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L805",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L805",
+      "line": 805,
+      "test": "should format a closure",
+      "section": "EXPRESSIONS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L805.in.nf",
+      "out": "cases/ScriptFormatterTest-L805.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L813",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L813",
+      "line": 813,
+      "test": "should format a closure",
+      "section": "EXPRESSIONS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L813.in.nf",
+      "out": "cases/ScriptFormatterTest-L813.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L821",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L821",
+      "line": 821,
+      "test": "should format a closure",
+      "section": "EXPRESSIONS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L821.in.nf",
+      "out": "cases/ScriptFormatterTest-L821.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L829",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L829",
+      "line": 829,
+      "test": "should format a closure",
+      "section": "EXPRESSIONS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L829.in.nf",
+      "out": "cases/ScriptFormatterTest-L829.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L844",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L844",
+      "line": 844,
+      "test": "should format index and property accesses",
+      "section": "EXPRESSIONS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L844.in.nf",
+      "out": "cases/ScriptFormatterTest-L844.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L856",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L856",
+      "line": 856,
+      "test": "should format a function call",
+      "section": "EXPRESSIONS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L856.in.nf",
+      "out": "cases/ScriptFormatterTest-L856.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L866",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L866",
+      "line": 866,
+      "test": "should format a function call",
+      "section": "EXPRESSIONS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L866.in.nf",
+      "out": "cases/ScriptFormatterTest-L866.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L882",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L882",
+      "line": 882,
+      "test": "should format a constructor call",
+      "section": "EXPRESSIONS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L882.in.nf",
+      "out": "cases/ScriptFormatterTest-L882.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L892",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L892",
+      "line": 892,
+      "test": "should format unary/binary/ternary expressions",
+      "section": "EXPRESSIONS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L892.in.nf",
+      "out": "cases/ScriptFormatterTest-L892.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L912",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L912",
+      "line": 912,
+      "test": "should preserve a trailing comment",
+      "section": "COMMENTS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L912.in.nf",
+      "out": "cases/ScriptFormatterTest-L912.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L920",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L920",
+      "line": 920,
+      "test": "should preserve a trailing comment",
+      "section": "COMMENTS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L920.in.nf",
+      "out": "cases/ScriptFormatterTest-L920.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L928",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L928",
+      "line": 928,
+      "test": "should preserve a trailing comment",
+      "section": "COMMENTS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L928.in.nf",
+      "out": "cases/ScriptFormatterTest-L928.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L940",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L940",
+      "line": 940,
+      "test": "should preserve a dangling comment",
+      "section": "COMMENTS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L940.in.nf",
+      "out": "cases/ScriptFormatterTest-L940.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L951",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L951",
+      "line": 951,
+      "test": "should preserve a dangling comment",
+      "section": "COMMENTS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L951.in.nf",
+      "out": "cases/ScriptFormatterTest-L951.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L959",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L959",
+      "line": 959,
+      "test": "should preserve a dangling comment",
+      "section": "COMMENTS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L959.in.nf",
+      "out": "cases/ScriptFormatterTest-L959.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L973",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L973",
+      "line": 973,
+      "test": "should preserve comments in a list or map literal",
+      "section": "COMMENTS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L973.in.nf",
+      "out": "cases/ScriptFormatterTest-L973.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L993",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L993",
+      "line": 993,
+      "test": "should preserve comments in call arguments",
+      "section": "COMMENTS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L993.in.nf",
+      "out": "cases/ScriptFormatterTest-L993.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L1008",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L1008",
+      "line": 1008,
+      "test": "should preserve comments in a process",
+      "section": "COMMENTS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L1008.in.nf",
+      "out": "cases/ScriptFormatterTest-L1008.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L1032",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L1032",
+      "line": 1032,
+      "test": "should preserve comments in an agent",
+      "section": "COMMENTS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L1032.in.nf",
+      "out": "cases/ScriptFormatterTest-L1032.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L1058",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L1058",
+      "line": 1058,
+      "test": "should preserve comments in an if/else",
+      "section": "COMMENTS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L1058.in.nf",
+      "out": "cases/ScriptFormatterTest-L1058.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L1076",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L1076",
+      "line": 1076,
+      "test": "should preserve a comment before an else branch",
+      "section": "COMMENTS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L1076.in.nf",
+      "out": "cases/ScriptFormatterTest-L1076.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L1097",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L1097",
+      "line": 1097,
+      "test": "should preserve a block comment",
+      "section": "COMMENTS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L1097.in.nf",
+      "out": "cases/ScriptFormatterTest-L1097.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L1111",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L1111",
+      "line": 1111,
+      "test": "should preserve a file header",
+      "section": "COMMENTS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L1111.in.nf",
+      "out": "cases/ScriptFormatterTest-L1111.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L1131",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L1131",
+      "line": 1131,
+      "test": "should preserve comments in a params block",
+      "section": "COMMENTS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L1131.in.nf",
+      "out": "cases/ScriptFormatterTest-L1131.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L1150",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L1150",
+      "line": 1150,
+      "test": "should preserve comments on a function",
+      "section": "COMMENTS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L1150.in.nf",
+      "out": "cases/ScriptFormatterTest-L1150.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L1166",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L1166",
+      "line": 1166,
+      "test": "should preserve a trailing comment on a single-line if",
+      "section": "COMMENTS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L1166.in.nf",
+      "out": "cases/ScriptFormatterTest-L1166.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L1184",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L1184",
+      "line": 1184,
+      "test": "should preserve a comment after a closure parameter list",
+      "section": "COMMENTS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L1184.in.nf",
+      "out": "cases/ScriptFormatterTest-L1184.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L1210",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L1210",
+      "line": 1210,
+      "test": "should preserve comments in a crlf source",
+      "section": "COMMENTS",
+      "kind": "format-equals",
+      "in": "cases/ScriptFormatterTest-L1210.in.nf",
+      "out": "cases/ScriptFormatterTest-L1210.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L1215",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L1215",
+      "line": 1215,
+      "test": "should hoist a comment that has no place to go",
+      "section": "COMMENTS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L1215.in.nf",
+      "out": "cases/ScriptFormatterTest-L1215.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L1235",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L1235",
+      "line": 1235,
+      "test": "should preserve comments on method chain links",
+      "section": "COMMENTS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L1235.in.nf",
+      "out": "cases/ScriptFormatterTest-L1235.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L1246",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L1246",
+      "line": 1246,
+      "test": "should preserve comments on method chain links",
+      "section": "COMMENTS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L1246.in.nf",
+      "out": "cases/ScriptFormatterTest-L1246.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L1258",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L1258",
+      "line": 1258,
+      "test": "should preserve comments on method chain links",
+      "section": "COMMENTS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L1258.in.nf",
+      "out": "cases/ScriptFormatterTest-L1258.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L1274",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L1274",
+      "line": 1274,
+      "test": "should preserve comments on method chain links",
+      "section": "COMMENTS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L1274.in.nf",
+      "out": "cases/ScriptFormatterTest-L1274.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L1287",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L1287",
+      "line": 1287,
+      "test": "should not treat comment-like string text as a comment",
+      "section": "COMMENTS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L1287.in.nf",
+      "out": "cases/ScriptFormatterTest-L1287.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L1302",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L1302",
+      "line": 1302,
+      "test": "should re-indent a multi-line string with its statement",
+      "section": "MULTI-LINE STRINGS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L1302.in.nf",
+      "out": "cases/ScriptFormatterTest-L1302.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L1323",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L1323",
+      "line": 1323,
+      "test": "should re-indent a multi-line string with its statement",
+      "section": "MULTI-LINE STRINGS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L1323.in.nf",
+      "out": "cases/ScriptFormatterTest-L1323.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L1349",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L1349",
+      "line": 1349,
+      "test": "should never shift a string line past its content",
+      "section": "MULTI-LINE STRINGS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L1349.in.nf",
+      "out": "cases/ScriptFormatterTest-L1349.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L1375",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L1375",
+      "line": 1375,
+      "test": "should not re-indent a string whose statement starts mid-line",
+      "section": "MULTI-LINE STRINGS",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L1375.in.nf",
+      "out": "cases/ScriptFormatterTest-L1375.out.nf"
+    },
+    {
+      "id": "ScriptFormatterTest-L1401",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L1401",
+      "line": 1401,
+      "test": "should align trailing comments in a legacy workflow",
+      "section": "HARSHIL ALIGNMENT",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L1401.in.nf",
+      "out": "cases/ScriptFormatterTest-L1401.out.nf",
+      "excluded": "Harshil alignment (-harshil-alignment) is not a default of nextflow lint -format; the printer implements the defaults only (plan F-110 open point 5)",
+      "options": "harshil"
+    },
+    {
+      "id": "ScriptFormatterTest-L1438",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L1438",
+      "line": 1438,
+      "test": "should align trailing comments but not type annotations in a typed workflow",
+      "section": "HARSHIL ALIGNMENT",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L1438.in.nf",
+      "out": "cases/ScriptFormatterTest-L1438.out.nf",
+      "excluded": "Harshil alignment (-harshil-alignment) is not a default of nextflow lint -format; the printer implements the defaults only (plan F-110 open point 5)",
+      "options": "harshil"
+    },
+    {
+      "id": "ScriptFormatterTest-L1479",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L1479",
+      "line": 1479,
+      "test": "should align trailing comments in a typed process",
+      "section": "HARSHIL ALIGNMENT",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L1479.in.nf",
+      "out": "cases/ScriptFormatterTest-L1479.out.nf",
+      "excluded": "Harshil alignment (-harshil-alignment) is not a default of nextflow lint -format; the printer implements the defaults only (plan F-110 open point 5)",
+      "options": "harshil"
+    },
+    {
+      "id": "ScriptFormatterTest-L1520",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L1520",
+      "line": 1520,
+      "test": "should align trailing comments in a params block and record",
+      "section": "HARSHIL ALIGNMENT",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L1520.in.nf",
+      "out": "cases/ScriptFormatterTest-L1520.out.nf",
+      "excluded": "Harshil alignment (-harshil-alignment) is not a default of nextflow lint -format; the printer implements the defaults only (plan F-110 open point 5)",
+      "options": "harshil"
+    },
+    {
+      "id": "ScriptFormatterTest-L1561",
+      "upstream": "script/formatter/ScriptFormatterTest.groovy#L1561",
+      "line": 1561,
+      "test": "should not align trailing comments of multi-line entries",
+      "section": "HARSHIL ALIGNMENT",
+      "kind": "check-format",
+      "in": "cases/ScriptFormatterTest-L1561.in.nf",
+      "out": "cases/ScriptFormatterTest-L1561.out.nf",
+      "excluded": "Harshil alignment (-harshil-alignment) is not a default of nextflow lint -format; the printer implements the defaults only (plan F-110 open point 5)",
+      "options": "harshil"
+    }
+  ]
+}
