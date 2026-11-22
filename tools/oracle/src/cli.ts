@@ -10,6 +10,11 @@ import { parseArgs } from "node:util";
 import { loadManifest, type Manifest } from "./cases.ts";
 import { type FixtureManifest, loadFixtures, runFixtures } from "./fixtures.ts";
 import {
+  type FormatManifest,
+  loadFormatManifest,
+  runFormatTrees,
+} from "./format.ts";
+import {
   type Exec,
   ensureNextflow,
   nextflowEnv,
@@ -21,6 +26,7 @@ import {
   DEFAULT_MANIFEST,
   FIXTURES_FILE,
   ORACLE_CACHE,
+  PRINTER_FIXTURES_FILE,
   REPO_ROOT,
 } from "./paths.ts";
 import { loadPin, type NextflowPin } from "./pin.ts";
@@ -28,7 +34,8 @@ import { annotations, formatReport } from "./report.ts";
 import { runOracle } from "./run.ts";
 import { loadTreeManifest, runTree, type TreeManifest } from "./trees.ts";
 
-export const USAGE = "Usage: pnpm oracle [--case <id>]... [--manifest <file>]";
+export const USAGE =
+  "Usage: pnpm oracle [--case <id>]... [--manifest <file>] [--write-format]";
 
 export type OracleDeps = {
   pin?: NextflowPin;
@@ -39,6 +46,8 @@ export type OracleDeps = {
   fixturesFile?: string;
   /** The trees to lint as one run each. Default: F-102's AST fixtures and error inputs, on a plain run (no --case, no --manifest). */
   trees?: TreeManifest[];
+  /** The printer fixture trees to format (`format` and `fixed-point` checks). Default: the pack's fixtures.json, on a plain run (no --case, no --manifest). */
+  formatManifest?: FormatManifest;
   write?: (line: string) => void;
 };
 
@@ -49,7 +58,11 @@ export function main(argv: readonly string[], deps: OracleDeps = {}): number {
   const oracleCache = deps.oracleCache ?? ORACLE_CACHE;
   const args = argv[0] === "--" ? argv.slice(1) : argv;
 
-  let values: { case?: string[]; manifest?: string };
+  let values: {
+    case?: string[];
+    manifest?: string;
+    "write-format"?: boolean;
+  };
   try {
     values = parseArgs({
       args,
@@ -57,6 +70,7 @@ export function main(argv: readonly string[], deps: OracleDeps = {}): number {
       options: {
         case: { type: "string", multiple: true },
         manifest: { type: "string" },
+        "write-format": { type: "boolean" },
       },
     }).values;
   } catch (error) {
@@ -65,6 +79,7 @@ export function main(argv: readonly string[], deps: OracleDeps = {}): number {
     return 2;
   }
 
+  const writeFormat = values["write-format"] === true;
   const fixturesFile =
     values.case !== undefined
       ? undefined
@@ -75,6 +90,7 @@ export function main(argv: readonly string[], deps: OracleDeps = {}): number {
   let manifest: Manifest;
   let fixtures: FixtureManifest | undefined;
   let trees: TreeManifest[];
+  let formatManifest: FormatManifest | undefined;
   try {
     pin = deps.pin ?? loadPin();
     manifest = loadManifest(resolve(values.manifest ?? DEFAULT_MANIFEST));
@@ -88,6 +104,12 @@ export function main(argv: readonly string[], deps: OracleDeps = {}): number {
             loadTreeManifest(AST_ERRORS_FILE, "ast-errors"),
           ]
         : []);
+    const plain = values.case === undefined && values.manifest === undefined;
+    formatManifest =
+      deps.formatManifest ??
+      (plain || writeFormat
+        ? loadFormatManifest(PRINTER_FIXTURES_FILE)
+        : undefined);
   } catch (error) {
     write((error as Error).message);
     return 2;
@@ -118,6 +140,20 @@ export function main(argv: readonly string[], deps: OracleDeps = {}): number {
     return 3;
   }
 
+  if (writeFormat) {
+    const rows = runFormatTrees(formatManifest as FormatManifest, {
+      exec,
+      formatDir: `${oracleCache}/format`,
+      write: true,
+      log: write,
+    });
+    for (const r of rows) {
+      write(`${r.matched ? "wrote   " : "MISMATCH"} ${r.caseId} ${r.kind}`);
+      for (const problem of r.problems) write(`  ${problem}`);
+    }
+    return rows.every((r) => r.matched) ? 0 : 2;
+  }
+
   let run: ReturnType<typeof runOracle>;
   try {
     run = runOracle(manifest, pin, {
@@ -142,6 +178,15 @@ export function main(argv: readonly string[], deps: OracleDeps = {}): number {
     run.results.push(
       ...runTree(tree, { exec, cacheDir: oracleCache, log: write }),
     );
+  if (formatManifest !== undefined && values.case === undefined) {
+    run.results.push(
+      ...runFormatTrees(formatManifest, {
+        exec,
+        formatDir: `${oracleCache}/format`,
+        log: write,
+      }),
+    );
+  }
   const report = formatReport(run);
   mkdirSync(oracleCache, { recursive: true });
   writeFileSync(`${oracleCache}/report.md`, report);

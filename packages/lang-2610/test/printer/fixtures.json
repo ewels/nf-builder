@@ -1,0 +1,325 @@
+{
+  "about": "Printer fixtures (F-110, ADR 0005, LA-45). formatted*/ is what nextflow lint -format writes for input/ (regenerate with pnpm oracle --write-format; never edit). printed*/ is what the printer prints where it differs from formatted*/ (knownDifference) or has no input (synthesised, edited); Vitest writes it, the oracle checks it.",
+  "upstream": {
+    "tag": "v26.10.7",
+    "commit": "0ad848ef3c3a22824cd9eb2ca14568385867702d",
+    "formatter": "modules/nf-lang/src/main/java/nextflow/script/formatter"
+  },
+  "formattedWith": "nextflow lint -format -o json ., Nextflow 26.10.7, NXF_SYNTAX_PARSER=v2",
+  "trees": [
+    {
+      "name": "printer",
+      "input": "input",
+      "formatted": "formatted",
+      "printed": "printed"
+    },
+    {
+      "name": "ast",
+      "input": "../ast/fixtures",
+      "formatted": "formatted-ast",
+      "printed": "printed-ast"
+    }
+  ],
+  "knownDifferences": {
+    "type-rename": "lint -format renames resolved types through the Java class hierarchy (int to Integer, ArrayList to List, Long to Integer); the result can fail lint or change what the code does. The printer prints type names as written.",
+    "catch-package": "lint -format drops the package of every catch type, so java.nio.file.AccessDeniedException becomes an undefined AccessDeniedException. The printer drops it only for default-imported packages.",
+    "call-wrap": "lint -format prints f(1)(2) as a wrapped .call( and wraps again on every pass. The printer prints f(1).call(2) and wraps only for a trailing comma, comments or arguments on a later line."
+  },
+  "files": [
+    {
+      "tree": "printer",
+      "path": "typed/feature-flags.nf",
+      "kind": "parsed",
+      "spec": [
+        "LA-45"
+      ],
+      "covers": [
+        "Feature flags",
+        "comments"
+      ]
+    },
+    {
+      "tree": "ast",
+      "path": "comments.nf",
+      "kind": "parsed"
+    },
+    {
+      "tree": "ast",
+      "path": "comments-attachment.nf",
+      "kind": "parsed"
+    },
+    {
+      "tree": "ast",
+      "path": "shebang.nf",
+      "kind": "parsed"
+    },
+    {
+      "tree": "ast",
+      "path": "feature-flag.nf",
+      "kind": "parsed"
+    },
+    {
+      "tree": "ast",
+      "path": "some/module.nf",
+      "kind": "parsed"
+    },
+    {
+      "tree": "ast",
+      "path": "include-alias.nf",
+      "kind": "parsed"
+    },
+    {
+      "tree": "ast",
+      "path": "include-clauses.nf",
+      "kind": "parsed"
+    },
+    {
+      "tree": "ast",
+      "path": "include-newlines.nf",
+      "kind": "parsed"
+    },
+    {
+      "tree": "ast",
+      "path": "include-separate.nf",
+      "kind": "parsed"
+    },
+    {
+      "tree": "ast",
+      "path": "include-pipeline.nf",
+      "kind": "parsed"
+    },
+    {
+      "tree": "ast",
+      "path": "pipelines/rnaseq.nf",
+      "kind": "parsed"
+    },
+    {
+      "tree": "ast",
+      "path": "include-registry.nf",
+      "kind": "parsed"
+    },
+    {
+      "tree": "ast",
+      "path": "modules/nf-core/fastqc/main.nf",
+      "kind": "parsed"
+    },
+    {
+      "tree": "ast",
+      "path": "params-block.nf",
+      "kind": "parsed"
+    },
+    {
+      "tree": "ast",
+      "path": "params-legacy.nf",
+      "kind": "parsed"
+    },
+    {
+      "tree": "ast",
+      "path": "workflow-named.nf",
+      "kind": "parsed"
+    },
+    {
+      "tree": "ast",
+      "path": "workflow-entry.nf",
+      "kind": "parsed"
+    },
+    {
+      "tree": "ast",
+      "path": "workflow-typed.nf",
+      "kind": "parsed"
+    },
+    {
+      "tree": "ast",
+      "path": "workflow-emit-only.nf",
+      "kind": "parsed"
+    },
+    {
+      "tree": "ast",
+      "path": "workflow-implicit-main.nf",
+      "kind": "parsed"
+    },
+    {
+      "tree": "ast",
+      "path": "process-minimal.nf",
+      "kind": "parsed"
+    },
+    {
+      "tree": "ast",
+      "path": "process-legacy.nf",
+      "kind": "parsed"
+    },
+    {
+      "tree": "ast",
+      "path": "process-exec.nf",
+      "kind": "parsed"
+    },
+    {
+      "tree": "ast",
+      "path": "process-legacy-io.nf",
+      "kind": "parsed"
+    },
+    {
+      "tree": "ast",
+      "path": "process-typed.nf",
+      "kind": "parsed"
+    },
+    {
+      "tree": "ast",
+      "path": "process-typed-io.nf",
+      "kind": "parsed"
+    },
+    {
+      "tree": "ast",
+      "path": "agent.nf",
+      "kind": "parsed"
+    },
+    {
+      "tree": "ast",
+      "path": "function.nf",
+      "kind": "parsed"
+    },
+    {
+      "tree": "ast",
+      "path": "enum.nf",
+      "kind": "parsed"
+    },
+    {
+      "tree": "ast",
+      "path": "record.nf",
+      "kind": "parsed"
+    },
+    {
+      "tree": "ast",
+      "path": "output-block.nf",
+      "kind": "parsed"
+    },
+    {
+      "tree": "ast",
+      "path": "stmt-separators.nf",
+      "kind": "parsed"
+    },
+    {
+      "tree": "ast",
+      "path": "stmt-variable-declaration.nf",
+      "kind": "parsed"
+    },
+    {
+      "tree": "ast",
+      "path": "stmt-assignment.nf",
+      "kind": "parsed"
+    },
+    {
+      "tree": "ast",
+      "path": "stmt-expression.nf",
+      "kind": "parsed"
+    },
+    {
+      "tree": "ast",
+      "path": "stmt-assert.nf",
+      "kind": "parsed"
+    },
+    {
+      "tree": "ast",
+      "path": "stmt-if-else.nf",
+      "kind": "parsed"
+    },
+    {
+      "tree": "ast",
+      "path": "stmt-return.nf",
+      "kind": "parsed"
+    },
+    {
+      "tree": "ast",
+      "path": "stmt-throw.nf",
+      "kind": "parsed"
+    },
+    {
+      "tree": "ast",
+      "path": "stmt-try-catch.nf",
+      "kind": "parsed",
+      "knownDifference": "catch-package"
+    },
+    {
+      "tree": "ast",
+      "path": "stmt-try-catch-legacy.nf",
+      "kind": "parsed"
+    },
+    {
+      "tree": "ast",
+      "path": "stmt-labelled.nf",
+      "kind": "parsed"
+    },
+    {
+      "tree": "ast",
+      "path": "stmt-empty.nf",
+      "kind": "parsed"
+    },
+    {
+      "tree": "ast",
+      "path": "stmt-empty-body.nf",
+      "kind": "parsed"
+    },
+    {
+      "tree": "ast",
+      "path": "expr-literals.nf",
+      "kind": "parsed"
+    },
+    {
+      "tree": "ast",
+      "path": "expr-strings.nf",
+      "kind": "parsed"
+    },
+    {
+      "tree": "ast",
+      "path": "expr-gstrings.nf",
+      "kind": "parsed"
+    },
+    {
+      "tree": "ast",
+      "path": "expr-collections.nf",
+      "kind": "parsed"
+    },
+    {
+      "tree": "ast",
+      "path": "expr-closures.nf",
+      "kind": "parsed"
+    },
+    {
+      "tree": "ast",
+      "path": "expr-index-property.nf",
+      "kind": "parsed"
+    },
+    {
+      "tree": "ast",
+      "path": "expr-calls.nf",
+      "kind": "parsed"
+    },
+    {
+      "tree": "ast",
+      "path": "expr-call-value.nf",
+      "kind": "parsed",
+      "knownDifference": "call-wrap"
+    },
+    {
+      "tree": "ast",
+      "path": "expr-constructor.nf",
+      "kind": "parsed",
+      "knownDifference": "type-rename"
+    },
+    {
+      "tree": "ast",
+      "path": "expr-operators.nf",
+      "kind": "parsed"
+    },
+    {
+      "tree": "ast",
+      "path": "expr-types.nf",
+      "kind": "parsed"
+    },
+    {
+      "tree": "ast",
+      "path": "legacy-dataflow.nf",
+      "kind": "parsed"
+    }
+  ]
+}

@@ -1,1 +1,3 @@
 packages/lang-2610/test/ported/cases/** -text
+packages/lang-2610/test/printer/** -text
+packages/lang-2610/test/ported/formatter/cases/** -text

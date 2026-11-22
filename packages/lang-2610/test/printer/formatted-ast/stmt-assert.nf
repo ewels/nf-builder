@@ -1,0 +1,2 @@
+assert 2 + 2 == 4 : 'The math broke!'
+assert true != false

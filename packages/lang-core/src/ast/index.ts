@@ -3,13 +3,15 @@ export type {
   ParseResult,
   ScriptParseResult,
 } from "./parse-result.ts";
-export type {
-  Comment,
-  CommentKind,
-  CommentSlots,
-  NodeBase,
-  Position,
-  Range,
+export {
+  type Comment,
+  type CommentKind,
+  type CommentSlots,
+  hasPosition,
+  NO_RANGE,
+  type NodeBase,
+  type Position,
+  type Range,
 } from "./range.ts";
 export * from "./script.ts";
 export { type AstNode, childNodes, walk } from "./walk.ts";
