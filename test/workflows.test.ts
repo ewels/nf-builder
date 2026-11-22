@@ -30,6 +30,7 @@ describe("CI workflows", () => {
       "features",
       "audit",
       "corpus",
+      "corpus-parse",
     ]) {
       expect(ci, job).toMatch(new RegExp(`^  ${job}:`, "m"));
     }
@@ -38,7 +39,7 @@ describe("CI workflows", () => {
     }
     const jobs = ci.split(/^jobs:/m)[1] ?? "";
     const blocks = jobs.split(/^ {2}(?=[\w-]+:\s*$)/m).slice(1);
-    expect(blocks.length).toBe(8);
+    expect(blocks.length).toBe(9);
     for (const block of blocks) expect(block).toContain("timeout-minutes:");
     for (const command of [
       "pnpm check",
@@ -49,6 +50,7 @@ describe("CI workflows", () => {
       "node scripts/check-features.ts",
       "pnpm audit --audit-level high",
       "pnpm corpus:fetch --check",
+      "pnpm test:corpus",
     ]) {
       expect(ci, command).toContain(`run: ${command}`);
     }
@@ -94,6 +96,39 @@ describe("CI workflows", () => {
       setup,
     );
     expect(job).toContain("run: pnpm corpus:fetch --check");
+  });
+
+  it("F-006 step 2 ADR-0005: the corpus-parse job sets up Java and Nextflow, runs corpus:lint then test:corpus, and uploads the report", () => {
+    const ci = read(join(WORKFLOWS, "ci.yml"));
+    const job =
+      ci.split(/^ {2}corpus-parse:\s*$/m)[1]?.split(/^ {2}[\w-]+:\s*$/m)[0] ??
+      "";
+    expect(job).toMatch(/name: Corpus parse vs nextflow lint/);
+    const at = (needle: string | RegExp): number => {
+      const index =
+        typeof needle === "string" ? job.indexOf(needle) : job.search(needle);
+      expect(index, String(needle)).toBeGreaterThanOrEqual(0);
+      return index;
+    };
+    const order = [
+      at("uses: ./.github/actions/setup"),
+      at("uses: ./.github/actions/corpus"),
+      at(/uses: actions\/setup-java@[0-9a-f]{40}/),
+      at("distribution: temurin"),
+      at(/java-version: "?21"?/),
+      at("path: .cache/nextflow"),
+      at("sha256sum -c"),
+      at("run: pnpm corpus:lint"),
+      at("run: pnpm test:corpus"),
+      at(/uses: actions\/upload-artifact@[0-9a-f]{40}/),
+    ];
+    expect(order).toEqual([...order].sort((a, b) => a - b));
+    expect(job).toMatch(/hashFiles\('packages\/lang-2610\/upstream\.json'\)/);
+    expect(job).toContain("curl -fsSL --retry 3");
+    expect(job).toContain("nextflowDist");
+    expect(job).toContain("path: .cache/reports/");
+    expect(job).toMatch(/if: always\(\)/);
+    expect(job).toContain("timeout-minutes: 20");
   });
 
   it("F-009: the setup action only enables the pnpm cache when it installs", () => {

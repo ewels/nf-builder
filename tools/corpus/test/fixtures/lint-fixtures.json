@@ -1,0 +1,81 @@
+{
+  "date": "2026-11-22T03:30:20.908483773Z",
+  "summary": {
+    "errors": 11,
+    "filesWithErrors": 8,
+    "filesWithoutErrors": 1,
+    "filesFormatted": 0,
+    "warnings": 0,
+    "filesWithWarnings": 0,
+    "filesWithoutWarnings": 9
+  },
+  "errors": [
+    {
+      "filename": "bad-declaration.nf",
+      "startLine": 23,
+      "startColumn": 18,
+      "message": "Unexpected input: '='"
+    },
+    {
+      "filename": "section-order.nf",
+      "startLine": 8,
+      "startColumn": 10,
+      "message": "Unexpected input: ':'"
+    },
+    {
+      "filename": "typed-legacy-mixed.nf",
+      "startLine": 19,
+      "startColumn": 5,
+      "message": "Invalid input declaration in typed process"
+    },
+    {
+      "filename": "typed-legacy-mixed.nf",
+      "startLine": 22,
+      "startColumn": 5,
+      "message": "`path` is not defined"
+    },
+    {
+      "filename": "typed-legacy-mixed.nf",
+      "startLine": 26,
+      "startColumn": 13,
+      "message": "`message` is not defined"
+    },
+    {
+      "filename": "typed-without-flag.nf",
+      "startLine": 4,
+      "startColumn": 5,
+      "message": "Typed input declaration is not allowed in legacy process -- set `nextflow.enable.types = true` to use typed processes in this script"
+    },
+    {
+      "filename": "typed-without-flag.nf",
+      "startLine": 11,
+      "startColumn": 13,
+      "message": "`message` is not defined"
+    },
+    {
+      "filename": "unclosed-brace.nf",
+      "startLine": 17,
+      "startColumn": 1,
+      "message": "Unexpected end of file -- check for an unclosed brace, bracket, parenthesis, or string"
+    },
+    {
+      "filename": "unclosed-comment.nf",
+      "startLine": 2,
+      "startColumn": 1,
+      "message": "Unexpected input: '/'"
+    },
+    {
+      "filename": "bad-config-block.config",
+      "startLine": 6,
+      "startColumn": 1,
+      "message": "Unexpected input: '}'"
+    },
+    {
+      "filename": "unclosed-config-block.config",
+      "startLine": 8,
+      "startColumn": 1,
+      "message": "Unexpected end of file -- check for an unclosed brace, bracket, parenthesis, or string"
+    }
+  ],
+  "warnings": []
+}

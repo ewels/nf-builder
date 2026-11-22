@@ -1,0 +1,23 @@
+[
+  {
+    "pipeline": "fixtures",
+    "file": "section-order.nf",
+    "lint": "error",
+    "parser": "ok",
+    "cause": "The grammar does not reject the out-of-order process: the block parses as an expression statement (a call named process with a closure argument), not as a processDef, so nf-lang's AST builder reports the unexpected ':' later, not the grammar."
+  },
+  {
+    "pipeline": "fixtures",
+    "file": "typed-legacy-mixed.nf",
+    "lint": "error",
+    "parser": "ok",
+    "cause": "Nextflow rejects this in its semantic checks (typed and legacy declarations mixed in one process), not in the grammar."
+  },
+  {
+    "pipeline": "fixtures",
+    "file": "typed-without-flag.nf",
+    "lint": "error",
+    "parser": "ok",
+    "cause": "Nextflow rejects this in its semantic checks (typed inputs need nextflow.enable.types = true), not in the grammar."
+  }
+]

@@ -24,7 +24,9 @@
     "check:budget": "node scripts/check-bundle-budget.ts",
     "check:hosts": "node scripts/check-hosts.ts",
     "corpus:fetch": "node tools/corpus/src/cli.ts",
-    "gen:grammar": "node scripts/gen-grammar.ts"
+    "gen:grammar": "node scripts/gen-grammar.ts",
+    "corpus:lint": "node tools/corpus/src/lint-cli.ts",
+    "test:corpus": "vitest run --config vitest.corpus.config.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "2.6.8",
