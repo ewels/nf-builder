@@ -28,7 +28,8 @@ function titles(lines: string[], browser: string): string[] {
     .sort();
 }
 
-describe("e2e browser selection", () => {
+// Each spawned `playwright --list` takes 1 to 2 s, and longer on a busy machine; the 5 s default timed out under load.
+describe("e2e browser selection", { timeout: 30_000 }, () => {
   it("F-003 QA-20: e2e runs use Chromium only unless PW_BROWSERS says otherwise", () => {
     expect(selectedBrowsers(undefined)).toEqual(["chromium"]);
     expect(selectedBrowsers("")).toEqual(["chromium"]);
