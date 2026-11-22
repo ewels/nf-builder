@@ -1,0 +1,27 @@
+ConfigFile 1:1-68:1
+  #block 1:1-12:3
+  #line 14:1-14:10
+  ConfigBlock process 16:1-67:2
+    ConfigSelector withName: 'CNVKIT_BATCH' 18:5-26:6
+      ConfigAssign ext.args = Closure 19:9-19:113
+      ConfigAssign ext.when = Closure 20:9-20:84
+      ConfigAssign publishDir = Map 21:9-25:10
+    ConfigSelector withName: '.*:BAM_VARIANT_CALLING_CNVKIT:CNVKIT_CALL' 28:5-35:6
+      ConfigAssign ext.when = Closure 29:9-29:84
+      ConfigAssign publishDir = Map 30:9-34:10
+    ConfigSelector withName: '.*:BAM_VARIANT_CALLING_GERMLINE_ALL:BAM_VARIANT_CALLING_CNVKIT:CNVKIT_CALL' 36:5-39:6
+      ConfigAssign ext.prefix = Closure 37:9-37:57
+      ConfigAssign ext.args = String 38:9-38:35
+    ConfigSelector withName: '.*:BAM_VARIANT_CALLING_SOMATIC_ALL:BAM_VARIANT_CALLING_CNVKIT:CNVKIT_CALL' 40:5-42:6
+      ConfigAssign ext.prefix = Closure 41:9-41:56
+    ConfigSelector withName: '.*:BAM_VARIANT_CALLING_TUMOR_ONLY_ALL:BAM_VARIANT_CALLING_CNVKIT:CNVKIT_CALL' 43:5-45:6
+      ConfigAssign ext.prefix = Closure 44:9-44:59
+    ConfigSelector withName: 'CNVKIT_EXPORT' 47:5-56:6
+      ConfigAssign ext.args = String 48:9-48:25
+      ConfigAssign ext.prefix = Closure 49:9-49:46
+      ConfigAssign ext.when = Closure 50:9-50:84
+      ConfigAssign publishDir = Map 51:9-55:10
+    ConfigSelector withName: 'CNVKIT_GENEMETRICS' 58:5-66:6
+      ConfigAssign ext.prefix = Closure 59:9-59:55
+      ConfigAssign ext.when = Closure 60:9-60:84
+      ConfigAssign publishDir = Map 61:9-65:10

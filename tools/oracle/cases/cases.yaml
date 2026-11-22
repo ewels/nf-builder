@@ -105,3 +105,35 @@ cases:
     lint:
       expect: error
       errors: ["`undefined_channel` is not defined"]
+  # F-103: the config AST fixtures. Every file lints clean (warnings allowed); packages/lang-2610/test/config-ast reads them by path.
+  - id: config-constructs
+    about: Every config construct the config AST models, from the config docs, nf-lang's config tests and the nf-core shapes.
+    spec: [F-103, FI-01, FI-05]
+    sources:
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/config.mdx#L29-L95
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/config.mdx#L185-L357
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/modules/nf-lang/src/test/groovy/nextflow/config/formatter/ConfigFormatterTest.groovy#L102-L141
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/modules/nextflow/src/test/groovy/nextflow/config/ConfigParserV2Test.groovy#L60-L82
+    lint: { expect: ok }
+  - id: config-ast-errors
+    about: Configs that nf-lang's ConfigAstBuilder reports (incomplete and invalid statements, escapes, number format, fatal errors); lint reports each at the position F-103's tests expect.
+    spec: [F-103, FI-01]
+    sources:
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/modules/nf-lang/src/main/java/nextflow/config/parser/ConfigAstBuilder.java#L259-L260
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/modules/nf-lang/src/main/java/nextflow/config/parser/ConfigAstBuilder.java#L342-L359
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/modules/nf-lang/src/main/java/nextflow/script/parser/EscapeUtils.java#L50-L75
+    lint:
+      expect: error
+      errors:
+        [
+          "Config settings must be assigned with an equals sign (`=`)",
+          "Incomplete statement",
+          "Invalid assignment target -- must be a variable, index, or property expression",
+          "Empty list literal should not contain any comma(,)",
+          "Nested parenthesis is not allowed in multiple assignment, e.g. ((a)) = b",
+          "Number of value 99999999999 does not fit in the range of int, but int was enforced.",
+          "Invalid escape sequence: '\\q'",
+          "Invalid escape sequence: '\\.'",
+          "If statements cannot be mixed with config statements",
+          "Variable declarations cannot be mixed with config statements",
+        ]

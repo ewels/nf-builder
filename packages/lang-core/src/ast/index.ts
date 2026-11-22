@@ -1,4 +1,6 @@
+export * from "./config.ts";
 export type {
+  ConfigParseResult,
   ParseProblem,
   ParseResult,
   ScriptParseResult,

@@ -1,0 +1,25 @@
+ConfigFile 1:1-42:1
+  #block 1:1-11:3
+  ConfigBlock params 13:1-28:2
+    ConfigAssign config_profile_name = String 14:5-14:53
+    ConfigAssign config_profile_description = String 15:5-15:80
+    #line 17:5-17:37
+    ConfigAssign input = String 18:5-18:123
+    #line 20:5-20:20
+    ConfigAssign tools = String 21:5-21:144
+    ConfigAssign split_fastq = Number 22:5-22:27
+    ConfigAssign intervals = String 23:5-23:112
+    ConfigAssign wes = Boolean 24:5-24:23
+    ConfigAssign filter_vcfs = Boolean 25:5-25:23
+    ConfigAssign normalize_vcfs = Boolean 26:5-26:26
+    ConfigAssign snv_consensus_calling = Boolean 27:5-27:33
+  ConfigBlock process 30:1-41:2
+    #line 31:5-31:50
+    #line 32:5-32:102
+    ConfigSelector withName: 'PARABRICKS_.*' 33:5-40:6
+      ConfigAssign cpus = Closure 34:9-34:47
+      ConfigAssign memory = Closure 35:9-35:68
+      ConfigAssign time = Closure 36:9-36:48
+      ConfigAssign resourceLimits = Map 37:9-37:52
+      ConfigAssign maxRetries = Number 38:9-38:23
+      ConfigAssign errorStrategy = Closure 39:9-39:98

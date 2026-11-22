@@ -1,0 +1,5 @@
+ConfigFile 1:1-10:1
+  ConfigBlock process 1:1-9:2
+    ConfigSelector withName: 'BRACKEN' 2:5-8:6
+      ConfigAssign ext.args = GString 3:9-3:52
+      ConfigAssign publishDir = Map 4:9-7:10

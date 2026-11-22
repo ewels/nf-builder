@@ -1,0 +1,4 @@
+ConfigFile 1:1-477:1
+  #block 1:1-9:3
+  ConfigAssign params.genomes = Map 11:1-476:2
+    #line 12:5-12:46

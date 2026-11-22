@@ -1,0 +1,61 @@
+ConfigFile 1:1-216:1
+  #block 1:1-11:3
+  #line 13:1-13:46
+  ConfigBlock process 14:1-215:2
+    ConfigSelector withName: 'BBMAP_INDEX' 16:5-23:6
+      ConfigAssign ext.args = String 17:9-17:31
+      ConfigAssign publishDir = Map 18:9-22:10
+    ConfigSelector withName: 'BWAMEM1_INDEX' 25:5-33:6
+      ConfigAssign ext.prefix = Closure 26:9-26:96
+      ConfigAssign publishDir = Map 27:9-32:10
+    ConfigSelector withName: 'BWAMEM2_INDEX' 35:5-42:6
+      ConfigAssign publishDir = Map 36:9-41:10
+    ConfigSelector withName: 'CNVKIT_ANTITARGET' 44:5-52:6
+      ConfigAssign ext.when = Closure 45:9-45:84
+      ConfigAssign publishDir = Map 46:9-51:10
+    ConfigSelector withName: 'CNVKIT_REFERENCE' 54:5-63:6
+      ConfigAssign ext.prefix = Closure 55:9-55:34
+      ConfigAssign ext.when = Closure 56:9-56:112
+      ConfigAssign publishDir = Map 57:9-62:10
+    ConfigSelector withName: 'DRAGMAP_HASHTABLE' 65:5-72:6
+      ConfigAssign publishDir = Map 66:9-71:10
+    ConfigSelector withName: 'GATK4_CREATESEQUENCEDICTIONARY' 74:5-81:6
+      ConfigAssign publishDir = Map 75:9-80:10
+    ConfigSelector withName: 'MSISENSOR2_SCAN' 83:5-90:6
+      ConfigAssign publishDir = Map 84:9-89:10
+    ConfigSelector withName: 'MSISENSORPRO_SCAN' 92:5-99:6
+      ConfigAssign publishDir = Map 93:9-98:10
+    ConfigSelector withName: 'SAMTOOLS_FAIDX' 101:5-108:6
+      ConfigAssign publishDir = Map 102:9-107:10
+    ConfigSelector withName: 'TABIX_BCFTOOLS_ANNOTATIONS' 110:5-118:6
+      ConfigAssign ext.prefix = Closure 111:9-111:47
+      ConfigAssign publishDir = Map 112:9-117:10
+    ConfigSelector withName: 'TABIX_DBSNP' 120:5-128:6
+      ConfigAssign ext.prefix = Closure 121:9-121:47
+      ConfigAssign publishDir = Map 122:9-127:10
+    ConfigSelector withName: 'TABIX_CONTAMINATION_RESOURCE' 130:5-138:6
+      ConfigAssign ext.prefix = Closure 131:9-131:47
+      ConfigAssign publishDir = Map 132:9-137:10
+    ConfigSelector withName: 'TABIX_GERMLINE_RESOURCE' 140:5-148:6
+      ConfigAssign ext.prefix = Closure 141:9-141:47
+      ConfigAssign publishDir = Map 142:9-147:10
+    ConfigSelector withName: 'TABIX_KNOWN_INDELS' 150:5-158:6
+      ConfigAssign ext.prefix = Closure 151:9-151:47
+      ConfigAssign publishDir = Map 152:9-157:10
+    ConfigSelector withName: 'TABIX_KNOWN_SNPS' 160:5-168:6
+      ConfigAssign ext.prefix = Closure 161:9-161:47
+      ConfigAssign publishDir = Map 162:9-167:10
+    ConfigSelector withName: 'TABIX_FORCE_CALL_ALLELES' 170:5-178:6
+      ConfigAssign ext.prefix = Closure 171:9-171:47
+      ConfigAssign publishDir = Map 172:9-177:10
+    ConfigSelector withName: 'TABIX_PON' 180:5-188:6
+      ConfigAssign ext.prefix = Closure 181:9-181:47
+      ConfigAssign publishDir = Map 182:9-187:10
+    ConfigSelector withName: 'UNZIP_ALLELES|UNZIP_LOCI|UNZIP_GC|UNZIP_RT' 190:5-194:6
+      ConfigAssign publishDir = Map 191:9-193:10
+    ConfigSelector withName: 'UNTAR_CHR_DIR' 196:5-203:6
+      ConfigAssign ext.prefix = String 197:9-197:37
+      ConfigAssign publishDir = Map 198:9-202:10
+    ConfigSelector withName: 'UNTAR_MSISENSOR2_MODELS' 205:5-214:6
+      ConfigAssign ext.prefix = String 206:9-206:30
+      ConfigAssign publishDir = Map 207:9-213:10

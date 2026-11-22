@@ -1,0 +1,4 @@
+ConfigFile 1:1-32:1
+  ConfigBlock process 1:1-31:2
+    ConfigSelector withName: 'DUPRADAR' 2:5-30:6
+      ConfigAssign publishDir = List 3:9-29:10

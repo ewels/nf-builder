@@ -1,0 +1,18 @@
+ConfigFile 1:1-115:1
+  ConfigBlock process 1:1-114:2
+    ConfigSelector withName: '.*:BAM_RSEQC:RSEQC_BAMSTAT' 2:5-7:6
+      ConfigAssign publishDir = Map 3:9-6:10
+    ConfigSelector withName: '.*:BAM_RSEQC:RSEQC_INFEREXPERIMENT' 9:5-14:6
+      ConfigAssign publishDir = Map 10:9-13:10
+    ConfigSelector withName: '.*:BAM_RSEQC:RSEQC_JUNCTIONANNOTATION' 16:5-44:6
+      ConfigAssign publishDir = List 17:9-43:10
+    ConfigSelector withName: '.*:BAM_RSEQC:RSEQC_JUNCTIONSATURATION' 46:5-59:6
+      ConfigAssign publishDir = List 47:9-58:10
+    ConfigSelector withName: '.*:BAM_RSEQC:RSEQC_READDUPLICATION' 61:5-79:6
+      ConfigAssign publishDir = List 62:9-78:10
+    ConfigSelector withName: '.*:BAM_RSEQC:RSEQC_READDISTRIBUTION' 81:5-86:6
+      ConfigAssign publishDir = Map 82:9-85:10
+    ConfigSelector withName: '.*:BAM_RSEQC:RSEQC_INNERDISTANCE' 88:5-106:6
+      ConfigAssign publishDir = List 89:9-105:10
+    ConfigSelector withName: '.*:BAM_RSEQC:RSEQC_TIN' 108:5-113:6
+      ConfigAssign publishDir = Map 109:9-112:10

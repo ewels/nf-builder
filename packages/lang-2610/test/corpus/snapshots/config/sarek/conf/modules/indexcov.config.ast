@@ -1,0 +1,9 @@
+ConfigFile 1:1-23:1
+  #line 2:1-2:12
+  ConfigBlock process 4:1-22:2
+    ConfigSelector withName: 'SAMTOOLS_REINDEX_BAM' 6:5-12:6
+      ConfigAssign ext.args = Closure 7:9-7:42
+      #line 7:43-7:93
+      ConfigAssign publishDir = Map 8:9-10:10
+    ConfigSelector withName: 'GOLEFT_INDEXCOV' 14:5-20:6
+      ConfigAssign publishDir = Map 15:9-18:14

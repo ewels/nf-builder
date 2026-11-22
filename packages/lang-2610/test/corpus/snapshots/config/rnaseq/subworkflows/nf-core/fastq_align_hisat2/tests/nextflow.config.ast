@@ -1,0 +1,4 @@
+ConfigFile 1:1-6:1
+  ConfigBlock process 1:1-5:2
+    ConfigSelector withName: SAMTOOLS_SORT 2:5-4:6
+      ConfigAssign ext.prefix = Closure 3:9-3:45

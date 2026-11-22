@@ -1,0 +1,7 @@
+ConfigFile 1:1-20:1
+  #block 1:1-11:3
+  ConfigBlock params 13:1-19:2
+    ConfigAssign config_profile_name = String 14:5-14:53
+    ConfigAssign config_profile_description = String 15:5-15:80
+    #line 17:5-17:90
+    ConfigAssign input = String 18:5-18:158

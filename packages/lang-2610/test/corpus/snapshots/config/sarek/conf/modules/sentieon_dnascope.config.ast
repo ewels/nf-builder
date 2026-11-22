@@ -1,0 +1,17 @@
+ConfigFile 1:1-57:1
+  #block 1:1-12:3
+  #line 14:1-14:21
+  ConfigBlock process 16:1-56:2
+    ConfigSelector withName: 'SENTIEON_DNASCOPE' 18:5-27:6
+      ConfigAssign ext.prefix = Closure 19:9-19:125
+      ConfigAssign ext.when = Closure 20:9-20:101
+      ConfigAssign publishDir = Map 21:9-26:10
+    ConfigSelector withName: 'MERGE_SENTIEON_DNASCOPE_VCFS' 29:5-36:6
+      ConfigAssign ext.prefix = Closure 30:9-30:114
+      ConfigAssign publishDir = Map 31:9-35:10
+    ConfigSelector withName: 'MERGE_SENTIEON_DNASCOPE_GVCFS' 38:5-45:6
+      ConfigAssign ext.prefix = Closure 39:9-39:55
+      ConfigAssign publishDir = Map 40:9-44:10
+    ConfigSelector withName: 'SENTIEON_DNAMODELAPPLY' 47:5-54:6
+      ConfigAssign ext.prefix = Closure 48:9-48:62
+      ConfigAssign publishDir = Map 49:9-53:10

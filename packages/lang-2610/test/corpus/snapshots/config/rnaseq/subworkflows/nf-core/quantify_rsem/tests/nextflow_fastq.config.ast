@@ -1,0 +1,18 @@
+ConfigFile 1:1-32:1
+  ConfigBlock process 1:1-31:2
+    ConfigSelector withName: 'RSEM_PREPAREREFERENCE' 2:5-4:6
+      ConfigAssign ext.args = String 3:9-3:28
+    ConfigSelector withName: 'QUANTIFY_RSEM:RSEM_CALCULATEEXPRESSION' 6:5-8:6
+      ConfigAssign ext.args = String 7:9-7:53
+    ConfigSelector withName: 'QUANTIFY_RSEM:CUSTOM_RSEMMERGECOUNTS' 10:5-12:6
+      ConfigAssign ext.prefix = Closure 11:9-11:39
+    ConfigSelector withName: 'QUANTIFY_RSEM:QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT:CUSTOM_TX2GENE' 14:5-16:6
+      ConfigAssign ext.prefix = Closure 15:9-15:39
+    ConfigSelector withName: 'QUANTIFY_RSEM:QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT:TXIMETA_TXIMPORT' 18:5-20:6
+      ConfigAssign ext.prefix = Closure 19:9-19:39
+    ConfigSelector withName: 'QUANTIFY_RSEM:QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT:SE_GENE_UNIFIED' 22:5-25:6
+      ConfigAssign ext.prefix = Closure 23:9-23:43
+      ConfigAssign ext.args = String 24:9-24:89
+    ConfigSelector withName: 'QUANTIFY_RSEM:QUANT_TXIMPORT_SUMMARIZEDEXPERIMENT:SE_TRANSCRIPT_UNIFIED' 27:5-30:6
+      ConfigAssign ext.prefix = Closure 28:9-28:49
+      ConfigAssign ext.args = String 29:9-29:54

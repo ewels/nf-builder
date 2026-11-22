@@ -1,0 +1,6 @@
+ConfigFile 1:1-19:1
+  ConfigBlock process 1:1-18:2
+    ConfigSelector withName: 'MULTIQC' 2:5-17:6
+      ConfigAssign ext.args = Closure 3:9-5:29
+      ConfigAssign ext.prefix = Closure 6:9-6:102
+      ConfigAssign publishDir = Map 7:9-16:10

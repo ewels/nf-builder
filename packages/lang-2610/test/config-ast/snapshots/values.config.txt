@@ -1,0 +1,482 @@
+ConfigFile 1:1-62:1
+  comments[0] line 1:1-1:114 "// F-103 fixture. Expression and statement kinds from nextflow-io/nextflow v26.10.7 docs/reference/syntax.mdx, as"
+  comments[1] line 2:1-2:37 "// config values and closure bodies."
+  statements[0] ConfigAssign 3:1-3:44
+    path[0] ConfigName form="identifier" 3:1-3:7 "params"
+    path[1] ConfigName form="identifier" 3:8-3:16 "integers"
+    value List trailingComma=false 3:19-3:44
+      elements[0] Number integer=true 3:20-3:21 "1"
+      elements[1] Number integer=true 3:23-3:27 "0x1F"
+      elements[2] Number integer=true 3:29-3:34 "1_000"
+      elements[3] Number integer=true 3:36-3:39 "10L"
+      elements[4] Number integer=true 3:41-3:43 "7i"
+  statements[1] ConfigAssign 4:1-4:36
+    path[0] ConfigName form="identifier" 4:1-4:7 "params"
+    path[1] ConfigName form="identifier" 4:8-4:14 "floats"
+    value List trailingComma=false 4:17-4:36
+      elements[0] Number integer=false 4:18-4:23 "1.5e3"
+      elements[1] Number integer=false 4:25-4:29 "2.0d"
+      elements[2] Number integer=false 4:31-4:35 "3.5f"
+  statements[2] ConfigAssign 5:1-5:35
+    path[0] ConfigName form="identifier" 5:1-5:7 "params"
+    path[1] ConfigName form="identifier" 5:8-5:13 "words"
+    value List trailingComma=false 5:16-5:35
+      elements[0] Boolean 5:17-5:21 "true"
+      elements[1] Boolean 5:23-5:28 "false"
+      elements[2] Null 5:30-5:34 "null"
+  statements[3] ConfigAssign 6:1-8:21
+    path[0] ConfigName form="identifier" 6:1-6:7 "params"
+    path[1] ConfigName form="identifier" 6:8-6:15 "strings"
+    value List trailingComma=false 6:18-8:21
+      elements[0] String value="single" quote="'" 6:19-6:27 "'single'"
+      elements[1] String value="double" quote="\"" 6:29-6:37 "\"double\""
+      elements[2] String value="triple\nsingle" quote="'''" 6:39-7:10 "'''triple\nsingle'''"
+      elements[3] String value="triple\ndouble" quote="\"\"\"" 7:12-8:10 "\"\"\"triple\ndouble\"\"\""
+      elements[4] String value="slashy" quote="/" 8:12-8:20 "/slashy/"
+  statements[4] ConfigAssign 9:1-9:45
+    path[0] ConfigName form="identifier" 9:1-9:7 "params"
+    path[1] ConfigName form="identifier" 9:8-9:15 "escapes"
+    value String value="tab\there \\ 'quoted' é" quote="'" 9:18-9:45 "'tab\\there \\\\ \\'quoted\\' é'"
+  statements[5] ConfigAssign 10:1-10:19
+    path[0] ConfigName form="identifier" 10:1-10:7 "params"
+    path[1] ConfigName form="identifier" 10:8-10:12 "size"
+    value Property navigation="." 10:15-10:19
+      object Number integer=true 10:15-10:16 "8"
+      property Identifier 10:17-10:19 "GB"
+  statements[6] ConfigAssign 11:1-11:18
+    path[0] ConfigName form="identifier" 11:1-11:7 "params"
+    path[1] ConfigName form="identifier" 11:8-11:12 "time"
+    value Property navigation="." 11:15-11:18
+      object Number integer=true 11:15-11:16 "1"
+      property Identifier 11:17-11:18 "h"
+  statements[7] ConfigAssign 12:1-12:54
+    path[0] ConfigName form="identifier" 12:1-12:7 "params"
+    path[1] ConfigName form="identifier" 12:8-12:15 "gstring"
+    value GString quote="\"" 12:18-12:54
+      parts[0] Interpolation braced=true 12:19-12:35
+        expression Property navigation="." 12:21-12:34
+          object Variable 12:21-12:27 "params"
+          property Identifier 12:28-12:34 "outdir"
+      parts[1] GStringText 12:35-12:38 "/x_"
+      parts[2] Interpolation braced=false 12:38-12:53
+        expression Property navigation="." 12:39-12:53
+          object Property navigation="." 12:39-12:50
+            object Variable 12:39-12:45 "params"
+            property Identifier 12:46-12:50 "name"
+          property Identifier 12:51-12:53 "id"
+  statements[8] ConfigAssign 13:1-13:25
+    path[0] ConfigName form="identifier" 13:1-13:7 "params"
+    path[1] ConfigName form="identifier" 13:8-13:12 "list"
+    value List trailingComma=true 13:15-13:25
+      elements[0] Number integer=true 13:16-13:17 "1"
+      elements[1] Number integer=true 13:19-13:20 "2"
+      elements[2] Number integer=true 13:22-13:23 "3"
+  statements[9] ConfigAssign 14:1-14:65
+    path[0] ConfigName form="identifier" 14:1-14:7 "params"
+    path[1] ConfigName form="identifier" 14:8-14:11 "map"
+    value Map trailingComma=false 14:14-14:65
+      entries[0] MapEntry 14:15-14:24
+        key Identifier 14:15-14:19 "name"
+        value String value="x" quote="'" 14:21-14:24 "'x'"
+      entries[1] MapEntry 14:26-14:41
+        key Parenthesized 14:26-14:38
+          expression Property navigation="." 14:27-14:37
+            object Variable 14:27-14:33 "params"
+            property Identifier 14:34-14:37 "key"
+        value Number integer=true 14:40-14:41 "1"
+      entries[2] MapEntry 14:43-14:54
+        key String value="quoted" quote="'" 14:43-14:51 "'quoted'"
+        value Number integer=true 14:53-14:54 "2"
+      entries[3] MapEntry 14:56-14:64
+        key String value="a-b" quote="'" 14:56-14:61 "'a-b'"
+        value Number integer=true 14:63-14:64 "3"
+  statements[10] ConfigAssign 15:1-15:19
+    path[0] ConfigName form="identifier" 15:1-15:7 "params"
+    path[1] ConfigName form="identifier" 15:8-15:13 "empty"
+    value Map trailingComma=false 15:16-15:19 "[:]"
+  statements[11] ConfigAssign 16:1-16:38
+    path[0] ConfigName form="identifier" 16:1-16:7 "params"
+    path[1] ConfigName form="identifier" 16:8-16:14 "nested"
+    value List trailingComma=false 16:17-16:38
+      elements[0] Map trailingComma=false 16:18-16:24
+        entries[0] MapEntry 16:19-16:23
+          key Identifier 16:19-16:20 "a"
+          value Number integer=true 16:22-16:23 "1"
+      elements[1] Map trailingComma=false 16:26-16:37
+        entries[0] MapEntry 16:27-16:36
+          key Identifier 16:27-16:28 "b"
+          value Map trailingComma=false 16:30-16:36
+            entries[0] MapEntry 16:31-16:35
+              key Identifier 16:31-16:32 "c"
+              value Number integer=true 16:34-16:35 "2"
+  statements[12] ConfigAssign 17:1-17:26
+    path[0] ConfigName form="identifier" 17:1-17:7 "params"
+    path[1] ConfigName form="identifier" 17:8-17:12 "safe"
+    value Property navigation="?." 17:15-17:26
+      object Property navigation="." 17:15-17:23
+        object Variable 17:15-17:21 "params"
+        property Identifier 17:22-17:23 "a"
+      property Identifier 17:25-17:26 "b"
+  statements[13] ConfigAssign 18:1-18:28
+    path[0] ConfigName form="identifier" 18:1-18:7 "params"
+    path[1] ConfigName form="identifier" 18:8-18:14 "spread"
+    value Property navigation="*." 18:17-18:28
+      object List trailingComma=false 18:17-18:25
+        elements[0] Map trailingComma=false 18:18-18:24
+          entries[0] MapEntry 18:19-18:23
+            key Identifier 18:19-18:20 "a"
+            value Number integer=true 18:22-18:23 "1"
+      property Identifier 18:27-18:28 "a"
+  statements[14] ConfigAssign 19:1-19:30
+    path[0] ConfigName form="identifier" 19:1-19:7 "params"
+    path[1] ConfigName form="identifier" 19:8-19:13 "index"
+    value Index 19:16-19:30
+      object Property navigation="." 19:16-19:27
+        object Variable 19:16-19:22 "params"
+        property Identifier 19:23-19:27 "list"
+      indices[0] Number integer=true 19:28-19:29 "0"
+  statements[15] ConfigAssign 20:1-20:26
+    path[0] ConfigName form="identifier" 20:1-20:7 "params"
+    path[1] ConfigName form="identifier" 20:8-20:12 "call"
+    value MethodCall trailingComma=false parens=true 20:15-20:26
+      method Identifier 20:15-20:18 "env"
+      args[0] String value="HOME" quote="'" 20:19-20:25 "'HOME'"
+  statements[16] ConfigAssign 21:1-21:50
+    path[0] ConfigName form="identifier" 21:1-21:7 "params"
+    path[1] ConfigName form="identifier" 21:8-21:12 "date"
+    value MethodCall navigation="." trailingComma=false parens=true 21:15-21:50
+      receiver New trailingComma=false 21:15-21:35
+        type TypeRef nullable=false 21:19-21:33 "java.util.Date"
+      method Identifier 21:36-21:42 "format"
+      args[0] String value="yyyy" quote="'" 21:43-21:49 "'yyyy'"
+  statements[17] ConfigAssign 22:1-22:40
+    path[0] ConfigName form="identifier" 22:1-22:7 "params"
+    path[1] ConfigName form="identifier" 22:8-22:11 "ops"
+    value Binary operator="-" 22:14-22:40
+      left Binary operator="+" 22:14-22:23
+        left Number integer=true 22:14-22:15 "1"
+        right Binary operator="*" 22:18-22:23
+          left Number integer=true 22:18-22:19 "2"
+          right Number integer=true 22:22-22:23 "3"
+      right Binary operator="%" 22:26-22:40
+        left Binary operator="/" 22:26-22:31
+          left Number integer=true 22:26-22:27 "4"
+          right Number integer=true 22:30-22:31 "2"
+        right Binary operator="**" 22:34-22:40
+          left Number integer=true 22:34-22:35 "3"
+          right Number integer=true 22:39-22:40 "2"
+  statements[18] ConfigAssign 23:1-23:49
+    path[0] ConfigName form="identifier" 23:1-23:7 "params"
+    path[1] ConfigName form="identifier" 23:8-23:13 "logic"
+    value Binary operator="||" 23:16-23:49
+      left Binary operator="&&" 23:16-23:37
+        left Unary operator="!" 23:16-23:25
+          operand Property navigation="." 23:17-23:25
+            object Variable 23:17-23:23 "params"
+            property Identifier 23:24-23:25 "a"
+        right Property navigation="." 23:29-23:37
+          object Variable 23:29-23:35 "params"
+          property Identifier 23:36-23:37 "b"
+      right Property navigation="." 23:41-23:49
+        object Variable 23:41-23:47 "params"
+        property Identifier 23:48-23:49 "c"
+  statements[19] ConfigAssign 24:1-24:83
+    path[0] ConfigName form="identifier" 24:1-24:7 "params"
+    path[1] ConfigName form="identifier" 24:8-24:15 "compare"
+    value Binary operator="&&" 24:18-24:83
+      left Binary operator="&&" 24:18-24:72
+        left Binary operator="&&" 24:18-24:62
+          left Binary operator="&&" 24:18-24:52
+            left Binary operator="&&" 24:18-24:42
+              left Binary operator="&&" 24:18-24:33
+                left Binary operator="<" 24:18-24:23
+                  left Number integer=true 24:18-24:19 "1"
+                  right Number integer=true 24:22-24:23 "2"
+                right Binary operator="<=" 24:27-24:33
+                  left Number integer=true 24:27-24:28 "2"
+                  right Number integer=true 24:32-24:33 "3"
+              right Binary operator=">" 24:37-24:42
+                left Number integer=true 24:37-24:38 "3"
+                right Number integer=true 24:41-24:42 "2"
+            right Binary operator=">=" 24:46-24:52
+              left Number integer=true 24:46-24:47 "3"
+              right Number integer=true 24:51-24:52 "2"
+          right Binary operator="==" 24:56-24:62
+            left Number integer=true 24:56-24:57 "1"
+            right Number integer=true 24:61-24:62 "1"
+        right Binary operator="!=" 24:66-24:72
+          left Number integer=true 24:66-24:67 "1"
+          right Number integer=true 24:71-24:72 "2"
+      right Binary operator="<=>" 24:76-24:83
+        left Number integer=true 24:76-24:77 "1"
+        right Number integer=true 24:82-24:83 "2"
+  statements[20] ConfigAssign 25:1-25:44
+    path[0] ConfigName form="identifier" 25:1-25:7 "params"
+    path[1] ConfigName form="identifier" 25:8-25:12 "bits"
+    value Binary operator="|" 25:15-25:44
+      left Binary operator="&" 25:15-25:20
+        left Number integer=true 25:15-25:16 "1"
+        right Number integer=true 25:19-25:20 "2"
+      right Binary operator="^" 25:23-25:44
+        left Number integer=true 25:23-25:24 "3"
+        right Binary operator=">>>" 25:27-25:44
+          left Binary operator=">>" 25:27-25:38
+            left Binary operator="<<" 25:27-25:33
+              left Number integer=true 25:27-25:28 "4"
+              right Number integer=true 25:32-25:33 "1"
+            right Number integer=true 25:37-25:38 "1"
+          right Number integer=true 25:43-25:44 "1"
+  statements[21] ConfigAssign 26:1-26:29
+    path[0] ConfigName form="identifier" 26:1-26:7 "params"
+    path[1] ConfigName form="identifier" 26:8-26:13 "range"
+    value List trailingComma=false 26:16-26:29
+      elements[0] Binary operator=".." 26:17-26:21
+        left Number integer=true 26:17-26:18 "1"
+        right Number integer=true 26:20-26:21 "3"
+      elements[1] Binary operator="..<" 26:23-26:28
+        left Number integer=true 26:23-26:24 "1"
+        right Number integer=true 26:27-26:28 "3"
+  statements[22] ConfigAssign 27:1-27:47
+    path[0] ConfigName form="identifier" 27:1-27:7 "params"
+    path[1] ConfigName form="identifier" 27:8-27:13 "regex"
+    value Binary operator="&&" 27:16-27:47
+      left Binary operator="=~" 27:16-27:28
+        left String value="abc" quote="'" 27:16-27:21 "'abc'"
+        right String value="a" quote="/" 27:25-27:28 "/a/"
+      right Binary operator="==~" 27:32-27:47
+        left String value="abc" quote="'" 27:32-27:37 "'abc'"
+        right String value="abc" quote="/" 27:42-27:47 "/abc/"
+  statements[23] ConfigAssign 28:1-28:48
+    path[0] ConfigName form="identifier" 28:1-28:7 "params"
+    path[1] ConfigName form="identifier" 28:8-28:18 "membership"
+    value Binary operator="&&" 28:21-28:48
+      left Binary operator="in" 28:21-28:32
+        left Number integer=true 28:21-28:22 "1"
+        right List trailingComma=false 28:26-28:32
+          elements[0] Number integer=true 28:27-28:28 "1"
+          elements[1] Number integer=true 28:30-28:31 "2"
+      right Binary operator="!in" 28:36-28:48
+        left Number integer=true 28:36-28:37 "3"
+        right List trailingComma=false 28:42-28:48
+          elements[0] Number integer=true 28:43-28:44 "1"
+          elements[1] Number integer=true 28:46-28:47 "2"
+  statements[24] ConfigAssign 29:1-29:34
+    path[0] ConfigName form="identifier" 29:1-29:7 "params"
+    path[1] ConfigName form="identifier" 29:8-29:12 "cast"
+    value Cast 29:15-29:34
+      operand Property navigation="." 29:15-29:23
+        object Variable 29:15-29:21 "params"
+        property Identifier 29:22-29:23 "x"
+      type TypeRef nullable=false 29:27-29:34 "Integer"
+  statements[25] ConfigAssign 30:1-30:72
+    path[0] ConfigName form="identifier" 30:1-30:7 "params"
+    path[1] ConfigName form="identifier" 30:8-30:16 "instance"
+    value Binary operator="&&" 30:19-30:72
+      left TypeTest operator="instanceof" 30:19-30:43
+        operand Property navigation="." 30:19-30:27
+          object Variable 30:19-30:25 "params"
+          property Identifier 30:26-30:27 "x"
+        type TypeRef nullable=false 30:39-30:43 "List"
+      right TypeTest operator="!instanceof" 30:47-30:72
+        operand Property navigation="." 30:47-30:55
+          object Variable 30:47-30:53 "params"
+          property Identifier 30:54-30:55 "y"
+        type TypeRef nullable=false 30:68-30:72 "List"
+  statements[26] ConfigAssign 31:1-31:70
+    path[0] ConfigName form="identifier" 31:1-31:7 "params"
+    path[1] ConfigName form="identifier" 31:8-31:15 "ternary"
+    value Ternary 31:18-31:70
+      condition Property navigation="." 31:18-31:26
+        object Variable 31:18-31:24 "params"
+        property Identifier 31:25-31:26 "a"
+      consequent Property navigation="." 31:29-31:37
+        object Variable 31:29-31:35 "params"
+        property Identifier 31:36-31:37 "b"
+      alternate Ternary 31:40-31:70
+        condition Property navigation="." 31:40-31:48
+          object Variable 31:40-31:46 "params"
+          property Identifier 31:47-31:48 "c"
+        consequent Property navigation="." 31:51-31:59
+          object Variable 31:51-31:57 "params"
+          property Identifier 31:58-31:59 "d"
+        alternate Property navigation="." 31:62-31:70
+          object Variable 31:62-31:68 "params"
+          property Identifier 31:69-31:70 "e"
+  statements[27] ConfigAssign 32:1-32:43
+    path[0] ConfigName form="identifier" 32:1-32:7 "params"
+    path[1] ConfigName form="identifier" 32:8-32:13 "elvis"
+    value Elvis 32:16-32:43
+      condition Property navigation="." 32:16-32:24
+        object Variable 32:16-32:22 "params"
+        property Identifier 32:23-32:24 "a"
+      alternate Elvis 32:28-32:43
+        condition Property navigation="." 32:28-32:36
+          object Variable 32:28-32:34 "params"
+          property Identifier 32:35-32:36 "b"
+        alternate String value="c" quote="'" 32:40-32:43 "'c'"
+  statements[28] ConfigAssign 33:1-33:34
+    path[0] ConfigName form="identifier" 33:1-33:7 "params"
+    path[1] ConfigName form="identifier" 33:8-33:13 "paren"
+    value Binary operator="*" 33:16-33:34
+      left Parenthesized 33:16-33:30
+        expression Binary operator="+" 33:17-33:29
+          left Property navigation="." 33:17-33:25
+            object Variable 33:17-33:23 "params"
+            property Identifier 33:24-33:25 "a"
+          right Number integer=true 33:28-33:29 "1"
+      right Number integer=true 33:33-33:34 "2"
+  statements[29] ConfigAssign 34:1-34:35
+    path[0] ConfigName form="identifier" 34:1-34:7 "params"
+    path[1] ConfigName form="identifier" 34:8-34:13 "unary"
+    value List trailingComma=false 34:16-34:35
+      elements[0] Unary operator="-" 34:17-34:19
+        operand Number integer=true 34:18-34:19 "1"
+      elements[1] Unary operator="+" 34:21-34:23
+        operand Number integer=true 34:22-34:23 "1"
+      elements[2] Unary operator="~" 34:25-34:27
+        operand Number integer=true 34:26-34:27 "1"
+      elements[3] Unary operator="!" 34:29-34:34
+        operand Boolean 34:30-34:34 "true"
+  statements[30] ConfigAssign 35:1-35:44
+    path[0] ConfigName form="identifier" 35:1-35:7 "params"
+    path[1] ConfigName form="identifier" 35:8-35:16 "map_call"
+    value MethodCall navigation="." trailingComma=false parens=false 35:19-35:44
+      receiver List trailingComma=false 35:19-35:25
+        elements[0] Number integer=true 35:20-35:21 "1"
+        elements[1] Number integer=true 35:23-35:24 "2"
+      method Identifier 35:26-35:33 "collect"
+      closures[0] Closure 35:34-35:44
+        body[0] ExpressionStatement 35:36-35:42
+          expression Binary operator="*" 35:36-35:42
+            left Variable 35:36-35:38 "it"
+            right Number integer=true 35:41-35:42 "2"
+  statements[31] ConfigAssign 36:1-36:39
+    path[0] ConfigName form="identifier" 36:1-36:8 "process"
+    path[1] ConfigName form="identifier" 36:9-36:12 "ext"
+    path[2] ConfigName form="identifier" 36:13-36:20 "version"
+    value Closure 36:23-36:39
+      body[0] ExpressionStatement 36:25-36:37
+        expression Property navigation="." 36:25-36:37
+          object Variable 36:25-36:29 "task"
+          property Identifier 36:30-36:37 "attempt"
+  statements[32] ConfigAssign 37:1-37:64
+    path[0] ConfigName form="identifier" 37:1-37:8 "process"
+    path[1] ConfigName form="identifier" 37:9-37:12 "ext"
+    path[2] ConfigName form="identifier" 37:13-37:17 "args"
+    value Closure 37:20-37:64
+      params[0] Parameter def=false 37:22-37:26
+        name Identifier 37:22-37:26 "meta"
+      body[0] ExpressionStatement 37:30-37:62
+        expression Ternary 37:30-37:62
+          condition Property navigation="." 37:30-37:37
+            object Variable 37:30-37:34 "meta"
+            property Identifier 37:35-37:37 "id"
+          consequent GString quote="\"" 37:40-37:57
+            parts[0] GStringText 37:41-37:46 "--id "
+            parts[1] Interpolation braced=true 37:46-37:56
+              expression Property navigation="." 37:48-37:55
+                object Variable 37:48-37:52 "meta"
+                property Identifier 37:53-37:55 "id"
+          alternate String value="" quote="'" 37:60-37:62 "''"
+  statements[33] ConfigAssign 38:1-38:53
+    path[0] ConfigName form="identifier" 38:1-38:8 "process"
+    path[1] ConfigName form="identifier" 38:9-38:12 "ext"
+    path[2] ConfigName form="identifier" 38:13-38:18 "args2"
+    value Closure 38:21-38:53
+      params[0] Parameter def=false 38:23-38:31
+        legacyType LegacyType dimensions=0 38:23-38:29
+          type TypeRef nullable=false 38:23-38:29 "String"
+        name Identifier 38:30-38:31 "a"
+      params[1] Parameter def=false 38:33-38:42
+        legacyType LegacyType dimensions=0 38:33-38:36
+          type TypeRef nullable=false 38:33-38:36 "int"
+        name Identifier 38:37-38:38 "b"
+        defaultValue Number integer=true 38:41-38:42 "1"
+      body[0] ExpressionStatement 38:46-38:51
+        expression Binary operator="*" 38:46-38:51
+          left Variable 38:46-38:47 "a"
+          right Variable 38:50-38:51 "b"
+  statements[34] ConfigAssign 39:1-61:2
+    path[0] ConfigName form="identifier" 39:1-39:8 "process"
+    path[1] ConfigName form="identifier" 39:9-39:12 "ext"
+    path[2] ConfigName form="identifier" 39:13-39:16 "pre"
+    value Closure 39:19-61:2
+      body[0] VariableDeclaration def=true multiple=false 40:5-40:14
+        targets[0] TypedName 40:9-40:10
+          name Identifier 40:9-40:10 "v"
+        initializer Number integer=true 40:13-40:14 "1"
+      body[1] VariableDeclaration def=true multiple=true 41:5-41:24
+        targets[0] TypedName 41:10-41:11
+          name Identifier 41:10-41:11 "a"
+        targets[1] TypedName 41:13-41:14
+          name Identifier 41:13-41:14 "b"
+        initializer List trailingComma=false 41:18-41:24
+          elements[0] Number integer=true 41:19-41:20 "1"
+          elements[1] Number integer=true 41:22-41:23 "2"
+      body[2] VariableDeclaration def=false multiple=false 42:5-42:19
+        legacyType LegacyType dimensions=0 42:5-42:11
+          type TypeRef nullable=false 42:5-42:11 "String"
+        targets[0] TypedName 42:12-42:13
+          name Identifier 42:12-42:13 "s"
+        initializer String value="x" quote="'" 42:16-42:19 "'x'"
+      body[3] VariableDeclaration def=false multiple=false 43:5-43:14
+        legacyType LegacyType dimensions=0 43:5-43:8
+          type TypeRef nullable=false 43:5-43:8 "int"
+        targets[0] TypedName 43:9-43:10
+          name Identifier 43:9-43:10 "n"
+        initializer Number integer=true 43:13-43:14 "2"
+      body[4] Assignment operator="=" 44:5-44:20
+        target TupleTarget 44:5-44:11
+          names[0] Variable 44:6-44:7 "a"
+          names[1] Variable 44:9-44:10 "b"
+        value List trailingComma=false 44:14-44:20
+          elements[0] Variable 44:15-44:16 "b"
+          elements[1] Variable 44:18-44:19 "a"
+      body[5] Assignment operator="+=" 45:5-45:11
+        target Variable 45:5-45:6 "v"
+        value Number integer=true 45:10-45:11 "1"
+      body[6] Assert 46:5-46:28
+        condition Binary operator="==" 46:12-46:18
+          left Variable 46:12-46:13 "v"
+          right Number integer=true 46:17-46:18 "2"
+        message String value="wrong" quote="'" 46:21-46:28 "'wrong'"
+      body[7] TryCatch 47:5-55:6
+        body Block 47:9-49:6
+          statements[0] ExpressionStatement 48:9-48:10
+            expression Variable 48:9-48:10 "v"
+        catches[0] Catch legacy=true 50:5-52:6
+          types[0] TypeRef nullable=false 50:12-50:23 "IOException"
+          types[1] TypeRef nullable=false 50:26-50:47 "IllegalStateException"
+          variable Identifier 50:48-50:49 "e"
+          body Block 50:52-52:6
+            statements[0] Throw 51:9-51:16
+              value Variable 51:15-51:16 "e"
+        catches[1] Catch legacy=true 53:5-55:6
+          types[0] TypeRef nullable=false 53:12-53:21 "Exception"
+          variable Identifier 53:22-53:23 "e"
+          body Block 53:26-55:6
+            statements[0] Return 54:9-54:17
+              value Variable 54:16-54:17 "v"
+      body[8] If elseRange=57:5-57:9 56:5-57:41
+        condition Binary operator=">" 56:9-56:14
+          left Variable 56:9-56:10 "v"
+          right Number integer=true 56:13-56:14 "1"
+        consequent ExpressionStatement 56:17-56:30
+          expression MethodCall trailingComma=false parens=false 56:17-56:30
+            method Identifier 56:17-56:24 "println"
+            args[0] String value="big" quote="'" 56:25-56:30 "'big'"
+        alternate If 57:10-57:41
+          condition Binary operator="<" 57:14-57:19
+            left Variable 57:14-57:15 "v"
+            right Number integer=true 57:18-57:19 "0"
+          consequent Block 57:22-57:41
+            statements[0] ExpressionStatement 57:24-57:39
+              expression MethodCall trailingComma=false parens=false 57:24-57:39
+                method Identifier 57:24-57:31 "println"
+                args[0] String value="small" quote="'" 57:32-57:39 "'small'"
+      body[9] ExpressionStatement 58:5-58:14
+        expression MethodCall trailingComma=false parens=false 58:5-58:14
+          method Identifier 58:5-58:12 "println"
+          args[0] Variable 58:13-58:14 "v"
+      body[10] Return 60:5-60:13
+        value Variable 60:12-60:13 "v"

@@ -1,0 +1,5 @@
+ConfigFile 1:1-7:1
+  ConfigBlock process 1:1-6:2
+    ConfigSelector withName: '.*:BAM_VARIANT_CALLING_MUTECT2:MUTECT2' 2:5-5:6
+      #line 3:9-3:60
+      ConfigAssign ext.args = Closure 4:9-4:159

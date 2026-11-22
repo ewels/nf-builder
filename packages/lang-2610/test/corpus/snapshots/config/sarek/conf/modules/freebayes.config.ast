@@ -1,0 +1,29 @@
+ConfigFile 1:1-86:1
+  #block 1:1-12:3
+  #line 14:1-14:13
+  ConfigBlock process 16:1-85:2
+    ConfigSelector withName: 'MERGE_FREEBAYES' 18:5-25:6
+      ConfigAssign ext.prefix = Closure 19:9-19:48
+      ConfigAssign publishDir = Map 20:9-24:10
+    ConfigSelector withName: 'FREEBAYES' 27:5-35:6
+      ConfigAssign ext.args = Closure 28:9-28:80
+      #line 29:9-29:124
+      ConfigAssign ext.prefix = Closure 30:9-30:102
+      ConfigAssign ext.when = Closure 31:9-31:87
+      ConfigAssign publishDir = Map 32:9-34:10
+    ConfigSelector withName: 'BCFTOOLS_SORT' 37:5-45:6
+      ConfigAssign ext.prefix = Closure 38:9-38:104
+      ConfigAssign publishDir = Map 39:9-44:10
+    ConfigSelector withName: 'TABIX_VC_FREEBAYES' 47:5-54:6
+      ConfigAssign ext.prefix = Closure 48:9-48:41
+      ConfigAssign publishDir = Map 49:9-53:10
+    ConfigSelector withName: 'VCFLIB_VCFFILTER' 56:5-64:6
+      ConfigAssign ext.prefix = Closure 57:9-57:57
+      ConfigAssign ext.args = Closure 58:9-58:77
+      ConfigAssign publishDir = Map 59:9-63:10
+    ConfigSelector withName: 'TABIX_VC_FREEBAYES_FILT' 66:5-73:6
+      ConfigAssign ext.prefix = Closure 67:9-67:41
+      ConfigAssign publishDir = Map 68:9-72:10
+    #line 75:5-75:28
+    ConfigSelector withName: '.*:BAM_VARIANT_CALLING_SOMATIC_ALL:BAM_VARIANT_CALLING_FREEBAYES:FREEBAYES' 76:9-84:10
+      ConfigAssign ext.args = Closure 77:13-83:56

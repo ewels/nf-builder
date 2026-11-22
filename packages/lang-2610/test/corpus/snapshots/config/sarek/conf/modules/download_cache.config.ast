@@ -1,0 +1,13 @@
+ConfigFile 1:1-37:1
+  #block 1:1-12:3
+  #line 14:1-14:17
+  ConfigBlock process 16:1-36:2
+    #line 18:5-18:14
+    ConfigSelector withName: 'SNPEFF_DOWNLOAD' 19:5-25:6
+      ConfigAssign ext.when = Closure 20:9-20:131
+      ConfigAssign publishDir = Map 21:9-24:10
+    #line 27:5-27:11
+    ConfigSelector withName: 'ENSEMBLVEP_DOWNLOAD' 28:5-35:6
+      ConfigAssign ext.when = Closure 29:9-29:128
+      ConfigAssign ext.args = Closure 30:9-30:93
+      ConfigAssign publishDir = Map 31:9-34:10

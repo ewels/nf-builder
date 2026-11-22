@@ -1,0 +1,31 @@
+ConfigFile 1:1-131:1
+  #block 1:1-12:3
+  #line 14:1-14:16
+  ConfigBlock process 16:1-130:2
+    ConfigSelector withName: 'ASSESS_SIGNIFICANCE' 18:5-24:6
+      ConfigAssign publishDir = Map 19:9-23:10
+    ConfigSelector withName: 'FREEC_.*' 26:5-33:6
+      ConfigAssign ext.when = Closure 27:9-27:90
+      ConfigAssign publishDir = Map 28:9-32:10
+    ConfigSelector withName: 'FREEC2BED' 35:5-42:6
+      ConfigAssign ext.args = Closure 36:9-36:47
+      ConfigAssign publishDir = Map 37:9-41:10
+    ConfigSelector withName: 'FREEC2CIRCOS' 44:5-51:6
+      ConfigAssign ext.args = Closure 45:9-45:47
+      ConfigAssign publishDir = Map 46:9-50:10
+    ConfigSelector withName: 'MAKEGRAPH2' 53:5-59:6
+      ConfigAssign publishDir = Map 54:9-58:10
+    #line 61:1-61:30
+    ConfigSelector withName: 'FREEC_TUMORONLY' 62:5-92:6
+      ConfigAssign ext.args = Closure 63:9-91:10
+        #line 70:70-70:111
+        #line 71:61-71:103
+        #line 82:21-82:43
+        #line 88:21-88:58
+    #line 94:1-94:24
+    ConfigSelector withName: 'FREEC_SOMATIC' 95:5-129:6
+      ConfigAssign ext.args = Closure 96:9-128:10
+        #line 107:70-107:111
+        #line 108:61-108:103
+        #line 119:21-119:43
+        #line 125:21-125:58

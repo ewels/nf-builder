@@ -1,0 +1,10 @@
+ConfigFile 1:1-19:1
+  ConfigBlock process 1:1-18:2
+    ConfigSelector withName: 'GFFREAD' 2:5-4:6
+      ConfigAssign ext.args = String 3:9-3:47
+    ConfigSelector withName: 'STAR_GENOMEGENERATE.*' 7:5-9:6
+      ConfigAssign ext.args = String 8:9-8:45
+    ConfigSelector withName: 'STAR_ALIGN.*' 11:5-13:6
+      ConfigAssign ext.args = String 12:9-12:129
+    ConfigSelector withName: 'UNTAR_.*' 15:5-17:6
+      ConfigAssign ext.args2 = String 16:9-16:38

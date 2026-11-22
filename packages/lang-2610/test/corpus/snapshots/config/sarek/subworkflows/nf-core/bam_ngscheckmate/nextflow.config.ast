@@ -1,0 +1,8 @@
+ConfigFile 1:1-14:1
+  #line 1:1-1:60
+  ConfigBlock process 3:1-13:2
+    ConfigSelector withName: '.*BAM_NGSCHECKMATE:BCFTOOLS_MPILEUP' 4:5-7:6
+      ConfigAssign ext.args2 = String 5:9-5:49
+      ConfigAssign ext.args3 = String 6:9-6:35
+    ConfigSelector withName: '.*BAM_NGSCHECKMATE:NGSCHECKMATE_NCM' 9:5-11:6
+      ConfigAssign ext.args = String 10:9-10:24

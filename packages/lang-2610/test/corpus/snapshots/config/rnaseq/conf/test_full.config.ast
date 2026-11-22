@@ -1,0 +1,9 @@
+ConfigFile 1:1-22:1
+  #block 1:1-11:3
+  ConfigBlock params 13:1-21:2
+    ConfigAssign config_profile_name = String 14:5-14:53
+    ConfigAssign config_profile_description = String 15:5-15:80
+    #line 17:5-17:37
+    ConfigAssign input = String 18:5-18:159
+    ConfigAssign genome = String 19:5-19:30
+    ConfigAssign pseudo_aligner = String 20:5-20:30

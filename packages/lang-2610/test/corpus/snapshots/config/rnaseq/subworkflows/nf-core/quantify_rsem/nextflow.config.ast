@@ -1,0 +1,7 @@
+ConfigFile 1:1-12:1
+  #line 1:1-1:60
+  ConfigBlock process 3:1-11:2
+    ConfigSelector withName: '.*:QUANTIFY_RSEM:RSEM_CALCULATEEXPRESSION|.*:QUANTIFY_RSEM:SENTIEON_RSEMCALCULATEEXPRESSION' 4:5-6:6
+      ConfigAssign ext.args = String 5:9-5:48
+    ConfigSelector withName: '.*:QUANTIFY_RSEM:CUSTOM_RSEMMERGECOUNTS' 8:5-10:6
+      ConfigAssign ext.prefix = Closure 9:9-9:39

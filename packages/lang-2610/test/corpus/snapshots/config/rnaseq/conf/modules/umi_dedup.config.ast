@@ -1,0 +1,32 @@
+ConfigFile 1:1-101:1
+  #line 1:1-1:3
+  #line 2:1-2:56
+  #line 3:1-3:3
+  ConfigBlock process 5:1-100:2
+    ConfigSelector withName: '.*:BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS_(GEN|TRANSCRIPT)OME:UMITOOLS_DEDUP' 6:5-12:6
+      ConfigAssign ext.args = Closure 7:9-11:29
+    ConfigSelector withName: '.*:BAM_DEDUP_STATS_SAMTOOLS_UMICOLLAPSE_(GEN|TRANSCRIPT)OME:UMICOLLAPSE' 14:5-21:6
+      ConfigAssign ext.args = Closure 15:9-20:28
+    ConfigSelector withName: '.*:BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS_(GEN|TRANSCRIPT)OME:SAMTOOLS_VIEW_PRIMARY' 23:5-27:6
+      ConfigAssign ext.args = String 24:9-24:35
+      ConfigAssign ext.prefix = Closure 25:9-25:46
+      ConfigAssign publishDir = Map 26:9-26:40
+    ConfigSelector withName: '.*:BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS_(GEN|TRANSCRIPT)OME:SAMTOOLS_INDEX_PRIMARY' 29:5-32:6
+      ConfigAssign ext.args = Closure 30:9-30:58
+      ConfigAssign publishDir = Map 31:9-31:40
+    #line 34:5-34:66
+    ConfigSelector withName: '.*:BAM_DEDUP_STATS_SAMTOOLS_UMI(COLLAPSE|TOOLS)_GENOME:UMI(COLLAPSE|TOOLS_DEDUP)' 36:5-38:6
+      ConfigAssign ext.prefix = Closure 37:9-37:55
+    #line 40:5-40:38
+    ConfigSelector withName: '.*:BAM_DEDUP_STATS_SAMTOOLS_UMITOOLS_GENOME:UMITOOLS_DEDUP' 42:5-61:6
+      ConfigAssign publishDir = List 43:9-60:10
+    #line 63:5-63:40
+    ConfigSelector withName: '.*:BAM_DEDUP_STATS_SAMTOOLS_UMICOLLAPSE_GENOME:UMICOLLAPSE' 65:5-79:6
+      ConfigAssign publishDir = List 66:9-78:10
+    ConfigSelector withName: '.*:BAM_DEDUP_STATS_SAMTOOLS_UMI(COLLAPSE|TOOLS)_GENOME:SAMTOOLS_INDEX' 81:5-90:6
+      ConfigAssign ext.args = Closure 82:9-82:58
+      ConfigAssign ext.prefix = Closure 83:9-83:55
+      ConfigAssign publishDir = Map 84:9-89:10
+    ConfigSelector withName: '.*:BAM_DEDUP_STATS_SAMTOOLS_UMI(COLLAPSE|TOOLS)_GENOME:BAM_STATS_SAMTOOLS:.*' 92:5-99:6
+      ConfigAssign ext.prefix = Closure 93:9-93:59
+      ConfigAssign publishDir = Map 94:9-98:10

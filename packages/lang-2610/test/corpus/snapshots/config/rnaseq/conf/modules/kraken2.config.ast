@@ -1,0 +1,7 @@
+ConfigFile 1:1-12:1
+  ConfigBlock process 1:1-11:2
+    ConfigSelector withName: 'KRAKEN2' 2:5-10:6
+      #line 3:9-3:86
+      #line 4:9-4:85
+      ConfigAssign ext.args = String 5:9-5:62
+      ConfigAssign publishDir = Map 6:9-9:10

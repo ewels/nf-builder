@@ -1,0 +1,172 @@
+ConfigFile 1:1-44:1
+  comments[0] line 1:1-1:117 "// F-103 fixture. Source: nextflow-io/nextflow v26.10.7 docs/config.mdx#L287-L317, plus the nf-core `publishDir` and"
+  comments[1] line 2:1-2:47 "// `ext.args` shapes (closures, maps, `when`)."
+  statements[0] ConfigBlock 3:1-16:2
+    name ConfigName form="identifier" 3:1-3:8 "process"
+    statements[0] ConfigAssign 4:5-8:6
+      path[0] ConfigName form="identifier" 4:5-4:15 "publishDir"
+      value Map trailingComma=false 4:18-8:6
+        entries[0] MapEntry 5:9-5:85
+          key Identifier 5:9-5:13 "path"
+          value Closure 5:15-5:85
+            body[0] ExpressionStatement 5:17-5:83
+              expression GString quote="\"" 5:17-5:83
+                parts[0] Interpolation braced=true 5:18-5:34
+                  expression Property navigation="." 5:20-5:33
+                    object Variable 5:20-5:26 "params"
+                    property Identifier 5:27-5:33 "outdir"
+                parts[1] GStringText 5:34-5:35 "/"
+                parts[2] Interpolation braced=true 5:35-5:82
+                  expression MethodCall navigation="." trailingComma=false parens=true 5:37-5:81
+                    receiver Index 5:37-5:67
+                      object MethodCall navigation="." trailingComma=false parens=true 5:37-5:63
+                        receiver Property navigation="." 5:37-5:49
+                          object Variable 5:37-5:41 "task"
+                          property Identifier 5:42-5:49 "process"
+                        method Identifier 5:50-5:58 "tokenize"
+                        args[0] String value=":" quote="'" 5:59-5:62 "':'"
+                      indices[0] Unary operator="-" 5:64-5:66
+                        operand Number integer=true 5:65-5:66 "1"
+                    method Identifier 5:68-5:79 "toLowerCase"
+        entries[1] MapEntry 6:9-6:38
+          key Identifier 6:9-6:13 "mode"
+          value Property navigation="." 6:15-6:38
+            object Variable 6:15-6:21 "params"
+            property Identifier 6:22-6:38 "publish_dir_mode"
+        entries[2] MapEntry 7:9-7:82
+          key Identifier 7:9-7:15 "saveAs"
+          value Closure 7:17-7:82
+            params[0] Parameter def=false 7:19-7:27
+              name Identifier 7:19-7:27 "filename"
+            body[0] ExpressionStatement 7:31-7:80
+              expression Ternary 7:31-7:80
+                condition MethodCall navigation="." trailingComma=false parens=true 7:31-7:62
+                  receiver Variable 7:31-7:39 "filename"
+                  method Identifier 7:40-7:46 "equals"
+                  args[0] String value="versions.yml" quote="'" 7:47-7:61 "'versions.yml'"
+                consequent Null 7:65-7:69 "null"
+                alternate Variable 7:72-7:80 "filename"
+    statements[1] ConfigSelector 9:5-14:6
+      selector ConfigName form="identifier" 9:5-9:13 "withName"
+      target ConfigName form="string" 9:15-9:23 "'FASTQC'"
+      statements[0] ConfigAssign 10:9-10:49
+        path[0] ConfigName form="identifier" 10:9-10:13 "when"
+        value Closure 10:16-10:49
+          body[0] ExpressionStatement 10:18-10:47
+            expression Binary operator="!=" 10:18-10:47
+              left Property navigation="." 10:18-10:25
+                object Variable 10:18-10:22 "meta"
+                property Identifier 10:23-10:25 "id"
+              right Property navigation="." 10:29-10:47
+                object Variable 10:29-10:35 "params"
+                property Identifier 10:36-10:47 "skip_sample"
+      statements[1] ConfigAssign 11:9-11:29
+        path[0] ConfigName form="identifier" 11:9-11:12 "ext"
+        path[1] ConfigName form="identifier" 11:13-11:17 "args"
+        value String value="--quiet" quote="'" 11:20-11:29 "'--quiet'"
+      statements[2] ConfigAssign 12:9-12:41
+        path[0] ConfigName form="identifier" 12:9-12:15 "memory"
+        value Closure 12:18-12:41
+          body[0] ExpressionStatement 12:20-12:39
+            expression Binary operator="*" 12:20-12:39
+              left Property navigation="." 12:20-12:24
+                object Number integer=true 12:20-12:21 "6"
+                property Identifier 12:22-12:24 "GB"
+              right Property navigation="." 12:27-12:39
+                object Variable 12:27-12:31 "task"
+                property Identifier 12:32-12:39 "attempt"
+      statements[3] ConfigAssign 13:9-13:79
+        path[0] ConfigName form="identifier" 13:9-13:22 "errorStrategy"
+        value Closure 13:25-13:79
+          body[0] ExpressionStatement 13:27-13:77
+            expression Ternary 13:27-13:77
+              condition Binary operator="in" 13:27-13:56
+                left Property navigation="." 13:27-13:42
+                  object Variable 13:27-13:31 "task"
+                  property Identifier 13:32-13:42 "exitStatus"
+                right List trailingComma=false 13:46-13:56
+                  elements[0] Number integer=true 13:47-13:50 "143"
+                  elements[1] Number integer=true 13:52-13:55 "137"
+              consequent String value="retry" quote="'" 13:59-13:66 "'retry'"
+              alternate String value="finish" quote="'" 13:69-13:77 "'finish'"
+    statements[2] ConfigSelector 15:5-15:53
+      selector ConfigName form="identifier" 15:5-15:13 "withName"
+      target ConfigName form="string" 15:15-15:32 "'NFCORE_.*:ALIGN'"
+      statements[0] ConfigAssign 15:35-15:51
+        path[0] ConfigName form="identifier" 15:35-15:38 "ext"
+        path[1] ConfigName form="identifier" 15:39-15:43 "when"
+        value Boolean 15:46-15:51 "false"
+  statements[1] ConfigAssign 18:1-21:2
+    path[0] ConfigName form="identifier" 18:1-18:9 "workflow"
+    path[1] ConfigName form="identifier" 18:10-18:20 "onComplete"
+    value Closure 18:23-21:2
+      body[0] ExpressionStatement 19:5-19:32
+        expression MethodCall trailingComma=false parens=false 19:5-19:32
+          method Identifier 19:5-19:12 "println"
+          args[0] String value="Pipeline complete" quote="\"" 19:13-19:32 "\"Pipeline complete\""
+      body[1] ExpressionStatement 20:5-20:50
+        expression MethodCall trailingComma=false parens=false 20:5-20:50
+          method Identifier 20:5-20:12 "println"
+          args[0] GString quote="\"" 20:13-20:50
+            parts[0] GStringText 20:14-20:28 "Command line: "
+            parts[1] Interpolation braced=false 20:28-20:49
+              expression Property navigation="." 20:29-20:49
+                object Variable 20:29-20:37 "workflow"
+                property Identifier 20:38-20:49 "commandLine"
+  statements[2] ConfigAssign 22:1-24:2
+    path[0] ConfigName form="identifier" 22:1-22:9 "workflow"
+    path[1] ConfigName form="identifier" 22:10-22:17 "onError"
+    value Closure 22:20-24:2
+      body[0] ExpressionStatement 23:5-23:42
+        expression MethodCall trailingComma=false parens=false 23:5-23:42
+          method Identifier 23:5-23:12 "println"
+          args[0] String value="Error: something went wrong" quote="\"" 23:13-23:42 "\"Error: something went wrong\""
+  statements[3] ConfigAssign 25:1-25:43
+    path[0] ConfigName form="identifier" 25:1-25:9 "workflow"
+    path[1] ConfigName form="identifier" 25:10-25:16 "output"
+    path[2] ConfigName form="identifier" 25:17-25:21 "mode"
+    value Property navigation="." 25:24-25:43
+      object Variable 25:24-25:30 "params"
+      property Identifier 25:31-25:43 "publish_mode"
+  statements[4] ConfigBlock 27:1-29:2
+    name ConfigName form="identifier" 27:1-27:4 "env"
+    statements[0] ConfigAssign 28:5-28:16
+      path[0] ConfigName form="identifier" 28:5-28:8 "FOO"
+      value String value="bar" quote="'" 28:11-28:16 "'bar'"
+  statements[5] ConfigBlock 30:1-35:2
+    name ConfigName form="identifier" 30:1-30:7 "params"
+    statements[0] ConfigAssign 31:5-31:18
+      path[0] ConfigName form="identifier" 31:5-31:13 "max_cpus"
+      value Number integer=true 31:16-31:18 "64"
+    statements[1] ConfigBlock 32:5-34:6
+      name ConfigName form="identifier" 32:5-32:11 "nested"
+      statements[0] ConfigAssign 33:9-33:17
+        path[0] ConfigName form="identifier" 33:9-33:13 "deep"
+        value Number integer=true 33:16-33:17 "1"
+  statements[6] ConfigBlock 36:1-42:2
+    name ConfigName form="identifier" 36:1-36:9 "manifest"
+    statements[0] ConfigAssign 37:5-37:17
+      path[0] ConfigName form="identifier" 37:5-37:9 "name"
+      value String value="x/y" quote="'" 37:12-37:17 "'x/y'"
+    statements[1] ConfigAssign 38:5-41:6
+      path[0] ConfigName form="identifier" 38:5-38:17 "contributors"
+      value List trailingComma=false 38:20-41:6
+        elements[0] Map trailingComma=false 39:9-39:38
+          entries[0] MapEntry 39:10-39:19
+            key Identifier 39:10-39:14 "name"
+            value String value="A" quote="'" 39:16-39:19 "'A'"
+          entries[1] MapEntry 39:21-39:37
+            key Identifier 39:21-39:32 "affiliation"
+            value String value="B" quote="'" 39:34-39:37 "'B'"
+        elements[1] Map trailingComma=false 40:9-40:38
+          entries[0] MapEntry 40:10-40:19
+            key Identifier 40:10-40:14 "name"
+            value String value="C" quote="'" 40:16-40:19 "'C'"
+          entries[1] MapEntry 40:21-40:37
+            key Identifier 40:21-40:32 "affiliation"
+            value String value="D" quote="'" 40:34-40:37 "'D'"
+  statements[7] ConfigAssign 43:1-43:53
+    path[0] ConfigName form="identifier" 43:1-43:9 "nextflow"
+    path[1] ConfigName form="identifier" 43:10-43:16 "enable"
+    path[2] ConfigName form="identifier" 43:17-43:45 "configProcessNamesValidation"
+    value Boolean 43:48-43:53 "false"

@@ -1,0 +1,103 @@
+ConfigFile 1:1-35:1
+  ConfigBlock process 1:1-1:128
+    ConfigSelector withName: 'BEDTOOLS_GENOMECOV' 1:11-1:126
+      ConfigAssign container = String 1:44-1:124
+  ConfigBlock process 2:1-2:135
+    ConfigSelector withName: 'BOWTIE2_ALIGN' 2:11-2:133
+      ConfigAssign container = String 2:39-2:131
+  ConfigBlock process 3:1-3:135
+    ConfigSelector withName: 'BOWTIE2_BUILD' 3:11-3:133
+      ConfigAssign container = String 3:39-3:131
+  ConfigBlock process 4:1-4:133
+    ConfigSelector withName: 'CUSTOM_CATADDITIONALFASTA' 4:11-4:131
+      ConfigAssign container = String 4:51-4:129
+  ConfigBlock process 5:1-5:124
+    ConfigSelector withName: 'CUSTOM_GTFFILTER' 5:11-5:122
+      ConfigAssign container = String 5:42-5:120
+  ConfigBlock process 6:1-6:136
+    ConfigSelector withName: 'CUSTOM_MULTIQCCUSTOMBIOTYPE' 6:11-6:134
+      ConfigAssign container = String 6:53-6:132
+  ConfigBlock process 7:1-7:124
+    ConfigSelector withName: 'CUSTOM_RSEMMERGECOUNTS' 7:11-7:122
+      ConfigAssign container = String 7:48-7:120
+  ConfigBlock process 8:1-8:122
+    ConfigSelector withName: 'CUSTOM_TX2GENE' 8:11-8:120
+      ConfigAssign container = String 8:40-8:118
+  ConfigBlock process 9:1-9:121
+    ConfigSelector withName: 'EAUTILS_GTF2BED' 9:11-9:119
+      ConfigAssign container = String 9:41-9:117
+  ConfigBlock process 10:1-10:111
+    ConfigSelector withName: 'FASTP' 10:11-10:109
+      ConfigAssign container = String 10:31-10:107
+  ConfigBlock process 11:1-11:114
+    ConfigSelector withName: 'FASTQC' 11:11-11:112
+      ConfigAssign container = String 11:32-11:110
+  ConfigBlock process 12:1-12:121
+    ConfigSelector withName: 'HISAT2_ALIGN' 12:11-12:119
+      ConfigAssign container = String 12:38-12:117
+  ConfigBlock process 13:1-13:119
+    ConfigSelector withName: 'HISAT2_BUILD' 13:11-13:117
+      ConfigAssign container = String 13:38-13:115
+  ConfigBlock process 14:1-14:134
+    ConfigSelector withName: 'HISAT2_EXTRACTSPLICESITES' 14:11-14:132
+      ConfigAssign container = String 14:51-14:130
+  ConfigBlock process 15:1-15:114
+    ConfigSelector withName: 'MULTIQC' 15:11-15:112
+      ConfigAssign container = String 15:33-15:110
+  ConfigBlock process 16:1-16:128
+    ConfigSelector withName: 'PICARD_MARKDUPLICATES' 16:11-16:126
+      ConfigAssign container = String 16:47-16:124
+  ConfigBlock process 17:1-17:122
+    ConfigSelector withName: 'QUALIMAP_RNASEQ' 17:11-17:120
+      ConfigAssign container = String 17:41-17:118
+  ConfigBlock process 18:1-18:113
+    ConfigSelector withName: 'RUSTQC' 18:11-18:111
+      ConfigAssign container = String 18:32-18:109
+  ConfigBlock process 19:1-19:120
+    ConfigSelector withName: 'SALMON_INDEX' 19:11-19:118
+      ConfigAssign container = String 19:38-19:116
+  ConfigBlock process 20:1-20:120
+    ConfigSelector withName: 'SALMON_QUANT' 20:11-20:118
+      ConfigAssign container = String 20:38-20:116
+  ConfigBlock process 21:1-21:129
+    ConfigSelector withName: 'SAMTOOLS_FAIDX' 21:11-21:127
+      ConfigAssign container = String 21:40-21:125
+  ConfigBlock process 22:1-22:129
+    ConfigSelector withName: 'SAMTOOLS_FASTQ' 22:11-22:127
+      ConfigAssign container = String 22:40-22:125
+  ConfigBlock process 23:1-23:132
+    ConfigSelector withName: 'SAMTOOLS_FLAGSTAT' 23:11-23:130
+      ConfigAssign container = String 23:43-23:128
+  ConfigBlock process 24:1-24:132
+    ConfigSelector withName: 'SAMTOOLS_IDXSTATS' 24:11-24:130
+      ConfigAssign container = String 24:43-24:128
+  ConfigBlock process 25:1-25:129
+    ConfigSelector withName: 'SAMTOOLS_INDEX' 25:11-25:127
+      ConfigAssign container = String 25:40-25:125
+  ConfigBlock process 26:1-26:128
+    ConfigSelector withName: 'SAMTOOLS_SORT' 26:11-26:126
+      ConfigAssign container = String 26:39-26:124
+  ConfigBlock process 27:1-27:129
+    ConfigSelector withName: 'SAMTOOLS_STATS' 27:11-27:127
+      ConfigAssign container = String 27:40-27:125
+  ConfigBlock process 28:1-28:128
+    ConfigSelector withName: 'SAMTOOLS_VIEW' 28:11-28:126
+      ConfigAssign container = String 28:39-28:124
+  ConfigBlock process 29:1-29:131
+    ConfigSelector withName: 'SENTIEON_STARALIGN' 29:11-29:129
+      ConfigAssign container = String 29:44-29:127
+  ConfigBlock process 30:1-30:122
+    ConfigSelector withName: 'SEQKIT_REPLACE' 30:11-30:120
+      ConfigAssign container = String 30:40-30:118
+  ConfigBlock process 31:1-31:120
+    ConfigSelector withName: 'SEQKIT_STATS' 31:11-31:118
+      ConfigAssign container = String 31:38-31:116
+  ConfigBlock process 32:1-32:138
+    ConfigSelector withName: 'STAR_GENOMEGENERATE' 32:11-32:136
+      ConfigAssign container = String 32:45-32:134
+  ConfigBlock process 33:1-33:123
+    ConfigSelector withName: 'UCSC_BEDCLIP' 33:11-33:121
+      ConfigAssign container = String 33:38-33:119
+  ConfigBlock process 34:1-34:141
+    ConfigSelector withName: 'UCSC_BEDGRAPHTOBIGWIG' 34:11-34:139
+      ConfigAssign container = String 34:47-34:137

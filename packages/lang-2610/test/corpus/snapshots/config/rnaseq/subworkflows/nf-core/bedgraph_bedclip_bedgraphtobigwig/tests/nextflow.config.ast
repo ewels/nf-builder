@@ -1,0 +1,5 @@
+ConfigFile 1:1-10:1
+  ConfigBlock process 1:1-9:2
+    ConfigAssign publishDir = Closure 3:5-3:105
+    ConfigSelector withName: UCSC_BEDCLIP 5:5-7:6
+      ConfigAssign ext.prefix = Closure 6:9-6:43

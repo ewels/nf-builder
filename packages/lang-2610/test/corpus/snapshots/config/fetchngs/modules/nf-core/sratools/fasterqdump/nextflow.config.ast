@@ -1,0 +1,5 @@
+ConfigFile 1:1-10:2
+  ConfigBlock process 1:1-10:2
+    ConfigSelector withName: SRATOOLS_FASTERQDUMP 2:5-9:6
+      ConfigAssign ext.args = String 3:9-3:55
+      ConfigAssign publishDir = Map 4:9-8:10

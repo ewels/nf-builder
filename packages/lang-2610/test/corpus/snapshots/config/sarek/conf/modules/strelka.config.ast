@@ -1,0 +1,20 @@
+ConfigFile 1:1-54:1
+  #block 1:1-12:3
+  #line 14:1-14:11
+  ConfigBlock process 16:1-53:2
+    ConfigSelector withName: 'STRELKA_.*' 18:5-28:6
+      ConfigAssign ext.args = Closure 19:9-19:53
+      ConfigAssign ext.prefix = Closure 20:9-20:118
+      ConfigAssign ext.when = Closure 21:9-21:85
+      ConfigAssign publishDir = Map 22:9-27:10
+    ConfigSelector withName: 'MERGE_STRELKA.*' 30:5-36:6
+      ConfigAssign publishDir = Map 31:9-35:10
+    ConfigSelector withName: 'MERGE_STRELKA' 38:5-40:6
+      ConfigAssign ext.prefix = Closure 39:9-39:55
+    ConfigSelector withName: 'MERGE_STRELKA_GENOME' 42:5-44:6
+      ConfigAssign ext.prefix = Closure 43:9-43:53
+    #line 46:5-46:28
+    ConfigSelector withName: 'MERGE_STRELKA_INDELS' 47:5-49:6
+      ConfigAssign ext.prefix = Closure 48:9-48:61
+    ConfigSelector withName: 'MERGE_STRELKA_SNVS' 50:5-52:6
+      ConfigAssign ext.prefix = Closure 51:9-51:59

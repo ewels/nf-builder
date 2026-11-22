@@ -1,0 +1,5 @@
+ConfigFile 1:1-14:1
+  ConfigBlock process 1:1-13:2
+    ConfigSelector withName: 'SUBREAD_FEATURECOUNTS' 2:5-12:6
+      ConfigAssign ext.args = Closure 3:9-7:29
+      ConfigAssign publishDir = Map 8:9-11:10

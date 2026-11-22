@@ -1,0 +1,13 @@
+ConfigFile 1:1-36:1
+  ConfigBlock process 1:1-35:2
+    ConfigSelector withName: 'STRINGTIE_STRINGTIE' 2:5-12:6
+      ConfigAssign ext.args = Closure 3:9-7:10
+      ConfigAssign publishDir = Map 8:9-11:10
+    #line 14:5-14:76
+    #line 15:5-15:76
+    #line 16:5-16:69
+    ConfigSelector withName: 'NFCORE_RNASEQ:RNASEQ:BAM_STRINGTIE_MERGE:STRINGTIE_STRINGTIE' 17:5-27:6
+      ConfigAssign ext.prefix = Closure 18:9-18:45
+      ConfigAssign publishDir = Map 19:9-26:10
+    ConfigSelector withName: 'NFCORE_RNASEQ:RNASEQ:BAM_STRINGTIE_MERGE:STRINGTIE_MERGE' 29:5-34:6
+      ConfigAssign publishDir = Map 30:9-33:10
