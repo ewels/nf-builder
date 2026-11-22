@@ -32,7 +32,12 @@ import {
   type OperatorArguments,
 } from "./library";
 import { variablesRead } from "./reads";
-import { type Value, WorkflowScope } from "./scope";
+import {
+  type ReadPath,
+  type ResolvedRead,
+  type Value,
+  WorkflowScope,
+} from "./scope";
 import {
   callDataflow,
   emitName,
@@ -41,6 +46,7 @@ import {
   pipelineSignature,
   processSignature,
   type Signature,
+  spec,
   workflowSignature,
 } from "./signature";
 import { flowFromDeclared, UNKNOWN, wrapFlow } from "./types";
@@ -137,15 +143,8 @@ interface Feed {
   readonly edges: readonly FeedEdge[];
   /** The type of the argument when known: its source for a direct feed, else its inline type. */
   readonly type: FlowType | null;
-  /** The type of an inline argument (it reads no graph value). */
-  readonly argumentType: FlowType | null;
 }
-interface FeedEdge {
-  readonly from: PortRef;
-  readonly type: FlowType;
-  readonly variable: string | null;
-  readonly direct: boolean;
-}
+type FeedEdge = Omit<GraphEdge, "id" | "to">;
 
 const OUT = "out";
 const unwrap = (expression: Expression): Expression =>
@@ -157,15 +156,35 @@ const argumentValue = (argument: MethodCall["args"][number]): Expression =>
 const methodName = (call: MethodCall): string | null =>
   call.method.kind === "Identifier" ? call.method.name : null;
 
-function spec(id: string, type: FlowType | null): PortSpec {
-  return { id, label: id, type };
+function port(s: PortSpec, feed?: Feed): Port {
+  return {
+    id: s.id,
+    label: s.label,
+    type: s.type,
+    argument: feed?.range ?? null,
+    // an inline argument (one that reads no graph value) keeps its type for LA-32 checks
+    argumentType: feed?.edges.length === 0 ? feed.type : null,
+  };
 }
-function port(
-  s: PortSpec,
-  argument: Range | null = null,
-  argumentType: FlowType | null = null,
-): Port {
-  return { id: s.id, label: s.label, type: s.type, argument, argumentType };
+
+const edgesOf = (resolved: ResolvedRead, direct: boolean): FeedEdge[] =>
+  resolved.sources.map((s) => ({
+    from: s.port,
+    type: s.type ?? UNKNOWN,
+    variable: resolved.variable,
+    direct,
+  }));
+
+/** A feed from a resolved read: direct when it reads one port whole. */
+function readFeed(range: Range, read: ReadPath, resolved: ResolvedRead): Feed {
+  const direct =
+    resolved.sources.length === 1 &&
+    resolved.consumed === read.properties.length;
+  return {
+    range,
+    edges: edgesOf(resolved, direct),
+    type: direct ? (resolved.sources[0]?.type ?? null) : null,
+  };
 }
 
 class Projecting {
@@ -177,13 +196,12 @@ class Projecting {
   constructor(
     private readonly model: ProjectModel,
     private readonly library: DataflowLibrary,
-    private readonly path: string,
     private readonly text: string,
     private readonly ref: WorkflowRef,
     private readonly node: WorkflowNode,
     private readonly emitTypes: EmitTypes,
   ) {
-    this.#keys = new KeyAllocator(path, ref.name);
+    this.#keys = new KeyAllocator(ref.path, ref.name);
   }
 
   run(): Projection {
@@ -197,7 +215,7 @@ class Projecting {
     for (const take of takes) {
       const id = this.#keys.take(take.name.name);
       const type = flowFromDeclared(take.type);
-      this.#push({
+      this.#nodes.push({
         id,
         kind: "take",
         label: take.name.name,
@@ -220,14 +238,10 @@ class Projecting {
     };
   }
 
-  #push(node: GraphNode): void {
-    this.#nodes.push(node);
-  }
-
   // ---- params ----
 
   #fileAst(): ScriptAst | null {
-    const source = this.model.file(this.path)?.source;
+    const source = this.model.file(this.ref.path)?.source;
     return source?.language === "nextflow" ? source.ast : null;
   }
 
@@ -250,7 +264,7 @@ class Projecting {
     for (const name of read)
       if (!specs.some((s) => s.id === name)) specs.push(spec(name, null));
     const id = this.#keys.params();
-    this.#push({
+    this.#nodes.push({
       id,
       kind: "params",
       label: "params",
@@ -273,11 +287,11 @@ class Projecting {
       const feed =
         value === null ? this.#feedName(name, item.range) : this.#feed(value);
       const id = this.#keys.emit(name);
-      this.#push({
+      this.#nodes.push({
         id,
         kind: "emit",
         label: name,
-        inputs: [port(spec("in", declared), feed.range, feed.argumentType)],
+        inputs: [port(spec("in", declared), feed)],
         outputs: [],
         range: item.range,
         name,
@@ -287,41 +301,35 @@ class Projecting {
   }
 
   #addOutput(node: WorkflowNode): void {
+    // only the entry workflow publishes, and the output block belongs to it (a named workflow with `publish:` is Unparsed)
+    if (this.ref.name !== null) return;
     const publishers = node.kind === "Workflow" ? node.publishers : null;
-    // the output block belongs to the entry workflow; a named workflow has an output node only if it publishes
-    const block =
-      this.ref.name === null
-        ? this.#fileAst()?.body.find((i) => i.kind === "OutputBlock")
-        : undefined;
+    const block = this.#fileAst()?.body.find((i) => i.kind === "OutputBlock");
     if (block === undefined && publishers === null) return;
     const specs: PortSpec[] = [];
     for (const o of block?.outputs ?? [])
       specs.push(spec(o.name.name, flowFromDeclared(o.type)));
-    const feeds: { name: string; feed: Feed }[] = [];
+    const feeds = new Map<string, Feed>();
     for (const item of publishers?.items ?? []) {
       const name = item.name.name;
-      feeds.push({
+      feeds.set(
         name,
-        feed:
-          item.value === null
-            ? this.#feedName(name, item.range)
-            : this.#feed(item.value),
-      });
+        item.value === null
+          ? this.#feedName(name, item.range)
+          : this.#feed(item.value),
+      );
       if (!specs.some((s) => s.id === name)) specs.push(spec(name, null));
     }
     const id = this.#keys.output();
-    this.#push({
+    this.#nodes.push({
       id,
       kind: "output",
       label: "output",
-      inputs: specs.map((s) => {
-        const feed = feeds.find((f) => f.name === s.id)?.feed;
-        return port(s, feed?.range ?? null, feed?.argumentType ?? null);
-      }),
+      inputs: specs.map((s) => port(s, feeds.get(s.id))),
       outputs: [],
       range: block?.range ?? publishers?.range ?? node.range,
     });
-    for (const { name, feed } of feeds)
+    for (const [name, feed] of feeds)
       this.#connect(feed, { node: id, port: name });
   }
 
@@ -376,16 +384,17 @@ class Projecting {
         : [
             spec(
               variable,
-              expression === null ? null : inlineType(expression, this.library),
+              // a copy of a graph value (`w2 = w`) has that value's type; anything else an inline one
+              expression === null ? null : this.#feed(expression).type,
             ),
           ];
-    const first = this.text
-      .slice(statement.range.start, statement.range.end)
-      .split("\n")[0]
-      ?.trim();
-    const label =
-      (first ?? "").length > 60 ? `${first?.slice(0, 59)}…` : (first ?? "");
-    this.#push({
+    const first = (
+      this.text
+        .slice(statement.range.start, statement.range.end)
+        .split("\n")[0] ?? ""
+    ).trim();
+    const label = first.length > 60 ? `${first.slice(0, 59)}…` : first;
+    this.#nodes.push({
       id,
       kind: "code",
       label,
@@ -421,33 +430,43 @@ class Projecting {
     );
   }
 
-  /** The dataflow of what a receiver stands for, when it is a reference whose source type is known. */
-  #receiverDataflow(receiver: Expression): FlowType["dataflow"] {
-    const sources = this.#reference(receiver)?.resolved.sources ?? [];
-    return sources.length === 1 ? (sources[0]?.type?.dataflow ?? null) : null;
-  }
-
+  /** A catalogue operator on a dataflow expression, or on a reference whose single source isn't plain. */
   #isOperatorCall(call: MethodCall): boolean {
     const name = methodName(call);
     if (name === null || call.receiver === null) return false;
     const receiver = unwrap(call.receiver);
-    const isDe = this.#isDataflow(receiver);
-    if (!isDe && this.#reference(receiver) === null) return false;
-    const kind = isDe ? null : this.#receiverDataflow(receiver);
-    if (kind === "plain") return false;
-    return this.library.isOperator(name, kind);
+    let kind: FlowType["dataflow"] = null;
+    if (!this.#isDataflow(receiver) && !this.#isOutputOfCall(receiver)) {
+      const ref = this.#reference(receiver);
+      if (ref === null) return false;
+      // a property the scope didn't consume (`split.small`) is of unknown type
+      const { sources, consumed } = ref.resolved;
+      if (sources.length === 1 && consumed === ref.read.properties.length)
+        kind = sources[0]?.type?.dataflow ?? null;
+    }
+    return kind !== "plain" && this.library.isOperator(name, kind);
+  }
+
+  /** `<call>.<name>`: a property of a dataflow expression, which stands for one output of the node it creates. */
+  #isOutputOfCall(expression: Expression): boolean {
+    const e = unwrap(expression);
+    return (
+      e.kind === "Property" &&
+      e.property.kind === "Identifier" &&
+      this.#isDataflow(e.object)
+    );
   }
 
   #callable(call: MethodCall): Callable | null {
     const name = methodName(call);
     if (name === null || call.receiver !== null) return null;
-    const binding = this.model.lookup(this.path, name);
+    const binding = this.model.lookup(this.ref.path, name);
     return binding === undefined ? null : this.#resolveBinding(name, binding);
   }
 
   #resolveBinding(name: string, binding: Binding): Callable | null {
     let declaration: IncludableDeclaration | null;
-    let path: string | null = this.path;
+    let path: string | null = this.ref.path;
     let module: string | null = null;
     let pipeline = false;
     if (binding.kind === "declaration") declaration = binding.declaration;
@@ -461,13 +480,17 @@ class Projecting {
         target.kind === "file" || target.kind === "missing"
           ? target.module
           : null;
-      if (declaration === null)
-        return {
-          callee: unresolved(name, null, "unresolved", path, module),
-          signature: (n) => fallbackSignature(null, n),
-        };
     }
-    const base = { path, module };
+    const callable = (
+      kind: Callee["kind"],
+      status: Callee["status"],
+      typed: boolean | null,
+      signature: Callable["signature"] = fallbackSignature,
+    ): Callable => ({
+      callee: { name, kind, status, typed, path, module },
+      signature,
+    });
+    if (declaration === null) return callable(null, "unresolved", null);
     if (declaration.kind === "Unparsed") {
       const keyword = declaration.head?.keyword;
       if (
@@ -476,11 +499,7 @@ class Projecting {
         keyword !== "agent"
       )
         return null;
-      const kind = pipeline ? "pipeline" : keyword;
-      return {
-        callee: { name, kind, status: "unparsed", typed: null, ...base },
-        signature: (n) => fallbackSignature(kind, n),
-      };
+      return callable(pipeline ? "pipeline" : keyword, "unparsed", null);
     }
     if (
       pipeline &&
@@ -488,94 +507,49 @@ class Projecting {
         declaration.kind === "Script" ||
         declaration.kind === "ParamsBlock")
     )
-      return {
-        callee: {
-          name,
-          kind: "pipeline",
-          status: "modelled",
-          typed: declaration.kind === "Workflow" ? declaration.typed : null,
-          ...base,
-        },
-        signature: (n) => {
+      return callable(
+        "pipeline",
+        "modelled",
+        declaration.kind === "Workflow" ? declaration.typed : null,
+        (n) => {
           const source =
             path === null ? undefined : this.model.file(path)?.source;
           return source?.language === "nextflow" && source.ast !== null
             ? pipelineSignature(source.ast)
-            : fallbackSignature("pipeline", n);
+            : fallbackSignature(n);
         },
-      };
+      );
     switch (declaration.kind) {
       case "Process":
-        return declaration.typed
-          ? this.#modelled(
-              name,
-              base,
-              processSignature(declaration, this.library),
-            )
-          : {
-              callee: {
-                name,
-                kind: "process",
-                status: "modelled",
-                typed: false,
-                ...base,
-              },
-              signature: (n) => ({
-                ...fallbackSignature("process", n),
-                typed: false,
-              }),
-            };
-      case "Agent":
-        return this.#modelled(
-          name,
-          base,
-          processSignature(declaration, this.library),
+      case "Agent": {
+        if (declaration.kind === "Process" && !declaration.typed)
+          return callable("process", "modelled", false);
+        const signature = processSignature(declaration, this.library);
+        return callable(
+          declaration.kind === "Agent" ? "agent" : "process",
+          "modelled",
+          true,
+          () => signature,
         );
+      }
       case "Workflow": {
         // the emit types come from the callee's own projection, so the signature is built when a call needs it
         const workflow = declaration.name?.name ?? null;
-        const callee = base.path;
         let signature: Signature | undefined;
-        return {
-          callee: {
-            name,
-            kind: "workflow",
-            status: "modelled",
-            typed: declaration.typed,
-            ...base,
-          },
-          signature: () => {
-            signature ??= workflowSignature(
-              declaration,
-              (id) =>
-                (callee === null
-                  ? undefined
-                  : this.emitTypes(callee, workflow).get(id)) ?? null,
-            );
-            return signature;
-          },
-        };
+        return callable("workflow", "modelled", declaration.typed, () => {
+          signature ??= workflowSignature(
+            declaration,
+            (id) =>
+              (path === null
+                ? undefined
+                : this.emitTypes(path, workflow).get(id)) ?? null,
+          );
+          return signature;
+        });
       }
       default:
         return null;
     }
-  }
-
-  #modelled(
-    name: string,
-    base: { path: string | null; module: string | null },
-    signature: Signature,
-  ): Callable {
-    return {
-      callee: {
-        name,
-        kind: signature.kind,
-        status: "modelled",
-        typed: signature.typed,
-        ...base,
-      },
-      signature: () => signature,
-    };
   }
 
   #isDataflow(expression: Expression): boolean {
@@ -599,11 +573,30 @@ class Projecting {
 
   // ---- feeding ports ----
 
-  #feed(expression: Expression): Feed {
-    const range = expression.range;
+  /**
+   * The node a dataflow expression creates, or for `<call>.<name>` the call's node with that output port (a direct
+   * feed); a property that names no output reads all of them, indirectly. Null for anything else.
+   */
+  #nested(expression: Expression): { value: Value; direct: boolean } | null {
     if (this.#isDataflow(expression)) {
       const value = this.#build(expression, null);
-      const direct = value.ports.length === 1;
+      return { value, direct: value.ports.length === 1 };
+    }
+    const e = unwrap(expression);
+    if (!this.#isOutputOfCall(e) || e.kind !== "Property") return null;
+    const value = this.#build(e.object, null);
+    const name = e.property.kind === "Identifier" ? e.property.name : "";
+    const named = value.ports.filter((p) => p.id === name);
+    return named.length > 0
+      ? { value: { node: value.node, ports: named }, direct: true }
+      : { value, direct: false };
+  }
+
+  #feed(expression: Expression): Feed {
+    const range = expression.range;
+    const nested = this.#nested(expression);
+    if (nested !== null) {
+      const { value, direct } = nested;
       return {
         range,
         edges: value.ports.map((p) => ({
@@ -613,65 +606,25 @@ class Projecting {
           direct,
         })),
         type: direct ? (value.ports[0]?.type ?? null) : null,
-        argumentType: null,
       };
     }
     const ref = this.#reference(expression);
-    if (ref !== null) {
-      const { read, resolved } = ref;
-      const direct =
-        resolved.sources.length === 1 &&
-        resolved.consumed === read.properties.length;
-      return {
-        range,
-        edges: resolved.sources.map((s) => ({
-          from: s.port,
-          type: s.type ?? UNKNOWN,
-          variable: resolved.variable,
-          direct,
-        })),
-        type: direct ? (resolved.sources[0]?.type ?? null) : null,
-        argumentType: null,
-      };
-    }
+    if (ref !== null) return readFeed(range, ref.read, ref.resolved);
     const edges: FeedEdge[] = [];
     for (const read of variablesRead(expression, { closures: false })) {
       const resolved = this.#scope.resolveRead(read);
-      if (resolved === null) continue;
-      for (const s of resolved.sources)
-        edges.push({
-          from: s.port,
-          type: s.type ?? UNKNOWN,
-          variable: resolved.variable,
-          direct: false,
-        });
+      if (resolved !== null) edges.push(...edgesOf(resolved, false));
     }
-    const inline = inlineType(expression, this.library);
-    return {
-      range,
-      edges,
-      type: inline,
-      argumentType: edges.length === 0 ? inline : null,
-    };
+    return { range, edges, type: inlineType(expression, this.library) };
   }
 
   /** A feed that reads the variable `name` whole (a bare `emit: x` or `publish: x`). */
   #feedName(name: string, range: Range): Feed {
-    const resolved = this.#scope.resolveRead({ name, properties: [] });
-    if (resolved === null)
-      return { range, edges: [], type: null, argumentType: null };
-    const direct = resolved.sources.length === 1;
-    return {
-      range,
-      edges: resolved.sources.map((s) => ({
-        from: s.port,
-        type: s.type ?? UNKNOWN,
-        variable: resolved.variable,
-        direct,
-      })),
-      type: direct ? (resolved.sources[0]?.type ?? null) : null,
-      argumentType: null,
-    };
+    const read = { name, properties: [] };
+    const resolved = this.#scope.resolveRead(read);
+    return resolved === null
+      ? { range, edges: [], type: null }
+      : readFeed(range, read, resolved);
   }
 
   #connect(feed: Feed, to: PortRef): void {
@@ -725,11 +678,11 @@ class Projecting {
         if (feeds[i]) fed.set(input.id, feeds[i] as Feed);
       }
     }
+    const { callee } = callable;
     const kind = callDataflow(feeds.map((f) => f.type));
-    const processLike =
-      signature.kind === "process" || signature.kind === "agent";
+    const processLike = callee.kind === "process" || callee.kind === "agent";
     const outputs = signature.outputs.map((o): PortSpec => {
-      if (!processLike || !callable.callee.typed) return o;
+      if (!processLike || !callee.typed) return o;
       const element = o.type?.element ?? null;
       return {
         ...o,
@@ -740,25 +693,19 @@ class Projecting {
             : wrapFlow(kind, element),
       };
     });
-    const name = callable.callee.name;
+    const name = callee.name;
     const id =
       assigned === null
         ? this.#keys.unassigned(name)
         : this.#keys.assigned(assigned);
-    this.#push({
+    this.#nodes.push({
       id,
       kind: "call",
       label: name,
-      inputs: inputSpecs.map((s) =>
-        port(
-          s,
-          fed.get(s.id)?.range ?? null,
-          fed.get(s.id)?.argumentType ?? null,
-        ),
-      ),
+      inputs: inputSpecs.map((s) => port(s, fed.get(s.id))),
       outputs: outputs.map((s) => port(s)),
       range: call.range,
-      callee: callable.callee,
+      callee,
     });
     for (const [input, feed] of fed)
       this.#connect(feed, { node: id, port: input });
@@ -785,7 +732,7 @@ class Projecting {
       assigned === null
         ? this.#keys.unassigned(label)
         : this.#keys.assigned(assigned);
-    this.#push({
+    this.#nodes.push({
       id,
       kind: "factory",
       label,
@@ -854,13 +801,14 @@ class Projecting {
         const parameter =
           names?.[isNamed ? 0 : positionalSeen - 1 + (named ? 1 : 0)];
         pending.push({
-          port: {
-            id: `${stepNumber}:${argIndex + 1}`,
-            label: `${operator}(${parameter ?? argIndex + 1})`,
-            type: null,
-            argument: feed.range,
-            argumentType: null,
-          },
+          port: port(
+            {
+              id: `${stepNumber}:${argIndex + 1}`,
+              label: `${operator}(${parameter ?? argIndex + 1})`,
+              type: null,
+            },
+            feed,
+          ),
           feed,
         });
       });
@@ -879,14 +827,11 @@ class Projecting {
         ? this.#keys.unassigned(`.${first}`)
         : this.#keys.assigned(assigned);
     const outputs = voidEnd ? [] : [spec(OUT, declared ?? current)];
-    this.#push({
+    this.#nodes.push({
       id,
       kind: "chain",
       label: steps.map((s) => `.${s.operator}`).join(""),
-      inputs: [
-        port(spec("in", null), base.range),
-        ...pending.map((p) => p.port),
-      ],
+      inputs: [port(spec("in", null), base), ...pending.map((p) => p.port)],
       outputs: outputs.map((s) => port(s)),
       range: outer.range,
       steps,
@@ -911,16 +856,6 @@ class Projecting {
         portOrder(a.from, "outputs") - portOrder(b.from, "outputs"),
     );
   }
-}
-
-function unresolved(
-  name: string,
-  kind: Callee["kind"],
-  status: Callee["status"],
-  path: string | null,
-  module: string | null,
-): Callee {
-  return { name, kind, status, typed: null, path, module };
 }
 
 /** `record(k: v, …)` as a call's only argument: its entries; null for any other shape. */
@@ -998,7 +933,6 @@ export function createProjector(
       return new Projecting(
         model,
         library,
-        path,
         file.source.text,
         found.ref,
         found.node,

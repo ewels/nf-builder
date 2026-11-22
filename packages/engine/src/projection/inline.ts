@@ -4,14 +4,8 @@ import type { Expression, FlowType } from "@nf-builder/lang-core";
 import type { DataflowLibrary } from "./library";
 import { typeFromRef, wrapFlow } from "./types";
 
-const plain = (name: string): FlowType =>
+export const plain = (name: string): FlowType =>
   wrapFlow("plain", { name, args: [], nullable: false });
-
-/** The type of a `null` constant: not "dynamic" for nf-lang's channel-or-value rule. */
-export const NULL_TYPE: FlowType = plain("Null");
-
-export const isNullConstant = (type: FlowType | null): boolean =>
-  type !== null && type.dataflow === "plain" && type.element?.name === "Null";
 
 /** The type of an expression that doesn't read a variable; null when it isn't known. */
 export function inlineType(
@@ -27,7 +21,7 @@ export function inlineType(
     case "Boolean":
       return plain("Boolean");
     case "Null":
-      return NULL_TYPE;
+      return plain("Null");
     case "List":
       return plain("List");
     case "Map":

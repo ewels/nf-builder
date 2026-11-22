@@ -310,7 +310,7 @@
         "Node identities are stable across a re-parse with whitespace-only changes"
       ],
       "passes": true,
-      "notes": "From F-105: ProjectModel.lookup(path, name) gives a call's binding (a local declaration, or an include entry with its resolved target and declaration); plugin entries have none; entries bound to Unparsed draw as unparsed nodes; ResolvedEntry.pipeline marks pipeline includes. Verified 2026-11-22: step 1 by packages/engine/test/projection/snapshot.test.ts (every typed workflow in the F-102 typed fixtures, the s1-typed-calls-legacy oracle cases and the F-106 fixture tree) and test/corpus/projection.corpus.ts (the rnaseq-nf-typed pin's two workflows; CI corpus-parse); the Channel/Value kind of every probed value matches nextflow lint 26.10.7 (types-oracle.test.ts against the projection-fixtures oracle tree). Step 2 by identity.test.ts (5 whitespace kinds x 3 seeds on 4 sets, guarded by F-104's equivalent) and the corpus identity test. Every workflow of every pin projects with unique ids (projection-corpus.md is F-107's baseline: rnaseq 173 code nodes of 398 main statements, sarek 354 of 843, fetchngs 27 of 41). ADR 0036. No Playwright test (no UI, Q13)."
+      "notes": "From F-105: ProjectModel.lookup(path, name) gives a call's binding (a local declaration, or an include entry with its resolved target and declaration); plugin entries have none; entries bound to Unparsed draw as unparsed nodes; ResolvedEntry.pipeline marks pipeline includes. Verified 2026-11-22: step 1 by packages/engine/test/projection/snapshot.test.ts (every typed workflow in the F-102 typed fixtures, the s1-typed-calls-legacy oracle cases and the F-106 fixture tree) and test/corpus/projection.corpus.ts (the rnaseq-nf-typed pin's two workflows; CI corpus-parse); the Channel/Value kind of every probed value matches nextflow lint 26.10.7 (types-oracle.test.ts against the projection-fixtures oracle tree). Step 2 by identity.test.ts (5 whitespace kinds x 3 seeds on 4 sets, guarded by F-104's equivalent) and the corpus identity test. Every workflow of every pin projects with unique ids (projection-corpus.md is F-107's baseline: rnaseq 170 code nodes of 398 main statements, sarek 350 of 843, fetchngs 27 of 41). ADR 0036. No Playwright test (no UI, Q13)."
     },
     {
       "id": "F-107",
@@ -347,7 +347,7 @@
         "Round trip remains equivalent"
       ],
       "passes": false,
-      "notes": "From F-106: code nodes are shells with no inputs and one output for a single-variable assignment (codeNode in packages/engine/src/projection/project.ts); variablesRead (projection/reads.ts) and scope.ts are the start of free-variable analysis."
+      "notes": "From F-106: code nodes are shells with no inputs and one output for a single-variable assignment (the #code method in packages/engine/src/projection/project.ts); variablesRead (projection/reads.ts) and scope.ts are the start of free-variable analysis."
     },
     {
       "id": "F-109",

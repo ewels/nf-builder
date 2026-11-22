@@ -26,8 +26,6 @@ export interface ReadOptions {
   readonly closures?: boolean;
 }
 
-type Locals = ReadonlySet<string>;
-
 /** The variable at the root of `a.b.c` and the names after it, when every step is a simple property; null otherwise. */
 function propertyChain(
   expression: Expression,
@@ -51,7 +49,7 @@ export function variablesRead(
   const closures = options.closures ?? true;
   const reads: Read[] = [];
 
-  const visitClosure = (closure: Closure, outer: Locals): void => {
+  const visitClosure = (closure: Closure, outer: Set<string>): void => {
     if (!closures) return;
     const locals = new Set(outer);
     if (closure.params === null) locals.add("it");
@@ -59,7 +57,7 @@ export function variablesRead(
     for (const statement of closure.body) visit(statement, locals);
   };
 
-  const visit = (node: AstNode, locals: Set<string> | Locals): void => {
+  const visit = (node: AstNode, locals: Set<string>): void => {
     const n = node as Expression | Statement | NamedArgument;
     switch (n.kind) {
       case "Variable":
@@ -96,14 +94,16 @@ export function variablesRead(
         return;
       case "VariableDeclaration":
         if (n.initializer !== null) visit(n.initializer, locals);
-        // a `def` inside a closure is local from here on
-        if (locals instanceof Set)
-          for (const t of n.targets) locals.add(t.name.name);
+        // a `def` is local from here on
+        for (const t of n.targets) locals.add(t.name.name);
         return;
       case "Assignment":
-        if (n.target.kind === "Variable" && n.operator === "=")
+        // an assigned name or tuple isn't read; a compound or indexed target is
+        if (
+          (n.target.kind === "Variable" && n.operator === "=") ||
+          n.target.kind === "TupleTarget"
+        )
           visit(n.value, locals);
-        else if (n.target.kind === "TupleTarget") visit(n.value, locals);
         else for (const child of childNodes(n)) visit(child, locals);
         return;
     }

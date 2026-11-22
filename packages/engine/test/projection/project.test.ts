@@ -273,6 +273,7 @@ describe("F-106 AR-10 LA-20 projector", () => {
     ]);
     const p = must(
       await projectorForFiles({
+        // deliberately not lint-clean: `extra` and `inline` are published but not declared in the output block
         "main.nf":
           "nextflow.enable.types = true\n\nworkflow {\n    main:\n    x = channel.of(1)\n\n    publish:\n    extra = x\n    inline = 'a'\n}\n\noutput {\n    declared: Channel<Integer> {\n        path 'd'\n    }\n}\n",
       }),
@@ -340,9 +341,9 @@ describe("F-106 AR-10 LA-20 projector", () => {
     const p = must(
       await projectorForFiles({
         "m.nf":
-          "nextflow.enable.types = true\n\nprocess P {\n    input:\n    x: Path\n\n    output:\n    a: Path = x\n    b: Path = x\n\n    script:\n    'x'\n}\n",
+          "nextflow.enable.types = true\n\nprocess P {\n    input:\n    x: Path\n\n    output:\n    a: Path = x\n\n    script:\n    'x'\n}\n\nprocess R {\n    input:\n    x: Path\n\n    output:\n    a: Path = x\n    b: Path = x\n\n    script:\n    'x'\n}\n",
         "main.nf":
-          "nextflow.enable.types = true\n\ninclude { P } from './m'\n\nworkflow W {\n    take:\n    src: Channel<Path>\n\n    main:\n    v = src\n    v = P(v)\n    w = P(v.a)\n    z = P(P(w.b))\n}\n",
+          "nextflow.enable.types = true\n\ninclude { P ; R } from './m'\n\nworkflow W {\n    take:\n    src: Channel<Path>\n\n    main:\n    v = src\n    v = P(v)\n    w = R(v)\n    z = P(P(w.b))\n}\n",
       }),
       "main.nf",
       "W",
@@ -351,33 +352,51 @@ describe("F-106 AR-10 LA-20 projector", () => {
     expect(node(p, "main.nf#W/v").kind).toBe("code");
     expect(node(p, "main.nf#W/v~2").kind).toBe("call");
     expect(into(p, "main.nf#W/v~2", "x")[0]?.from.node).toBe("main.nf#W/v");
+    // the use after the reassignment reads the latest assignment
     expect(into(p, "main.nf#W/w", "x")).toMatchObject([
       {
         from: { node: "main.nf#W/v~2", port: "a" },
-        variable: "v.a",
+        variable: "v",
         direct: true,
       },
     ]);
-    // a nested call is its own node; its two outputs feed the argument, indirectly
+    // a nested call is its own node, created before the call using it
     expect(into(p, "main.nf#W/z", "x")).toMatchObject([
       {
         from: { node: "main.nf#W/P@1", port: "a" },
         variable: null,
-        direct: false,
-      },
-      {
-        from: { node: "main.nf#W/P@1", port: "b" },
-        variable: null,
-        direct: false,
+        direct: true,
       },
     ]);
     expect(into(p, "main.nf#W/P@1", "x")).toMatchObject([
-      { from: { node: "main.nf#W/w", port: "b" }, variable: "w.b" },
+      {
+        from: { node: "main.nf#W/w", port: "b" },
+        variable: "w.b",
+        direct: true,
+      },
     ]);
     const order = p.nodes.map((n) => n.id);
     expect(order.indexOf("main.nf#W/P@1")).toBeLessThan(
       order.indexOf("main.nf#W/z"),
     );
+  });
+
+  it("F-106 AR-10: using a multi-output nested call as a whole gives one indirect edge per output port", async () => {
+    const p = must(
+      await projectorForFiles({
+        // deliberately not lint-clean: a record passed to a Path input shows the per-output fan-in
+        "m.nf":
+          "nextflow.enable.types = true\n\nprocess R {\n    input:\n    x: Path\n\n    output:\n    a: Path = x\n    b: Path = x\n\n    script:\n    'x'\n}\n",
+        "main.nf":
+          "nextflow.enable.types = true\n\ninclude { R } from './m'\n\nworkflow W {\n    take:\n    src: Channel<Path>\n\n    main:\n    z = R(R(src))\n}\n",
+      }),
+      "main.nf",
+      "W",
+    );
+    expect(into(p, "main.nf#W/z", "x")).toMatchObject([
+      { from: { node: "main.nf#W/R@1", port: "a" }, direct: false },
+      { from: { node: "main.nf#W/R@1", port: "b" }, direct: false },
+    ]);
   });
 
   it("F-106 AR-10: a pipeline call takes the included pipeline's params and gives its outputs; record() arguments map to params", async () => {
@@ -402,6 +421,7 @@ describe("F-106 AR-10 LA-20 projector", () => {
     ]);
     const p = must(
       await projectorForFiles({
+        // deliberately not lint-clean: the extra record key `c` and the bare `SUB(s)` exercise the pipeline port rules
         "sub.nf":
           "nextflow.enable.types = true\n\nparams {\n    a: String\n    b: Integer\n}\n\nworkflow {\n    main:\n    x = channel.of(params.a)\n\n    publish:\n    x = x\n}\n\noutput {\n    x: Channel<String> {\n        path 'x'\n    }\n}\n",
         "main.nf":
@@ -448,7 +468,7 @@ describe("F-106 AR-10 LA-20 projector", () => {
     const p = must(
       await projectorForFiles({
         "main.nf":
-          "include { thing } from 'plugin/nf-x'\n\nfunction helper() {\n    return 1\n}\n\nworkflow {\n    log.info 'a'\n    helper()\n    thing()\n    nothing()\n    x = helper()\n    if (x) {\n        println x\n    }\n}\n",
+          "include { thing } from 'plugin/nf-x'\n\ndef helper() {\n    return 1\n}\n\nworkflow {\n    log.info 'a'\n    helper()\n    thing()\n    nothing()\n    x = helper()\n    if (x) {\n        println x\n    }\n}\n",
       }),
       "main.nf",
       null,
@@ -463,6 +483,76 @@ describe("F-106 AR-10 LA-20 projector", () => {
     ]);
     expect(node(p, "main.nf#/x").outputs.map((o) => o.id)).toEqual(["x"]);
     expect(node(p, "main.nf#/:code@1").inputs).toEqual([]);
+  });
+
+  it("F-106 AR-12 LA-24: a chain on a property of a branch or multiMap result is still a chain, with an indirect edge from the whole result", async () => {
+    const p = must(
+      await projectorForFiles({
+        "main.nf":
+          "nextflow.enable.types = true\n\nworkflow {\n    main:\n    ch = channel.fromPath('x')\n    split = ch.branch { v ->\n        small: v.size() < 10\n        large: v\n    }\n    split.small.view()\n    up = split.large.map { v -> v }\n}\n",
+      }),
+      "main.nf",
+      null,
+    );
+    expect(p.nodes.map((n) => [n.id, n.kind])).toEqual([
+      ["main.nf#/ch", "factory"],
+      ["main.nf#/split", "chain"],
+      ["main.nf#/.view@1", "chain"],
+      ["main.nf#/up", "chain"],
+    ]);
+    for (const id of ["main.nf#/.view@1", "main.nf#/up"])
+      expect(into(p, id, "in")).toMatchObject([
+        {
+          from: { node: "main.nf#/split", port: "out" },
+          variable: "split",
+          direct: false,
+        },
+      ]);
+  });
+
+  it("F-106 AR-10: a call nested under a property in an argument or a chain is its own node, and the property is its output port", async () => {
+    const p = must(
+      await projectorForFiles({
+        "main.nf":
+          "nextflow.enable.types = true\n\nprocess MULTI {\n    input:\n    a: Path\n    b: Path\n\n    output:\n    txt: Path = file('t.txt')\n    html: Path = file('h.html')\n\n    script:\n    'x'\n}\n\nprocess ONE {\n    input:\n    v: Path\n\n    output:\n    out: Path = file('o')\n\n    script:\n    'x'\n}\n\nworkflow {\n    main:\n    ch = channel.fromPath('x')\n    one = ONE(MULTI(ch, file('x')).txt)\n    two = MULTI(ch, file('y')).html.collect()\n}\n",
+      }),
+      "main.nf",
+      null,
+    );
+    expect(into(p, "main.nf#/one", "v")).toMatchObject([
+      {
+        from: { node: "main.nf#/MULTI@1", port: "txt" },
+        variable: null,
+        direct: true,
+      },
+    ]);
+    expect(into(p, "main.nf#/MULTI@1", "a")).toMatchObject([
+      { from: { node: "main.nf#/ch", port: "out" }, variable: "ch" },
+    ]);
+    expect(node(p, "main.nf#/two").kind).toBe("chain");
+    expect(into(p, "main.nf#/two", "in")).toMatchObject([
+      {
+        from: { node: "main.nf#/MULTI@2", port: "html" },
+        variable: null,
+        direct: true,
+      },
+    ]);
+    // as nextflow lint infers it
+    expect(type(node(p, "main.nf#/two"), "out")).toBe("Value<Bag<Path>>");
+  });
+
+  it("F-106 LA-28: a copy of a graph value carries its type", async () => {
+    const p = must(
+      await projectorForFiles({
+        "main.nf":
+          "nextflow.enable.types = true\n\nparams {\n    names: List<String> = ['a']\n}\n\nworkflow {\n    main:\n    ch = channel.fromPath('x')\n    names = params.names\n    w = ch\n    w2 = w\n}\n",
+      }),
+      "main.nf",
+      null,
+    );
+    expect(type(node(p, "main.nf#/names"), "names")).toBe("List<String>");
+    expect(type(node(p, "main.nf#/w"), "w")).toBe("Channel<Path>");
+    expect(type(node(p, "main.nf#/w2"), "w2")).toBe("Channel<Path>");
   });
 
   it("F-106 ADR-0004: calls to an Unparsed declaration or to an include with a missing target are call nodes marked unparsed or unresolved", async () => {
@@ -489,6 +579,7 @@ describe("F-106 AR-10 LA-20 projector", () => {
 
   it("F-106 LA-26: the output block feeds only the entry workflow's output node; a named workflow has none (publish is entry-only)", async () => {
     const p = await projectorForFiles({
+      // deliberately not lint-clean: the output block has no publish section to declare outputs for
       "main.nf":
         "nextflow.enable.types = true\n\nworkflow PLAIN {\n    main:\n    x = channel.of(1)\n}\n\nworkflow {\n    main:\n    y = channel.of(1)\n}\n\noutput {\n    x: Channel<Integer> {\n        path 'x'\n    }\n}\n",
     });

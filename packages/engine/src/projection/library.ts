@@ -12,7 +12,7 @@ import type {
   Signature,
   TypeExpr,
 } from "@nf-builder/lang-core";
-import { parseTypeText, UNKNOWN, wrapFlow } from "./types";
+import { parseTypeText, UNKNOWN, WILDCARD, wrapFlow } from "./types";
 
 export interface OperatorArguments {
   /** Positional arguments that aren't closures, in order; null when the type is unknown. */
@@ -29,7 +29,7 @@ export interface DataflowLibrary {
   factoryType(
     name: string,
     args: readonly (TypeExpr | null)[],
-    named?: boolean,
+    named: boolean,
   ): FlowType;
   operatorType(
     name: string,
@@ -48,7 +48,6 @@ export interface DataflowLibrary {
   typedOutputType(name: string): TypeExpr | null;
 }
 
-const WILDCARD: TypeExpr = { name: "?", args: [], nullable: false };
 const isGeneric = (name: string): boolean => /^[A-Z]$/.test(name);
 const baseName = (type: string): string => type.replace(/<.*$/, "");
 
@@ -74,7 +73,7 @@ function flowOf(returns: string, element: TypeExpr | null): FlowType | null {
   return wrapFlow("plain", type);
 }
 
-const sameType = (a: FlowType, b: FlowType): boolean =>
+const same = (a: unknown, b: unknown): boolean =>
   JSON.stringify(a) === JSON.stringify(b);
 
 /** The result of several candidate overloads: a type they all agree on, else their shared kind, else unknown. */
@@ -84,7 +83,7 @@ function merge(results: readonly (FlowType | null)[]): FlowType | "void" {
   const flows = results.filter((r): r is FlowType => r !== null);
   if (flows.length !== results.length) return UNKNOWN;
   const [first] = flows as [FlowType, ...FlowType[]];
-  if (flows.every((f) => sameType(f, first))) return first;
+  if (flows.every((f) => same(f, first))) return first;
   const kind = first.dataflow;
   return kind !== null && flows.every((f) => f.dataflow === kind)
     ? wrapFlow(kind, null)
@@ -126,32 +125,6 @@ function operatorCandidates(
   return rest.length > 0 ? rest : all;
 }
 
-interface Tables {
-  readonly channel: Map<string, OperatorEntry[]>;
-  readonly value: Map<string, OperatorEntry[]>;
-  readonly factories: Map<string, CatalogueEntry>;
-  readonly functions: Map<string, CatalogueEntry>;
-  readonly typedOutputs: Map<string, CatalogueEntry>;
-}
-
-function tables(catalogue: ScriptCatalogue): Tables {
-  const byName = (entries: readonly CatalogueEntry[]) =>
-    new Map(entries.map((e) => [e.name, e]));
-  const channel = new Map<string, OperatorEntry[]>();
-  const value = new Map<string, OperatorEntry[]>();
-  for (const entry of catalogue.operators) {
-    const table = entry.receiver === "Channel" ? channel : value;
-    table.set(entry.name, [...(table.get(entry.name) ?? []), entry]);
-  }
-  return {
-    channel,
-    value,
-    factories: byName(catalogue.factories),
-    functions: byName(catalogue.functions),
-    typedOutputs: byName(catalogue.processSections.typedOutputs),
-  };
-}
-
 function returnOf(entry: CatalogueEntry | undefined): TypeExpr | null {
   if (entry === undefined) return null;
   const returns = new Set(entry.signatures.map((s) => s.returns));
@@ -182,21 +155,32 @@ function factoryArgumentTypes(
 }
 
 function makeLibrary(catalogue: ScriptCatalogue): DataflowLibrary {
-  const t = tables(catalogue);
+  const byName = (entries: readonly CatalogueEntry[]) =>
+    new Map(entries.map((e) => [e.name, e]));
+  const channel = new Map<string, OperatorEntry[]>();
+  const value = new Map<string, OperatorEntry[]>();
+  for (const entry of catalogue.operators) {
+    const table = entry.receiver === "Channel" ? channel : value;
+    table.set(entry.name, [...(table.get(entry.name) ?? []), entry]);
+  }
+  const factories = byName(catalogue.factories);
+  const functions = byName(catalogue.functions);
+  const typedOutputs = byName(catalogue.processSections.typedOutputs);
+  // a plain or unknown receiver takes operators of either type
   const operatorsFor = (
     name: string,
     receiver: Dataflow | null,
   ): OperatorEntry[] => [
-    ...(receiver === "value" ? [] : (t.channel.get(name) ?? [])),
-    ...(receiver === "channel" ? [] : (t.value.get(name) ?? [])),
+    ...(receiver === "value" ? [] : (channel.get(name) ?? [])),
+    ...(receiver === "channel" ? [] : (value.get(name) ?? [])),
   ];
   return {
     isFactory: (namespace, name) =>
       (namespace === "channel" || namespace === "Channel") &&
-      t.factories.has(name),
+      factories.has(name),
     isOperator: (name, receiver) => operatorsFor(name, receiver).length > 0,
-    factoryType(name, args, named = false) {
-      const entry = t.factories.get(name);
+    factoryType(name, args, named) {
+      const entry = factories.get(name);
       if (entry === undefined) return UNKNOWN;
       const total = args.length + (named ? 1 : 0);
       const exact = entry.signatures.filter((s) =>
@@ -212,7 +196,7 @@ function makeLibrary(catalogue: ScriptCatalogue): DataflowLibrary {
           const element =
             first !== undefined &&
             first !== null &&
-            types.every((x) => JSON.stringify(x) === JSON.stringify(first))
+            types.every((x) => same(x, first))
               ? first
               : null;
           return flowOf(s.returns, element);
@@ -220,26 +204,21 @@ function makeLibrary(catalogue: ScriptCatalogue): DataflowLibrary {
       ) as FlowType;
     },
     operatorType(name, receiver, args) {
-      const receivers =
-        receiver.dataflow === "channel" || receiver.dataflow === "value"
-          ? receiver.dataflow
-          : null;
       const candidates = operatorCandidates(
-        operatorsFor(name, receivers),
+        operatorsFor(name, receiver.dataflow),
         args,
       );
       return merge(candidates.map((s) => flowOf(s.returns, receiver.element)));
     },
     parameterNames(name, receiver, args) {
-      const receivers =
-        receiver.dataflow === "channel" || receiver.dataflow === "value"
-          ? receiver.dataflow
-          : null;
-      const [first] = operatorCandidates(operatorsFor(name, receivers), args);
+      const [first] = operatorCandidates(
+        operatorsFor(name, receiver.dataflow),
+        args,
+      );
       return first === undefined ? null : first.parameters.map((p) => p.name);
     },
-    functionType: (name) => returnOf(t.functions.get(name)),
-    typedOutputType: (name) => returnOf(t.typedOutputs.get(name)),
+    functionType: (name) => returnOf(functions.get(name)),
+    typedOutputType: (name) => returnOf(typedOutputs.get(name)),
   };
 }
 

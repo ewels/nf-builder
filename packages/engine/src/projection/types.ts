@@ -12,7 +12,7 @@ import type {
 /** Neither the dataflow kind nor the element is known. */
 export const UNKNOWN: FlowType = { dataflow: null, element: null };
 
-const WILDCARD: TypeExpr = { name: "?", args: [], nullable: false };
+export const WILDCARD: TypeExpr = { name: "?", args: [], nullable: false };
 
 function typeFromArgument(argument: TypeRef | Wildcard): TypeExpr {
   return argument.kind === "Wildcard" ? WILDCARD : typeFromRef(argument);

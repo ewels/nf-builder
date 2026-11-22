@@ -5,7 +5,6 @@
 
 import type {
   AgentDef,
-  Callee,
   Expression,
   ExpressionStatement,
   FlowType,
@@ -15,7 +14,7 @@ import type {
   TypedProcess,
   WorkflowDef,
 } from "@nf-builder/lang-core";
-import { inlineType, isNullConstant } from "./inline";
+import { inlineType, plain } from "./inline";
 import type { DataflowLibrary } from "./library";
 import { asEmitType, flowFromDeclared, UNKNOWN, wrapFlow } from "./types";
 
@@ -26,34 +25,30 @@ export interface PortSpec {
 }
 
 export interface Signature {
-  readonly kind: Callee["kind"];
-  readonly typed: boolean | null;
   readonly inputs: readonly PortSpec[];
   readonly outputs: readonly PortSpec[];
 }
 
-const plainType = (name: string): FlowType =>
-  wrapFlow("plain", { name, args: [], nullable: false });
+/** A port labelled with its id. */
+export function spec(id: string, type: FlowType | null): PortSpec {
+  return { id, label: id, type };
+}
 
 function inputSpec(input: ProcessInput, index: number): PortSpec {
   switch (input.kind) {
     case "TypedName":
-      return {
-        id: input.name.name,
-        label: input.name.name,
-        type: flowFromDeclared(input.type),
-      };
+      return spec(input.name.name, flowFromDeclared(input.type));
     case "RecordInput":
       return {
         id: `$${index + 1}`,
         label: `record(${input.fields.map((f) => f.name.name).join(", ")})`,
-        type: plainType("Record"),
+        type: plain("Record"),
       };
     case "TupleInput":
       return {
         id: `$${index + 1}`,
         label: `tuple(${input.components.map((c) => c.name.name).join(", ")})`,
-        type: plainType("Tuple"),
+        type: plain("Tuple"),
       };
   }
 }
@@ -81,31 +76,23 @@ export function processSignature(
   library: DataflowLibrary,
 ): Signature {
   const inputs = (def.inputs?.items ?? []).map(inputSpec);
-  const declared = new Map<string, FlowType | null>();
-  for (const spec of inputs) declared.set(spec.id, spec.type);
+  const declared = new Map(inputs.map((s) => [s.id, s.type]));
   const outputItems = def.outputs?.items ?? [];
-  const outputs = outputItems.map((item, index): PortSpec => {
-    if (item.kind === "NamedOutput") {
-      const type =
+  const outputs = outputItems.map((item, index) => {
+    if (item.kind === "NamedOutput")
+      return spec(
+        item.name.name,
         flowFromDeclared(item.type) ??
-        (item.value === null
-          ? null
-          : outputValueType(item.value, declared, library));
-      return { id: item.name.name, label: item.name.name, type };
-    }
-    const id = outputItems.length === 1 ? "out" : `$${index + 1}`;
-    return {
-      id,
-      label: id,
-      type: outputValueType(item.expression, declared, library),
-    };
+          (item.value === null
+            ? null
+            : outputValueType(item.value, declared, library)),
+      );
+    return spec(
+      outputItems.length === 1 ? "out" : `$${index + 1}`,
+      outputValueType(item.expression, declared, library),
+    );
   });
-  return {
-    kind: def.kind === "Agent" ? "agent" : "process",
-    typed: true,
-    inputs,
-    outputs,
-  };
+  return { inputs, outputs };
 }
 
 /** The port name of an emit item: its name, the variable it names, `out` for a lone expression, else `$n`. */
@@ -124,25 +111,17 @@ export function workflowSignature(
   def: WorkflowDef,
   emitType: (name: string) => FlowType | null,
 ): Signature {
-  const inputs = (def.takes?.items ?? []).map(
-    (take): PortSpec => ({
-      id: take.name.name,
-      label: take.name.name,
-      type: flowFromDeclared(take.type),
-    }),
+  const inputs = (def.takes?.items ?? []).map((take) =>
+    spec(take.name.name, flowFromDeclared(take.type)),
   );
   const emitItems = def.emits?.items ?? [];
-  const outputs = emitItems.map((item, index): PortSpec => {
+  const outputs = emitItems.map((item, index) => {
     const id = emitName(item, index, emitItems.length);
     const declared =
       item.kind === "NamedOutput" ? flowFromDeclared(item.type) : null;
-    return {
-      id,
-      label: id,
-      type: asEmitType(declared ?? emitType(id) ?? UNKNOWN),
-    };
+    return spec(id, asEmitType(declared ?? emitType(id) ?? UNKNOWN));
   });
-  return { kind: "workflow", typed: def.typed, inputs, outputs };
+  return { inputs, outputs };
 }
 
 /**
@@ -153,50 +132,34 @@ export function pipelineSignature(ast: ScriptAst): Signature {
   const params = ast.body.find((i) => i.kind === "ParamsBlock");
   const output = ast.body.find((i) => i.kind === "OutputBlock");
   return {
-    kind: "pipeline",
-    typed: ast.typesEnabled,
-    inputs: (params?.params ?? []).map((p) => ({
-      id: p.name.name,
-      label: p.name.name,
-      type: flowFromDeclared(p.type),
-    })),
-    outputs: (output?.outputs ?? []).map((o) => ({
-      id: o.name.name,
-      label: o.name.name,
-      type: asEmitType(flowFromDeclared(o.type) ?? UNKNOWN),
-    })),
+    inputs: (params?.params ?? []).map((p) =>
+      spec(p.name.name, flowFromDeclared(p.type)),
+    ),
+    outputs: (output?.outputs ?? []).map((o) =>
+      spec(o.name.name, asEmitType(flowFromDeclared(o.type) ?? UNKNOWN)),
+    ),
   };
 }
 
 /** For a callee with no usable declaration: `$1..$n` inputs and one output of unknown type. */
-export function fallbackSignature(
-  kind: Callee["kind"],
-  argumentCount: number,
-): Signature {
+export function fallbackSignature(argumentCount: number): Signature {
   return {
-    kind,
-    typed: null,
-    inputs: Array.from({ length: argumentCount }, (_, i) => ({
-      id: `$${i + 1}`,
-      label: `$${i + 1}`,
-      type: null,
-    })),
-    outputs: [{ id: "out", label: "out", type: null }],
+    inputs: Array.from({ length: argumentCount }, (_, i) =>
+      spec(`$${i + 1}`, null),
+    ),
+    outputs: [spec("out", null)],
   };
 }
 
 /**
  * nf-lang's `checkProcessCall` rule: the result is a channel if any argument is a channel, or is dynamic (not known)
- * and not a `null` constant; otherwise a value.
+ * and not a `null` constant (which is plain here); otherwise a value.
  */
 export function callDataflow(
   args: readonly (FlowType | null)[],
 ): "channel" | "value" {
   return args.some(
-    (a) =>
-      a === null ||
-      a.dataflow === "channel" ||
-      (a.dataflow === null && !isNullConstant(a)),
+    (a) => a === null || a.dataflow === "channel" || a.dataflow === null,
   )
     ? "channel"
     : "value";
