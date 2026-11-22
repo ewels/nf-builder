@@ -2,6 +2,8 @@ ConfigFile 1:1-44:1
   comments[0] line 1:1-1:117 "// F-103 fixture. Source: nextflow-io/nextflow v26.10.7 docs/config.mdx#L287-L317, plus the nf-core `publishDir` and"
   comments[1] line 2:1-2:47 "// `ext.args` shapes (closures, maps, `when`)."
   statements[0] ConfigBlock 3:1-16:2
+    leadingComments[0] line 1:1-1:117 "// F-103 fixture. Source: nextflow-io/nextflow v26.10.7 docs/config.mdx#L287-L317, plus the nf-core `publishDir` and"
+    leadingComments[1] line 2:1-2:47 "// `ext.args` shapes (closures, maps, `when`)."
     name ConfigName form="identifier" 3:1-3:8 "process"
     statements[0] ConfigAssign 4:5-8:6
       path[0] ConfigName form="identifier" 4:5-4:15 "publishDir"

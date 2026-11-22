@@ -93,6 +93,8 @@ export type CommentDumpFile =
 export type CommentDump = { files: CommentDumpFile[] };
 /** The file written to `.cache/corpus-lint/<id>.comments.json`. */
 export type CommentDumpResult = CommentDump & {
+  /** 2: configs are dumped as well as scripts; an older file is made again. */
+  format: 2;
   id: string;
   sha: string;
   nextflowVersion: string;
@@ -223,6 +225,16 @@ export function lintDir(
   );
 }
 
+/** Whether a cached comment dump has the current format (see `CommentDumpResult`). */
+function hasFormat(file: string): boolean {
+  try {
+    const cached: unknown = JSON.parse(readFileSync(file, "utf8"));
+    return isRecord(cached) && cached.format === 2;
+  } catch {
+    return false;
+  }
+}
+
 export function isCached(file: string, sha: string, version: string): boolean {
   try {
     const cached: unknown = JSON.parse(readFileSync(file, "utf8"));
@@ -300,7 +312,10 @@ export function lintCorpus(o: {
     const file = join(LINT_CACHE_DIR, `${t.id}.json`);
     const commentsFile = join(LINT_CACHE_DIR, `${t.id}.comments.json`);
     const commentsCached =
-      !commentsFor || (!o.force && isCached(commentsFile, t.sha, version));
+      !commentsFor ||
+      (!o.force &&
+        isCached(commentsFile, t.sha, version) &&
+        hasFormat(commentsFile));
     if (!o.force && isCached(file, t.sha, version)) {
       results.push(JSON.parse(readFileSync(file, "utf8")) as LintResult);
       o.log(`corpus-lint: ${t.id} up to date`);
@@ -340,6 +355,7 @@ function writeComments(
     id: target.id,
     sha: target.sha,
     nextflowVersion: version,
+    format: 2,
     ...dump,
   };
   writeFileSync(file, `${JSON.stringify(result)}\n`);
@@ -348,6 +364,6 @@ function writeComments(
     0,
   );
   log(
-    `corpus-lint: ${target.id}: ${dump.files.length} scripts, ${comments} comments (${((Date.now() - started) / 1000).toFixed(1)} s)`,
+    `corpus-lint: ${target.id}: ${dump.files.length} files, ${comments} comments (${((Date.now() - started) / 1000).toFixed(1)} s)`,
   );
 }

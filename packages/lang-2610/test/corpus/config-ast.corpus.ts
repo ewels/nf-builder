@@ -5,8 +5,10 @@
 // Reads .cache/corpus by path; imports nothing from tools/.
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
+import type { AstNode } from "@nf-builder/lang-core";
 import { describe, expect, it } from "vitest";
 import { parseConfigAst } from "../../src/ast/index.ts";
+import { anchors, attachments, type Row } from "../ast/comment-anchors.ts";
 import { checkConfigRanges } from "../config-ast/check-config-ranges.ts";
 import { renderConfigAst, snapshotPath } from "./config-snapshot.ts";
 import { listSources } from "./corpus-files.ts";
@@ -31,6 +33,31 @@ const configs = ids.flatMap((id) =>
           text: readFileSync(join(CORPUS, id, s.path), "utf8"),
         }))
     : [],
+);
+const LINT = join(ROOT, ".cache/corpus-lint");
+type DumpRow = {
+  line: number;
+  column: number;
+  text: string;
+  slot: Row["slot"];
+  node: {
+    class: string;
+    line: number;
+    column: number;
+    endLine: number;
+    endColumn: number;
+  };
+};
+type Dump = {
+  files: { file: string; comments?: DumpRow[]; error?: string }[];
+};
+const dumps = new Map(
+  ids.flatMap((id) => {
+    const file = join(LINT, `${id}.comments.json`);
+    return existsSync(file)
+      ? [[id, JSON.parse(readFileSync(file, "utf8")) as Dump] as const]
+      : [];
+  }),
 );
 const built = new Map(
   configs.map((c) => [`${c.id}/${c.path}`, parseConfigAst(c.text)] as const),
@@ -107,5 +134,50 @@ describe("F-103 step 2: ranges", () => {
       comments += result.ast.comments.length;
     }
     expect(comments).toBeGreaterThan(700);
+  });
+
+  it("F-103 step 2 AR-02: corpus config comment attachment matches nf-lang 26.10.7", () => {
+    const differences: string[] = [];
+    let compared = 0;
+    let upstream = 0;
+    for (const c of configs) {
+      const result = built.get(`${c.id}/${c.path}`);
+      const file = dumps.get(c.id)?.files.find((f) => f.file === c.path);
+      if (!result?.ok || !file?.comments) continue; // rejected upstream too
+      upstream += file.comments.length;
+      const ours = attachments(result.ast);
+      const where = `${c.id}/${c.path}`;
+      const keys = file.comments.map((r) => `${r.line}:${r.column}`).sort();
+      if (JSON.stringify([...ours.keys()].sort()) !== JSON.stringify(keys)) {
+        differences.push(`${where}: the attached comments differ`);
+        continue;
+      }
+      for (const dumped of file.comments) {
+        const key = `${dumped.line}:${dumped.column}`;
+        const mine = (ours.get(key) ?? [])[0];
+        const row: Row = {
+          line: dumped.line,
+          column: dumped.column,
+          slot: dumped.slot,
+          anchor: dumped.node.class,
+          from: [dumped.node.line, dumped.node.column],
+          to: [dumped.node.endLine, dumped.node.endColumn],
+          text: dumped.text,
+        };
+        if (!mine) differences.push(`${where} ${key}: not attached`);
+        else if (mine.slot !== row.slot)
+          differences.push(
+            `${where} ${key}: slot ${mine.slot}, nf-lang ${row.slot}`,
+          );
+        else if (!anchors(row, mine.node as AstNode & Record<string, unknown>))
+          differences.push(
+            `${where} ${key}: anchor ${mine.node.kind}@${mine.node.range.line}:${mine.node.range.column}-${mine.node.range.endLine}:${mine.node.range.endColumn}, nf-lang ${row.anchor}@${row.from}-${row.to}`,
+          );
+        else compared++;
+      }
+    }
+    expect(differences.slice(0, 20)).toEqual([]);
+    expect(compared).toBe(upstream);
+    expect(compared).toBeGreaterThan(700);
   });
 });

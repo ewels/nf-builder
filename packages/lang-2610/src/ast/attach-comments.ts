@@ -22,6 +22,8 @@ import type {
   CallExpr,
   Closure,
   Comment,
+  ConfigAst,
+  ConfigStatement,
   Expression,
   IfStatement,
   MethodCall,
@@ -99,6 +101,19 @@ export function attachComments(
   new Attacher().run(script, comments);
 }
 
+/**
+ * Attach the comments of a config file (upstream's `CommentAttacher` on a `ConfigNode`). The containers are the blocks
+ * and selectors, and the `plugins` apply block; values and `includeConfig` sources go through the shared expression
+ * walker. An incomplete or invalid statement is dropped upstream, so it carries no comment here either.
+ */
+export function attachConfigComments(
+  config: ConfigAst,
+  comments: readonly Comment[],
+): void {
+  if (comments.length === 0) return;
+  new Attacher().runConfig(config, comments);
+}
+
 type Slots = Map<AstNode, Comment[]>;
 
 class Attacher {
@@ -122,6 +137,20 @@ class Attacher {
         this.statements([item], root);
       }
     }
+    for (const comment of comments) this.attach(comment, root);
+    flush(this.leading, "leadingComments");
+    flush(this.trailing, "trailingComments");
+    flush(this.dangling, "danglingComments");
+  }
+
+  runConfig(config: ConfigAst, comments: readonly Comment[]): void {
+    const root = new Container(
+      config,
+      Number.NEGATIVE_INFINITY,
+      Number.POSITIVE_INFINITY,
+      false,
+    );
+    this.configStatements(config.statements, root);
     for (const comment of comments) this.attach(comment, root);
     flush(this.leading, "leadingComments");
     flush(this.trailing, "trailingComments");
@@ -205,6 +234,36 @@ class Attacher {
   ): void {
     if (from < to)
       container.children.push({ node, start: from, end: to, trailing });
+  }
+
+  // Config statements
+
+  private configStatements(
+    statements: readonly ConfigStatement[],
+    parent: Container,
+  ): void {
+    for (const stmt of statements) {
+      if (stmt.kind === "ConfigIncomplete" || stmt.kind === "ConfigInvalid")
+        continue;
+      this.addChild(parent, stmt);
+      switch (stmt.kind) {
+        case "ConfigApplyBlock": {
+          const c = this.container(stmt, parent);
+          for (const apply of stmt.statements) this.addChild(c, apply);
+          break;
+        }
+        case "ConfigAssign":
+          this.walk(stmt.value, parent);
+          break;
+        case "ConfigBlock":
+        case "ConfigSelector":
+          this.configStatements(stmt.statements, this.container(stmt, parent));
+          break;
+        case "ConfigInclude":
+          this.walk(stmt.source, parent);
+          break;
+      }
+    }
   }
 
   // Script declarations

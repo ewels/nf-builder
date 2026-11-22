@@ -2,6 +2,8 @@ ConfigFile 1:1-62:1
   comments[0] line 1:1-1:114 "// F-103 fixture. Expression and statement kinds from nextflow-io/nextflow v26.10.7 docs/reference/syntax.mdx, as"
   comments[1] line 2:1-2:37 "// config values and closure bodies."
   statements[0] ConfigAssign 3:1-3:44
+    leadingComments[0] line 1:1-1:114 "// F-103 fixture. Expression and statement kinds from nextflow-io/nextflow v26.10.7 docs/reference/syntax.mdx, as"
+    leadingComments[1] line 2:1-2:37 "// config values and closure bodies."
     path[0] ConfigName form="identifier" 3:1-3:7 "params"
     path[1] ConfigName form="identifier" 3:8-3:16 "integers"
     value List trailingComma=false 3:19-3:44

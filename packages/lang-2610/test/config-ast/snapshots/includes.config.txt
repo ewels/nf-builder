@@ -1,6 +1,7 @@
 ConfigFile 1:1-8:1
   comments[0] line 1:1-1:118 "// F-103 fixture. Source: nextflow-io/nextflow v26.10.7 docs/config.mdx#L79-L95, with a ternary and a GString source."
   statements[0] ConfigAssign 2:1-2:25
+    leadingComments[0] line 1:1-1:118 "// F-103 fixture. Source: nextflow-io/nextflow v26.10.7 docs/config.mdx#L79-L95, with a ternary and a GString source."
     path[0] ConfigName form="identifier" 2:1-2:8 "process"
     path[1] ConfigName form="identifier" 2:9-2:17 "executor"
     value String value="sge" quote="'" 2:20-2:25 "'sge'"

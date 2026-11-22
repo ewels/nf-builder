@@ -1,10 +1,9 @@
 import { type AstNode, type Comment, walk } from "@nf-builder/lang-core";
-import type { parseScriptAst } from "../../src/ast/index.ts";
 
 // Shared by comments.test.ts (the fixtures) and test/corpus/ast.corpus.ts (the whole corpus): where our comment
 // attachment put each comment, and whether a node is the anchor nf-lang's CommentAttacher chose.
 
-type Built = Extract<ReturnType<typeof parseScriptAst>, { ok: true }>["ast"];
+type Built = AstNode;
 
 export type Slot = "leading" | "trailing" | "dangling";
 export type Attachment = {
@@ -106,12 +105,32 @@ const PARAMETERS = new Set([
  * `allowLabelStart`: a statement with labels starts at its first label in our tree (ADR 0027), so its start column may
  * differ from nf-lang's; the line and the end must still match.
  */
+/** nf-lang's config node classes and the kinds of our config nodes that stand for them. */
+const CONFIG_ANCHORS: Record<string, readonly string[]> = {
+  ConfigNode: ["ConfigFile"],
+  ConfigAssignNode: ["ConfigAssign"],
+  ConfigBlockNode: ["ConfigBlock", "ConfigSelector"],
+  ConfigApplyBlockNode: ["ConfigApplyBlock"],
+  ConfigApplyNode: ["ConfigApply"],
+  ConfigIncludeNode: ["ConfigInclude"],
+};
+
 export function anchors(
   row: Row,
   node: AstNode & Record<string, unknown>,
   options: { allowLabelStart?: boolean } = {},
 ): boolean {
   if (row.anchor === "ScriptNode") return node.kind === "Script";
+  const config = CONFIG_ANCHORS[row.anchor];
+  if (config)
+    return (
+      config.includes(node.kind) &&
+      (node.kind === "ConfigFile" ||
+        (node.range.line === row.from[0] &&
+          node.range.column === row.from[1] &&
+          node.range.endLine === row.to[0] &&
+          node.range.endColumn === row.to[1]))
+    );
   const r = node.range;
   if (row.anchor === "BlockStatement") {
     // upstream's block starts at its first statement; ours includes the braces

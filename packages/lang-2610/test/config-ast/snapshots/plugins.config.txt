@@ -1,6 +1,7 @@
 ConfigFile 1:1-12:1
   comments[0] line 1:1-1:140 "// F-103 fixture. Source: nextflow-io/nextflow v26.10.7 modules/nextflow/src/test/groovy/nextflow/config/ConfigParserV2Test.groovy#L60-L82."
   statements[0] ConfigApplyBlock 2:1-6:2
+    leadingComments[0] line 1:1-1:140 "// F-103 fixture. Source: nextflow-io/nextflow v26.10.7 modules/nextflow/src/test/groovy/nextflow/config/ConfigParserV2Test.groovy#L60-L82."
     name ConfigName form="identifier" 2:1-2:8 "plugins"
     statements[0] ConfigApply 3:5-3:13
       name Identifier 3:5-3:7 "id"
