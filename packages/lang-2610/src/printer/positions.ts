@@ -9,9 +9,6 @@ export const line = (node: AstNode): number => node.range.line;
 /** `ASTNode.getLastLineNumber`. */
 export const lastLine = (node: AstNode): number => node.range.endLine;
 
-/** `ASTNode.getColumnNumber`. */
-export const column = (node: AstNode): number => node.range.column;
-
 /**
  * The last line of a call's argument list, the counterpart of `node.getArguments().getLastLineNumber()`. A trailing
  * closure starts on the line of the closing parenthesis (the grammar allows no newline between the arguments and the

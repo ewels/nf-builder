@@ -37,8 +37,10 @@ const render = (path: Path | null): string => {
   return parts.reverse().join("").replace(/^\./, "") || "ast";
 };
 
-/** The first difference between two ASTs ignoring positions and comment slots; null when there is none. Iterative. */
-function diffAst(a: unknown, b: unknown): string | null {
+/**
+ * The first difference between two AST nodes ignoring positions and comment slots; null when there is none. Iterative.
+ */
+export function diffNodes(a: unknown, b: unknown): string | null {
   const stack: [unknown, unknown, Path | null][] = [[a, b, null]];
   while (stack.length > 0) {
     const [x, y, path] = stack.pop() as [unknown, unknown, Path | null];
@@ -118,7 +120,7 @@ export function equivalent(a: SourceFile, b: SourceFile): Equivalence {
     return normaliseText(a.text) === normaliseText(b.text)
       ? { equivalent: true }
       : { equivalent: false, reason: "text differs" };
-  const diff = diffAst(a.ast, b.ast);
+  const diff = diffNodes(a.ast, b.ast);
   if (diff !== null) return { equivalent: false, reason: diff };
   const ca = commentList(a);
   const cb = commentList(b);

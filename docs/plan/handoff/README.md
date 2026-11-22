@@ -14,7 +14,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-106 typed projection | merged, PR #32 | Plan deleted in its PR. |
 | F-107 legacy projection | `feat/F-107`, in PR | Plan deleted in its PR. |
 | F-108 code nodes | merged, PR #34 | |
-| F-111 edit commands | `feat/F-111` | Review fixes building; then merge F-107 and add a legacy Connect test. PR after F-107. |
+| F-111 edit commands | `feat/F-111`, in PR | Plan deleted in its PR. |
 | F-112 diagnostics | not started | [plan](plan-F-112.md). After F-106 (and F-111 for fixes). |
 | F-113 engine worker | not started | [plan](plan-F-113.md). After F-111. |
 | F-202 projects in IndexedDB | not started | [plan](plan-F-202.md). After F-113. |
@@ -64,7 +64,7 @@ Next free ADR number: 0042 (0038 is F-107's, 0039 F-111's, 0040 and 0041 F-011's
 ### F-108 (merged with its PR)
 - Accept every recommendation in section 6: closure reads are code-node inputs; mutations are reads only; conditional writes replace the binding; no port for `params` as a whole; keys from the first output; a lint-only free-variable oracle tree. One ADR for the LA-27 readings.
 
-### F-111 — [plan](plan-F-111.md)
+### F-111 (merged with its PR)
 - Accept every recommendation in section 6: declaration-level reprint for workflow commands, identifier edits for renames, item-boundary include inserts; the command model of 2.2 (plain data, ids resolved at apply time, patches with inverses, `commit` separate); AR-24 read as "no problem the file didn't have"; our own LA-13 check (lint accepts positional mixing, upstream-bugs #20) with `ParseProblem.code` tags; `null` placeholders for missing positional inputs; variable introduction names; Connect moves a later source when safe; DeleteNode clears direct arguments; CreateProcess writes `modules/local/<lower>/main.nf` from `LanguagePack.scaffold`; the rename limits; `fast-check` 4.11.0 as an engine dev dependency (ADR 0011). One ADR at landing.
 
 ### F-112 — [plan](plan-F-112.md)

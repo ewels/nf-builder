@@ -145,7 +145,8 @@ describe("synthesised and edited trees", () => {
 
   it("F-110 LA-45: parse(print(parse(x))) has the structure of parse(x) for the expected files whose text it keeps", () => {
     const files = [
-      // not typed/process.nf (its multi-line string is re-indented) typed/function.nf (a legacy type becomes modern) nor typed/expressions.nf (named arguments move last)
+      // not typed/function.nf (a legacy type becomes modern) nor typed/expressions.nf (named arguments move last)
+      "typed/process.nf",
       "typed/workflow.nf",
       "typed/record.nf",
       "typed/params.nf",

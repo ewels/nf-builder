@@ -25,7 +25,8 @@
     "catch-package": "lint -format drops the package of every catch type, so java.nio.file.AccessDeniedException becomes an undefined AccessDeniedException. The printer drops it only for default-imported packages.",
     "call-wrap": "lint -format prints f(1)(2) as a wrapped .call( and wraps again on every pass. The printer prints f(1).call(2) and wraps only for a trailing comma, comments or arguments on a later line.",
     "named-args-comma": "lint -format writes the comma between the positional and the named arguments of a wrapped call after the trailing comma and the trailing comment of the last positional argument, so it prints a,, or a // c, (invalid code). The printer writes the comma with the argument.",
-    "directive-comment": "lint -format prints the arguments of a directive wrapped by a comment without parentheses (memory, the comment, 2.GB), which is not a directive any more. The printer keeps the parentheses and wraps them as it wraps call arguments."
+    "directive-comment": "lint -format prints the arguments of a directive wrapped by a comment without parentheses (memory, the comment, 2.GB), which is not a directive any more. The printer keeps the parentheses and wraps them as it wraps call arguments.",
+    "string-reindent": "lint -format shifts the interior lines of a multi-line string with the statement that holds it, which changes the string's value (docs/research/upstream-bugs.md #23). The printer prints multi-line string and GString content exactly as written."
   },
   "files": [
     {
@@ -50,7 +51,24 @@
       "covers": [
         "Process (typed)",
         "comments"
-      ]
+      ],
+      "knownDifference": "string-reindent",
+      "differingLines": {
+        "formatted": [
+          41,
+          42,
+          43,
+          47,
+          48
+        ],
+        "printed": [
+          41,
+          42,
+          43,
+          47,
+          48
+        ]
+      }
     },
     {
       "tree": "printer",
@@ -190,7 +208,20 @@
         "CRLF line endings",
         "tabs",
         "multi-line strings"
-      ]
+      ],
+      "knownDifference": "string-reindent",
+      "differingLines": {
+        "formatted": [
+          3,
+          4,
+          5
+        ],
+        "printed": [
+          3,
+          4,
+          5
+        ]
+      }
     },
     {
       "tree": "printer",
@@ -673,6 +704,30 @@
       "tree": "ast",
       "path": "legacy-dataflow.nf",
       "kind": "parsed"
+    },
+    {
+      "tree": "printer",
+      "path": "known/string-reindent.nf",
+      "kind": "parsed",
+      "spec": [
+        "LA-45"
+      ],
+      "covers": [
+        "Multi-line strings"
+      ],
+      "knownDifference": "string-reindent",
+      "differingLines": {
+        "formatted": [
+          4,
+          5,
+          6
+        ],
+        "printed": [
+          4,
+          5,
+          6
+        ]
+      }
     }
   ]
 }

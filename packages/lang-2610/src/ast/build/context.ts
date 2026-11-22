@@ -58,8 +58,10 @@ export class BuildContext {
   }
 
   /** Collect an error and carry on (upstream `collectSyntaxError`). */
-  error(message: string, at: Range): void {
-    this.errors.push(problem(message, at));
+  error(message: string, at: Range, code?: string): void {
+    this.errors.push(
+      code ? { ...problem(message, at), code } : problem(message, at),
+    );
   }
 
   /**
