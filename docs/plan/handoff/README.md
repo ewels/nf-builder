@@ -19,6 +19,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-113 engine worker | merged, PR #39 | |
 | F-202 projects in IndexedDB | `feat/F-202` | Tasks 1–5 committed; task 6 building. [plan](plan-F-202.md). |
 | F-205 canvas | `feat/F-205` | Tasks 1–3 committed; task 4 building. [plan](plan-F-205.md). |
+| F-203 new project dialog | not started | [plan](plan-F-203.md). After F-202 and F-205. |
 | F-206 details pane | not started | [plan](plan-F-206.md). After F-205. |
 | F-207 layout sidecar | not started | [plan](plan-F-207.md). After F-205 and F-202. |
 | F-208 view modes and Code | not started | [plan](plan-F-208.md). After F-205. |
@@ -172,3 +173,17 @@ Next free ADR number: 0045 (0042 is F-112's, 0044 F-011's).
   - add F-202 to F-209's `depends_on` and F-209 to F-309's (`scope-change` label in F-209's PR);
   - full-file byte checks, sidecar included;
   - node moves stay outside the history.
+
+### F-203 — [plan](plan-F-203.md)
+- Accept every recommendation in section 6:
+  - **Q6 (answer at landing):** v0.1 ships Start blank, Hello world and Samplesheet to MultiQC. The nf-core skeleton and Pipeline composition move to a new M8 feature, "More project templates" (`scope-change`).
+  - **Format:** templates are pack-owned trees with generated `templates.json` (`pnpm gen:templates`), loaded lazily by `loadTemplates()`. Not a stored format.
+  - **Content:**
+    - no substitution and no `manifest.name`;
+    - blank has no output block (lint rejects an empty one);
+    - LA-42 `eval` versions, with the oracle's `run.tools` shims;
+    - Hello world has no `topic:` section;
+    - offline test data under `assets/`.
+  - **Dialog:** Publish docs is carried but does nothing until F-606; Import and the metro checkbox stay out of scope; the header's Templates button opens the dialog on From a template.
+  - **Licence:** template content is dedicated under MIT-0, with a `licences.md` row.
+  - **Checks:** the doc-comment check is test-only until F-311 and F-312; F-207 re-approves the template baselines.
