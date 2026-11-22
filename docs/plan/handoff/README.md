@@ -8,13 +8,13 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 |---|---|---|
 | F-102 script AST | merged, PR #23 | |
 | F-103 config AST | merged, PR #24 | |
-| F-104 round trip | `feat/F-104`, in PR | Plan deleted in its PR. |
+| F-104 round trip | merged, PR #26 | |
 | F-110 printer | merged, PR #25 | |
-| F-105 semantic model | not started | [plan](plan-F-105.md). Branch from `main` after F-104 merges. |
+| F-105 semantic model | `feat/F-105` | Tasks 1–2 building. [plan](plan-F-105.md). |
 | F-106 typed projection | not started | [plan](plan-F-106.md). Branch from `main` after F-105 merges. |
 | F-107 legacy projection | not started | [plan](plan-F-107.md). After F-106; parallel with F-108. |
 | F-108 code nodes | not started | [plan](plan-F-108.md). After F-106; parallel with F-107. |
-| F-501 registry snapshot | not started | [plan](plan-F-501.md). Branch from `main` after F-104 merges; runs alongside F-105. |
+| F-501 registry snapshot | `feat/F-501` | Task 1 building. [plan](plan-F-501.md). Maintainer issue #27 (build hook) opened. |
 
 Next free ADR number: 0034.
 

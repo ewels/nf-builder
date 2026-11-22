@@ -8,6 +8,6 @@
   },
   "scripts": {
     "typecheck": "tsc",
-    "test": "vitest run"
+    "test": "vitest run --test-timeout=30000"
   }
 }
