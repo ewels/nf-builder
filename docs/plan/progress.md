@@ -230,3 +230,10 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
 - Next: F-102, F-103, then F-104 and F-110.
 - Decisions: the maintainer's own (ADR 0030). Other simplifications offered (deferring docs publishing, the metro map, schema editors and registry extras; narrowing legacy editing, forms and diagnostics) were declined.
 - Blockers: none.
+
+## 2026-11-22 · process · Claude with Phil Ewels
+- Did: docs-only changes (`docs/`, `AGENTS.md`, `CLAUDE.md`, package READMEs) may be pushed straight to `main` after `pnpm check`; code, tests, workflows, configuration, dependencies, generated files and `features.json` still go through PRs ([ADR 0031](../adr/0031-docs-only-changes-to-main.md)).
+- State: no feature status changed.
+- Next: finish F-102's current builder run, then hand off.
+- Decisions: the maintainer's own (ADR 0031).
+- Blockers: none.

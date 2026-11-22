@@ -66,7 +66,7 @@ Run `pnpm test:corpus` when touching the parser, model, projection or printer. T
 - edit generated files (below);
 - edit the body of an `Accepted` ADR, except to append a spike result (ADR 0001);
 - delete, skip or weaken a test or approved visual baseline;
-- push to `main` directly, or merge a PR before CI is green and the reviewer has nothing blocking;
+- push code, tests, workflows, configuration, dependencies, generated files or `features.json` to `main` directly, or merge a PR before CI is green and the reviewer has nothing blocking (docs-only changes may go straight to `main` after `pnpm check`, ADR 0031);
 - force-push or rewrite history on `main`;
 - commit tokens or secrets;
 - call a network host not on the ADR 0002 allow-list from app code (build-time tools may use the hosts their ADR records, ADR 0017);

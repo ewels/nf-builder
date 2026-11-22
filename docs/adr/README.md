@@ -33,3 +33,4 @@ Process: [0001](0001-record-decisions-as-adrs.md). Template: [template.md](templ
 | [0028](0028-palette-data-path.md) | Load the palette from the pack and the catalogue lazily | Accepted (agent) |
 | [0029](0029-relax-qa-03.md) | Let opening a large project take longer, as long as the app stays responsive | Accepted |
 | [0030](0030-trim-v0-1-scope-and-gates.md) | Defer private GitHub import and report the timing budgets instead of gating them | Accepted |
+| [0031](0031-docs-only-changes-to-main.md) | Push docs-only changes straight to main | Accepted |
