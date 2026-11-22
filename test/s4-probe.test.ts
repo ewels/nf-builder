@@ -1,6 +1,7 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { stripPolicyMeta } from "../e2e/s4-probe/page.ts";
 import {
   classify,
   matchTemplate,
@@ -9,35 +10,54 @@ import {
   openApiGetPaths,
   type ProbeRun,
   pickHeaders,
-  probeOrigin,
+  probeSite,
   RECORDED_HEADERS,
   toMarkdown,
 } from "../e2e/s4-probe/report.ts";
 import { S4_TARGETS } from "../e2e/s4-probe/targets.ts";
+import { PRODUCTION_URL } from "../e2e/urls.ts";
 import { REPO_ROOT } from "../scripts/check-common.ts";
 import { findUrls } from "../scripts/check-hosts.ts";
+import { policyMetaHtml } from "../scripts/security-policy-meta.ts";
 
 const PAGE = "https://nf-builder.netlify.app";
 
 describe("S4 probe model", () => {
-  it("F-008 step 1: S4_PROBE_URL accepts only the production site, its deploy previews and the local preview, over https except localhost", () => {
-    expect(probeOrigin("https://nf-builder.netlify.app/")).toBe(PAGE);
-    expect(
-      probeOrigin("https://deploy-preview-12--nf-builder.netlify.app"),
-    ).toBe("https://deploy-preview-12--nf-builder.netlify.app");
-    expect(probeOrigin("http://localhost:4173")).toBe("http://localhost:4173");
+  it("F-008 step 1 ADR-0040: S4_PROBE_URL accepts only the production Pages site and a local preview under its base path, over https except localhost", () => {
+    expect(probeSite(PRODUCTION_URL)).toEqual({
+      url: PRODUCTION_URL,
+      origin: "https://ewels.github.io",
+    });
+    expect(probeSite("https://ewels.github.io/nf-builder")).toEqual({
+      url: PRODUCTION_URL,
+      origin: "https://ewels.github.io",
+    });
+    expect(probeSite("http://localhost:4173/nf-builder/")).toEqual({
+      url: "http://localhost:4173/nf-builder/",
+      origin: "http://localhost:4173",
+    });
     for (const bad of [
       undefined,
       "",
-      "http://nf-builder.netlify.app",
-      "https://evil.example",
-      "https://nf-builder.netlify.app.evil.example",
-      "https://x--nf-builder.netlify.app.evil.example",
+      "http://ewels.github.io/nf-builder/",
+      "https://evil.example/nf-builder/",
+      "https://ewels.github.io.evil.example/nf-builder/",
+      "https://ewels.github.io/other/",
+      "https://nf-builder.netlify.app/",
+      "http://localhost:4173",
+      "http://localhost:4173/",
+      "http://localhost.evil.example:4173/nf-builder/",
     ]) {
-      expect(() => probeOrigin(bad), String(bad)).toThrow(
-        /nf-builder\.netlify\.app/,
-      );
+      expect(() => probeSite(bad), String(bad)).toThrow(/S4_PROBE_URL/);
     }
+  });
+
+  it("F-008 ADR-0023: stripPolicyMeta removes the CSP meta and nothing else, so the deployed probe measures CORS, not our CSP", () => {
+    const html = `<!doctype html><html><head>${policyMetaHtml()}<meta charset="utf-8"><title>x</title></head><body></body></html>`;
+    expect(stripPolicyMeta(html)).toBe(
+      '<!doctype html><html><head><meta name="referrer" content="no-referrer"><meta charset="utf-8"><title>x</title></head><body></body></html>',
+    );
+    expect(stripPolicyMeta("<p>none</p>")).toBe("<p>none</p>");
   });
 
   it("F-008 ADR-0009: after a cross-origin redirect to another origin the browser sends Origin null, otherwise the Origin is kept", () => {
@@ -377,7 +397,7 @@ describe("S4 probe page", () => {
   it("F-008 QA-30: the S4 probe page loads one same-origin module script and has no inline script or style", () => {
     const html = readFileSync(join(PAGE_DIR, "index.html"), "utf8");
     expect(html.match(/<script\b[^>]*>[\s\S]*?<\/script>/g)).toEqual([
-      '<script type="module" src="/spike/s4/probe.js"></script>',
+      '<script type="module" src="probe.js"></script>',
     ]);
     expect(html.match(/<script/g)).toHaveLength(1);
     expect(html).not.toContain("<style");

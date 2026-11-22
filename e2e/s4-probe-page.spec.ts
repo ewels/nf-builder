@@ -16,7 +16,9 @@ test("F-008 ADR-0009: the S4 probe page loads under the site CSP with no violati
     ),
   ).toBe(CONTENT_SECURITY_POLICY);
   await expect(page).toHaveTitle(PROBE_TITLE);
-  const results = await runInPage(page, [{ id: "self", url: "/version.json" }]);
+  const results = await runInPage(page, [
+    { id: "self", url: "../../version.json" },
+  ]);
   expect(results).toHaveLength(1);
   const [result] = results;
   expect(result).toMatchObject({

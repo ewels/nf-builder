@@ -2,15 +2,15 @@ import { expect, test } from "@playwright/test";
 import { CONTENT_SECURITY_POLICY } from "../scripts/security-policy.ts";
 import { SMOKE_TAG } from "./browsers.ts";
 import { watchForCspViolations } from "./csp.ts";
-import { DEV_URL } from "./urls.ts";
+import { DEV_URL, E2E_BASE_PATH } from "./urls.ts";
 
-const DEEP_ROUTE = "/projects/example/pipeline";
+const DEEP_ROUTE = "projects/example/pipeline";
 
 test("F-002: the app shell shows the header with the app name and three columns, with no CSP violations", {
   tag: SMOKE_TAG,
 }, async ({ page }) => {
   const watch = await watchForCspViolations(page);
-  await page.goto("/");
+  await page.goto("./");
   // ADR 0040: the policy is the first element of <head>, in a <meta http-equiv>, not a response header.
   expect(
     await page.evaluate(() => {
@@ -48,7 +48,7 @@ test("F-002: the app shell shows the header with the app name and three columns,
 test("F-002 UX-02: the left column is 256 px and the right 296 px by default; the centre fills the rest", async ({
   page,
 }) => {
-  await page.goto("/");
+  await page.goto("./");
   const left = await page
     .getByRole("complementary", { name: "Components and files" })
     .boundingBox();
@@ -73,14 +73,16 @@ test("F-002 step 1: pnpm dev serves the app and the header shows the app name", 
   ).toBeVisible();
 });
 
-test("F-002 step 2 ADR-0040: vite preview serves the build as GitHub Pages does: no security headers, a deep route is 404, and the entry script is served", async ({
+test("F-002 step 2 ADR-0040: vite preview serves the build as GitHub Pages does: no security headers, a deep route is 404, and the entry script is under the base", async ({
   request,
 }) => {
-  const root = await request.get("/");
+  const root = await request.get("./");
   const deep = await request.get(DEEP_ROUTE);
   expect(deep.status()).toBe(404);
   const html = await root.text();
-  const asset = /src="(\/assets\/[^"]+\.js)"/.exec(html)?.[1];
+  const asset = new RegExp(`src="(${E2E_BASE_PATH}assets/[^"]+\\.js)"`).exec(
+    html,
+  )?.[1];
   expect(asset).toBeDefined();
   const assetResponse = await request.get(asset ?? "");
   expect(assetResponse.status()).toBe(200);
@@ -103,7 +105,7 @@ test("F-002 QA-30: the CSP blocks an injected inline script, and the violation i
   page,
 }) => {
   const watch = await watchForCspViolations(page);
-  await page.goto("/");
+  await page.goto("./");
   await page.evaluate(() => {
     const script = document.createElement("script");
     script.textContent = "window.__injectedRan = true";
@@ -117,7 +119,7 @@ test("F-002 QA-30: the CSP blocks an injected inline script, and the violation i
 test("F-002 step 3: the build serves /version.json with the commit and context", async ({
   request,
 }) => {
-  const response = await request.get("/version.json");
+  const response = await request.get("version.json");
   expect(response.status()).toBe(200);
   const body: unknown = await response.json();
   expect(body).toEqual({
