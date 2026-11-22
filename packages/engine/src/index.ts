@@ -145,4 +145,9 @@ export { loadParser } from "./source/parser";
 export { printSourceFile } from "./source/print";
 export { createSourceFile } from "./source/source-file";
 export { verifyModel } from "./source/verify";
-export { type TemplateList, templateFiles, templateList } from "./templates";
+export {
+  BLANK_TEMPLATE,
+  type TemplateList,
+  templateFiles,
+  templateList,
+} from "./templates";

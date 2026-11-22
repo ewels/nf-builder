@@ -20,9 +20,6 @@ export function ProjectControls(): JSX.Element {
   const remove = useProjects((s) => s.remove);
   const showDialog = useProjects((s) => s.showDialog);
   const closeDialog = useProjects((s) => s.closeDialog);
-  const templates = useTemplates(
-    dialog?.kind === "new" ? languageVersions[0] : undefined,
-  );
   // a dialog's own unmount can't restore focus, so put it back on the element that opened it once the dialog has gone
   // (WCAG 2.4.3). The store recorded that element when the dialog was requested, before the dialog took focus; if it has
   // left the page, the switcher's button gets focus.
@@ -51,7 +48,7 @@ export function ProjectControls(): JSX.Element {
       {dialog?.kind === "new" ? (
         <NewProjectDialog
           languageVersions={languageVersions}
-          templates={templates}
+          useTemplates={useTemplates}
           projects={status.projects}
           currentId={current?.id ?? null}
           initialRoute={dialog.route}

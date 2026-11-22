@@ -4,6 +4,7 @@ import { installedPacks, installedPackVersions } from "../../src/packs";
 import { createProjector } from "../../src/projection/project";
 import { createEngineService } from "../../src/service/service";
 import {
+  BLANK_TEMPLATE,
   loadTemplateSet,
   templateFiles,
   templateList,
@@ -143,6 +144,13 @@ describe("F-203 engine templates", () => {
     expect(await templateList(version)).toEqual(list);
     await expect(service.templates("0.0")).rejects.toThrow(
       "No language pack for 0.0",
+    );
+  });
+
+  it("F-203 UX-60: BLANK_TEMPLATE resolves to the pack's blank template, whatever its id", async () => {
+    const set = await loadTemplateSet(version);
+    expect(await templateFiles(version, BLANK_TEMPLATE)).toEqual(
+      await templateFiles(version, set.blank.id),
     );
   });
 

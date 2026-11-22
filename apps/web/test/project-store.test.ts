@@ -67,6 +67,9 @@ function fixture(
     palette: async (v) => {
       calls.push(`palette:${v}`);
     },
+    templates: async (v) => {
+      calls.push(`templates:${v}`);
+    },
     storage: storage ?? (() => undefined),
     languageVersion: "26.10",
     canvas: {
@@ -142,7 +145,12 @@ describe("F-202 project store", () => {
   it("F-202 QA-03 ADR-0029: start requests the palette before reopening the most recently opened project", async () => {
     const f = fixture(ready({ projects: [meta("recent"), meta("older")] }));
     await f.store.getState().start();
-    expect(f.calls).toEqual(["palette:26.10", "watch", "openProject:recent"]);
+    expect(f.calls).toEqual([
+      "palette:26.10",
+      "templates:26.10",
+      "watch",
+      "openProject:recent",
+    ]);
   });
 
   it("F-202 QA-03 ADR-0029: start does not wait for the palette before watching", async () => {
@@ -152,6 +160,7 @@ describe("F-202 project store", () => {
     const never = createProjectStore({
       workspace: () => f.workspace,
       palette: () => new Promise(() => undefined),
+      templates: () => new Promise(() => undefined),
       storage: () => undefined,
       languageVersion: "26.10",
       canvas: { show: async () => undefined, projectGone: () => undefined },
@@ -161,13 +170,30 @@ describe("F-202 project store", () => {
     expect(deps.calls).toContain("watch");
   });
 
+  it("F-203 UX-60: start prefetches the template list, and a failed prefetch does not stop it", async () => {
+    const f = fixture(ready({ projects: [meta("a")] }));
+    const failing = createProjectStore({
+      workspace: () => f.workspace,
+      palette: async () => undefined,
+      templates: async () => {
+        throw new Error("worker failed");
+      },
+      storage: () => undefined,
+      languageVersion: "26.10",
+      canvas: { show: async () => undefined, projectGone: () => undefined },
+    });
+    await failing.getState().start();
+    expect(f.workspace.openProject).toHaveBeenCalledWith("a");
+    expect(failing.getState().status.storage).toBe("ready");
+  });
+
   it("F-202 IO-01: start opens nothing when a project is already open or none exist", async () => {
     const a = fixture(ready());
     await a.store.getState().start();
-    expect(a.calls).toEqual(["palette:26.10", "watch"]);
+    expect(a.calls).toEqual(["palette:26.10", "templates:26.10", "watch"]);
     const b = fixture(ready({ projects: [meta("a")], current: meta("a") }));
     await b.store.getState().start();
-    expect(b.calls).toEqual(["palette:26.10", "watch"]);
+    expect(b.calls).toEqual(["palette:26.10", "templates:26.10", "watch"]);
   });
 
   it("F-202 IO-01: the store mirrors pushed workspace status", async () => {

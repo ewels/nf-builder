@@ -19,6 +19,7 @@ import {
   type StorageUsage,
   storageUsage,
 } from "./storage-health";
+import { requestTemplates } from "./templates";
 
 /** The dialog that is open, if any; it lives here so the header can open it (F-203). */
 export type ProjectDialog =
@@ -50,6 +51,8 @@ interface ProjectActions {
 export interface ProjectStoreDeps {
   readonly workspace: () => WorkspaceApi;
   readonly palette: (version: string) => Promise<unknown>;
+  /** The template list, requested up front like the palette so the New project dialog finds it ready (F-203). */
+  readonly templates: (version: string) => Promise<unknown>;
   readonly storage: () => StorageManager | undefined;
   readonly languageVersion: string | undefined;
   /** The canvas (F-205): shown every project the worker opens, and told when the stored project is gone. */
@@ -113,6 +116,8 @@ export function createProjectStore(
           // the palette request goes first: the worker's queue is serial and a long open would delay it (ADR 0029)
           if (deps.languageVersion !== undefined)
             void deps.palette(deps.languageVersion).catch(() => undefined);
+          if (deps.languageVersion !== undefined)
+            void deps.templates(deps.languageVersion).catch(() => undefined);
           const workspace = deps.workspace();
           const initial = await workspace.watch(onStatus);
           set({ status: initial });
@@ -185,6 +190,7 @@ function projectStore() {
   store ??= createProjectStore({
     workspace: getEngine,
     palette: requestPaletteView,
+    templates: requestTemplates,
     storage: () =>
       typeof navigator === "undefined" ? undefined : navigator.storage,
     languageVersion: installedPackVersions()[0],

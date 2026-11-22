@@ -36,14 +36,20 @@ export async function templateList(
   };
 }
 
-/** One template's files, sorted by path. Rejects for an unknown id, naming the id and the version. */
+/** A template id that means "the pack's blank template", so a caller needn't know its id (F-203, ADR 0047). */
+export const BLANK_TEMPLATE = "@blank";
+
+/** One template's files, sorted by path. `BLANK_TEMPLATE` is the pack's blank template. Rejects for an unknown id, naming the id and the version. */
 export async function templateFiles(
   version: string,
   id: string,
   packs?: readonly LanguagePack[],
 ): Promise<readonly ProjectFile[]> {
   const set = await loadTemplateSet(version, packs);
-  const found = [set.blank, ...set.templates].find((t) => t.id === id);
+  const found =
+    id === BLANK_TEMPLATE
+      ? set.blank
+      : [set.blank, ...set.templates].find((t) => t.id === id);
   if (!found) {
     throw new Error(`No template "${id}" for Nextflow ${version}`);
   }

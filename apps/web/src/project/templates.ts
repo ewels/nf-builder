@@ -1,7 +1,7 @@
 // The pack's project templates for the new-project dialog (F-203). They come from the engine worker, so the main thread
 // holds no pack (F-113).
 import type { TemplateList } from "@nf-builder/engine";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getEngine } from "../engine/engine-client";
 
 export type TemplatesState =
@@ -23,10 +23,21 @@ export function requestTemplates(version: string): Promise<TemplateList> {
   return request;
 }
 
-/** Loads the template list for `version`; results for a version that is no longer current are ignored. */
-export function useTemplates(version: string | undefined): TemplatesState {
-  const [state, setState] = useState<{
+export interface TemplatesView {
+  readonly state: TemplatesState;
+  /** Asks again after a failure. */
+  reload(): void;
+}
+
+/**
+ * Loads the template list for `version`; results for a version that is no longer current are ignored, and `reload`
+ * starts a new attempt.
+ */
+export function useTemplates(version: string | undefined): TemplatesView {
+  const [attempt, setAttempt] = useState(0);
+  const [loaded, setLoaded] = useState<{
     readonly version: string;
+    readonly attempt: number;
     readonly result: TemplatesState;
   }>();
   useEffect(() => {
@@ -34,12 +45,14 @@ export function useTemplates(version: string | undefined): TemplatesState {
     let current = true;
     requestTemplates(version).then(
       (list) => {
-        if (current) setState({ version, result: { status: "ready", list } });
+        if (current)
+          setLoaded({ version, attempt, result: { status: "ready", list } });
       },
       (error: unknown) => {
         if (current)
-          setState({
+          setLoaded({
             version,
+            attempt,
             result: {
               status: "error",
               message: error instanceof Error ? error.message : String(error),
@@ -50,8 +63,13 @@ export function useTemplates(version: string | undefined): TemplatesState {
     return () => {
       current = false;
     };
-  }, [version]);
-  return state !== undefined && state.version === version
-    ? state.result
-    : LOADING;
+  }, [version, attempt]);
+  const reload = useCallback(() => setAttempt((n) => n + 1), []);
+  const state =
+    loaded !== undefined &&
+    loaded.version === version &&
+    loaded.attempt === attempt
+      ? loaded.result
+      : LOADING;
+  return { state, reload };
 }

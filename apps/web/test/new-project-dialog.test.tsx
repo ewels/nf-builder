@@ -1,11 +1,14 @@
 import type { TemplateList } from "@nf-builder/engine";
+import { BLANK_TEMPLATE } from "@nf-builder/engine";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import {
   NewProjectDialog,
   type NewProjectDialogProps,
   newProjectRequest,
+  submitOutcome,
 } from "../src/project/new-project-dialog";
+import type { TemplatesState } from "../src/project/templates";
 import type { ProjectMeta } from "../src/workspace/types";
 
 const list: TemplateList = {
@@ -24,12 +27,16 @@ const meta = (id: string, name: string): ProjectMeta => ({
   updatedAt: 1,
   openedAt: 1,
 });
+const view = (state: TemplatesState) => () => ({
+  state,
+  reload: () => undefined,
+});
 const none = async () => undefined;
 const dialog = (over: Partial<NewProjectDialogProps> = {}) =>
   renderToStaticMarkup(
     <NewProjectDialog
       languageVersions={["26.10", "26.04"]}
-      templates={{ status: "ready", list }}
+      useTemplates={view({ status: "ready", list })}
       projects={[]}
       currentId={null}
       initialRoute="blank"
@@ -121,25 +128,71 @@ describe("F-203 new project dialog", () => {
     expect(html).not.toContain("tabindex");
   });
 
-  it("F-203 UX-60: loading and failed template lists; Start blank stays usable", () => {
+  it("F-203 UX-60: while the list loads the dialog says so, and only a failure says the templates couldn't be loaded", () => {
     const loading = dialog({
       initialRoute: "template",
-      templates: { status: "loading" },
+      useTemplates: view({ status: "loading" }),
     });
     expect(loading).toContain("Loading templates…");
+    expect(loading).not.toContain("couldn&#x27;t be loaded");
     const failed = dialog({
       initialRoute: "template",
-      templates: { status: "error", message: "worker failed" },
+      useTemplates: view({ status: "error", message: "worker failed" }),
     });
     expect(failed).toContain("Templates couldn&#x27;t be loaded.");
+    expect(failed).not.toContain("Loading templates");
     for (const html of [loading, failed]) {
       expect(html).toMatch(
         /<button[^>]*type="submit"(?![^>]*disabled)[^>]*>Create<\/button>/,
       );
-      expect(html).toMatch(
-        /<input[^>]*type="radio"(?![^>]*disabled)[^>]*>[\s\S]*?Start blank/,
-      );
     }
+  });
+
+  it("F-203 UX-60 ADR-0047: Start blank sends BLANK_TEMPLATE while the list loads and after it failed; From a template waits, or retries after a failure", () => {
+    const form = {
+      name: "RNA",
+      languageVersion: "26.10",
+      route: "blank" as const,
+      templateId: null,
+      publishDocs: true,
+    };
+    const blank = {
+      request: {
+        name: "RNA",
+        languageVersion: "26.10",
+        template: BLANK_TEMPLATE,
+        publishDocs: true,
+      },
+    };
+    const failed = { status: "error", message: "worker failed" } as const;
+    for (const state of [{ status: "loading" } as const, failed])
+      expect(submitOutcome(form, state)).toEqual(blank);
+    expect(submitOutcome(form, { status: "ready", list })).toEqual(blank);
+    const fromTemplate = { ...form, route: "template" as const };
+    expect(submitOutcome(fromTemplate, { status: "loading" })).toEqual({
+      error: expect.stringContaining("still loading"),
+    });
+    expect(submitOutcome(fromTemplate, failed)).toEqual({ reload: true });
+    expect(
+      submitOutcome(
+        { ...fromTemplate, templateId: "qc" },
+        { status: "ready", list },
+      ),
+    ).toMatchObject({ request: { template: "qc" } });
+    expect(submitOutcome({ ...fromTemplate, name: " " }, failed)).toMatchObject(
+      { error: expect.stringContaining("1 to 100") },
+    );
+  });
+
+  it("F-203 QA-10: the Projects in this browser section is labelled by its heading", () => {
+    const html = dialog();
+    const labelledBy = /<section[^>]*aria-labelledby="([^"]+)"/.exec(html)?.[1];
+    expect(html).toMatch(
+      new RegExp(
+        `<h3[^>]*id="${labelledBy}"[^>]*>Projects in this browser</h3>`,
+      ),
+    );
+    expect(html).not.toContain('aria-label="Projects');
   });
 
   it("F-203 UX-60: newProjectRequest rejects a bad name and returns the route's template id and the Publish docs value", () => {
@@ -153,7 +206,7 @@ describe("F-203 new project dialog", () => {
     expect(newProjectRequest(form, list)).toEqual({
       name: "RNA",
       languageVersion: "26.10",
-      template: "blank",
+      template: BLANK_TEMPLATE,
       publishDocs: true,
     });
     expect(
@@ -172,8 +225,11 @@ describe("F-203 new project dialog", () => {
         error: expect.stringContaining("1 to 100"),
       });
     expect(newProjectRequest(form, null)).toMatchObject({
-      error: expect.any(String),
+      template: BLANK_TEMPLATE,
     });
+    expect(
+      newProjectRequest({ ...form, route: "template" }, null),
+    ).toMatchObject({ error: expect.any(String) });
     expect(
       newProjectRequest({ ...form, route: "template", templateId: null }, list),
     ).toMatchObject({ error: expect.stringContaining("template") });

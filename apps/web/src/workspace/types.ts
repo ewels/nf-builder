@@ -23,7 +23,7 @@ export interface NewProject {
   readonly name: string;
   readonly languageVersion: string;
   readonly files: readonly ProjectFile[];
-  /** A template id from the pack (F-203): the project starts with that template's files, so `files` must be empty. */
+  /** A template id from the pack, or the engine's `BLANK_TEMPLATE` (F-203): the project starts with that template's files, so `files` must be empty. */
   readonly template?: string;
   /** The Publish docs to GitHub Pages choice (UX-60). Carried with the request; it has no effect until F-606. */
   readonly publishDocs?: boolean;

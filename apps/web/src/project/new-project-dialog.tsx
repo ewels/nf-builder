@@ -1,7 +1,7 @@
 // The New project dialog (F-203, UX-60): name, Nextflow version, Start blank or From a template, Publish docs, and the
 // projects stored in this browser. A native <dialog> opened modally; native controls only, so it works by keyboard
 // (QA-10, QA-11) and inside a cross-origin frame (ADR 0044). An error shows inline and the dialog stays open.
-import type { TemplateList } from "@nf-builder/engine";
+import { BLANK_TEMPLATE, type TemplateList } from "@nf-builder/engine";
 import { type FormEvent, type JSX, useId, useState } from "react";
 import {
   DEFAULT_PROJECT_NAME,
@@ -10,14 +10,14 @@ import {
 } from "../workspace/project-name";
 import type { ProjectMeta } from "../workspace/types";
 import { useModal } from "./project-dialogs";
-import type { TemplatesState } from "./templates";
+import type { TemplatesView } from "./templates";
 
 export type NewProjectRoute = "blank" | "template";
 
 export interface NewProjectRequest {
   readonly name: string;
   readonly languageVersion: string;
-  /** The pack's template id; Start blank is the pack's blank template. */
+  /** The pack's template id; Start blank is `BLANK_TEMPLATE`, which the worker resolves, so it needs no list. */
   readonly template: string;
   /** Carried with the request; it has no effect until F-606. */
   readonly publishDocs: boolean;
@@ -39,9 +39,11 @@ export function newProjectRequest(
   const name = normaliseProjectName(form.name);
   if (name === null)
     return { error: `Enter a name of 1 to ${PROJECT_NAME_MAX} characters.` };
-  if (list === null)
-    return { error: "Templates couldn't be loaded. Try again in a moment." };
-  const template = form.route === "blank" ? list.blank.id : form.templateId;
+  let template: string | null = BLANK_TEMPLATE;
+  if (form.route === "template") {
+    if (list === null) return { error: "Templates aren't loaded yet." };
+    template = form.templateId;
+  }
   if (template === null) return { error: "Choose a template." };
   return {
     name,
@@ -51,9 +53,33 @@ export function newProjectRequest(
   };
 }
 
+/** What Create does: send a request, show a message, or ask for the template list again after it failed. */
+export type SubmitOutcome =
+  | { readonly request: NewProjectRequest }
+  | { readonly error: string }
+  | { readonly reload: true };
+
+export function submitOutcome(
+  form: NewProjectForm,
+  templates: TemplatesView["state"],
+): SubmitOutcome {
+  const list = templates.status === "ready" ? templates.list : null;
+  const request = newProjectRequest(form, list);
+  if (!("error" in request)) return { request };
+  // only a missing list is special; a bad name or no chosen template is reported as it is
+  const waiting =
+    form.route === "template" &&
+    list === null &&
+    normaliseProjectName(form.name) !== null;
+  if (!waiting) return request;
+  if (templates.status === "error") return { reload: true };
+  return { error: "Templates are still loading. Try again in a moment." };
+}
+
 export interface NewProjectDialogProps {
   readonly languageVersions: readonly string[];
-  readonly templates: TemplatesState;
+  /** The template hook (`useTemplates`), called with the version chosen in the dialog. */
+  readonly useTemplates: (version: string) => TemplatesView;
   readonly projects: readonly ProjectMeta[];
   readonly currentId: string | null;
   readonly initialRoute: NewProjectRoute;
@@ -63,14 +89,15 @@ export interface NewProjectDialogProps {
 }
 
 export function NewProjectDialog(props: NewProjectDialogProps): JSX.Element {
-  const { templates } = props;
   const modal = useModal(props.onClose);
   const ids = useId();
   const titleId = `${ids}-title`;
+  const projectsId = `${ids}-projects`;
   const [name, setName] = useState(DEFAULT_PROJECT_NAME);
   const [languageVersion, setLanguageVersion] = useState(
     props.languageVersions[0] ?? "",
   );
+  const { state: templates, reload } = props.useTemplates(languageVersion);
   const [route, setRoute] = useState<NewProjectRoute>(props.initialRoute);
   const [chosen, setChosen] = useState<string | null>(null);
   const [publishDocs, setPublishDocs] = useState(true);
@@ -79,15 +106,20 @@ export function NewProjectDialog(props: NewProjectDialogProps): JSX.Element {
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
-    const request = newProjectRequest(
+    const outcome = submitOutcome(
       { name, languageVersion, route, templateId, publishDocs },
-      list,
+      templates,
     );
-    if ("error" in request) {
-      modal.setError(request.error);
+    if ("reload" in outcome) {
+      modal.setError(null);
+      reload();
       return;
     }
-    await modal.run(() => props.onCreate(request));
+    if ("error" in outcome) {
+      modal.setError(outcome.error);
+      return;
+    }
+    await modal.run(() => props.onCreate(outcome.request));
   };
 
   return (
@@ -185,11 +217,8 @@ export function NewProjectDialog(props: NewProjectDialogProps): JSX.Element {
           />
           <span>Publish docs to GitHub Pages</span>
         </label>
-        <section
-          className="dialog-projects"
-          aria-label="Projects in this browser"
-        >
-          <h3>Projects in this browser</h3>
+        <section className="dialog-projects" aria-labelledby={projectsId}>
+          <h3 id={projectsId}>Projects in this browser</h3>
           {props.projects.length === 0 ? (
             <p className="muted">No projects in this browser yet.</p>
           ) : (

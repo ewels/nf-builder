@@ -1,5 +1,6 @@
 import "fake-indexeddb/auto";
 import {
+  BLANK_TEMPLATE,
   createEngineService,
   type EditCommand,
   type EngineApi,
@@ -316,6 +317,20 @@ describe("F-202 workspace", () => {
     expect(await s.workspace.readFile("main.nf")).toContain(
       "nextflow.enable.types = true",
     );
+  });
+
+  it("F-203 UX-60: Start blank needs no template id: BLANK_TEMPLATE stores the pack's blank template", async () => {
+    const s = setup();
+    await s.watching;
+    const { blank } = await templateList(version);
+    const meta = await s.workspace.createProject({
+      name: "B",
+      languageVersion: version,
+      files: [],
+      template: BLANK_TEMPLATE,
+    });
+    const stored = await (await s.reader()).readProject(meta.id);
+    expect(stored?.files).toEqual(await templateFiles(version, blank.id));
   });
 
   it("F-203: createProject refuses an unknown template, and a template given with files", async () => {
