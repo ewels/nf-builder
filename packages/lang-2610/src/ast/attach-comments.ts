@@ -78,13 +78,18 @@ class Container {
   readonly children: Slot[] = [];
   readonly nested: Container[] = [];
 
-  constructor(
-    readonly node: AstNode,
-    readonly start: number,
-    readonly end: number,
-    /** Emit leftover comments as leading on the node instead of dangling. */
-    readonly hoist: boolean,
-  ) {}
+  readonly node: AstNode;
+  readonly start: number;
+  readonly end: number;
+  /** Emit leftover comments as leading on the node instead of dangling. */
+  readonly hoist: boolean;
+
+  constructor(node: AstNode, start: number, end: number, hoist: boolean) {
+    this.node = node;
+    this.start = start;
+    this.end = end;
+    this.hoist = hoist;
+  }
 
   contains(comment: Comment): boolean {
     return this.start <= start(comment) && end(comment) <= this.end;

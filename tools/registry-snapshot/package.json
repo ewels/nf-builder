@@ -1,0 +1,18 @@
+{
+  "name": "@nf-builder/registry-snapshot",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@nf-builder/lang-2610": "workspace:*",
+    "@nf-builder/lang-core": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "yaml": "2.9.1"
+  }
+}

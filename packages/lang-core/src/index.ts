@@ -50,6 +50,22 @@ export {
   type SourceLayout,
 } from "./printer.ts";
 export type {
+  PluginConfigOption,
+  PluginConfigScope,
+  PluginDefinition,
+  PluginFunction,
+  RegistrySnapshotIndex,
+  RegistrySnapshotPorts,
+  SnapshotFile,
+  SnapshotModule,
+  SnapshotModuleBundle,
+  SnapshotModulePorts,
+  SnapshotOutput,
+  SnapshotPlugin,
+  SnapshotPluginFile,
+  SnapshotPort,
+} from "./registry-snapshot.ts";
+export type {
   ConfigSourceFile,
   ConfigSourceParse,
   ParseStatus,

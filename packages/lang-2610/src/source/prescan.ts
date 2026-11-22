@@ -631,7 +631,10 @@ export class Positioner {
   private offset = 0;
   private line = 1;
   private column = 1;
-  constructor(private readonly text: string) {}
+  private readonly text: string;
+  constructor(text: string) {
+    this.text = text;
+  }
 
   at(offset: number): { line: number; column: number } {
     if (offset < this.offset) {

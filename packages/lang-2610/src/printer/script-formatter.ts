@@ -65,7 +65,10 @@ const callOf = (stmt: Statement): MethodCall | null =>
     : null;
 
 export class ScriptFormatter {
-  constructor(private readonly fmt: Formatter) {}
+  private readonly fmt: Formatter;
+  constructor(fmt: Formatter) {
+    this.fmt = fmt;
+  }
 
   /** The whole script (L93): the shebang, a code snippet or the declarations, and the script's dangling comments. */
   script(ast: ScriptAst): void {
