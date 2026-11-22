@@ -16,6 +16,7 @@ export function connectEngine(
     (failed ? Promise.race([call, failed]) : call) as P;
   return {
     palette: (version) => race(remote.palette(version)),
+    templates: (version) => race(remote.templates(version)),
     open: (request, onProgress) =>
       race(remote.open(request, onProgress && proxy(onProgress))),
     writeFiles: (files) => race(remote.writeFiles(files)),

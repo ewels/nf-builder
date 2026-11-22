@@ -8,7 +8,10 @@ import { describe, expect, it } from "vitest";
 import { pack } from "../src/index";
 import { docOf, expectedTags } from "./templates/doc-tags";
 
-const EXPECTED = [{ id: "blank", name: "Blank" }] as const;
+const EXPECTED = [
+  { id: "blank", name: "Blank" },
+  { id: "hello-world", name: "Hello world" },
+] as const;
 
 async function all(): Promise<{ set: TemplateSet; list: ProjectTemplate[] }> {
   const set = await pack.loadTemplates();

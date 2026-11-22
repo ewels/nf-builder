@@ -5,4 +5,7 @@ blank:
   id: blank
   name: Blank
   description: An empty pipeline with an entry workflow and a params block, ready to build on.
-templates: []
+templates:
+  - id: hello-world
+    name: Hello world
+    description: A typed pipeline with one process that writes a greeting to a file.

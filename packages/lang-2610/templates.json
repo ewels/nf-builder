@@ -22,5 +22,33 @@
       }
     ]
   },
-  "templates": []
+  "templates": [
+    {
+      "id": "hello-world",
+      "name": "Hello world",
+      "description": "A typed pipeline with one process that writes a greeting to a file.",
+      "files": [
+        {
+          "path": "README.md",
+          "text": "# Hello world\n\nA small typed pipeline: one process writes a greeting to a text file, and the workflow publishes it.\n\n- `main.nf` holds the `params` block, the entry workflow and the `output` block.\n- `modules/local/say_hello/main.nf` holds the process.\n- `nextflow_schema.json` describes the `greeting` parameter.\n\nRun it with `nextflow run . --greeting 'Hello again'`. The file appears in `results/greetings/`.\n"
+        },
+        {
+          "path": "main.nf",
+          "text": "nextflow.enable.types = true\n\ninclude { SAY_HELLO } from './modules/local/say_hello/main.nf'\n\nparams {\n    // The greeting to write to the output file.\n    greeting: String = 'Hello, world!'\n}\n\n/**\n * Writes the greeting to a text file and publishes it.\n */\nworkflow {\n\n    main:\n    greetings = channel.of(params.greeting)\n    greeting_file = SAY_HELLO(greetings)\n\n    publish:\n    greeting_file = greeting_file\n}\n\noutput {\n    greeting_file: Channel<Path> {\n        path 'greetings'\n    }\n}\n"
+        },
+        {
+          "path": "modules/local/say_hello/main.nf",
+          "text": "nextflow.enable.types = true\n\n/**\n * Writes a greeting to a text file.\n *\n * @param greeting The text to write.\n * @return The file that holds the greeting.\n */\nprocess SAY_HELLO {\n    input:\n    greeting: String\n\n    output:\n    file('greeting.txt')\n\n    script:\n    \"\"\"\n    echo '${greeting}' > greeting.txt\n    \"\"\"\n}\n"
+        },
+        {
+          "path": "nextflow.config",
+          "text": "manifest {\n    description = 'Writes a greeting to a text file'\n    nextflowVersion = '>=26.10.6'\n}\n"
+        },
+        {
+          "path": "nextflow_schema.json",
+          "text": "{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"Pipeline parameters\",\n  \"description\": \"The parameters of the Hello world pipeline.\",\n  \"type\": \"object\",\n  \"$defs\": {\n    \"greeting_options\": {\n      \"title\": \"Greeting options\",\n      \"type\": \"object\",\n      \"description\": \"What the pipeline writes.\",\n      \"properties\": {\n        \"greeting\": {\n          \"type\": \"string\",\n          \"default\": \"Hello, world!\",\n          \"description\": \"The greeting to write to the output file.\"\n        }\n      }\n    }\n  },\n  \"allOf\": [{ \"$ref\": \"#/$defs/greeting_options\" }]\n}\n"
+        }
+      ]
+    }
+  ]
 }

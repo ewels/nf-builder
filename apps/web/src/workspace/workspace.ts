@@ -110,6 +110,7 @@ export function createWorkspace(options: WorkspaceOptions): WorkspaceApi {
 
   return {
     palette: (version) => engine.palette(version),
+    templates: (version) => engine.templates(version),
     project: (path, workflow) => engine.project(path, workflow),
     diagnostics: () => engine.diagnostics(),
     readFile: (path) => engine.readFile(path),
