@@ -1,6 +1,9 @@
+import { existsSync } from "node:fs";
 import { expect, type Locator, type Page, test } from "@playwright/test";
-import { SMOKE_TAG } from "./browsers.ts";
+import { SMOKE_TAG, VISUAL_TAG } from "./browsers.ts";
 import { watchForCspViolations } from "./csp.ts";
+
+const BASELINE = "app-shell-default.png";
 
 const left = (page: Page) =>
   page.getByRole("complementary", { name: "Components and files" });
@@ -167,3 +170,38 @@ test("F-201 UX-02: the centre column shows a tab strip above the canvas area", a
   const c = await centre(page).locator(".canvas-area").boundingBox();
   expect((s?.y ?? 0) + (s?.height ?? 0)).toBeLessThanOrEqual((c?.y ?? 0) + 0.5);
 });
+
+test(
+  "F-201 step 2 UX-01 UX-02 UX-03: the default app shell matches the approved baseline",
+  {
+    tag: VISUAL_TAG,
+  },
+  async ({ browser }, testInfo) => {
+    const context = await browser.newContext({
+      viewport: { width: 1440, height: 900 },
+    });
+    const page = await context.newPage();
+    await page.goto("/");
+    await page.getByRole("contentinfo").waitFor();
+    const guidance =
+      "No approved baseline, or the shell changed: download the playwright-chromium artifact, view the -actual.png and commit it as the baseline (ADR 0021)";
+    // With updateSnapshots "none" Playwright writes no -actual.png for a missing baseline, so write it here.
+    if (!existsSync(testInfo.snapshotPath(BASELINE))) {
+      const actual = testInfo.outputPath("app-shell-default-actual.png");
+      await page.screenshot({
+        path: actual,
+        animations: "disabled",
+        caret: "hide",
+      });
+      await testInfo.attach("app-shell-default-actual.png", {
+        path: actual,
+        contentType: "image/png",
+      });
+      throw new Error(
+        `${guidance}. Expected at ${testInfo.snapshotPath(BASELINE)}`,
+      );
+    }
+    await expect(page, guidance).toHaveScreenshot(BASELINE);
+    await context.close();
+  },
+);

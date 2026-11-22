@@ -117,4 +117,18 @@ describe("CI workflows", () => {
       ),
     ).toBe(true);
   });
+  it("F-201 ADR-0021: the e2e job runs on a pinned runner image and uploads the report and test-results (with the actual screenshots) when it fails", () => {
+    const ci = read(join(WORKFLOWS, "ci.yml"));
+    const job = /^ {2}e2e:\s*$([\s\S]*?)^ {2}budget:/m.exec(ci)?.[1] ?? "";
+    expect(job).toMatch(/runs-on: ubuntu-24\.04\s*$/m);
+    expect(job).not.toContain("ubuntu-latest");
+    const upload =
+      /- name: Upload the Playwright report and traces\n([\s\S]*?)(?=\n {6}- |\n\S|$)/.exec(
+        job,
+      )?.[1] ?? "";
+    expect(upload).toMatch(/if: failure\(\)/);
+    expect(upload).toContain("uses: actions/upload-artifact@");
+    expect(upload).toContain("playwright-report/");
+    expect(upload).toContain("test-results/");
+  });
 });
