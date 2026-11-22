@@ -92,6 +92,7 @@ If your change adds a dependency, moves a package boundary, changes a stored or 
   1. the pack's `catalogue/*.json`;
   2. https://docs.seqera.io/nextflow;
   3. the syntax reference.
+- Record every bug or doc gap found in Nextflow, nf-lang, the language server or the Nextflow docs in `docs/research/upstream-bugs.md`, with a minimal reproducer checked against the pinned release, so the maintainer can file it upstream.
 - Use the Nextflow agent skills:
   - Claude Code: eight skills from `seqeralabs/nextflow-plugin` are vendored in `.claude/skills/` (see its README), so cloud sessions get them too;
   - other agents: `npx skills add seqeralabs/nextflow-plugin`.
