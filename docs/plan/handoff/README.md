@@ -14,7 +14,9 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-106 typed projection | not started | [plan](plan-F-106.md). Branch from `main` after F-105 merges. |
 | F-107 legacy projection | not started | [plan](plan-F-107.md). After F-106; parallel with F-108. |
 | F-108 code nodes | not started | [plan](plan-F-108.md). After F-106; parallel with F-107. |
-| F-501 registry snapshot | `feat/F-501`, in PR | Plan deleted in its PR. Maintainer issue #27 (build hook). |
+| F-111 edit commands | not started | [plan](plan-F-111.md). Tasks 1–6 need only F-105; 7 onwards need F-106. |
+| F-112 diagnostics | not started | [plan](plan-F-112.md). After F-106 (and F-111 for fixes). |
+| F-501 registry snapshot | `feat/F-501`, in PR | Plan deleted in its PR. Blocked on #31 (snapshot branch unreadable while the repository is private); #27 (build hook). |
 
 Next free ADR number: 0036 (0034 is F-105's, 0035 F-501's).
 
@@ -45,6 +47,7 @@ Next free ADR number: 0036 (0034 is F-105's, 0035 F-501's).
 ### F-106 — [plan](plan-F-106.md)
 - Accept every recommendation in section 6: types in lang-core, logic in the engine with catalogue data; the 2.5 node-key grammar in a new ADR (a stored format once F-207 writes `layout.json`); the 2.4 type subset with `plain` values; code-node shells until F-108; calls are processes, workflows, agents and pipelines (unparsed and unresolved marked by status); the plan's port names; a type-probe oracle tree; whitespace-only per F-104's `equivalent`; projector as a snapshot, F-113 owns invalidation; no Playwright test.
 - Rebase sections 3 and 4 on F-104's and F-105's names as built (section 1.4 lists them).
+- Amendment from the F-112 plan: ports carry `argumentType` (the inline argument's type) for LA-32 checks.
 - Amendment from the F-107/F-108 plans: task 4 also creates `packages/engine/src/projection/scope.ts` (`lookup`, `bind`, `resolveRead`, multi-value bindings) and `Read.properties`, so F-107 and F-108 can run in parallel (plan-F-107.md section 1.5).
 
 ### F-107 — [plan](plan-F-107.md)
@@ -52,6 +55,16 @@ Next free ADR number: 0036 (0034 is F-105's, 0035 F-501's).
 
 ### F-108 — [plan](plan-F-108.md)
 - Accept every recommendation in section 6: closure reads are code-node inputs; mutations are reads only; conditional writes replace the binding; no port for `params` as a whole; keys from the first output; a lint-only free-variable oracle tree. One ADR for the LA-27 readings.
+
+### F-111 — [plan](plan-F-111.md)
+- Accept every recommendation in section 6: declaration-level reprint for workflow commands, identifier edits for renames, item-boundary include inserts; the command model of 2.2 (plain data, ids resolved at apply time, patches with inverses, `commit` separate); AR-24 read as "no problem the file didn't have"; our own LA-13 check (lint accepts positional mixing, upstream-bugs #20) with `ParseProblem.code` tags; `null` placeholders for missing positional inputs; variable introduction names; Connect moves a later source when safe; DeleteNode clears direct arguments; CreateProcess writes `modules/local/<lower>/main.nf` from `LanguagePack.scaffold`; the rename limits; `fast-check` 4.11.0 as an engine dev dependency (ADR 0011). One ADR at landing.
+
+### F-112 — [plan](plan-F-112.md)
+- Accept the recommendations in section 6, except:
+  - quick fixes carry text edits (`QuickFix { title, path, edits }`) and become F-111's `ReplaceFileText { path, text }` when applied (the plan's own fallback), so F-111's command shape is unchanged;
+  - no new feature for full nf-lang name-resolution and type-check parity: the spec doesn't require it for v0.1, so the deferred checks (point 4's list) are recorded in F-112's notes and ADR.
+- LA-33 amended: a missing argument is an error (nf-lang rejects it), an unused output a warning. LA-31 and a new LA-37 row as in point 7. `Port.argumentType` is added to F-106 (point 13).
+- Rules behind a lazy `LanguagePack.loadLints()`, one ADR at landing.
 
 ### F-501 (merged with its PR)
 - Accept every recommendation in section 6: an orphan `registry-snapshot` branch fetched by each Netlify build; ship without the build-hook secret and open a `maintainer` issue for it; split `index.json` (QA-06) and `ports.json`, with IO-31 read as the pair; `tools/registry-snapshot` may import lang-core and pack entries (amends ADR 0003); make lang-2610 erasable for plain Node; ports from registry metadata in `meta.yml` order; parser wins on kind and component; every bundle file; pinned dependency closure; plugin release admitted by the pinned Nextflow; the failure policy; a path-filtered PR dry run outside "CI green"; daily at 03:23 UTC; the fixture snapshot for e2e. ADR 0035 (F-105 takes 0034).

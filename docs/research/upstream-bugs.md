@@ -29,6 +29,7 @@ To reproduce with the pinned dist: `NXF_OFFLINE=true .cache/nextflow/26.10.7/nex
 | 17 | Nextflow registry | `nf-core/tiara/tiara` returns HTTP 500 on its module and releases endpoints | F-501 plan | no |
 | 18 | Nextflow registry | Module metadata lists outputs in a different order from `meta.yml` and `main.nf` | F-501 plan | no |
 | 19 | Nextflow registry | `nf-core/fasta_clean_faidx` is listed as a process but declares a workflow; `nextflow-io/hello` has no `componentName` | F-501 plan | no |
+| 20 | nf-lang lint | A legacy process before `nextflow.enable.types = true` and a typed one after it in the same script pass lint and run, although the docs say a script can't mix them | F-111 plan | no |
 
 ## Details
 
@@ -262,3 +263,49 @@ workflow {
 - **What happens:** `nf-core/fasta_clean_faidx` is listed with `kind: Process`, but its `main.nf` declares a workflow; `nextflow-io/hello` has no `metadata.componentName`, although its `main.nf` declares process `HELLO`.
 - **Expected:** `kind` and `componentName` that match `main.nf`.
 - **nf-builder:** takes kind and component from the parsed `main.nf` and reports disagreements (F-501).
+
+### 20. Typed and legacy processes can be mixed in one script by position
+
+```nextflow
+process LEGACY_GOODBYE {
+    input:
+    val x
+
+    script:
+    """
+    echo goodbye ${x}
+    """
+
+    stub:
+    """
+    echo goodbye ${x}
+    """
+}
+
+nextflow.enable.types = true
+
+process TYPED_HELLO {
+    input:
+    x: String
+
+    script:
+    """
+    echo hello ${x}
+    """
+
+    stub:
+    """
+    echo hello ${x}
+    """
+}
+
+workflow {
+    LEGACY_GOODBYE(channel.of('a'))
+    TYPED_HELLO('b')
+}
+```
+
+- **What happens:** `nextflow lint .` reports no errors and `nextflow run main.nf -stub` runs both processes. The typed/legacy split depends on where the feature flag appears; lint only rejects a legacy definition after the flag or a typed one without it.
+- **Expected:** the static-types docs (`docs/static-typing.mdx` L50 at the pinned commit) say a script can't mix typed and legacy definitions, so lint should report the legacy process here, or the docs should describe the positional rule.
+- **nf-builder:** refuses edits that would mix the two in one script (LA-13, F-111), and keeps scripts that are already mixed editable.
+- **Reproducer:** the oracle case `f111-mixed-after-flag` (added with F-111) records this file.
