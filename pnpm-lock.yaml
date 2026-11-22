@@ -78,6 +78,10 @@ importers:
       '@nf-builder/lang-core':
         specifier: workspace:*
         version: link:../lang-core
+    devDependencies:
+      yaml:
+        specifier: 2.9.1
+        version: 2.9.1
 
   packages/lang-2610:
     dependencies:

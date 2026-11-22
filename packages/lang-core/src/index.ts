@@ -1,4 +1,5 @@
 import type { Catalogue } from "./catalogue.ts";
+import type { IncludeRules } from "./includes.ts";
 import type { PaletteDefinition } from "./palette.ts";
 import type { SourceParser } from "./source-file.ts";
 
@@ -7,6 +8,8 @@ export interface LanguagePack {
   readonly version: string;
   /** The palette.yaml overlay (ADR 0025); small, loaded with the pack. */
   readonly palette: PaletteDefinition;
+  /** Include resolution rules (AR-03, F-105): pure, loaded with the pack. */
+  readonly includes: IncludeRules;
   /** The generated catalogue, loaded on first call (a dynamic import, so it stays out of the initial bundle; ADR 0028). */
   loadCatalogue(): Promise<Catalogue>;
   /** The parser with declaration-level fallback, loaded on first call (a dynamic import; ADR 0004, ADR 0027). */

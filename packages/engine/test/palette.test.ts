@@ -1,4 +1,8 @@
-import type { Catalogue, LanguagePack } from "@nf-builder/lang-core";
+import type {
+  Catalogue,
+  IncludeRules,
+  LanguagePack,
+} from "@nf-builder/lang-core";
 import { describe, expect, it } from "vitest";
 import { installedPackVersions } from "../src/packs";
 import { loadPalette } from "../src/palette";
@@ -61,6 +65,7 @@ function fake(load: (real: Catalogue) => Promise<Catalogue>): LanguagePack {
         },
       ],
     },
+    includes: {} as IncludeRules,
     loadCatalogue: () => load({} as Catalogue),
     loadParser: () => Promise.reject(new Error("not used here")),
   };
