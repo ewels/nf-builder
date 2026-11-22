@@ -3,6 +3,8 @@ import {
   type BrowserName,
   SMOKE_TAG,
   selectedBrowsers,
+  VISUAL_TAG,
+  visualEnabled,
 } from "./e2e/browsers.ts";
 import { DEV_URL, PREVIEW_URL } from "./e2e/urls.ts";
 
@@ -24,6 +26,9 @@ function project(name: BrowserName) {
           viewport,
           launchOptions: { executablePath },
         },
+        grepInvert: visualEnabled(process.env)
+          ? undefined
+          : new RegExp(`${VISUAL_TAG}\\b`),
       };
     case "firefox":
       return { grep, use: { ...devices["Desktop Firefox"], viewport } };
@@ -34,6 +39,10 @@ function project(name: BrowserName) {
 
 export default defineConfig({
   testDir: "e2e",
+  // Baselines are never written implicitly: a missing or changed one fails and the actual image lands in test-results/.
+  updateSnapshots: "none",
+  snapshotPathTemplate:
+    "{testDir}/__screenshots__/{testFilePath}/{arg}-{projectName}-{platform}{ext}",
   forbidOnly: Boolean(process.env.CI),
   workers: process.env.CI ? 1 : undefined,
   reporter: process.env.CI

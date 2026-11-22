@@ -29,7 +29,8 @@ jobs:
 
   e2e:
     name: Playwright ${{ matrix.suite }} (${{ matrix.browser }})
-    runs-on: ubuntu-latest
+    # Pinned: visual baselines are rendered here, so the image must not move with the default runner label (ADR 0021).
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     strategy:
       fail-fast: false

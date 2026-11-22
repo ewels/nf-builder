@@ -6,3 +6,9 @@ describe("@nf-builder/lang-2610", () => {
     expect(entry).toBeTypeOf("object");
   });
 });
+
+describe("LanguagePack", () => {
+  it("LA-01 ADR-0006: the pack entry exports a LanguagePack for 26.10", () => {
+    expect(entry.pack.version).toBe("26.10");
+  });
+});

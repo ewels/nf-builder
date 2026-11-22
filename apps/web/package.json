@@ -11,8 +11,10 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@nf-builder/engine": "workspace:*",
     "react": "19.3.1",
-    "react-dom": "19.3.1"
+    "react-dom": "19.3.1",
+    "zustand": "5.1.0"
   },
   "devDependencies": {
     "@types/node": "22.20.5",
