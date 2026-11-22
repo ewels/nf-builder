@@ -43,11 +43,35 @@ const treeOf = (code: string, kind: string) =>
   dirs.find((d) => d.code === code && d.kind === kind)?.dir;
 
 /** How a code's diagnostics are compared with lint's errors: which lint messages count, and where our message may differ (paths). */
-const PARITY: Record<string, { lint: RegExp; cut: string | null }> = {
+const PARITY: Record<
+  string,
+  { lint: RegExp; cut: string | null; key?: "lint" | "warnings" }
+> = {
   syntax: { lint: /./, cut: null },
   "include-target": { lint: /^Invalid include source/, cut: "'" },
   "include-not-parsed": { lint: /^Module could not be parsed/, cut: "'" },
   "include-name": { lint: /^Included name/, cut: " in module" },
+  // warnings that `nextflow lint` prints
+  "deprecated-when": {
+    lint: /^The `when` section is deprecated/,
+    cut: null,
+    key: "warnings",
+  },
+  "deprecated-shell": {
+    lint: /^The `shell` block is deprecated/,
+    cut: null,
+    key: "warnings",
+  },
+  "deprecated-channel": {
+    lint: /^The use of `Channel` to access channel factories/,
+    cut: null,
+    key: "warnings",
+  },
+  "implicit-it": {
+    lint: /^Implicit closure parameter is deprecated/,
+    cut: null,
+    key: "warnings",
+  },
 };
 const VERBS = new Set([
   "add",
@@ -122,8 +146,8 @@ describe("F-112 fixtures", () => {
       if (!parity) return; // an own or paranoid code: lint has no counterpart
       const cut = (m: string): string =>
         parity.cut ? (m.split(parity.cut)[0] ?? m) : m;
-      const theirs = recorded(code, "positive", "lint").filter((e) =>
-        parity.lint.test(e.message),
+      const theirs = recorded(code, "positive", parity.key ?? "lint").filter(
+        (e) => parity.lint.test(e.message),
       );
       expect(
         ours.map((d) => `${d.path}:${d.range.line}:${d.range.column}`),
@@ -211,24 +235,13 @@ const PENDING = [
   "agent-output",
   "call-arity",
   "config-include-placement",
-  "deprecated-channel",
-  "deprecated-directive",
-  "deprecated-shell",
-  "deprecated-when",
   "duplicate-name",
   "feature-flag",
-  "implicit-it",
   "include-alias",
-  "legacy-params",
-  "legacy-process",
-  "legacy-workflow",
   "missing-type",
   "multiple-channels",
-  "params-outside-entry",
   "pipeline-include-types",
-  "publish-dir",
   "publish-type-ignored",
-  "tuple-where-record",
   "type-mismatch",
   "typed-process-outputs",
   "unused-output",
