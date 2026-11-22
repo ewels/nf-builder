@@ -151,4 +151,13 @@ describe("@nf-builder/web", () => {
       channels: 0,
     });
   });
+
+  it('F-201 F-206: with no project the details column still reads "Nothing selected" under the Details heading', () => {
+    const html = renderToStaticMarkup(<AppShell />);
+    const column =
+      /<aside[^>]*aria-label="Details"[\s\S]*?<\/aside>/.exec(html)?.[0] ?? "";
+    expect(column).toContain('<h2 class="column-title">Details</h2>');
+    expect(column).toContain('<p class="muted">Nothing selected</p>');
+    expect(column).not.toContain("Edit");
+  });
 });

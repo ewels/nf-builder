@@ -59,7 +59,7 @@ const view: CanvasView = {
 
 describe("F-205 flow elements", () => {
   it("F-205 AR-31: toFlowNodes keeps ids, positions and sizes and passes the view as data", () => {
-    const nodes = toFlowNodes(view, false);
+    const nodes = toFlowNodes(view, false, null);
     expect(
       nodes.map((n) => [
         n.id,
@@ -77,7 +77,7 @@ describe("F-205 flow elements", () => {
   });
 
   it("F-205 UX-24: toFlowEdges maps ports to handle ids and sets aria labels from tooltips", () => {
-    const [edge] = toFlowEdges(view);
+    const [edge] = toFlowEdges(view, null);
     expect(edge).toMatchObject({
       id: "e1",
       type: "flow",
@@ -90,5 +90,28 @@ describe("F-205 flow elements", () => {
     });
     expect(outputHandle({ id: "out" })).toBe("out:out");
     expect(inputHandle({ id: "x" })).toBe("in:x");
+  });
+
+  it("F-206 UX-24: edges touching the selected node are highlighted and raised; edges are not selectable", () => {
+    const [edge] = toFlowEdges(view, "main.nf#/a");
+    expect(edge?.data?.highlighted).toBe(true);
+    expect(edge?.zIndex).toBeGreaterThan(0);
+    expect(edge?.selectable).toBe(false);
+    const [target] = toFlowEdges(view, "main.nf#/:emit:r");
+    expect(target?.data?.highlighted).toBe(true);
+    const [other] = toFlowEdges(view, "main.nf#/other");
+    expect(other?.data?.highlighted).toBe(false);
+    expect(other?.zIndex ?? 0).toBe(0);
+    expect(other?.selectable).toBe(false);
+    expect(toFlowEdges(view, null)[0]?.data?.highlighted).toBe(false);
+  });
+
+  it("F-206 UX-30: only the selected node is marked selected", () => {
+    const nodes = toFlowNodes(view, true, "main.nf#/:emit:r");
+    expect(nodes.map((n) => n.selected)).toEqual([false, true]);
+    expect(toFlowNodes(view, true, null).map((n) => n.selected)).toEqual([
+      false,
+      false,
+    ]);
   });
 });

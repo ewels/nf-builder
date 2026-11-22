@@ -3,6 +3,7 @@
 // store (F-202) opens stored projects in the worker and hands the summary to `show`; `open` is the test hook's raw open.
 import type {
   EngineApi,
+  NodeDetails,
   OpenRequest,
   ProjectChange,
   Projection,
@@ -32,6 +33,22 @@ export type CanvasContent =
     }
   | { readonly status: "unavailable"; readonly message: string };
 
+/** The worker's details for the selected node (F-206). */
+export type DetailsContent =
+  | { readonly status: "idle" }
+  | { readonly status: "loading"; readonly node: string }
+  | {
+      readonly status: "ready";
+      readonly node: string;
+      readonly revision: number;
+      readonly details: NodeDetails;
+    }
+  | {
+      readonly status: "unavailable";
+      readonly node: string;
+      readonly message: string;
+    };
+
 /** Who opened the project on show: a stored project (F-202) or a raw `open` of the test hook, which is never stored. */
 export type CanvasSource = "project" | "unsaved";
 
@@ -43,6 +60,9 @@ export interface WorkspaceState {
   readonly content: CanvasContent;
   /** Session only (F-205 open point 11). */
   readonly portLabels: boolean;
+  /** The selected node's id, in the active tab's projection (single selection, F-206). */
+  readonly selected: string | null;
+  readonly details: DetailsContent;
 }
 
 export interface WorkspaceActions {
@@ -57,6 +77,8 @@ export interface WorkspaceActions {
   openWorkflow(path: string, workflow: string | null): Promise<void>;
   selectTab(id: string): Promise<void>;
   setPortLabels(value: boolean): void;
+  /** Selects a node and loads its details; null clears the selection. */
+  select(id: string | null): Promise<void>;
 }
 
 /** The workflow a project opens with: main.nf's entry, else the first entry workflow, else the first named one. */
@@ -87,6 +109,7 @@ export function tabFor(ref: {
 }
 
 const EMPTY: CanvasContent = { status: "empty" };
+const IDLE: DetailsContent = { status: "idle" };
 
 const messageOf = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
@@ -97,9 +120,17 @@ export function createCanvasStore(
   return createStore<WorkspaceState & WorkspaceActions>()((set, get) => {
     // a result for a superseded tab or project is dropped
     let generation = 0;
+    // a details result for a superseded selection is dropped
+    let selection = 0;
+
+    function clearSelection(): void {
+      selection++;
+      set({ selected: null, details: IDLE });
+    }
 
     async function load(tab: WorkflowTab, quiet = false): Promise<void> {
       const mine = ++generation;
+      if (!quiet) clearSelection();
       // a refresh keeps the canvas on screen (and its viewport) until the new projection arrives
       set(
         quiet
@@ -128,6 +159,52 @@ export function createCanvasStore(
       if (mine === generation) set({ content });
     }
 
+    async function loadDetails(id: string): Promise<void> {
+      const { tabs, activeTab, content } = get();
+      const tab = tabs.find((t) => t.id === activeTab);
+      if (tab === undefined || content.status !== "ready") return;
+      const mine = ++selection;
+      set({ selected: id, details: { status: "loading", node: id } });
+      let details: DetailsContent;
+      try {
+        const result = await engine().details(tab.path, tab.workflow, id);
+        if (mine !== selection) return;
+        if ("ok" in result)
+          details = {
+            status: "unavailable",
+            node: id,
+            message: result.message,
+          };
+        else if (result.details === null) {
+          clearSelection();
+          return;
+        } else {
+          const current = get().content;
+          details =
+            current.status === "ready" && current.revision === result.revision
+              ? {
+                  status: "ready",
+                  node: id,
+                  revision: result.revision,
+                  details: result.details,
+                }
+              : {
+                  status: "unavailable",
+                  node: id,
+                  message: "The project changed. Select the node again.",
+                };
+        }
+      } catch (error) {
+        if (mine !== selection) return;
+        details = {
+          status: "unavailable",
+          node: id,
+          message: messageOf(error),
+        };
+      }
+      set({ details });
+    }
+
     return {
       source: null,
       summary: null,
@@ -135,6 +212,8 @@ export function createCanvasStore(
       activeTab: null,
       content: EMPTY,
       portLabels: true,
+      selected: null,
+      details: IDLE,
 
       async open(request) {
         generation++;
@@ -145,6 +224,7 @@ export function createCanvasStore(
 
       async show(summary, source = "project") {
         generation++;
+        clearSelection();
         const first = defaultWorkflow(summary.workflows);
         const tab = first === null ? null : tabFor(first);
         set({
@@ -160,6 +240,7 @@ export function createCanvasStore(
       projectGone() {
         if (get().source !== "project") return;
         generation++;
+        clearSelection();
         set({
           source: null,
           summary: null,
@@ -182,6 +263,8 @@ export function createCanvasStore(
         const active = tabs.find((t) => t.id === activeTab);
         if (active !== undefined) {
           await load(active, true);
+          const { selected } = get();
+          if (selected !== null) await loadDetails(selected);
           return;
         }
         const first = defaultWorkflow(change.workflows);
@@ -205,6 +288,16 @@ export function createCanvasStore(
 
       setPortLabels(portLabels) {
         set({ portLabels });
+      },
+
+      async select(id) {
+        if (id === null) {
+          clearSelection();
+          return;
+        }
+        const { selected, details } = get();
+        if (id === selected && details.status !== "unavailable") return;
+        await loadDetails(id);
       },
     };
   });

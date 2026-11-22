@@ -15,6 +15,8 @@ export type CanvasFlowNode = Node<CanvasNodeData, "card" | "pill">;
 type CanvasEdgeData = {
   dataflow: EdgeDataflow;
   tooltip: string;
+  /** The edge touches the selected node (UX-24). */
+  highlighted: boolean;
 } & Record<string, unknown>;
 export type CanvasFlowEdge = Edge<CanvasEdgeData, "flow">;
 
@@ -26,6 +28,7 @@ export const outputHandle = (port: Pick<CanvasPortView, "id">): string =>
 export function toFlowNodes(
   view: CanvasView,
   portLabels: boolean,
+  selected: string | null,
 ): CanvasFlowNode[] {
   return view.nodes.map((n) => ({
     id: n.id,
@@ -34,19 +37,32 @@ export function toFlowNodes(
     initialWidth: n.width,
     initialHeight: n.height,
     data: { view: n, portLabels },
+    selected: n.id === selected,
     ariaLabel: n.ariaLabel,
   }));
 }
 
-export function toFlowEdges(view: CanvasView): CanvasFlowEdge[] {
-  return view.edges.map((e) => ({
-    id: e.id,
-    type: "flow",
-    source: e.source,
-    sourceHandle: outputHandle({ id: e.sourcePort }),
-    target: e.target,
-    targetHandle: inputHandle({ id: e.targetPort }),
-    data: { dataflow: e.dataflow, tooltip: e.tooltip },
-    ariaLabel: e.tooltip,
-  }));
+/** A highlighted edge is drawn above the others. */
+const HIGHLIGHTED_Z = 1000;
+
+export function toFlowEdges(
+  view: CanvasView,
+  selected: string | null,
+): CanvasFlowEdge[] {
+  return view.edges.map((e) => {
+    const highlighted =
+      selected !== null && (e.source === selected || e.target === selected);
+    return {
+      id: e.id,
+      type: "flow",
+      source: e.source,
+      sourceHandle: outputHandle({ id: e.sourcePort }),
+      target: e.target,
+      targetHandle: inputHandle({ id: e.targetPort }),
+      data: { dataflow: e.dataflow, tooltip: e.tooltip, highlighted },
+      ariaLabel: e.tooltip,
+      selectable: false,
+      ...(highlighted ? { zIndex: HIGHLIGHTED_Z } : {}),
+    };
+  });
 }

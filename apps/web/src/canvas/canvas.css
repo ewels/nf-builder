@@ -179,6 +179,21 @@
   stroke-width: 1;
 }
 
+.react-flow__edge-path.is-highlighted {
+  stroke: var(--color-accent);
+  stroke-width: 2;
+}
+
+.react-flow__node.selected .canvas-node {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.react-flow__edge.inactive {
+  /* edges are not selectable, but they still take the pointer for the tooltip (UX-24) */
+  pointer-events: visibleStroke;
+}
+
 .react-flow__edge:hover .react-flow__edge-path {
   stroke: var(--color-accent);
   stroke-width: 2.5;

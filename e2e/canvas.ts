@@ -88,6 +88,16 @@ export async function canvasReady(page: Page): Promise<void> {
 export const node = (page: Page, id: string): Locator =>
   page.locator(`.react-flow__node[data-id="${id}"]`);
 
+/** Clicks the empty pane, clear of the controls, the minimap and the attribution (clears the selection). */
+export async function clickEmptyCanvas(page: Page): Promise<void> {
+  await page.locator(".react-flow__pane").click({ position: { x: 8, y: 8 } });
+}
+
+/** Clicks a node's title bar, which selects it. */
+export async function selectNode(page: Page, id: string): Promise<void> {
+  await node(page, id).locator(".canvas-node-title").first().click();
+}
+
 /** The viewport's zoom, read from its transform. */
 export function viewportZoom(page: Page): Promise<number> {
   return page.locator(".react-flow__viewport").evaluate((el) => {

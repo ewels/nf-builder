@@ -5,6 +5,7 @@ import {
   ControlButton,
   Controls,
   MiniMap,
+  type OnNodesChange,
   ReactFlow,
   ReactFlowProvider,
   useNodesInitialized,
@@ -16,7 +17,12 @@ import { type JSX, type MouseEvent, useEffect, useMemo, useState } from "react";
 import "./canvas.css";
 import { NODE_TYPES } from "./canvas-nodes";
 import { EDGE_TYPES } from "./flow-edge";
-import { type CanvasFlowEdge, toFlowEdges, toFlowNodes } from "./flow-elements";
+import {
+  type CanvasFlowEdge,
+  type CanvasFlowNode,
+  toFlowEdges,
+  toFlowNodes,
+} from "./flow-elements";
 
 /** Sentence-case labels with no delete wording (nodes can't be deleted yet). */
 const CANVAS_ARIA_LABELS = {
@@ -48,25 +54,50 @@ interface WorkflowCanvasProps {
   readonly projection: Projection;
   readonly portLabels: boolean;
   readonly onPortLabelsChange: (value: boolean) => void;
+  readonly selected: string | null;
+  readonly onSelect: (id: string | null) => void;
 }
 
 function CanvasInner({
   projection,
   portLabels,
   onPortLabelsChange,
+  selected,
+  onSelect,
 }: WorkflowCanvasProps): JSX.Element {
   const view = useMemo(
     () => canvasView(projection, { portLabels }),
     [projection, portLabels],
   );
   const initialNodes = useMemo(
-    () => toFlowNodes(view, portLabels),
-    [view, portLabels],
+    () => toFlowNodes(view, portLabels, selected),
+    [view, portLabels, selected],
   );
   // controlled nodes: React Flow reports each node's measured size through onNodesChange
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  useEffect(() => setNodes(initialNodes), [initialNodes, setNodes]);
-  const edges = useMemo(() => toFlowEdges(view), [view]);
+  const [nodes, setNodes, applyNodeChanges] = useNodesState(initialNodes);
+  // a refresh replaces the nodes but keeps the measured sizes, so the selection (held in the store) survives it
+  useEffect(
+    () =>
+      setNodes((current) =>
+        initialNodes.map((n) => {
+          const old = current.find((c) => c.id === n.id);
+          return old?.measured === undefined
+            ? n
+            : { ...n, measured: old.measured };
+        }),
+      ),
+    [initialNodes, setNodes],
+  );
+  // selection is the store's: only React Flow's keyboard select and deselect are forwarded (single select, UX-30)
+  const onNodesChange: OnNodesChange<CanvasFlowNode> = (changes) => {
+    const picks = changes.getByType("select");
+    const chosen = picks.find((c) => c.selected);
+    if (chosen !== undefined) onSelect(chosen.id);
+    else if (picks.some((c) => c.id === selected)) onSelect(null);
+    for (const pick of picks) changes.remove(pick);
+    applyNodeChanges(changes);
+  };
+  const edges = useMemo(() => toFlowEdges(view, selected), [view, selected]);
   // shown at the pointer, outside the zoomed viewport so it stays readable (UX-24)
   const [tooltip, setTooltip] = useState<{
     text: string;
@@ -109,6 +140,10 @@ function CanvasInner({
         fitViewOptions={FIT}
         nodesDraggable={false}
         nodesConnectable={false}
+        multiSelectionKeyCode={null}
+        selectionKeyCode={null}
+        onNodeClick={(_event, n) => onSelect(n.id)}
+        onPaneClick={() => onSelect(null)}
         deleteKeyCode={null}
         ariaLabelConfig={CANVAS_ARIA_LABELS}
         attributionPosition="bottom-center"
