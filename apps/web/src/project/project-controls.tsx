@@ -12,6 +12,7 @@ const languageVersions = installedPackVersions();
 
 export function ProjectControls(): JSX.Element {
   const status = useProjects((s) => s.status);
+  const opener = useProjects((s) => s.opener);
   const dialog = useProjects((s) => s.dialog);
   const create = useProjects((s) => s.create);
   const open = useProjects((s) => s.open);
@@ -22,26 +23,18 @@ export function ProjectControls(): JSX.Element {
   const templates = useTemplates(
     dialog?.kind === "new" ? languageVersions[0] : undefined,
   );
-  // a dialog's own unmount can't restore focus, so put it back on the control that opened it once the dialog has gone
-  // (WCAG 2.4.3): the switcher puts focus on its button before it acts, and the header's button is focused when clicked
+  // a dialog's own unmount can't restore focus, so put it back on the element that opened it once the dialog has gone
+  // (WCAG 2.4.3). The store recorded that element when the dialog was requested, before the dialog took focus; if it has
+  // left the page, the switcher's button gets focus.
   const button = useRef<HTMLButtonElement>(null);
-  const opener = useRef<HTMLElement | null>(null);
   const shown = useRef(false);
   useEffect(() => {
-    if (dialog !== null && !shown.current) {
-      opener.current =
-        document.activeElement instanceof HTMLElement
-          ? document.activeElement
-          : null;
-    } else if (dialog === null && shown.current) {
-      const target = opener.current?.isConnected
-        ? opener.current
-        : button.current;
+    if (dialog === null && shown.current) {
+      const target = opener?.isConnected ? opener : button.current;
       target?.focus();
-      opener.current = null;
     }
     shown.current = dialog !== null;
-  }, [dialog]);
+  }, [dialog, opener]);
   const { current } = status;
   return (
     <>

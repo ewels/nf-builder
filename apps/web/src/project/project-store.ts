@@ -28,6 +28,8 @@ export type ProjectDialog =
 
 interface ProjectUiState {
   readonly dialog: ProjectDialog | null;
+  /** The element that had focus when the dialog was requested; focus returns to it on close (QA-10, WCAG 2.4.3). */
+  readonly opener: HTMLElement | null;
   readonly status: WorkspaceStatus;
   /** Set while usage is at or above the warning fraction. */
   readonly storageWarning: StorageUsage | null;
@@ -101,6 +103,7 @@ export function createProjectStore(
 
     return {
       dialog: null,
+      opener: null,
       status: INITIAL_STATUS,
       storageWarning: null,
       persisted: null,
@@ -130,7 +133,16 @@ export function createProjectStore(
       },
 
       showDialog(dialog) {
-        set({ dialog });
+        // read before the dialog mounts: its own effects move focus into it
+        const active =
+          typeof document === "undefined" ? null : document.activeElement;
+        set({
+          dialog,
+          opener:
+            typeof HTMLElement !== "undefined" && active instanceof HTMLElement
+              ? active
+              : null,
+        });
       },
 
       closeDialog() {

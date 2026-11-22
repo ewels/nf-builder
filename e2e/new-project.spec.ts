@@ -213,3 +213,20 @@ test("F-203 QA-30: creating from each template raises no CSP violation or consol
   expect(await watch.violations()).toEqual([]);
   expect(watch.consoleErrors).toEqual([]);
 });
+
+test("F-203 QA-10 UX-01: Escape on the dialog opened from the header's Templates button returns focus to it", async ({
+  page,
+}) => {
+  await page.goto("./");
+  await expect(switcher(page)).toBeEnabled();
+  const templates = page
+    .getByRole("banner")
+    .getByRole("button", { name: "Templates" });
+  await templates.focus();
+  await page.keyboard.press("Enter");
+  const dialog = newProjectDialog(page);
+  await expect(dialog).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(dialog).toBeHidden();
+  await expect(templates).toBeFocused();
+});
