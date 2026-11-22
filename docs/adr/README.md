@@ -31,3 +31,4 @@ Process: [0001](0001-record-decisions-as-adrs.md). Template: [template.md](templ
 | [0025](0025-palette-overlay.md) | Keep the palette overlay in YAML, generate JSON for the pack | Accepted (agent) |
 | [0026](0026-no-language-server-in-v0-1.md) | Keep the CheerpJ language server out of v0.1 | Accepted (agent) |
 | [0028](0028-palette-data-path.md) | Load the palette from the pack and the catalogue lazily | Accepted (agent) |
+| [0029](0029-relax-qa-03.md) | Let opening a large project take longer, as long as the app stays responsive | Accepted |

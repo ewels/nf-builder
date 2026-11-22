@@ -216,3 +216,10 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - Q16 answered: new feature F-210 (Files view, UX-16); F-301 depends on it (`scope-change`).
   - Tests: the remaining Playwright listing test gets a 30 s timeout.
 - Blockers: none.
+
+## 2026-11-22 · QA-03 · Claude with Phil Ewels
+- Did: QA-03 relaxed at the maintainer's request: a responsive UI with loading progress, and a 30 s regression ceiling for sarek instead of 3 s ([ADR 0029](../adr/0029-relax-qa-03.md)).
+- State: no feature status changed.
+- Next: F-102, F-103, then F-104 and F-110.
+- Decisions: the maintainer's own (ADR 0029).
+- Blockers: none.
