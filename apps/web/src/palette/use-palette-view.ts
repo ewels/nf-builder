@@ -1,5 +1,6 @@
-import { loadPalette, type PaletteView } from "@nf-builder/engine";
+import type { PaletteView } from "@nf-builder/engine";
 import { useEffect, useState } from "react";
+import { getEngine } from "../engine/engine-client";
 
 type PaletteViewState =
   | { readonly status: "loading" }
@@ -17,14 +18,16 @@ export function usePaletteView(version: string | undefined): PaletteViewState {
   useEffect(() => {
     if (version === undefined) return;
     let current = true;
-    loadPalette(version).then(
-      (view) => {
-        if (current) setState({ version, result: { status: "ready", view } });
-      },
-      () => {
-        if (current) setState({ version, result: { status: "error" } });
-      },
-    );
+    getEngine()
+      .palette(version)
+      .then(
+        (view) => {
+          if (current) setState({ version, result: { status: "ready", view } });
+        },
+        () => {
+          if (current) setState({ version, result: { status: "error" } });
+        },
+      );
     return () => {
       current = false;
     };

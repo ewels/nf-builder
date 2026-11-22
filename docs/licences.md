@@ -29,3 +29,4 @@ Every vendored file and runtime dependency with terms beyond a standard permissi
 | Nextflow TextMate grammar (via Shiki) | Syntax highlighting in Monaco (ADR 0003) | Check during F-304 | |
 | Checks and messages ported from nf-lang v26.10.7 (`ScriptAstBuilder` warnings, script and config `VariableScopeVisitor`, `ResolveIncludeVisitor`, `ScriptResolveVisitor`, `TypeCheckingVisitor` call, emit, output and multi-channel checks, `CallArityVisitor`, `Types.isAssignableFrom`) in `packages/lang-2610/src/lints/` | Diagnostics matching `nextflow lint` (F-112, ADR 0042) | Apache-2.0 | Line references in the source |
 | Advice text derived from the Nextflow docs (`deprecations.mdx`, `strict-syntax.mdx`, `store-dir.mdx`) at v26.10.7 | Diagnostic advice (F-112) | Apache-2.0 | Docs pages cited in `src/lints/advice.ts` |
+| Comlink 4.4.2 (GoogleChromeLabs/comlink) | Engine worker bridge in `@nf-builder/web` (F-113, ADR 0043) | Apache-2.0 | npm package licence |

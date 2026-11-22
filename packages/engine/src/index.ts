@@ -106,6 +106,25 @@ export {
 } from "./projection/project";
 export { formatFlowType, formatType } from "./projection/types";
 export {
+  createEngineService,
+  type EngineServiceOptions,
+} from "./service/service";
+export type {
+  Applied,
+  ApplyOutcome,
+  DiagnosticsResult,
+  EngineApi,
+  EngineRefusal,
+  EngineRefusalCode,
+  FileSummary,
+  LoadPhase,
+  LoadProgress,
+  OpenRequest,
+  ProjectChange,
+  ProjectionResult,
+  ProjectSummary,
+} from "./service/types";
+export {
   type Equivalence,
   equivalent,
   normaliseText,

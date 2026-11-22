@@ -402,6 +402,28 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - `fast-check` 4.11.0 as an engine dev dependency (ADR 0011).
 - Blockers: none new.
 
+## 2026-11-22 · F-113 · Claude (autonomous)
+- Did:
+  - The engine runs in a module Web Worker behind Comlink. A pure `EngineApi` service (`packages/engine/src/service/`) handles open with progress, apply, patches, writes, projections, diagnostics and the palette.
+  - The palette and the `window.nfBuilderEngine` test hook go through the worker. The main bundle no longer holds the parser or catalogues (75 kB initial JS).
+  - A worker manifest feeds `check:hosts`.
+  - A Chromium trace checks that no parsing happens on the main thread.
+  - `pnpm bench` and a CI `bench` job report QA-03 and QA-04.
+- State: passing.
+- Next: F-202 and F-205.
+- Decisions:
+  - [ADR 0043](../adr/0043-engine-worker.md):
+    - Comlink 4.4.2 is a runtime dependency of `@nf-builder/web` only;
+    - the service is pure;
+    - the main thread keeps only pack versions and palette search;
+    - worker chunks are recorded in `.vite/worker-manifest.json`, and `check:hosts` skips JSON worker chunks (amends ADR 0028's rule);
+    - worker chunks stay outside QA-01;
+    - the page is throttled 4× and the worker runs unthrottled (QA-02 and QA-03 clarified);
+    - F-702 gates QA-03, and QA-04 is reported.
+  - `.github/workflows/ci.yml` gains a `bench` job, and the `pnpm bench` script is new.
+  - First numbers (local): sarek cold open 18.6 s of 30 s; edit p95 271 ms of 100 ms. The cost of re-projection and the double parse is noted in F-702.
+  - The bench includes FASTQC under an alias to measure AddCall, since SAREK already calls FASTQC (a process is called once per workflow).
+
 ## 2026-11-22 · F-112 · Claude (autonomous)
 - Did:
   - Pack lint rules behind a lazy `loadLints()`, and an engine diagnoser that combines parse problems, model diagnostics and the rules.
