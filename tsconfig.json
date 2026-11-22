@@ -8,6 +8,7 @@
   },
   "include": [
     "vitest.config.ts",
+    "vitest.corpus.config.ts",
     "test",
     "scripts",
     "playwright.config.ts"

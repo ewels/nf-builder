@@ -1,0 +1,22 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": [
+      "ES2024",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "types": [
+      "vite/client",
+      "node"
+    ],
+    "erasableSyntaxOnly": true
+  },
+  "include": [
+    "src",
+    "prepare.ts",
+    "headers.ts",
+    "serve.ts",
+    "vite.config.ts"
+  ]
+}

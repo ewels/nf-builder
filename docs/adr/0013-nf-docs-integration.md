@@ -47,3 +47,12 @@
 - Committing generated Markdown via the nf-docs pre-commit hook: noisy diffs. Could be an option later.
 - Converting `nextflow -with-dag` output with `nf-metro convert`: needs a Nextflow run. The builder already has the graph.
 - Drawing the metro map on the canvas itself: two diagram editors to maintain. The `.mmd` file stays editable as text.
+
+## Spike result
+
+2026-11-22, spike S5 (F-010), [report](../research/2026-11-22-spike-s5-nf-metro.md):
+- nf-metro 2.1.0 renders the nf-core rnaseq and sarek example maps in a Web Worker under Pyodide 314.0.8, self-hosted, under the production CSP plus `'wasm-unsafe-eval'` only (ADR 0024).
+- The SVG matches `nf-metro render` exactly: 0 differing pixels, identical text apart from the CLI's final newline.
+- No nf-metro patches. The browser installs nf-metro, lark, drawsvg, networkx and Pillow by wheel URL; `av` and `resvg-py` are never fetched. Pillow, from Pyodide's wasm build, is needed because nf-metro parses colours with it, so it isn't only a PNG dependency as the Context says.
+- Cold load: 16.5 MB served (10.5 MB gzip), first SVG after 8.6 s locally and 8.7 s in CI; `import nf_metro` (about 4 s) is the largest part.
+- The in-browser route stands (FI-54) and the `metro-map.yml` fallback isn't needed. FI-54 should lazy-load the worker, time out the runtime start (a CSP without `'wasm-unsafe-eval'` makes it hang), and add `'wasm-unsafe-eval'` to `netlify.toml` then.

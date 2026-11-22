@@ -78,6 +78,22 @@ describe("e2e browser selection", { timeout: 30_000 }, () => {
     );
     expect(firefox).toEqual(smoke);
   });
+  it("F-010 ADR-0024: spike S5 runs in its own one-worker Chromium project, so --repeat-each cannot start two servers, and no other project collects it", () => {
+    const all = list({ PW_BROWSERS: "chromium,firefox,webkit" }, []);
+    const spike = all.filter((line) =>
+      line.includes("spike-s5-nf-metro.spec.ts"),
+    );
+    expect(spike.length).toBeGreaterThanOrEqual(4);
+    for (const line of spike) expect(line).toMatch(/^\[chromium-spikes\] /);
+    const project = config.projects?.find((p) => p.name === "chromium-spikes");
+    expect(project?.workers).toBe(1);
+    const smoke = list({ PW_BROWSERS: "chromium,firefox,webkit" }, [
+      "--grep",
+      "@smoke",
+    ]);
+    expect(smoke.filter((line) => line.includes("spike-"))).toEqual([]);
+  });
+
   it("F-201 ADR-0021: @visual tests are listed on Chromium only, and only when CI or PW_VISUAL=1 is set", () => {
     expect(VISUAL_TAG).toBe("@visual");
     expect(visualEnabled({})).toBe(false);

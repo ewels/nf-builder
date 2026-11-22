@@ -1,0 +1,4517 @@
+{
+  "source": {
+    "generator": "tools/spec-extract",
+    "languageServer": "v26.10.2",
+    "nfLang": "26.10.4",
+    "jarSha256": "20326778651c5c5e5f40a570c2275d1f520419941624386a2b1a111f1dfa4b26"
+  },
+  "scopes": [
+    {
+      "kind": "scope",
+      "name": "agent",
+      "description": "The `agent` scope controls the default settings applied to agents.",
+      "children": [
+        {
+          "kind": "option",
+          "name": "apiKey",
+          "description": "The API key used to authenticate with the LLM provider. When not specified, the `NXF_AGENT_API_KEY` environment variable is used, then the API provider's own variable (e.g. `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`) when the endpoint it would be sent to belongs to that provider.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "apiProvider",
+          "description": "The provider namespace the API key and base URL are taken from when they come from the environment, one of `anthropic`, `azure`, `gemini`, `google`, `mistral`, `openai`, `openrouter`. When not specified, it is inferred from the host of `baseUrl` when that names a well-known provider, and otherwise from the model id prefix. It does NOT select the wire protocol, which is always the model id prefix.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "baseUrl",
+          "description": "The base URL of the endpoint serving the model, e.g. a local vLLM or Ollama server or a gateway. When not specified, the `NXF_AGENT_BASE_URL` environment variable is used, then the API provider's own variable (`OPENAI_BASE_URL`, `ANTHROPIC_BASE_URL`, `AZURE_OPENAI_ENDPOINT`), then the provider default.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "maxIterations",
+          "description": "The default maximum number of LLM iterations used by an agent that does not declare a `maxIterations` directive (default: `20`).",
+          "types": [
+            "Integer"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "maxToolOutputInlineSize",
+          "description": "The maximum size of a structured tool-output file whose contents are passed to the LLM; larger outputs are returned as a path handle (default: `32 KB`).",
+          "types": [
+            "MemoryUnit"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "model",
+          "description": "The default model (`provider/model`) used by an agent that does not declare a `model` directive.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "requestTimeout",
+          "description": "The amount of time to wait for an LLM chat request to complete before failing (default: `120 sec`).",
+          "types": [
+            "Duration"
+          ]
+        },
+        {
+          "kind": "scope",
+          "name": "rpc",
+          "description": "Settings for the agent RPC broker that a canonical agent task connects back to.",
+          "children": [
+            {
+              "kind": "option",
+              "name": "capabilityTimeout",
+              "description": "How long an agent RPC capability remains valid while its task waits to start, i.e. the maximum queueing delay tolerated between the task script being generated and the agent connecting back to the driver (default: `1 h`).",
+              "types": [
+                "Duration"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "port",
+              "description": "The port the driver's agent RPC broker binds to. `0` (the default) picks an ephemeral port; pin it when the driver sits behind a firewall that must be opened in advance.",
+              "types": [
+                "Integer"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "remoteHost",
+              "description": "The host name a containerized agent task uses to reach the driver's RPC broker. Falls back to the `NXF_AGENT_RPC_REMOTE_HOST` environment variable, then to inference from the container engine and the executor: the engine's built-in host alias (`host.docker.internal` for Docker, `host.containers.internal` for Podman) when that engine runs on the driver host, `127.0.0.1` when the container shares the driver's network namespace, and otherwise the driver's own address on its default route. Set it explicitly where the driver does not share a network with its tasks: a Kubernetes driver outside the cluster the pods run in, a cloud batch driver on an instance in a different VPC from the compute environment, or a multi-homed submit node whose default route is not the compute fabric. Give a routable driver address or an in-cluster service name.",
+              "types": [
+                "String"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "tls",
+              "description": "When `true` (the default), the driver's agent RPC broker serves TLS with a certificate generated for the run, whose fingerprint the agent task pins. Set it to `false` only to inspect the stream while debugging: the prompt, inputs, tool arguments and results then cross the network in cleartext, and the task cannot tell the real driver from an impostor.",
+              "types": [
+                "Boolean"
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "runner",
+          "description": "The agent runner extension to use (for example `pi` or `langchain4j`). Required when more than one runner plugin is enabled.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "trace",
+          "description": "When `true`, log a readable trace of each agent's execution - the turns, the model reasoning and the tool invocations - at INFO level; the tool inputs and outputs are logged at DEBUG. Enabled by the `-with-agent-trace` run option (default: `false`).",
+          "types": [
+            "Boolean"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "scope",
+      "name": "appleContainer",
+      "description": "The `appleContainer` scope controls how [Apple container](https://github.com/apple/container) runtime is used by Nextflow.",
+      "children": [
+        {
+          "kind": "option",
+          "name": "enabled",
+          "description": "Enable Apple container execution (default: `false`).",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "engineOptions",
+          "description": "Specify additional options supported by the `container` CLI i.e. `container [OPTIONS] run`.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "envWhitelist",
+          "description": "Comma separated list of environment variable names to be included in the container environment.",
+          "types": [
+            "List<String>"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "kill",
+          "description": "",
+          "types": [
+            "Boolean",
+            "Object",
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "registry",
+          "description": "The registry from where container images are pulled. It should NOT include the protocol prefix i.e. `http://`.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "remove",
+          "description": "Clean up the container after the execution (default: `true`).",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "runOptions",
+          "description": "Specify extra command line options supported by the `container run` command.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "temp",
+          "description": "Mounts a path of your choice as the `/tmp` directory in the container.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "tty",
+          "description": "Allocates a pseudo-tty (default: `false`).",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "writableInputMounts",
+          "description": "When `false`, mount input directories as read-only (default: `true`).",
+          "types": [
+            "Boolean"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "scope",
+      "name": "apptainer",
+      "description": "The `apptainer` scope controls how [Apptainer](https://apptainer.org) containers are executed by Nextflow.",
+      "children": [
+        {
+          "kind": "option",
+          "name": "autoMounts",
+          "description": "Automatically mount host paths in the executed container (default: `true`). It requires the `user bind control` feature to be enabled in your Apptainer installation.",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "cacheDir",
+          "description": "The directory where remote Apptainer images are stored. When using a computing cluster it must be a shared folder accessible to all compute nodes.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "enabled",
+          "description": "Execute tasks with Apptainer containers (default: `false`).",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "engineOptions",
+          "description": "Specify additional options supported by the Apptainer engine i.e. `apptainer [OPTIONS]`.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "envWhitelist",
+          "description": "Comma separated list of environment variable names to be included in the container environment.",
+          "types": [
+            "List<String>"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "libraryDir",
+          "description": "Directory where remote Apptainer images are retrieved. When using a computing cluster it must be a shared folder accessible to all compute nodes.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "noHttps",
+          "description": "Pull the Apptainer image with http protocol (default: `false`).",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "ociAutoPull",
+          "description": "When enabled, OCI (and Docker) container images are pulled and converted to the SIF format by the Apptainer run command, instead of Nextflow (default: `false`).",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "pullTimeout",
+          "description": "The amount of time the Apptainer pull can last, exceeding which the process is terminated (default: `20 min`).",
+          "types": [
+            "Duration"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "registry",
+          "description": "The registry from where Docker images are pulled. It should be only used to specify a private registry server. It should NOT include the protocol prefix i.e. `http://`.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "resourceLimits",
+          "description": "Apply the task `cpus` and `memory` directives as container resource limits using the `--cpus` and `--memory` flags (default: `false`).",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "runOptions",
+          "description": "Specify extra command line options supported by `apptainer exec`.",
+          "types": [
+            "String"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "scope",
+      "name": "aws",
+      "description": "The `aws` scope controls the interactions with AWS, including AWS Batch and S3.",
+      "children": [
+        {
+          "kind": "option",
+          "name": "accessKey",
+          "description": "AWS account access key.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "scope",
+          "name": "batch",
+          "description": "The `aws` scope controls the interactions with AWS, including AWS Batch and S3.",
+          "children": [
+            {
+              "kind": "option",
+              "name": "cliPath",
+              "description": "The path where the AWS command line tool is installed in the host AMI.",
+              "types": [
+                "String"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "delayBetweenAttempts",
+              "description": "Delay between download attempts from S3 (default: `10 sec`).",
+              "types": [
+                "Duration"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "executionRole",
+              "description": "The AWS Batch [Execution Role](https://docs.aws.amazon.com/batch/latest/userguide/execution-IAM-role.html) ARN that needs to be used to execute the Batch Job. It is mandatory when using AWS Fargate.",
+              "types": [
+                "String"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "forceGlacierTransfer",
+              "description": "When `true`, add the `--force-glacier-transfer` flag to AWS CLI S3 download commands (default: `false`).",
+              "types": [
+                "Boolean"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "jobRole",
+              "description": "The AWS Batch Job Role ARN that needs to be used to execute the Batch Job.",
+              "types": [
+                "String"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "logsGroup",
+              "description": "The name of the logs group used by Batch Jobs (default: `/aws/batch/job`).",
+              "types": [
+                "String"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "maxParallelTransfers",
+              "description": "Max parallel upload/download transfer operations *per job* (default: `4`).",
+              "types": [
+                "Integer"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "maxSpotAttempts",
+              "description": "Max number of execution attempts of a job interrupted by a EC2 Spot reclaim event (default: `0`)",
+              "types": [
+                "Integer"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "maxTransferAttempts",
+              "description": "Max number of downloads attempts from S3 (default: `1`).",
+              "types": [
+                "Integer"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "platformType",
+              "description": "The compute platform type used by AWS Batch. Can be either `ec2` or `fargate`. Set to `fargate` to use [AWS Fargate](https://docs.aws.amazon.com/batch/latest/userguide/fargate.html).",
+              "types": [
+                "String"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "retryMode",
+              "description": "The [retry mode](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-retries.html) used to handle rate-limiting by AWS APIs. Can be one of `standard`, `legacy`, `adaptive`, or `built-in` (default: `standard`).",
+              "types": [
+                "String"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "schedulingPriority",
+              "description": "The scheduling priority for all tasks when using [fair-share scheduling](https://aws.amazon.com/blogs/hpc/introducing-fair-share-scheduling-for-aws-batch/) (default: `0`).",
+              "types": [
+                "Integer"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "shareIdentifier",
+              "description": "The share identifier for all tasks when using [fair-share scheduling](https://aws.amazon.com/blogs/hpc/introducing-fair-share-scheduling-for-aws-batch/).",
+              "types": [
+                "String"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "terminateUnschedulableJobs",
+              "description": "When `true`, jobs that cannot be scheduled due to lack of resources or misconfiguration are terminated and handled as task failures (default: `false`).",
+              "types": [
+                "Boolean"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "volumes",
+              "description": "List of container mounts. Mounts can be specified as simple e.g. `/some/path` or canonical format e.g. `/host/path:/mount/path[:ro|rw]`.",
+              "types": [
+                "List<String>"
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "scope",
+          "name": "client",
+          "description": "The `aws` scope controls the interactions with AWS, including AWS Batch and S3.",
+          "children": [
+            {
+              "kind": "option",
+              "name": "anonymous",
+              "description": "Allow the access of public S3 buckets without providing AWS credentials (default: `false`). Any service that does not accept unsigned requests will return a service access error.",
+              "types": [
+                "Boolean"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "connectionTimeout",
+              "description": "The amount of time to wait (in milliseconds) when initially establishing a connection before timing out (default: `10000`).",
+              "types": [
+                "Integer"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "endpoint",
+              "description": "The AWS S3 API entry point e.g. `https://s3-us-west-1.amazonaws.com`. The endpoint must include the protocol prefix e.g. `https://`.",
+              "types": [
+                "String"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "maxConcurrency",
+              "description": "The `aws` scope controls the interactions with AWS, including AWS Batch and S3.",
+              "types": [
+                "Integer"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "maxConnections",
+              "description": "The maximum number of open HTTP connections used by the S3 client (default: `50`).",
+              "types": [
+                "Integer"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "maxDownloadHeapMemory",
+              "description": "The maximum size for the heap memory buffer used by concurrent downloads. It must be at least 10 times the `minimumPartSize` (default:`400 MB`).",
+              "types": [
+                "MemoryUnit"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "maxErrorRetry",
+              "description": "The maximum number of retry attempts for failed retryable requests (default: `-1`).",
+              "types": [
+                "Integer"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "maxNativeMemory",
+              "description": "The `aws` scope controls the interactions with AWS, including AWS Batch and S3.",
+              "types": [
+                "MemoryUnit"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "minimumPartSize",
+              "description": "The minimum part size used for multipart uploads to S3 (default: `8 MB`).",
+              "types": [
+                "MemoryUnit"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "multipartThreshold",
+              "description": "The object size threshold used for multipart uploads to S3 (default: same as `aws.cllient.minimumPartSize`).",
+              "types": [
+                "MemoryUnit"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "proxyHost",
+              "description": "The proxy host to connect through.",
+              "types": [
+                "String"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "proxyPassword",
+              "description": "The password to use when connecting through a proxy.",
+              "types": [
+                "String"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "proxyPort",
+              "description": "The port to use when connecting through a proxy.",
+              "types": [
+                "Integer"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "proxyScheme",
+              "description": "The protocol scheme to use when connecting through a proxy. Can be `http` or `https` (default: `'http'`).",
+              "types": [
+                "String"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "proxyUsername",
+              "description": "The user name to use when connecting through a proxy.",
+              "types": [
+                "String"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "requesterPays",
+              "description": "Use [Requester Pays](https://docs.aws.amazon.com/AmazonS3/latest/userguide/RequesterPaysBuckets.html) for S3 buckets (default: `false`).",
+              "types": [
+                "Boolean"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "s3Acl",
+              "description": "Specify predefined bucket permissions, also known as [canned ACL](https://docs.aws.amazon.com/AmazonS3/latest/userguide/acl-overview.html#canned-acl). Can be one of `Private`, `PublicRead`, `PublicReadWrite`, `AuthenticatedRead`, `LogDeliveryWrite`, `BucketOwnerRead`, `BucketOwnerFullControl`, or `AwsExecRead`.",
+              "types": [
+                "Object",
+                "String"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "s3PathStyleAccess",
+              "description": "Use the path-based access model to access objects in S3-compatible storage systems (default: `false`).",
+              "types": [
+                "Boolean"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "socketTimeout",
+              "description": "The amount of time to wait (in milliseconds) for data to be transferred over an established, open connection before the connection is timed out (default: `30000`).",
+              "types": [
+                "Integer"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "storageClass",
+              "description": "The S3 storage class applied to stored objects, one of \\[`STANDARD`, `STANDARD_IA`, `ONEZONE_IA`, `INTELLIGENT_TIERING`\\] (default: `STANDARD`).",
+              "types": [
+                "String"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "storageEncryption",
+              "description": "The S3 server side encryption to be used when saving objects on S3. Can be `AES256` or `aws:kms` (default: none).",
+              "types": [
+                "String"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "storageKmsKeyId",
+              "description": "The AWS KMS key Id to be used to encrypt files stored in the target S3 bucket.",
+              "types": [
+                "String"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "targetThroughputInGbps",
+              "description": "The target network throughput (in Gbps) used for S3 uploads and downloads (default: `10`).",
+              "types": [
+                "Float"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "uploadChunkSize",
+              "description": "The size of a single part in a multipart upload (default: `100 MB`).",
+              "types": [
+                "MemoryUnit"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "uploadMaxAttempts",
+              "description": "The maximum number of upload attempts after which a multipart upload returns an error (default: `5`).",
+              "types": [
+                "Integer"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "uploadMaxThreads",
+              "description": "The maximum number of threads used for multipart upload (default: `10`).",
+              "types": [
+                "Integer"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "uploadRetrySleep",
+              "description": "The time to wait after a failed upload attempt to retry the part upload (default: `500ms`).",
+              "types": [
+                "Duration"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "uploadStorageClass",
+              "description": "The S3 storage class applied to stored objects. Can be `STANDARD`, `STANDARD_IA`, `ONEZONE_IA`, or `INTELLIGENT_TIERING` (default: `STANDARD`).",
+              "types": [
+                "String"
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "profile",
+          "description": "AWS profile from `~/.aws/credentials`.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "region",
+          "description": "AWS region (e.g. `us-east-1`).",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "secretKey",
+          "description": "AWS account secret key.",
+          "types": [
+            "String"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "scope",
+      "name": "azure",
+      "description": "The `azure` scope allows you to configure the interactions with Azure, including Azure Batch and Azure Blob Storage.",
+      "children": [
+        {
+          "kind": "scope",
+          "name": "activeDirectory",
+          "description": "The `azure` scope allows you to configure the interactions with Azure, including Azure Batch and Azure Blob Storage.",
+          "children": [
+            {
+              "kind": "option",
+              "name": "servicePrincipalId",
+              "description": "The service principal client ID. Defaults to environment variable `AZURE_CLIENT_ID`.",
+              "types": [
+                "String"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "servicePrincipalSecret",
+              "description": "The service principal client secret. Defaults to environment variable `AZURE_CLIENT_SECRET`.",
+              "types": [
+                "String"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "tenantId",
+              "description": "The Azure tenant ID. Defaults to environment variable `AZURE_TENANT_ID`.",
+              "types": [
+                "String"
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "scope",
+          "name": "azcopy",
+          "description": "The `azure` scope allows you to configure the interactions with Azure, including Azure Batch and Azure Blob Storage.",
+          "children": [
+            {
+              "kind": "option",
+              "name": "blobTier",
+              "description": "The blob [access tier](https://learn.microsoft.com/en-us/azure/storage/blobs/access-tiers-overview) used by `azcopy` to upload files to Azure Blob Storage. Valid options are `None`, `Hot`, or `Cool` (default: `None`).",
+              "types": [
+                "String"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "blockSize",
+              "description": "The block size (in MB) used by `azcopy` to transfer files between Azure Blob Storage and compute nodes (default: `4`).",
+              "types": [
+                "String"
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "scope",
+          "name": "batch",
+          "description": "The `azure` scope allows you to configure the interactions with Azure, including Azure Batch and Azure Blob Storage.",
+          "children": [
+            {
+              "kind": "option",
+              "name": "accountKey",
+              "description": "The batch service account key. Defaults to environment variable `AZURE_BATCH_ACCOUNT_KEY`.",
+              "types": [
+                "String"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "accountName",
+              "description": "The batch service account name. Defaults to environment variable `AZURE_BATCH_ACCOUNT_NAME`.",
+              "types": [
+                "String"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "allowPoolCreation",
+              "description": "Enable the automatic creation of batch pools specified in the Nextflow configuration file (default: `false`).",
+              "types": [
+                "Boolean"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "autoPoolMode",
+              "description": "Enable the automatic creation of batch pools depending on the pipeline resources demand (default: `true`).",
+              "types": [
+                "Boolean"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "copyToolInstallMode",
+              "description": "The mode in which the `azcopy` tool is installed by Nextflow (default: `'node'`).",
+              "types": [
+                "Object",
+                "String"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "deleteJobsOnCompletion",
+              "description": "Delete all jobs when the workflow completes (default: `false`).",
+              "types": [
+                "Boolean"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "deletePoolsOnCompletion",
+              "description": "Delete all compute node pools when the workflow completes (default: `false`).",
+              "types": [
+                "Boolean"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "deleteTasksOnCompletion",
+              "description": "Delete each task when it completes (default: `true`).",
+              "types": [
+                "Boolean"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "endpoint",
+              "description": "The batch service endpoint e.g. `https://nfbatch1.westeurope.batch.azure.com`.",
+              "types": [
+                "String"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "jobMaxWallClockTime",
+              "description": "The maximum elapsed time that jobs may run, measured from the time they are created (default: `30d`).",
+              "types": [
+                "Duration"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "jobQuotaRetryDelay",
+              "description": "The delay between attempts to create a job when the active job quota has been reached (default: `'2 min'`).",
+              "types": [
+                "Duration"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "location",
+              "description": "The name of the batch service region, e.g. `westeurope` or `eastus2`. Not needed when the endpoint is specified.",
+              "types": [
+                "String"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "maxJobQuotaRetries",
+              "description": "The maximum number of attempts to create a job when the active job quota has been reached (default: `3`). Set to `0` to fail immediately without retrying.",
+              "types": [
+                "Integer"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "poolIdentityClientId",
+              "description": "The client ID for an Azure [managed identity](https://learn.microsoft.com/en-us/entra/identity/managed-identities-azure-resources/overview) that is available on all Azure Batch node pools. This identity is used by Fusion to authenticate to Azure storage. If set to `'auto'`, Fusion will use the first available managed identity.",
+              "types": [
+                "String"
+              ]
+            },
+            {
+              "kind": "placeholder",
+              "name": "pools",
+              "description": "The `azure` scope allows you to configure the interactions with Azure, including Azure Batch and Azure Blob Storage.",
+              "placeholderName": "<name>",
+              "children": [
+                {
+                  "kind": "option",
+                  "name": "allowUnverifiedImages",
+                  "description": "Allow the use of unverified VM images when resolving the image from the Batch supported-images list (default: `false`). Ignored when `virtualMachineImageId` is set.",
+                  "types": [
+                    "Boolean"
+                  ]
+                },
+                {
+                  "kind": "option",
+                  "name": "autoScale",
+                  "description": "Enable autoscaling feature for the pool identified with `<name>`.",
+                  "types": [
+                    "Boolean"
+                  ]
+                },
+                {
+                  "kind": "option",
+                  "name": "fileShareRootPath",
+                  "description": "The internal root mount point when mounting File Shares. Must be `/mnt/resource/batch/tasks/fsmounts` for CentOS nodes or `/mnt/batch/tasks/fsmounts` for Ubuntu nodes (default: CentOS).",
+                  "types": [
+                    "String"
+                  ]
+                },
+                {
+                  "kind": "option",
+                  "name": "lowPriority",
+                  "description": "Enable the use of low-priority VMs (default: `false`).",
+                  "types": [
+                    "Boolean"
+                  ]
+                },
+                {
+                  "kind": "option",
+                  "name": "maxVmCount",
+                  "description": "The max number of virtual machines when using auto scaling.",
+                  "types": [
+                    "Integer"
+                  ]
+                },
+                {
+                  "kind": "option",
+                  "name": "mountOptions",
+                  "description": "The mount options for mounting the file shares (default: `-o vers=3.0,dir_mode=0777,file_mode=0777,sec=ntlmssp`).",
+                  "types": [
+                    "String"
+                  ]
+                },
+                {
+                  "kind": "option",
+                  "name": "offer",
+                  "description": "The offer type of the virtual machine type used by the pool identified with `<name>` (default: `centos-container`).",
+                  "types": [
+                    "String"
+                  ]
+                },
+                {
+                  "kind": "option",
+                  "name": "privileged",
+                  "description": "Enable the task to run with elevated access. Ignored if `runAs` is set (default: `false`).",
+                  "types": [
+                    "Boolean"
+                  ]
+                },
+                {
+                  "kind": "option",
+                  "name": "publisher",
+                  "description": "The publisher of virtual machine type used by the pool identified with `<name>` (default: `microsoft-azure-batch`).",
+                  "types": [
+                    "String"
+                  ]
+                },
+                {
+                  "kind": "option",
+                  "name": "runAs",
+                  "description": "The username under which the task is run. The user must already exist on each node of the pool.",
+                  "types": [
+                    "String"
+                  ]
+                },
+                {
+                  "kind": "option",
+                  "name": "scaleFormula",
+                  "description": "The [scale formula](https://docs.microsoft.com/en-us/azure/batch/batch-automatic-scaling) for the pool identified with `<name>`.",
+                  "types": [
+                    "String"
+                  ]
+                },
+                {
+                  "kind": "option",
+                  "name": "scaleInterval",
+                  "description": "The interval at which to automatically adjust the Pool size according to the autoscale formula. Must be at least 5 minutes and at most 168 hours (default: `10 mins`).",
+                  "types": [
+                    "Duration"
+                  ]
+                },
+                {
+                  "kind": "option",
+                  "name": "schedulePolicy",
+                  "description": "The scheduling policy for the pool identified with `<name>`. Can be either `spread` or `pack` (default: `spread`).",
+                  "types": [
+                    "String"
+                  ]
+                },
+                {
+                  "kind": "option",
+                  "name": "sku",
+                  "description": "The ID of the Compute Node agent SKU which the pool identified with `<name>` supports (default: `batch.node.ubuntu 24.04`).",
+                  "types": [
+                    "String"
+                  ]
+                },
+                {
+                  "kind": "scope",
+                  "name": "startTask",
+                  "description": "The `azure` scope allows you to configure the interactions with Azure, including Azure Batch and Azure Blob Storage.",
+                  "children": [
+                    {
+                      "kind": "option",
+                      "name": "privileged",
+                      "description": "Enable the `startTask` to run with elevated access (default: `false`).",
+                      "types": [
+                        "Boolean"
+                      ]
+                    },
+                    {
+                      "kind": "option",
+                      "name": "script",
+                      "description": "The `startTask` that is executed as the node joins the Azure Batch node pool.",
+                      "types": [
+                        "String"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "kind": "option",
+                  "name": "virtualMachineImageId",
+                  "description": "The resource ID of a custom VM image from an Azure Compute Gallery to use for the pool nodes\n(e.g. `/subscriptions/<id>/resourceGroups/<group>/providers/Microsoft.Compute/galleries/<gallery>/images/<definition>/versions/<version>`).\nWhen set, `publisher` and `offer` are ignored, and `sku` must be set to the Batch node agent SKU id that matches the image OS (e.g. `batch.node.ubuntu 24.04`).",
+                  "types": [
+                    "String"
+                  ]
+                },
+                {
+                  "kind": "option",
+                  "name": "virtualNetwork",
+                  "description": "The subnet ID of a virtual network in which to create the pool.",
+                  "types": [
+                    "String"
+                  ]
+                },
+                {
+                  "kind": "option",
+                  "name": "vmCount",
+                  "description": "The number of virtual machines provisioned by the pool identified with `<name>`.",
+                  "types": [
+                    "Integer"
+                  ]
+                },
+                {
+                  "kind": "option",
+                  "name": "vmType",
+                  "description": "The virtual machine type used by the pool identified with `<name>`.",
+                  "types": [
+                    "String"
+                  ]
+                }
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "terminateJobsOnCompletion",
+              "description": "When the workflow completes, set all jobs to terminate on task completion (default: `true`).",
+              "types": [
+                "Boolean"
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "scope",
+          "name": "managedIdentity",
+          "description": "The `azure` scope allows you to configure the interactions with Azure, including Azure Batch and Azure Blob Storage.",
+          "children": [
+            {
+              "kind": "option",
+              "name": "clientId",
+              "description": "The client ID for an Azure [managed identity](https://learn.microsoft.com/en-us/entra/identity/managed-identities-azure-resources/overview). Defaults to environment variable `AZURE_MANAGED_IDENTITY_USER`.",
+              "types": [
+                "String"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "system",
+              "description": "When `true`, use the system-assigned [managed identity](https://learn.microsoft.com/en-us/entra/identity/managed-identities-azure-resources/overview) to authenticate Azure resources. Defaults to environment variable `AZURE_MANAGED_IDENTITY_SYSTEM`.",
+              "types": [
+                "Boolean"
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "scope",
+          "name": "registry",
+          "description": "The `azure` scope allows you to configure the interactions with Azure, including Azure Batch and Azure Blob Storage.",
+          "children": [
+            {
+              "kind": "option",
+              "name": "password",
+              "description": "The password to connect to a private container registry.",
+              "types": [
+                "String"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "server",
+              "description": "The container registry from which to pull the Docker images (default: `docker.io`).",
+              "types": [
+                "String"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "userName",
+              "description": "The username to connect to a private container registry.",
+              "types": [
+                "String"
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "scope",
+          "name": "retryPolicy",
+          "description": "The `azure` scope allows you to configure the interactions with Azure, including Azure Batch and Azure Blob Storage.",
+          "children": [
+            {
+              "kind": "option",
+              "name": "delay",
+              "description": "Delay when retrying failed API requests (default: `250ms`).",
+              "types": [
+                "Duration"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "jitter",
+              "description": "Jitter value when retrying failed API requests (default: `0.25`).",
+              "types": [
+                "Float"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "maxAttempts",
+              "description": "Max attempts when retrying failed API requests (default: `10`).",
+              "types": [
+                "Integer"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "maxDelay",
+              "description": "Max delay when retrying failed API requests (default: `90s`).",
+              "types": [
+                "Duration"
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "scope",
+          "name": "storage",
+          "description": "The `azure` scope allows you to configure the interactions with Azure, including Azure Batch and Azure Blob Storage.",
+          "children": [
+            {
+              "kind": "option",
+              "name": "accountKey",
+              "description": "The blob storage account key. Defaults to environment variable `AZURE_STORAGE_ACCOUNT_KEY`.",
+              "types": [
+                "String"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "accountName",
+              "description": "The blob storage account name. Defaults to environment variable `AZURE_STORAGE_ACCOUNT_NAME`.",
+              "types": [
+                "String"
+              ]
+            },
+            {
+              "kind": "placeholder",
+              "name": "fileShares",
+              "description": "The `azure` scope allows you to configure the interactions with Azure, including Azure Batch and Azure Blob Storage.",
+              "placeholderName": "<name>",
+              "children": [
+                {
+                  "kind": "option",
+                  "name": "mountOptions",
+                  "description": "The file share mount options.",
+                  "types": [
+                    "String"
+                  ]
+                },
+                {
+                  "kind": "option",
+                  "name": "mountPath",
+                  "description": "The file share mount path.",
+                  "types": [
+                    "String"
+                  ]
+                }
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "sasToken",
+              "description": "The blob storage shared access signature (SAS) token, which can be provided instead of an account key. Defaults to environment variable `AZURE_STORAGE_SAS_TOKEN`.",
+              "types": [
+                "String"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "tokenDuration",
+              "description": "The duration of the SAS token generated by Nextflow when the `sasToken` option is *not* specified (default: `48h`).",
+              "types": [
+                "Duration"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "option",
+      "name": "bucketDir",
+      "description": "The remote work directory used by hybrid workflows. Equivalent to the `-bucket-dir` option of the `run` command.",
+      "types": [
+        "String"
+      ]
+    },
+    {
+      "kind": "scope",
+      "name": "charliecloud",
+      "description": "The `charliecloud` scope controls how [Charliecloud](https://hpc.github.io/charliecloud/) containers are executed by Nextflow.",
+      "children": [
+        {
+          "kind": "option",
+          "name": "cacheDir",
+          "description": "The directory where remote Charliecloud images are stored. When using a computing cluster it must be a shared folder accessible to all compute nodes.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "enabled",
+          "description": "Execute tasks with Charliecloud containers (default: `false`).",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "envWhitelist",
+          "description": "Comma separated list of environment variable names to be included in the container environment.",
+          "types": [
+            "List<String>"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "pullTimeout",
+          "description": "The amount of time the Charliecloud pull can last, exceeding which the process is terminated (default: `20 min`).",
+          "types": [
+            "Duration"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "registry",
+          "description": "The registry from where images are pulled. It should be only used to specify a private registry server. It should NOT include the protocol prefix i.e. `http://`.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "runOptions",
+          "description": "Specify extra command line options supported by the `ch-run` command.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "temp",
+          "description": "Mounts a path of your choice as the `/tmp` directory in the container. Use the special value `'auto'` to create a temporary directory each time a container is created.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "writableInputMounts",
+          "description": "When `false`, mount input directories as read-only (default: `true`).",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "writeFake",
+          "description": "Run containers from storage in writeable mode using overlayfs (default: `true`).",
+          "types": [
+            "Boolean"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "option",
+      "name": "cleanup",
+      "description": "Delete all files associated with a run in the work directory when the run completes successfully (default: `false`).",
+      "types": [
+        "Boolean"
+      ]
+    },
+    {
+      "kind": "scope",
+      "name": "conda",
+      "description": "The `conda` scope controls the creation of Conda environments by the Conda package manager.",
+      "children": [
+        {
+          "kind": "option",
+          "name": "cacheDir",
+          "description": "The path where Conda environments are stored. It should be accessible from all compute nodes when using a shared file system.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "channels",
+          "description": "The list of Conda channels that can be used to resolve Conda packages. Channel priority decreases from left to right.",
+          "types": [
+            "List<String>"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "createOptions",
+          "description": "Extra command line options for the `conda create` command. See the [Conda documentation](https://docs.conda.io/projects/conda/en/latest/commands/create.html) for more information.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "createTimeout",
+          "description": "The amount of time to wait for the Conda environment to be created before failing (default: `20 min`).",
+          "types": [
+            "Duration"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "enabled",
+          "description": "Execute tasks with Conda environments (default: `false`).",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "useMamba",
+          "description": "Use [Mamba](https://github.com/mamba-org/mamba) instead of `conda` to create Conda environments (default: `false`).",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "useMicromamba",
+          "description": "Use [Micromamba](https://mamba.readthedocs.io/en/latest/user_guide/micromamba.html) instead of `conda` to create Conda environments (default: `false`).",
+          "types": [
+            "Boolean"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "scope",
+      "name": "dag",
+      "description": "The `dag` scope controls the workflow diagram generated by Nextflow.",
+      "children": [
+        {
+          "kind": "option",
+          "name": "depth",
+          "description": "*Supported by the HTML and Mermaid renderers.*\n\nControls the maximum depth at which to render sub-workflows (default: no limit).",
+          "types": [
+            "Integer"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "direction",
+          "description": "*Supported by the Graphviz, DOT, HTML and Mermaid renderers.*\n\nControls the direction of the DAG, can be `'LR'` (left-to-right) or `'TB'` (top-to-bottom) (default: `'TB'`).",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "directory",
+          "description": "The directory where the DAG file should be saved, relative to the workflow output directory.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "enabled",
+          "description": "When `true` enables the generation of the DAG file (default: `false`).",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "file",
+          "description": "Graph file name (default: `'dag-<timestamp>.html'`).",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "overwrite",
+          "description": "When `true` overwrites any existing DAG file with the same name (default: `false`).",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "verbose",
+          "description": "*Only supported by the HTML and Mermaid renderers.*\n\nWhen `false`, channel names are omitted, operators are collapsed, and empty workflow inputs are removed (default: `false`).",
+          "types": [
+            "Boolean"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "scope",
+      "name": "docker",
+      "description": "The `docker` scope controls how [Docker](https://www.docker.com) containers are executed by Nextflow.",
+      "children": [
+        {
+          "kind": "option",
+          "name": "cpuLimits",
+          "description": "Use the `--cpus` flag to limit CPU usage instead of `--cpu-shares` (default: `false`).",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "enabled",
+          "description": "Enable Docker execution (default: `false`).",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "engineOptions",
+          "description": "Specify additional options supported by the Docker engine i.e. `docker [OPTIONS]`.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "envWhitelist",
+          "description": "Comma separated list of environment variable names to be included in the container environment.",
+          "types": [
+            "List<String>"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "fixOwnership",
+          "description": "Fix ownership of files created by the Docker container (default: `false`).",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "kill",
+          "description": "",
+          "types": [
+            "Boolean",
+            "Object",
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "legacy",
+          "description": "Use command line options removed since Docker 1.10.0 (default: `false`).",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "mountFlags",
+          "description": "Add the specified flags to the volume mounts e.g. `'ro,Z'`.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "registry",
+          "description": "The registry from where Docker images are pulled. It should be only used to specify a private registry server. It should NOT include the protocol prefix i.e. `http://`.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "registryOverride",
+          "description": "When `true`, forces the override of the registry name in fully qualified container image names with the registry specified by `docker.registry` (default: `false`).",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "remove",
+          "description": "Clean up the container after the execution (default: `true`). See the [Docker documentation](https://docs.docker.com/engine/reference/run/#clean-up---rm) for details.",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "runOptions",
+          "description": "Specify extra command line options supported by the `docker run` command. See the [Docker documentation](https://docs.docker.com/engine/reference/run/) for details.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "sudo",
+          "description": "Executes Docker run command as `sudo` (default: `false`).",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "temp",
+          "description": "Mounts a path of your choice as the `/tmp` directory in the container. Use the special value `'auto'` to create a temporary directory each time a container is created.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "tty",
+          "description": "Allocates a pseudo-tty (default: `false`).",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "writableInputMounts",
+          "description": "When `false`, mount input directories as read-only (default: `true`).",
+          "types": [
+            "Boolean"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "scope",
+      "name": "env",
+      "description": "The `env` scope allows you to define environment variables that will be exported into the environment where workflow tasks are executed.\n\n[Read more](https://docs.seqera.io/nextflow/reference/config/env)",
+      "children": []
+    },
+    {
+      "kind": "scope",
+      "name": "executor",
+      "description": "The `executor` scope controls various executor behaviors.",
+      "children": [
+        {
+          "kind": "option",
+          "name": "account",
+          "description": "*Used only by the SLURM, LSF, PBS and PBS Pro executors.*\n\nThe project or organization account that should be charged for running the pipeline jobs.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "cpus",
+          "description": "*Used only by the local executor and grid executors.*\n\nThe maximum number of CPUs that can be requested by submitted tasks. Pending tasks are not submitted until enough CPUs are available, and a task that requests more CPUs than this limit fails. A job array counts the CPUs of all its tasks. Only CPUs requested with the `cpus` directive are counted (not `clusterOptions`), and a task without it counts as 1 CPU. For the local executor, the default is the number of CPUs on the system. For grid executors, there is no limit by default.",
+          "types": [
+            "Integer"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "dumpInterval",
+          "description": "Determines how often to log the executor status (default: `5 min`).",
+          "types": [
+            "Duration"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "exitReadTimeout",
+          "description": "*Used only by grid executors.*\n\nDetermines how long to wait for the `.exitcode` file to be created after the task has completed, before returning an error status (default: `270 sec`).",
+          "types": [
+            "Duration"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "jobName",
+          "description": "*Used only by grid executors and Google Batch.*\n\nDetermines the name of jobs submitted to the underlying cluster executor:\n```groovy\nexecutor.jobName = { \"$task.name - $task.hash\" }\n```",
+          "types": [
+            "Closure<String>"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "killBatchSize",
+          "description": "Determines the number of jobs that can be killed in a single command execution (default: `100`).",
+          "types": [
+            "Integer"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "memory",
+          "description": "*Used only by the local executor and grid executors.*\n\nThe maximum amount of memory that can be requested by submitted tasks. Pending tasks are not submitted until enough memory is available, and a task that requests more memory than this limit fails. A job array counts the memory of all its tasks. Only memory requested with the `memory` directive is counted (not `clusterOptions`). For the local executor, the default is the total memory on the system. For grid executors, there is no limit by default.",
+          "types": [
+            "MemoryUnit"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "name",
+          "description": "The name of the executor to be used (default: `local`).",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "onlyJobState",
+          "description": "*Used only by the SLURM executor.*\n\nWhen `true`, job status queries use `squeue --only-job-state` without partition (`-p`) or user (`-u`) filters. This is required for SLURM installations where `squeue` only accepts the `--only-job-state` option (default: `false`).",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "perCpuMemAllocation",
+          "description": "*Used only by the SLURM executor.*\n\nWhen `true`, memory allocations for SLURM jobs are specified as `--mem-per-cpu <task.memory / task.cpus>` instead of `--mem <task.memory>`.",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "perJobMemLimit",
+          "description": "*Used only by the LSF executor.*\n\nEnables the *per-job* memory limit mode for LSF jobs.",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "perTaskReserve",
+          "description": "*Used only by the LSF executor.*\n\nEnables the *per-task* memory reserve mode for LSF jobs.",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "pollInterval",
+          "description": "Determines how often to check for process termination. Default varies for each executor.",
+          "types": [
+            "Duration"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "queueGlobalStatus",
+          "description": "Determines how job status is retrieved. When `false` only the queue associated with the job execution is queried. When `true` the job status is queried globally i.e. irrespective of the submission queue (default: `false`).",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "queueSize",
+          "description": "The number of tasks the executor will handle in a parallel manner. A queue size of zero corresponds to no limit. Default varies for each executor.",
+          "types": [
+            "Integer"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "queueStatInterval",
+          "description": "*Used only by grid executors.*\n\nDetermines how often to fetch the queue status from the scheduler (default: `1 min`).",
+          "types": [
+            "Duration"
+          ]
+        },
+        {
+          "kind": "scope",
+          "name": "retry",
+          "description": "The `executor.retry` scope controls the behavior of retrying failed job submissions.\n\n[Read more](https://docs.seqera.io/nextflow/reference/config/executor)",
+          "children": [
+            {
+              "kind": "option",
+              "name": "delay",
+              "description": "*Used only by grid executors.*\n\nDelay when retrying failed job submissions (default: `500ms`).",
+              "types": [
+                "Duration"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "jitter",
+              "description": "*Used only by grid executors.*\n\nJitter value when retrying failed job submissions (default: `0.25`).",
+              "types": [
+                "Float"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "maxAttempts",
+              "description": "*Used only by grid executors.*\n\nMax attempts when retrying failed job submissions (default: `3`).",
+              "types": [
+                "Integer"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "maxDelay",
+              "description": "*Used only by grid executors.*\n\nMax delay when retrying failed job submissions (default: `30s`).",
+              "types": [
+                "Duration"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "reason",
+              "description": "*Used only by grid executors.*\n\nRegex pattern that when verified causes a failed submit operation to be re-tried (default: `Socket timed out`).",
+              "types": [
+                "String"
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "submitRateLimit",
+          "description": "Determines the max rate of job submission per time unit, for example `'10sec'` (10 jobs per second) or `'50/2min'` (50 jobs every 2 minutes) (default: unlimited).",
+          "types": [
+            "String"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "scope",
+      "name": "fusion",
+      "description": "The `fusion` scope provides advanced configuration for the use of the [Fusion file system](https://docs.seqera.io/fusion).",
+      "children": [
+        {
+          "kind": "option",
+          "name": "cacheSize",
+          "description": "The maximum size of the local cache used by the Fusion client.",
+          "types": [
+            "MemoryUnit"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "containerConfigUrl",
+          "description": "The URL of the container layer that provides the Fusion client. Supports `http(s)://...` and `file:/...` (absolute, no authority) schemes.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "enabled",
+          "description": "Enable the Fusion file system (default: `false`).",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "exportStorageCredentials",
+          "description": "Export the access credentials required by the underlying object storage to the task execution environment (default: `false`).",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "logLevel",
+          "description": "The log level of the Fusion client.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "logOutput",
+          "description": "The output location of the Fusion log.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "privileged",
+          "description": "Enable privileged containers for Fusion (default: `true`).",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "snapshots",
+          "description": "Enable Fusion snapshotting (preview, default: `false`). This feature allows Fusion to automatically restore a job when it is interrupted by a spot reclamation.",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "tags",
+          "description": "The pattern that determines how tags are applied to files created via the Fusion client (default: `[.command.*|.exitcode|.fusion.*](nextflow.io/metadata=true),[*](nextflow.io/temporary=true)`). Set to `false` to disable tags.",
+          "types": [
+            "Boolean",
+            "String"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "scope",
+      "name": "google",
+      "description": "The `google` scope allows you to configure the interactions with Google Cloud, including Google Cloud Batch and Google Cloud Storage.",
+      "children": [
+        {
+          "kind": "scope",
+          "name": "batch",
+          "description": "The `google` scope allows you to configure the interactions with Google Cloud, including Google Cloud Batch and Google Cloud Storage.",
+          "children": [
+            {
+              "kind": "option",
+              "name": "allowedLocations",
+              "description": "The set of [allowed locations](https://cloud.google.com/batch/docs/reference/rest/v1/projects.locations.jobs#locationpolicy) for VMs to be provisioned (default: no restriction).",
+              "types": [
+                "List<String>"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "autoRetryExitCodes",
+              "description": "The list of exit codes that should be automatically retried by Google Batch when `google.batch.maxSpotAttempts` is greater than 0 (default: `[50001]`).\n\n[Read more](https://cloud.google.com/batch/docs/troubleshooting#reserved-exit-codes)",
+              "types": [
+                "List<Integer>"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "bootDiskImage",
+              "description": "The image URI of the virtual machine boot disk, e.g `batch-debian` (default: none).\n\n[Read more](https://cloud.google.com/batch/docs/vm-os-environment-overview#vm-os-image-options)",
+              "types": [
+                "String"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "bootDiskSize",
+              "description": "The size of the virtual machine boot disk, e.g `50.GB` (default: none).",
+              "types": [
+                "MemoryUnit"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "cpuPlatform",
+              "description": "The [minimum CPU Platform](https://cloud.google.com/compute/docs/instances/specify-min-cpu-platform#specifications), e.g. `'Intel Skylake'` (default: none).",
+              "types": [
+                "String"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "gcsfuseOptions",
+              "description": "List of custom mount options for `gcsfuse` (default: `['-o rw', '-implicit-dirs']`).",
+              "types": [
+                "List<String>"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "installGpuDrivers",
+              "description": "",
+              "types": [
+                "Boolean"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "installOpsAgent",
+              "description": "Enable the installation of the Ops Agent on Google Batch instances for enhanced monitoring and logging (default: `false`).",
+              "types": [
+                "Boolean"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "logsPath",
+              "description": "The Google Cloud Storage path where job logs should be stored, e.g. `gs://my-logs-bucket/logs`.",
+              "types": [
+                "String"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "maxSpotAttempts",
+              "description": "Max number of execution attempts of a job interrupted by a Compute Engine Spot reclaim event (default: `0`).",
+              "types": [
+                "Integer"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "network",
+              "description": "The URL of an existing network resource to which the VM will be attached.",
+              "types": [
+                "String"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "networkTags",
+              "description": "The [network tags](https://cloud.google.com/vpc/docs/add-remove-network-tags) to be applied to the instances created by Google Batch jobs (e.g., `['allow-ssh', 'allow-http']`).",
+              "types": [
+                "List<String>"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "preemptible",
+              "description": "",
+              "types": [
+                "Boolean"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "serviceAccountEmail",
+              "description": "The Google service account email to use for the pipeline execution. If not specified, the default Compute Engine service account for the project will be used.",
+              "types": [
+                "String"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "spot",
+              "description": "Enable the use of spot virtual machines (default: `false`).",
+              "types": [
+                "Boolean"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "subnetwork",
+              "description": "The URL of an existing subnetwork resource in the network to which the VM will be attached.",
+              "types": [
+                "String"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "usePrivateAddress",
+              "description": "Do not provision public IP addresses for VMs, such that they only have an internal IP address (default: `false`).",
+              "types": [
+                "Boolean"
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "enableRequesterPaysBuckets",
+          "description": "Use the given Google Cloud project ID as the billing project for storage access (default: `false`). Required when accessing data from [requester pays](https://cloud.google.com/storage/docs/requester-pays) buckets.",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "httpConnectTimeout",
+          "description": "The HTTP connection timeout for Cloud Storage API requests (default: `'60s'`).",
+          "types": [
+            "Duration"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "httpReadTimeout",
+          "description": "The HTTP read timeout for Cloud Storage API requests (default: `'60s'`).",
+          "types": [
+            "Duration"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "location",
+          "description": "The Google Cloud location where jobs are executed (default: `us-central1`).",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "project",
+          "description": "The Google Cloud project ID to use for pipeline execution.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "scope",
+          "name": "storage",
+          "description": "The `google` scope allows you to configure the interactions with Google Cloud, including Google Cloud Batch and Google Cloud Storage.",
+          "children": [
+            {
+              "kind": "scope",
+              "name": "retryPolicy",
+              "description": "The `google` scope allows you to configure the interactions with Google Cloud, including Google Cloud Batch and Google Cloud Storage.",
+              "children": [
+                {
+                  "kind": "option",
+                  "name": "maxAttempts",
+                  "description": "Max attempts when retrying failed API requests to Cloud Storage (default: `10`).",
+                  "types": [
+                    "Integer"
+                  ]
+                },
+                {
+                  "kind": "option",
+                  "name": "maxDelay",
+                  "description": "Max delay when retrying failed API requests to Cloud Storage (default: `'90s'`).",
+                  "types": [
+                    "Duration"
+                  ]
+                },
+                {
+                  "kind": "option",
+                  "name": "multiplier",
+                  "description": "Delay multiplier when retrying failed API requests to Cloud Storage (default: `2.0`).",
+                  "types": [
+                    "Float"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "scope",
+      "name": "k8s",
+      "description": "The `k8s` scope controls the deployment and execution of workflow applications in a Kubernetes cluster.",
+      "children": [
+        {
+          "kind": "option",
+          "name": "autoMountHostPaths",
+          "description": "Automatically mount host paths into the task pods (default: `false`). Only intended for development purposes when using a single node.",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "cleanup",
+          "description": "When `true`, successful pods are automatically deleted (default: `true`).",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "client",
+          "description": "Map of options for the K8s client.\n\nIf this option is specified, it will be used instead of `.kube/config`.",
+          "types": [
+            "Map"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "clientRefreshInterval",
+          "description": "The interval after which the Kubernetes client configuration is refreshed (default: `50m`).",
+          "types": [
+            "Duration"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "computeResourceType",
+          "description": "Whether to use Kubernetes `Pod` or `Job` resource type to carry out Nextflow tasks (default: `Job`).",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "context",
+          "description": "The Kubernetes [configuration context](https://kubernetes.io/docs/tasks/access-application-cluster/configure-access-multiple-clusters/) to use.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "cpuLimits",
+          "description": "When `true`, set both the pod CPUs `request` and `limit` to the value specified by the `cpus` directive, otherwise set only the `request` (default: `false`).",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "scope",
+          "name": "debug",
+          "description": "The `k8s` scope controls the deployment and execution of workflow applications in a Kubernetes cluster.",
+          "children": [
+            {
+              "kind": "option",
+              "name": "yaml",
+              "description": "Save the pod spec for each task to `.command.yaml` in the task directory (default: `false`).",
+              "types": [
+                "Boolean"
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "fetchNodeName",
+          "description": "Include the hostname of each task in the execution trace (default: `false`).",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "fuseDevicePlugin",
+          "description": "The FUSE device plugin to be used when enabling Fusion in unprivileged mode (default: `['nextflow.io/fuse': 1]`).",
+          "types": [
+            "Map"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "httpConnectTimeout",
+          "description": "The Kubernetes HTTP client request connection timeout e.g. `'60s'`.",
+          "types": [
+            "Duration"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "httpReadTimeout",
+          "description": "The Kubernetes HTTP client request connection read timeout e.g. `'60s'`.",
+          "types": [
+            "Duration"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "imagePullPolicy",
+          "description": "The strategy for pulling container images. Can be `IfNotPresent`, `Always`, `Never`.\n\n[Read more](https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy)",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "launchDir",
+          "description": "The path where the workflow is launched and the user data is stored (default: `<volume-claim-mount-path>/<user-name>`). Must be a path in a shared K8s persistent volume.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "namespace",
+          "description": "The Kubernetes namespace to use (default: `default`).",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "pod",
+          "description": "Additional pod configuration options such as environment variables, config maps, secrets, etc. Allows the same settings as the [pod](https://docs.seqera.io/nextflow/reference/process#pod) process directive.",
+          "types": [
+            "List",
+            "Map",
+            "Object"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "projectDir",
+          "description": "The path where Nextflow projects are downloaded (default: `<volume-claim-mount-path>/projects`). Must be a path in a shared K8s persistent volume.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "pullPolicy",
+          "description": "",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "scope",
+          "name": "retryPolicy",
+          "description": "The `k8s` scope controls the deployment and execution of workflow applications in a Kubernetes cluster.",
+          "children": [
+            {
+              "kind": "option",
+              "name": "delay",
+              "description": "Delay when retrying failed API requests (default: `250ms`).",
+              "types": [
+                "Duration"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "jitter",
+              "description": "Jitter value when retrying failed API requests (default: `0.25`).",
+              "types": [
+                "Float"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "maxAttempts",
+              "description": "Max attempts when retrying failed API requests (default: `4`).",
+              "types": [
+                "Integer"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "maxDelay",
+              "description": "Max delay when retrying failed API requests (default: `90s`).",
+              "types": [
+                "Duration"
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "runAsUser",
+          "description": "The user ID to be used to run the containers. Shortcut for the `securityContext` option.",
+          "types": [
+            "Integer",
+            "Object",
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "securityContext",
+          "description": "The [security context](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/) to use for all pods.",
+          "types": [
+            "Map"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "serviceAccount",
+          "description": "The Kubernetes [service account name](https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/) to use.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "storageClaimName",
+          "description": "The name of the persistent volume claim where the shared work directory is stored.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "storageMountPath",
+          "description": "The mount path for the persistent volume claim (default: `/workspace`).",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "storageSubPath",
+          "description": "The path in the persistent volume to be mounted (default: `/`).",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "userName",
+          "description": "",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "workDir",
+          "description": "The path of the shared work directory (default: `<user-dir>/work`). Must be a path in a shared K8s persistent volume.",
+          "types": [
+            "String"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "scope",
+      "name": "lineage",
+      "description": "The `lineage` scope controls the generation of lineage metadata.",
+      "children": [
+        {
+          "kind": "option",
+          "name": "enabled",
+          "description": "Enable generation of lineage metadata (default: `false`).",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "scope",
+          "name": "store",
+          "description": "The `lineage` scope controls the generation of lineage metadata.",
+          "children": [
+            {
+              "kind": "option",
+              "name": "location",
+              "description": "The location of the lineage metadata store (default: `./.lineage`).",
+              "types": [
+                "String"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "scope",
+      "name": "mail",
+      "description": "The `mail` scope controls the mail server used to send email notifications.",
+      "children": [
+        {
+          "kind": "option",
+          "name": "debug",
+          "description": "Enable Java Mail logging for debugging purposes (default: `false`).",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "from",
+          "description": "Default email sender address.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "sendMailTimeout",
+          "description": "",
+          "types": [
+            "Duration"
+          ]
+        },
+        {
+          "kind": "scope",
+          "name": "smtp",
+          "description": "The `mail.smtp` scope supports any SMTP configuration property in the [Java Mail API](https://javaee.github.io/javamail/).\n\n[Read more](https://javaee.github.io/javamail/docs/api/com/sun/mail/smtp/package-summary.html#properties)",
+          "children": [
+            {
+              "kind": "option",
+              "name": "host",
+              "description": "Host name of the mail server.",
+              "types": [
+                "String"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "password",
+              "description": "User password to connect to the mail server.",
+              "types": [
+                "String"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "port",
+              "description": "Port number of the mail server.",
+              "types": [
+                "Integer"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "user",
+              "description": "User name to connect to the mail server.",
+              "types": [
+                "String"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "scope",
+      "name": "manifest",
+      "description": "The `manifest` scope allows you to define some metadata that is useful when publishing or running your pipeline.",
+      "children": [
+        {
+          "kind": "option",
+          "name": "author",
+          "description": "Project author name (use a comma to separate multiple names).",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "contributors",
+          "description": "List of project contributors. Should be a list of maps.",
+          "types": [
+            "List<Object>"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "defaultBranch",
+          "description": "Git repository default branch (default: `master`).",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "description",
+          "description": "Free text describing the workflow project.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "diagram",
+          "description": "Project workflow diagram location (Relative path or URL).",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "docsUrl",
+          "description": "Project documentation URL.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "doi",
+          "description": "Project related publication DOI identifier.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "gitmodules",
+          "description": "Controls whether git sub-modules should be cloned with the main repository.\n\nCan be either a boolean value, a list of submodule names, or a comma-separated string of submodule names.",
+          "types": [
+            "Object"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "homePage",
+          "description": "Project home page URL.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "icon",
+          "description": "Project related icon location (Relative path or URL).",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "license",
+          "description": "Project license.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "mainScript",
+          "description": "Project main script (default: `main.nf`).",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "name",
+          "description": "Project short name.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "nextflowVersion",
+          "description": "Minimum required Nextflow version.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "organization",
+          "description": "Project organization.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "recurseSubmodules",
+          "description": "Pull submodules recursively from the Git repository.",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "version",
+          "description": "Project version number.",
+          "types": [
+            "String"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "scope",
+      "name": "nextflow",
+      "description": "",
+      "children": [
+        {
+          "kind": "scope",
+          "name": "enable",
+          "description": "",
+          "children": [
+            {
+              "kind": "option",
+              "name": "configProcessNamesValidation",
+              "description": "When `true`, prints a warning for every `withName:` process selector that doesn't match a process in the pipeline (default: `true`).",
+              "types": [
+                "boolean"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "dsl",
+              "description": "Defines the DSL version (`1` or `2`).",
+              "types": [
+                "float"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "moduleBinaries",
+              "description": "When `true`, enables the use of module-scoped executable scripts via [module resources](https://docs.seqera.io/nextflow/modules/developing-modules#resources).",
+              "types": [
+                "boolean"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "strict",
+              "description": "When `true`, the pipeline is executed in [strict mode](https://docs.seqera.io/nextflow/reference/feature-flags).",
+              "types": [
+                "boolean"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "types",
+              "description": "When `true`, enables the use of [typed processes](https://docs.seqera.io/nextflow/process-typed) and [typed workflows](https://docs.seqera.io/nextflow/workflow-typed).\n\nThis feature flag must be enabled in every script that uses typed processes/workflows. Legacy processes/workflows can not be defined in scripts that enable this feature flag.",
+              "types": [
+                "boolean"
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "scope",
+          "name": "preview",
+          "description": "",
+          "children": [
+            {
+              "kind": "option",
+              "name": "recursion",
+              "description": "When `true`, enables the use of [process and workflow recursion](https://docs.seqera.io/nextflow/workflow#process-and-workflow-recursion).",
+              "types": [
+                "boolean"
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "scope",
+          "name": "retryPolicy",
+          "description": "",
+          "children": [
+            {
+              "kind": "option",
+              "name": "delay",
+              "description": "Delay used for retryable operations (default: `350ms`).",
+              "types": [
+                "Duration"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "jitter",
+              "description": "Jitter value used for retryable operations (default: `0.25`).",
+              "types": [
+                "Double"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "maxAttempts",
+              "description": "Max attempts used for retryable operations (default: `5`).",
+              "types": [
+                "Integer"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "maxDelay",
+              "description": "Max delay used for retryable operations (default: `90s`).",
+              "types": [
+                "Duration"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "multiplier",
+              "description": "Multiplier used for the exponential backoff delay of retryable operations (default: `2.0`).",
+              "types": [
+                "Double"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "scope",
+      "name": "notification",
+      "description": "The `notification` scope controls the automatic sending of an email notification on workflow completion.",
+      "children": [
+        {
+          "kind": "option",
+          "name": "attributes",
+          "description": "Map of variables that can be used in the template file.",
+          "types": [
+            "Map"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "enabled",
+          "description": "Send an email notification when the workflow execution completes (default: `false`).",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "from",
+          "description": "Sender address for the email notification.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "template",
+          "description": "Path of a template file containing the contents of the email notification.",
+          "types": [
+            "Object"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "to",
+          "description": "Recipient address for the email notification. Multiple addresses can be specified as a comma-separated list.",
+          "types": [
+            "String"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "option",
+      "name": "outputDir",
+      "description": "The pipeline output directory. Equivalent to the `-output-dir` option of the `run` command.",
+      "types": [
+        "String"
+      ]
+    },
+    {
+      "kind": "scope",
+      "name": "params",
+      "description": "The `params` scope allows you to define parameters that will be accessible in the pipeline script.\n\n[Read more](https://docs.seqera.io/nextflow/config#parameters)",
+      "children": []
+    },
+    {
+      "kind": "dsl",
+      "name": "plugins",
+      "description": "The `plugins` scope allows you to include plugins at runtime.\n\n[Read more](https://docs.seqera.io/nextflow/plugins)",
+      "dsl": "PluginsDsl"
+    },
+    {
+      "kind": "scope",
+      "name": "podman",
+      "description": "The `podman` scope controls how [Podman](https://podman.io/) containers are executed by Nextflow.",
+      "children": [
+        {
+          "kind": "option",
+          "name": "enabled",
+          "description": "Execute tasks with Podman containers (default: `false`).",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "engineOptions",
+          "description": "Specify additional options supported by the Podman engine i.e. `podman [OPTIONS]`.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "envWhitelist",
+          "description": "Comma separated list of environment variable names to be included in the container environment.",
+          "types": [
+            "List<String>"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "kill",
+          "description": "",
+          "types": [
+            "Object"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "mountFlags",
+          "description": "Add the specified flags to the volume mounts e.g. `'ro,Z'`.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "registry",
+          "description": "The registry from where container images are pulled. It should be only used to specify a private registry server. It should NOT include the protocol prefix i.e. `http://`.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "remove",
+          "description": "Clean-up the container after the execution (default: `true`).",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "runOptions",
+          "description": "Specify extra command line options supported by the `podman run` command.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "temp",
+          "description": "Mounts a path of your choice as the `/tmp` directory in the container. Use the special value `'auto'` to create a temporary directory each time a container is created.",
+          "types": [
+            "String"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "scope",
+      "name": "process",
+      "description": "The `process` scope allows you to specify default directives for processes in your pipeline.\n\n[Read more](https://docs.seqera.io/nextflow/config#process-configuration)",
+      "children": [
+        {
+          "kind": "option",
+          "name": "accelerator",
+          "description": "The `accelerator` directive allows you to request hardware accelerators (e.g. GPUs) for the task execution.\n\n[Read more](https://docs.seqera.io/nextflow/reference/process#accelerator)",
+          "types": [
+            "Integer",
+            "Map"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "afterScript",
+          "description": "The `afterScript` directive allows you to execute a custom (Bash) snippet *after* the task script.\n\n[Read more](https://docs.seqera.io/nextflow/reference/process#afterscript)",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "arch",
+          "description": "The `arch` directive allows you to define the CPU architecture to build the software used by the task.\n\n[Read more](https://docs.seqera.io/nextflow/reference/process#arch)",
+          "types": [
+            "Map",
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "array",
+          "description": "The `array` directive allows you to submit tasks as *job arrays* for executors that support it.\n\n[Read more](https://docs.seqera.io/nextflow/reference/process#array)",
+          "types": [
+            "Integer"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "beforeScript",
+          "description": "The `beforeScript` directive allows you to execute a custom (Bash) snippet *before* the task script.\n\n[Read more](https://docs.seqera.io/nextflow/reference/process#beforescript)",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "cache",
+          "description": "The `cache` directive allows you to store the process results to a local cache. When the cache is enabled *and* the pipeline is launched with the `-resume` option, any task executions that are already cached will be reused.\n\n[Read more](https://docs.seqera.io/nextflow/reference/process#cache)",
+          "types": [
+            "Boolean",
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "clusterOptions",
+          "description": "The `clusterOptions` directive allows the usage of any native configuration option accepted by your cluster submit command. You can use it to request non-standard resources or use settings that are specific to your cluster and not supported out of the box by Nextflow.\n\n[Read more](https://docs.seqera.io/nextflow/reference/process#clusteroptions)",
+          "types": [
+            "List",
+            "String",
+            "String[]"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "conda",
+          "description": "The `conda` directive allows for the definition of the process dependencies using the [Conda](https://conda.io) package manager.\n\n[Read more](https://docs.seqera.io/nextflow/reference/process#conda)",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "container",
+          "description": "The `container` directive allows you to execute the process script in a container.\n\n[Read more](https://docs.seqera.io/nextflow/reference/process#container)",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "containerOptions",
+          "description": "The `containerOptions` directive allows you to specify any container execution option supported by the underlying container engine (ie. Docker, Singularity, etc). This can be useful to provide container settings only for a specific process.\n\n[Read more](https://docs.seqera.io/nextflow/reference/process#containeroptions)",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "cpus",
+          "description": "The `cpus` directive allows you to define the number of (logical) CPUs required by each task.\n\n[Read more](https://docs.seqera.io/nextflow/reference/process#cpus)",
+          "types": [
+            "Integer"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "debug",
+          "description": "The `debug` directive allows you to print the process standard output to Nextflow's standard output, i.e. the console. By default this directive is disabled.\n\n[Read more](https://docs.seqera.io/nextflow/reference/process#debug)",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "disk",
+          "description": "The `disk` directive allows you to define how much local disk storage the process is allowed to use.\n\n[Read more](https://docs.seqera.io/nextflow/reference/process#disk)",
+          "types": [
+            "Map",
+            "MemoryUnit"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "errorStrategy",
+          "description": "The `errorStrategy` directive allows you to define what to do when a task fails.\n\n[Read more](https://docs.seqera.io/nextflow/reference/process#errorstrategy)",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "executor",
+          "description": "The `executor` defines the underlying system where tasks are executed.\n\n[Read more](https://docs.seqera.io/nextflow/reference/process#executor)",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "ext",
+          "description": "The `ext` is a special directive used for custom settings by some executors.\n\n[Read more](https://docs.seqera.io/nextflow/reference/process#ext)",
+          "types": [
+            "Map"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "fair",
+          "description": "The `fair` directive, when enabled, guarantees that process outputs will be emitted in the order in which they were received.\n\n[Read more](https://docs.seqera.io/nextflow/reference/process#fair)",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "hints",
+          "description": "The `hints` directive specifies executor-specific hints as key-value pairs. Keys may be namespaced with an `executor/` prefix to target a specific executor.\n\n[Read more](https://docs.seqera.io/nextflow/reference/process#hints)",
+          "types": [
+            "Map"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "label",
+          "description": "The `label` directive allows you to annotate a process with a mnemonic identifier of your choice.\n\n[Read more](https://docs.seqera.io/nextflow/reference/process#label)",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "machineType",
+          "description": "The `machineType` directive can be used to specify a predefined Google Compute Platform [machine type](https://cloud.google.com/compute/docs/machine-types) when using the [Google Batch](https://docs.seqera.io/nextflow/reference/executor/google-batch) executor.\n\n[Read more](https://docs.seqera.io/nextflow/reference/process#machinetype)",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "maxErrors",
+          "description": "The `maxErrors` directive allows you to specify the maximum number of times a process can fail when using the `retry` or `ignore` error strategy. By default this directive is disabled.\n\n[Read more](https://docs.seqera.io/nextflow/reference/process#maxerrors)",
+          "types": [
+            "Integer"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "maxForks",
+          "description": "The `maxForks` directive allows you to define the maximum number of tasks (per process) that can be executed in parallel.\n\n[Read more](https://docs.seqera.io/nextflow/reference/process#maxforks)",
+          "types": [
+            "Integer"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "maxRetries",
+          "description": "The `maxRetries` directive allows you to define the maximum number of times a task can be retried when using the `retry` error strategy. By default only one retry is allowed.\n\n[Read more](https://docs.seqera.io/nextflow/reference/process#maxretries)",
+          "types": [
+            "Integer"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "maxSubmitAwait",
+          "description": "The `maxSubmitAwait` directives allows you to specify how long a task can remain in the submission queue. If a task remains in the queue beyond this time limit, it will fail.\n\n[Read more](https://docs.seqera.io/nextflow/reference/process#maxsubmitawait)",
+          "types": [
+            "Duration"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "memory",
+          "description": "The `memory` directive allows you to define how much memory is required by each task. Can be a string (e.g. `'8 GB'`) or a memory unit (e.g. `8.GB`).\n\n[Read more](https://docs.seqera.io/nextflow/reference/process#memory)",
+          "types": [
+            "MemoryUnit"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "module",
+          "description": "The `module` directive allows you to provide software dependencies to a process using [Environment Modules](http://modules.sourceforge.net/).\n\n[Read more](https://docs.seqera.io/nextflow/reference/process#module)",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "penv",
+          "description": "The `penv` directive allows you to define the parallel environment to be used when submitting a parallel task to the [SGE](https://docs.seqera.io/nextflow/reference/executor/sge) resource manager.\n\n[Read more](https://docs.seqera.io/nextflow/reference/process#penv)",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "pod",
+          "description": "The `pod` directive allows you to define pod specific settings, such as environment variables, secrets, and config maps, when using the [Kubernetes](https://docs.seqera.io/nextflow/reference/executor/kubernetes) executor.\n\n[Read more](https://docs.seqera.io/nextflow/reference/process#pod)",
+          "types": [
+            "List",
+            "Map"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "publishDir",
+          "description": "The `publishDir` directive allows you to publish the process output files to a directory.\n\n[Read more](https://docs.seqera.io/nextflow/reference/process#publishdir)",
+          "types": [
+            "List",
+            "Map",
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "queue",
+          "description": "The `queue` directive allows you to specify the queue to which jobs are submitted when using a grid executor.\n\n[Read more](https://docs.seqera.io/nextflow/reference/process#queue)",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "resourceLabels",
+          "description": "The `resourceLabels` directive allows you to specify custom name-value pairs which are applied to the compute resources used for the process execution.\n\n[Read more](https://docs.seqera.io/nextflow/reference/process#resourcelabels)",
+          "types": [
+            "Map"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "resourceLimits",
+          "description": "The `resourceLimits` directive allows you to specify environment-specific limits for task resource requests.\n\n[Read more](https://docs.seqera.io/nextflow/reference/process#resourcelimits)",
+          "types": [
+            "Map"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "scratch",
+          "description": "The `scratch` directive allows you to execute each task in a temporary directory that is local to the compute node.\n\n[Read more](https://docs.seqera.io/nextflow/reference/process#scratch)",
+          "types": [
+            "Boolean",
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "secret",
+          "description": "The `secret` directive allows you to securely provide secrets to a process.\n\n[Read more](https://docs.seqera.io/nextflow/secrets#process-directive)",
+          "types": [
+            "List"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "shell",
+          "description": "The `shell` directive allows you to define a custom shell command for process scripts. By default, script blocks are executed with `/bin/bash -ue`.\n\n[Read more](https://docs.seqera.io/nextflow/reference/process#shell)",
+          "types": [
+            "List",
+            "String",
+            "String[]"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "spack",
+          "description": "The `spack` directive allows you to provide software dependencies using the [Spack](https://spack.io) package manager.\n\n[Read more](https://docs.seqera.io/nextflow/reference/process#spack)",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "stageInMode",
+          "description": "The `stageInMode` directive defines how input files are staged into the task work directory.\n\n[Read more](https://docs.seqera.io/nextflow/reference/process#stageinmode)",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "stageOutMode",
+          "description": "The `stageOutMode` directive defines how output files are staged out from the scratch directory to the task work directory when using the `scratch` directive.\n\n[Read more](https://docs.seqera.io/nextflow/reference/process#stageoutmode)",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "storeDir",
+          "description": "The `storeDir` directive allows you to use an external directory as a *permanent* cache for process outputs.\n\n[Read more](https://docs.seqera.io/nextflow/reference/process#storedir)",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "tag",
+          "description": "The `tag` directive allows you to associate each process execution with a custom label, so that it will be easier to identify in the log file or in a report.\n\n[Read more](https://docs.seqera.io/nextflow/reference/process#tag)",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "time",
+          "description": "The `time` directive allows you to define how long a task is allowed to run.\n\n[Read more](https://docs.seqera.io/nextflow/reference/process#time)",
+          "types": [
+            "Duration"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "when",
+          "description": "When `false`, the process is not executed. Can be a closure to evaluate the condition for each task.\n\n[Read more](https://docs.seqera.io/nextflow/config#disabling-processes)",
+          "types": [
+            "Boolean"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "scope",
+      "name": "profiles",
+      "description": "The `profiles` block allows you to define configuration profiles. A profile is a set of configuration settings that can be applied at runtime with the `-profile` command line option.\n\n[Read more](https://docs.seqera.io/nextflow/config#config-profiles)",
+      "children": []
+    },
+    {
+      "kind": "scope",
+      "name": "registry",
+      "description": "The `registry` scope provides configuration for the Nextflow module registry.\nThis includes the registry URL(s) and API key for authentication.",
+      "children": [
+        {
+          "kind": "option",
+          "name": "apiKey",
+          "description": "API key for authenticating with the primary registry",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "url",
+          "description": "Registry URL or list of registry URLs in priority order (primary URL first)",
+          "types": [
+            "Object<String>",
+            "String"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "scope",
+      "name": "report",
+      "description": "The `report` scope allows you to configure the workflow [execution report](https://docs.seqera.io/nextflow/reports#execution-report).",
+      "children": [
+        {
+          "kind": "option",
+          "name": "directory",
+          "description": "The directory where the report file should be saved, relative to the workflow output directory.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "enabled",
+          "description": "Create the execution report on workflow completion (default: `false`).",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "file",
+          "description": "The path of the created execution report file (default: `'report-<timestamp>.html'`).",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "maxTasks",
+          "description": "",
+          "types": [
+            "Integer"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "overwrite",
+          "description": "Overwrite any existing report file with the same name (default: `false`).",
+          "types": [
+            "Boolean"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "option",
+      "name": "resume",
+      "description": "Enable the use of previously cached task executions. Equivalent to the `-resume` option of the `run` command.",
+      "types": [
+        "Boolean"
+      ]
+    },
+    {
+      "kind": "scope",
+      "name": "sarus",
+      "description": "The `sarus` scope controls how [Sarus](https://sarus.readthedocs.io) containers are executed by Nextflow.",
+      "children": [
+        {
+          "kind": "option",
+          "name": "enabled",
+          "description": "Execute tasks with Sarus containers (default: `false`).",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "envWhitelist",
+          "description": "Comma-separated list of environment variable names to be included in the container environment.",
+          "types": [
+            "List<String>"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "runOptions",
+          "description": "Specify extra command line options supported by the `sarus run` command.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "tty",
+          "description": "Allocates a pseudo-tty (default: `false`).",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "verbose",
+          "description": "",
+          "types": [
+            "Boolean"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "scope",
+      "name": "seqera",
+      "description": "The `seqera` scope provides configuration for Seqera services.",
+      "children": [
+        {
+          "kind": "scope",
+          "name": "executor",
+          "description": "Configuration for the Seqera compute executor.",
+          "children": [
+            {
+              "kind": "option",
+              "name": "autoLabels",
+              "description": "DEPRECATED: use `tower.autoLabels` instead. This option is honoured for backward\ncompatibility and takes precedence over `tower.autoLabels` when specified, including\nwhen set to `false`.\n\nAutomatically attach workflow metadata labels (with the `nextflow.io/` and\n`seqera.io/platform/` prefixes) to the compute resources. Accepts:\n  - `true`: include all available metadata labels\n  - `false` (default): disable\n  - a list or comma-separated string of short names: e.g.\n    `['runName', 'projectName']` or `'runName,projectName'`\nValid names: `projectName`, `userName`, `runName`, `sessionId`, `resume`,\n`revision`, `commitId`, `repository`, `manifestName`, `runtimeVersion`,\n`workflowId`, `workspaceId`, `computeEnvId`.",
+              "types": [
+                "Set<String>"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "batchFlushInterval",
+              "description": "The interval for batching task submissions (default: `5 sec`).",
+              "types": [
+                "Duration"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "computeEnvId",
+              "description": "The Seqera Platform compute environment ID. When specified, the scheduler resolves\nthe compute environment directly by this ID instead of listing all workspace CEs.\nUsed as a fallback when the workflow launch does not include a CE reference.",
+              "types": [
+                "String"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "endpoint",
+              "description": "The Seqera scheduler service endpoint URL.",
+              "types": [
+                "String"
+              ]
+            },
+            {
+              "kind": "scope",
+              "name": "httpClient",
+              "description": "HTTP client settings for requests to the Seqera scheduler service.",
+              "children": [
+                {
+                  "kind": "option",
+                  "name": "connectTimeout",
+                  "description": "The maximum time to wait for a connection to the Seqera scheduler service to be\nestablished, applied to a single attempt (default: `10 sec`). It bounds only reaching\nthe service, never waiting for its response — see `requestTimeout` for that. A\ntimed-out connection proves the request never arrived, so it is retried under\n`seqera.executor.retryPolicy` for every request, task submissions included. It must be\ngreater than zero — unlike `requestTimeout`, `0 sec` is not accepted as \"unbounded\".",
+                  "types": [
+                    "Duration"
+                  ]
+                },
+                {
+                  "kind": "option",
+                  "name": "requestTimeout",
+                  "description": "The maximum time to wait for a response from the Seqera scheduler service, applied to\na single attempt (default: `45 sec`). A timed-out poll or cancel is retried under\n`seqera.executor.retryPolicy`, so the worst case for one call is `requestTimeout`\ntimes `retryPolicy.maxAttempts` plus the accumulated delays; a timed-out task\nsubmission is not re-sent, since the scheduler may already be creating the tasks.\nSet to `0 sec` to wait indefinitely.",
+                  "types": [
+                    "Duration"
+                  ]
+                }
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "keyPairName",
+              "description": "The EC2 key pair name for SSH access to instances.",
+              "types": [
+                "String"
+              ]
+            },
+            {
+              "kind": "scope",
+              "name": "machineRequirement",
+              "description": "Machine/infrastructure requirements for session tasks.",
+              "children": [
+                {
+                  "kind": "option",
+                  "name": "capacityMode",
+                  "description": "The ECS capacity provider mode: `managed` (default) or `asg`.\n- `managed`: ECS Managed Instances\n- `asg`: Auto Scaling Group-backed capacity provider",
+                  "types": [
+                    "String"
+                  ]
+                },
+                {
+                  "kind": "option",
+                  "name": "diskAllocation",
+                  "description": "The disk allocation strategy: `task` or `node`.\n- `task`: Per-task EBS volume created at task launch (default)\n- `node`: Per-node instance storage attached at cluster level",
+                  "types": [
+                    "String"
+                  ]
+                },
+                {
+                  "kind": "option",
+                  "name": "diskEncrypted",
+                  "description": "Enable KMS encryption for the EBS volume.\nDefault: false.",
+                  "types": [
+                    "Boolean"
+                  ]
+                },
+                {
+                  "kind": "option",
+                  "name": "diskIops",
+                  "description": "The IOPS for io1/io2/gp3 volumes. Required for io1/io2.",
+                  "types": [
+                    "Integer"
+                  ]
+                },
+                {
+                  "kind": "option",
+                  "name": "diskMountPath",
+                  "description": "The container path where the disk is mounted (e.g., `/data`).\nDefault: `/tmp`.",
+                  "types": [
+                    "String"
+                  ]
+                },
+                {
+                  "kind": "option",
+                  "name": "diskSize",
+                  "description": "The disk size for session-level storage (e.g., `100.GB`).",
+                  "types": [
+                    "MemoryUnit"
+                  ]
+                },
+                {
+                  "kind": "option",
+                  "name": "diskThroughputMiBps",
+                  "description": "The throughput in MiB/s for gp3 volumes (125-1000).\nDefault: 325 (Fusion recommended).",
+                  "types": [
+                    "Integer"
+                  ]
+                },
+                {
+                  "kind": "option",
+                  "name": "diskType",
+                  "description": "The EBS volume type for task scratch disk (e.g., `ebs/gp3`, `ebs/io1`).\nDefault: `ebs/gp3`.",
+                  "types": [
+                    "String"
+                  ]
+                },
+                {
+                  "kind": "option",
+                  "name": "machineTypes",
+                  "description": "List of acceptable machine type patterns. Supports exact types (e.g., `t3.small`),\nfamily prefixes (e.g., `m5` matches all m5 sizes), and glob wildcards (e.g., `t*.small`).",
+                  "types": [
+                    "List<String>"
+                  ]
+                },
+                {
+                  "kind": "option",
+                  "name": "maxSpotAttempts",
+                  "description": "Maximum number of spot retry attempts before falling back to on-demand.\nOnly used when provisioning is `spot` or `spotFirst`.",
+                  "types": [
+                    "Integer"
+                  ]
+                },
+                {
+                  "kind": "option",
+                  "name": "onDemandCostRatio",
+                  "description": "Cost limit on the spot to on-demand fallback. With `spotFirst`, a task falls back to on-demand\nonly while on-demand costs at most this multiple of the spot price. When not set, the\nscheduler's default for the cloud provider applies. Set to `0` to remove the limit, so tasks\nalways fall back whatever the price. Only used when provisioning is `spotFirst`.",
+                  "types": [
+                    "Float"
+                  ]
+                },
+                {
+                  "kind": "option",
+                  "name": "provisioning",
+                  "description": "The instance provisioning mode: `spot`, `ondemand`, or `spotFirst`.",
+                  "types": [
+                    "String"
+                  ]
+                }
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "predictionModel",
+              "description": "The resource prediction model to use for estimating task resource requirements\nbased on historical execution metrics. Supported values: `qr/v1`, `qr/v2` (quantile regression).\nWhen not set, no resource estimation is applied.",
+              "types": [
+                "String"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "provider",
+              "description": "The compute backend provider type (e.g. `aws`, `local`).\nWhen specified, used together with region to select the matching compute environment.",
+              "types": [
+                "String"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "providerConfig",
+              "description": "Backend-specific provider configuration merged into the compute cluster's backend\nproperties (for cluster isolation). When omitted, the backend falls back to its\nenvironment variable configuration.",
+              "types": [
+                "Map<String, String>"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "region",
+              "description": "The AWS region for task execution (default: `eu-central-1`).",
+              "types": [
+                "String"
+              ]
+            },
+            {
+              "kind": "scope",
+              "name": "retryPolicy",
+              "description": "Configuration for the Seqera compute executor.",
+              "children": [
+                {
+                  "kind": "option",
+                  "name": "delay",
+                  "description": "The initial delay when a failing HTTP request is retried (default: `450ms`).",
+                  "types": [
+                    "Duration"
+                  ]
+                },
+                {
+                  "kind": "option",
+                  "name": "jitter",
+                  "description": "The jitter factor for randomizing retry delays (default: `0.25`).",
+                  "types": [
+                    "Float"
+                  ]
+                },
+                {
+                  "kind": "option",
+                  "name": "maxAttempts",
+                  "description": "The maximum number of retry attempts (default: `10`).",
+                  "types": [
+                    "Integer"
+                  ]
+                },
+                {
+                  "kind": "option",
+                  "name": "maxDelay",
+                  "description": "The max delay when a failing HTTP request is retried (default: `90s`).",
+                  "types": [
+                    "Duration"
+                  ]
+                },
+                {
+                  "kind": "option",
+                  "name": "multiplier",
+                  "description": "The multiplier for exponential backoff (default: `2.0`).",
+                  "types": [
+                    "Float"
+                  ]
+                }
+              ]
+            },
+            {
+              "kind": "scope",
+              "name": "schedulingRequirement",
+              "description": "Scheduling requirements applied to this run by the Seqera scheduler.",
+              "children": [
+                {
+                  "kind": "option",
+                  "name": "maxCpusPerUser",
+                  "description": "Maximum concurrent vCPUs a single user may consume across all of that user's runs on this\ncompute environment (default: no limit). A task requesting more `cpus` than this cap fails\ninstead of being queued.",
+                  "types": [
+                    "Integer"
+                  ]
+                }
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "shellEnabled",
+              "description": "Enable on-demand interactive shell access (e.g. SSH) to this run's task containers\n(VM and local backends). When `true`, a running task can be reached with\n`sched task ssh <task-id>` (or a plain `ssh <task-id>@<scheduler>`), and the\nconnection survives task completion. Default: `false`.",
+              "types": [
+                "Boolean"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "strategy",
+              "description": "Execution strategy within the chosen provider.\nNarrows compute-environment selection when a provider offers multiple strategies\n(e.g. AWS supports `ecs` and `vm`). When omitted, the provider's canonical default\nstrategy is used (AWS → `ecs`).",
+              "types": [
+                "String"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "taskEnvironment",
+              "description": "Custom environment variables to apply to all tasks submitted by the Seqera executor.\nThese are merged with the Fusion environment variables, with Fusion variables taking precedence.",
+              "types": [
+                "Map<String, String>"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "scope",
+      "name": "shifter",
+      "description": "The `shifter` scope controls how [Shifter](https://docs.nersc.gov/programming/shifter/overview/) containers are executed by Nextflow.",
+      "children": [
+        {
+          "kind": "option",
+          "name": "enabled",
+          "description": "Execute tasks with Shifter containers (default: `false`).",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "envWhitelist",
+          "description": "Comma-separated list of environment variable names to be included in the container environment.",
+          "types": [
+            "List<String>"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "verbose",
+          "description": "",
+          "types": [
+            "Boolean"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "scope",
+      "name": "singularity",
+      "description": "The `singularity` scope controls how [Singularity](https://sylabs.io/singularity/) containers are executed by Nextflow.",
+      "children": [
+        {
+          "kind": "option",
+          "name": "autoMounts",
+          "description": "Automatically mount host paths in the executed container (default: `true`). It requires the `user bind control` feature to be enabled in your Singularity installation.",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "cacheDir",
+          "description": "The directory where remote Singularity images are stored. When using a compute cluster, it must be a shared folder accessible to all compute nodes.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "enabled",
+          "description": "Execute tasks with Singularity containers (default: `false`).",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "engineOptions",
+          "description": "Specify additional options supported by the Singularity engine i.e. `singularity [OPTIONS]`.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "envWhitelist",
+          "description": "Comma separated list of environment variable names to be included in the container environment.",
+          "types": [
+            "List<String>"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "libraryDir",
+          "description": "Directory where remote Singularity images are retrieved. When using a computing cluster it must be a shared folder accessible to all compute nodes.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "noHttps",
+          "description": "Pull the Singularity image with http protocol (default: `false`).",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "ociAutoPull",
+          "description": "When enabled, OCI (and Docker) container images are pull and converted to a SIF image file format implicitly by the Singularity run command, instead of Nextflow (default: `false`).",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "ociMode",
+          "description": "Enable OCI-mode, that allows running native OCI compliant container image with Singularity using `crun` or `runc` as low-level runtime (default: `false`).",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "pullTimeout",
+          "description": "The amount of time the Singularity pull can last, after which the process is terminated (default: `20 min`).",
+          "types": [
+            "Duration"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "registry",
+          "description": "The registry from where Docker images are pulled. It should be only used to specify a private registry server. It should NOT include the protocol prefix i.e. `http://`.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "resourceLimits",
+          "description": "Apply the task `cpus` and `memory` directives as container resource limits using the `--cpus` and `--memory` flags (default: `false`).",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "runOptions",
+          "description": "Specify extra command line options supported by `singularity exec`.",
+          "types": [
+            "String"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "scope",
+      "name": "smolvm",
+      "description": "The `smolvm` scope controls how [smolvm](https://github.com/smol-machines/smolvm) microVMs are executed by Nextflow.",
+      "children": [
+        {
+          "kind": "option",
+          "name": "enabled",
+          "description": "Enable smolvm execution (default: `false`).",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "engineOptions",
+          "description": "Specify additional options supported by the smolvm CLI i.e. `smolvm [OPTIONS] machine run`.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "envWhitelist",
+          "description": "Comma separated list of environment variable names to be included in the VM environment.",
+          "types": [
+            "List<String>"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "network",
+          "description": "Enable outbound network access in the VM (default: `true`).",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "registry",
+          "description": "The registry from where images are pulled. It should NOT include the protocol prefix i.e. `http://`.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "runOptions",
+          "description": "Specify extra command line options supported by the `smolvm machine run` command.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "temp",
+          "description": "Mounts a path of your choice as the `/tmp` directory in the VM.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "tty",
+          "description": "Allocates a pseudo-tty (default: `false`).",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "writableInputMounts",
+          "description": "When `false`, mount input directories as read-only (default: `true`).",
+          "types": [
+            "Boolean"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "scope",
+      "name": "spack",
+      "description": "The `spack` scope controls the creation of a Spack environment by the Spack package manager.",
+      "children": [
+        {
+          "kind": "option",
+          "name": "cacheDir",
+          "description": "The path where Spack environments are stored. It should be accessible from all compute nodes when using a shared file system.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "checksum",
+          "description": "Enable checksum verification of source tarballs (default: `true`).",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "createTimeout",
+          "description": "The amount of time to wait for the Spack environment to be created before failing (default: `60 min`).",
+          "types": [
+            "Duration"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "enabled",
+          "description": "Execute tasks with Spack environments (default: `false`).",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "parallelBuilds",
+          "description": "The maximum number of parallel package builds (default: the number of available CPUs).",
+          "types": [
+            "Integer"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "scope",
+      "name": "timeline",
+      "description": "The `timeline` scope controls the execution timeline report generated by Nextflow.",
+      "children": [
+        {
+          "kind": "option",
+          "name": "directory",
+          "description": "The directory where the timeline file should be saved, relative to the workflow output directory.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "enabled",
+          "description": "Create the timeline report on workflow completion file (default: `false`).",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "file",
+          "description": "Timeline file name (default: `'timeline-<timestamp>.html'`).",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "overwrite",
+          "description": "Overwrite any existing timeline file with the same name (default: `false`).",
+          "types": [
+            "Boolean"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "scope",
+      "name": "tower",
+      "description": "The `tower` scope controls the settings for [Seqera Platform](https://seqera.io) (formerly Tower Cloud).",
+      "children": [
+        {
+          "kind": "option",
+          "name": "accessToken",
+          "description": "The unique access token for your Seqera Platform account.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "autoLabels",
+          "description": "Automatically derive resource labels from the workflow metadata (using the `nextflow.io/`\nand `seqera.io/platform/` key prefixes) and attach them to the compute resources created\nby the executor. Accepts:\n  - `true`: include all available metadata labels\n  - `false` (default): disable\n  - a list or comma-separated string of short names: e.g.\n    `['runName', 'projectName']` or `'runName,projectName'`\n\nValid names: `projectName`, `userName`, `runName`, `sessionId`, `resume`,\n`revision`, `commitId`, `repository`, `manifestName`, `runtimeVersion`,\n`workflowId`, `workspaceId`, `computeEnvId`.\n\nThe labels declared with the `resourceLabels` process directive take precedence\non key collision.",
+          "types": [
+            "Boolean",
+            "List",
+            "Object",
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "computeEnvId",
+          "description": "The Compute Environment ID in Seqera Platform in which to launch the run (default: the primary environment in the workspace).",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "enabled",
+          "description": "Enable workflow monitoring with Seqera Platform (default: `false`).",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "endpoint",
+          "description": "The endpoint of your Seqera Platform instance (default: `https://api.cloud.seqera.io`).",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "httpConnectTimeout",
+          "description": "The HTTP connection timeout for Seqera Platform API requests (default: `'60s'`).",
+          "types": [
+            "Duration"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "httpReadTimeout",
+          "description": "The HTTP read timeout for Seqera Platform API requests (default: `'60s'`).",
+          "types": [
+            "Duration"
+          ]
+        },
+        {
+          "kind": "scope",
+          "name": "retryPolicy",
+          "description": "The `tower` scope controls the settings for [Seqera Platform](https://seqera.io) (formerly Tower Cloud).",
+          "children": [
+            {
+              "kind": "option",
+              "name": "delay",
+              "description": "Initial delay before retrying a failed Tower operation (default: `350ms`).",
+              "types": [
+                "Duration"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "jitter",
+              "description": "Random jitter factor applied to retry delays to avoid thundering herd issues (default: `0.25`).",
+              "types": [
+                "Float"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "maxAttempts",
+              "description": "Maximum number of retry attempts for Tower operations (default: `10`).",
+              "types": [
+                "Integer"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "maxDelay",
+              "description": "Maximum delay between retry attempts for Tower operations (default: `90s`).",
+              "types": [
+                "Duration"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "multiplier",
+              "description": "Multiplier factor for exponential backoff between retry attempts (default: `2.0`).",
+              "types": [
+                "Float"
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "workspaceId",
+          "description": "The workspace ID in Seqera Platform in which to save the run (default: the launching user's personal workspace).",
+          "types": [
+            "String"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "scope",
+      "name": "trace",
+      "description": "The `trace` scope controls the layout of the execution trace file generated by Nextflow.",
+      "children": [
+        {
+          "kind": "option",
+          "name": "directory",
+          "description": "The directory where the trace file should be saved, relative to the workflow output directory.",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "enabled",
+          "description": "Create the execution trace file on workflow completion (default: `false`).",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "fields",
+          "description": "Comma-separated list of [trace fields](https://docs.seqera.io/nextflow/reports#trace-file) to include in the report.",
+          "types": [
+            "List<String>",
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "file",
+          "description": "Trace file name (default: `'trace-<timestamp>.txt'`).",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "overwrite",
+          "description": "Overwrite any existing trace file with the same name (default: `false`).",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "raw",
+          "description": "Report trace metrics as raw numbers where applicable, i.e. report duration values in milliseconds and memory values in bytes (default: `false`).",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "sep",
+          "description": "Character used to separate values in each row (default: `\\t`).",
+          "types": [
+            "String"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "scope",
+      "name": "wave",
+      "description": "The `wave` scope provides advanced configuration for the use of [Wave containers](https://docs.seqera.io/wave).",
+      "children": [
+        {
+          "kind": "scope",
+          "name": "build",
+          "description": "The `wave` scope provides advanced configuration for the use of [Wave containers](https://docs.seqera.io/wave).",
+          "children": [
+            {
+              "kind": "option",
+              "name": "cacheRepository",
+              "description": "The container repository used to cache image layers built by the Wave service.",
+              "types": [
+                "String"
+              ]
+            },
+            {
+              "kind": "scope",
+              "name": "compression",
+              "description": "The `wave.build.compression` scope controls compression of the container image built by Wave.",
+              "children": [
+                {
+                  "kind": "option",
+                  "name": "force",
+                  "description": "Forcefully apply the compression option to all layers, including already existing layers (default: `false`).",
+                  "types": [
+                    "Boolean"
+                  ]
+                },
+                {
+                  "kind": "option",
+                  "name": "level",
+                  "description": "The compression level used when building a container, depending on the chosen algorithm: gzip and estargz (0-9), zstd (0-22).",
+                  "types": [
+                    "Integer"
+                  ]
+                },
+                {
+                  "kind": "option",
+                  "name": "mode",
+                  "description": "The compression algorithm used when building the container. Allowed values are `gzip`, `estargz` and `zstd` (default: `gzip`).",
+                  "types": [
+                    "String"
+                  ]
+                }
+              ]
+            },
+            {
+              "kind": "scope",
+              "name": "conda",
+              "description": "The `wave.build.conda` scope controls how Conda packages are provisioned into containers.",
+              "children": [
+                {
+                  "kind": "option",
+                  "name": "baseImage",
+                  "description": "The base image for the final stage in multi-stage Conda container builds (default: `ubuntu:24.04`). This option only applies when `wave.build.template` is set to `conda/micromamba:v2`, `conda/micromamba:v2-fast`, `conda/pixi:v1` or `conda/pixi:v1-fast`.",
+                  "types": [
+                    "String"
+                  ]
+                },
+                {
+                  "kind": "option",
+                  "name": "basePackages",
+                  "description": "One or more Conda packages to be always added in the resulting container (default: `conda-forge::procps-ng`).",
+                  "types": [
+                    "String"
+                  ]
+                },
+                {
+                  "kind": "option",
+                  "name": "commands",
+                  "description": "One or more commands to be added to the Dockerfile used to build a Conda based image.",
+                  "types": [
+                    "List<String>"
+                  ]
+                },
+                {
+                  "kind": "option",
+                  "name": "mambaImage",
+                  "description": "The Mamba container image used to build Conda based containers. This is expected to be a [micromamba-docker](https://github.com/mamba-org/micromamba-docker) image.",
+                  "types": [
+                    "String"
+                  ]
+                }
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "maxDuration",
+              "description": "",
+              "types": [
+                "Duration"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "repository",
+              "description": "The container repository where images built by Wave are uploaded.",
+              "types": [
+                "String"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "template",
+              "description": "The build template to use for container builds. Supported values: `conda/pixi:v1` (Pixi with multi-stage builds), `conda/pixi:v1-fast` (like `conda/pixi:v1`, with the Conda environment split into multiple image layers, Docker only), `conda/micromamba:v2` (Micromamba 2.x with multi-stage builds), `conda/micromamba:v2-fast` (like `conda/micromamba:v2`, with the Conda environment split into multiple image layers, Docker only), `cran/installr:v1` (R/CRAN packages). Default: standard conda/micromamba:v1 template.",
+              "types": [
+                "String"
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "enabled",
+          "description": "Enable the use of Wave containers (default: `false`).",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "endpoint",
+          "description": "The Wave service endpoint (default: `https://wave.seqera.io`).",
+          "types": [
+            "String"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "freeze",
+          "description": "Enable Wave container freezing (default: `false`). Wave will provision a non-ephemeral container image that will be pushed to a container repository of your choice.\n\nSee also: `wave.build.repository` and `wave.build.cacheRepository`",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "scope",
+          "name": "httpClient",
+          "description": "The `wave` scope provides advanced configuration for the use of [Wave containers](https://docs.seqera.io/wave).",
+          "children": [
+            {
+              "kind": "option",
+              "name": "connectTimeout",
+              "description": "The connection timeout for the Wave HTTP client (default: `30s`).",
+              "types": [
+                "Duration"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "maxRate",
+              "description": "The maximum request rate for the Wave HTTP client (default: `1/sec`).",
+              "types": [
+                "Object"
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "mirror",
+          "description": "Enable Wave container mirroring (default: `false`). Wave will mirror (i.e. copy) the containers in your pipeline to a container registry of your choice, so that pipeline tasks can pull the containers from this registry instead of the original one.\n\nSee also: `wave.build.repository`",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "scope",
+          "name": "retryPolicy",
+          "description": "The `wave` scope provides advanced configuration for the use of [Wave containers](https://docs.seqera.io/wave).",
+          "children": [
+            {
+              "kind": "option",
+              "name": "delay",
+              "description": "The initial delay when a failing HTTP request is retried (default: `450ms`).",
+              "types": [
+                "Duration"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "jitter",
+              "description": "The jitter factor used to randomly vary retry delays (default: `0.25`).",
+              "types": [
+                "Float"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "maxAttempts",
+              "description": "The max number of attempts a failing HTTP request is retried (default: `5`).",
+              "types": [
+                "Integer"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "maxDelay",
+              "description": "The max delay when a failing HTTP request is retried (default: `90s`).",
+              "types": [
+                "Duration"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "multiplier",
+              "description": "The multiplier used for exponential backoff delay calculations (default: `2.0`)",
+              "types": [
+                "Float"
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "scope",
+          "name": "scan",
+          "description": "The `wave` scope provides advanced configuration for the use of [Wave containers](https://docs.seqera.io/wave).",
+          "children": [
+            {
+              "kind": "option",
+              "name": "allowedLevels",
+              "description": "Comma-separated list of allowed vulnerability levels when scanning containers for security vulnerabilities in `required` mode.",
+              "types": [
+                "List<Object>",
+                "String"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "mode",
+              "description": "Enable Wave container security scanning. Wave will scan the containers in your pipeline for security vulnerabilities.",
+              "types": [
+                "Object",
+                "String"
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "strategy",
+          "description": "The strategy to be used when resolving multiple Wave container requirements (default: `'container,dockerfile,conda'`).",
+          "types": [
+            "List<String>",
+            "String"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "option",
+      "name": "workDir",
+      "description": "The pipeline work directory. Equivalent to the `-work-dir` option of the `run` command.",
+      "types": [
+        "String"
+      ]
+    },
+    {
+      "kind": "scope",
+      "name": "workflow",
+      "description": "The `workflow` scope provides workflow execution options.",
+      "children": [
+        {
+          "kind": "option",
+          "name": "failOnIgnore",
+          "description": "When `true`, the pipeline will exit with a non-zero exit code if any failed tasks are ignored using the `ignore` error strategy (default: `false`).",
+          "types": [
+            "Boolean"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "onComplete",
+          "description": "Specify a closure that will be invoked at the end of a workflow run (including failed runs).",
+          "types": [
+            "Closure"
+          ]
+        },
+        {
+          "kind": "option",
+          "name": "onError",
+          "description": "Specify a closure that will be invoked if a workflow run is terminated.",
+          "types": [
+            "Closure"
+          ]
+        },
+        {
+          "kind": "scope",
+          "name": "output",
+          "description": "The `workflow.output` scope provides options for publishing workflow outputs.\n\n[Read more](https://docs.seqera.io/nextflow/reference/config/workflow)",
+          "children": [
+            {
+              "kind": "option",
+              "name": "contentType",
+              "description": "*Currently only supported for S3.*\n\nSpecify the media type, also known as [MIME type](https://developer.mozilla.org/en-US/docs/Web/HTTP/MIME_types), of published files (default: `false`). Can be a string (e.g. `'text/html'`), or `true` to infer the content type from the file extension.",
+              "types": [
+                "Object"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "copyAttributes",
+              "description": "*Currently only supported for local and shared filesystems.*\n\nCopy file attributes (such as the last modified timestamp) to the published file (default: `false`).",
+              "types": [
+                "Boolean"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "enabled",
+              "description": "Enable or disable publishing (default: `true`).",
+              "types": [
+                "Boolean"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "ignoreErrors",
+              "description": "When `true`, the workflow will not fail if a file can't be published for some reason (default: `false`).",
+              "types": [
+                "Boolean"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "includeInputs",
+              "description": "When `true`, files that do not originate from the work directory, such as input files, are also published (default: `false`).",
+              "types": [
+                "Boolean"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "mode",
+              "description": "The file publishing method (default: `'symlink'`).",
+              "types": [
+                "String"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "overwrite",
+              "description": "Determines when to overwrite an existing file in the output directory (default: `'standard'`).",
+              "types": [
+                "Object"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "storageClass",
+              "description": "*Currently only supported for S3.*\n\nSpecify the storage class for published files.",
+              "types": [
+                "String"
+              ]
+            },
+            {
+              "kind": "option",
+              "name": "tags",
+              "description": "*Currently only supported for S3.*\n\nSpecify arbitrary tags for published files.",
+              "types": [
+                "Map"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

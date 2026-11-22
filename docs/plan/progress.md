@@ -147,3 +147,26 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - ADR 0009 confirmed and its status set to Accepted: the registry sends no CORS headers, so the snapshot is the registry source; GitHub import via `api.github.com` and `raw.githubusercontent.com` works; `codeload.github.com` is blocked, so zip import is an upload (spike result; notes on F-403, F-501, F-502).
   - `test/e2e-browsers.test.ts`: the Playwright listing tests get a 30 s timeout (they timed out under load).
 - Blockers: none.
+
+## 2026-11-22 · F-010 · Claude (autonomous)
+- Did: spike S5: `spikes/s5-nf-metro/` renders the nf-core rnaseq and sarek metro maps with nf-metro 2.1.0 in a Web Worker under self-hosted Pyodide 314.0.8; identical to the CLI (0 differing pixels); 16.5 MB served (10.5 MB gzip), first SVG after 8.6 s; [report](../research/2026-11-22-spike-s5-nf-metro.md). PR #15.
+- State: passing.
+- Next: F-006 in review, F-007 building, then M1 from F-101.
+- Decisions:
+  - Spike pages that needn't be deployed live in `spikes/<id>/`; Pyodide self-hosted and fetched at build time; `'wasm-unsafe-eval'` only in the spike's preview; build-time hosts cdn.jsdelivr.net, pypi.org, files.pythonhosted.org, raw.githubusercontent.com ([ADR 0024](../adr/0024-spike-s5-self-hosted-pyodide.md)).
+  - `playwright.config.ts`: spike specs run in their own one-worker `chromium-spikes` project (each repeat would otherwise build and serve the spike concurrently).
+  - ADR 0013 stands (spike result): no nf-metro patches; Pillow is needed for SVG too; FI-54 follow-ups in F-607's notes.
+  - No new npm dependency and no workflow edit; CI's Chromium job fetches about 17 MB of assets and 50 MB of CLI wheels until FI-54.
+- Blockers: none.
+
+## 2026-11-22 · F-006 · Claude (autonomous)
+- Did: spike S2: vendored nf-lang 26.10.7 grammars with a hand port of their Java actions; `pnpm gen:grammar` generates the TypeScript parser (committed); `parseScript`/`parseConfig`; `pnpm corpus:lint` and `pnpm test:corpus` compare the parser with `nextflow lint` on the corpus (CI job `corpus-parse`); `tools/spec-extract` and `pnpm gen:catalogue` generate the 26.10 catalogue (CI job `catalogue`); a stage-1 prediction fix that cut warm sarek parsing from 38 s to 1.1 s. [Report](../research/2026-11-22-spike-s2-parser.md).
+- State: passing.
+- Next: F-010 and F-008 in review, F-007, then M1 from F-101.
+- Decisions:
+  - `antlr4ng` 3.0.16 runtime and `antlr-ng` 1.0.10 dev dependency, pinned exactly and grouped in Renovate; generated parser committed; spec-extract as a single-file Java program; catalogue from language server v26.10.2 (nf-lang 26.10.4) against 26.10.7 grammars; build-time hosts; two blocking CI jobs ([ADR 0020](../adr/0020-parser-and-catalogue-generation.md)).
+  - Licensing: upstream NOTICE and Apache-2.0 licence ship with the grammars; `docs/licences.md` lists the generated parser, ported classes, catalogue text and antlr4ng.
+  - Stage 1 predicts the `sep` and `type` decisions with full LL; trees equal pure LL on the files the corpus harness checks (and on the whole corpus in a one-off research check).
+  - QA-03 cold-start risk handed to F-113 (notes); the catalogue's 26.10.4 skew and docs gaps recorded in ADR 0005's spike result.
+  - Hand-off plans folder removed now that all three hand-off features have merged.
+- Blockers: none.

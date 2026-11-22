@@ -2,6 +2,12 @@
   "extends": "../../tsconfig.base.json",
   "include": [
     "src",
-    "test"
-  ]
+    "test",
+    "grammar"
+  ],
+  "compilerOptions": {
+    "types": [
+      "node"
+    ]
+  }
 }
