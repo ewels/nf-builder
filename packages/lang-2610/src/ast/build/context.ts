@@ -15,6 +15,14 @@ export class FatalBuildError extends Error {
   }
 }
 
+/** How a build differs from a whole-file one (F-104: a chunk of a file is built as a fragment). */
+export interface ScriptBuildOptions {
+  /** Types were enabled by an earlier chunk. */
+  readonly typesEnabled?: boolean;
+  /** Skip the whole-script checks, which depend on the other chunks. */
+  readonly fragment?: boolean;
+}
+
 /** The state one build shares: the text's positions, the token stream, the collected errors. */
 export class BuildContext {
   readonly index: PositionIndex;
@@ -28,9 +36,17 @@ export class BuildContext {
    */
   numberFormatError: { message: string; at: Range } | null = null;
 
-  constructor(text: string, tokens: CommonTokenStream) {
+  private readonly fragment: boolean;
+
+  constructor(
+    text: string,
+    tokens: CommonTokenStream,
+    options: ScriptBuildOptions = {},
+  ) {
     this.index = new PositionIndex(text);
     this.tokens = tokens;
+    this.typesEnabled = options.typesEnabled ?? false;
+    this.fragment = options.fragment ?? false;
   }
 
   range(ctx: ParserRuleContext): Range {
@@ -48,9 +64,10 @@ export class BuildContext {
 
   /**
    * Collect an error about the whole script, not the node it is reported at (a duplicate params block, statements mixed
-   * with declarations): F-104 never isolates a declaration for it.
+   * with declarations): F-104 never isolates a declaration for it. Nothing in a fragment, which does not see the rest.
    */
   fileError(message: string, at: Range): void {
+    if (this.fragment) return;
     this.errors.push({ ...problem(message, at), scope: "file" });
   }
 
