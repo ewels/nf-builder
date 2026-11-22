@@ -23,3 +23,5 @@ export const PRINTER_FIXTURES_FILE = `${REPO_ROOT}/packages/lang-2610/test/print
 export const CONFIG_AST_ERRORS_FILE = `${REPO_ROOT}/packages/lang-2610/test/config-ast/errors.json`;
 /** Read by path, never imported: the F-106 type-probe tree; lint's error on each `def probeN: Boolean = <expr>` line reveals the type nf-lang infers. */
 export const PROJECTION_FIXTURES_FILE = `${REPO_ROOT}/packages/engine/test/projection/fixtures.json`;
+/** Read by path, never imported: the F-108 free-variable probe tree; lint's "is not defined" errors in each probe statement are its free reads. */
+export const FREE_VARIABLE_PROBES_FILE = `${REPO_ROOT}/packages/engine/test/projection/code/free-variables.json`;

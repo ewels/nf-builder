@@ -202,3 +202,15 @@ cases:
       - https://github.com/nextflow-io/nextflow/blob/v26.10.7/modules/nf-lang/src/main/java/nextflow/script/formatter/ScriptFormattingVisitor.java
     lint: { expect: ok }
     run: { expect: ok }
+  # F-108: code nodes with free-variable ports.
+  - id: f108-code-nodes
+    about: Arbitrary Groovy statements (declarations, tuple targets, if/else and try/catch assignments, compound assignment, GStrings, logging, list building, closures, a local function call, assert, workflow.onComplete) between dataflow in legacy workflows, plus a typed workflow with the same kinds of statements in its own file.
+    spec: [F-108, AR-13, LA-27, LA-10, LA-13, ADR-0004]
+    sources:
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/modules/nf-lang/src/main/java/nextflow/script/control/VariableScopeVisitor.java#L603-L713
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/workflow.mdx
+    lint: { expect: ok }
+    run:
+      expect: ok
+      args: ["-stub", "--reads", "x", "--threshold", "3"]
+      output: ["txt: ", "tagged: R1:", "typed: "]

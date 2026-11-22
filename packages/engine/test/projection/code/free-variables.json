@@ -1,0 +1,320 @@
+{
+  "about": "F-108 free-variable probe tree. Each workflow in main.nf holds one probe statement and a reader line; nextflow lint's \"is not defined\" errors in the statement are its free reads, and those in the reader line are the names it leaves undefined. These messages are the only errors. Recorded from a real run of nextflow 26.10.7 (lint -o json, NXF_SYNTAX_PARSER=v2, NXF_OFFLINE=true), never written by hand.",
+  "fixtures": [
+    {
+      "file": "main.nf",
+      "lint": [
+        {
+          "line": 7,
+          "column": 10,
+          "message": "`a1` is not defined"
+        },
+        {
+          "line": 7,
+          "column": 15,
+          "message": "`a1` is not defined"
+        },
+        {
+          "line": 12,
+          "column": 10,
+          "message": "`a2` is not defined"
+        },
+        {
+          "line": 12,
+          "column": 32,
+          "message": "`b2` is not defined"
+        },
+        {
+          "line": 17,
+          "column": 10,
+          "message": "`a3` is not defined"
+        },
+        {
+          "line": 17,
+          "column": 28,
+          "message": "`c3` is not defined"
+        },
+        {
+          "line": 22,
+          "column": 8,
+          "message": "`a4` is not defined"
+        },
+        {
+          "line": 32,
+          "column": 15,
+          "message": "`a5` is not defined"
+        },
+        {
+          "line": 32,
+          "column": 23,
+          "message": "`b5` is not defined"
+        },
+        {
+          "line": 37,
+          "column": 5,
+          "message": "`acc6` is not defined"
+        },
+        {
+          "line": 37,
+          "column": 17,
+          "message": "`v6` is not defined"
+        },
+        {
+          "line": 42,
+          "column": 5,
+          "message": "`lst7` is not defined"
+        },
+        {
+          "line": 42,
+          "column": 9,
+          "message": "`idx7` is not defined"
+        },
+        {
+          "line": 42,
+          "column": 18,
+          "message": "`e7` is not defined"
+        },
+        {
+          "line": 47,
+          "column": 5,
+          "message": "`lst8` is not defined"
+        },
+        {
+          "line": 47,
+          "column": 13,
+          "message": "`x8` is not defined"
+        },
+        {
+          "line": 52,
+          "column": 10,
+          "message": "`a9` is not defined"
+        },
+        {
+          "line": 52,
+          "column": 15,
+          "message": "`b9` is not defined"
+        },
+        {
+          "line": 52,
+          "column": 21,
+          "message": "`c9` is not defined"
+        },
+        {
+          "line": 52,
+          "column": 27,
+          "message": "`d9` is not defined"
+        },
+        {
+          "line": 57,
+          "column": 11,
+          "message": "`obj10` is not defined"
+        },
+        {
+          "line": 62,
+          "column": 8,
+          "message": "`a11` is not defined"
+        },
+        {
+          "line": 63,
+          "column": 23,
+          "message": "`b11` is not defined"
+        },
+        {
+          "line": 66,
+          "column": 22,
+          "message": "`inner11` is not defined"
+        },
+        {
+          "line": 71,
+          "column": 15,
+          "message": "`a12` is not defined"
+        },
+        {
+          "line": 76,
+          "column": 22,
+          "message": "`e12` is not defined"
+        },
+        {
+          "line": 80,
+          "column": 8,
+          "message": "`a13` is not defined"
+        },
+        {
+          "line": 90,
+          "column": 17,
+          "message": "`a14` is not defined"
+        },
+        {
+          "line": 95,
+          "column": 16,
+          "message": "`a15` is not defined"
+        },
+        {
+          "line": 100,
+          "column": 11,
+          "message": "`compute16` is not defined"
+        },
+        {
+          "line": 100,
+          "column": 21,
+          "message": "`a16` is not defined"
+        },
+        {
+          "line": 105,
+          "column": 14,
+          "message": "`a17` is not defined"
+        },
+        {
+          "line": 110,
+          "column": 22,
+          "message": "`a18` is not defined"
+        },
+        {
+          "line": 115,
+          "column": 18,
+          "message": "`a19` is not defined"
+        },
+        {
+          "line": 120,
+          "column": 5,
+          "message": "`a20` is not defined"
+        },
+        {
+          "line": 125,
+          "column": 5,
+          "message": "`a21` is not defined"
+        },
+        {
+          "line": 130,
+          "column": 15,
+          "message": "`a22` is not defined"
+        },
+        {
+          "line": 135,
+          "column": 11,
+          "message": "`a23` is not defined"
+        },
+        {
+          "line": 135,
+          "column": 46,
+          "message": "`b23` is not defined"
+        },
+        {
+          "line": 136,
+          "column": 22,
+          "message": "`loc23` is not defined"
+        },
+        {
+          "line": 140,
+          "column": 11,
+          "message": "`r24` is not defined"
+        },
+        {
+          "line": 140,
+          "column": 17,
+          "message": "`a24` is not defined"
+        },
+        {
+          "line": 145,
+          "column": 11,
+          "message": "`a25` is not defined"
+        },
+        {
+          "line": 145,
+          "column": 55,
+          "message": "`b25` is not defined"
+        },
+        {
+          "line": 150,
+          "column": 5,
+          "message": "`x26` is not defined"
+        },
+        {
+          "line": 150,
+          "column": 13,
+          "message": "`y26` is not defined"
+        },
+        {
+          "line": 155,
+          "column": 12,
+          "message": "`a27` is not defined"
+        },
+        {
+          "line": 155,
+          "column": 19,
+          "message": "`b27` is not defined"
+        },
+        {
+          "line": 160,
+          "column": 19,
+          "message": "`a28` is not defined"
+        },
+        {
+          "line": 165,
+          "column": 11,
+          "message": "`foo29` is not defined"
+        },
+        {
+          "line": 165,
+          "column": 17,
+          "message": "`a29` is not defined"
+        },
+        {
+          "line": 165,
+          "column": 28,
+          "message": "`c29` is not defined"
+        },
+        {
+          "line": 170,
+          "column": 8,
+          "message": "`a30` is not defined"
+        },
+        {
+          "line": 177,
+          "column": 11,
+          "message": "`a31` is not defined"
+        },
+        {
+          "line": 182,
+          "column": 11,
+          "message": "`a32` is not defined"
+        },
+        {
+          "line": 187,
+          "column": 11,
+          "message": "`a33` is not defined"
+        },
+        {
+          "line": 192,
+          "column": 32,
+          "message": "`a34` is not defined"
+        },
+        {
+          "line": 197,
+          "column": 11,
+          "message": "`a35` is not defined"
+        },
+        {
+          "line": 202,
+          "column": 11,
+          "message": "`a36` is not defined"
+        },
+        {
+          "line": 202,
+          "column": 30,
+          "message": "`t36` is not defined"
+        },
+        {
+          "line": 207,
+          "column": 11,
+          "message": "`a37` is not defined"
+        },
+        {
+          "line": 207,
+          "column": 33,
+          "message": "`b37` is not defined"
+        }
+      ]
+    }
+  ]
+}

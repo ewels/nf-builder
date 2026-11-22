@@ -35,6 +35,9 @@ describe("F-106 AR-10 reads", () => {
     expect(reads("[(k): v, name: w]")).toEqual(["k", "v", "w"]);
     expect(reads("a.b[i].c")).toEqual(["a.b", "i"]);
     expect(reads("a?.b")).toEqual(["a.b"]);
+    // a spread is not a property step: `a*.name` reads `a` whole
+    expect(reads("a*.name")).toEqual(["a"]);
+    expect(reads("a.b*.c")).toEqual(["a.b"]);
   });
 
   it("F-106 AR-10: reads inside closures can be left out, for wiring", () => {

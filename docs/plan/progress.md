@@ -344,6 +344,15 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - In memory only; no new dependency.
 - Blockers: none new.
 
+## 2026-11-22 · F-108 · Claude (autonomous)
+- Did: code nodes wired by free-variable analysis (`packages/engine/src/projection/free-variables.ts`, `code.ts`): an input per resolved variable a statement reads, an output per variable it writes, exact source text; a lint-only probe tree checks the free reads against `nextflow lint`; code-node text round-trips.
+- State: passing (stacked on F-106; merges after it once CI runs, #33).
+- Next: F-107 and F-111 in progress.
+- Decisions:
+  - Closure reads are inputs; mutations are reads only; a conditional write replaces the binding; no port for `params` as a whole; keys from the first output; a lint-only free-variable oracle tree ([ADR 0037](../adr/0037-code-nodes-and-free-variables.md)).
+  - `CodeNode` gains `text`; no new dependency.
+  - Upstream: lint reports some variable errors one column early (`docs/research/upstream-bugs.md` 22).
+- Blockers: #33.
 ## 2026-11-22 · F-111 · Claude (autonomous)
 - Did: edit commands in `packages/engine/src/edit/` (types in lang-core): CreateProcess, AddCall, Connect, Disconnect, DeleteNode, RenameDeclaration and ReplaceFileText, applied as text patches with inverses behind the AR-24 and LA-13 guards. Property tests with fast-check over fixture trees, a corpus reprint check, and oracle cases that lint and stub-run edited trees. The printer now keeps multi-line string content verbatim.
 - State: passing.

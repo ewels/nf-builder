@@ -1,0 +1,13 @@
+workflow main.nf#SUMMARISE legacy
+main.nf#SUMMARISE/:take:pairs take "pairs" @30:5
+  out out (out): -
+main.nf#SUMMARISE/fwd code "def (fwd, rev) = ['R1', 'R2']" @33:5
+  out fwd (fwd): -
+  out rev (rev): -
+main.nf#SUMMARISE/tagged chain ".map" steps=map @34:14
+  in in (in): -
+    <- main.nf#SUMMARISE/:take:pairs[out] ? via pairs
+  out out (out): ?
+main.nf#SUMMARISE/:emit:tagged emit "tagged" @37:5
+  in in (in): -
+    <- main.nf#SUMMARISE/tagged[out] ? via tagged

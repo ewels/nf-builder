@@ -91,7 +91,10 @@ export interface EmitNode extends NodeShape<"emit"> {
 }
 export type ParamsNode = NodeShape<"params">;
 export type OutputNode = NodeShape<"output">;
-export type CodeNode = NodeShape<"code">;
+export interface CodeNode extends NodeShape<"code"> {
+  /** The statement's exact source text (UX-28); `label` is its first line (UX-22). */
+  readonly text: string;
+}
 
 export type GraphNode =
   | CallNode

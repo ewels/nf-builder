@@ -24,6 +24,7 @@ import type {
 } from "@nf-builder/lang-core";
 import type { Binding } from "../model/file-model";
 import type { ProjectModel } from "../model/project";
+import { buildCodeNode } from "./code";
 import { inlineType } from "./inline";
 import { KeyAllocator } from "./keys";
 import {
@@ -253,8 +254,9 @@ class Projecting {
       node.kind === "Workflow"
         ? [node.main, node.emits, node.publishers].filter((s) => s !== null)
         : scriptStatements(node);
+    // closure reads count too: a code node's closures read parameters it is wired to
     for (const section of sections)
-      for (const r of variablesRead(section, { closures: false }))
+      for (const r of variablesRead(section))
         if (r.name === "params" && r.property !== null) read.add(r.property);
     const entry = this.ref.name === null;
     if (!(entry && block !== null) && read.size === 0) return;
@@ -376,34 +378,22 @@ class Projecting {
     variable: string | null,
     expression: Expression | null,
   ): void {
-    const id =
-      variable === null ? this.#keys.code() : this.#keys.assigned(variable);
-    const outputs =
-      variable === null
-        ? []
-        : [
-            spec(
-              variable,
-              // a copy of a graph value (`w2 = w`) has that value's type; anything else an inline one
-              expression === null ? null : this.#feed(expression).type,
-            ),
-          ];
-    const first = (
-      this.text
-        .slice(statement.range.start, statement.range.end)
-        .split("\n")[0] ?? ""
-    ).trim();
-    const label = first.length > 60 ? `${first.slice(0, 59)}…` : first;
-    this.#nodes.push({
-      id,
-      kind: "code",
-      label,
-      inputs: [],
-      outputs: outputs.map((s) => port(s)),
-      range: statement.range,
+    const { node, edges } = buildCodeNode(statement, {
+      scope: this.#scope,
+      keys: this.#keys,
+      text: this.text,
+      isCode: (id) => this.#nodes.some((n) => n.id === id && n.kind === "code"),
+      // a copy of a graph value (`w2 = w`) has that value's type; anything else an inline one
+      assignedType: () =>
+        variable === null || expression === null
+          ? null
+          : this.#feed(expression).type,
     });
-    if (variable !== null)
-      this.#scope.bind(variable, [{ node: id, ports: outputs }]);
+    this.#nodes.push(node);
+    for (const edge of edges) this.#edges.set(edge.id, edge);
+    // each assigned name now stands for this node's port of that name, replacing an earlier binding
+    for (const output of node.outputs)
+      this.#scope.bind(output.id, [{ node: node.id, ports: [output] }]);
   }
 
   // ---- dataflow expressions ----
@@ -886,6 +876,7 @@ const isChain = (e: Expression): boolean =>
   e.kind === "Variable" ||
   (e.kind === "Property" &&
     e.property.kind === "Identifier" &&
+    e.navigation !== "*." &&
     isChain(e.object));
 
 /** The types of a projection's emits that come straight from one value: its emit nodes' single direct feed. */

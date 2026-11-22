@@ -4,6 +4,8 @@ main.nf#/:params params "params" @21:1
   out transcriptome (transcriptome): Path
   out multiqc (multiqc): Path
 main.nf#/:code@1 code "log.info """\" @38:5
+  in params.transcriptome (params.transcriptome): -
+    <- main.nf#/:params[transcriptome] Path via params.transcriptome indirect
 main.nf#/samples_ch call "RNASEQ" callee=RNASEQ:workflow:modelled:typed @53:18
   in read_pairs_ch (read_pairs_ch): Channel<Sample>
     <- main.nf#/:params[reads] Channel<Sample> via params.reads
