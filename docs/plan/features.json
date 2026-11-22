@@ -541,8 +541,8 @@
         "Searching `group` finds `groupTuple`",
         "No legacy-only construct appears"
       ],
-      "passes": false,
-      "notes": "From F-109: groupTuple is legacy-only (every catalogue entry deprecated), so UX-13 keeps it out of the palette; step 2's search example needs a modern operator (for example groupBy)."
+      "passes": true,
+      "notes": "From F-109: groupTuple is legacy-only (every catalogue entry deprecated), so UX-13 keeps it out of the palette; step 2's search example needs a modern operator (for example groupBy). Verified 2026-11-22 on PR #20: e2e/palette.spec.ts (Chromium) covers step 1 (categories toggle by mouse and keyboard and the open set persists across reload, ADR 0028), step 2 (searching group finds groupBy; groupTuple is legacy-only and never shown, Q15) and step 3 (every modern factory and operator shown, legacy-only absent; agent carries the preview badge); the catalogue loads as a lazy JSON chunk. App shell baseline re-approved from the CI artefact (ADR 0021)."
     },
     {
       "id": "F-205",

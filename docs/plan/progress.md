@@ -204,3 +204,15 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - Q4 answered: `agent` stays in the palette with a `preview` badge; `fromLineage` and pipeline includes, documented as experimental, carry no badge.
   - F-204's search example (`groupTuple`) is legacy-only; noted on F-204.
 - Blockers: none.
+
+## 2026-11-22 · F-204 · Claude (autonomous)
+- Did: the left column's Components and Files tabs; the palette from the pack in UX-12's accordions with operator groups, search and preview badges; open categories persist; the catalogue loads lazily; the app shell baseline re-approved. PR #20.
+- State: passing.
+- Next: F-102 and F-103, then F-104, F-110.
+- Decisions:
+  - `LanguagePack` gains `palette` and `loadCatalogue()`; the engine resolves a serialisable palette view; open categories persist under `nf-builder:palette` version 1 ([ADR 0028](../adr/0028-palette-data-path.md)).
+  - IO-41 skips built chunks whose manifest source is a `.json` file, amending ADR 0015's scan (ADR 0028); palette docs links join the never-fetched list.
+  - Q15 answered: step 2's intent is checked with `groupBy`.
+  - Q16 answered: new feature F-210 (Files view, UX-16); F-301 depends on it (`scope-change`).
+  - Tests: the remaining Playwright listing test gets a 30 s timeout.
+- Blockers: none.
