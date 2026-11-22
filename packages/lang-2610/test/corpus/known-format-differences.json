@@ -1,0 +1,44 @@
+[
+  {
+    "pipeline": "rnaseq",
+    "file": "modules/nf-core/trimgalore/main.nf",
+    "knownDifference": "type-rename",
+    "cause": "lint -format renames the resolved type through the Java class hierarchy: `as int` becomes `as Integer`."
+  },
+  {
+    "pipeline": "rnaseq",
+    "file": "subworkflows/local/multiqc_rnaseq/main.nf",
+    "knownDifference": "type-rename",
+    "cause": "lint -format renames the resolved type through the Java class hierarchy: `as boolean` becomes `as Boolean`, and `new LinkedHashMap(...)` becomes `new Map(...)`, an abstract type that fails lint."
+  },
+  {
+    "pipeline": "rnaseq",
+    "file": "subworkflows/local/utils_nfcore_rnaseq_pipeline/main.nf",
+    "knownDifference": "type-rename",
+    "cause": "lint -format renames the resolved type through the Java class hierarchy: `as double` becomes `as Float`, and `Double.isNaN` becomes `Float.isNaN`, a different class."
+  },
+  {
+    "pipeline": "rnaseq",
+    "file": "subworkflows/nf-core/fastq_qc_trim_filter_setstrandedness/main.nf",
+    "knownDifference": "type-rename",
+    "cause": "lint -format renames the resolved type through the Java class hierarchy: `as double` becomes `as Float`."
+  },
+  {
+    "pipeline": "rnaseq",
+    "file": "subworkflows/nf-core/fastq_remove_rrna/main.nf",
+    "knownDifference": "type-rename",
+    "cause": "lint -format renames the resolved type through the Java class hierarchy: `as float` and `as int` become `as Float` and `as Integer`."
+  },
+  {
+    "pipeline": "sarek",
+    "file": "main.nf",
+    "knownDifference": "type-rename",
+    "cause": "lint -format renames the resolved type through the Java class hierarchy: `as boolean` becomes `as Boolean`."
+  },
+  {
+    "pipeline": "sarek",
+    "file": "subworkflows/local/samplesheet_to_channel/main.nf",
+    "knownDifference": "catch-package",
+    "cause": "lint -format drops the package of every catch type: `catch (java.lang.reflect.InvocationTargetException ex)` loses its package, and `InvocationTargetException` is not defined (checked with nextflow lint on the formatted file)."
+  }
+]

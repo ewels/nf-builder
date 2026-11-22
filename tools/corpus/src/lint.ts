@@ -3,7 +3,15 @@
 // it comes from the launcher, which is the pinned dist in .cache/nextflow/ unless told otherwise.
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import {
+  cpSync,
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { basename, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { Manifest } from "./manifest.ts";
@@ -71,6 +79,67 @@ export function parseLintJson(stdout: string): {
     };
   });
   return { filesChecked: filesWithErrors + filesWithoutErrors, errors };
+}
+
+/** The JSON `nextflow lint -format -o json` prints: the lint summary and errors, and how many files it rewrote. */
+export function parseFormatJson(stdout: string): {
+  filesChecked: number;
+  filesFormatted: number;
+  errors: LintError[];
+} {
+  const lint = parseLintJson(stdout);
+  const summary = (JSON.parse(stdout) as { summary: Record<string, unknown> })
+    .summary;
+  if (typeof summary.filesFormatted !== "number")
+    throw new Error("nextflow lint -format summary has no filesFormatted");
+  return { ...lint, filesFormatted: summary.filesFormatted };
+}
+
+/** The file written to `.cache/corpus-lint/<id>.format.json`; the formatted tree is `.cache/corpus-lint/<id>.format/`. */
+export type FormatResult = {
+  id: string;
+  sha: string;
+  nextflowVersion: string;
+  filesChecked: number;
+  filesFormatted: number;
+  errors: LintError[];
+};
+
+/**
+ * Formats a copy of `dir` (never `dir` itself: `-format` rewrites files in place, and `.git` is left out) into `outDir`
+ * with `nextflow lint -format -o json .`. Nextflow formats only the files that lint without errors, so those are the files
+ * a printer must reproduce. Exit 0 or 1 with parseable JSON is a result.
+ */
+export function formatDir(
+  launcher: string,
+  dir: string,
+  outDir: string,
+): { filesChecked: number; filesFormatted: number; errors: LintError[] } {
+  rmSync(outDir, { recursive: true, force: true });
+  cpSync(dir, outDir, {
+    recursive: true,
+    filter: (source) => basename(source) !== ".git",
+  });
+  const run = spawnSync(launcher, ["lint", "-format", "-o", "json", "."], {
+    cwd: outDir,
+    encoding: "utf8",
+    env: lintEnv(),
+    maxBuffer: 256 * 1024 * 1024,
+  });
+  if (run.error)
+    throw new Error(`could not run ${launcher}: ${run.error.message}`);
+  if (run.status === 0 || run.status === 1) {
+    try {
+      return parseFormatJson(run.stdout);
+    } catch (error) {
+      throw new Error(
+        `${(error as Error).message}\nstderr tail:\n${tail(run.stderr)}`,
+      );
+    }
+  }
+  throw new Error(
+    `nextflow lint -format exited with ${run.status} in ${outDir}\nstderr tail:\n${tail(run.stderr)}`,
+  );
 }
 
 export type CommentRow = {
@@ -299,6 +368,8 @@ export function lintCorpus(o: {
   for (const t of targets) {
     const file = join(LINT_CACHE_DIR, `${t.id}.json`);
     const commentsFile = join(LINT_CACHE_DIR, `${t.id}.comments.json`);
+    // only the pinned pipelines are formatted: the fixtures are malformed on purpose
+    const formatTarget = t.id !== "fixtures";
     const commentsCached =
       !commentsFor || (!o.force && isCached(commentsFile, t.sha, version));
     if (!o.force && isCached(file, t.sha, version)) {
@@ -306,6 +377,7 @@ export function lintCorpus(o: {
       o.log(`corpus-lint: ${t.id} up to date`);
       if (!commentsCached)
         writeComments(o.launcher, t, version, commentsFile, o.log);
+      if (formatTarget) writeFormat(o.launcher, t, version, o.force, o.log);
       continue;
     }
     const started = Date.now();
@@ -322,6 +394,7 @@ export function lintCorpus(o: {
       `corpus-lint: ${t.id}: ${lint.filesChecked} files, ${lint.errors.length} errors (${((Date.now() - started) / 1000).toFixed(1)} s)`,
     );
     if (commentsFor) writeComments(o.launcher, t, version, commentsFile, o.log);
+    if (formatTarget) writeFormat(o.launcher, t, version, o.force, o.log);
   }
   return results;
 }
@@ -349,5 +422,35 @@ function writeComments(
   );
   log(
     `corpus-lint: ${target.id}: ${dump.files.length} scripts, ${comments} comments (${((Date.now() - started) / 1000).toFixed(1)} s)`,
+  );
+}
+
+/** Writes `<id>.format/` and `<id>.format.json`, unless both are there for this pin and Nextflow version. */
+function writeFormat(
+  launcher: string,
+  target: { id: string; sha: string; dir: string },
+  version: string,
+  force: boolean | undefined,
+  log: (line: string) => void,
+): void {
+  const file = join(LINT_CACHE_DIR, `${target.id}.format.json`);
+  const tree = join(LINT_CACHE_DIR, `${target.id}.format`);
+  if (!force && existsSync(tree) && isCached(file, target.sha, version)) {
+    log(`corpus-lint: ${target.id} format up to date`);
+    return;
+  }
+  const started = Date.now();
+  // a half-written tree must not look cached
+  rmSync(file, { force: true });
+  const formatted = formatDir(launcher, target.dir, tree);
+  const result: FormatResult = {
+    id: target.id,
+    sha: target.sha,
+    nextflowVersion: version,
+    ...formatted,
+  };
+  writeFileSync(file, `${JSON.stringify(result, null, 2)}\n`);
+  log(
+    `corpus-lint: ${target.id}: ${formatted.filesFormatted} files formatted (${((Date.now() - started) / 1000).toFixed(1)} s)`,
   );
 }
