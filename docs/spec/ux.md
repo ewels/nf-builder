@@ -8,7 +8,7 @@ Mockup: [docs/mockup](../mockup/README.md). Where the mockup and this file disag
 |---|---|
 | UX-01 | Header bar with app name, project switcher, save state, Templates, Import, Export, and Nextflow version selector. The selector lists installed language packs; at launch only `26.10`. |
 | UX-02 | Three columns under the header: left (palette or files, 256 px default), centre (tabs plus canvas or editor), right (details, 296 px default). Side columns can be resized and collapsed; widths persist per browser. |
-| UX-03 | Status bar: problems count, suggestions count (separate, links to the problems panel), node and channel counts for the active canvas, language version. |
+| UX-03 | Status bar: problems count, suggestions count (separate, links to the problems panel), node and channel counts for the active canvas, language version. Problems count errors plus warnings; with a project open both counts are buttons that open the problems panel on their tab; the bar reads "Checking for problems…" before the first result; node and channel counts are hidden on a file tab (ADR 0054). |
 | UX-04 | Below 1024 px wide the app is read-only: canvas and details only, with a note that editing needs a larger screen. |
 
 ## Left column
@@ -27,7 +27,7 @@ Mockup: [docs/mockup](../mockup/README.md). Where the mockup and this file disag
 
 | ID | Requirement |
 |---|---|
-| UX-20 | One canvas per workflow (entry or named). Tabs above the canvas hold open workflows and open files. |
+| UX-20 | One canvas per workflow (entry or named). Tabs above the canvas hold open workflows and open files. A file without a workflow opens in a code-only tab with no view-mode toggle (ADR 0054). |
 | UX-21 | Node anatomy: kind icon tile, name in monospace, one subtitle line (kind, or registry name), then one row per port. Input ports on the left edge, outputs on the right. A "port labels" toggle hides labels for compact view. |
 | UX-22 | Node kinds and colours: process and registry module (green; module shows its registry name), workflow (blue; offset shadow shows it opens), operator chain (amber pill), channel factory (purple), params (purple), output block (pink), take and emit (grey pills), code node (grey, monospace preview of first line), unparsed (grey, error outline). An unresolved callee draws as unparsed, subtitled "not found"; a pipeline draws as a workflow and an agent as a process with its own icon (ADR 0046). |
 | UX-23 | Typed processes and workflows carry a small `typed` badge on the top edge. No badge means legacy syntax (ADR 0007). |

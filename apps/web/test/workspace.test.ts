@@ -293,6 +293,40 @@ describe("F-202 workspace", () => {
     db.close();
   });
 
+  it("F-309 IO-01: applyFix is autosaved like apply; a refused fix saves nothing", async () => {
+    const s = setup();
+    await s.watching;
+    const text = "workflow {\n    x = Channel.of(1)\n    x.view()\n}\n";
+    const meta = await s.workspace.createProject({
+      name: "P",
+      languageVersion: version,
+      files: [{ path: "main.nf", text }],
+    });
+    const opened = await s.workspace.openProject(meta.id);
+    const diagnosed = await s.workspace.diagnostics();
+    if (!("diagnostics" in diagnosed)) throw new Error("refused");
+    const fix = diagnosed.diagnostics.find((d) => d.fix)?.fix;
+    if (!fix) throw new Error("no fix");
+    expect(diagnosed.revision).toBe(opened.summary.revision);
+    // a refused fix (stale revision) saves nothing
+    expect(
+      await s.workspace.applyFix(fix, diagnosed.revision + 3),
+    ).toMatchObject({ ok: false, code: "stale" });
+    await s.workspace.flush();
+    expect(s.saves).toHaveLength(0);
+    const applied = ok(await s.workspace.applyFix(fix, diagnosed.revision)) as {
+      revision: number;
+    };
+    expect(applied.revision).toBe(diagnosed.revision + 1);
+    await s.workspace.flush();
+    expect(s.saves).toHaveLength(1);
+    const db = await s.reader();
+    expect((await db.readProject(meta.id))?.files).toEqual([
+      { path: "main.nf", text: text.replace("Channel.of", "channel.of") },
+    ]);
+    db.close();
+  });
+
   it("F-202 QA-03 ADR-0029: openProject pushes opening progress, then the current project", async () => {
     const s = setup();
     await s.watching;

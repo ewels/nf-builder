@@ -651,3 +651,16 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - IO-11, IO-12, QA-32 and the architecture data flow updated; an fflate licences row.
   - `scope-change`: F-403 added to F-404's `depends_on`, and the deferred M8 feature F-407 "Binary files in projects" added.
 - Blockers: none.
+
+## 2026-11-23 · F-309 · Claude (autonomous)
+- Did:
+  - A problems panel at the bottom of the centre column with Problems and Suggestions tabs, rows grouped by file, a keyboard model and quick-fix buttons; status-bar counts that open it.
+  - Quick fixes applied through the engine (`EngineApi.applyFix`) as one undo step, refused when their file has changed.
+  - Navigation from a problem to its node (selected and centred) or its code; code-only file tabs (`openFile`) for files without a workflow; a details-pane link to the panel.
+- State: passing once CI is green with the approved baselines.
+- Next: F-703, F-210, F-605, F-601 and F-401 (plans ready).
+- Decisions:
+  - [ADR 0054](../adr/0054-problems-panel.md): diagnostics pulled per revision, the panel's placement and session-only state, `EngineApi.applyFix` (amends ADR 0043's API list) with per-file staleness (clarifies ADR 0042), the 64-character cap on fix edits, navigation rules, code-only file tabs, and the step 2 reading.
+  - UX-03 and UX-20 updated.
+  - Problems panel and status-bar baselines approved from CI (ADR 0021).
+- Blockers: none.

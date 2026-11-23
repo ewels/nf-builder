@@ -74,6 +74,8 @@ interface WorkflowCanvasProps {
   readonly onPortLabelsChange: (value: boolean) => void;
   readonly selected: string | null;
   readonly onSelect: (id: string | null) => void;
+  /** A request to centre a node (F-309); each `seq` is acted on once, by whichever canvas is ready first. */
+  readonly focus: { readonly id: string; readonly seq: number } | null;
   /** The stored positions, kept up to date by the store (F-207). */
   readonly positions: Positions;
   /** Layout messages to show, oldest problem first. */
@@ -84,12 +86,16 @@ interface WorkflowCanvasProps {
   readonly onPlace: (placement: Placement) => void;
 }
 
+// the newest focus request acted on: a canvas mounted later (another tab) doesn't repeat it
+let handledFocus = 0;
+
 function CanvasInner({
   projection,
   portLabels,
   onPortLabelsChange,
   selected,
   onSelect,
+  focus,
   positions,
   notices,
   onMove,
@@ -209,7 +215,7 @@ function CanvasInner({
     });
   };
   const initialized = useNodesInitialized();
-  const { fitView } = useReactFlow();
+  const { fitView, getNode, getZoom, setCenter } = useReactFlow();
   const [ready, setReady] = useState(false);
   useEffect(() => {
     if (!initialized) return;
@@ -221,6 +227,22 @@ function CanvasInner({
       cancelled = true;
     };
   }, [initialized, fitView]);
+  // centre a node the problems panel asked for, at the current zoom (F-309, UX-30)
+  useEffect(() => {
+    if (!ready || focus === null || focus.seq <= handledFocus) return;
+    handledFocus = focus.seq;
+    const node = getNode(focus.id);
+    if (node === undefined) return;
+    const width = node.measured?.width ?? node.width ?? 0;
+    const height = node.measured?.height ?? node.height ?? 0;
+    const reduced = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    void setCenter(node.position.x + width / 2, node.position.y + height / 2, {
+      zoom: getZoom(),
+      duration: reduced ? 0 : 200,
+    });
+  }, [ready, focus, getNode, getZoom, setCenter]);
   const host = useRef<HTMLDivElement>(null);
   useRefitOnResize(host, FIT);
   // Auto-layout moves nodes in place, so the viewport is fitted again once React Flow has them

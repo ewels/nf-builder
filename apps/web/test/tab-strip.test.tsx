@@ -23,6 +23,7 @@ describe("F-209 QA-10 tab strip", () => {
     const some = children(
       strip([
         {
+          kind: "workflow",
           id: "main.nf#",
           path: "main.nf",
           workflow: null,

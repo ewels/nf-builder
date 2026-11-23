@@ -51,6 +51,9 @@ function followProject(model: monaco.editor.ITextModel, text: string): void {
   model.pushStackElement();
 }
 
+// the newest reveal request shown: an editor mounted later (another tab, a mode switch) doesn't repeat it
+let handledReveal = 0;
+
 export default function CodeEditor({
   path,
   onSync,
@@ -118,6 +121,38 @@ export default function CodeEditor({
         cursorBlinking: reduced ? "solid" : "blink",
         smoothScrolling: !reduced,
       });
+      // the selection as line:column pairs, for the end-to-end tests
+      const publishSelection = () => {
+        const r = editor.getSelection();
+        if (r !== null && host.current !== null)
+          host.current.dataset.selection = `${r.startLineNumber}:${r.startColumn}-${r.endLineNumber}:${r.endColumn}`;
+      };
+      publishSelection();
+      // F-309: select and scroll to a range; the focus stays where it is (the problems panel)
+      const showReveal = () => {
+        const request = canvasStore.getState().reveal;
+        if (
+          request === null ||
+          request.path !== path ||
+          request.seq <= handledReveal
+        )
+          return;
+        handledReveal = request.seq;
+        const range = monaco.Range.fromPositions(
+          model.getPositionAt(request.start),
+          model.getPositionAt(request.end),
+        );
+        editor.setSelection(range);
+        editor.revealRangeInCenterIfOutsideViewport(range);
+      };
+      const onSelection = editor.onDidChangeCursorSelection(publishSelection);
+      showReveal();
+      cleanup.push(
+        () => onSelection.dispose(),
+        canvasStore.subscribe((state, before) => {
+          if (state.reveal !== before.reveal) showReveal();
+        }),
+      );
       const onContent = model.onDidChangeContent(() =>
         sync.edit(model.getValue()),
       );

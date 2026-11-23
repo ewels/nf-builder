@@ -24,7 +24,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-207 layout sidecar | merged, PR #49 | |
 | F-208 view modes and Code | merged, PR #46 | |
 | F-209 undo and redo | merged, PR #50 | |
-| F-309 problems panel | `feat/F-309`, PR #52 (draft) | Built and reviewed; review fixes were building when work paused on 2026-11-23. Then: commit the CI baselines `problems-panel` (re-render after the fix-title change) and `problems-status-bar`, write the records (ADR draft below), merge main, CI, merge. |
+| F-309 problems panel | merged, PR #52 | |
 | F-403 zip import | merged, PR #51 | |
 | F-502 registry client | merged, PR #48 | |
 | Parser error position | `fix/parser-error-position` | A blank line before `stub:` or `emit:` moved a later syntax error to that keyword (antlr4ng and Groovy's optimised ANTLR runtime differ); fix building. |
@@ -35,7 +35,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 
 Branches are stacked: `feat/F-108` → `feat/F-107`; `feat/F-111` also merges F-107. Open PRs for F-108, F-107 and F-111 against `main` in that order (merge `main` into each first), each green before the next. Worktrees: `/home/user/wt-F-1xx`.
 
-Next free ADR number: 0054 (0052 is F-207's, 0053 F-403's).
+Next free ADR number: 0055 (0054 is F-309's).
 
 ## Decisions already taken on the plans' open points
 
@@ -196,7 +196,7 @@ Next free ADR number: 0054 (0052 is F-207's, 0053 F-403's).
   - full-file byte checks, sidecar included;
   - node moves stay outside the history.
 
-### F-309 — [plan](plan-F-309.md)
+### F-309 (merged with its PR)
 - Accept every recommendation in section 6:
   - start after F-208 and F-209; F-209's PR adds F-209 to F-309's `depends_on`;
   - the panel at the bottom of the centre column, closed by default, fixed height, open state for the session only (no stored format);
@@ -302,7 +302,6 @@ Next free ADR number: 0054 (0052 is F-207's, 0053 F-403's).
 ## Paused on 2026-11-23
 
 Work paused at the maintainer's request (usage limits). To resume:
-- **PR #52 (F-309):** the review-fix builder may have left commits on `feat/F-309`. Check `git log`, run `pnpm check` and the F-309 e2e tests, then do the steps in its row. The ADR is drafted as 0054 (next free after F-403's 0053).
 - **Next features, plans ready:** F-703 (read-only below 1024 px; start from main), F-210 (Files view; reuse F-309's `openFile`), F-605 (Markdown and other files; after F-309), F-601 (config editor; tasks 1 to 6 independent of F-309), F-401 (GitHub import; after F-403).
 - Then plan M3 from F-301 onwards.
 

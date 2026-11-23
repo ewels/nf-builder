@@ -8,6 +8,7 @@ import type {
   ParseProblem,
   ParseStatus,
   Projection,
+  QuickFix,
   RefusalCode,
   SourceLanguage,
   TextPatch,
@@ -138,6 +139,15 @@ export interface EngineApi {
   ): Promise<ProjectChange | EngineRefusal>;
   apply(
     command: EditCommand,
+    revision: number,
+    options?: ApplyOptions,
+  ): Promise<ApplyOutcome>;
+  /**
+   * Applies a quick fix as one `ReplaceFileText` and one undo step labelled `options.label ?? fix.title` (F-309, ADR 0042).
+   * `revision` is the revision the fix was diagnosed at: the fix is refused as stale when its own file changed after that.
+   */
+  applyFix(
+    fix: QuickFix,
     revision: number,
     options?: ApplyOptions,
   ): Promise<ApplyOutcome>;

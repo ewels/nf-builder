@@ -222,6 +222,66 @@ describe("F-113 engine client", () => {
     close();
   });
 
+  it("F-309: the facade forwards applyFix and announces its change to onEngineChange listeners", async () => {
+    const { port1, port2 } = new MessageChannel();
+    exposeEngine(
+      createWorkspace({
+        engine: createEngineService(),
+        openDb: (onClosed) => openProjectDb(new IDBFactory(), onClosed),
+      }),
+      port1,
+    );
+    class PortWorker extends EventTarget {
+      constructor() {
+        super();
+        port2.addEventListener("message", (e) =>
+          this.dispatchEvent(new MessageEvent("message", { data: e.data })),
+        );
+        port2.start();
+      }
+      postMessage(message: unknown, transfer?: Transferable[]) {
+        port2.postMessage(message, transfer ?? []);
+      }
+      terminate() {}
+    }
+    vi.stubGlobal("Worker", PortWorker);
+    // a fresh module, so the singleton engine of the other tests isn't reused
+    vi.resetModules();
+    const fresh = await import("../src/engine/engine-client");
+    const engine = fresh.getEngine();
+    const heard: { revision: number; files: unknown }[] = [];
+    const off = fresh.onEngineChange((c) => heard.push(c));
+    try {
+      const text = "workflow {\n    x = Channel.of(1)\n    x.view()\n}\n";
+      const summary = await engine.open({
+        version,
+        files: [{ path: "main.nf", text }],
+      });
+      const diagnosed = await engine.diagnostics();
+      if (!("diagnostics" in diagnosed)) throw new Error("refused");
+      const fix = diagnosed.diagnostics.find((d) => d.fix)?.fix;
+      if (!fix) throw new Error("no fix");
+      expect(await engine.applyFix(fix, summary.revision + 2)).toMatchObject({
+        ok: false,
+        code: "stale",
+      });
+      expect(heard).toHaveLength(0);
+      const applied = await engine.applyFix(fix, summary.revision, {
+        label: "Fix it",
+      });
+      if (!applied.ok) throw new Error(applied.message);
+      expect(applied.history.undo).toBe("Fix it");
+      expect(heard).toHaveLength(1);
+      expect(heard[0]?.revision).toBe(applied.revision);
+      expect(await engine.readFile("main.nf")).toContain("channel.of");
+    } finally {
+      off();
+      vi.unstubAllGlobals();
+      port1.close();
+      port2.close();
+    }
+  });
+
   it("F-113: importing the client starts no worker", async () => {
     let touched = false;
     const original = Object.getOwnPropertyDescriptor(globalThis, "Worker");

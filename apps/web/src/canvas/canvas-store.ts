@@ -17,6 +17,7 @@ import {
   type ProjectChange,
   type Projection,
   type ProjectSummary,
+  type QuickFix,
   type WorkflowRef,
 } from "@nf-builder/engine";
 import { useStore } from "zustand";
@@ -25,12 +26,16 @@ import { getEngine, onEngineChange } from "../engine/engine-client";
 import type { ViewMode } from "../views/view-mode";
 
 export interface WorkflowTab {
-  /** `<path>#<workflow>`, the empty name for the entry workflow (the projection key prefix, ADR 0036). */
+  /** `<path>#<workflow>`, the empty name for the entry workflow (the projection key prefix, ADR 0036); `file:<path>` for a file tab. */
   readonly id: string;
+  /** A workflow's canvas tab, or a code-only tab of a file (F-309, UX-20). */
+  readonly kind: "workflow" | "file";
   readonly path: string;
   /** Null for the entry workflow. */
   readonly workflow: string | null;
   readonly label: string;
+  /** The tooltip: the full path of a file tab. */
+  readonly title?: string;
   /** The view mode of this tab, for the session (AR-30, UX-27). */
   readonly mode: ViewMode;
 }
@@ -95,6 +100,15 @@ export interface WorkspaceState {
   readonly history: HistoryStatus;
   /** The last undo or redo result or refusal, for the history live region (F-209). */
   readonly historyNotice: string | null;
+  /** The last request to show a range of a file's code: offsets only, never text; `seq` rises with each (F-309). */
+  readonly reveal: {
+    readonly path: string;
+    readonly start: number;
+    readonly end: number;
+    readonly seq: number;
+  } | null;
+  /** The last request to centre a node of the active tab's canvas (F-309). */
+  readonly focusNode: { readonly id: string; readonly seq: number } | null;
 }
 
 export interface WorkspaceActions {
@@ -107,6 +121,15 @@ export interface WorkspaceActions {
   /** The engine changed the open project: re-project the active tab, or open the default workflow of a blank project. */
   changed(change: ProjectChange): Promise<void>;
   openWorkflow(path: string, workflow: string | null): Promise<void>;
+  /**
+   * Opens a code-only tab for a file, once per path, and shows it (F-309, UX-20). A `.nf` file that has a workflow opens
+   * that workflow's canvas tab instead. F-210, F-605 and F-601 open files through this.
+   */
+  openFile(path: string): Promise<void>;
+  /** Asks the file's code editor to select and scroll to a range; the editor shows it when it is mounted (F-309). */
+  revealCode(path: string, range: { start: number; end: number }): void;
+  /** Asks the active canvas to centre a node at its current zoom (F-309). */
+  focusOn(id: string): void;
   selectTab(id: string): Promise<void>;
   setMode(tabId: string, mode: ViewMode): void;
   setPortLabels(value: boolean): void;
@@ -116,6 +139,16 @@ export interface WorkspaceActions {
    */
   apply(
     command: EditCommand,
+    session?: number,
+    options?: ApplyOptions,
+  ): Promise<ApplyOutcome>;
+  /**
+   * Applies a quick fix diagnosed at `revision` as one undo step (F-309, ADR 0042). Pending code edits are sent first, so
+   * the fix may then be refused as stale. Joins the queue of applies, undos and redos.
+   */
+  applyFix(
+    fix: QuickFix,
+    revision: number,
     session?: number,
     options?: ApplyOptions,
   ): Promise<ApplyOutcome>;
@@ -164,12 +197,32 @@ export function defaultWorkflow(
 const fileName = (path: string): string =>
   path.slice(path.lastIndexOf("/") + 1);
 
+/** The tab label of a file: its name, with the folder too for the many `main.nf` of a project (`legacy_count/main.nf`). */
+const fileLabel = (path: string): string =>
+  path.endsWith("/main.nf")
+    ? path.split("/").slice(-2).join("/")
+    : fileName(path);
+
+/** A code-only tab for a file (F-309, UX-20). */
+export function fileTabFor(path: string): WorkflowTab {
+  return {
+    id: `file:${path}`,
+    kind: "file",
+    path,
+    workflow: null,
+    label: fileLabel(path),
+    title: path,
+    mode: "code",
+  };
+}
+
 export function tabFor(ref: {
   readonly path: string;
   readonly name: string | null;
 }): WorkflowTab {
   return {
     id: `${ref.path}#${ref.name ?? ""}`,
+    kind: "workflow",
     path: ref.path,
     workflow: ref.name,
     label: ref.name ?? fileName(ref.path),
@@ -230,6 +283,8 @@ export function createCanvasStore(
     let generation = 0;
     // a details result for a superseded selection is dropped
     let selection = 0;
+    // sequence numbers of reveal and focus requests: never reset, so a late editor can tell a request it has seen
+    let requests = 0;
 
     // apply, undo and redo run one at a time, each at the revision the previous one produced
     let queue: Promise<unknown> = Promise.resolve();
@@ -253,6 +308,12 @@ export function createCanvasStore(
 
     async function load(tab: WorkflowTab, quiet = false): Promise<void> {
       const mine = ++generation;
+      // a file tab has no projection: its code pane reads the file itself
+      if (tab.kind === "file") {
+        clearSelection();
+        set({ activeTab: tab.id, content: EMPTY });
+        return;
+      }
       if (!quiet) clearSelection();
       // a refresh keeps the canvas on screen (and its viewport) until the new projection arrives
       set(
@@ -458,6 +519,23 @@ export function createCanvasStore(
       }
     }
 
+    /** After an apply or a fix: adopt a newer revision; an internal refusal can follow a write that cleared the history. */
+    async function afterApply(outcome: ApplyOutcome): Promise<void> {
+      await adoptNewer(outcome);
+      if (!outcome.ok && outcome.code === "internal") await refreshHistory();
+    }
+
+    /** Sends the code panes' pending edits; outside the queue, as their send is queued itself. */
+    const flushPending = () =>
+      Promise.all([...flushes].map((flush) => flush().catch(() => {})));
+
+    /** Adds `tab` once and shows it. */
+    async function openTab(tab: WorkflowTab): Promise<void> {
+      if (!get().tabs.some((t) => t.id === tab.id))
+        set({ tabs: [...get().tabs, tab] });
+      await load(tab);
+    }
+
     async function stepHistory(
       kind: "undo" | "redo",
       session: number | undefined,
@@ -466,8 +544,8 @@ export function createCanvasStore(
       const mine = session ?? get().session;
       if (mine !== get().session)
         return refusal("no-project", "The project changed.");
-      // pending code edits become the step that gets undone; outside the queue, as their send is queued itself
-      await Promise.all([...flushes].map((flush) => flush().catch(() => {})));
+      // pending code edits become the step that gets undone
+      await flushPending();
       return send(
         mine,
         async (revision) => {
@@ -506,6 +584,8 @@ export function createCanvasStore(
       layoutNotice: null,
       history: EMPTY_HISTORY,
       historyNotice: null,
+      reveal: null,
+      focusNode: null,
 
       async open(request) {
         generation++;
@@ -532,6 +612,8 @@ export function createCanvasStore(
           layoutNotice: summary.layout.message,
           history: EMPTY_HISTORY,
           historyNotice: null,
+          reveal: null,
+          focusNode: null,
         });
         if (tab !== null) await load(tab);
       },
@@ -551,6 +633,8 @@ export function createCanvasStore(
           layoutNotice: null,
           history: EMPTY_HISTORY,
           historyNotice: null,
+          reveal: null,
+          focusNode: null,
         });
       },
 
@@ -561,15 +645,34 @@ export function createCanvasStore(
         const renamed = renamedTabs(summary.workflows, change.workflows);
         // a stale tab that already holds a new id gives way to the renamed one
         const taken = new Set([...renamed.values()].map((w) => tabFor(w).id));
-        const tabs = get()
-          .tabs.filter((t) => renamed.has(t.id) || !taken.has(t.id))
+        // a file tab goes with its file (text null: deleted, e.g. by undoing CreateProcess)
+        const deleted = new Set(
+          change.files.filter((f) => f.text === null).map((f) => f.path),
+        );
+        const before = get().tabs;
+        const tabs = before
+          .filter((t) => renamed.has(t.id) || !taken.has(t.id))
+          .filter((t) => !(t.kind === "file" && deleted.has(t.path)))
           .map((t) => {
             const to = renamed.get(t.id);
             return to === undefined ? t : { ...tabFor(to), mode: t.mode };
           });
         const current = get().activeTab;
         const moved = current === null ? undefined : renamed.get(current);
-        const activeTab = moved === undefined ? current : tabFor(moved).id;
+        let activeTab = moved === undefined ? current : tabFor(moved).id;
+        // the active file tab went: the previous tab takes over, else the first left
+        const closed =
+          activeTab !== null && !tabs.some((t) => t.id === activeTab)
+            ? before.find((t) => t.id === activeTab)
+            : undefined;
+        if (closed?.kind === "file") {
+          const at = before.indexOf(closed);
+          const left = before
+            .slice(0, at)
+            .reverse()
+            .find((t) => tabs.some((k) => k.id === t.id));
+          activeTab = left?.id ?? tabs[0]?.id ?? null;
+        }
         set({
           tabs,
           activeTab,
@@ -586,6 +689,11 @@ export function createCanvasStore(
           },
         });
         const active = tabs.find((t) => t.id === activeTab);
+        if (closed?.kind === "file" && active !== undefined) {
+          await load(active);
+          return;
+        }
+        if (active?.kind === "file") return;
         if (active !== undefined) {
           await load(active, true);
           await resendMove(active);
@@ -600,11 +708,26 @@ export function createCanvasStore(
         await load(tab);
       },
 
-      async openWorkflow(path, workflow) {
-        const tab = tabFor({ path, name: workflow });
-        if (!get().tabs.some((t) => t.id === tab.id))
-          set({ tabs: [...get().tabs, tab] });
-        await load(tab);
+      openWorkflow: (path, workflow) =>
+        openTab(tabFor({ path, name: workflow })),
+
+      async openFile(path) {
+        const { summary } = get();
+        if (summary === null) return;
+        const workflow = defaultWorkflow(
+          summary.workflows.filter((w) => w.path === path),
+        );
+        await openTab(workflow === null ? fileTabFor(path) : tabFor(workflow));
+      },
+
+      revealCode(path, range) {
+        set({
+          reveal: { path, start: range.start, end: range.end, seq: ++requests },
+        });
+      },
+
+      focusOn(id) {
+        set({ focusNode: { id, seq: ++requests } });
       },
 
       async selectTab(id) {
@@ -614,7 +737,9 @@ export function createCanvasStore(
 
       setMode(tabId, mode) {
         set({
-          tabs: get().tabs.map((t) => (t.id === tabId ? { ...t, mode } : t)),
+          tabs: get().tabs.map((t) =>
+            t.id === tabId && t.kind === "workflow" ? { ...t, mode } : t,
+          ),
         });
       },
 
@@ -626,13 +751,20 @@ export function createCanvasStore(
         send(
           session,
           (revision) => engine().apply(command, revision, options),
-          async (outcome) => {
-            await adoptNewer(outcome);
-            // an internal refusal can follow a write that cleared the engine's history
-            if (!outcome.ok && outcome.code === "internal")
-              await refreshHistory();
-          },
+          afterApply,
         ),
+
+      async applyFix(fix, revision, session, options) {
+        const mine = session ?? get().session;
+        if (mine !== get().session)
+          return refusal("no-project", "The project changed.");
+        await flushPending();
+        return send(
+          mine,
+          () => engine().applyFix(fix, revision, options),
+          afterApply,
+        );
+      },
 
       undo: (session) => stepHistory("undo", session),
       redo: (session) => stepHistory("redo", session),

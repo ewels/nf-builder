@@ -1,10 +1,17 @@
-import { nodeView, workflowSummary } from "@nf-builder/engine";
+import {
+  type Diagnostic,
+  nodeView,
+  problemKey,
+  problemsView,
+  workflowSummary,
+} from "@nf-builder/engine";
 import type { JSX } from "react";
 import {
   type CanvasContent,
   type DetailsContent,
   useWorkspace,
 } from "../canvas/canvas-store";
+import { problemsStore } from "../problems/problems-store";
 import "./details.css";
 import { NodeDetailsView } from "./node-details";
 import { WorkflowSummaryView } from "./workflow-summary";
@@ -14,10 +21,12 @@ export function DetailsBody({
   content,
   selected,
   details,
+  onShowProblems,
 }: {
   readonly content: CanvasContent;
   readonly selected: string | null;
   readonly details: DetailsContent;
+  readonly onShowProblems?: (first: Diagnostic) => void;
 }): JSX.Element {
   if (content.status !== "ready")
     return <p className="muted">Nothing selected</p>;
@@ -35,7 +44,11 @@ export function DetailsBody({
       : "loading";
   return (
     <div className="details-pane" data-details-state={state}>
-      <NodeDetailsView view={view} details={details} />
+      <NodeDetailsView
+        view={view}
+        details={details}
+        onShowProblems={onShowProblems}
+      />
     </div>
   );
 }
@@ -45,6 +58,13 @@ export function DetailsPane(): JSX.Element {
   const selected = useWorkspace((s) => s.selected);
   const details = useWorkspace((s) => s.details);
   return (
-    <DetailsBody content={content} selected={selected} details={details} />
+    <DetailsBody
+      content={content}
+      selected={selected}
+      details={details}
+      onShowProblems={(first) =>
+        problemsStore.getState().show(problemsView(first), problemKey(first))
+      }
+    />
   );
 }

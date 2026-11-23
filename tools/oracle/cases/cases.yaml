@@ -359,3 +359,21 @@ cases:
       - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/workflow-typed.mdx
     lint: { expect: ok }
     run: { expect: ok }
+
+  # F-309: the problems-panel fixtures, a legacy project with one deprecated-channel warning and the legacy suggestions, and its fixed form.
+  - id: f309-problems
+    about: A legacy project whose entry workflow uses `Channel.of` (a lint warning with a quick fix), with a legacy workflow and a legacy process (suggestions in two files); reads the call's `.out` so no unused-output warning fires.
+    spec: [F-309, UX-03, LA-34, LA-35]
+    sources:
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/process.mdx
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/workflow.mdx
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/reference/channel.mdx
+    lint: { expect: ok }
+    run: { expect: ok }
+  - id: f309-problems-fixed
+    about: The f309-problems tree after the `deprecated-channel` quick fix (`channel.of`); lints with no warning, and the file equals the fix's output byte for byte.
+    spec: [F-309, UX-03, LA-34, AR-05]
+    sources:
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/reference/channel.mdx
+    lint: { expect: ok, clean: true }
+    run: { expect: ok }
