@@ -57,6 +57,8 @@ function fake(
     details?: (node: string) => Promise<unknown>;
     /** The stored positions `project` answers with. */
     positions?: Positions;
+    /** The ids of the projection's nodes (default none); a function is asked at each `project`. */
+    nodes?: string[] | (() => string[]);
     /** What `setLayout` answers with (default: the sidecar was written, status ok). */
     setLayout?: (write: LayoutWrite) => Promise<unknown>;
   } = {},
@@ -89,7 +91,13 @@ function fake(
         projection:
           found === undefined || key === options.nullFor
             ? null
-            : projectionOf(found),
+            : {
+                ...projectionOf(found),
+                nodes: (typeof options.nodes === "function"
+                  ? options.nodes()
+                  : (options.nodes ?? [])
+                ).map((id) => ({ id })) as never,
+              },
         positions: options.positions ?? {},
       };
     },
@@ -750,6 +758,94 @@ describe("F-206 selection", () => {
       expect(c.notice).toBeNull();
     });
 
+    const staleAnswer = {
+      ok: false,
+      revision: 2,
+      code: "stale",
+      message: "The project changed (revision 2, not 1). Nothing was changed.",
+      path: null,
+      problems: [],
+    };
+    const change = {
+      revision: 2,
+      files: [],
+      remodelled: [],
+      history: EMPTY_HISTORY,
+      workflows: wf,
+    };
+    const NOTICE =
+      "Your last move couldn't be saved because the workflow changed. Move the node again.";
+
+    it("F-207 AR-11: a move refused as stale is sent again once after the next refresh, when its nodes are still there", async () => {
+      let revision = 1;
+      let calls = 0;
+      const { engine, writes } = fake(wf, {
+        positions: stored,
+        nodes: ["a", "b"],
+        get revision() {
+          return revision;
+        },
+        setLayout: async () => (++calls === 1 ? staleAnswer : { ...ok() }),
+      });
+      const store = createCanvasStore(() => engine);
+      await store.getState().open(request);
+      await store.getState().moveNodes({ a: { x: 5, y: 5 } });
+      expect(writes).toHaveLength(1);
+      revision = 2;
+      await store.getState().changed(change);
+      expect(writes).toHaveLength(2);
+      expect(writes[1]).toEqual({
+        revision: 2,
+        path: "main.nf",
+        workflow: null,
+        positions: { a: { x: 5, y: 5 } },
+        replace: false,
+      });
+      const c = store.getState().content;
+      if (c.status !== "ready") throw new Error("not ready");
+      expect(c.positions.a).toEqual({ x: 5, y: 5 });
+      expect(c.notice).toBeNull();
+      // sent once only
+      await store.getState().changed({ ...change, revision: 3 });
+      expect(writes).toHaveLength(2);
+    });
+
+    it("F-207 AR-11: a stale move whose node is gone after the refresh shows a notice and isn't sent again", async () => {
+      let present = ["a", "b"];
+      const { engine, writes } = fake(wf, {
+        positions: stored,
+        nodes: () => present,
+        revision: 2,
+        setLayout: async () => staleAnswer,
+      });
+      const store = createCanvasStore(() => engine);
+      await store.getState().open(request);
+      await store.getState().moveNodes({ a: { x: 5, y: 5 } });
+      present = ["b"];
+      await store.getState().changed(change);
+      expect(writes).toHaveLength(1);
+      const c = store.getState().content;
+      if (c.status !== "ready") throw new Error("not ready");
+      expect(c.notice).toBe(NOTICE);
+    });
+
+    it("F-207 AR-11: a move refused as stale twice shows the notice", async () => {
+      const { engine, writes } = fake(wf, {
+        positions: stored,
+        nodes: ["a", "b"],
+        revision: 2,
+        setLayout: async () => staleAnswer,
+      });
+      const store = createCanvasStore(() => engine);
+      await store.getState().open(request);
+      await store.getState().moveNodes({ a: { x: 5, y: 5 } });
+      await store.getState().changed(change);
+      expect(writes).toHaveLength(2);
+      const c = store.getState().content;
+      if (c.status !== "ready") throw new Error("not ready");
+      expect(c.notice).toBe(NOTICE);
+    });
+
     it("F-207 ADR-0008: a placement is stored and saved; with nothing added nothing is sent, and a replace sends the whole set", async () => {
       const { engine, writes } = fake(wf);
       const store = createCanvasStore(() => engine);
@@ -801,6 +897,12 @@ describe("F-206 selection", () => {
       expect(c.positions).toEqual({});
     });
   });
+});
+
+const ok = () => ({
+  revision: 1,
+  files: [],
+  layout: { state: "ok", message: null },
 });
 
 const statusOf = (undoCount: number, redoCount = 0) => ({

@@ -178,6 +178,9 @@ export function tabFor(ref: {
 }
 
 const REPLACED_NOTICE = "The layout file couldn't be read and was replaced.";
+
+const STALE_MOVE =
+  "Your last move couldn't be saved because the workflow changed. Move the node again.";
 /**
  * Pairs each workflow that vanished from a file with the one that appeared in it, when there is exactly one of each:
  * a rename, forwards or back (F-209). Keys are tab ids.
@@ -236,6 +239,12 @@ export function createCanvasStore(
       return run;
     };
     const flushes = new Set<() => Promise<void>>();
+    // the last layout write the engine refused as stale, sent again after the next refresh
+    let pendingMove: {
+      tab: string;
+      positions: Positions;
+      replace: boolean;
+    } | null = null;
 
     function clearSelection(): void {
       selection++;
@@ -328,6 +337,7 @@ export function createCanvasStore(
       revision: number,
       positions: Positions,
       replace: boolean,
+      retried = false,
     ): Promise<void> {
       let notice: string | null = null;
       try {
@@ -338,9 +348,14 @@ export function createCanvasStore(
           positions,
           replace,
         });
-        // computed before a change shifted the keys: the next projection has fresh positions, so nothing to say
-        if ("ok" in result && result.code === "stale") return;
-        if ("ok" in result)
+        // computed before a change shifted the keys: sent once more after the refresh, if its nodes are still there
+        if ("ok" in result && result.code === "stale") {
+          if (!retried) {
+            pendingMove = { tab: tab.id, positions, replace };
+            return;
+          }
+          notice = STALE_MOVE;
+        } else if ("ok" in result)
           notice = `The positions couldn't be saved (${result.message}).`;
         else {
           const { summary } = get();
@@ -368,6 +383,33 @@ export function createCanvasStore(
         activeTab === tab.id
       )
         set({ content: { ...content, notice } });
+    }
+
+    /** Sends a move the engine refused as stale once more, now that the projection is refreshed; says so if it can't. */
+    async function resendMove(tab: WorkflowTab): Promise<void> {
+      const pending = pendingMove;
+      pendingMove = null;
+      if (pending === null || pending.tab !== tab.id) return;
+      const { content } = get();
+      if (content.status !== "ready") return;
+      const present = new Set(content.projection.nodes.map((n) => n.id));
+      if (!Object.keys(pending.positions).every((id) => present.has(id))) {
+        set({ content: { ...content, notice: STALE_MOVE } });
+        return;
+      }
+      set({
+        content: {
+          ...content,
+          positions: { ...content.positions, ...pending.positions },
+        },
+      });
+      await save(
+        tab,
+        content.revision,
+        pending.positions,
+        pending.replace,
+        true,
+      );
     }
 
     /** A refusal that reports a newer revision: another writer got in first, so adopt it and show what it left. */
@@ -467,6 +509,7 @@ export function createCanvasStore(
 
       async open(request) {
         generation++;
+        pendingMove = null;
         const summary = await engine().open(request);
         await get().show(summary, "unsaved");
         return summary;
@@ -474,6 +517,7 @@ export function createCanvasStore(
 
       async show(summary, source = "project") {
         generation++;
+        pendingMove = null;
         clearSelection();
         const first = defaultWorkflow(summary.workflows);
         const tab = first === null ? null : tabFor(first);
@@ -544,6 +588,7 @@ export function createCanvasStore(
         const active = tabs.find((t) => t.id === activeTab);
         if (active !== undefined) {
           await load(active, true);
+          await resendMove(active);
           const { selected } = get();
           if (selected !== null) await loadDetails(selected);
           return;
