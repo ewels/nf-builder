@@ -30,18 +30,24 @@ describe("base path", () => {
   it("F-011 ADR-0040: no app source, index.html, public file, Vite config, build script or pages.yml hard-codes /nf-builder/", () => {
     // apps/web/public has no files since F-502 deleted the S4 probe page; scan it if it comes back.
     const files = (dir: string): string[] =>
-      !existsSync(join(REPO_ROOT, dir))
-        ? []
-        : readdirSync(join(REPO_ROOT, dir), {
-            recursive: true,
-            withFileTypes: true,
-          })
-            .filter((e) => e.isFile())
-            .map((e) => join(e.parentPath, e.name));
+      readdirSync(join(REPO_ROOT, dir), {
+        recursive: true,
+        withFileTypes: true,
+      })
+        .filter((e) => e.isFile())
+        .map((e) => join(e.parentPath, e.name));
+    const source = files("apps/web/src");
+    const scripts = files("scripts");
+    expect(source.length).toBeGreaterThan(0);
+    expect(scripts.length).toBeGreaterThan(0);
+    // Only this directory may be absent.
+    const pub = existsSync(join(REPO_ROOT, "apps/web/public"))
+      ? files("apps/web/public")
+      : [];
     const targets = [
-      ...files("apps/web/src"),
-      ...files("apps/web/public").filter((f) => !f.includes("/registry/")),
-      ...files("scripts"),
+      ...source,
+      ...pub.filter((f) => !f.includes("/registry/")),
+      ...scripts,
       join(REPO_ROOT, "apps/web/index.html"),
       join(REPO_ROOT, "apps/web/vite.config.ts"),
       join(REPO_ROOT, ".github/workflows/pages.yml"),
