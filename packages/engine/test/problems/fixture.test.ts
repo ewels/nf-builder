@@ -2,7 +2,11 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { applyTextEdits } from "../../src/diagnostics/text-edits";
-import { nodeAtRange, problemTarget } from "../../src/problems";
+import {
+  nodeAtRange,
+  problemSections,
+  problemTarget,
+} from "../../src/problems";
 import { diagnoseFiles, FIXTURES, fixtureDirs } from "../diagnostics/open";
 import { readTree } from "../model/read-tree";
 import { projectorFor } from "../projection/open";
@@ -113,5 +117,47 @@ describe("F-309 fixtures", () => {
     }
     expect(fixes).toBeGreaterThan(0);
     expect(FIXTURES).toContain("lints");
+  });
+
+  it("F-309 LA-31 LA-32 LA-33 LA-36: over the pack's lint fixtures, construct, type and arity errors land under Problems as errors, an unused output as a warning, and tuple, params and publishDir lints under Suggestions", async () => {
+    // fixture code -> the section and severity its positive tree must produce
+    const expected = [
+      // LA-31
+      ["feature-flag", "problems", "error"],
+      ["pipeline-include-types", "problems", "error"],
+      ["agent-output", "problems", "error"],
+      ["config-include-placement", "problems", "error"],
+      // LA-32
+      ["type-mismatch", "problems", "error"],
+      // LA-33
+      ["call-arity", "problems", "error"],
+      ["unused-output", "problems", "warning"],
+      // LA-36
+      ["tuple-where-record", "suggestions", "suggestion"],
+      ["legacy-params", "suggestions", "suggestion"],
+      ["params-outside-entry", "suggestions", "suggestion"],
+      ["publish-dir", "suggestions", "suggestion"],
+    ] as const;
+    for (const [code, view, severity] of expected) {
+      const dir = fixtureDirs().find(
+        (f) => f.code === code && f.kind === "positive",
+      )?.dir;
+      if (dir === undefined) throw new Error(`no positive fixture for ${code}`);
+      const { diagnoser } = await diagnoseFiles(readTree(dir));
+      const sections = problemSections(diagnoser.all());
+      const listed = sections[view]
+        .flatMap((g) => g.diagnostics)
+        .filter((d) => d.code === code);
+      expect(listed.length, `${code} under ${view}`).toBeGreaterThan(0);
+      expect(
+        listed.every((d) => d.severity === severity),
+        `${code} is a ${severity}`,
+      ).toBe(true);
+      const other = view === "problems" ? "suggestions" : "problems";
+      expect(
+        sections[other].flatMap((g) => g.diagnostics).map((d) => d.code),
+        `${code} not under ${other}`,
+      ).not.toContain(code);
+    }
   });
 });
