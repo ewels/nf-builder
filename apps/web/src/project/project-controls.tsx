@@ -8,6 +8,7 @@ import { DeleteProjectDialog, ProjectNameDialog } from "./project-dialogs";
 import { useProjects } from "./project-store";
 import { ProjectSwitcher } from "./project-switcher";
 import { useTemplates } from "./templates";
+import { useZipImport } from "./zip-import";
 
 const languageVersions = installedPackVersions();
 
@@ -49,6 +50,7 @@ export function ProjectControls(): JSX.Element {
         <NewProjectDialog
           languageVersions={languageVersions}
           useTemplates={useTemplates}
+          useZipImport={useZipImport}
           projects={status.projects}
           currentId={current?.id ?? null}
           initialRoute={dialog.route}

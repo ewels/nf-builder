@@ -25,7 +25,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-208 view modes and Code | merged, PR #46 | |
 | F-209 undo and redo | merged, PR #50 | |
 | F-309 problems panel | `feat/F-309`, PR #52 (draft) | Built and reviewed; review fixes were building when work paused on 2026-11-23. Then: commit the CI baselines `problems-panel` (re-render after the fix-title change) and `problems-status-bar`, write the records (ADR draft below), merge main, CI, merge. |
-| F-403 zip import | `feat/F-403`, PR #51 | Reviewed, fixed and recorded (ADR 0053); merge once CI is green. |
+| F-403 zip import | merged, PR #51 | |
 | F-502 registry client | merged, PR #48 | |
 | Parser error position | `fix/parser-error-position` | A blank line before `stub:` or `emit:` moved a later syntax error to that keyword (antlr4ng and Groovy's optimised ANTLR runtime differ); fix building. |
 | F-501 registry snapshot | merged, PR #29; passing | Confirmed on live data after the snapshot-triggered Pages deploy. |
@@ -35,7 +35,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 
 Branches are stacked: `feat/F-108` → `feat/F-107`; `feat/F-111` also merges F-107. Open PRs for F-108, F-107 and F-111 against `main` in that order (merge `main` into each first), each green before the next. Worktrees: `/home/user/wt-F-1xx`.
 
-Next free ADR number: 0053 (0052 is F-207's).
+Next free ADR number: 0054 (0052 is F-207's, 0053 F-403's).
 
 ## Decisions already taken on the plans' open points
 
@@ -220,7 +220,7 @@ Next free ADR number: 0053 (0052 is F-207's).
   - the F-204 locator change and the shell baseline re-approval, recorded in the PR;
   - extend the recorded-registry-data licences row to the live fixtures.
 
-### F-403 — [plan](plan-F-403.md)
+### F-403 (merged with its PR)
 - Accept every recommendation in section 6:
   - fflate 0.8.3, pinned, as a runtime dependency of `@nf-builder/sources` (`unzipSync` only), plus root dev fflate and `sources` dev fast-check 4.11.0;
   - unzipping in the engine worker with `sources` loaded lazily;
@@ -302,7 +302,6 @@ Next free ADR number: 0053 (0052 is F-207's).
 ## Paused on 2026-11-23
 
 Work paused at the maintainer's request (usage limits). To resume:
-- **PR #51 (F-403):** ready; merge when CI is green, then update its handoff row.
 - **PR #52 (F-309):** the review-fix builder may have left commits on `feat/F-309`. Check `git log`, run `pnpm check` and the F-309 e2e tests, then do the steps in its row. The ADR is drafted as 0054 (next free after F-403's 0053).
 - **Next features, plans ready:** F-703 (read-only below 1024 px; start from main), F-210 (Files view; reuse F-309's `openFile`), F-605 (Markdown and other files; after F-309), F-601 (config editor; tasks 1 to 6 independent of F-309), F-401 (GitHub import; after F-403).
 - Then plan M3 from F-301 onwards.

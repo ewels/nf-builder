@@ -6,6 +6,7 @@ import type {
   ProjectFile,
   ProjectSummary,
 } from "@nf-builder/engine";
+import type { ImportRefusal, ImportSummary } from "@nf-builder/sources";
 
 /** A project record as stored in IndexedDB (schema v1). Times are milliseconds since the epoch. */
 export interface ProjectMeta {
@@ -19,6 +20,17 @@ export interface ProjectMeta {
   readonly openedAt: number;
 }
 
+/** A staged import (F-403): the stage's id and the ignore list text to select the files with. */
+export interface ImportChoice {
+  readonly id: string;
+  readonly ignore: string;
+}
+
+/** What staging a zip returns: the summary of what would be imported, or why the zip is refused. */
+export type ImportStageResult =
+  | { readonly ok: true; readonly id: string; readonly summary: ImportSummary }
+  | ImportRefusal;
+
 export interface NewProject {
   readonly name: string;
   readonly languageVersion: string;
@@ -27,6 +39,8 @@ export interface NewProject {
   readonly template?: string;
   /** The Publish docs to GitHub Pages choice (UX-60). Carried with the request; it has no effect until F-606. */
   readonly publishDocs?: boolean;
+  /** A staged zip import (F-403): the worker copies its selected files, so `files` must be empty and there is no `template`. */
+  readonly import?: ImportChoice;
 }
 
 /** One file write: a `null` text deletes the file. */
@@ -82,6 +96,11 @@ export interface OpenedProject {
 
 export interface WorkspaceApi extends EngineApi {
   watch(listener: (status: WorkspaceStatus) => void): Promise<WorkspaceStatus>;
+  /** Reads a zip in the worker and stages it; the page gets the summary only (F-403). `name` is the file's name, which a cloned `Blob` loses. */
+  stageZip(file: Blob, name: string): Promise<ImportStageResult>;
+  /** The summary of the staged import under another ignore list. */
+  restageImport(id: string, ignore: string): Promise<ImportStageResult>;
+  discardImport(id: string): Promise<void>;
   createProject(input: NewProject): Promise<ProjectMeta>;
   openProject(id: string): Promise<OpenedProject>;
   renameProject(id: string, name: string): Promise<ProjectMeta>;

@@ -111,6 +111,24 @@ describe("F-202 F-205 project store and canvas", () => {
     ]);
   });
 
+  it("F-403 UX-60: create sends the import choice without a template, then opens the new project", async () => {
+    const f = fixture(ready());
+    await f.store.getState().create({
+      name: "Zip",
+      languageVersion: "26.10",
+      publishDocs: false,
+      import: { id: "stage-1", ignore: "data/\n" },
+    });
+    expect(f.workspace.createProject).toHaveBeenCalledWith({
+      name: "Zip",
+      languageVersion: "26.10",
+      files: [],
+      publishDocs: false,
+      import: { id: "stage-1", ignore: "data/\n" },
+    });
+    expect(f.calls).toContain("openProject:new");
+  });
+
   it("F-202 F-205 UX-20: a failed open shows nothing", async () => {
     const f = fixture(ready());
     (f.workspace.openProject as ReturnType<typeof vi.fn>).mockRejectedValue(
