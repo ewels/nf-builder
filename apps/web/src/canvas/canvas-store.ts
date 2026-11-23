@@ -325,17 +325,33 @@ export function createCanvasStore(
       });
     }
 
+    async function refreshHistory(): Promise<void> {
+      try {
+        set({ history: await engine().history() });
+      } catch {
+        // the status stays as it was; the next change carries it
+      }
+    }
+
     async function stepHistory(
       kind: "undo" | "redo",
       session: number | undefined,
     ): Promise<HistoryOutcome> {
-      if (session !== undefined && session !== get().session)
+      // the project shown when the key was pressed, not whichever is shown once the flushes are done
+      const mine = session ?? get().session;
+      if (mine !== get().session)
         return refusal("no-project", "The project changed.");
       // pending code edits become the step that gets undone; outside the queue, as their send is queued itself
       await Promise.all([...flushes].map((flush) => flush().catch(() => {})));
       return send(
-        session,
-        (revision) => engine()[kind](revision),
+        mine,
+        async (revision) => {
+          try {
+            return await engine()[kind](revision);
+          } catch (error) {
+            return refusal("internal", messageOf(error));
+          }
+        },
         async (outcome) => {
           if (outcome.ok) {
             set({
@@ -346,11 +362,7 @@ export function createCanvasStore(
           // no retry: the top step may no longer be the one the user saw
           set({ historyNotice: outcome.message });
           await adoptNewer(outcome);
-          try {
-            set({ history: await engine().history() });
-          } catch {
-            // the status stays as it was; the next change carries it
-          }
+          await refreshHistory();
         },
       );
     }
@@ -476,7 +488,16 @@ export function createCanvasStore(
       },
 
       apply: (command, session, options) =>
-        send(session, (revision) => engine().apply(command, revision, options)),
+        send(
+          session,
+          (revision) => engine().apply(command, revision, options),
+          async (outcome) => {
+            await adoptNewer(outcome);
+            // an internal refusal can follow a write that cleared the engine's history
+            if (!outcome.ok && outcome.code === "internal")
+              await refreshHistory();
+          },
+        ),
 
       undo: (session) => stepHistory("undo", session),
       redo: (session) => stepHistory("redo", session),

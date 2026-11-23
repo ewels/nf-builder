@@ -776,6 +776,74 @@ describe("F-209 history", () => {
     expect(log.filter((l) => l.startsWith("undo"))).toHaveLength(1);
   });
 
+  it("F-209 AR-23: a worker failure on undo or redo becomes an internal refusal and a notice, not a rejection", async () => {
+    const wf = [ref("main.nf", null)];
+    const { engine, log } = historic(wf, {
+      undo: async () => {
+        throw new Error("worker died");
+      },
+      redo: async (r) => changeAt(r + 1, wf, statusOf(1), { label: "x" }),
+    });
+    const store = createCanvasStore(() => engine);
+    await store.getState().open(request);
+    const outcome = await store.getState().undo();
+    expect(outcome.ok === false && outcome.code).toBe("internal");
+    expect(store.getState().historyNotice).toBe("worker died");
+    // the queue still works afterwards
+    const next = await store.getState().redo();
+    expect(next.ok).toBe(true);
+    expect(log).toContain("redo@1");
+  });
+
+  it("F-209 ADR-0004 IO-01: a key press made while a flush is pending does not act on a project opened meanwhile", async () => {
+    const wf = [ref("main.nf", null)];
+    const { engine, log } = historic(wf, {
+      undo: async (r) => changeAt(r + 1, wf, statusOf(0, 1), { label: "x" }),
+    });
+    const store = createCanvasStore(() => engine);
+    await store.getState().open(request);
+    let release = () => {};
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    store.getState().registerFlush(() => gate);
+    const pending = store.getState().undo();
+    await store.getState().show(summaryOf(wf), "project");
+    release();
+    const outcome = await pending;
+    expect(outcome.ok === false && outcome.code).toBe("no-project");
+    expect(log.filter((l) => l.startsWith("undo"))).toEqual([]);
+  });
+
+  it("F-209 AR-23: an internal refusal from apply refreshes the history", async () => {
+    const wf = [ref("main.nf", null)];
+    const { engine, log } = historic(wf, {
+      apply: async () => ({
+        ok: false,
+        revision: 3,
+        code: "internal",
+        message: "boom",
+        path: null,
+        problems: [],
+      }),
+      history: async () => EMPTY_HISTORY,
+    });
+    const store = createCanvasStore(() => engine);
+    await store.getState().open(request);
+    await store.getState().changed({
+      revision: 1,
+      files: [],
+      remodelled: [],
+      history: statusOf(2),
+      workflows: wf,
+    });
+    expect(store.getState().history.undoCount).toBe(2);
+    await store.getState().apply(command);
+    expect(log).toEqual(["apply@1", "history"]);
+    expect(store.getState().summary?.revision).toBe(3);
+    expect(store.getState().history).toEqual(EMPTY_HISTORY);
+  });
+
   it("F-209 F-301: apply passes group and label to the engine; opening a project resets the history and notice", async () => {
     const wf = [ref("main.nf", null)];
     const seen: unknown[] = [];
