@@ -67,7 +67,7 @@ describe("F-403 import stager", () => {
     });
   });
 
-  it("F-403: files reports ignore-list problems and an import with no files", async () => {
+  it("F-403 IO-12: files reports ignore-list problems and an import with no files", async () => {
     const stager = createImportStager({ newId: () => "s1" });
     await stager.stageZip(zip({ "main.nf": "x" }), "a.zip");
     expect(await stager.files("s1", "!main.nf\n")).toMatchObject({
@@ -80,7 +80,7 @@ describe("F-403 import stager", () => {
     });
   });
 
-  it("F-403: a newer stage replaces the older one, and discard makes an id gone", async () => {
+  it("F-403 IO-11: a newer stage replaces the older one, and discard makes an id gone", async () => {
     let n = 0;
     const stager = createImportStager({ newId: () => `s${++n}` });
     await stager.stageZip(zip({ "a.nf": "a" }), "a.zip");

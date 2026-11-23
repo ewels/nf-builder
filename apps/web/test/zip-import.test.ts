@@ -141,7 +141,7 @@ describe("F-403 zip import state", () => {
     });
   });
 
-  it("F-403: choosing another file, reset and a refusal discard the previous stage", async () => {
+  it("F-403 IO-11: choosing another file, reset and a refusal discard the previous stage", async () => {
     const h = harness();
     h.stage.mockResolvedValueOnce(ok("a", "a.zip"));
     h.view.choose(file("a.zip"));
@@ -164,7 +164,7 @@ describe("F-403 zip import state", () => {
     expect(h.states.at(-1)).toEqual({ status: "empty" });
   });
 
-  it("F-403: a reply for a file that was replaced is discarded", async () => {
+  it("F-403 IO-11: a reply for a file that was replaced is discarded", async () => {
     const h = harness();
     const slow: { resolve?: (r: ImportStageResult) => void } = {};
     h.stage.mockImplementationOnce(
@@ -181,7 +181,7 @@ describe("F-403 zip import state", () => {
   it("F-403 UX-60: zipProjectName drops .zip and keeps at most 100 characters", () => {
     expect(zipProjectName("rnaseq-nf-main.zip")).toBe("rnaseq-nf-main");
     expect(zipProjectName("Data.ZIP")).toBe("Data");
-    expect(zipProjectName("x".repeat(150) + ".zip")).toHaveLength(100);
+    expect(zipProjectName(`${"x".repeat(150)}.zip`)).toHaveLength(100);
     expect(zipProjectName(".zip")).toBe("Untitled project");
   });
 });

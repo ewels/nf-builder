@@ -154,7 +154,7 @@ test("F-403 step 2 IO-12 QA-32: a zip that expands to more than 200 MB is refuse
   expect((await stored(page)).projects).toHaveLength(before);
 });
 
-test("F-403 IO-11 IO-12: a zip with no top-level folder keeps its paths, a file that isn't a zip is refused, and Cancel discards the stage", async ({
+test("F-403 IO-11 IO-12: a zip with no top-level folder keeps its paths, a file that isn't a zip is refused, and Cancel stores nothing", async ({
   page,
 }, testInfo) => {
   const flat = testInfo.outputPath("flat.zip");

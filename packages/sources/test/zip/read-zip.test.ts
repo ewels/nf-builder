@@ -10,6 +10,7 @@ import {
   rawEntryZip,
   renameEntry,
   withCompression,
+  withFlags,
   withRecordedSizes,
   zipOf,
 } from "../fixtures/zips";
@@ -67,6 +68,7 @@ describe("readZip", () => {
       },
       { comment: "abc" },
     );
+    expect(new TextDecoder().decode(zip.slice(-3))).toBe("abc");
     const result = read(zip);
     expect(result.stripped).toBe("repo-abc");
     expect(result.entries).toBe(5);
@@ -80,6 +82,29 @@ describe("readZip", () => {
         reason: null,
       },
     ]);
+  });
+
+  it("F-403 IO-12: an entry flagged as encrypted (its data is not valid deflate) refuses the zip as damaged and names the entry and password protection", () => {
+    const zip = withFlags(
+      rawEntryZip(
+        "a.nf",
+        Uint8Array.from([
+          0x9c, 0x3e, 0x77, 0x01, 0xfe, 0x42, 0x10, 0xaa, 0x55, 0x13, 0x8d,
+          0x2b,
+        ]),
+        {
+          method: 8,
+          originalSize: 20,
+        },
+      ),
+      "a.nf",
+      0x0801,
+    );
+    expect(readZip(zip)).toEqual({
+      ok: false,
+      code: "damaged",
+      message: expect.stringMatching(/at a\.nf .*password-protected/),
+    });
   });
 
   it("F-403 IO-11: a zip with no single top-level folder keeps its paths", () => {
@@ -147,7 +172,7 @@ describe("readZip", () => {
     );
     const result = read(zip);
     const by = Object.fromEntries(result.candidates.map((c) => [c.path, c]));
-    expect(by.__proto__).toMatchObject({ reason: "unsafe-path" });
+    expect(by["__proto__"]).toMatchObject({ reason: "unsafe-path" });
     expect(({} as { text?: string }).text).toBeUndefined();
   });
 

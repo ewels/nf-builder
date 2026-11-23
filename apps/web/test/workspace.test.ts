@@ -680,7 +680,7 @@ describe("F-403 workspace zip import", () => {
     expect(s.statuses.at(-1)?.projects ?? []).toHaveLength(0);
   });
 
-  it("F-403: createProject refuses an unknown or discarded import, an import with a template or files, ignore-list problems and an import with no files", async () => {
+  it("F-403 IO-12: createProject refuses an unknown or discarded import, an import with a template or files, ignore-list problems and an import with no files", async () => {
     const s = setup();
     await s.watching;
     const base = { name: "Pipe", languageVersion: version };

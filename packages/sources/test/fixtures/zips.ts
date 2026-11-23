@@ -19,7 +19,15 @@ export function zipOf(
           ? content
           : [content[0], { level: content[1].level }];
   }
-  return zipSync(zippable);
+  const zip = zipSync(zippable);
+  const comment = text.encode(options.comment ?? "");
+  if (comment.length === 0) return zip;
+  // the end-of-central-directory record has no comment yet: its last two bytes are the comment length
+  const out = new Uint8Array(zip.length + comment.length);
+  out.set(zip);
+  out.set(comment, zip.length);
+  view(out).setUint16(zip.length - 2, comment.length, true);
+  return out;
 }
 
 const view = (zip: Uint8Array) =>
@@ -76,6 +84,20 @@ export function withCompression(
   const { central, local } = findHeaders(out, name);
   v.setUint16(central + 10, method, true);
   v.setUint16(local + 8, method, true);
+  return out;
+}
+
+/** Sets the general-purpose flag bits of one entry (bit 0 marks it as encrypted). */
+export function withFlags(
+  zip: Uint8Array,
+  name: string,
+  flags: number,
+): Uint8Array {
+  const out = zip.slice();
+  const v = view(out);
+  const { central, local } = findHeaders(out, name);
+  v.setUint16(central + 8, flags, true);
+  v.setUint16(local + 6, flags, true);
   return out;
 }
 
