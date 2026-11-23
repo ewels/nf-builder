@@ -36,3 +36,24 @@ export const jsonResponse = (
   contentType = "application/json; charset=utf-8",
   status = 200,
 ) => new Response(body, { status, headers: { "content-type": contentType } });
+
+export const fixture = (name: string) =>
+  readFileSync(new URL(`./fixtures/live/${name}`, import.meta.url), "utf8");
+
+/** Serves the snapshot and the live fixtures. */
+export function serve(
+  overrides: (url: string) => Response | undefined = () => undefined,
+) {
+  return fakeFetch((url) => {
+    const o = overrides(url);
+    if (o) return o;
+    if (url.startsWith(SNAPSHOT_URL)) return jsonResponse(goldenText());
+    if (url.includes("/modules/list") && url.includes("kind=Process"))
+      return jsonResponse(fixture("modules-process-1.json"));
+    if (url.includes("/modules/list") && url.includes("kind=Workflow"))
+      return jsonResponse(fixture("modules-workflow-1.json"));
+    if (url.includes("/plugins"))
+      return jsonResponse(fixture("plugins-1.json"));
+    return jsonResponse("{}", "application/json", 404);
+  });
+}
