@@ -45,6 +45,8 @@ export function createImportStager(options: StagerOptions = {}): ImportStager {
   };
   /** One stage is kept at a time; a newer one replaces it. */
   let stage: Stage | undefined;
+  /** Counts `stageZip` calls: reads can finish out of order, and only the newest call may stage. */
+  let generation = 0;
 
   const summaryOf = (m: SourcesModule, s: Stage, ignore: string) =>
     m.summarise({
@@ -61,11 +63,14 @@ export function createImportStager(options: StagerOptions = {}): ImportStager {
 
   return {
     stageZip: async (file, name) => {
+      const mine = ++generation;
       const m = await module();
       stage = undefined;
       const tooBig = m.checkArchiveSize(file.size);
       if (tooBig) return tooBig;
-      const read = m.readZip(new Uint8Array(await file.arrayBuffer()));
+      const bytes = new Uint8Array(await file.arrayBuffer());
+      if (mine !== generation) return m.refuse("gone");
+      const read = m.readZip(bytes);
       if (!read.ok) return read;
       const staged: Stage = { id: newId(), source: name, read };
       stage = staged;

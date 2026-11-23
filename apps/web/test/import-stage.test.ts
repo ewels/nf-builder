@@ -108,4 +108,22 @@ describe("F-403 import stager", () => {
     expect(refused).toMatchObject({ ok: false, code: "not-zip" });
     expect(await stager.restage("s1", "")).toMatchObject({ code: "gone" });
   });
+
+  it("F-403 IO-11: the newest stageZip wins when an older, larger read finishes last", async () => {
+    let n = 0;
+    const stager = createImportStager({ newId: () => `s${++n}` });
+    const slow = zip({ "a.nf": "a" });
+    const late = {
+      size: slow.size,
+      arrayBuffer: () =>
+        new Promise<ArrayBuffer>((resolve) =>
+          setTimeout(() => resolve(slow.arrayBuffer()), 30),
+        ),
+    } as unknown as Blob;
+    const first = stager.stageZip(late, "a.zip");
+    const second = await stager.stageZip(zip({ "b.nf": "b" }), "b.zip");
+    expect(second).toMatchObject({ ok: true, id: "s1" });
+    expect(await first).toMatchObject({ ok: false, code: "gone" });
+    expect(await stager.restage("s1", "")).toMatchObject({ ok: true });
+  });
 });
