@@ -310,7 +310,7 @@ describe("F-203 new project dialog", () => {
     expect(html).toContain("22 files, 31 kB");
     expect(html).toContain("Removed the top-level folder rnaseq-nf-main/.");
     expect(html).toContain("Skipped files (13)");
-    expect(html).toContain("Binary files");
+    expect(html).toContain("Binary or non-UTF-8 files");
     expect(html).toContain("multiqc/nextflow_logo.png");
     expect(html).toMatch(/<textarea[^>]*>data\/\n?<\/textarea>/);
     const labelled = /<label[^>]*for="([^"]+)"[^>]*>Ignore list<\/label>/.exec(

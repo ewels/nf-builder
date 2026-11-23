@@ -69,7 +69,7 @@ test("F-403 step 1 IO-11 IO-12 QA-30: a GitHub archive zip of rnaseq-nf imports 
   await expect(dialog.getByLabel("Name")).toHaveValue(top);
   await summary.getByText("Skipped files (13)").click();
   await expect(summary).toContainText("Ignored by the list: 12 files");
-  await expect(summary).toContainText("Binary files: 1 file");
+  await expect(summary).toContainText("Binary or non-UTF-8 files: 1 file");
   await expect(summary).toContainText("multiqc/nextflow_logo.png");
   await dialog.getByRole("button", { name: "Create" }).click();
   await dialog.waitFor({ state: "hidden" });

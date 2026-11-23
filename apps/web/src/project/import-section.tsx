@@ -7,7 +7,7 @@ import type { ZipImportView } from "./zip-import";
 const SKIP_LABELS: Record<SkipReason, string> = {
   ignored: "Ignored by the list",
   "too-large": "Over 1 MB",
-  binary: "Binary files",
+  binary: "Binary or non-UTF-8 files",
   "unsafe-path": "Unsafe paths",
   duplicate: "Duplicate paths",
   unsupported: "Unsupported compression",
@@ -130,8 +130,8 @@ export function ImportSection(props: {
           />
           <p className="muted" id={helpId}>
             One pattern per line, as in .gitignore. A trailing / matches a
-            folder and a leading / anchors to the top. Binary files and files
-            over 1 MB are always skipped.
+            folder and a leading / anchors to the top. Binary or non-UTF-8 files
+            and files over 1 MB are always skipped.
           </p>
           {state.summary.ignoreProblems.length > 0 ? (
             <ul className="dialog-error" id={problemsId}>
