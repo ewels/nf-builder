@@ -18,10 +18,8 @@ __MACOSX/
 .DS_Store
 `;
 
-export interface IgnoreRule {
+interface IgnoreRule {
   readonly line: number;
-  readonly pattern: string;
-  readonly anchored: boolean;
   readonly folderOnly: boolean;
   readonly regex: RegExp;
 }
@@ -80,7 +78,7 @@ export function parseIgnore(text: string): IgnoreList {
     const regex = new RegExp(
       `^${anchored ? "" : "(?:.*/)?"}${globBody(pattern)}$`,
     );
-    rules.push({ line, pattern: trimmed, anchored, folderOnly, regex });
+    rules.push({ line, folderOnly, regex });
   });
   return { rules, problems };
 }

@@ -5,7 +5,6 @@ import { execFileSync } from "node:child_process";
 import {
   cpSync,
   existsSync,
-  mkdirSync,
   mkdtempSync,
   readFileSync,
   rmSync,
@@ -16,6 +15,7 @@ import { join } from "node:path";
 import type { FrameLocator, Locator, Page } from "@playwright/test";
 import { zipSync } from "fflate";
 import { REPO_ROOT } from "../scripts/check-common.ts";
+import { openNewProjectDialog } from "./templates.ts";
 
 /** A pinned corpus pipeline's checkout (`pnpm corpus:fetch`). */
 export function corpusDir(id: string): string {
@@ -65,7 +65,6 @@ export function gitArchiveZip(dir: string, prefix: string, out: string): void {
     git("config", "core.autocrlf", "false");
     git("add", "-A", "-f");
     git("commit", "-q", "-m", "fixture");
-    mkdirSync(join(out, ".."), { recursive: true });
     git("archive", "--format=zip", `--prefix=${prefix}/`, "-o", out, "HEAD");
   } finally {
     rmSync(work, { recursive: true, force: true });
@@ -83,7 +82,6 @@ export function writeZip(
   for (const [path, content] of Object.entries(files))
     entries[path] =
       typeof content === "string" ? encoder.encode(content) : content;
-  mkdirSync(join(out, ".."), { recursive: true });
   writeFileSync(out, zipSync(entries, { level }));
 }
 
@@ -92,10 +90,7 @@ export async function chooseZip(
   root: Page | FrameLocator,
   path: string,
 ): Promise<Locator> {
-  await root.getByRole("banner").locator(".project-switcher-button").click();
-  await root.getByRole("button", { name: "New project…" }).click();
-  const dialog = root.getByRole("dialog", { name: "New project" });
-  await dialog.waitFor();
+  const dialog = await openNewProjectDialog(root);
   await dialog.getByRole("radio", { name: "Import" }).check();
   await dialog.getByRole("radio", { name: "Zip file" }).check();
   await dialog.getByLabel("Zip file to import").setInputFiles(path);

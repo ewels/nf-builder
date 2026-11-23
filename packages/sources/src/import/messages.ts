@@ -1,12 +1,7 @@
-import {
-  formatBytes,
-  formatCount,
-  IMPORT_LIMITS,
-  type ImportLimits,
-} from "./limits.ts";
+import { formatBytes, formatCount, IMPORT_LIMITS } from "./limits.ts";
 import type { ImportRefusal, ImportRefusalCode } from "./types.ts";
 
-export interface RefusalDetail {
+interface RefusalDetail {
   readonly size?: number;
   readonly path?: string;
   readonly cause?: string;
@@ -15,16 +10,12 @@ export interface RefusalDetail {
 export function refuse(
   code: ImportRefusalCode,
   detail: RefusalDetail = {},
-  limits: ImportLimits = IMPORT_LIMITS,
 ): ImportRefusal {
-  return { ok: false, code, message: message(code, detail, limits) };
+  return { ok: false, code, message: message(code, detail) };
 }
 
-function message(
-  code: ImportRefusalCode,
-  detail: RefusalDetail,
-  limits: ImportLimits,
-): string {
+function message(code: ImportRefusalCode, detail: RefusalDetail): string {
+  const limits = IMPORT_LIMITS;
   switch (code) {
     case "too-big":
       return `This zip is ${formatBytes(detail.size ?? 0)}. Imports take zips of up to ${formatBytes(limits.maxArchiveBytes)}.`;

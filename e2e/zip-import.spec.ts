@@ -1,18 +1,15 @@
-import { readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { expect, type Page, test } from "@playwright/test";
-import {
-  initialJsFiles,
-  type Manifest,
-} from "../scripts/check-bundle-budget.ts";
 import { REPO_ROOT, WEB_DIST } from "../scripts/check-common.ts";
 import { readWorkerManifest } from "../scripts/worker-manifest.ts";
 import { SMOKE_TAG } from "./browsers.ts";
+import { lazyJsFiles } from "./code-view.ts";
 import { watchForCspViolations } from "./csp.ts";
 import { readProject } from "./engine.ts";
 import { readStoredDatabase, switcher } from "./projects.ts";
 import { templateFilesOnDisk } from "./templates.ts";
-import { E2E_BASE_PATH, PREVIEW_URL } from "./urls.ts";
+import { PREVIEW_URL } from "./urls.ts";
 import {
   chooseZip,
   corpusDir,
@@ -218,9 +215,7 @@ test("F-403 IO-11 QA-30 ADR-0044: inside a cross-origin iframe a zip is read and
     `<iframe id="app" src="${PREVIEW_URL}" width="1200" height="800"></iframe>`,
   );
   const frame = page.frameLocator("#app");
-  await expect(
-    frame.getByRole("banner").locator(".project-switcher-button"),
-  ).toBeEnabled();
+  await expect(switcher(frame)).toBeEnabled();
   const dialog = await chooseZip(frame, zip);
   await expect(dialog.locator(".import-summary")).toContainText("1 file");
   const appFrame = page.frames().find((f) => f.url() === PREVIEW_URL);
@@ -231,23 +226,17 @@ test("F-403 IO-11 QA-30 ADR-0044: inside a cross-origin iframe a zip is read and
 });
 
 test("F-403 QA-01 IO-11: the zip reader is only in a lazily loaded worker chunk, never in the initial JavaScript", () => {
-  const manifest = JSON.parse(
-    readFileSync(join(WEB_DIST, ".vite/manifest.json"), "utf8"),
-  ) as Manifest;
-  const html = readFileSync(join(WEB_DIST, "index.html"), "utf8");
-  const initial = initialJsFiles(manifest, html, E2E_BASE_PATH);
+  const { initial, lazy } = lazyJsFiles();
   expect(initial.length).toBeGreaterThan(0);
   for (const file of initial)
     expect(readFileSync(join(WEB_DIST, file), "utf8"), file).not.toContain(
       ZIP_MARKER,
     );
   const worker = readWorkerManifest(WEB_DIST);
-  const holders = readdirSync(join(WEB_DIST, "assets"))
-    .filter((f) => f.endsWith(".js"))
-    .map((f) => `assets/${f}`)
-    .filter((f) =>
-      readFileSync(join(WEB_DIST, f), "utf8").includes(ZIP_MARKER),
-    );
+  // the initial files hold no marker (above), so only the lazy ones can
+  const holders = lazy.filter((f) =>
+    readFileSync(join(WEB_DIST, f), "utf8").includes(ZIP_MARKER),
+  );
   expect(holders.length).toBeGreaterThan(0);
   const workerFiles = new Set(worker.map((c) => c.file));
   for (const file of holders) expect(workerFiles.has(file), file).toBe(true);

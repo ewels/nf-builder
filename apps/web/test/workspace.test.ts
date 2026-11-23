@@ -12,7 +12,6 @@ import { IDBFactory } from "fake-indexeddb";
 import { zipSync } from "fflate";
 import { describe, expect, it } from "vitest";
 import type { Timer } from "../src/workspace/autosave";
-import type { ImportStager } from "../src/workspace/import-stage";
 import { openProjectDb, type ProjectDb } from "../src/workspace/project-db";
 import type { WorkspaceStatus } from "../src/workspace/types";
 import { createWorkspace, randomId } from "../src/workspace/workspace";
@@ -48,7 +47,6 @@ function manualTimer() {
 function setup(
   factory = new IDBFactory(),
   engine: EngineApi = createEngineService(),
-  importer?: ImportStager,
 ) {
   const clock = manualTimer();
   const saves: { projectId: string; path: string; text: string | null }[][] =
@@ -71,7 +69,6 @@ function setup(
     now: () => (time += 10),
     newId: () => `id${++ids}`,
     timer: clock.timer,
-    importer,
   });
   const statuses: WorkspaceStatus[] = [];
   const watching = workspace.watch((s) => statuses.push(s));

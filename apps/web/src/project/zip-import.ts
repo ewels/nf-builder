@@ -11,7 +11,7 @@ import {
 } from "../workspace/project-name";
 import type { ImportStageResult, WorkspaceApi } from "../workspace/types";
 
-export const IGNORE_DEBOUNCE_MS = 300;
+const IGNORE_DEBOUNCE_MS = 300;
 
 export type ZipImportState =
   | { readonly status: "empty" }
@@ -38,14 +38,13 @@ export interface ZipImportView {
   reset(): void;
 }
 
-export interface ZipImportDeps {
+interface ZipImportDeps {
   workspace(): Pick<
     WorkspaceApi,
     "stageZip" | "restageImport" | "discardImport"
   >;
   onChange(state: ZipImportState): void;
   readonly timer?: Timer;
-  readonly debounceMs?: number;
 }
 
 const EMPTY: ZipImportState = { status: "empty" };
@@ -59,12 +58,14 @@ export function zipProjectName(fileName: string): string {
   return name === "" ? DEFAULT_PROJECT_NAME : name;
 }
 
-export function createZipImport(deps: ZipImportDeps): ZipImportView {
+/** The import's actions; its state goes to `onChange`. */
+export function createZipImport(
+  deps: ZipImportDeps,
+): Omit<ZipImportView, "state"> {
   const timer: Timer = deps.timer ?? {
     set: (fn, ms) => setTimeout(fn, ms),
     clear: (h) => clearTimeout(h as ReturnType<typeof setTimeout>),
   };
-  const delay = deps.debounceMs ?? IGNORE_DEBOUNCE_MS;
   let state: ZipImportState = EMPTY;
   let choice = 0; // which file the replies belong to
   let request = 0; // which restage is the newest
@@ -72,7 +73,6 @@ export function createZipImport(deps: ZipImportDeps): ZipImportView {
 
   const set = (next: ZipImportState) => {
     state = next;
-    view.state = next;
     deps.onChange(next);
   };
   const discard = (id: string) => {
@@ -98,8 +98,7 @@ export function createZipImport(deps: ZipImportDeps): ZipImportView {
     deps
       .workspace()
       .restageImport(id, ignore)
-      .then(
-        (result) => result,
+      .catch(
         (failure: unknown): ImportStageResult => ({
           ok: false,
           code: "gone",
@@ -116,8 +115,7 @@ export function createZipImport(deps: ZipImportDeps): ZipImportView {
       });
   };
 
-  const view: { state: ZipImportState } & ZipImportView = {
-    state,
+  return {
     choose(file) {
       dropStage();
       if (file === null) return set(EMPTY);
@@ -127,8 +125,7 @@ export function createZipImport(deps: ZipImportDeps): ZipImportView {
       deps
         .workspace()
         .stageZip(file, name)
-        .then(
-          (result) => result,
+        .catch(
           (failure: unknown): ImportStageResult => ({
             ok: false,
             code: "damaged",
@@ -158,30 +155,24 @@ export function createZipImport(deps: ZipImportDeps): ZipImportView {
       if (state.status !== "ready") return;
       timer.clear(handle);
       set({ ...state, ignore: text, updating: true });
-      handle = timer.set(restage, delay);
+      handle = timer.set(restage, IGNORE_DEBOUNCE_MS);
     },
     reset() {
       dropStage();
       if (state.status !== "empty") set(EMPTY);
     },
   };
-  return view;
 }
 
 /** The hook the dialog uses: one import per mount, whose stage is discarded when the dialog goes. */
 export function useZipImport(): ZipImportView {
   const [state, setState] = useState<ZipImportState>(EMPTY);
-  const control = useRef<ZipImportView>(undefined);
+  const control = useRef<ReturnType<typeof createZipImport>>(undefined);
   control.current ??= createZipImport({
     workspace: getEngine,
     onChange: setState,
   });
   const inner = control.current;
   useEffect(() => () => inner.reset(), [inner]);
-  return {
-    state,
-    choose: (file) => inner.choose(file),
-    setIgnore: (text) => inner.setIgnore(text),
-    reset: () => inner.reset(),
-  };
+  return { ...inner, state };
 }

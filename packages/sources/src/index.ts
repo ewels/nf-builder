@@ -1,20 +1,7 @@
-export type { IgnoreList, IgnoreRule } from "./import/ignore.ts";
-export { DEFAULT_IGNORE, isIgnored, parseIgnore } from "./import/ignore.ts";
-export type { ImportLimits } from "./import/limits.ts";
-export { formatBytes, formatCount, IMPORT_LIMITS } from "./import/limits.ts";
-export type { RefusalDetail } from "./import/messages.ts";
+export { DEFAULT_IGNORE, parseIgnore } from "./import/ignore.ts";
+export { formatBytes, formatCount } from "./import/limits.ts";
 export { refuse } from "./import/messages.ts";
-export type { EntryPath } from "./import/paths.ts";
-export { entryPath, stripFolder, topFolder } from "./import/paths.ts";
-export {
-  importProblem,
-  SKIP_LIST_MAX,
-  SKIP_ORDER,
-  selectFiles,
-  skipReason,
-  summarise,
-} from "./import/select.ts";
-export { decodeText, SNIFF_BYTES } from "./import/text.ts";
+export { importProblem, selectFiles, summarise } from "./import/select.ts";
 export type {
   FixedSkipReason,
   IgnoreProblem,
@@ -39,5 +26,5 @@ export type {
   RegistryReadOptions,
   RegistrySource,
 } from "./registry/types.ts";
-export type { ReadZipOptions, ZipRead } from "./zip/read-zip.ts";
+export type { ZipRead } from "./zip/read-zip.ts";
 export { checkArchiveSize, readZip } from "./zip/read-zip.ts";

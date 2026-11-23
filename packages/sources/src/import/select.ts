@@ -7,7 +7,7 @@ import type {
   SkipReason,
 } from "./types.ts";
 
-export const SKIP_ORDER: readonly SkipReason[] = [
+const SKIP_ORDER: readonly SkipReason[] = [
   "ignored",
   "too-large",
   "binary",
@@ -15,16 +15,13 @@ export const SKIP_ORDER: readonly SkipReason[] = [
   "duplicate",
   "unsupported",
 ];
-export const SKIP_LIST_MAX = 100;
+const SKIP_LIST_MAX = 100;
 
-const byPath = (a: { path: string }, b: { path: string }): number =>
+export const byPath = (a: { path: string }, b: { path: string }): number =>
   a.path < b.path ? -1 : a.path > b.path ? 1 : 0;
 
 /** Why a candidate is left out, or null when it is imported. */
-export function skipReason(
-  c: ImportCandidate,
-  list: IgnoreList,
-): SkipReason | null {
+function skipReason(c: ImportCandidate, list: IgnoreList): SkipReason | null {
   if (c.reason === "unsafe-path" || c.reason === "duplicate") return c.reason;
   if (isIgnored(list, c.path)) return "ignored";
   if (c.reason !== null) return c.reason;

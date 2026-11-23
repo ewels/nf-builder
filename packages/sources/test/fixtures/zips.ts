@@ -1,7 +1,7 @@
 import { type ZipOptions, zipSync } from "fflate";
 
 type Content = string | Uint8Array | [Uint8Array, { level: 0 | 1 | 6 }];
-export type ZipFiles = Record<string, Content>;
+type ZipFiles = Record<string, Content>;
 
 const text = new TextEncoder();
 
@@ -51,23 +51,17 @@ function findHeaders(
   return { central, local };
 }
 
-/** Rewrites the sizes recorded for one entry, in its central record and local header. */
+/** Rewrites the uncompressed size recorded for one entry, in its central record and local header. */
 export function withRecordedSizes(
   zip: Uint8Array,
   name: string,
-  sizes: { originalSize?: number; compressedSize?: number },
+  sizes: { originalSize: number },
 ): Uint8Array {
   const out = zip.slice();
   const v = view(out);
   const { central, local } = findHeaders(out, name);
-  if (sizes.compressedSize !== undefined) {
-    v.setUint32(central + 20, sizes.compressedSize, true);
-    v.setUint32(local + 18, sizes.compressedSize, true);
-  }
-  if (sizes.originalSize !== undefined) {
-    v.setUint32(central + 24, sizes.originalSize, true);
-    v.setUint32(local + 22, sizes.originalSize, true);
-  }
+  v.setUint32(central + 24, sizes.originalSize, true);
+  v.setUint32(local + 22, sizes.originalSize, true);
   return out;
 }
 

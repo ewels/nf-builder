@@ -1,7 +1,7 @@
 // Helpers for the new project dialog end-to-end tests (F-203). The node ids repeat `TEMPLATE_NODES` in
 // packages/engine/test/templates/templates.test.ts: dependency rules stop the engine importing e2e/.
 import { join } from "node:path";
-import type { Locator, Page } from "@playwright/test";
+import type { FrameLocator, Locator, Page } from "@playwright/test";
 import { REPO_ROOT } from "../scripts/check-common.ts";
 import { readProject } from "./engine.ts";
 import { switcher } from "./projects.ts";
@@ -55,14 +55,16 @@ export const templateFilesOnDisk = (id: string) =>
   readProject(join(REPO_ROOT, "packages/lang-2610/templates", id));
 
 /** The New project dialog. */
-export const newProjectDialog = (page: Page): Locator =>
-  page.getByRole("dialog", { name: "New project" });
+export const newProjectDialog = (root: Page | FrameLocator): Locator =>
+  root.getByRole("dialog", { name: "New project" });
 
 /** Opens the dialog from the header panel; Start blank is the route it opens on. */
-export async function openNewProjectDialog(page: Page): Promise<Locator> {
-  await switcher(page).click();
-  await page.getByRole("button", { name: "New project…" }).click();
-  const dialog = newProjectDialog(page);
+export async function openNewProjectDialog(
+  root: Page | FrameLocator,
+): Promise<Locator> {
+  await switcher(root).click();
+  await root.getByRole("button", { name: "New project…" }).click();
+  const dialog = newProjectDialog(root);
   await dialog.waitFor();
   return dialog;
 }

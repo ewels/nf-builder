@@ -1,12 +1,8 @@
 import { unzipSync } from "fflate";
-import { IMPORT_LIMITS, type ImportLimits } from "../import/limits.ts";
+import { IMPORT_LIMITS } from "../import/limits.ts";
 import { refuse } from "../import/messages.ts";
-import {
-  type EntryPath,
-  entryPath,
-  stripFolder,
-  topFolder,
-} from "../import/paths.ts";
+import { entryPath, stripFolder, topFolder } from "../import/paths.ts";
+import { byPath } from "../import/select.ts";
 import { decodeText } from "../import/text.ts";
 import type {
   FixedSkipReason,
@@ -24,7 +20,6 @@ export interface ZipRead {
 }
 
 export interface ReadZipOptions {
-  readonly limits?: ImportLimits;
   readonly now?: () => number;
 }
 
@@ -49,42 +44,38 @@ class Breach extends Error {
   }
 }
 
-export function checkArchiveSize(
-  size: number,
-  limits: ImportLimits = IMPORT_LIMITS,
-): ImportRefusal | null {
-  if (size < MIN_ZIP_BYTES) return refuse("not-zip", {}, limits);
-  if (size > limits.maxArchiveBytes) return refuse("too-big", { size }, limits);
+export function checkArchiveSize(size: number): ImportRefusal | null {
+  if (size < MIN_ZIP_BYTES) return refuse("not-zip");
+  if (size > IMPORT_LIMITS.maxArchiveBytes) return refuse("too-big", { size });
   return null;
 }
 
-/** Pass 1: the central directory only. Nothing is inflated. */
-function listRecords(bytes: Uint8Array, limits: ImportLimits): ZipRecord[] {
+/** Pass 1: the central directory only. Nothing is inflated, and anything fflate can't read is "not-zip". */
+function listRecords(bytes: Uint8Array): ZipRecord[] {
   const records: ZipRecord[] = [];
   let total = 0;
-  unzipSync(bytes, {
-    filter: (info) => {
-      if (records.length >= limits.maxEntries)
-        throw new Breach("too-many-entries");
-      total += info.originalSize;
-      if (total > limits.maxTotalBytes)
-        throw new Breach("too-large-uncompressed");
-      records.push({
-        name: info.name,
-        size: info.size,
-        originalSize: info.originalSize,
-        compression: info.compression,
-      });
-      return false;
-    },
-  });
+  try {
+    unzipSync(bytes, {
+      filter: (info) => {
+        if (records.length >= IMPORT_LIMITS.maxEntries)
+          throw new Breach("too-many-entries");
+        total += info.originalSize;
+        if (total > IMPORT_LIMITS.maxTotalBytes)
+          throw new Breach("too-large-uncompressed");
+        records.push({
+          name: info.name,
+          size: info.size,
+          originalSize: info.originalSize,
+          compression: info.compression,
+        });
+        return false;
+      },
+    });
+  } catch (error) {
+    throw error instanceof Breach ? error : new Breach("not-zip");
+  }
   return records;
 }
-
-const isUnsafeFolder = (
-  record: ZipRecord | undefined,
-  path: EntryPath,
-): boolean => path.kind === "unsafe" && /[/\\]$/.test(record?.name ?? "");
 
 /** A deflated entry can't honestly be much bigger than its content; a stored one is the same size. */
 function plausible(record: ZipRecord): boolean {
@@ -106,32 +97,25 @@ export function readZip(
   bytes: Uint8Array,
   options: ReadZipOptions = {},
 ): ZipRead | ImportRefusal {
-  const limits = options.limits ?? IMPORT_LIMITS;
   const now = options.now ?? Date.now;
   const started = now();
   let last: string | undefined;
   try {
-    const records = (() => {
-      try {
-        return listRecords(bytes, limits);
-      } catch (error) {
-        if (error instanceof Breach) throw error;
-        throw new Breach("not-zip");
-      }
-    })();
-
-    const parsed: EntryPath[] = records.map((record) => entryPath(record.name));
-    // An unsafe folder entry holds no file, so it needs no row of its own.
-    const stripped = topFolder(
-      parsed.filter((p, i) => !isUnsafeFolder(records[i], p)),
-    );
+    const records = listRecords(bytes);
+    const entries = records
+      .map((record, index) => ({ record, index, path: entryPath(record.name) }))
+      // An unsafe folder entry holds no file, so it needs no row of its own.
+      .filter(
+        ({ record, path }) =>
+          !(path.kind === "unsafe" && /[/\\]$/.test(record.name)),
+      );
+    const stripped = topFolder(entries.map((e) => e.path));
 
     const planned: Planned[] = [];
     const seen = new Set<string>();
     const admit = new Set<number>();
-    for (const [index, record] of records.entries()) {
-      const path = parsed[index] as EntryPath;
-      if (path.kind === "folder" || isUnsafeFolder(record, path)) continue;
+    for (const { record, index, path } of entries) {
+      if (path.kind === "folder") continue;
       if (path.kind === "unsafe") {
         planned.push({
           path: path.path,
@@ -157,7 +141,8 @@ export function readZip(
       seen.add(stripPath);
       if (record.compression !== 0 && record.compression !== 8)
         skip("unsupported");
-      else if (record.originalSize > limits.maxTextFileBytes) skip("too-large");
+      else if (record.originalSize > IMPORT_LIMITS.maxTextFileBytes)
+        skip("too-large");
       else if (!plausible(record)) throw new Breach("damaged", stripPath);
       else {
         admit.add(index);
@@ -177,7 +162,8 @@ export function readZip(
         position += 1;
         if (!admit.has(position)) return false;
         last = info.name;
-        if (now() - started > limits.unpackMs) throw new Breach("too-slow");
+        if (now() - started > IMPORT_LIMITS.unpackMs)
+          throw new Breach("too-slow");
         return true;
       },
     });
@@ -198,13 +184,12 @@ export function readZip(
         reason: text === null ? "binary" : null,
       };
     });
-    candidates.sort((a, b) => (a.path < b.path ? -1 : a.path > b.path ? 1 : 0));
+    candidates.sort(byPath);
     return { ok: true, entries: records.length, stripped, candidates };
   } catch (error) {
-    if (error instanceof Breach) {
-      return refuse(error.code, { path: error.path }, limits);
-    }
+    if (error instanceof Breach)
+      return refuse(error.code, { path: error.path });
     const cause = error instanceof Error ? error.message : "unknown error";
-    return refuse("damaged", { path: last ?? "an entry", cause }, limits);
+    return refuse("damaged", { path: last, cause });
   }
 }

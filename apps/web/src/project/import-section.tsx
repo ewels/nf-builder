@@ -4,7 +4,7 @@ import { formatBytes, formatCount, type SkipReason } from "@nf-builder/sources";
 import { type JSX, useId } from "react";
 import type { ZipImportView } from "./zip-import";
 
-export const SKIP_LABELS: Record<SkipReason, string> = {
+const SKIP_LABELS: Record<SkipReason, string> = {
   ignored: "Ignored by the list",
   "too-large": "Over 1 MB",
   binary: "Binary files",
