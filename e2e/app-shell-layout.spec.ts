@@ -191,6 +191,8 @@ test(
     await page
       .getByRole("button", { name: "Processes", exact: true })
       .waitFor();
+    // Not the approved image of "Loading registry modules…".
+    await expect(page.locator(".registry-source")).toHaveText(/^Snapshot · /);
     const guidance =
       "No approved baseline, or the shell changed: download the playwright-chromium artifact, view the -actual.png and commit it as the baseline (ADR 0021)";
     // With updateSnapshots "none" Playwright writes no -actual.png for a missing baseline, so write it here.

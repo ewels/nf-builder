@@ -226,4 +226,9 @@ test("F-502 ADR-0044 QA-30: inside a cross-origin iframe the palette shows the r
   await expect(sourceLine(frame)).toHaveText(/^Snapshot · /);
   await expect(moduleRows(frame)).toHaveCount(3);
   expect(watch.consoleErrors).toEqual([]);
+  // The init script also runs in the frame, so its violations are readable there.
+  const inner = await (
+    await page.locator("#app").elementHandle()
+  )?.contentFrame();
+  expect(await inner?.evaluate(() => window.__cspViolations ?? [])).toEqual([]);
 });
