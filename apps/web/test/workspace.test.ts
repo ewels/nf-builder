@@ -187,6 +187,66 @@ describe("F-202 workspace", () => {
     db.close();
   });
 
+  it("F-209 IO-01: undo and redo are autosaved like apply, including a deleted file; a refused undo saves nothing", async () => {
+    const s = setup();
+    await s.watching;
+    const meta = await s.workspace.createProject({
+      name: "P",
+      languageVersion: version,
+      files: [{ path: "main.nf", text: "workflow {\n}\n" }],
+    });
+    const opened = await s.workspace.openProject(meta.id);
+    const applied = ok(
+      await s.workspace.apply(
+        { kind: "createProcess", name: "REPORT", caller: "main.nf" },
+        opened.summary.revision,
+      ),
+    ) as { revision: number };
+    await s.workspace.flush();
+    const db = await s.reader();
+    const stored = async () => (await db.readProject(meta.id))?.files;
+    expect((await stored())?.map((f) => f.path)).toEqual([
+      "main.nf",
+      "modules/local/report/main.nf",
+    ]);
+    expect(s.saves).toHaveLength(1);
+    const undone = ok(await s.workspace.undo(applied.revision)) as {
+      revision: number;
+    };
+    await s.workspace.flush();
+    expect(s.saves).toHaveLength(2);
+    expect(s.saves[1]).toContainEqual({
+      projectId: meta.id,
+      path: "modules/local/report/main.nf",
+      text: null,
+    });
+    expect(await stored()).toEqual([
+      { path: "main.nf", text: "workflow {\n}\n" },
+    ]);
+    const redone = ok(await s.workspace.redo(undone.revision)) as {
+      revision: number;
+    };
+    await s.workspace.flush();
+    expect(s.saves).toHaveLength(3);
+    expect((await stored())?.map((f) => f.path)).toEqual([
+      "main.nf",
+      "modules/local/report/main.nf",
+    ]);
+    // refusals (stale, nothing to redo) save nothing, and history passes straight through
+    expect(await s.workspace.redo(redone.revision)).toMatchObject({
+      ok: false,
+      code: "no-history",
+    });
+    expect(await s.workspace.undo(applied.revision)).toMatchObject({
+      ok: false,
+      code: "stale",
+    });
+    expect(await s.workspace.history()).toMatchObject({ undoCount: 1 });
+    await s.workspace.flush();
+    expect(s.saves).toHaveLength(3);
+    db.close();
+  });
+
   it("F-202 QA-03 ADR-0029: openProject pushes opening progress, then the current project", async () => {
     const s = setup();
     await s.watching;

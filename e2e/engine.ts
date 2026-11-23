@@ -44,6 +44,7 @@ export interface EngineHook {
   apply(
     command: unknown,
     revision: number,
+    options?: { group?: string; label?: string },
   ): Promise<{
     ok: boolean;
     revision: number | null;
@@ -57,4 +58,25 @@ export interface EngineHook {
     revision: number,
   ): Promise<{ ok: boolean; revision: number | null }>;
   project(path: string, workflow: string | null): Promise<unknown>;
+  readFile(path: string): Promise<string | null>;
+  undo(revision: number): Promise<{
+    ok: boolean;
+    revision: number | null;
+    label?: string;
+    code?: string;
+    message?: string;
+  }>;
+  redo(revision: number): Promise<{
+    ok: boolean;
+    revision: number | null;
+    label?: string;
+    code?: string;
+    message?: string;
+  }>;
+  history(): Promise<{
+    undo: string | null;
+    redo: string | null;
+    undoCount: number;
+    redoCount: number;
+  }>;
 }

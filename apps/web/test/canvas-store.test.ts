@@ -1,10 +1,11 @@
-import type {
-  EngineApi,
-  EngineRefusal,
-  Projection,
-  ProjectionResult,
-  ProjectSummary,
-  WorkflowRef,
+import {
+  EMPTY_HISTORY,
+  type EngineApi,
+  type EngineRefusal,
+  type Projection,
+  type ProjectionResult,
+  type ProjectSummary,
+  type WorkflowRef,
 } from "@nf-builder/engine";
 import { describe, expect, it } from "vitest";
 import {
@@ -260,7 +261,13 @@ describe("F-205 canvas store", () => {
     const store = createCanvasStore(() => engine);
     await store.getState().show(summaryOf([]));
     expect(store.getState().tabs).toEqual([]);
-    const change = { revision: 2, files: [], remodelled: [], workflows: wf };
+    const change = {
+      revision: 2,
+      files: [],
+      remodelled: [],
+      history: EMPTY_HISTORY,
+      workflows: wf,
+    };
     await store.getState().changed(change);
     expect(store.getState().tabs.map((t) => t.id)).toEqual(["main.nf#"]);
     expect(store.getState().content.status).toBe("ready");
@@ -274,9 +281,13 @@ describe("F-205 canvas store", () => {
 
   it("F-205: a change with no project shown does nothing", async () => {
     const store = createCanvasStore(() => fake([]).engine);
-    await store
-      .getState()
-      .changed({ revision: 1, files: [], remodelled: [], workflows: [] });
+    await store.getState().changed({
+      revision: 1,
+      files: [],
+      remodelled: [],
+      history: EMPTY_HISTORY,
+      workflows: [],
+    });
     expect(store.getState().summary).toBeNull();
   });
 });
@@ -529,9 +540,13 @@ describe("F-206 selection", () => {
     await store.getState().open(request);
     await store.getState().select("a");
     options.revision = 2;
-    await store
-      .getState()
-      .changed({ revision: 2, files: [], remodelled: [], workflows: wf });
+    await store.getState().changed({
+      revision: 2,
+      files: [],
+      remodelled: [],
+      history: EMPTY_HISTORY,
+      workflows: wf,
+    });
     expect(store.getState().selected).toBe("a");
     const d = store.getState().details;
     expect(d.status === "ready" && d.revision).toBe(2);
@@ -545,9 +560,13 @@ describe("F-206 selection", () => {
     await store.getState().select("a");
     expect(store.getState().selected).toBe("a");
     expect(store.getState().details).toEqual({ status: "loading", node: "a" });
-    await store
-      .getState()
-      .changed({ revision: 2, files: [], remodelled: [], workflows: wf });
+    await store.getState().changed({
+      revision: 2,
+      files: [],
+      remodelled: [],
+      history: EMPTY_HISTORY,
+      workflows: wf,
+    });
     const d = store.getState().details;
     expect(d.status === "ready" && d.revision).toBe(2);
   });
@@ -558,9 +577,13 @@ describe("F-206 selection", () => {
     await store.getState().open(request);
     await store.getState().select("a");
     options.nullFor = "main.nf#";
-    await store
-      .getState()
-      .changed({ revision: 2, files: [], remodelled: [], workflows: wf });
+    await store.getState().changed({
+      revision: 2,
+      files: [],
+      remodelled: [],
+      history: EMPTY_HISTORY,
+      workflows: wf,
+    });
     expect(store.getState().content.status).toBe("unavailable");
     expect(store.getState().selected).toBeNull();
     expect(store.getState().details).toEqual({ status: "idle" });
