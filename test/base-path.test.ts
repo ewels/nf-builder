@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { basePath } from "../scripts/base-path.ts";
@@ -28,13 +28,16 @@ describe("base path", () => {
   );
 
   it("F-011 ADR-0040: no app source, index.html, public file, Vite config, build script or pages.yml hard-codes /nf-builder/", () => {
+    // apps/web/public has no files since F-502 deleted the S4 probe page; scan it if it comes back.
     const files = (dir: string): string[] =>
-      readdirSync(join(REPO_ROOT, dir), {
-        recursive: true,
-        withFileTypes: true,
-      })
-        .filter((e) => e.isFile())
-        .map((e) => join(e.parentPath, e.name));
+      !existsSync(join(REPO_ROOT, dir))
+        ? []
+        : readdirSync(join(REPO_ROOT, dir), {
+            recursive: true,
+            withFileTypes: true,
+          })
+            .filter((e) => e.isFile())
+            .map((e) => join(e.parentPath, e.name));
     const targets = [
       ...files("apps/web/src"),
       ...files("apps/web/public").filter((f) => !f.includes("/registry/")),
