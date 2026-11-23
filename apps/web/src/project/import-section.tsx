@@ -16,6 +16,16 @@ const SKIP_LABELS: Record<SkipReason, string> = {
 const plural = (n: number, one: string, many: string): string =>
   n === 1 ? `1 ${one}` : `${formatCount(n)} ${many}`;
 
+/** Passes the chosen file on and empties the input, so choosing the same file again still fires `change`. */
+export function takeChosenFile(
+  view: Pick<ZipImportView, "choose">,
+  input: { files: FileList | null; value: string },
+): void {
+  const file = input.files?.[0] ?? null;
+  input.value = "";
+  view.choose(file);
+}
+
 export function ImportSection(props: {
   readonly view: ZipImportView;
   readonly busy: boolean;
@@ -42,9 +52,7 @@ export function ImportSection(props: {
             type="file"
             accept=".zip,application/zip,application/x-zip-compressed"
             disabled={props.busy}
-            onChange={(event) =>
-              props.view.choose(event.target.files?.[0] ?? null)
-            }
+            onChange={(event) => takeChosenFile(props.view, event.target)}
           />
         </label>
         {state.status === "reading" ? (

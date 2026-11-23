@@ -3,6 +3,7 @@ import { BLANK_TEMPLATE } from "@nf-builder/engine";
 import type { ImportSummary } from "@nf-builder/sources";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
+import { takeChosenFile } from "../src/project/import-section";
 import {
   NewProjectDialog,
   type NewProjectDialogProps,
@@ -391,5 +392,22 @@ describe("F-203 new project dialog", () => {
     expect(newProjectRequest(form(readyZip({ files: 0 })), null)).toEqual({
       error: "Nothing to import: every file was skipped.",
     });
+  });
+
+  it("F-403 IO-12: choosing a file empties the input, so the same file can be chosen again after a refusal", () => {
+    const chosen: (File | null)[] = [];
+    const picked = new File(["x"], "a.zip");
+    const input = {
+      files: [picked] as unknown as FileList,
+      value: "C:\\a.zip",
+    };
+    takeChosenFile({ choose: (f) => void chosen.push(f) }, input);
+    expect(chosen).toEqual([picked]);
+    expect(input.value).toBe("");
+    takeChosenFile(
+      { choose: (f) => void chosen.push(f) },
+      { files: null, value: "x" },
+    );
+    expect(chosen.at(-1)).toBeNull();
   });
 });
