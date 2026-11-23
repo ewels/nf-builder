@@ -48,10 +48,13 @@ const projected = (r: ProjectionResult | EngineRefusal) =>
   must(r) as ProjectionResult & { projection: Projection };
 const texts = (change: { files: readonly FileText[] }) =>
   Object.fromEntries(change.files.map((f) => [f.path, f.text]));
+/** The revision a freshly opened project has. */
+const OPENED = 1;
 const place = (
   positions: Record<string, { x: number; y: number }>,
   replace = false,
-) => ({ ...entry, positions, replace });
+  revision = OPENED,
+) => ({ ...entry, positions, replace, revision });
 const pos = { [KEY_A]: { x: 10, y: 20 }, [KEY_B]: { x: 30, y: 40 } };
 
 describe("F-207 engine service layout", () => {
@@ -121,6 +124,7 @@ describe("F-207 engine service layout", () => {
     );
     expect("ok" in nan && nan.ok).toBe(false);
     const missing = await service.setLayout({
+      revision: summary.revision,
       path: "main.nf",
       workflow: "NOPE",
       positions: {},
@@ -141,6 +145,30 @@ describe("F-207 engine service layout", () => {
       ),
     ) as ProjectChange;
     expect(stillValid.revision).toBe(summary.revision + 1);
+  });
+
+  it("F-207 AR-11: setLayout refuses a write computed for an older revision as stale, without advancing the revision or writing", async () => {
+    const { service, summary } = await opened();
+    expect(summary.revision).toBe(OPENED);
+    const changed = must(
+      await service.apply(
+        {
+          kind: "replaceFileText",
+          path: "a.nf",
+          text: proc("A").replace("'A'", "'A2'"),
+        },
+        summary.revision,
+      ),
+    ) as ProjectChange;
+    const late = await service.setLayout(place(pos, false, summary.revision));
+    expect(late).toMatchObject({ ok: false, code: "stale" });
+    expect("message" in late && late.message).toMatch(/changed/);
+    expect("revision" in late && late.revision).toBe(changed.revision);
+    expect(await service.readFile(LAYOUT_PATH)).toBeNull();
+    const fresh = must(
+      await service.setLayout(place(pos, false, changed.revision)),
+    );
+    expect(fresh.revision).toBe(changed.revision);
   });
 
   it("F-207 ADR-0008: setLayout with replace drops the workflow's other entries, and an unchanged write returns no files", async () => {

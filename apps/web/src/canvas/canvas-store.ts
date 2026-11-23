@@ -269,11 +269,14 @@ export function createCanvasStore(
       let notice: string | null = null;
       try {
         const result = await engine().setLayout({
+          revision,
           path: tab.path,
           workflow: tab.workflow,
           positions,
           replace,
         });
+        // computed before a change shifted the keys: the next projection has fresh positions, so nothing to say
+        if ("ok" in result && result.code === "stale") return;
         if ("ok" in result)
           notice = `The positions couldn't be saved (${result.message}).`;
         else {

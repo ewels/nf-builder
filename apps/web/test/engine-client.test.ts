@@ -121,7 +121,7 @@ describe("F-113 engine client", () => {
 
   it("F-207 ADR-0003: setLayout crosses the Comlink bridge, and project() returns the stored positions", async () => {
     const { engine, close } = connected();
-    await engine.open({
+    const summary = await engine.open({
       version,
       files: [
         {
@@ -132,6 +132,7 @@ describe("F-113 engine client", () => {
     });
     const position = { "main.nf#/A@1": { x: 5, y: 6 } };
     const change = await engine.setLayout({
+      revision: summary.revision,
       path: "main.nf",
       workflow: null,
       positions: position,
@@ -145,6 +146,7 @@ describe("F-113 engine client", () => {
       positions: position,
     });
     const refused = await engine.setLayout({
+      revision: summary.revision,
       path: "main.nf",
       workflow: null,
       positions: { nope: { x: 1, y: 1 } },

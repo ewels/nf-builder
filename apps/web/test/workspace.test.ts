@@ -197,10 +197,11 @@ describe("F-202 workspace", () => {
       languageVersion: version,
       files: [{ path: "main.nf", text: main }],
     });
-    await s.workspace.openProject(meta.id);
+    const opened = await s.workspace.openProject(meta.id);
     const position = { "main.nf#/A@1": { x: 12, y: 34 } };
     const change = ok(
       await s.workspace.setLayout({
+        revision: opened.summary.revision,
         path: "main.nf",
         workflow: null,
         positions: position,
@@ -212,6 +213,7 @@ describe("F-202 workspace", () => {
     ]);
     // a refused write saves nothing
     const refused = await s.workspace.setLayout({
+      revision: opened.summary.revision,
       path: "main.nf",
       workflow: null,
       positions: { "main.nf#/NOPE@1": { x: 1, y: 1 } },

@@ -36,6 +36,8 @@ export interface LayoutStatus {
 
 /** Positions to store for one workflow; `replace` drops that workflow's other entries first. */
 export interface LayoutWrite {
+  /** The revision the positions were computed for; a write for another revision is refused as stale (F-207). */
+  readonly revision: number;
   readonly path: string;
   /** Null for the entry workflow. */
   readonly workflow: string | null;

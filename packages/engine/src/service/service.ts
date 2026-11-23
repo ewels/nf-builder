@@ -450,6 +450,9 @@ export function createEngineService(
 
     setLayout: (write) =>
       guarded((open, startedChanging): LayoutChange | EngineRefusal => {
+        // positions computed before a change may name keys the carry has since moved
+        const refused = stale(write.revision);
+        if (refused) return refused;
         const projection = projectionOf(open, write.path, write.workflow);
         if (!projection)
           return refusal(

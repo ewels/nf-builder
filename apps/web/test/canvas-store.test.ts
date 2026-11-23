@@ -636,6 +636,7 @@ describe("F-206 selection", () => {
       expect(c.positions).toEqual({ a: { x: 10, y: 21 }, b: stored.b });
       expect(writes).toEqual([
         {
+          revision: 1,
           path: "main.nf",
           workflow: null,
           positions: { a: { x: 10, y: 21 } },
@@ -677,6 +678,30 @@ describe("F-206 selection", () => {
       const c = store.getState().content;
       if (c.status !== "ready") throw new Error("not ready");
       expect(c.notice).toBe("The positions couldn't be saved (no such node).");
+    });
+
+    it("F-207 AR-11: a move the engine refuses as stale is dropped quietly, with no notice", async () => {
+      const stale = {
+        ok: false,
+        revision: 2,
+        code: "stale",
+        message:
+          "The project changed (revision 2, not 1). Nothing was changed.",
+        path: null,
+        problems: [],
+      };
+      const { engine, writes } = fake(wf, {
+        positions: stored,
+        setLayout: async () => stale,
+      });
+      const store = createCanvasStore(() => engine);
+      await store.getState().open(request);
+      await store.getState().moveNodes({ a: { x: 5, y: 5 } });
+      expect(writes).toHaveLength(1);
+      expect(writes[0]?.revision).toBe(1);
+      const c = store.getState().content;
+      if (c.status !== "ready") throw new Error("not ready");
+      expect(c.notice).toBeNull();
     });
 
     it("F-207 ADR-0008: a placement is stored and saved; with nothing added nothing is sent, and a replace sends the whole set", async () => {

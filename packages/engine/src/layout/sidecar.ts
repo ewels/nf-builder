@@ -140,7 +140,7 @@ export function workflowPositions(
 /** Merges `write.positions`; with `replace`, the workflow's other entries go first. Coordinates are rounded. */
 export function writePositions(
   doc: LayoutDocument,
-  write: LayoutWrite,
+  write: Omit<LayoutWrite, "revision">,
 ): LayoutDocument {
   const nodes: Record<string, Point> = {};
   for (const [id, p] of Object.entries(doc.nodes))
