@@ -3,6 +3,7 @@ import type {
   RegistryFailure,
   RegistryIndex,
 } from "@nf-builder/sources";
+import { RegistryError } from "@nf-builder/sources";
 import { describe, expect, it } from "vitest";
 import { createRegistryStore } from "../src/registry/registry-store";
 
@@ -30,7 +31,8 @@ function fake(
       reads.push({ refresh: options?.refresh === true });
       const next = script.shift();
       if (!next) throw new Error("script exhausted");
-      if ("code" in next) throw Object.assign(new Error(next.message), next);
+      if ("code" in next)
+        throw new RegistryError(next.code, "https://x.test/", next.message);
       return next;
     },
   };
@@ -120,5 +122,67 @@ describe("registry store", () => {
     expect(made).toEqual([false, true]);
     const state = store.getState().state;
     expect(state.status === "ready" && state.index.source).toBe("live");
+  });
+
+  /** A client whose first read is answered by hand. */
+  function deferred() {
+    let resolve: (index: RegistryIndex) => void = () => undefined;
+    let reject: (error: unknown) => void = () => undefined;
+    const client: RegistryClient = {
+      source: "snapshot",
+      index: () =>
+        new Promise<RegistryIndex>((res, rej) => {
+          resolve = res;
+          reject = rej;
+        }),
+    };
+    return {
+      client,
+      resolve: (i: RegistryIndex) => resolve(i),
+      reject: (e: unknown) => reject(e),
+    };
+  }
+
+  it("F-502 IO-30: a first load that resolves after reload({ live: true }) is ignored, and the live index stays", async () => {
+    const slow = deferred();
+    const live = fake("live", [indexOf("live", "2026-11-23T10:00:00Z")]);
+    const store = createRegistryStore((l) => (l ? live.client : slow.client));
+    store.getState().load();
+    await store.getState().reload({ live: true });
+    slow.resolve(indexOf("snapshot", "2026-11-22T00:00:00Z"));
+    await settle();
+    const state = store.getState().state;
+    expect(state.status === "ready" && state.index.source).toBe("live");
+  });
+
+  it("F-502 IO-30: a first load that fails after reload({ live: true }) is ignored, and the live index stays", async () => {
+    const slow = deferred();
+    const live = fake("live", [indexOf("live", "2026-11-23T10:00:00Z")]);
+    const store = createRegistryStore((l) => (l ? live.client : slow.client));
+    store.getState().load();
+    await store.getState().reload({ live: true });
+    slow.reject(new TypeError("Failed to fetch"));
+    await settle();
+    const state = store.getState().state;
+    expect(state.status === "ready" && state.index.source).toBe("live");
+  });
+
+  it("F-502 UX-14: every error code reaches the view state, for a first load and for a refresh", async () => {
+    for (const code of ["unavailable", "invalid", "http", "timeout"] as const) {
+      const failure: RegistryFailure = { code, message: code };
+      const good = indexOf("snapshot", "2026-11-22T00:00:00Z");
+      const f = fake("snapshot", [failure, good, failure]);
+      const store = createRegistryStore(() => f.client);
+      store.getState().load();
+      await settle();
+      const failed = store.getState().state;
+      expect(failed.status === "failed" && failed.failure.code).toBe(code);
+      store.getState().refresh();
+      await settle();
+      store.getState().refresh();
+      await settle();
+      const state = store.getState().state;
+      expect(state.status === "ready" && state.refreshFailure?.code).toBe(code);
+    }
   });
 });
