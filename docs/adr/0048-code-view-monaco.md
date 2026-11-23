@@ -22,7 +22,7 @@ UX-27 asks for Graph, Split and Code view modes per tab, and ADR 0003 names Mona
 - **Dependencies.** Three runtime dependencies of `@nf-builder/web`, pinned: `monaco-editor` 0.57.0 (MIT), `shiki` 4.6.0 and `@shikijs/monaco` 4.6.0 (MIT).
   - Monaco uses lean imports: the editor API plus the contributions the view needs. There is no React wrapper: `@monaco-editor/react` loads Monaco from a CDN, against ADR 0002.
   - Monaco's editor worker is a bundled module worker returned by `MonacoEnvironment.getWorker`, never a `blob:` URL, so it runs under `worker-src 'self'` and in frames.
-  - Highlighting uses Shiki's `nextflow` grammar and the `github-light` theme through `@shikijs/monaco`. If Shiki fails to load, the editor opens with plain text.
+  - Highlighting uses Shiki's `nextflow` grammar and the `github-light` theme through `@shikijs/monaco`. If Shiki fails to initialise, the editor opens with plain text. If the Code view's chunk fails to load, the pane says so and the rest of the app keeps working, as the canvas does (ADR 0046).
   - Size: the Code view is a lazy chunk of about 900 kB gzipped, plus its CSS, worker and codicon font, all outside QA-01. An end-to-end test checks that Monaco never enters the initial JavaScript.
 - **Editing (AR-24).**
   - Typing sends `ReplaceFileText` after a 300 ms pause, when the editor loses focus, and when the mode or tab changes.
@@ -31,7 +31,7 @@ UX-27 asks for Graph, Split and Code view modes per tab, and ADR 0003 names Mona
   - A clean buffer follows changes made elsewhere; a buffer with an unsent or refused draft keeps it.
   - Drafts belong to one project: opening another project disposes every editor model, drops unsent text and refuses commands queued for the old project.
 - **AR-30 reading.** Editor models hold the open files' text on the main thread, as any editor must. The Zustand stores still hold no file text: `lastChange` carries paths only.
-- **Modes.** The toggle is a radio group in the tab strip, with G, S and C as shortcuts outside text fields and the editor (UX-70). Modes are kept per tab for the session. Split is a fixed half-and-half layout. The graph re-fits whenever its pane changes size, as on a mode switch or a window resize, which resets the user's pan and zoom; F-207 may refine this. The editor highlights the current line only while it has focus.
+- **Modes.** The toggle is a radio group in the tab strip, with G, S and C as shortcuts outside text fields, the editor and dialogs (UX-70). Modes are kept per tab for the session. Split is a fixed half-and-half layout. The graph re-fits whenever its pane changes size, as on a mode switch or a window resize, which resets the user's pan and zoom; F-207 may refine this. The editor highlights the current line only while it has focus.
 - **IO-41.** Eight URLs in Monaco's chunk (messages, product configuration, a markdown helper, a console warning and a CSS comment) are listed in `scripts/non-fetched-urls.ts`; none is fetched.
 
 ## Consequences
