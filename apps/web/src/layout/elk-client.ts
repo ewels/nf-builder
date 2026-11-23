@@ -26,6 +26,8 @@ function start(): Promise<Started> {
       failed.catch(() => undefined); // calls that race it handle the rejection; this is only a guard
       let elk: InstanceType<typeof ELK> | undefined;
       const stop = () => {
+        // calls still waiting on this worker will never be answered
+        fail(new Error("The ELK worker was stopped"));
         elk?.terminateWorker();
         if (started === attempt) {
           started = undefined;
@@ -33,8 +35,8 @@ function start(): Promise<Started> {
         }
       };
       const onFailure = (detail: string) => {
-        stop();
         fail(new Error(`The ELK worker failed (${detail})`));
+        stop();
       };
       elk = new ELK({
         workerUrl: elkWorkerUrl,
@@ -56,7 +58,7 @@ function start(): Promise<Started> {
         terminate: stop,
         failed,
       };
-      active = run;
+      if (started === attempt) active = run;
       return run;
     },
   );

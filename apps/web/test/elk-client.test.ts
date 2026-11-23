@@ -93,6 +93,26 @@ describe("F-207 ELK client", () => {
     expect(FakeElkWorker.made).toHaveLength(2);
   });
 
+  it("F-207 ADR-0008: when a stuck worker is stopped, every call still waiting on it rejects at once", async () => {
+    vi.stubGlobal("Worker", FakeElkWorker);
+    const graph = elkGraph(
+      canvasView(await entryProjection(), { portLabels: true }),
+    );
+    await runElk(graph);
+    vi.useFakeTimers();
+    FakeElkWorker.silent = true;
+    const first = runElk(graph);
+    const firstOutcome = expect(first).rejects.toThrow(/30 seconds/);
+    await vi.advanceTimersByTimeAsync(10_000);
+    const second = runElk(graph);
+    const secondOutcome = expect(second).rejects.toThrow(/ELK worker/);
+    // the first call's timer stops the worker at 30 s; the second would otherwise wait until 40 s
+    await vi.advanceTimersByTimeAsync(20_000);
+    await firstOutcome;
+    await secondOutcome;
+    expect(FakeElkWorker.made[0]?.terminated).toBe(true);
+  });
+
   it("F-207 ADR-0008: ELK lays out the f111-start-typed entry workflow deterministically, with no overlaps and every edge left to right", async () => {
     const view = canvasView(await entryProjection(), { portLabels: true });
     expect(view.nodes.length).toBeGreaterThan(3);
