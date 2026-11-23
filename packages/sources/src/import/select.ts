@@ -55,7 +55,11 @@ export function summarise(input: {
     if (reason === null) {
       files += 1;
       bytes += c.size;
-    } else groups.set(reason, [...(groups.get(reason) ?? []), c]);
+    } else {
+      const group = groups.get(reason);
+      if (group === undefined) groups.set(reason, [c]);
+      else group.push(c);
+    }
   }
   const skipped: SkipGroup[] = [];
   for (const reason of SKIP_ORDER) {

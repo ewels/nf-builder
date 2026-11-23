@@ -112,4 +112,19 @@ describe("import selection", () => {
       "Nothing to import: every file was skipped.",
     );
   });
+
+  it("F-403 IO-11: summarise groups 20,000 skipped files in linear time", () => {
+    const candidates = Array.from({ length: 20_000 }, (_, i) =>
+      file(`work/f${i}.txt`),
+    );
+    const input = { source: "a.zip", stripped: null, candidates };
+    const started = performance.now();
+    const summary = summarise({ ...input, ignore: "work/\n" });
+    const elapsed = performance.now() - started;
+    expect(summary.skipped[0]).toMatchObject({
+      reason: "ignored",
+      count: 20_000,
+    });
+    expect(elapsed).toBeLessThan(500);
+  });
 });
