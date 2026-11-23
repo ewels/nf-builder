@@ -35,6 +35,8 @@ const PREVIEW_LINES = 8;
 const PREVIEW_LINE_CHARS = 200;
 /** The most characters a directive or topic value shows. */
 const VALUE_CHARS = 60;
+/** A description is cut here, so the details stay small whatever the doc comment (AR-30). */
+const DESCRIPTION_CHARS = 600;
 
 export interface CalleeDeclaration {
   /** The declaration; for a pipeline the entry workflow, never the whole-file `ScriptAst`. */
@@ -94,7 +96,10 @@ export function docSummary(
     lines.push(line);
   }
   const text = plainText(lines.join("\n").trim());
-  return text === "" ? null : text;
+  if (text === "") return null;
+  return text.length <= DESCRIPTION_CHARS
+    ? text
+    : `${text.slice(0, DESCRIPTION_CHARS - 1).trimEnd()}…`;
 }
 
 /** Collapses whitespace to single spaces and cuts at `max` characters, ending in "…". */
@@ -230,10 +235,9 @@ function typedTopics(
     const e = item.expression;
     if (e.kind !== "Binary" || e.operator !== ">>") continue;
     rows.push({
-      name:
-        e.right.kind === "String"
-          ? e.right.value
-          : oneLine(slice(text, e.right)),
+      name: oneLine(
+        e.right.kind === "String" ? e.right.value : slice(text, e.right),
+      ),
       value: oneLine(slice(text, e.left)),
     });
   }

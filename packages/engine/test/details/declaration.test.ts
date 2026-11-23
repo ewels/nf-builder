@@ -108,6 +108,30 @@ describe("F-206 declaration details", () => {
     expect(oneLine("abcd", 4)).toBe("abcd");
   });
 
+  it("F-206 UX-30 AR-30: a long description is cut at 600 characters with an ellipsis; a short one is kept", () => {
+    const comment = (body: string) =>
+      docSummary([
+        { kind: "doc", text: body, range: undefined as never, ownLine: true },
+      ]);
+    const long = comment(`/**\n * ${"word ".repeat(300)}\n */`);
+    expect(long?.length).toBeLessThanOrEqual(600);
+    expect(long?.endsWith("…")).toBe(true);
+    const exact = "a".repeat(600);
+    expect(comment(`/** ${exact} */`)).toBe(exact);
+  });
+
+  it("F-206 UX-30 AR-30: a topic name is cut at 60 characters, as the other values are", async () => {
+    const name = "t".repeat(100);
+    const typed = await detail(
+      {
+        "main.nf": TYPED + entry("P(channel.of(1))"),
+        "p.nf": `${TYPED}process P {\n    input:\n    x: Integer\n    output:\n    y: Integer = x\n    topic:\n    tuple('p', '1.0') >> '${name}'\n    script:\n    'true'\n}\n`,
+      },
+      "P",
+    );
+    expect(typed.topics[0]?.name).toBe(`${"t".repeat(59)}…`);
+  });
+
   it("F-206 UX-30 LA-20: topics list a typed process's topic emissions and a legacy output's topic option", async () => {
     const typed = await detail(
       {
