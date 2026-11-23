@@ -21,6 +21,8 @@ import {
 
 // A message of fflate's reader: only a chunk that holds the zip reader has it.
 const ZIP_MARKER = "invalid zip data";
+/** The live registry host, which only the registry client contains. */
+const REGISTRY_MARKER = "registry.nextflow.io";
 
 const byPath = (a: { path: string }, b: { path: string }) =>
   a.path < b.path ? -1 : a.path > b.path ? 1 : 0;
@@ -246,4 +248,9 @@ test("F-403 QA-01 IO-11: the zip reader is only in a lazily loaded worker chunk,
   );
   expect(main).toBeDefined();
   expect(holders).not.toContain(main?.file);
+  // the worker loads only the import entry, so the registry client isn't in that chunk
+  for (const file of holders)
+    expect(readFileSync(join(WEB_DIST, file), "utf8"), file).not.toContain(
+      REGISTRY_MARKER,
+    );
 });

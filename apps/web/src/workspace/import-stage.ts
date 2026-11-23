@@ -1,10 +1,14 @@
 // Staging of an import in the engine worker (F-403, ADR 0003, ADR 0045). A zip is read here, so its file text never
 // reaches the page: the page gets a summary, and `createProject` copies the selected files from the stage. The
-// `@nf-builder/sources` module (fflate included) is loaded on the first `stageZip`, so it is a separate worker chunk.
-import type { ImportedFile, ImportSummary, ZipRead } from "@nf-builder/sources";
+// `@nf-builder/sources/import` module (fflate included) is loaded on the first `stageZip`, so it is a separate worker chunk.
+import type {
+  ImportedFile,
+  ImportSummary,
+  ZipRead,
+} from "@nf-builder/sources/import";
 import type { ImportStageResult } from "./types";
 
-export type SourcesModule = typeof import("@nf-builder/sources");
+export type SourcesModule = typeof import("@nf-builder/sources/import");
 
 /** The files to store, or the message that stops Create. A refusal has the same shape. */
 type ImportFilesResult =
@@ -36,7 +40,7 @@ interface StagerOptions {
 }
 
 export function createImportStager(options: StagerOptions = {}): ImportStager {
-  const load = options.load ?? (() => import("@nf-builder/sources"));
+  const load = options.load ?? (() => import("@nf-builder/sources/import"));
   const newId = options.newId ?? stageId;
   let sources: Promise<SourcesModule> | undefined;
   const module = (): Promise<SourcesModule> => {
