@@ -243,3 +243,42 @@ Next free ADR number: 0052 (0050 is F-502's, 0051 F-209's).
   - the `web-worker-no-github-client` dependency-cruiser rule;
   - mocked e2e evidence with blob SHAs checked against the corpus, an opt-in `F401_LIVE=1` test, the git-generated tree fixture;
   - 8 requests in flight, one retry on network errors or 5xx; the accepted input forms (IO-10); session-only report; the repository name as the default project name; warn but allow a repository with no `.nf` files.
+
+### F-703 — [plan](plan-F-703.md)
+- Accept every recommendation in section 6:
+  - start after F-207 merges (no `depends_on` change; recorded in notes);
+  - the code view isn't mounted below 1024 px: Graph only, modes kept per tab;
+  - switching projects stays; New, Templates, Import, Rename and Delete are hidden and refused; an open dialog closes;
+  - read-only writes nothing to the project (positions stay in memory; `openedAt` still updates);
+  - side by side from 640 to 1023 px with a fixed details column, stacked below 640 px; the minimap is dropped; zoom, fit and port labels stay;
+  - all header actions hidden; Export stays hidden in read-only for v0.1 (note to F-404);
+  - WCAG 1.4.4 accepted for v0.1 with an F-701 note on an "Edit anyway" override;
+  - the `read-only` refusal code (type-only) and guards in the page's stores, not the worker;
+  - flush, then guard, on narrowing;
+  - the copy in point 12; the `READ_ONLY_ALLOWED` e2e allow-list; one `@smoke` test; no prefetch change;
+  - F-202's multi-tab note answered: last write wins stands for v0.1.
+
+### F-210 — [plan](plan-F-210.md)
+- Accept every recommendation in section 6:
+  - `EngineApi.listFiles`, pulled while the panel is visible, rows built by a pure engine function;
+  - a new `CreateFile` command (one undo step; extends ADR 0039 and AR-21);
+  - empty folders as `<folder>/.gitkeep` (no format change);
+  - adding files as raw writes that clear the undo history, with the dialog saying so;
+  - IO-12 limits and binary skipping for loose files, no ignore list;
+  - a dropped zip uses F-403's staging plus a "Keep the folder" checkbox;
+  - always confirm, replace only after listing, skip clashes with reasons;
+  - the target-folder rules; refuse dropped folders;
+  - registry tags from the pack's `scriptInclude` check, excluding `local`; read-only registry files left to F-506;
+  - badges from parse status; file tabs reuse F-309's code-only tabs (F-309 lands first); a script with a workflow opens its canvas tab;
+  - rename, move and delete become a new M3 feature that depends on F-210 (`scope-change`);
+  - the 2.8 tree keyboard model; one shared `projectPathProblem` in lang-core; the document drop guard for file drags; session-only state; one `@visual` baseline.
+
+### F-605 — [plan](plan-F-605.md)
+- Accept every recommendation in section 6:
+  - FI-32's "binary files are listed but not opened" is read for v0.1 as "projects hold text files only"; step 2 moves to the deferred M8 "Binary files in projects" feature (added by F-403's PR, or by F-605's if not), with an ADR and `scope-change`;
+  - marked 18.2.1 and DOMPurify 3.4.18, pinned, as runtime dependencies; jsdom 31.0.1 as a web dev dependency;
+  - the 2.2 sanitising rules (images `data:` only); placeholders for project images (note to F-607);
+  - no heading anchors or code highlighting in the preview;
+  - Preview, Split and Code modes for Markdown, opening in Preview, with G, S and C positional (UX-27 amended);
+  - tasks 1 to 3 now, tasks 4 to 7 after F-309 merges; no `depends_on` change;
+  - the tablist label "Open workflows and files"; the 2.6 language set; `EngineApi.outline`; AR-30 extended to the preview; tab closing left to F-307; no preview size cap; the step 1 test tagged `@smoke`.
