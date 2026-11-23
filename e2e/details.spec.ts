@@ -11,6 +11,7 @@ import {
   openFixture,
   openWorkflow,
   selectNode,
+  touchMain,
 } from "./canvas.ts";
 import { watchForCspViolations } from "./csp.ts";
 import {
@@ -106,6 +107,42 @@ test("F-206 UX-30: selecting a node keeps the viewport", async ({ page }) => {
   await selectNode(page, NODE.counted);
   await expect(node(page, NODE.counted)).toHaveClass(/selected/);
   expect(await transform()).toBe(before);
+});
+
+test("F-206 UX-24 UX-30: a port-labels toggle and a refresh keep the selection and re-fit", async ({
+  page,
+}) => {
+  await page.goto("./");
+  await openFixture(page);
+  await canvasReady(page);
+  const transform = () =>
+    page
+      .locator(".react-flow__viewport")
+      .evaluate((el) => getComputedStyle(el).transform);
+  const highlighted = page.locator(".react-flow__edge-path.is-highlighted");
+  await selectNode(page, NODE.greeted);
+  await expect(node(page, NODE.greeted)).toHaveClass(/selected/);
+  const count = await highlighted.count();
+  expect(count).toBeGreaterThan(0);
+  const actions: [string, () => Promise<unknown>][] = [
+    ["toggle", () => page.getByRole("button", { name: "Port labels" }).click()],
+    ["refresh", () => touchMain(page)],
+  ];
+  for (const [name, act] of actions) {
+    await page.getByRole("button", { name: "Zoom in" }).click();
+    await layoutSettled(page);
+    const zoomed = await transform();
+    await act();
+    // the new view is measured and fitted again
+    await expect.poll(transform, { message: name }).not.toBe(zoomed);
+    await layoutSettled(page);
+    await expect(node(page, NODE.greeted), name).toHaveClass(/selected/);
+    await expect(highlighted, name).toHaveCount(count);
+    const fitted = await transform();
+    await page.getByRole("button", { name: "Fit view" }).click();
+    await layoutSettled(page);
+    expect(await transform(), `${name}: fitted`).toBe(fitted);
+  }
 });
 
 test("F-206 UX-30 QA-11: Enter on a focused node selects it, Escape clears", async ({

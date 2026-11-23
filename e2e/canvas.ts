@@ -54,6 +54,22 @@ export async function openProject(
   );
 }
 
+/** Rewrites the fixture's main.nf through the engine hook with a trailing comment, so the canvas refreshes with the same nodes. */
+export function touchMain(page: Page): Promise<unknown> {
+  const main = readProject(F205_FIXTURE).find((f) => f.path === "main.nf");
+  if (main === undefined) throw new Error("the fixture has no main.nf");
+  return page.evaluate(async (text) => {
+    const engine = (
+      window as unknown as {
+        nfBuilderEngine: {
+          writeFiles(files: { path: string; text: string }[]): Promise<unknown>;
+        };
+      }
+    ).nfBuilderEngine;
+    await engine.writeFiles([{ path: "main.nf", text }]);
+  }, `${main.text}\n// touched\n`);
+}
+
 export const openFixture = (page: Page) =>
   openProject(page, readProject(F205_FIXTURE));
 
