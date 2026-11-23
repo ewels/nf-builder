@@ -521,6 +521,10 @@ test("F-205 F-202 UX-20 IO-01: after a reload the reopened project's canvas show
   await createProjectInUi(page, "Reload me");
   await writeMain(page);
   await canvasReady(page);
+  // the quiet refresh after the write replaces the blank template's canvas; wait for MAIN_NF's `channel.of` call
+  await expect(
+    page.locator(".react-flow__node").filter({ hasText: "channel.of" }).first(),
+  ).toBeVisible();
   const nodes = await page.locator(".react-flow__node").count();
   await expect(page.getByRole("banner").locator(".save-state")).toHaveText(
     "Saved",

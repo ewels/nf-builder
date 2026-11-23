@@ -9,5 +9,11 @@
   "scripts": {
     "typecheck": "tsc",
     "test": "vitest run --test-timeout=30000"
+  },
+  "dependencies": {
+    "@nf-builder/lang-core": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5"
   }
 }

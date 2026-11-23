@@ -304,14 +304,81 @@ describe("F-207 engine service layout", () => {
         { kind: "deleteNode", target: entry, node: KEY_A },
         summary.revision,
       ),
-    ) as ApplyOutcome & ProjectChange & { inverse: never[] };
+    ) as ApplyOutcome & ProjectChange;
     expect(texts(deleted)[LAYOUT_PATH]).not.toContain(KEY_A);
-    const undone = must(
-      await service.applyPatches(deleted.inverse, deleted.revision),
-    ) as ProjectChange;
+    const undone = must(await service.undo(deleted.revision)) as ProjectChange;
     expect(texts(undone)[LAYOUT_PATH]).toBe(
       formatLayout({ version: 1, nodes: pos }),
     );
+  });
+
+  const renameCommand = {
+    kind: "renameDeclaration",
+    path: "a.nf",
+    name: "A",
+    newName: "Z",
+  } as const;
+
+  it("F-209 F-207: undoing a rename carries the sidecar back byte for byte", async () => {
+    const { service, summary } = await opened();
+    const start = formatLayout({ version: 1, nodes: pos });
+    await service.setLayout(place(pos));
+    const renamed = must(
+      (await service.apply(renameCommand, summary.revision)) as ApplyOutcome,
+    ) as ProjectChange;
+    expect(texts(renamed)[LAYOUT_PATH]).toContain("main.nf#/Z@1");
+    const undone = must(await service.undo(renamed.revision)) as ProjectChange;
+    expect(texts(undone)[LAYOUT_PATH]).toBe(start);
+    expect(await service.readFile(LAYOUT_PATH)).toBe(start);
+    expect(undone.remodelled).toContain(LAYOUT_PATH);
+    const back = projected(await service.project("main.nf", null));
+    expect(back.positions[KEY_A]).toEqual(pos[KEY_A]);
+  });
+
+  it("F-209 F-207: redoing a rename carries the sidecar forward again", async () => {
+    const { service, summary } = await opened();
+    await service.setLayout(place(pos));
+    const renamed = must(
+      (await service.apply(renameCommand, summary.revision)) as ApplyOutcome,
+    ) as ProjectChange;
+    const forward = await service.readFile(LAYOUT_PATH);
+    const undone = must(await service.undo(renamed.revision)) as ProjectChange;
+    const redone = must(await service.redo(undone.revision)) as ProjectChange;
+    expect(texts(redone)[LAYOUT_PATH]).toBe(forward);
+    const after = projected(await service.project("main.nf", null));
+    expect(after.positions["main.nf#/Z@1"]).toEqual(pos[KEY_A]);
+  });
+
+  it("F-209 F-207: undo and redo of deleting one of two identical calls restore and drop the positions", async () => {
+    const service = createEngineService();
+    const main =
+      "include { A } from './a.nf'\n\nworkflow {\n    A()\n    A()\n}\n";
+    const summary = await service.open({
+      version,
+      files: [
+        { path: "main.nf", text: main },
+        { path: "a.nf", text: proc("A") },
+      ],
+    });
+    const first = "main.nf#/A@1";
+    const second = "main.nf#/A@2";
+    const both = { [first]: { x: 1, y: 2 }, [second]: { x: 3, y: 4 } };
+    const start = formatLayout({ version: 1, nodes: both });
+    await service.setLayout(place(both, false, summary.revision));
+    const deleted = must(
+      await service.apply(
+        { kind: "deleteNode", target: entry, node: first },
+        summary.revision,
+      ),
+    ) as ApplyOutcome & ProjectChange;
+    const afterDelete = texts(deleted)[LAYOUT_PATH];
+    expect(afterDelete).toBe(
+      formatLayout({ version: 1, nodes: { [first]: both[second] } }),
+    );
+    const undone = must(await service.undo(deleted.revision)) as ProjectChange;
+    expect(texts(undone)[LAYOUT_PATH]).toBe(start);
+    const redone = must(await service.redo(undone.revision)) as ProjectChange;
+    expect(texts(redone)[LAYOUT_PATH]).toBe(afterDelete);
   });
 
   it("F-207 ADR-0003: every layout result survives structuredClone", async () => {

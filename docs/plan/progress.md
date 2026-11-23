@@ -588,3 +588,41 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - Task 0 wasn't needed: F-112 had already wired the diagnoser into the service.
   - The two details-pane baselines are approved from CI (ADR 0021).
 - Blockers: none.
+
+## 2026-11-23 · Parser error position fix · Claude (autonomous)
+- Did: fixed the parser's first error landing on an earlier `stub:` or `emit:` keyword when a blank line precedes it and a syntax error comes later in the file; such positions now match `nextflow lint`. Two out-of-order-section cases on the reparse path remain (see the spike S2 addendum). Found through F-208's refused-edit baseline.
+- State: fix only; no feature changes `passes`.
+- Next: F-208, F-207, F-502, then F-403 and F-209.
+- Decisions:
+  - The cause is a runtime difference (antlr4ng against Groovy's optimised ANTLR runtime), recorded as an addendum to the [spike S2 note](../research/2026-11-22-spike-s2-parser.md); stage 2 decides SLL fallbacks with two or more exiting alternatives by full LL. ADR 0020 stands.
+  - A new malformed fixture, `late-error-after-stub.nf`, and a position check against lint in the corpus test (ADR 0017).
+- Blockers: none.
+
+## 2026-11-23 · F-502 · Claude (autonomous)
+- Did:
+  - `packages/sources`: a registry client with a snapshot implementation, a live implementation and automatic fallback. Live stays off behind `LIVE_REGISTRY = false`, because `registry.nextflow.io` still sends no CORS header (S4 re-run on 2026-11-23).
+  - The palette's registry.nextflow.io section: source and age, a refresh button, the unavailable and failure states, and interim module and plugin lists until F-503.
+  - The S4 probe, its workflow and its tests are deleted, as ADR 0023 planned.
+- State: passing once CI is green with the re-approved app-shell baseline.
+- Next: F-207, F-209, then F-403 and F-309.
+- Decisions:
+  - [ADR 0050](../adr/0050-registry-client.md): the client surface, snapshot validation, HTTP cache only, the live gate and how to turn it on, live overlay rules, the palette states, and the probe deletion (a workflow edit). Amends ADR 0009's "prefers live"; IO-30 and UX-14 updated.
+  - `@nf-builder/sources` becomes a dependency of `@nf-builder/web` (ADR 0003 already allows it); `sources` depends on `lang-core` and takes `@types/node` 22.20.5 as a dev dependency; no dependency-cruiser change.
+  - The F-204 locator is narrowed to the generic region and F-011 step 2's test checks the app page only; neither assertion is weakened. The base-path test now tolerates only a missing `apps/web/public`.
+  - Licences row for recorded registry data extended to the hand-written live fixtures.
+  - The app-shell baseline is re-approved from CI (ADR 0021).
+
+## 2026-11-23 · F-209 · Claude (autonomous)
+- Did:
+  - Undo and redo in the engine worker: one step per command, groups for multi-command actions, limits, and clearing on raw writes. Every change reports the history's labels.
+  - Undo and Redo buttons in the tab strip, platform shortcuts that leave text fields, Monaco and dialogs alone, and a live region.
+  - The store flushes pending Code-view text before an undo, and captures the session when undo is pressed.
+- State: passing once CI is green with the re-approved tab-strip baselines.
+- Next: F-207 (merges after this and carries layout keys on undo), F-502, then F-403 and F-309.
+- Decisions:
+  - [ADR 0051](../adr/0051-undo-and-redo.md): history in the worker (amends ADR 0043's API), step and group model, limits of 100 steps and 8,000,000 units, shortcuts, controls, and the test hook's `apply` signature. It corrects ADR 0039's attribution: history is F-209's and autosave F-202's.
+  - AR-23 and UX-70 updated.
+  - `scope-change`: F-202 added to F-209's `depends_on`, and F-209 to F-309's.
+  - The tab-strip baselines are re-approved from CI (ADR 0021).
+  - Commit c594543 on the branch doesn't typecheck on its own; the squash merge hides it.
+- Blockers: none.

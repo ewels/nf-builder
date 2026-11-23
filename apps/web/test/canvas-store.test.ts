@@ -1,12 +1,13 @@
-import type {
-  EngineApi,
-  EngineRefusal,
-  LayoutWrite,
-  Positions,
-  Projection,
-  ProjectionResult,
-  ProjectSummary,
-  WorkflowRef,
+import {
+  EMPTY_HISTORY,
+  type EngineApi,
+  type EngineRefusal,
+  type LayoutWrite,
+  type Positions,
+  type Projection,
+  type ProjectionResult,
+  type ProjectSummary,
+  type WorkflowRef,
 } from "@nf-builder/engine";
 import { describe, expect, it } from "vitest";
 import {
@@ -279,7 +280,13 @@ describe("F-205 canvas store", () => {
     const store = createCanvasStore(() => engine);
     await store.getState().show(summaryOf([]));
     expect(store.getState().tabs).toEqual([]);
-    const change = { revision: 2, files: [], remodelled: [], workflows: wf };
+    const change = {
+      revision: 2,
+      files: [],
+      remodelled: [],
+      history: EMPTY_HISTORY,
+      workflows: wf,
+    };
     await store.getState().changed(change);
     expect(store.getState().tabs.map((t) => t.id)).toEqual(["main.nf#"]);
     expect(store.getState().content.status).toBe("ready");
@@ -293,9 +300,13 @@ describe("F-205 canvas store", () => {
 
   it("F-205: a change with no project shown does nothing", async () => {
     const store = createCanvasStore(() => fake([]).engine);
-    await store
-      .getState()
-      .changed({ revision: 1, files: [], remodelled: [], workflows: [] });
+    await store.getState().changed({
+      revision: 1,
+      files: [],
+      remodelled: [],
+      history: EMPTY_HISTORY,
+      workflows: [],
+    });
     expect(store.getState().summary).toBeNull();
   });
 });
@@ -548,9 +559,13 @@ describe("F-206 selection", () => {
     await store.getState().open(request);
     await store.getState().select("a");
     options.revision = 2;
-    await store
-      .getState()
-      .changed({ revision: 2, files: [], remodelled: [], workflows: wf });
+    await store.getState().changed({
+      revision: 2,
+      files: [],
+      remodelled: [],
+      history: EMPTY_HISTORY,
+      workflows: wf,
+    });
     expect(store.getState().selected).toBe("a");
     const d = store.getState().details;
     expect(d.status === "ready" && d.revision).toBe(2);
@@ -564,9 +579,13 @@ describe("F-206 selection", () => {
     await store.getState().select("a");
     expect(store.getState().selected).toBe("a");
     expect(store.getState().details).toEqual({ status: "loading", node: "a" });
-    await store
-      .getState()
-      .changed({ revision: 2, files: [], remodelled: [], workflows: wf });
+    await store.getState().changed({
+      revision: 2,
+      files: [],
+      remodelled: [],
+      history: EMPTY_HISTORY,
+      workflows: wf,
+    });
     const d = store.getState().details;
     expect(d.status === "ready" && d.revision).toBe(2);
   });
@@ -577,9 +596,13 @@ describe("F-206 selection", () => {
     await store.getState().open(request);
     await store.getState().select("a");
     options.nullFor = "main.nf#";
-    await store
-      .getState()
-      .changed({ revision: 2, files: [], remodelled: [], workflows: wf });
+    await store.getState().changed({
+      revision: 2,
+      files: [],
+      remodelled: [],
+      history: EMPTY_HISTORY,
+      workflows: wf,
+    });
     expect(store.getState().content.status).toBe("unavailable");
     expect(store.getState().selected).toBeNull();
     expect(store.getState().details).toEqual({ status: "idle" });
@@ -777,5 +800,343 @@ describe("F-206 selection", () => {
       if (c.status !== "ready") throw new Error("not ready");
       expect(c.positions).toEqual({});
     });
+  });
+});
+
+const statusOf = (undoCount: number, redoCount = 0) => ({
+  undo: undoCount > 0 ? "Edit main.nf" : null,
+  redo: redoCount > 0 ? "Edit main.nf" : null,
+  undoCount,
+  redoCount,
+});
+
+/** A fake whose `apply`, `undo`, `redo` and `history` answer from scripts, logging every call in order. */
+function historic(
+  workflows: WorkflowRef[],
+  script: {
+    apply?: (revision: number, options: unknown) => Promise<unknown>;
+    undo?: (revision: number) => Promise<unknown>;
+    redo?: (revision: number) => Promise<unknown>;
+    history?: () => Promise<unknown>;
+  },
+) {
+  const base = fake(workflows);
+  const log: string[] = [];
+  const engine = {
+    ...base.engine,
+    apply: async (_c: unknown, revision: number, options: unknown) => {
+      log.push(`apply@${revision}`);
+      return script.apply?.(revision, options);
+    },
+    undo: async (revision: number) => {
+      log.push(`undo@${revision}`);
+      return script.undo?.(revision);
+    },
+    redo: async (revision: number) => {
+      log.push(`redo@${revision}`);
+      return script.redo?.(revision);
+    },
+    history: async () => {
+      log.push("history");
+      return script.history?.() ?? EMPTY_HISTORY;
+    },
+  } as unknown as EngineApi;
+  return { engine, log, calls: base.calls };
+}
+
+const changeAt = (
+  revision: number,
+  workflows: WorkflowRef[],
+  history = statusOf(1),
+  extra: object = {},
+) => ({
+  ok: true,
+  revision,
+  files: [{ path: "main.nf", text: "x" }],
+  remodelled: ["main.nf"],
+  workflows,
+  history,
+  ...extra,
+});
+
+describe("F-209 history", () => {
+  it("F-209 AR-23: undo and redo send the store's revision, adopt the new revision and history, record the changed paths and reload the active projection", async () => {
+    const wf = [ref("main.nf", null)];
+    const { engine, log, calls } = historic(wf, {
+      undo: async (r) =>
+        changeAt(r + 1, wf, statusOf(0, 1), { label: "Edit main.nf" }),
+      redo: async (r) =>
+        changeAt(r + 1, wf, statusOf(1), { label: "Edit main.nf" }),
+    });
+    const store = createCanvasStore(() => engine);
+    await store.getState().open(request);
+    expect(store.getState().history).toEqual(EMPTY_HISTORY);
+    const undone = await store.getState().undo();
+    expect(undone.ok).toBe(true);
+    expect(log).toEqual(["undo@1"]);
+    expect(store.getState().summary?.revision).toBe(2);
+    expect(store.getState().history).toEqual(statusOf(0, 1));
+    expect(store.getState().lastChange).toEqual({
+      revision: 2,
+      paths: ["main.nf"],
+    });
+    expect(store.getState().historyNotice).toBe("Undone: Edit main.nf");
+    expect(calls).toEqual(["main.nf#", "main.nf#"]);
+    await store.getState().redo();
+    expect(log).toEqual(["undo@1", "redo@2"]);
+    expect(store.getState().history).toEqual(statusOf(1));
+    expect(store.getState().historyNotice).toBe("Redone: Edit main.nf");
+  });
+
+  it("F-209: apply, undo and redo run one at a time, each at the revision the previous one produced", async () => {
+    const wf = [ref("main.nf", null)];
+    const gate: { open: () => void } = { open: () => undefined };
+    const held = new Promise<void>((resolve) => {
+      gate.open = resolve;
+    });
+    const { engine, log } = historic(wf, {
+      apply: async (r) => {
+        await held;
+        return changeAt(r + 1, wf);
+      },
+      undo: async (r) => changeAt(r + 1, wf, statusOf(0, 1), { label: "x" }),
+      redo: async (r) => changeAt(r + 1, wf, statusOf(1), { label: "x" }),
+    });
+    const store = createCanvasStore(() => engine);
+    await store.getState().open(request);
+    const all = Promise.all([
+      store.getState().apply(command),
+      store.getState().undo(),
+      store.getState().redo(),
+    ]);
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    expect(log).toEqual(["apply@1"]);
+    gate.open();
+    await all;
+    expect(log).toEqual(["apply@1", "undo@2", "redo@3"]);
+    expect(store.getState().summary?.revision).toBe(4);
+  });
+
+  it("F-209 F-208: undo and redo first await the registered code-pane flushes, and a flush that apply queues does not deadlock", async () => {
+    const wf = [ref("main.nf", null)];
+    const { engine, log } = historic(wf, {
+      apply: async (r) => changeAt(r + 1, wf),
+      undo: async (r) => changeAt(r + 1, wf, statusOf(0, 1), { label: "x" }),
+      redo: async (r) => changeAt(r + 1, wf, statusOf(1), { label: "x" }),
+    });
+    const store = createCanvasStore(() => engine);
+    await store.getState().open(request);
+    const unregister = store.getState().registerFlush(async () => {
+      log.push("flush");
+      await store.getState().apply(command, store.getState().session);
+    });
+    await store.getState().undo();
+    expect(log).toEqual(["flush", "apply@1", "undo@2"]);
+    unregister();
+    await store.getState().redo();
+    expect(log).toEqual(["flush", "apply@1", "undo@2", "redo@3"]);
+  });
+
+  it("F-209 ADR-0004 IO-01: an undo or redo from a project that is no longer shown never reaches the engine", async () => {
+    const wf = [ref("main.nf", null)];
+    const { engine, log } = historic(wf, {});
+    const store = createCanvasStore(() => engine);
+    await store.getState().open(request);
+    const first = store.getState().session;
+    await store.getState().show(summaryOf(wf), "project");
+    const a = await store.getState().undo(first);
+    const b = await store.getState().redo(first);
+    expect(a.ok === false && a.code).toBe("no-project");
+    expect(b.ok === false && b.code).toBe("no-project");
+    expect(log).toEqual([]);
+    const none = createCanvasStore(() => engine);
+    const c = await none.getState().undo();
+    expect(c.ok === false && c.code).toBe("no-project");
+  });
+
+  it("F-209: a stale or no-history refusal adopts a newer revision, refreshes the history, sets the notice and isn't retried", async () => {
+    const wf = [ref("main.nf", null)];
+    const { engine, log, calls } = historic(wf, {
+      undo: async () => ({
+        ok: false,
+        revision: 4,
+        code: "stale",
+        message: "The project changed.",
+        path: null,
+        problems: [],
+      }),
+      redo: async () => ({
+        ok: false,
+        revision: 4,
+        code: "no-history",
+        message: "There is nothing to redo.",
+        path: null,
+        problems: [],
+      }),
+      history: async () => statusOf(2),
+    });
+    const store = createCanvasStore(() => engine);
+    await store.getState().open(request);
+    const outcome = await store.getState().undo();
+    expect(outcome.ok === false && outcome.code).toBe("stale");
+    expect(log).toEqual(["undo@1", "history"]);
+    expect(store.getState().summary?.revision).toBe(4);
+    expect(store.getState().history).toEqual(statusOf(2));
+    expect(store.getState().historyNotice).toBe("The project changed.");
+    expect(calls).toEqual(["main.nf#", "main.nf#"]);
+    await store.getState().redo();
+    expect(store.getState().historyNotice).toBe("There is nothing to redo.");
+    expect(log.filter((l) => l.startsWith("undo"))).toHaveLength(1);
+  });
+
+  it("F-209 AR-23: a worker failure on undo or redo becomes an internal refusal and a notice, not a rejection", async () => {
+    const wf = [ref("main.nf", null)];
+    const { engine, log } = historic(wf, {
+      undo: async () => {
+        throw new Error("worker died");
+      },
+      redo: async (r) => changeAt(r + 1, wf, statusOf(1), { label: "x" }),
+    });
+    const store = createCanvasStore(() => engine);
+    await store.getState().open(request);
+    const outcome = await store.getState().undo();
+    expect(outcome.ok === false && outcome.code).toBe("internal");
+    expect(store.getState().historyNotice).toBe("worker died");
+    // the queue still works afterwards
+    const next = await store.getState().redo();
+    expect(next.ok).toBe(true);
+    expect(log).toContain("redo@1");
+  });
+
+  it("F-209 ADR-0004 IO-01: a key press made while a flush is pending does not act on a project opened meanwhile", async () => {
+    const wf = [ref("main.nf", null)];
+    const { engine, log } = historic(wf, {
+      undo: async (r) => changeAt(r + 1, wf, statusOf(0, 1), { label: "x" }),
+    });
+    const store = createCanvasStore(() => engine);
+    await store.getState().open(request);
+    let release = () => {};
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    store.getState().registerFlush(() => gate);
+    const pending = store.getState().undo();
+    await store.getState().show(summaryOf(wf), "project");
+    release();
+    const outcome = await pending;
+    expect(outcome.ok === false && outcome.code).toBe("no-project");
+    expect(log.filter((l) => l.startsWith("undo"))).toEqual([]);
+  });
+
+  it("F-209 AR-23: an internal refusal from apply refreshes the history", async () => {
+    const wf = [ref("main.nf", null)];
+    const { engine, log } = historic(wf, {
+      apply: async () => ({
+        ok: false,
+        revision: 3,
+        code: "internal",
+        message: "boom",
+        path: null,
+        problems: [],
+      }),
+      history: async () => EMPTY_HISTORY,
+    });
+    const store = createCanvasStore(() => engine);
+    await store.getState().open(request);
+    await store.getState().changed({
+      revision: 1,
+      files: [],
+      remodelled: [],
+      history: statusOf(2),
+      workflows: wf,
+    });
+    expect(store.getState().history.undoCount).toBe(2);
+    await store.getState().apply(command);
+    expect(log).toEqual(["apply@1", "history"]);
+    expect(store.getState().summary?.revision).toBe(3);
+    expect(store.getState().history).toEqual(EMPTY_HISTORY);
+  });
+
+  it("F-209 F-301: apply passes group and label to the engine; opening a project resets the history and notice", async () => {
+    const wf = [ref("main.nf", null)];
+    const seen: unknown[] = [];
+    const { engine } = historic(wf, {
+      apply: async (r, options) => {
+        seen.push(options);
+        return changeAt(r + 1, wf, statusOf(1));
+      },
+      undo: async (r) => changeAt(r + 1, wf, statusOf(0, 1), { label: "x" }),
+    });
+    const store = createCanvasStore(() => engine);
+    await store.getState().open(request);
+    await store
+      .getState()
+      .apply(command, undefined, { group: "g", label: "Add module" });
+    expect(seen).toEqual([{ group: "g", label: "Add module" }]);
+    expect(store.getState().history.undoCount).toBe(1);
+    await store.getState().undo();
+    expect(store.getState().historyNotice).not.toBeNull();
+    await store.getState().show(summaryOf(wf), "project");
+    expect(store.getState().history).toEqual(EMPTY_HISTORY);
+    expect(store.getState().historyNotice).toBeNull();
+  });
+
+  it("F-209 F-207: undoing a workflow rename keeps its tab, which follows the name back", async () => {
+    const before = [ref("main.nf", null), ref("lib.nf", "OLD")];
+    const after = [ref("main.nf", null), ref("lib.nf", "NEW")];
+    const { engine } = historic(before, {
+      undo: async (r) =>
+        changeAt(r + 1, before, statusOf(0, 1), { label: "x" }),
+      redo: async (r) => changeAt(r + 1, after, statusOf(1), { label: "x" }),
+    });
+    const store = createCanvasStore(() => engine);
+    await store.getState().open(request);
+    await store.getState().openWorkflow("lib.nf", "OLD");
+    store.getState().setMode("lib.nf#OLD", "split");
+    // the engine now holds the renamed workflow
+    await store.getState().changed({
+      revision: 2,
+      files: [],
+      remodelled: [],
+      history: statusOf(1),
+      workflows: after,
+    });
+    const tabs = () => store.getState().tabs.map((t) => [t.id, t.mode]);
+    expect(tabs()).toEqual([
+      ["main.nf#", "graph"],
+      ["lib.nf#NEW", "split"],
+    ]);
+    expect(store.getState().activeTab).toBe("lib.nf#NEW");
+    await store.getState().undo();
+    expect(tabs()).toEqual([
+      ["main.nf#", "graph"],
+      ["lib.nf#OLD", "split"],
+    ]);
+    expect(store.getState().activeTab).toBe("lib.nf#OLD");
+  });
+
+  it("F-209 F-207: a rename onto an id that a stale tab already holds leaves one tab with that id, keeping the renamed tab's mode", async () => {
+    const before = [ref("main.nf", null), ref("lib.nf", "OLD")];
+    const after = [ref("main.nf", null), ref("lib.nf", "NEW")];
+    const { engine } = historic(before, {});
+    const store = createCanvasStore(() => engine);
+    await store.getState().open(request);
+    await store.getState().openWorkflow("lib.nf", "OLD");
+    store.getState().setMode("lib.nf#OLD", "split");
+    await store.getState().openWorkflow("lib.nf", "NEW");
+    await store.getState().selectTab("lib.nf#OLD");
+    await store.getState().changed({
+      revision: 2,
+      files: [],
+      remodelled: [],
+      history: statusOf(1),
+      workflows: after,
+    });
+    const tabs = store.getState().tabs.map((t) => [t.id, t.mode]);
+    expect(tabs).toEqual([
+      ["main.nf#", "graph"],
+      ["lib.nf#NEW", "split"],
+    ]);
+    expect(store.getState().activeTab).toBe("lib.nf#NEW");
   });
 });

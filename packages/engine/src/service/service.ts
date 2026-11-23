@@ -19,8 +19,11 @@ import {
   createEditState,
   type EditState,
   patchResult,
+  patchSequence,
 } from "../edit/apply";
 import { PatchError } from "../edit/patches";
+import { EMPTY_HISTORY, History, type HistoryLimits } from "../history/history";
+import { commandLabel } from "../history/labels";
 import {
   type CarryHints,
   carryHints,
@@ -51,6 +54,7 @@ import type {
   EngineApi,
   EngineRefusal,
   EngineRefusalCode,
+  HistoryOutcome,
   LoadProgress,
   NodeDetailsResult,
   ProjectChange,
@@ -61,6 +65,8 @@ import type {
 export interface EngineServiceOptions {
   /** Called for every parse and model computation, including those of later edits (tests count work with it). */
   readonly trace?: (event: ModelEvent) => void;
+  /** Bounds of the undo history; tests inject small ones (F-209). */
+  readonly historyLimits?: HistoryLimits;
 }
 
 interface Open {
@@ -68,6 +74,7 @@ interface Open {
   readonly state: EditState;
   readonly lints: PackLints;
   readonly catalogue: Catalogue;
+  readonly history: History;
   projector?: Projector;
   diagnoser?: Diagnoser;
   /** Projections built at the current revision, by `path#workflow`; dropped whenever the revision moves (F-207). */
@@ -247,6 +254,7 @@ export function createEngineService(
     open.memo = new Map();
   };
 
+  /** Reports a change already written; callers update the history first, so the change carries its new status. */
   const changed = (
     open: Open,
     files: readonly FileText[],
@@ -262,6 +270,7 @@ export function createEngineService(
       remodelled:
         sidecar.length > 0 ? [...remodelled, LAYOUT_PATH].sort() : remodelled,
       workflows: projectorOf(open).workflows(),
+      history: open.history.status(),
     };
   };
 
@@ -289,6 +298,7 @@ export function createEngineService(
             `The engine failed unexpectedly (${reason}). Nothing was changed.`,
           );
         invalidate(open);
+        open.history.clear();
         return refusal(
           "internal",
           `The engine failed unexpectedly while changing the project (${reason}). The project may be partly changed; use the new revision and check its files.`,
@@ -312,20 +322,56 @@ export function createEngineService(
   const accept = (
     open: Open,
     result: Extract<CommandResult, { ok: true }>,
+    before: BeforeCarry | null,
+    hints: CarryHints,
+  ): ApplyOutcome => ({
+    ok: true,
+    ...changed(open, result.files, commit(open.state, result), before, hints),
+    patches: result.patches,
+    inverse: result.inverse,
+  });
+
+  /** Undo and redo share everything but the stack they take from. */
+  const move = (
+    open: Open,
+    given: number,
     startedChanging: () => void,
-    command?: EditCommand,
-  ): ApplyOutcome => {
+    direction: "undo" | "redo",
+  ): HistoryOutcome => {
+    const old = stale(given);
+    if (old) return old;
+    const lists =
+      direction === "undo"
+        ? open.history.undoLists()
+        : open.history.redoLists();
+    if (!lists)
+      return refusal("no-history", `There is nothing to ${direction}.`);
+    let files: readonly FileText[];
+    try {
+      files = patchSequence(open.state.model, lists);
+    } catch (error) {
+      if (!(error instanceof PatchError)) throw error;
+      open.history.clear();
+      return refusal(
+        "internal",
+        `${direction === "undo" ? "Undo" : "Redo"} failed (${error.message}). Nothing was changed, and the undo history was cleared.`,
+      );
+    }
+    const hints =
+      direction === "undo"
+        ? open.history.undoHints()
+        : open.history.redoHints();
     const before = prepareCarry(
       open,
-      result.files.map((f) => f.path),
+      files.map((f) => f.path),
     );
     startedChanging();
-    const remodelled = commit(open.state, result);
+    const label =
+      direction === "undo" ? open.history.undone() : open.history.redone();
     return {
       ok: true,
-      ...changed(open, result.files, remodelled, before, carryHints(command)),
-      patches: result.patches,
-      inverse: result.inverse,
+      label,
+      ...changed(open, files, commit(open.state, { files }), before, hints),
     };
   };
 
@@ -364,6 +410,7 @@ export function createEngineService(
           state,
           lints,
           catalogue,
+          history: new History(options.historyLimits),
           memo: new Map(),
           removed: new RemovedPositions(),
           ...readLayout(state.model.file(LAYOUT_PATH)?.source.text),
@@ -400,6 +447,7 @@ export function createEngineService(
           files.map((f) => f.path),
         );
         startedChanging();
+        open.history.clear();
         const touched = new Set<string>();
         for (const file of files) {
           const change =
@@ -416,7 +464,7 @@ export function createEngineService(
         return changed(open, files, [...touched].sort(), before, {});
       }),
 
-    apply: (command, given) =>
+    apply: (command, given, applyOptions) =>
       guarded((open, startedChanging): ApplyOutcome => {
         const old = stale(given);
         if (old) return old;
@@ -424,8 +472,37 @@ export function createEngineService(
         if (!result.ok) return { ...result, revision };
         if (result.files.some((f) => f.path === LAYOUT_PATH))
           return sidecarRefusal();
-        return accept(open, result, startedChanging, command);
+        const before = prepareCarry(
+          open,
+          result.files.map((f) => f.path),
+        );
+        startedChanging();
+        const hints = carryHints(command);
+        open.history.record(
+          {
+            patches: result.patches,
+            inverse: result.inverse,
+            renames: hints.renames ?? [],
+            deleted: hints.deleted ?? [],
+          },
+          applyOptions?.label ?? commandLabel(command),
+          applyOptions?.group ?? null,
+        );
+        return accept(open, result, before, hints);
       }),
+
+    undo: (given) =>
+      guarded((open, startedChanging) =>
+        move(open, given, startedChanging, "undo"),
+      ),
+
+    redo: (given) =>
+      guarded((open, startedChanging) =>
+        move(open, given, startedChanging, "redo"),
+      ),
+
+    history: () =>
+      serial(() => (current ? current.history.status() : EMPTY_HISTORY)),
 
     applyPatches: (patches, given) =>
       guarded((open, startedChanging): ApplyOutcome => {
@@ -441,7 +518,13 @@ export function createEngineService(
             return refusal("invalid", error.message);
           throw error;
         }
-        return accept(open, result, startedChanging);
+        const before = prepareCarry(
+          open,
+          result.files.map((f) => f.path),
+        );
+        startedChanging();
+        open.history.clear();
+        return accept(open, result, before, {});
       }),
 
     project: (path, workflow) =>

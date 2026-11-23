@@ -21,7 +21,11 @@ export function connectEngine(
     open: (request, onProgress) =>
       race(remote.open(request, onProgress && proxy(onProgress))),
     writeFiles: (files) => race(remote.writeFiles(files)),
-    apply: (command, revision) => race(remote.apply(command, revision)),
+    apply: (command, revision, options) =>
+      race(remote.apply(command, revision, options)),
+    undo: (revision) => race(remote.undo(revision)),
+    redo: (revision) => race(remote.redo(revision)),
+    history: () => race(remote.history()),
     applyPatches: (patches, revision) =>
       race(remote.applyPatches(patches, revision)),
     project: (path, workflow) => race(remote.project(path, workflow)),
@@ -62,8 +66,10 @@ function withChangeEvents<E extends WorkspaceApi>(api: E): E {
   return {
     ...api,
     writeFiles: async (files) => announced(await api.writeFiles(files)),
-    apply: async (command, revision) =>
-      announced(await api.apply(command, revision)),
+    apply: async (command, revision, options) =>
+      announced(await api.apply(command, revision, options)),
+    undo: async (revision) => announced(await api.undo(revision)),
+    redo: async (revision) => announced(await api.redo(revision)),
     applyPatches: async (patches, revision) =>
       announced(await api.applyPatches(patches, revision)),
   };

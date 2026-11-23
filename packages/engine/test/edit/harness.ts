@@ -61,7 +61,7 @@ const SNIPPETS = [
 const pick = <T>(list: readonly T[], i: number): T | undefined =>
   list.length === 0 ? undefined : list[i % list.length];
 
-const snapshot = (state: EditState): Map<string, string> =>
+export const snapshot = (state: EditState): Map<string, string> =>
   new Map(
     state.model
       .paths()

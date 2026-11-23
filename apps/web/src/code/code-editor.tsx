@@ -128,6 +128,8 @@ export default function CodeEditor({
         () => onBlur.dispose(),
         // a flush within the same project still sends; after a project change the sync is already disposed
         () => void sync.flush(),
+        // an undo or redo first sends what is pending, so a pending edit is the step that gets undone (F-209)
+        canvasStore.getState().registerFlush(() => sync.flush()),
         canvasStore.subscribe((state) => {
           if (state.session !== session) sync.dispose();
         }),

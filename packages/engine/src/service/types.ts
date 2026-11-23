@@ -14,6 +14,7 @@ import type {
   WorkflowRef,
 } from "@nf-builder/lang-core";
 import type { NodeDetails } from "../details/types";
+import type { HistoryStatus } from "../history/history";
 import type {
   LayoutChange,
   LayoutStatus,
@@ -60,9 +61,15 @@ export interface ProjectChange {
   /** The files whose model was recomputed, sorted. */
   readonly remodelled: readonly string[];
   readonly workflows: readonly WorkflowRef[];
+  /** The undo history after this change (F-209). */
+  readonly history: HistoryStatus;
 }
 
-export type EngineRefusalCode = RefusalCode | "stale" | "no-project";
+export type EngineRefusalCode =
+  | RefusalCode
+  | "stale"
+  | "no-project"
+  | "no-history";
 
 export interface EngineRefusal {
   readonly ok: false;
@@ -82,6 +89,22 @@ export interface Applied extends ProjectChange {
 }
 
 export type ApplyOutcome = Applied | EngineRefusal;
+
+/** How `apply` records a command in the undo history (F-209). */
+export interface ApplyOptions {
+  /** Commands applied in a row with the same group token make one undo step (F-301, F-310). */
+  readonly group?: string;
+  /** The step's label; the first command of a group sets it. Defaults to the command's own label. */
+  readonly label?: string;
+}
+
+/** A successful undo or redo: the change it made and the label of the step it moved. */
+export interface Undone extends ProjectChange {
+  readonly ok: true;
+  readonly label: string;
+}
+
+export type HistoryOutcome = Undone | EngineRefusal;
 
 export interface ProjectionResult {
   readonly revision: number;
@@ -113,8 +136,18 @@ export interface EngineApi {
   writeFiles(
     files: readonly FileText[],
   ): Promise<ProjectChange | EngineRefusal>;
-  apply(command: EditCommand, revision: number): Promise<ApplyOutcome>;
-  /** Undo and redo: applies patches built on `revision`. */
+  apply(
+    command: EditCommand,
+    revision: number,
+    options?: ApplyOptions,
+  ): Promise<ApplyOutcome>;
+  /** Undoes the newest step; `revision` must be current. Advances the revision by one (F-209, AR-23). */
+  undo(revision: number): Promise<HistoryOutcome>;
+  /** Re-applies the newest undone step; `revision` must be current. */
+  redo(revision: number): Promise<HistoryOutcome>;
+  /** The undo history of the open project; empty with no project. */
+  history(): Promise<HistoryStatus>;
+  /** Raw patches built on `revision`. They clear the undo history. */
   applyPatches(
     patches: readonly TextPatch[],
     revision: number,

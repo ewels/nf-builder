@@ -19,6 +19,8 @@ import {
   insertAfterLine,
   lineNumberOf,
   openCodeFixture,
+  radio,
+  syncStatus,
 } from "./code-view.ts";
 import {
   createProjectInUi,
@@ -29,10 +31,6 @@ import {
 } from "./projects.ts";
 
 const mode = (page: Page) => page.locator("#canvas-panel");
-const radio = (page: Page, name: string) =>
-  page.getByRole("radiogroup", { name: "View mode" }).getByRole("radio", {
-    name,
-  });
 
 test("F-208 step 1 UX-27 AR-30: the toggle switches the active tab between Graph, Split and Code, and each tab keeps its own mode", async ({
   page,
@@ -146,8 +144,6 @@ test("F-208 UX-70 QA-11: G, S and C do nothing while the New project dialog is o
   await page.keyboard.press("Escape");
   await expect(dialog).toBeHidden();
 });
-
-const syncStatus = (page: Page) => page.locator(".code-pane-status");
 
 async function openSplit(page: Page): Promise<void> {
   await page.goto("./");

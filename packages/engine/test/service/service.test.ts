@@ -415,3 +415,24 @@ describe("F-113 engine service", () => {
     });
   });
 });
+
+describe("F-209 AR-23 guarded history", () => {
+  it("F-209 AR-23: a throw after a write started clears the history", async () => {
+    let armed = false;
+    const { service, summary } = await opened(() => {
+      if (armed) throw new Error("parse boom");
+    });
+    const first = ok(await service.apply(addB, summary.revision));
+    expect((await service.history()).undoCount).toBe(1);
+    armed = true;
+    const refused = await service.apply(
+      replaceA(`${proc("A")}// armed\n`),
+      first.revision,
+    );
+    expect(refused).toMatchObject({ ok: false, code: "internal" });
+    expect(await service.history()).toMatchObject({
+      undoCount: 0,
+      redoCount: 0,
+    });
+  });
+});

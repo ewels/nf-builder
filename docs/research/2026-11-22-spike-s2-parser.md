@@ -73,3 +73,14 @@ Causes of the other gaps, from the docs at the same commit: `fromSRA` is marked 
 ## How to re-run
 
 `pnpm corpus:fetch && pnpm corpus:lint && pnpm test:corpus` (report in `.cache/reports/parse-corpus.md`); `pnpm gen:grammar 26.10 --check`; `pnpm gen:catalogue 26.10 --check`; `node tools/spec-extract/src/docs-compare.ts 26.10`.
+
+## Addendum 2026-11-23: runtime difference in error positions
+
+`nextflow lint` 26.10.7 runs nf-lang on Groovy's fork of the optimised ANTLR runtime (`me.sunlan:antlr4-runtime` 4.13.2.16). antlr4ng ports the reference runtime. In LL mode the optimised runtime hands a conflicted SLL prediction to full LL early; antlr4ng keeps SLL going and, when SLL then hits an error, falls back to the lowest alternative that left the rule.
+
+The visible effect: with a blank line before `stub:` or `emit:` and a syntax error later in the file, our first error landed on the section keyword (for example 35:5 "Unexpected input: 'stub'") where lint reports the real place (43:28 "Unexpected input: ')'"). The declarations isolated correctly; only the first error's position and message were wrong.
+
+Fix: stage 2 of `parseScript` and `parseConfig`, which share the two-stage run, uses an `LlSimulator` (the reparse path uses it too, for consistency) that, when the SLL fallback has to choose between two or more alternatives that left the rule, decides with full LL instead (`packages/lang-2610/src/parser/parse.ts`). It approximates the optimised runtime's earlier hand-over rather than porting its `isConflicted` check. It matches lint on 13 hand-written variants, every malformed fixture and 470 mutated corpus files, and corpus parse times are unchanged. The corpus test now compares the first error's line, column and message with lint for every malformed fixture lint rejects with "Unexpected …" (`late-error-after-stub.nf` covers this case).
+
+Known limitation: two cases on the reparse path still report the error at `stub:`. In both, a blank line comes before `stub:`, and an out-of-order `input:` or `when:` section follows the stub, where lint reports the colon (`18:10` or `18:9`). There the `processBody` decision has only one exiting alternative, so the override doesn't apply. Rerouting every SLL error to full LL doesn't fix it either, and it breaks other cases.
+
