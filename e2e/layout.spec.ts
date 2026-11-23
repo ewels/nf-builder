@@ -170,11 +170,14 @@ test("F-207 ADR-0008: with a partial sidecar, stored nodes keep their positions 
   expect(await nodePosition(page, KEY.reads)).toEqual(stored[KEY.reads]);
   expect(await nodePosition(page, KEY.count)).toEqual(stored[KEY.count]);
   expect(overlaps(await nodeBoxes(page))).toEqual([]);
+  // the header already says Saved for the file as opened, so wait for the placement itself
+  await expect
+    .poll(async () =>
+      Object.keys((await readSidecar(page))?.nodes ?? {}).sort(),
+    )
+    .toEqual([...ALL_KEYS].sort());
   await waitSaved(page);
   const sidecar = await readSidecar(page);
-  expect(Object.keys(sidecar?.nodes ?? {}).sort()).toEqual(
-    [...ALL_KEYS].sort(),
-  );
   expect(sidecar?.nodes[KEY.reads]).toEqual(stored[KEY.reads]);
   expect(sidecar?.nodes[KEY.count]).toEqual(stored[KEY.count]);
 });
@@ -207,8 +210,40 @@ test("F-207 IO-02: an unreadable sidecar shows the notice and is replaced", asyn
     )
     .toBe(ALL_KEYS.length);
   await waitSaved(page);
-  // the notice stays for the session, so the replacement isn't a surprise
-  await expect(notices(page)).toContainText("The layout file couldn't be read");
+  // the notice stays for the session, so the replacement isn't a surprise, but it now says what happened
+  await expect(notices(page)).toContainText(
+    "The layout file couldn't be read and was replaced.",
+  );
+  await expect(notices(page)).not.toContainText("will be replaced");
+});
+
+test("F-207 QA-11 UX-30: a node's description says to select it with enter or space and then move it with the arrow keys", async ({
+  page,
+}) => {
+  await openStoredProject(page);
+  const descriptions = page.locator('[id^="react-flow__node-desc-"]');
+  await expect(descriptions).toHaveText(
+    "Press enter or space to select this node, then use the arrow keys to move it.",
+  );
+});
+
+test("F-207 IO-02: entries of the sidecar that can't be read are dropped with a notice", async ({
+  page,
+}) => {
+  const stored = {
+    [KEY.reads]: { x: 500, y: 300 },
+    "not a node key": { x: 1, y: 1 },
+  };
+  await openStoredProject(page, [
+    {
+      path: SIDECAR,
+      text: `${JSON.stringify({ version: 1, nodes: stored }, null, 2)}\n`,
+    },
+  ]);
+  await expect(notices(page)).toContainText(
+    "1 layout entry couldn't be read and was dropped.",
+  );
+  expect(await nodePosition(page, KEY.reads)).toEqual(stored[KEY.reads]);
 });
 
 const ELK_WORKER = /elk-worker/;

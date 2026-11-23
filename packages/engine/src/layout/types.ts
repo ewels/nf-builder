@@ -30,7 +30,7 @@ export type LayoutState = "absent" | "ok" | "invalid" | "newer";
 
 export interface LayoutStatus {
   readonly state: LayoutState;
-  /** The notice text for `invalid` and `newer`; null otherwise. */
+  /** The notice text for `invalid` and `newer`, and for `ok` when entries were dropped; null otherwise. */
   readonly message: string | null;
 }
 

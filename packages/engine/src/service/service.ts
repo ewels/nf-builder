@@ -97,7 +97,20 @@ function readLayout(text: string | null | undefined): {
       layout: EMPTY_LAYOUT,
       layoutStatus: { state: parsed.state, message: parsed.message },
     };
-  return { layout: parsed.document, layoutStatus: OK };
+  const { dropped } = parsed;
+  return {
+    layout: parsed.document,
+    layoutStatus:
+      dropped === 0
+        ? OK
+        : {
+            state: "ok",
+            message:
+              dropped === 1
+                ? "1 layout entry couldn't be read and was dropped."
+                : `${dropped} layout entries couldn't be read and were dropped.`,
+          },
+  };
 }
 
 /** The state of the tracked workflows before a change, taken before `commit` because the projector reads the live model. */

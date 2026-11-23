@@ -230,6 +230,34 @@ describe("F-207 engine service layout", () => {
     expect(after.positions).toEqual({ [KEY_A]: pos[KEY_A] });
   });
 
+  it("F-207 IO-02: entries dropped from a readable sidecar are counted in its status message, and the file is still readable", async () => {
+    const text = `${JSON.stringify({
+      version: 1,
+      nodes: {
+        [KEY_A]: { x: 1, y: 2 },
+        "not a key": { x: 1, y: 2 },
+        [KEY_B]: { x: "far", y: 2 },
+      },
+    })}\n`;
+    const { service, summary } = await opened([{ path: LAYOUT_PATH, text }]);
+    expect(summary.layout).toEqual({
+      state: "ok",
+      message: "2 layout entries couldn't be read and were dropped.",
+    });
+    expect(projected(await service.project("main.nf", null)).positions).toEqual(
+      { [KEY_A]: { x: 1, y: 2 } },
+    );
+    const one = await opened([
+      {
+        path: LAYOUT_PATH,
+        text: `${JSON.stringify({ version: 1, nodes: { nope: { x: 1, y: 1 } } })}\n`,
+      },
+    ]);
+    expect(one.summary.layout.message).toBe(
+      "1 layout entry couldn't be read and was dropped.",
+    );
+  });
+
   it("F-207 IO-02: an invalid sidecar is reported and replaced at the next write; a newer one is reported and never written", async () => {
     const bad = await opened([{ path: LAYOUT_PATH, text: "not json" }]);
     expect(bad.summary.layout.state).toBe("invalid");

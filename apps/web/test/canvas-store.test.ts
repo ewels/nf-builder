@@ -601,7 +601,7 @@ describe("F-206 selection", () => {
       expect(c.notice).toBeNull();
     });
 
-    it("F-207 IO-02: an unreadable sidecar's message is kept as the layout notice, also after the file is replaced", async () => {
+    it("F-207 IO-02: an unreadable sidecar's message is the layout notice, and once the file is replaced it says so in the past tense", async () => {
       const store = createCanvasStore(
         () =>
           ({
@@ -622,8 +622,31 @@ describe("F-206 selection", () => {
       await store.getState().moveNodes({ a: { x: 5, y: 5 } });
       expect(store.getState().summary?.layout.state).toBe("ok");
       expect(store.getState().layoutNotice).toBe(
-        "The layout file couldn't be read (x).",
+        "The layout file couldn't be read and was replaced.",
       );
+      // later saves leave it as it is
+      await store.getState().moveNodes({ a: { x: 6, y: 6 } });
+      expect(store.getState().layoutNotice).toBe(
+        "The layout file couldn't be read and was replaced.",
+      );
+    });
+
+    it("F-207 IO-02: a notice about entries dropped from the sidecar stays after the next save", async () => {
+      const dropped = "2 layout entries couldn't be read and were dropped.";
+      const store = createCanvasStore(
+        () =>
+          ({
+            ...fake(wf, { positions: stored }).engine,
+            open: async () => ({
+              ...summaryOf(wf),
+              layout: { state: "ok", message: dropped },
+            }),
+          }) as unknown as EngineApi,
+      );
+      await store.getState().open(request);
+      expect(store.getState().layoutNotice).toBe(dropped);
+      await store.getState().moveNodes({ a: { x: 5, y: 5 } });
+      expect(store.getState().layoutNotice).toBe(dropped);
     });
 
     it("F-207 step 2: a drag updates positions locally and sends one setLayout with rounded coordinates", async () => {

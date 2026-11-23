@@ -159,6 +159,8 @@ export function tabFor(ref: {
   };
 }
 
+const REPLACED_NOTICE = "The layout file couldn't be read and was replaced.";
+
 const EMPTY: CanvasContent = { status: "empty" };
 const IDLE: DetailsContent = { status: "idle" };
 
@@ -284,8 +286,14 @@ export function createCanvasStore(
           if (summary !== null)
             set({
               summary: { ...summary, layout: result.layout },
-              // a file newer than this build is a problem for the rest of the session; a replaced one stays reported
-              layoutNotice: result.layout.message ?? get().layoutNotice,
+              // a file newer than this build is a problem for the rest of the session; a replaced one stays reported,
+              // in the past tense
+              layoutNotice:
+                result.layout.message ??
+                (summary.layout.state === "invalid" &&
+                result.layout.state === "ok"
+                  ? REPLACED_NOTICE
+                  : get().layoutNotice),
             });
         }
       } catch (error) {

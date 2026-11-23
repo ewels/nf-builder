@@ -40,11 +40,13 @@ import {
 } from "./flow-elements";
 import { useRefitOnResize } from "./use-refit-on-resize";
 
+const NODE_DESCRIPTION =
+  "Press enter or space to select this node, then use the arrow keys to move it.";
+
 /** Sentence-case labels with no delete wording (nodes can't be deleted yet) and none that offers to select an edge (edges aren't selectable). */
 const CANVAS_ARIA_LABELS = {
-  "node.a11yDescription.default": "Press enter or space to select this node.",
-  "node.a11yDescription.keyboardDisabled":
-    "Press enter or space to select this node.",
+  "node.a11yDescription.default": NODE_DESCRIPTION,
+  "node.a11yDescription.keyboardDisabled": NODE_DESCRIPTION,
   "node.a11yDescription.ariaLiveMessage": ({
     direction,
     x,
