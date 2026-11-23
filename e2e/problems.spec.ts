@@ -180,14 +180,9 @@ test("F-309 UX-30: activating a problem inside a node selects and centres that n
   await openProblemsFixture(page);
   await canvasReady(page);
   await expect(problemsReady(page)).toBeVisible();
-  // pan away first, so the node is out of view
-  const pane = page.locator(".react-flow__pane");
-  const box = await pane.boundingBox();
-  if (box === null) throw new Error("no canvas pane");
-  await page.mouse.move(box.x + 40, box.y + 40);
-  await page.mouse.down();
-  await page.mouse.move(box.x + 40 + 900, box.y + 40 + 700, { steps: 8 });
-  await page.mouse.up();
+  // open the panel first and let the canvas re-fit, so only focusOn can bring the node back
+  await statusCount(page, "problems").click();
+  await layoutSettled(page);
   const numbers = node(page, "main.nf#/numbers");
   const canvas = page.locator(".workflow-canvas");
   const inside = async () => {
@@ -201,9 +196,17 @@ test("F-309 UX-30: activating a problem inside a node selects and centres that n
       n.y + n.height <= c.y + c.height
     );
   };
+  expect(await inside()).toBe(true);
+  // pan away, so the node is out of view
+  const pane = page.locator(".react-flow__pane");
+  const box = await pane.boundingBox();
+  if (box === null) throw new Error("no canvas pane");
+  await page.mouse.move(box.x + 40, box.y + 40);
+  await page.mouse.down();
+  await page.mouse.move(box.x + 40 + 900, box.y + 40 + 700, { steps: 8 });
+  await page.mouse.up();
   expect(await inside()).toBe(false);
 
-  await statusCount(page, "problems").click();
   const go = problemRow(page, "deprecated-channel").locator(".problem-go");
   await go.click();
   await expect(numbers).toHaveClass(/selected/);
@@ -254,6 +257,8 @@ test("F-309 UX-20: activating a problem in a file without a workflow opens a Cod
     "code",
   );
   await expect(page.locator(".workflow-canvas")).toHaveCount(0);
+  // a file tab has no canvas, so no node and channel counts (UX-03)
+  await expect(page.locator("footer.status-bar")).not.toContainText("node");
   await expect(page.getByRole("radiogroup", { name: "View mode" })).toHaveCount(
     0,
   );
