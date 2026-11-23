@@ -1,7 +1,7 @@
 import type { RegistryErrorCode } from "@nf-builder/sources";
 import { type JSX, useEffect, useState } from "react";
 import { ChevronIcon, RefreshIcon } from "../shell/icons";
-import { formatBuildTime, sourceLine } from "./age";
+import { formatAge, formatBuildTime, sourceName } from "./age";
 import { type RegistryState, useRegistry } from "./registry-store";
 
 /** The interim lists show this many names each; F-503 replaces them. */
@@ -94,12 +94,20 @@ export function RegistrySectionView({
   const index = state.status === "ready" ? state.index : null;
   const canRefresh = state.status === "ready" || state.status === "failed";
   const refreshing = canRefresh && state.refreshing;
-  let line: string;
-  if (refreshing) line = "Refreshing…";
-  else if (index) line = sourceLine(index, now);
+  // The live region holds only what changes on a state change; the age ticks outside it.
+  let status: string;
+  if (refreshing) status = "Refreshing…";
+  else if (index) status = sourceName(index);
   else if (state.status === "failed")
-    line = FAILURE_MESSAGES[state.failure.code];
-  else line = "Loading registry modules…";
+    status = FAILURE_MESSAGES[state.failure.code];
+  else status = "Loading registry modules…";
+  const age =
+    index && !refreshing ? ` · updated ${formatAge(index.asOf, now)}` : null;
+  const title = !index
+    ? "Refresh registry data"
+    : index.source === "live"
+      ? `Live data read ${formatBuildTime(index.asOf)}; snapshot built ${formatBuildTime(index.snapshotAt)}`
+      : `Snapshot built ${formatBuildTime(index.asOf)}`;
 
   return (
     <section aria-labelledby="registry-heading" className="palette-registry">
@@ -114,18 +122,15 @@ export function RegistrySectionView({
           aria-describedby={SOURCE_ID}
           aria-busy={refreshing}
           disabled={!canRefresh || refreshing}
-          title={
-            index
-              ? `${index.source === "live" ? "Live data read" : "Snapshot built"} ${formatBuildTime(index.asOf)}`
-              : "Refresh registry data"
-          }
+          title={title}
           onClick={onRefresh}
         >
           <RefreshIcon />
         </button>
       </div>
-      <p id={SOURCE_ID} className="registry-source" aria-live="polite">
-        {line}
+      <p id={SOURCE_ID} className="registry-source">
+        <span aria-live="polite">{status}</span>
+        {age === null ? null : <span>{age}</span>}
       </p>
       {index?.liveFailure ? (
         <p className="registry-note">The live registry couldn't be reached.</p>

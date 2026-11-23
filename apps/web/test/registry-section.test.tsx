@@ -72,12 +72,14 @@ describe("registry section", () => {
   it("F-502 step 1 UX-14: a snapshot index shows the registry.nextflow.io heading, 'Snapshot · updated 5 hours ago' and a Refresh registry data button described by that line", () => {
     const html = render(ready(indexOf()));
     expect(html).toContain("registry.nextflow.io");
-    expect(html).toContain("Snapshot · updated 5 hours ago");
+    expect(html).toContain("<span> · updated 5 hours ago</span>");
     expect(html).toMatch(/aria-label="Refresh registry data"/);
     const describedBy = /aria-describedby="([^"]+)"/.exec(html)?.[1];
     expect(describedBy).toBeTruthy();
     expect(html).toMatch(
-      new RegExp(`<p[^>]*id="${describedBy}"[^>]*>Snapshot · updated 5 hours`),
+      new RegExp(
+        `<p[^>]*id="${describedBy}"[^>]*><span aria-live="polite">Snapshot</span><span> · updated 5 hours ago</span></p>`,
+      ),
     );
     expect(html).toContain("Snapshot built 22 Nov 2026, 00:00 UTC");
   });
@@ -86,7 +88,58 @@ describe("registry section", () => {
     const html = render(
       ready(indexOf({ source: "live", asOf: "2026-11-22T05:00:00.000Z" })),
     );
-    expect(html).toContain("Live · updated just now");
+    expect(html).toContain('<span aria-live="polite">Live</span>');
+    expect(html).toContain("<span> · updated just now</span>");
+  });
+
+  it("F-502 UX-14 ADR-0009: the ticking age is outside the live region, so only the source name and state messages are announced", () => {
+    const html = render(ready(indexOf()));
+    expect(html).not.toMatch(/<p[^>]*aria-live/);
+    expect(html).not.toMatch(/aria-live="polite"[^>]*>[^<]*updated/);
+    expect(render({ status: "loading" })).toContain(
+      '<span aria-live="polite">Loading registry modules…</span>',
+    );
+  });
+
+  it("F-502 UX-14 ADR-0009: a live index's refresh button title gives both the live read time and the snapshot build time", () => {
+    const html = render(
+      ready(
+        indexOf({
+          source: "live",
+          asOf: "2026-11-22T05:00:00.000Z",
+          snapshotAt: "2026-11-21T00:00:00.000Z",
+        }),
+      ),
+    );
+    expect(html).toContain(
+      'title="Live data read 22 Nov 2026, 05:00 UTC; snapshot built 21 Nov 2026, 00:00 UTC"',
+    );
+  });
+
+  it("F-502 UX-14: while refreshing the refresh button is disabled and aria-busy, otherwise enabled and not busy", () => {
+    const busy = render(ready(indexOf(), true));
+    expect(busy).toMatch(/<button[^>]*aria-busy="true"[^>]*disabled=""/);
+    const idle = render(ready(indexOf()));
+    expect(idle).toMatch(/<button[^>]*aria-busy="false"/);
+    expect(idle).not.toMatch(/<button[^>]*disabled/);
+  });
+
+  it("F-502 IO-30: timeout and http failures show their messages", () => {
+    const cases = [
+      [
+        "timeout",
+        "Couldn&#x27;t load registry modules. Check your connection, then refresh.",
+      ],
+      ["http", "The registry snapshot couldn&#x27;t be read."],
+    ] as const;
+    for (const [code, message] of cases) {
+      const html = render({
+        status: "failed",
+        failure: { code, message: "x" },
+        refreshing: false,
+      });
+      expect(html).toContain(message);
+    }
   });
 
   it("F-502 step 1 IO-30: after a live failure the section says the live registry couldn't be reached", () => {
@@ -98,7 +151,7 @@ describe("registry section", () => {
       ),
     );
     expect(html).toContain("The live registry couldn&#x27;t be reached.");
-    expect(html).toContain("Snapshot · updated 5 hours ago");
+    expect(html).toContain("<span> · updated 5 hours ago</span>");
   });
 
   it("F-502 IO-30 ADR-0035: unavailable, network and invalid failures each show their message and keep the refresh button", () => {
@@ -133,7 +186,7 @@ describe("registry section", () => {
     expect(html).not.toContain('role="status"');
     const searching = render(big, true, { modules: true, plugins: true });
     expect(searching).not.toContain("registry-item");
-    expect(searching).toContain("Snapshot · updated 5 hours ago");
+    expect(searching).toContain("<span> · updated 5 hours ago</span>");
     expect(searching).toContain("registry.nextflow.io");
   });
 

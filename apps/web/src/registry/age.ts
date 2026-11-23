@@ -31,8 +31,7 @@ export function formatBuildTime(iso: string): string {
   return `${buildTime.format(new Date(iso))} UTC`;
 }
 
-/** "Snapshot · updated 5 hours ago" or "Live · updated just now". */
-export function sourceLine(index: RegistryIndex, now: Date): string {
-  const source = index.source === "live" ? "Live" : "Snapshot";
-  return `${source} · updated ${formatAge(index.asOf, now)}`;
+/** "Snapshot" or "Live". */
+export function sourceName(index: RegistryIndex): string {
+  return index.source === "live" ? "Live" : "Snapshot";
 }
