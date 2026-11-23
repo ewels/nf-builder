@@ -19,6 +19,16 @@ export interface RenameHint {
   readonly to: string;
 }
 
+/** What a command tells the carry about the change it makes; each part is optional. */
+export interface CarryHints {
+  /** Declarations the command renamed. */
+  readonly renames?: readonly RenameHint[];
+  /** Ids of nodes before the change that the command deleted: they never match a node after it. */
+  readonly deleted?: readonly string[];
+  /** Ids of nodes after the change that the carry knows were restored (an undo): they never match a node before it. */
+  readonly inserted?: readonly string[];
+}
+
 const NONE = "\u0000";
 
 function nodeName(node: GraphNode): string {
@@ -106,13 +116,15 @@ function lcs(a: readonly string[], b: readonly string[]): [number, number][] {
  * Pairs the nodes of `before` with those of `after`: old id to new id. Each pass works on the nodes still unmatched, in
  * projection order. Passes: (1) a unique strong signature (kind, name, assigned variable, variables read); (2) the longest
  * common subsequence of strong signatures; (3) a unique name, with `renames` applied to the old callees; (4) the longest
- * common subsequence of names; (5) the longest common subsequence of kinds. A pair always has the same kind.
+ * common subsequence of names; (5) the longest common subsequence of kinds. A pair always has the same kind. A node the
+ * hints say was deleted (before) or restored (after) takes part in no pass.
  */
 export function matchNodes(
   before: Projection,
   after: Projection,
-  renames: readonly RenameHint[] = [],
+  hints: CarryHints = {},
 ): ReadonlyMap<string, string> {
+  const renames = hints.renames ?? [];
   const renamed = (node: GraphNode): string => {
     if (node.kind === "call") {
       const hint = renames.find(
@@ -124,8 +136,14 @@ export function matchNodes(
   };
   const old = describe(before, renamed);
   const next = describe(after, nodeName);
-  const oldLeft = new Set(old.map((_, i) => i));
-  const newLeft = new Set(next.map((_, i) => i));
+  const deleted = new Set(hints.deleted);
+  const inserted = new Set(hints.inserted);
+  const oldLeft = new Set(
+    old.flatMap((d, i) => (deleted.has(d.node.id) ? [] : [i])),
+  );
+  const newLeft = new Set(
+    next.flatMap((d, i) => (inserted.has(d.node.id) ? [] : [i])),
+  );
   const matched = new Map<string, string>();
   const take = (i: number, j: number) => {
     matched.set(
@@ -177,11 +195,21 @@ function push(map: Map<string, number[]>, key: string, value: number) {
 export const workflowKey = (w: { path: string; name: string | null }): string =>
   `${w.path}#${w.name ?? ""}`;
 
-/** The rename hint of a `renameDeclaration` command; none for any other. */
-export const renameHints = (command: EditCommand | undefined): RenameHint[] =>
-  command?.kind === "renameDeclaration"
-    ? [{ path: command.path, from: command.name, to: command.newName }]
-    : [];
+/** The hints of a command: the declaration a `renameDeclaration` renamed, the node a `deleteNode` deleted. */
+export const carryHints = (command: EditCommand | undefined): CarryHints => {
+  switch (command?.kind) {
+    case "renameDeclaration":
+      return {
+        renames: [
+          { path: command.path, from: command.name, to: command.newName },
+        ],
+      };
+    case "deleteNode":
+      return { deleted: [command.node] };
+    default:
+      return {};
+  }
+};
 
 /**
  * For each workflow in `before`, the workflow it became in `after`, or null when it vanished. A workflow with the same
@@ -278,12 +306,13 @@ const REMEMBERED = 500;
  * signature returns to the same workflow: undoing a delete then restores its position (ADR 0008). Holds at most 500.
  */
 export class RemovedPositions {
-  readonly #map = new Map<string, Point>();
+  readonly #map = new Map<string, { p: Point; id: string }>();
 
-  remember(workflowKey: string, signature: string, p: Point): void {
+  /** `id` is the removed node's id, which an undo gives back to the node it restores. */
+  remember(workflowKey: string, signature: string, p: Point, id: string): void {
     const key = `${workflowKey}${NONE}${signature}`;
     this.#map.delete(key);
-    this.#map.set(key, p);
+    this.#map.set(key, { p, id });
     while (this.#map.size > REMEMBERED) {
       const oldest = this.#map.keys().next().value;
       if (oldest === undefined) break;
@@ -296,7 +325,12 @@ export class RemovedPositions {
     const found = this.#map.get(key);
     if (found === undefined) return null;
     this.#map.delete(key);
-    return found;
+    return found.p;
+  }
+
+  /** The id of the node remembered under `signature`, without taking it. */
+  idOf(workflowKey: string, signature: string): string | undefined {
+    return this.#map.get(`${workflowKey}${NONE}${signature}`)?.id;
   }
 }
 
@@ -308,13 +342,44 @@ function nodeSignatures(projection: Projection): ReadonlyMap<string, string> {
 }
 
 /**
+ * The nodes of `after` that restore a removed node: where a signature has more nodes than before and the id of one of
+ * them is the id the removed node had. Matching leaves them out, so an undo of a delete doesn't pair the survivor with
+ * the restored node when both look the same.
+ */
+function restoredNodes(
+  before: Projection,
+  after: Projection,
+  removed: RemovedPositions,
+): string[] {
+  const count = (signatures: ReadonlyMap<string, string>) => {
+    const counts = new Map<string, number>();
+    for (const sig of signatures.values())
+      counts.set(sig, (counts.get(sig) ?? 0) + 1);
+    return counts;
+  };
+  const was = nodeSignatures(before);
+  const now = nodeSignatures(after);
+  const wasCount = count(was);
+  const nowCount = count(now);
+  const key = workflowKey(after.workflow);
+  const found: string[] = [];
+  for (const [id, sig] of now)
+    if (
+      (nowCount.get(sig) ?? 0) > (wasCount.get(sig) ?? 0) &&
+      removed.idOf(key, sig) === id
+    )
+      found.push(id);
+  return found;
+}
+
+/**
  * Moves each paired workflow's entries to the new ids. Entries of nodes that found no match are dropped (and remembered
  * in `removed`); entries of a vanished workflow are dropped. Nodes with no entry stay unplaced.
  */
 export function carryLayout(
   doc: LayoutDocument,
   pairs: readonly WorkflowPair[],
-  renames: readonly RenameHint[],
+  hints: CarryHints,
   removed?: RemovedPositions,
 ): LayoutDocument {
   const nodes: Record<string, Point> = { ...doc.nodes };
@@ -328,12 +393,15 @@ export function carryLayout(
     for (const id of Object.keys(stored)) delete nodes[id];
     const fromKey = workflowKey(before.workflow);
     if (after === null) continue;
-    const map = matchNodes(before, after, renames);
+    const map = matchNodes(before, after, {
+      ...hints,
+      inserted: removed ? restoredNodes(before, after, removed) : [],
+    });
     const oldSignatures = nodeSignatures(before);
     for (const [id, p] of Object.entries(stored)) {
       const target = map.get(id);
       if (target !== undefined) additions[target] = p;
-      else removed?.remember(fromKey, oldSignatures.get(id) ?? id, p);
+      else removed?.remember(fromKey, oldSignatures.get(id) ?? id, p, id);
     }
     const matchedNew = new Set(map.values());
     const newSignatures = nodeSignatures(after);

@@ -14,11 +14,11 @@ import {
   patchResult,
 } from "../../src/edit/apply";
 import {
+  type CarryHints,
+  carryHints,
   carryLayout,
   type LayoutDocument,
   type RemovedPositions,
-  type RenameHint,
-  renameHints,
   type WorkflowPair,
   workflowKey,
   workflowPairs,
@@ -86,7 +86,7 @@ function carried(
   state: EditState,
   doc: LayoutDocument,
   result: Accepted,
-  renames: readonly RenameHint[],
+  hints: CarryHints,
   removed?: RemovedPositions,
 ): Stepped {
   const before = snapshot(state);
@@ -97,10 +97,10 @@ function carried(
     after.workflows,
     (w) => after.projections.get(workflowKey(w)) ?? null,
     new Set(result.files.map((f) => f.path)),
-    renames,
+    hints.renames ?? [],
   );
   return {
-    doc: carryLayout(doc, pairs, renames, removed),
+    doc: carryLayout(doc, pairs, hints, removed),
     before,
     after,
     pairs,
@@ -115,7 +115,7 @@ export function stepPatches(
   patches: readonly TextPatch[],
   removed?: RemovedPositions,
 ): Stepped {
-  return carried(state, doc, patchResult(state.model, patches), [], removed);
+  return carried(state, doc, patchResult(state.model, patches), {}, removed);
 }
 
 /** Applies and commits `command`, then carries `doc` across it as the service does. */
@@ -127,5 +127,5 @@ export function step(
 ): Stepped {
   const result = applyCommand(state, command);
   if (!result.ok) throw new Error(`refused: ${result.code}: ${result.message}`);
-  return carried(state, doc, result, renameHints(command), removed);
+  return carried(state, doc, result, carryHints(command), removed);
 }

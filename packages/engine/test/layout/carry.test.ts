@@ -175,6 +175,27 @@ describe("F-207 carry", () => {
     expect(next.doc.nodes["main.nf#/b"]).toEqual(doc.nodes["main.nf#/b"]);
   });
 
+  it("F-207 AR-23 F-111: deleting the first of two identical calls keeps the survivor's own position, and undo restores both", async () => {
+    const state = await fixtureState("f111-start-typed", {
+      "main.nf":
+        "nextflow.enable.types = true\n\ninclude { COUNT } from './modules/local/count/main.nf'\n\nworkflow {\n    a = channel.of('a')\n    a.view()\n    a.view()\n}\n",
+    });
+    const removed = new RemovedPositions();
+    const start = seedLayout(snapshot(state));
+    const [first, second] = ["main.nf#/.view@1", "main.nf#/.view@2"] as const;
+    const del = step(
+      state,
+      start,
+      { kind: "deleteNode", target: entry, node: first },
+      removed,
+    );
+    // the survivor was the second call; it is now the first, and keeps the second's position
+    expect(del.doc.nodes[first]).toEqual(start.nodes[second]);
+    expect(del.doc.nodes[second]).toBeUndefined();
+    const undone = stepPatches(state, del.doc, del.inverse, removed);
+    expect(undone.doc).toEqual(start);
+  });
+
   it("F-207 F-111: AddCall leaves exactly the new node unplaced", async () => {
     const state = await fixtureState();
     const doc = seedLayout(snapshot(state));

@@ -1,10 +1,11 @@
 export {
+  type CarryHints,
+  carryHints,
   carryLayout,
   matchNodes,
   pairWorkflows,
   RemovedPositions,
   type RenameHint,
-  renameHints,
   type WorkflowPair,
   workflowKey,
   workflowPairs,

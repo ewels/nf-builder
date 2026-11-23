@@ -22,6 +22,8 @@ import {
 } from "../edit/apply";
 import { PatchError } from "../edit/patches";
 import {
+  type CarryHints,
+  carryHints,
   carryLayout,
   EMPTY_LAYOUT,
   formatLayout,
@@ -31,8 +33,6 @@ import {
   type LayoutStatus,
   parseLayout,
   RemovedPositions,
-  type RenameHint,
-  renameHints,
   trackedWorkflows,
   workflowKey,
   workflowPairs,
@@ -203,7 +203,7 @@ export function createEngineService(
   const finishCarry = (
     open: Open,
     before: BeforeCarry | null,
-    renames: readonly RenameHint[],
+    hints: CarryHints,
   ): FileText[] => {
     if (!before) return [];
     try {
@@ -212,9 +212,9 @@ export function createEngineService(
         projectorOf(open).workflows(),
         (w) => projectionOf(open, w.path, w.name),
         before.changed,
-        renames,
+        hints.renames ?? [],
       );
-      const next = carryLayout(open.layout, pairs, renames, open.removed);
+      const next = carryLayout(open.layout, pairs, hints, open.removed);
       const text = formatLayout(next);
       if (text === formatLayout(open.layout)) return [];
       open.state.model.setFile(LAYOUT_PATH, text);
@@ -239,10 +239,10 @@ export function createEngineService(
     files: readonly FileText[],
     remodelled: readonly string[],
     before: BeforeCarry | null,
-    renames: readonly RenameHint[],
+    hints: CarryHints,
   ): ProjectChange => {
     invalidate(open);
-    const sidecar = finishCarry(open, before, renames);
+    const sidecar = finishCarry(open, before, hints);
     return {
       revision,
       files: sidecar.length > 0 ? [...files, ...sidecar] : files,
@@ -310,7 +310,7 @@ export function createEngineService(
     const remodelled = commit(open.state, result);
     return {
       ok: true,
-      ...changed(open, result.files, remodelled, before, renameHints(command)),
+      ...changed(open, result.files, remodelled, before, carryHints(command)),
       patches: result.patches,
       inverse: result.inverse,
     };
@@ -400,7 +400,7 @@ export function createEngineService(
           Object.assign(open, readLayout(imported.text));
           open.removed = new RemovedPositions();
         }
-        return changed(open, files, [...touched].sort(), before, []);
+        return changed(open, files, [...touched].sort(), before, {});
       }),
 
     apply: (command, given) =>
