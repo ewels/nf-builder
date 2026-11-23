@@ -2,23 +2,32 @@
 // projects stored in this browser. A native <dialog> opened modally; native controls only, so it works by keyboard
 // (QA-10, QA-11) and inside a cross-origin frame (ADR 0044). An error shows inline and the dialog stays open.
 import { BLANK_TEMPLATE, type TemplateList } from "@nf-builder/engine";
-import { type FormEvent, type JSX, useId, useState } from "react";
+import { importProblem } from "@nf-builder/sources";
+import { type FormEvent, type JSX, useEffect, useId, useState } from "react";
 import {
   DEFAULT_PROJECT_NAME,
   normaliseProjectName,
   PROJECT_NAME_MAX,
 } from "../workspace/project-name";
-import type { ProjectMeta } from "../workspace/types";
+import type { ImportChoice, ProjectMeta } from "../workspace/types";
+import { ImportSection } from "./import-section";
 import { useModal } from "./project-dialogs";
 import type { TemplatesView } from "./templates";
+import {
+  type ZipImportState,
+  type ZipImportView,
+  zipProjectName,
+} from "./zip-import";
 
-export type NewProjectRoute = "blank" | "template";
+export type NewProjectRoute = "blank" | "template" | "import";
 
 export interface NewProjectRequest {
   readonly name: string;
   readonly languageVersion: string;
-  /** The pack's template id; Start blank is `BLANK_TEMPLATE`, which the worker resolves, so it needs no list. */
-  readonly template: string;
+  /** The pack's template id; Start blank is `BLANK_TEMPLATE`, which the worker resolves, so it needs no list. Not set for an import. */
+  readonly template?: string;
+  /** The staged zip and the ignore list to select its files with (F-403). */
+  readonly import?: ImportChoice;
   /** Carried with the request; it has no effect until F-606. */
   readonly publishDocs: boolean;
 }
@@ -29,6 +38,7 @@ export interface NewProjectForm {
   readonly route: NewProjectRoute;
   readonly templateId: string | null;
   readonly publishDocs: boolean;
+  readonly zip: ZipImportState;
 }
 
 /** The request for a filled-in form, or the message to show when it can't be made. */
@@ -39,6 +49,22 @@ export function newProjectRequest(
   const name = normaliseProjectName(form.name);
   if (name === null)
     return { error: `Enter a name of 1 to ${PROJECT_NAME_MAX} characters.` };
+  if (form.route === "import") {
+    const { zip } = form;
+    if (zip.status === "empty")
+      return { error: "Choose a zip file to import." };
+    if (zip.status === "reading")
+      return { error: `Reading ${zip.name}. Try again in a moment.` };
+    if (zip.status === "refused") return { error: zip.message };
+    const problem = importProblem(zip.summary);
+    if (problem !== null) return { error: problem };
+    return {
+      name,
+      languageVersion: form.languageVersion,
+      publishDocs: form.publishDocs,
+      import: { id: zip.id, ignore: zip.ignore },
+    };
+  }
   let template: string | null = BLANK_TEMPLATE;
   if (form.route === "template") {
     if (list === null) return { error: "Templates aren't loaded yet." };
@@ -83,6 +109,8 @@ export interface NewProjectDialogProps {
   readonly projects: readonly ProjectMeta[];
   readonly currentId: string | null;
   readonly initialRoute: NewProjectRoute;
+  /** The zip import hook (`useZipImport`): its stage is discarded when the dialog closes. */
+  readonly useZipImport: () => ZipImportView;
   onCreate(request: NewProjectRequest): Promise<void>;
   onOpen(id: string): Promise<void>;
   onClose(): void;
@@ -103,11 +131,26 @@ export function NewProjectDialog(props: NewProjectDialogProps): JSX.Element {
   const [publishDocs, setPublishDocs] = useState(true);
   const list = templates.status === "ready" ? templates.list : null;
   const templateId = chosen ?? list?.templates[0]?.id ?? null;
+  const zipView = props.useZipImport();
+  const zip = zipView.state;
+  // the zip's name becomes the project name while the field still holds the default or the last name taken from a zip
+  const [autoName, setAutoName] = useState(DEFAULT_PROJECT_NAME);
+  const zipName = zip.status === "ready" ? zip.name : null;
+  useEffect(() => {
+    if (zipName === null) return;
+    const next = zipProjectName(zipName);
+    setName((current) => (current === autoName ? next : current));
+    setAutoName(next);
+  }, [zipName, autoName]);
+  const chooseRoute = (next: NewProjectRoute) => {
+    if (next !== "import") zipView.reset();
+    setRoute(next);
+  };
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     const outcome = submitOutcome(
-      { name, languageVersion, route, templateId, publishDocs },
+      { name, languageVersion, route, templateId, publishDocs, zip },
       templates,
     );
     if ("reload" in outcome) {
@@ -163,7 +206,7 @@ export function NewProjectDialog(props: NewProjectDialogProps): JSX.Element {
               type="radio"
               name={`${ids}-route`}
               checked={route === "blank"}
-              onChange={() => setRoute("blank")}
+              onChange={() => chooseRoute("blank")}
             />
             <span>Start blank</span>
           </label>
@@ -172,11 +215,23 @@ export function NewProjectDialog(props: NewProjectDialogProps): JSX.Element {
               type="radio"
               name={`${ids}-route`}
               checked={route === "template"}
-              onChange={() => setRoute("template")}
+              onChange={() => chooseRoute("template")}
             />
             <span>From a template</span>
           </label>
+          <label className="dialog-choice">
+            <input
+              type="radio"
+              name={`${ids}-route`}
+              checked={route === "import"}
+              onChange={() => chooseRoute("import")}
+            />
+            <span>Import</span>
+          </label>
         </fieldset>
+        {route === "import" ? (
+          <ImportSection view={zipView} busy={modal.busy} />
+        ) : null}
         {route === "template" ? (
           <fieldset className="dialog-group">
             <legend>Template</legend>
