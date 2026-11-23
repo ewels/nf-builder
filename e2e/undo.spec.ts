@@ -26,6 +26,21 @@ const undoCountIs = (page: Page, n: number) =>
 const redoCountIs = (page: Page, n: number) =>
   expect.poll(async () => (await historyStatus(page)).redoCount).toBe(n);
 
+/**
+ * Monaco only draws the lines in view, so look at the top and the bottom of the file, and read the engine's text too,
+ * which is the whole file.
+ */
+async function expectEditorLacks(page: Page, text: string): Promise<void> {
+  for (const key of ["Home", "End"]) {
+    await page.locator(".monaco-editor .view-lines").click();
+    await page.keyboard.press(`ControlOrMeta+${key}`);
+    await expect(editor(page)).not.toContainText(text);
+  }
+  expect(Object.values(await currentFiles(page)).join("\n")).not.toContain(
+    text,
+  );
+}
+
 async function openSplit(page: Page, name: string): Promise<void> {
   await openStoredFixture(page, name);
   await radio(page, "Split").click();
@@ -88,8 +103,8 @@ test("F-209 step 1 step 2 AR-23 IO-01: five different edits each add one step; f
   expect(await storedFiles(page)).toEqual(startStored);
   expect(await currentFiles(page)).toEqual(startFiles);
   expect(await canvasIds(page)).toEqual(startIds);
-  await expect(editor(page)).not.toContainText("typed in split mode");
-  await expect(editor(page)).not.toContainText("COUNT_LINES");
+  for (const text of ["typed in split mode", "COUNT_LINES"])
+    await expectEditorLacks(page, text);
   expect((await historyStatus(page)).redoCount).toBe(5);
 
   for (let done = 1; done <= 5; done++) {

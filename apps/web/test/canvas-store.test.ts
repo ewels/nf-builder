@@ -901,4 +901,29 @@ describe("F-209 history", () => {
     ]);
     expect(store.getState().activeTab).toBe("lib.nf#OLD");
   });
+
+  it("F-209 F-207: a rename onto an id that a stale tab already holds leaves one tab with that id, keeping the renamed tab's mode", async () => {
+    const before = [ref("main.nf", null), ref("lib.nf", "OLD")];
+    const after = [ref("main.nf", null), ref("lib.nf", "NEW")];
+    const { engine } = historic(before, {});
+    const store = createCanvasStore(() => engine);
+    await store.getState().open(request);
+    await store.getState().openWorkflow("lib.nf", "OLD");
+    store.getState().setMode("lib.nf#OLD", "split");
+    await store.getState().openWorkflow("lib.nf", "NEW");
+    await store.getState().selectTab("lib.nf#OLD");
+    await store.getState().changed({
+      revision: 2,
+      files: [],
+      remodelled: [],
+      history: statusOf(1),
+      workflows: after,
+    });
+    const tabs = store.getState().tabs.map((t) => [t.id, t.mode]);
+    expect(tabs).toEqual([
+      ["main.nf#", "graph"],
+      ["lib.nf#NEW", "split"],
+    ]);
+    expect(store.getState().activeTab).toBe("lib.nf#NEW");
+  });
 });

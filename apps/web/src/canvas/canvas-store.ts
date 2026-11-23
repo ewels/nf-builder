@@ -429,10 +429,14 @@ export function createCanvasStore(
         if (summary === null) return;
         // a workflow renamed (or renamed back) keeps its tab, and its view mode
         const renamed = renamedTabs(summary.workflows, change.workflows);
-        const tabs = get().tabs.map((t) => {
-          const to = renamed.get(t.id);
-          return to === undefined ? t : { ...tabFor(to), mode: t.mode };
-        });
+        // a stale tab that already holds a new id gives way to the renamed one
+        const taken = new Set([...renamed.values()].map((w) => tabFor(w).id));
+        const tabs = get()
+          .tabs.filter((t) => renamed.has(t.id) || !taken.has(t.id))
+          .map((t) => {
+            const to = renamed.get(t.id);
+            return to === undefined ? t : { ...tabFor(to), mode: t.mode };
+          });
         const current = get().activeTab;
         const moved = current === null ? undefined : renamed.get(current);
         const activeTab = moved === undefined ? current : tabFor(moved).id;
