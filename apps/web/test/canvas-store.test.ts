@@ -1030,6 +1030,42 @@ describe("F-209 history", () => {
     expect(store.getState().summary?.revision).toBe(2);
   });
 
+  it("F-309 UX-20 F-209: a change that deletes a file closes its file tab, and the previous tab takes over when it was active", async () => {
+    const wf = [ref("main.nf", null)];
+    const store = createCanvasStore(() => fake(wf).engine);
+    await store.getState().open(request);
+    await store.getState().openFile("modules/a.nf");
+    await store.getState().openFile("modules/b.nf");
+    const change = (files: { path: string; text: string | null }[]) =>
+      ({
+        revision: 2,
+        workflows: wf,
+        files,
+        history: EMPTY_HISTORY,
+      }) as never;
+    // a background file tab goes without moving the active one
+    await store
+      .getState()
+      .changed(change([{ path: "modules/a.nf", text: null }]));
+    expect(store.getState().tabs.map((t) => t.id)).toEqual([
+      "main.nf#",
+      "file:modules/b.nf",
+    ]);
+    expect(store.getState().activeTab).toBe("file:modules/b.nf");
+    // an edited (not deleted) file keeps its tab
+    await store
+      .getState()
+      .changed(change([{ path: "modules/b.nf", text: "x" }]));
+    expect(store.getState().tabs).toHaveLength(2);
+    // the active file tab goes: the previous tab, with its canvas, takes over
+    await store
+      .getState()
+      .changed(change([{ path: "modules/b.nf", text: null }]));
+    expect(store.getState().tabs.map((t) => t.id)).toEqual(["main.nf#"]);
+    expect(store.getState().activeTab).toBe("main.nf#");
+    expect(store.getState().content.status).toBe("ready");
+  });
+
   it("F-309 AR-30: revealCode and focusOn record requests with rising sequence numbers, holding offsets and ids, never text", async () => {
     const store = createCanvasStore(() => fake([ref("main.nf", null)]).engine);
     await store.getState().open(request);

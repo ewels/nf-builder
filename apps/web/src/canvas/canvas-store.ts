@@ -515,15 +515,34 @@ export function createCanvasStore(
         const renamed = renamedTabs(summary.workflows, change.workflows);
         // a stale tab that already holds a new id gives way to the renamed one
         const taken = new Set([...renamed.values()].map((w) => tabFor(w).id));
-        const tabs = get()
-          .tabs.filter((t) => renamed.has(t.id) || !taken.has(t.id))
+        // a file tab goes with its file (text null: deleted, e.g. by undoing CreateProcess)
+        const deleted = new Set(
+          change.files.filter((f) => f.text === null).map((f) => f.path),
+        );
+        const before = get().tabs;
+        const tabs = before
+          .filter((t) => renamed.has(t.id) || !taken.has(t.id))
+          .filter((t) => !(t.kind === "file" && deleted.has(t.path)))
           .map((t) => {
             const to = renamed.get(t.id);
             return to === undefined ? t : { ...tabFor(to), mode: t.mode };
           });
         const current = get().activeTab;
         const moved = current === null ? undefined : renamed.get(current);
-        const activeTab = moved === undefined ? current : tabFor(moved).id;
+        let activeTab = moved === undefined ? current : tabFor(moved).id;
+        // the active file tab went: the previous tab takes over, else the first left
+        const closed =
+          activeTab !== null && !tabs.some((t) => t.id === activeTab)
+            ? before.find((t) => t.id === activeTab)
+            : undefined;
+        if (closed?.kind === "file") {
+          const at = before.indexOf(closed);
+          const left = before
+            .slice(0, at)
+            .reverse()
+            .find((t) => tabs.some((k) => k.id === t.id));
+          activeTab = left?.id ?? tabs[0]?.id ?? null;
+        }
         set({
           tabs,
           activeTab,
@@ -540,6 +559,10 @@ export function createCanvasStore(
           },
         });
         const active = tabs.find((t) => t.id === activeTab);
+        if (closed?.kind === "file" && active !== undefined) {
+          await load(active);
+          return;
+        }
         if (active?.kind === "file") return;
         if (active !== undefined) {
           await load(active, true);
