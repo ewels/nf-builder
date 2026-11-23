@@ -179,12 +179,6 @@
   stroke-width: 1;
 }
 
-/* Thicker as well as coloured (QA-12). The extra class beats the unknown-type and hover rules; a mismatch rule (F-302) goes after this one. */
-.react-flow__edge .react-flow__edge-path.is-highlighted {
-  stroke: var(--color-accent);
-  stroke-width: 3;
-}
-
 .react-flow__node.selected .canvas-node {
   outline: 2px solid var(--color-accent);
   outline-offset: 2px;
@@ -198,6 +192,12 @@
 .react-flow__edge:hover .react-flow__edge-path {
   stroke: var(--color-accent);
   stroke-width: 2.5;
+}
+
+/* Thicker as well as coloured (QA-12). It has the same specificity as the hover rule, so it goes after it to keep 3 px on hover; the extra class beats the unknown-type rule, and a mismatch rule (F-302) goes after this one. */
+.react-flow__edge .react-flow__edge-path.is-highlighted {
+  stroke: var(--color-accent);
+  stroke-width: 3;
 }
 
 .edge-tooltip {

@@ -92,6 +92,21 @@ test("F-206 UX-24: edges touching the selected node are highlighted until the se
     expect(await zIndex(path, "svg")).toBe("0");
   const other = Number(await zIndex(node(page, NODE.counted)));
   expect(other).toBeGreaterThanOrEqual(0);
+  // the hover rule must not thin a highlighted edge
+  const middle = await highlighted.first().evaluate((el) => {
+    const path = el as unknown as SVGPathElement;
+    const point = path
+      .getPointAtLength(path.getTotalLength() / 2)
+      .matrixTransform(path.getScreenCTM() ?? new DOMMatrix());
+    return { x: point.x, y: point.y };
+  });
+  await page.mouse.move(middle.x, middle.y);
+  await expect(page.locator(".react-flow__edge:hover")).toHaveCount(1);
+  expect(
+    await highlighted
+      .first()
+      .evaluate((el) => getComputedStyle(el).strokeWidth),
+  ).toBe("3px");
   await selectNode(page, NODE.counted);
   await expect(node(page, NODE.greeted)).not.toHaveClass(/selected/);
   await expect(node(page, NODE.counted)).toHaveClass(/selected/);
