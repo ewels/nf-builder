@@ -181,6 +181,8 @@ test(
     tag: VISUAL_TAG,
   },
   async ({ page }, testInfo) => {
+    // The registry section shows the snapshot's age: fix the clock so the baseline is stable.
+    await page.clock.setFixedTime(new Date("2026-11-22T05:00:00Z"));
     await page.goto("./");
     await page.getByRole("contentinfo").waitFor();
     await expect(
