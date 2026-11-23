@@ -211,3 +211,27 @@
   border-radius: 6px;
   pointer-events: none;
 }
+
+/* Layout notices (F-207): over the canvas, below its controls, and empty when there is nothing to say */
+.canvas-notices {
+  position: absolute;
+  top: var(--space-2);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  max-width: min(90%, 640px);
+  pointer-events: none;
+}
+
+.canvas-notices p {
+  margin: 0;
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 12px;
+}
