@@ -43,11 +43,13 @@ const whole = (n: number): number => Math.round(n) + 0;
 
 /**
  * Reads sidecar text. An entry is dropped (and counted) when its key isn't a node key or its coordinates are missing,
- * not finite or outside ±1e6; unknown fields are ignored. Never throws.
+ * not finite or outside ±1e6; unknown fields are ignored. Migrations run up to `target`, which is the version this build
+ * writes (only tests pass another). Never throws.
  */
 export function parseLayout(
   text: string,
   migrations: LayoutMigrations = LAYOUT_MIGRATIONS,
+  target: number = LAYOUT_VERSION,
 ): ParsedLayout {
   let raw: unknown;
   try {
@@ -56,10 +58,6 @@ export function parseLayout(
     return invalid("it isn't valid JSON");
   }
   if (!isRecord(raw)) return invalid("it isn't a JSON object");
-  const target = Math.max(
-    LAYOUT_VERSION,
-    ...Object.keys(migrations).map((k) => Number(k) + 1),
-  );
   let version = raw.version;
   if (typeof version !== "number" || !Number.isInteger(version) || version < 1)
     return invalid("its version is missing or not a whole number");

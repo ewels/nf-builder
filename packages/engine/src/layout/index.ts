@@ -24,6 +24,7 @@ export {
 export {
   EMPTY_LAYOUT,
   formatLayout,
+  LAYOUT_MIGRATIONS,
   parseLayout,
   trackedWorkflows,
   workflowPositions,

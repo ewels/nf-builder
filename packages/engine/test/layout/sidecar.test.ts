@@ -4,6 +4,8 @@ import { describe, expect, it } from "vitest";
 import {
   EMPTY_LAYOUT,
   formatLayout,
+  LAYOUT_MIGRATIONS,
+  LAYOUT_VERSION,
   type LayoutDocument,
   parseLayout,
   trackedWorkflows,
@@ -174,7 +176,21 @@ describe("F-207 sidecar", () => {
     expect(huge).toMatchObject({ ok: true, dropped: 1 });
   });
 
-  it("F-207 IO-02: migrations run in order from the file's version and the result is written at the current version", () => {
+  it("F-207 IO-02: the target version is LAYOUT_VERSION unless a test passes one, and the shipped table covers every older version", () => {
+    for (let v = 1; v < LAYOUT_VERSION; v++)
+      expect(LAYOUT_MIGRATIONS[v], `migration from ${v}`).toBeTypeOf(
+        "function",
+      );
+    // a table with a migration doesn't move the target: a file above LAYOUT_VERSION is newer
+    const migrations = {
+      [LAYOUT_VERSION]: (raw: Record<string, unknown>) => raw,
+    };
+    expect(
+      parseLayout(`{"version":${LAYOUT_VERSION + 1},"nodes":{}}`, migrations),
+    ).toMatchObject({ ok: false, state: "newer" });
+  });
+
+  it("F-207 IO-02: migrations run in order from the file's version up to the target, and a save writes the build's own version", () => {
     const calls: number[] = [];
     const migrations = {
       1: (raw: Record<string, unknown>) => {
@@ -206,6 +222,7 @@ describe("F-207 sidecar", () => {
     const parsed = parseLayout(
       '{"version":1,"nodes":{"main.nf#/a":{"left":3,"top":4}}}',
       migrations,
+      3,
     );
     expect(calls).toEqual([1, 2]);
     expect(parsed).toMatchObject({
@@ -214,13 +231,14 @@ describe("F-207 sidecar", () => {
     });
     // a file already at the target version runs none, and the shipped table is empty
     calls.length = 0;
-    parseLayout('{"version":3,"nodes":{}}', migrations);
+    parseLayout('{"version":3,"nodes":{}}', migrations, 3);
     expect(calls).toEqual([]);
-    expect(parseLayout('{"version":2,"nodes":{}}').ok).toBe(false);
-    // written at the current version
+    // the shipped table is empty and its target is LAYOUT_VERSION, so a version in between has no migration
+    expect(parseLayout('{"version":0,"nodes":{}}').ok).toBe(false);
+    // the target here is a stand-in: a save always writes the version this build knows
     expect(
       formatLayout((parsed as { document: LayoutDocument }).document),
-    ).toContain('"version": 1,');
+    ).toContain(`"version": ${LAYOUT_VERSION},`);
   });
 
   it("F-207 ADR-0008: writePositions merges, or replaces only the given workflow's entries", () => {
