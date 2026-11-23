@@ -57,3 +57,4 @@ Process: [0001](0001-record-decisions-as-adrs.md). Template: [template.md](templ
 | [0051](0051-undo-and-redo.md) | Keep undo and redo history in the engine worker, one step per command | Accepted (agent) |
 | [0052](0052-layout-sidecar.md) | Store node positions in a layout sidecar owned by the engine, and place new nodes with ELK in its own worker | Accepted (agent) |
 | [0053](0053-zip-import.md) | Import zips in the engine worker with fflate, one shared set of limits, ignore rules and text checks | Accepted (agent) |
+| [0054](0054-problems-panel.md) | List problems in a panel pulled per revision, apply quick fixes through the engine, and open files in code-only tabs | Accepted (agent) |
