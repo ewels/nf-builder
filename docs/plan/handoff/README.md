@@ -25,6 +25,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-208 view modes and Code | merged, PR #46 | |
 | F-209 undo and redo | merged, PR #50 | |
 | F-309 problems panel | not started | [plan](plan-F-309.md). After F-208 and F-209. |
+| F-403 zip import | merged, PR #51 | |
 | F-502 registry client | merged, PR #48 | |
 | Parser error position | `fix/parser-error-position` | A blank line before `stub:` or `emit:` moved a later syntax error to that keyword (antlr4ng and Groovy's optimised ANTLR runtime differ); fix building. |
 | F-501 registry snapshot | merged, PR #29; passing | Confirmed on live data after the snapshot-triggered Pages deploy. |
@@ -34,7 +35,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 
 Branches are stacked: `feat/F-108` → `feat/F-107`; `feat/F-111` also merges F-107. Open PRs for F-108, F-107 and F-111 against `main` in that order (merge `main` into each first), each green before the next. Worktrees: `/home/user/wt-F-1xx`.
 
-Next free ADR number: 0052 (0050 is F-502's, 0051 F-209's).
+Next free ADR number: 0054 (0052 is F-207's, 0053 F-403's).
 
 ## Decisions already taken on the plans' open points
 
@@ -219,7 +220,7 @@ Next free ADR number: 0052 (0050 is F-502's, 0051 F-209's).
   - the F-204 locator change and the shell baseline re-approval, recorded in the PR;
   - extend the recorded-registry-data licences row to the live fixtures.
 
-### F-403 — [plan](plan-F-403.md)
+### F-403 (merged with its PR)
 - Accept every recommendation in section 6:
   - fflate 0.8.3, pinned, as a runtime dependency of `@nf-builder/sources` (`unzipSync` only), plus root dev fflate and `sources` dev fast-check 4.11.0;
   - unzipping in the engine worker with `sources` loaded lazily;

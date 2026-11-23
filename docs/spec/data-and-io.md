@@ -14,8 +14,8 @@
 | ID | Requirement |
 |---|---|
 | IO-10 | GitHub import takes `owner/repo` or a github.com URL, an optional ref (default branch if empty) and an optional token. It follows ADR 0009: two API calls, contents from raw, blobs API for private repos. |
-| IO-11 | Zip import unzips in a worker and strips a single top-level folder. |
-| IO-12 | Both routes apply the size limit (1 MB per text file) and the default ignore list, editable before confirming. Limits guard against zip bombs: at most 20,000 entries and 200 MB uncompressed. |
+| IO-11 | Zip import unzips in the engine worker and strips a single top-level folder: one level, when every safe entry outside `__MACOSX/` lies under one folder and at least one file exists, decided before the ignore list (ADR 0053). |
+| IO-12 | Both routes apply the size limit (1 MB per text file) and the default ignore list, editable before confirming; unsupported ignore lines block Create. Binary files (a NUL in the first 8,000 bytes, or not UTF-8) and text files over 1 MB are skipped and listed, never stored. Limits guard against zip bombs: at most 20,000 entries (folders included), 200 MB uncompressed (recorded sizes) and a 200 MB zip. 1 MB is 1,000,000 bytes, shown in SI units (ADR 0053). |
 | IO-13 | The project records its source (repo and commit SHA, or zip name and hash). |
 | IO-14 | Import never fails because of code the app can't model (ADR 0004). Only I/O errors and limit breaches abort an import. |
 | IO-15 | Tokens are held in memory unless the user ticks "Remember on this device". |

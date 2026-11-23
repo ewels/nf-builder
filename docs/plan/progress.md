@@ -626,3 +626,15 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - The tab-strip baselines are re-approved from CI (ADR 0021).
   - Commit c594543 on the branch doesn't typecheck on its own; the squash merge hides it.
 - Blockers: none.
+
+## 2026-11-23 · F-403 · Claude (autonomous)
+- Did:
+  - Zip import in the engine worker with fflate: the New project dialog's Import route reads a zip, strips one top-level folder, applies the shared limits, ignore list and text check, shows a summary, and creates the project from the selection.
+  - `packages/sources/import`: the import core shared with F-401 (limits, paths, ignore list with a non-backtracking matcher, text detection, selection and summary) and the zip reader with bomb guards.
+- State: passing once CI is green.
+- Next: F-207 and F-309 merging, then F-703, F-210, F-605 and F-601.
+- Decisions:
+  - [ADR 0053](../adr/0053-zip-import.md): fflate 0.8.3 as a runtime dependency of `@nf-builder/sources` (`unzipSync` only), unzipping in the engine worker from the `./import` subpath, the API additions (amends ADRs 0043 and 0045), the limits table, the folder rule, the default ignore list reading ADR 0009's "test data" as nf-core's root folders, binary files skipped, and a damaged entry aborting the import.
+  - IO-11, IO-12, QA-32 and the architecture data flow updated; an fflate licences row.
+  - `scope-change`: F-403 added to F-404's `depends_on`, and the deferred M8 feature F-407 "Binary files in projects" added.
+- Blockers: none.

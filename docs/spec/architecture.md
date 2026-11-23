@@ -15,6 +15,7 @@ The main thread keeps only pack versions and palette search; parsing, modelling,
 
 - The UI never edits text or AST directly. It sends edit commands and renders projections.
 - The engine runs in a Web Worker behind a Comlink API. The UI keeps a read-only copy of the latest projection and diagnostics.
+- Zip import reads and unpacks the file in the engine worker; the page sees only the summary (ADR 0053).
 
 ## Engine model
 

@@ -690,7 +690,7 @@
         "A registry module folder shows the `registry` tag and a file with a syntax error shows an error badge"
       ],
       "passes": false,
-      "notes": "Added 2026-11-22 (F-204 PR, scope-change; Q16): UX-16 had no owning feature; F-301 step 1 relies on the Files view. Dropping a zip reuses F-403's zip import. From F-111: there is no create, delete or rename file command yet. From F-202: IndexedDB schema v1 stores text only; binary files need a schema version bump (ADR 0045). From F-208: an entry file with no workflows gets no tab, so there is no toggle to reach its Code view. From F-209: `writeFiles` (uploads, new files written raw) clears the undo history."
+      "notes": "Added 2026-11-22 (F-204 PR, scope-change; Q16): UX-16 had no owning feature; F-301 step 1 relies on the Files view. Dropping a zip reuses F-403's zip import. From F-111: there is no create, delete or rename file command yet. From F-202: IndexedDB schema v1 stores text only; binary files need a schema version bump (ADR 0045). From F-208: an entry file with no workflows gets no tab, so there is no toggle to reach its Code view. From F-209: `writeFiles` (uploads, new files written raw) clears the undo history. From F-403: reuse `stageZip`, `restageImport` and `discardImport` for dropped zips, and `selectFiles` for loose files; writes go through `writeFiles` in the worker."
     },
     {
       "id": "F-211",
@@ -982,7 +982,7 @@
         "The report lists parse failures and legacy share"
       ],
       "passes": false,
-      "notes": "From F-113: load an imported project with getEngine().open(request, onProgress) or getEngine().writeFiles(files). From F-202: IndexedDB schema v1 stores text only; binary imports need a schema version bump (ADR 0045). From F-203: a third radio in the New project dialog's route group can hold Import. Projects don't record their template; F-401 may add `{kind: \"template\", id, version}` as a project source (a stored-format change, ADR 0045)."
+      "notes": "From F-113: load an imported project with getEngine().open(request, onProgress) or getEngine().writeFiles(files). From F-202: IndexedDB schema v1 stores text only; binary imports need a schema version bump (ADR 0045). From F-203: a third radio in the New project dialog's route group can hold Import. Projects don't record their template; F-401 may add `{kind: \"template\", id, version}` as a project source (a stored-format change, ADR 0045). From F-403: reuse `@nf-builder/sources/import` (limits, `DEFAULT_IGNORE`, `parseIgnore`, `selectFiles`, `summarise`, `importProblem`) and `ImportSection`; add \"GitHub repository\" before \"Zip file\" in the dialog's \"Import from\" group; reuse `RNASEQ_NF_SKIPPED` in e2e; binaries are skipped on both routes; record the IO-13 zip case as `{kind: \"zip\", name, sha256}` hashed in the worker (`crypto.subtle` needs a secure context); the worker imports only the `./import` subpath, which the planned `web-worker-no-github-client` rule keeps clean."
     },
     {
       "id": "F-402",
@@ -1021,8 +1021,8 @@
         "Import a GitHub archive zip of rnaseq-nf: same files as the GitHub import",
         "A zip exceeding the limits is refused with a clear message"
       ],
-      "passes": false,
-      "notes": "From F-008 (S4): codeload.github.com only allows https://render.githubusercontent.com, so zip import is a file upload; no GitHub archive URL can be fetched in the browser. From F-113: load an imported project with getEngine().open(request, onProgress) or getEngine().writeFiles(files). From F-202: IndexedDB schema v1 stores text only; binary files in a zip need a schema version bump (ADR 0045). From F-203: zip import can join the New project dialog's route group."
+      "passes": true,
+      "notes": "From F-008 (S4): codeload.github.com only allows https://render.githubusercontent.com, so zip import is a file upload; no GitHub archive URL can be fetched in the browser. From F-113: load an imported project with getEngine().open(request, onProgress) or getEngine().writeFiles(files). From F-202: IndexedDB schema v1 stores text only; binary files in a zip need a schema version bump (ADR 0045). From F-203: zip import can join the New project dialog's route group. Verified 2026-11-23 (ADR 0053): step 1 by `e2e/zip-import.spec.ts` (a `git archive` zip of the pinned rnaseq-nf tree gives the same 22 files as the pinned tree after the IO-12 rules, 12 `data/` files ignored and one PNG skipped; with `/data/` removed from the list, 34 files); step 2 by the 20,001-entry and 201 MB refusals in e2e and the `packages/sources` limit and bomb tests (a 1 GB entry recorded as 1 MB is cut to its recorded size); also the newest-stage race, the iframe case, and an `@smoke` import of the hello-world template on all three browsers. Binary files are skipped (F-407)."
     },
     {
       "id": "F-404",
@@ -1034,7 +1034,8 @@
         "UX-62"
       ],
       "depends_on": [
-        "F-401"
+        "F-401",
+        "F-403"
       ],
       "steps": [
         "Import, make one scripted edit, export: every file the edit didn't touch is equivalent to the source",
@@ -1042,7 +1043,7 @@
         "Export, clear storage, import the zip: layout identical (ADR 0008 confirmation)"
       ],
       "passes": false,
-      "notes": "From F-104: untouched files export as printSourceFile output (byte-identical); IO-20 checks use engine equivalent()."
+      "notes": "From F-104: untouched files export as printSourceFile output (byte-identical); IO-20 checks use engine equivalent(). From F-403: imported projects lack binary files, symlinks (imported as text holding the target) and executable bits; `.nf-builder/` is never ignored; write with fflate `zipSync`; a file and a folder can share a path prefix (`x` and `x/y`). F-403 added to `depends_on` (step 3 imports a zip)."
     },
     {
       "id": "F-405",
@@ -1077,7 +1078,28 @@
         "Export all, clear storage, import the backup: every project restored with layout"
       ],
       "passes": false,
-      "notes": "From F-202: the backup format is its own and reads through the workspace; it is also the way to move projects to another origin (ADR 0045)."
+      "notes": "From F-202: the backup format is its own and reads through the workspace; it is also the way to move projects to another origin (ADR 0045). From F-403: a backup import may bypass the ignore list; reuse the limits and the text check."
+    },
+    {
+      "id": "F-407",
+      "milestone": "M8",
+      "description": "Binary files in projects: IndexedDB schema v2 stores binary content; both import routes and export keep binary files; binaries are listed in the Files view but not opened.",
+      "spec": [
+        "FI-32",
+        "IO-11",
+        "IO-12",
+        "IO-20"
+      ],
+      "depends_on": [
+        "F-403"
+      ],
+      "steps": [
+        "Import a zip containing a .png: the file is stored and listed in the Files view, and opening it shows a notice instead of an editor",
+        "Export the project: the .png is in the zip byte for byte",
+        "An older build opening the database is told to reload; a schema v1 database migrates to v2 without losing projects"
+      ],
+      "passes": false,
+      "notes": "Split from F-403 on 2026-11-23 (ADR 0053): v0.1 projects hold text files only and imports skip binary files; deferred past v0.1 (ADR 0030)."
     },
     {
       "id": "F-501",
@@ -1285,7 +1307,7 @@
         "A .png in the project is listed but not opened"
       ],
       "passes": false,
-      "notes": "From F-208: the markdown sanitiser must strip `<style>` elements and `style` attributes, because the policy allows inline styles for Monaco (ADR 0048); reuse the Monaco modules in `apps/web/src/code/`."
+      "notes": "From F-208: the markdown sanitiser must strip `<style>` elements and `style` attributes, because the policy allows inline styles for Monaco (ADR 0048); reuse the Monaco modules in `apps/web/src/code/`. From F-403: the deferred F-407 \"Binary files in projects\" exists; move F-605 step 2 there as planned."
     },
     {
       "id": "F-606",
