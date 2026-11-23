@@ -25,7 +25,7 @@ export interface CarryHints {
   readonly renames?: readonly RenameHint[];
   /** Ids of nodes before the change that the command deleted: they never match a node after it. */
   readonly deleted?: readonly string[];
-  /** Ids of nodes after the change that the carry knows were restored (an undo): they never match a node before it. */
+  /** Ids of nodes after the change that an undo restored: they never match a node before it, and take back a remembered position. */
   readonly inserted?: readonly string[];
 }
 
@@ -303,34 +303,39 @@ const REMEMBERED = 500;
 
 /**
  * Positions of nodes a change removed, kept for the session (never stored) and given back when a node with the same
- * signature returns to the same workflow: undoing a delete then restores its position (ADR 0008). Holds at most 500.
+ * signature returns to the same workflow: undoing a delete then restores its position (ADR 0008). Each workflow and
+ * signature keeps a stack, newest first, so identical nodes deleted one after another come back in reverse order.
+ * Holds at most 500.
  */
 export class RemovedPositions {
-  readonly #map = new Map<string, { p: Point; id: string }>();
+  readonly #map = new Map<string, Point[]>();
+  #size = 0;
 
-  /** `id` is the removed node's id, which an undo gives back to the node it restores. */
-  remember(workflowKey: string, signature: string, p: Point, id: string): void {
+  remember(workflowKey: string, signature: string, p: Point): void {
     const key = `${workflowKey}${NONE}${signature}`;
+    const stack = this.#map.get(key) ?? [];
     this.#map.delete(key);
-    this.#map.set(key, { p, id });
-    while (this.#map.size > REMEMBERED) {
-      const oldest = this.#map.keys().next().value;
+    stack.push(p);
+    this.#map.set(key, stack);
+    this.#size += 1;
+    while (this.#size > REMEMBERED) {
+      const oldest = this.#map.entries().next().value;
       if (oldest === undefined) break;
-      this.#map.delete(oldest);
+      const [oldKey, list] = oldest;
+      list.shift();
+      this.#size -= 1;
+      if (list.length === 0) this.#map.delete(oldKey);
     }
   }
 
   take(workflowKey: string, signature: string): Point | null {
     const key = `${workflowKey}${NONE}${signature}`;
-    const found = this.#map.get(key);
-    if (found === undefined) return null;
-    this.#map.delete(key);
-    return found.p;
-  }
-
-  /** The id of the node remembered under `signature`, without taking it. */
-  idOf(workflowKey: string, signature: string): string | undefined {
-    return this.#map.get(`${workflowKey}${NONE}${signature}`)?.id;
+    const stack = this.#map.get(key);
+    const found = stack?.pop();
+    if (stack === undefined || found === undefined) return null;
+    this.#size -= 1;
+    if (stack.length === 0) this.#map.delete(key);
+    return found;
   }
 }
 
@@ -339,37 +344,6 @@ function nodeSignatures(projection: Projection): ReadonlyMap<string, string> {
   return new Map(
     describe(projection, nodeName).map((d) => [d.node.id, d.strong]),
   );
-}
-
-/**
- * The nodes of `after` that restore a removed node: where a signature has more nodes than before and the id of one of
- * them is the id the removed node had. Matching leaves them out, so an undo of a delete doesn't pair the survivor with
- * the restored node when both look the same.
- */
-function restoredNodes(
-  before: Projection,
-  after: Projection,
-  removed: RemovedPositions,
-): string[] {
-  const count = (signatures: ReadonlyMap<string, string>) => {
-    const counts = new Map<string, number>();
-    for (const sig of signatures.values())
-      counts.set(sig, (counts.get(sig) ?? 0) + 1);
-    return counts;
-  };
-  const was = nodeSignatures(before);
-  const now = nodeSignatures(after);
-  const wasCount = count(was);
-  const nowCount = count(now);
-  const key = workflowKey(after.workflow);
-  const found: string[] = [];
-  for (const [id, sig] of now)
-    if (
-      (nowCount.get(sig) ?? 0) > (wasCount.get(sig) ?? 0) &&
-      removed.idOf(key, sig) === id
-    )
-      found.push(id);
-  return found;
 }
 
 /**
@@ -393,15 +367,12 @@ export function carryLayout(
     for (const id of Object.keys(stored)) delete nodes[id];
     const fromKey = workflowKey(before.workflow);
     if (after === null) continue;
-    const map = matchNodes(before, after, {
-      ...hints,
-      inserted: removed ? restoredNodes(before, after, removed) : [],
-    });
+    const map = matchNodes(before, after, hints);
     const oldSignatures = nodeSignatures(before);
     for (const [id, p] of Object.entries(stored)) {
       const target = map.get(id);
       if (target !== undefined) additions[target] = p;
-      else removed?.remember(fromKey, oldSignatures.get(id) ?? id, p, id);
+      else removed?.remember(fromKey, oldSignatures.get(id) ?? id, p);
     }
     const matchedNew = new Set(map.values());
     const newSignatures = nodeSignatures(after);

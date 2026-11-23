@@ -54,6 +54,19 @@ export function patchUnits(patches: readonly TextPatch[]): number {
   return units;
 }
 
+/** Renames in the order made, with a chain through one name joined: A to B then B to C becomes A to C. */
+function composeRenames(renames: readonly RenameHint[]): RenameHint[] {
+  const out: RenameHint[] = [];
+  for (const r of renames) {
+    const at = out.findIndex((x) => x.path === r.path && x.to === r.from);
+    const chained = out[at];
+    if (chained === undefined) out.push(r);
+    else if (chained.from === r.to) out.splice(at, 1);
+    else out[at] = { path: r.path, from: chained.from, to: r.to };
+  }
+  return out;
+}
+
 export class History {
   readonly #limits: HistoryLimits;
   #undo: HistoryStep[] = [];
@@ -98,27 +111,32 @@ export class History {
     return top ? top.parts.map((p) => p.patches) : null;
   }
 
-  /** What an undo of the top step tells the layout carry: its renames reversed, newest first. */
+  /**
+   * What an undo of the top step tells the layout carry: its renames reversed (a chain composed, so A to B then B to C
+   * undoes as C to A), and, for a one-part step, the nodes its command deleted as the ones the undo restores.
+   */
   undoHints(): CarryHints {
     const top = this.#undo[this.#undo.length - 1];
     if (!top) return {};
-    return {
-      renames: [...top.parts]
-        .reverse()
-        .flatMap((p) =>
-          [...(p.renames ?? [])]
-            .reverse()
-            .map((r) => ({ path: r.path, from: r.to, to: r.from })),
-        ),
-    };
+    const renames = composeRenames(top.parts.flatMap((p) => p.renames ?? []))
+      .reverse()
+      .map((r) => ({ path: r.path, from: r.to, to: r.from }));
+    const only = top.parts.length === 1 ? top.parts[0] : undefined;
+    return only?.deleted?.length
+      ? { renames, inserted: only.deleted }
+      : { renames };
   }
 
-  /** What a redo of the top undone step tells the layout carry: its renames and deleted nodes, oldest first. */
+  /**
+   * What a redo of the top undone step tells the layout carry: its renames (composed) and deleted nodes, oldest first.
+   * The ids of nodes deleted by a later part of a group are those before that part, so they are exact only for the
+   * first deleting part.
+   */
   redoHints(): CarryHints {
     const top = this.#redo[this.#redo.length - 1];
     if (!top) return {};
     return {
-      renames: top.parts.flatMap((p) => p.renames ?? []),
+      renames: composeRenames(top.parts.flatMap((p) => p.renames ?? [])),
       deleted: top.parts.flatMap((p) => p.deleted ?? []),
     };
   }

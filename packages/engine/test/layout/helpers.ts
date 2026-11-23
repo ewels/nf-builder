@@ -114,8 +114,9 @@ export function stepPatches(
   doc: LayoutDocument,
   patches: readonly TextPatch[],
   removed?: RemovedPositions,
+  hints: CarryHints = {},
 ): Stepped {
-  return carried(state, doc, patchResult(state.model, patches), {}, removed);
+  return carried(state, doc, patchResult(state.model, patches), hints, removed);
 }
 
 /** Applies and commits `command`, then carries `doc` across it as the service does. */

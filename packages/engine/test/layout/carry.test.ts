@@ -19,6 +19,9 @@ import {
 
 const COUNT_FILE = "modules/local/count/main.nf";
 
+const VIEWS = (body: string) =>
+  `nextflow.enable.types = true\n\ninclude { COUNT } from './modules/local/count/main.nf'\n\nworkflow {\n${body}}\n`;
+
 const entryNodes = (doc: LayoutDocument) =>
   Object.keys(doc.nodes)
     .filter((k) => k.startsWith("main.nf#/"))
@@ -192,8 +195,65 @@ describe("F-207 carry", () => {
     // the survivor was the second call; it is now the first, and keeps the second's position
     expect(del.doc.nodes[first]).toEqual(start.nodes[second]);
     expect(del.doc.nodes[second]).toBeUndefined();
-    const undone = stepPatches(state, del.doc, del.inverse, removed);
+    const undone = stepPatches(state, del.doc, del.inverse, removed, {
+      inserted: [first],
+    });
     expect(undone.doc).toEqual(start);
+  });
+
+  it("F-207 AR-23: a text edit that adds an identical node is not a restore, so the survivor stays put", async () => {
+    const body = "    a = channel.of('a')\n    a.view()\n    a.view()\n";
+    const state = await fixtureState("f111-start-typed", {
+      "main.nf": VIEWS(body),
+    });
+    const removed = new RemovedPositions();
+    const start = seedLayout(snapshot(state));
+    const [first, second] = ["main.nf#/.view@1", "main.nf#/.view@2"] as const;
+    const del = step(
+      state,
+      start,
+      { kind: "deleteNode", target: entry, node: first },
+      removed,
+    );
+    const added = step(
+      state,
+      del.doc,
+      {
+        kind: "replaceFileText",
+        path: "main.nf",
+        text: VIEWS(`${body}    a.view()\n`),
+      } as never,
+      removed,
+    );
+    expect(added.doc.nodes[first]).toEqual(start.nodes[second]);
+  });
+
+  it("F-207 AR-23: deleting two identical calls one at a time and undoing twice restores both positions", async () => {
+    const state = await fixtureState("f111-start-typed", {
+      "main.nf": VIEWS("    a = channel.of('a')\n    a.view()\n    a.view()\n"),
+    });
+    const removed = new RemovedPositions();
+    const start = seedLayout(snapshot(state));
+    const first = "main.nf#/.view@1";
+    const d1 = step(
+      state,
+      start,
+      { kind: "deleteNode", target: entry, node: first },
+      removed,
+    );
+    const d2 = step(
+      state,
+      d1.doc,
+      { kind: "deleteNode", target: entry, node: first },
+      removed,
+    );
+    const u2 = stepPatches(state, d2.doc, d2.inverse, removed, {
+      inserted: [first],
+    });
+    const u1 = stepPatches(state, u2.doc, d1.inverse, removed, {
+      inserted: [first],
+    });
+    expect(u1.doc).toEqual(start);
   });
 
   it("F-207 F-111: AddCall leaves exactly the new node unplaced", async () => {
