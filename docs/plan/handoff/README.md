@@ -23,7 +23,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-206 details pane | merged, PR #45 | |
 | F-207 layout sidecar | `feat/F-207` (`/home/user/wt-F-207`) | Tasks 1–5 committed (engine layout, service, ELK worker); task 6 (canvas wiring) after F-208 merges. [plan](plan-F-207.md). |
 | F-208 view modes and Code | merged, PR #46 | |
-| F-209 undo and redo | not started | [plan](plan-F-209.md). After F-208. |
+| F-209 undo and redo | merged, PR #50 | |
 | F-309 problems panel | not started | [plan](plan-F-309.md). After F-208 and F-209. |
 | F-502 registry client | `feat/F-502` | [plan](plan-F-502.md). |
 | Parser error position | `fix/parser-error-position` | A blank line before `stub:` or `emit:` moved a later syntax error to that keyword (antlr4ng and Groovy's optimised ANTLR runtime differ); fix building. |
@@ -34,7 +34,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 
 Branches are stacked: `feat/F-108` → `feat/F-107`; `feat/F-111` also merges F-107. Open PRs for F-108, F-107 and F-111 against `main` in that order (merge `main` into each first), each green before the next. Worktrees: `/home/user/wt-F-1xx`.
 
-Next free ADR number: 0050 (0047 is F-203's, 0048 F-208's, 0049 F-206's).
+Next free ADR number: 0052 (0050 is F-502's, 0051 F-209's).
 
 ## Decisions already taken on the plans' open points
 
@@ -181,7 +181,7 @@ Next free ADR number: 0050 (0047 is F-203's, 0048 F-208's, 0049 F-206's).
   - A clean buffer follows external changes, and a dirty one wins.
   - Step 3 evidence from the Node-side marker test and the budget job.
 
-### F-209 — [plan](plan-F-209.md)
+### F-209 (merged with its PR)
 - Accept every recommendation in section 6:
   - history lives in the engine worker's service, with `undo`, `redo`, `history` and `apply` options (amends ADR 0043's API);
   - a group is a sequence of parts under a `group` token, not concatenated inverses, because `applyPatches` refuses two patches to one path;

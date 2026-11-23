@@ -77,4 +77,4 @@ Mockup: [docs/mockup](../mockup/README.md). Where the mockup and this file disag
 
 | ID | Requirement |
 |---|---|
-| UX-70 | Every action reachable by mouse is reachable by keyboard. Minimum shortcuts: search (`/`), add focused palette item (Enter), delete (Delete/Backspace), undo and redo (platform standard), open popup (Enter), close popup (Esc), fit (`F`), auto-layout (`L`), switch view mode (`G`, `S`, `C`). |
+| UX-70 | Every action reachable by mouse is reachable by keyboard. Minimum shortcuts: search (`/`), add focused palette item (Enter), delete (Delete/Backspace), undo and redo (Ctrl+Z, Ctrl+Shift+Z or Ctrl+Y; ⌘Z and ⇧⌘Z on Apple platforms; text fields and code editors keep their own undo, ADR 0051), open popup (Enter), close popup (Esc), fit (`F`), auto-layout (`L`), switch view mode (`G`, `S`, `C`). |
