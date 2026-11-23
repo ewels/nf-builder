@@ -1,3 +1,4 @@
+import type { ApplyOptions, EditCommand } from "@nf-builder/engine";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { AppShell } from "./app-shell";
@@ -15,8 +16,17 @@ Object.defineProperty(window, "nfBuilderEngine", { get: getEngine });
 // Test hook (F-205, F-208): opens a project in the UI and edits it as the Code view does. Same rationale.
 Object.defineProperty(window, "nfBuilderWorkspace", {
   get: () => {
-    const { open, openWorkflow, apply } = canvasStore.getState();
-    return { open, openWorkflow, apply };
+    const { open, openWorkflow, apply, undo, redo, history } =
+      canvasStore.getState();
+    return {
+      open,
+      openWorkflow,
+      apply: (command: EditCommand, options?: ApplyOptions) =>
+        apply(command, undefined, options),
+      undo: () => undo(),
+      redo: () => redo(),
+      history: () => canvasStore.getState().history,
+    };
   },
 });
 

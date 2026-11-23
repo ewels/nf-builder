@@ -21,7 +21,7 @@ export function isEditableTarget(target: EventTarget | null): boolean {
 }
 
 /** Whether `target` is inside a dialog, or a modal dialog is open anywhere, so the page behind it is inert (UX-70). */
-function behindDialog(target: EventTarget | null): boolean {
+export function behindDialog(target: EventTarget | null): boolean {
   const el = target as { closest?: (selector: string) => unknown } | null;
   if (typeof el?.closest === "function" && el.closest("dialog") !== null)
     return true;

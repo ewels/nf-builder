@@ -1,5 +1,6 @@
 import type { JSX, KeyboardEvent } from "react";
 import { useWorkspace } from "../canvas/canvas-store";
+import { HistoryControls } from "../history/history-controls";
 import { ViewModeToggle } from "../views/view-mode-toggle";
 
 export const workflowTabId = (id: string): string => `workflow-tab-${id}`;
@@ -14,6 +15,7 @@ export function TabStrip(): JSX.Element {
     return (
       <div className="tab-strip">
         <span className="muted">No files open</span>
+        <HistoryControls />
       </div>
     );
   const move = (event: KeyboardEvent<HTMLDivElement>) => {
@@ -55,6 +57,7 @@ export function TabStrip(): JSX.Element {
           </button>
         ))}
       </div>
+      <HistoryControls />
       {active === undefined ? null : (
         <ViewModeToggle
           mode={active.mode}
