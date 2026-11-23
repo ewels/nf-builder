@@ -338,6 +338,11 @@ describe("F-203 new project dialog", () => {
       { status: "reading", name: "x.zip" },
     );
     expect(reading).toMatch(/role="status"[^>]*>Reading x\.zip…/);
+    const updating = dialog({ initialRoute: "import" }, {
+      ...(readyZip() as object),
+      updating: true,
+    } as ZipImportState);
+    expect(updating).toMatch(/role="status"[^>]*>Updating…/);
   });
 
   it("F-403 UX-60 IO-12: newProjectRequest for Import needs a read zip with files and no list problems, and carries its id and ignore text without a template", () => {
@@ -377,6 +382,12 @@ describe("F-203 new project dialog", () => {
         null,
       ),
     ).toEqual({ error: "Fix the ignore list first. Line 3: Bad." });
+    expect(
+      newProjectRequest(
+        form({ ...(readyZip() as object), updating: true } as ZipImportState),
+        null,
+      ),
+    ).toEqual({ error: "Updating the summary. Try again in a moment." });
     expect(newProjectRequest(form(readyZip({ files: 0 })), null)).toEqual({
       error: "Nothing to import: every file was skipped.",
     });

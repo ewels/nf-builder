@@ -109,7 +109,12 @@ export function createZipImport(
         if (mine !== request || wanted !== choice || state.status !== "ready")
           return;
         if (result.ok)
-          set({ ...state, summary: result.summary, updating: false });
+          set({
+            ...state,
+            summary: result.summary,
+            // a reply for older text leaves the newer edit pending
+            updating: state.ignore !== result.summary.ignore,
+          });
         else
           set({ status: "refused", name: state.name, message: result.message });
       });

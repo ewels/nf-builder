@@ -52,6 +52,11 @@ export function ImportSection(props: {
             Reading {state.name}…
           </p>
         ) : null}
+        {state.status === "ready" && state.updating ? (
+          <p className="muted" role="status">
+            Updating…
+          </p>
+        ) : null}
         {state.status === "refused" ? (
           <p className="dialog-error" role="alert">
             {state.message}

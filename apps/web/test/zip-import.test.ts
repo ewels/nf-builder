@@ -124,6 +124,23 @@ describe("F-403 zip import state", () => {
     });
   });
 
+  it("F-403 IO-12: a reply for older ignore text leaves the summary updating until the newest text is answered", async () => {
+    const h = harness();
+    h.stage.mockResolvedValueOnce(ok("a", "a.zip"));
+    h.view.choose(file("a.zip"));
+    await tick();
+    h.restage.mockResolvedValueOnce(ok("a", "a.zip", "one"));
+    h.view.setIgnore("one");
+    h.t.fire();
+    h.view.setIgnore("one\ntwo"); // typed while the first restage is in flight
+    await tick();
+    expect(h.states.at(-1)).toMatchObject({
+      ignore: "one\ntwo",
+      summary: { ignore: "one" },
+      updating: true,
+    });
+  });
+
   it("F-403: choosing another file, reset and a refusal discard the previous stage", async () => {
     const h = harness();
     h.stage.mockResolvedValueOnce(ok("a", "a.zip"));

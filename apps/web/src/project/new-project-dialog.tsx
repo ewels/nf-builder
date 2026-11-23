@@ -56,6 +56,8 @@ export function newProjectRequest(
       return { error: "Choose a zip file to import." };
     if (zip.status === "reading")
       return { error: `Reading ${zip.name}. Try again in a moment.` };
+    if (zip.updating)
+      return { error: "Updating the summary. Try again in a moment." };
     const problem = importProblem(zip.summary);
     if (problem !== null) return { error: problem };
     return {
