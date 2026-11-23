@@ -57,4 +57,27 @@ export interface EngineHook {
     revision: number,
   ): Promise<{ ok: boolean; revision: number | null }>;
   project(path: string, workflow: string | null): Promise<unknown>;
+  diagnostics(): Promise<{
+    revision?: number;
+    diagnostics?: {
+      path: string;
+      severity: string;
+      code: string;
+      message: string;
+      range: { start: number; end: number; line: number; column: number };
+      fix?: { title: string; path: string; edits: unknown[] };
+    }[];
+    code?: string;
+  }>;
+  applyFix(
+    fix: unknown,
+    revision: number,
+    options?: { label?: string },
+  ): Promise<{
+    ok: boolean;
+    revision: number | null;
+    code?: string;
+    message?: string;
+    history?: { undo: string | null; undoCount: number };
+  }>;
 }
