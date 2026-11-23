@@ -208,7 +208,7 @@ describe("corpus parse", () => {
     }
   });
 
-  it("F-006 step 2 LA-30 ADR-0005: for each fixture lint rejects with an Unexpected message, the parser's first error has lint's line, column and message", () => {
+  it("LA-30 ADR-0017: for each fixture lint rejects with an Unexpected message, the parser's first error has lint's line, column and message", () => {
     const rows = known();
     const mismatches: string[] = [];
     let compared = 0;

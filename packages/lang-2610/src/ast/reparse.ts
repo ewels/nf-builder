@@ -21,6 +21,7 @@ export function reparseDeclaration(
   tokens: CommonTokenStream,
 ): { rejected: boolean; error: ParseError | null } {
   const parser = new ScriptParser(tokens);
+  // LlSimulator is used for consistency with stage 2 of the parse; no input has yet been found where it changes the result.
   parser.errorHandler = new DescriptiveErrorStrategy();
   parser.interpreter = new LlSimulator(
     parser,

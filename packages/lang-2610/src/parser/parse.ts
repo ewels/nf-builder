@@ -1,6 +1,6 @@
 // Parses a script or config the way nf-lang's ScriptAstBuilder.buildCST does: SLL first with a bail-out strategy and no
 // listeners, then, if that fails with a parser error, LL with a listener that records the first error. One syntax error per file.
-// The runtimes differ in how LL treats a conflict (see LlSimulator), so stage 2 reproduces upstream's choice there.
+// The runtimes differ in how LL treats a conflict (see LlSimulator), so stage 2 approximates upstream's choice there.
 import {
   ATN,
   type ATNConfigSet,
@@ -76,7 +76,7 @@ export class FirstErrorListener extends BaseErrorListener {
  * Stage 1 is SLL, except for the decisions inside rules `sep` and `type`, which are predicted with LL. SLL cannot see the
  * caller of `sep : (NL | SEMI)+` (a blank line before `emit:`), nor tell `x instanceof List ? a : b` from a nullable type,
  * so it fails and drops to full LL for most real files (sarek: about 50 s instead of about 1 s). Upstream's two-stage
- * parse falls back on the same files. Stage 2 stays pure LL. The corpus test compares the stage 1 tree with the pure LL
+ * parse falls back on the same files. Stage 2 is LL, with the LlSimulator adjustment below. The corpus test compares the stage 1 tree with the LL
  * tree for every file of the small pipelines and a sample of sarek.
  */
 class Stage1Simulator extends ParserATNSimulator {
@@ -135,8 +135,12 @@ export class LlSimulator extends ParserATNSimulator {
       !input
     )
       return alt;
+    const [valid] = this.splitAccordingToSemanticValidity(
+      configs,
+      outerContext,
+    );
     const left = new Set(
-      configs.configs
+      valid.configs
         .filter(
           (c) =>
             c.reachesIntoOuterContext ||
