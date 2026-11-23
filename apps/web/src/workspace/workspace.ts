@@ -1,8 +1,8 @@
 // The workspace (F-202): projects in IndexedDB on top of the engine service. It runs in the worker, with no Comlink, so it
 // also runs in Node. One queue serialises everything that opens, changes or removes a project, so the project id a change
 // is saved under is always the project the engine applied it to. `palette`, `project`, `diagnostics`, `details` and
-// `readFile` and `history` pass straight through; `undo` and `redo` are changes like `apply`, so they are autosaved (F-209). Nothing here assumes a top-level page (ADR 0044): an unavailable database becomes a
-// status, not a crash.
+// `readFile` and `history` pass straight through; `undo` and `redo` are changes like `apply`, so they are autosaved
+// (F-209). Nothing here assumes a top-level page (ADR 0044): an unavailable database becomes a status, not a crash.
 import {
   type EngineApi,
   type EngineRefusal,
