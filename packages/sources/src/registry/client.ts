@@ -1,5 +1,5 @@
 import { toFailure } from "./errors.ts";
-import { createLiveClient } from "./live.ts";
+import { createLiveClient, type LiveClientOptions } from "./live.ts";
 import {
   createSnapshotClient,
   fromSnapshot,
@@ -10,11 +10,10 @@ import type { RegistryClient } from "./types.ts";
 /** Off: registry.nextflow.io sends no CORS headers (spike S4; re-checked 2026-11-23; ADR 00NN). */
 export const LIVE_REGISTRY = false;
 
-export interface RegistryClientOptions extends SnapshotClientOptions {
+export interface RegistryClientOptions
+  extends SnapshotClientOptions,
+    Omit<LiveClientOptions, "snapshot"> {
   readonly live?: boolean; // LIVE_REGISTRY
-  readonly registryUrl?: string;
-  readonly timeoutMs?: number;
-  readonly now?: () => Date;
 }
 
 /** The snapshot always; live on top of it when enabled, falling back to the snapshot (with liveFailure) if live fails. */
@@ -23,15 +22,7 @@ export function createRegistryClient(
 ): RegistryClient {
   const snapshot = createSnapshotClient(options);
   const live = options.live ?? LIVE_REGISTRY;
-  const liveClient = live
-    ? createLiveClient({
-        snapshot,
-        ...(options.registryUrl ? { registryUrl: options.registryUrl } : {}),
-        ...(options.fetch ? { fetch: options.fetch } : {}),
-        ...(options.timeoutMs ? { timeoutMs: options.timeoutMs } : {}),
-        ...(options.now ? { now: options.now } : {}),
-      })
-    : null;
+  const liveClient = live ? createLiveClient({ ...options, snapshot }) : null;
   return {
     source: live ? "live" : "snapshot",
     async index(opts) {

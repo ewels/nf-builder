@@ -19,7 +19,7 @@ const FAILURE_MESSAGES: Record<RegistryErrorCode, string> = {
   http: "The registry snapshot couldn't be read.",
 };
 
-export interface RegistrySectionViewProps {
+interface RegistrySectionViewProps {
   readonly state: RegistryState;
   readonly now: Date;
   readonly searching: boolean;
@@ -29,7 +29,6 @@ export interface RegistrySectionViewProps {
 }
 
 interface Row {
-  readonly key: string;
   readonly label: string;
   readonly title: string;
 }
@@ -37,7 +36,6 @@ interface Row {
 function RegistryList({
   id,
   label,
-  noun,
   rows,
   total,
   open,
@@ -45,7 +43,6 @@ function RegistryList({
 }: {
   readonly id: string;
   readonly label: string;
-  readonly noun: string;
   readonly rows: readonly Row[];
   readonly total: number;
   readonly open: boolean;
@@ -69,7 +66,7 @@ function RegistryList({
       <div id={listId} hidden={!open}>
         <ul className="registry-items" aria-label={label}>
           {rows.map((row) => (
-            <li key={row.key} className="registry-item" title={row.title}>
+            <li key={row.label} className="registry-item" title={row.title}>
               <span className="registry-item-label">{row.label}</span>
             </li>
           ))}
@@ -77,7 +74,7 @@ function RegistryList({
         {total > rows.length ? (
           <p className="registry-note">
             Showing {rows.length.toLocaleString("en-GB")} of{" "}
-            {total.toLocaleString("en-GB")} {noun}.
+            {total.toLocaleString("en-GB")} {id}.
           </p>
         ) : null}
       </div>
@@ -95,9 +92,8 @@ export function RegistrySectionView({
   onRefresh,
 }: RegistrySectionViewProps): JSX.Element {
   const index = state.status === "ready" ? state.index : null;
-  const refreshing =
-    (state.status === "ready" || state.status === "failed") && state.refreshing;
   const canRefresh = state.status === "ready" || state.status === "failed";
+  const refreshing = canRefresh && state.refreshing;
   let line: string;
   if (refreshing) line = "Refreshing…";
   else if (index) line = sourceLine(index, now);
@@ -142,9 +138,7 @@ export function RegistrySectionView({
           <RegistryList
             id="modules"
             label="Modules"
-            noun="modules"
             rows={index.modules.slice(0, REGISTRY_LIST_LIMIT).map((m) => ({
-              key: m.name,
               label: m.name,
               title: m.description,
             }))}
@@ -155,9 +149,7 @@ export function RegistrySectionView({
           <RegistryList
             id="plugins"
             label="Plugins"
-            noun="plugins"
             rows={index.plugins.slice(0, REGISTRY_LIST_LIMIT).map((p) => ({
-              key: p.id,
               label: p.id,
               title: p.summary,
             }))}

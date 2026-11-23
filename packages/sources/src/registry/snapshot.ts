@@ -1,5 +1,5 @@
 import type { RegistrySnapshotIndex } from "@nf-builder/lang-core";
-import { RegistryError } from "./errors.ts";
+import { RegistryError, readJson, request } from "./errors.ts";
 import type {
   RegistryClient,
   RegistryFailure,
@@ -20,7 +20,7 @@ export interface SnapshotRegistryClient extends RegistryClient {
 }
 
 /** Throws RegistryError("invalid") unless format 1 with a parseable generatedAt and module and plugin arrays. */
-export function parseSnapshotIndex(
+function parseSnapshotIndex(
   value: unknown,
   url: string,
 ): RegistrySnapshotIndex {
@@ -66,19 +66,12 @@ export function createSnapshotClient(
   let held: Promise<RegistrySnapshotIndex> | null = null;
 
   async function read(refresh: boolean): Promise<RegistrySnapshotIndex> {
-    let response: Response;
-    try {
-      response = await doFetch(url, {
-        credentials: "omit",
-        cache: refresh ? "no-cache" : "default",
-      });
-    } catch (error) {
-      throw new RegistryError(
-        "network",
-        url,
-        error instanceof Error ? error.message : String(error),
-      );
-    }
+    const response = await request(
+      doFetch,
+      url,
+      { credentials: "omit", cache: refresh ? "no-cache" : "default" },
+      "Registry snapshot",
+    );
     if (response.status === 404 || response.status === 410) {
       throw new RegistryError(
         "unavailable",
@@ -87,34 +80,10 @@ export function createSnapshotClient(
         response.status,
       );
     }
-    if (!response.ok) {
-      throw new RegistryError(
-        "http",
-        url,
-        `Registry snapshot request failed with HTTP ${response.status}.`,
-        response.status,
-      );
-    }
-    const type = response.headers.get("content-type") ?? "";
-    if (!type.includes("json")) {
-      throw new RegistryError(
-        "invalid",
-        url,
-        `Registry snapshot has content type "${type}", not JSON.`,
-        response.status,
-      );
-    }
-    let body: unknown;
-    try {
-      body = await response.json();
-    } catch {
-      throw new RegistryError(
-        "invalid",
-        url,
-        "Registry snapshot is not valid JSON.",
-      );
-    }
-    return parseSnapshotIndex(body, url);
+    return parseSnapshotIndex(
+      await readJson(response, url, "Registry snapshot"),
+      url,
+    );
   }
 
   function snapshot(opts?: RegistryReadOptions) {

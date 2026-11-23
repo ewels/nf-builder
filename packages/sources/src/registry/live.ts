@@ -1,5 +1,5 @@
 import type { RegistrySnapshotIndex } from "@nf-builder/lang-core";
-import { RegistryError } from "./errors.ts";
+import { RegistryError, readJson, request } from "./errors.ts";
 import { fromSnapshot, type SnapshotRegistryClient } from "./snapshot.ts";
 import type {
   RegistryClient,
@@ -8,7 +8,7 @@ import type {
   RegistryReadOptions,
 } from "./types.ts";
 
-export const REGISTRY_URL = "https://registry.nextflow.io";
+const REGISTRY_URL = "https://registry.nextflow.io";
 
 const PAGE_SIZE = 100;
 
@@ -77,49 +77,18 @@ export function createLiveClient(options: LiveClientOptions): RegistryClient {
   const timeoutMs = options.timeoutMs ?? 10_000;
   const now = options.now ?? (() => new Date());
 
-  async function get(url: string, signal: AbortSignal): Promise<unknown> {
-    let response: Response;
-    try {
-      // A simple GET: no custom headers, so no preflight.
-      response = await doFetch(url, { credentials: "omit", signal });
-    } catch (error) {
-      const name = (error as { name?: string } | null)?.name;
-      if (name === "TimeoutError" || name === "AbortError") {
-        throw new RegistryError("timeout", url, "The live registry timed out.");
-      }
-      throw new RegistryError(
-        "network",
+  // A simple GET: no custom headers, so no preflight.
+  const get = async (url: string, signal: AbortSignal) =>
+    readJson(
+      await request(
+        doFetch,
         url,
-        error instanceof Error ? error.message : String(error),
-      );
-    }
-    if (!response.ok) {
-      throw new RegistryError(
-        "http",
-        url,
-        `Live registry request failed with HTTP ${response.status}.`,
-        response.status,
-      );
-    }
-    const type = response.headers.get("content-type") ?? "";
-    if (!type.includes("json")) {
-      throw new RegistryError(
-        "invalid",
-        url,
-        `Live registry answered with content type "${type}", not JSON.`,
-        response.status,
-      );
-    }
-    try {
-      return await response.json();
-    } catch {
-      throw new RegistryError(
-        "invalid",
-        url,
-        "Live registry sent invalid JSON.",
-      );
-    }
-  }
+        { credentials: "omit", signal },
+        "Live registry",
+      ),
+      url,
+      "Live registry",
+    );
 
   /** Every item under `key` of every page, until a page says `last`. */
   async function listAll(

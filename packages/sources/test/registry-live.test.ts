@@ -4,14 +4,13 @@ import {
   createLiveClient,
   createSnapshotClient,
   overlayLive,
-  type RegistryError,
-  type SnapshotRegistryClient,
 } from "../src/index";
 import {
   fakeFetch,
   fixture,
   golden,
   jsonResponse,
+  rejection,
   SNAPSHOT_URL,
   serve,
 } from "./helpers";
@@ -19,28 +18,17 @@ import {
 const REGISTRY = "https://registry.test";
 const NOW = new Date("2026-11-23T10:00:00.000Z");
 
-function liveClient(f: ReturnType<typeof serve>, timeoutMs?: number) {
-  const snapshot: SnapshotRegistryClient = createSnapshotClient({
-    snapshotUrl: SNAPSHOT_URL,
-    fetch: f.fetch,
-  });
-  return createLiveClient({
-    snapshot,
+const liveClient = (f: ReturnType<typeof serve>, timeoutMs?: number) =>
+  createLiveClient({
+    snapshot: createSnapshotClient({
+      snapshotUrl: SNAPSHOT_URL,
+      fetch: f.fetch,
+    }),
     registryUrl: REGISTRY,
     fetch: f.fetch,
     now: () => NOW,
-    ...(timeoutMs ? { timeoutMs } : {}),
+    timeoutMs,
   });
-}
-
-const rejection = async (p: Promise<unknown>) => {
-  try {
-    await p;
-  } catch (e) {
-    return e as RegistryError;
-  }
-  throw new Error("expected rejection");
-};
 
 describe("registry live client", () => {
   it("F-502 IO-30 ADR-0009: the live client pages modules/list for kind Process and Workflow and plugins with size 100 until last, as OpenAPI 0.14.0 describes", async () => {
@@ -171,17 +159,10 @@ describe("registry live client", () => {
               reject(init.signal?.reason),
             );
           })
-        : (hang.fetch(url, init) as Promise<Response>),
+        : hang.fetch(url, init),
     );
-    const client = createLiveClient({
-      snapshot: createSnapshotClient({
-        snapshotUrl: SNAPSHOT_URL,
-        fetch: slow.fetch,
-      }),
-      registryUrl: REGISTRY,
-      fetch: slow.fetch,
-      timeoutMs: 20,
-    });
-    expect((await rejection(client.index())).code).toBe("timeout");
+    expect((await rejection(liveClient(slow, 20).index())).code).toBe(
+      "timeout",
+    );
   });
 });

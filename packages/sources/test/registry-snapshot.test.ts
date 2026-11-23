@@ -5,18 +5,11 @@ import {
   golden,
   goldenText,
   jsonResponse,
+  rejection,
   SNAPSHOT_URL,
 } from "./helpers";
 
 const serving = () => fakeFetch(() => jsonResponse(goldenText()));
-const rejection = async (p: Promise<unknown>) => {
-  try {
-    await p;
-  } catch (e) {
-    return e as RegistryError;
-  }
-  throw new Error("expected rejection");
-};
 
 describe("registry snapshot client", () => {
   it("F-502 IO-30 IO-31: the snapshot client reads index.json under snapshotUrl and returns its modules and plugins as source snapshot, with asOf and snapshotAt = generatedAt", async () => {

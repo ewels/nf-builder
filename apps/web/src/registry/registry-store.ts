@@ -1,13 +1,14 @@
 import {
+  createRegistryClient,
   LIVE_REGISTRY,
   type RegistryClient,
   type RegistryFailure,
   type RegistryIndex,
+  type RegistryReadOptions,
   toFailure,
 } from "@nf-builder/sources";
 import { useStore } from "zustand";
 import { createStore, type StoreApi } from "zustand/vanilla";
-import { appRegistryClient } from "./registry-client";
 
 export type RegistryState =
   | { readonly status: "idle" }
@@ -40,18 +41,24 @@ export function createRegistryStore(
   let client: RegistryClient | null = null;
   /** Bumped by reload, so a read that started before it is ignored. */
   let generation = 0;
-  const getClient = () => {
-    client ??= makeClient(LIVE_REGISTRY);
-    return client;
-  };
 
   return createStore<RegistryStore>()((set, get) => {
     const setState = (state: RegistryState) => set({ state });
+    const failed = (failure: RegistryFailure): RegistryState => ({
+      status: "failed",
+      failure,
+      refreshing: false,
+    });
 
-    async function first(): Promise<void> {
+    /** Reads the index; `onFailure` gives the state a failed read leaves. */
+    async function read(
+      options: RegistryReadOptions | undefined,
+      onFailure: (failure: RegistryFailure) => RegistryState,
+    ): Promise<void> {
       const mine = generation;
+      client ??= makeClient(LIVE_REGISTRY);
       try {
-        const index = await getClient().index();
+        const index = await client.index(options);
         if (mine !== generation) return;
         setState({
           status: "ready",
@@ -61,11 +68,7 @@ export function createRegistryStore(
         });
       } catch (error) {
         if (mine !== generation) return;
-        setState({
-          status: "failed",
-          failure: toFailure(error),
-          refreshing: false,
-        });
+        setState(onFailure(toFailure(error)));
       }
     }
 
@@ -74,48 +77,39 @@ export function createRegistryStore(
       load() {
         if (get().state.status !== "idle") return;
         setState({ status: "loading" });
-        void first();
+        void read(undefined, failed);
       },
       refresh() {
         const state = get().state;
         if (state.status !== "ready" && state.status !== "failed") return;
         if (state.refreshing) return;
-        const mine = generation;
         setState({ ...state, refreshing: true });
-        getClient()
-          .index({ refresh: true })
-          .then(
-            (index) => {
-              if (mine !== generation) return;
-              setState({
-                status: "ready",
-                index,
-                refreshing: false,
-                refreshFailure: null,
-              });
-            },
-            (error: unknown) => {
-              if (mine !== generation) return;
-              const failure = toFailure(error);
-              setState(
-                state.status === "ready"
-                  ? { ...state, refreshing: false, refreshFailure: failure }
-                  : { status: "failed", failure, refreshing: false },
-              );
-            },
-          );
+        void read({ refresh: true }, (failure) =>
+          state.status === "ready"
+            ? { ...state, refreshing: false, refreshFailure: failure }
+            : failed(failure),
+        );
       },
       async reload({ live }) {
         generation++;
         client = makeClient(live);
         setState({ status: "loading" });
-        await first();
+        await read(undefined, failed);
       },
     };
   });
 }
 
-export const registryStore = createRegistryStore(appRegistryClient);
+/** The app's client: the snapshot under BASE_URL; live only through the test hook or when LIVE_REGISTRY is on. */
+export const registryStore = createRegistryStore((live) =>
+  createRegistryClient({
+    snapshotUrl: new URL(
+      `${import.meta.env.BASE_URL}registry/`,
+      window.location.href,
+    ).href,
+    live,
+  }),
+);
 
 export function useRegistry<T>(selector: (store: RegistryStore) => T): T {
   return useStore(registryStore, selector);

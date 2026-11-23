@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
+import type { RegistryError } from "../src/index";
 
-export const GOLDEN_URL = new URL(
+const GOLDEN_URL = new URL(
   "../../../tools/registry-snapshot/test/fixtures/expected/registry/index.json",
   import.meta.url,
 );
@@ -10,12 +11,12 @@ export const golden = (): Record<string, unknown> =>
 
 export const SNAPSHOT_URL = "https://site.test/app/registry/";
 
-export interface Call {
+interface Call {
   readonly url: string;
   readonly init: RequestInit | undefined;
 }
 
-export type Handler = (
+type Handler = (
   url: string,
   init?: RequestInit,
 ) => Response | Promise<Response>;
@@ -36,6 +37,16 @@ export const jsonResponse = (
   contentType = "application/json; charset=utf-8",
   status = 200,
 ) => new Response(body, { status, headers: { "content-type": contentType } });
+
+/** The error `p` rejects with; throws if it resolves. */
+export async function rejection(p: Promise<unknown>): Promise<RegistryError> {
+  try {
+    await p;
+  } catch (e) {
+    return e as RegistryError;
+  }
+  throw new Error("expected rejection");
+}
 
 export const fixture = (name: string) =>
   readFileSync(new URL(`./fixtures/live/${name}`, import.meta.url), "utf8");

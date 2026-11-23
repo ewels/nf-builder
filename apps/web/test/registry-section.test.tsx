@@ -45,13 +45,10 @@ const indexOf = (
   ...overrides,
 });
 
-const ready = (
-  index: RegistryIndex,
-  extra: { refreshing?: boolean; refreshFailure?: null } = {},
-): RegistryState => ({
+const ready = (index: RegistryIndex, refreshing = false): RegistryState => ({
   status: "ready",
   index,
-  refreshing: extra.refreshing ?? false,
+  refreshing,
   refreshFailure: null,
 });
 
@@ -144,9 +141,7 @@ describe("registry section", () => {
     expect(render({ status: "loading" })).toContain(
       "Loading registry modules…",
     );
-    expect(render(ready(indexOf(), { refreshing: true }))).toContain(
-      "Refreshing…",
-    );
+    expect(render(ready(indexOf(), true))).toContain("Refreshing…");
   });
 
   it("F-204 F-502: before the store loads, PalettePanel still renders statically", () => {

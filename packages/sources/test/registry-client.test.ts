@@ -1,10 +1,6 @@
 import { describe, expect, it } from "vitest";
-import {
-  createRegistryClient,
-  LIVE_REGISTRY,
-  type RegistryError,
-} from "../src/index";
-import { jsonResponse, SNAPSHOT_URL, serve } from "./helpers";
+import { createRegistryClient, LIVE_REGISTRY } from "../src/index";
+import { jsonResponse, rejection, SNAPSHOT_URL, serve } from "./helpers";
 
 const REGISTRY = "https://registry.test";
 const NOW = new Date("2026-11-23T10:00:00.000Z");
@@ -55,12 +51,7 @@ describe("registry client", () => {
         ? jsonResponse("<html>", "text/html", 404)
         : undefined,
     );
-    try {
-      await make(f, true).index();
-      throw new Error("expected rejection");
-    } catch (e) {
-      expect((e as RegistryError).code).toBe("unavailable");
-    }
+    expect((await rejection(make(f, true).index())).code).toBe("unavailable");
   });
 
   it("F-502 ADR-00NN: LIVE_REGISTRY is off until the registry sends CORS headers", () => {
