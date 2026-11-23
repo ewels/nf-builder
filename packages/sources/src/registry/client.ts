@@ -7,7 +7,7 @@ import {
 } from "./snapshot.ts";
 import type { RegistryClient } from "./types.ts";
 
-/** Off: registry.nextflow.io sends no CORS headers (spike S4; re-checked 2026-11-23; ADR 00NN). */
+/** Off: registry.nextflow.io sends no CORS headers (spike S4; re-checked 2026-11-23; ADR 0050). */
 export const LIVE_REGISTRY = false;
 
 export interface RegistryClientOptions

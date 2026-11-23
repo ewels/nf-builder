@@ -54,7 +54,7 @@ describe("registry client", () => {
     expect((await rejection(make(f, true).index())).code).toBe("unavailable");
   });
 
-  it("F-502 ADR-00NN: LIVE_REGISTRY is off until the registry sends CORS headers", () => {
+  it("F-502 ADR-0050: LIVE_REGISTRY is off until the registry sends CORS headers", () => {
     expect(LIVE_REGISTRY).toBe(false);
   });
 });
