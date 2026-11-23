@@ -82,6 +82,7 @@ export {
   type EditState,
 } from "./edit/apply";
 export { applyPatches, PatchError } from "./edit/patches";
+export * from "./layout";
 export type {
   Binding,
   ConfigIncludeModel,
