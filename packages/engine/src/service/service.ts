@@ -3,8 +3,12 @@
 import type {
   Catalogue,
   CommandResult,
+  EditCommand,
   FileText,
   PackLints,
+  Projection,
+  TextPatch,
+  WorkflowRef,
 } from "@nf-builder/lang-core";
 import { createDiagnoser, type Diagnoser } from "../diagnostics/diagnose";
 import { loadLints } from "../diagnostics/lints";
@@ -16,6 +20,24 @@ import {
   patchResult,
 } from "../edit/apply";
 import { PatchError } from "../edit/patches";
+import type { LayoutChange } from "../layout";
+import {
+  carryLayout,
+  EMPTY_LAYOUT,
+  formatLayout,
+  LAYOUT_PATH,
+  type LayoutDocument,
+  type LayoutStatus,
+  type Point,
+  pairWorkflows,
+  parseLayout,
+  RemovedPositions,
+  type RenameHint,
+  trackedWorkflows,
+  type WorkflowPair,
+  workflowPositions,
+  writePositions,
+} from "../layout";
 import type { ModelEvent } from "../model/project";
 import { installedPacks } from "../packs";
 import { loadPalette } from "../palette";
@@ -45,7 +67,56 @@ interface Open {
   readonly catalogue: Catalogue;
   projector?: Projector;
   diagnoser?: Diagnoser;
+  /** Projections built at the current revision, by `path#workflow`; dropped whenever the revision moves (F-207). */
+  memo: Map<string, Projection | null>;
+  /** The sidecar's entries; empty when it is absent, invalid or newer. */
+  layout: LayoutDocument;
+  layoutStatus: LayoutStatus;
+  /** Positions of nodes a change removed, for undo (session only). */
+  removed: RemovedPositions;
 }
+
+const ABSENT: LayoutStatus = { state: "absent", message: null };
+const OK: LayoutStatus = { state: "ok", message: null };
+
+const SIDECAR_REFUSAL =
+  "nf-builder keeps .nf-builder/layout.json up to date itself. Move nodes on the canvas instead.";
+
+function readLayout(text: string | null | undefined): {
+  layout: LayoutDocument;
+  layoutStatus: LayoutStatus;
+} {
+  if (text === null || text === undefined)
+    return { layout: EMPTY_LAYOUT, layoutStatus: ABSENT };
+  const parsed = parseLayout(text);
+  if (!parsed.ok)
+    return {
+      layout: EMPTY_LAYOUT,
+      layoutStatus: { state: parsed.state, message: parsed.message },
+    };
+  return { layout: parsed.document, layoutStatus: OK };
+}
+
+const workflowKey = (w: { path: string; name: string | null }): string =>
+  `${w.path}#${w.name ?? ""}`;
+
+/** The state of the tracked workflows before a change, taken before `commit` because the projector reads the live model. */
+interface BeforeCarry {
+  readonly workflows: readonly WorkflowRef[];
+  readonly projections: ReadonlyMap<string, Projection>;
+  readonly changed: ReadonlySet<string>;
+}
+
+const renamesOf = (command: EditCommand | undefined): RenameHint[] =>
+  command?.kind === "renameDeclaration"
+    ? [{ path: command.path, from: command.name, to: command.newName }]
+    : [];
+
+const sane = (p: Point): boolean =>
+  Number.isFinite(p.x) &&
+  Number.isFinite(p.y) &&
+  Math.abs(p.x) <= 1e6 &&
+  Math.abs(p.y) <= 1e6;
 
 export function createEngineService(
   options: EngineServiceOptions = {},
@@ -94,18 +165,109 @@ export function createEngineService(
     return open.diagnoser;
   };
 
+  const projectionOf = (
+    open: Open,
+    path: string,
+    workflow: string | null,
+  ): Projection | null => {
+    const key = workflowKey({ path, name: workflow });
+    const known = open.memo.get(key);
+    if (known !== undefined) return known;
+    const built = projectorOf(open).project(path, workflow);
+    open.memo.set(key, built);
+    return built;
+  };
+
+  /** Projects the workflows with stored entries in the files about to change. Never throws: a failure means no carry. */
+  const prepareCarry = (
+    open: Open,
+    paths: readonly string[],
+  ): BeforeCarry | null => {
+    if (open.layoutStatus.state === "newer" || paths.includes(LAYOUT_PATH))
+      return null;
+    try {
+      const changedPaths = new Set(paths);
+      const tracked = trackedWorkflows(open.layout).filter((t) =>
+        changedPaths.has(t.path),
+      );
+      if (tracked.length === 0) return null;
+      const workflows = projectorOf(open).workflows();
+      const projections = new Map<string, Projection>();
+      for (const t of tracked) {
+        const ref = workflows.find(
+          (w) => w.path === t.path && w.name === t.workflow && w.modelled,
+        );
+        const projection = ref && projectionOf(open, t.path, t.workflow);
+        if (projection)
+          projections.set(
+            workflowKey({ path: t.path, name: t.workflow }),
+            projection,
+          );
+      }
+      return { workflows, projections, changed: changedPaths };
+    } catch {
+      return null;
+    }
+  };
+
+  /** Carries the stored keys across a committed change; returns the sidecar's new text when it changed. */
+  const finishCarry = (
+    open: Open,
+    before: BeforeCarry | null,
+    renames: readonly RenameHint[],
+  ): FileText[] => {
+    if (!before) return [];
+    try {
+      const paired = pairWorkflows(
+        before.workflows,
+        projectorOf(open).workflows(),
+        before.changed,
+        renames,
+      );
+      const pairs: WorkflowPair[] = [];
+      for (const w of before.workflows) {
+        const old = before.projections.get(workflowKey(w));
+        if (!old) continue;
+        const target = paired.get(workflowKey(w));
+        if (target === undefined) continue;
+        if (target === null) {
+          pairs.push({ before: old, after: null });
+          continue;
+        }
+        // a workflow that is present but unmodelled is left alone
+        const now = target.modelled
+          ? projectionOf(open, target.path, target.name)
+          : null;
+        if (now) pairs.push({ before: old, after: now });
+      }
+      const next = carryLayout(open.layout, pairs, renames, open.removed);
+      const text = formatLayout(next);
+      if (text === formatLayout(open.layout)) return [];
+      open.state.model.setFile(LAYOUT_PATH, text);
+      open.layout = next;
+      return [{ path: LAYOUT_PATH, text }];
+    } catch {
+      // the worst case is that nodes are placed again
+      return [];
+    }
+  };
+
   const changed = (
     open: Open,
     files: readonly FileText[],
     remodelled: readonly string[],
+    carry?: { before: BeforeCarry | null; renames: readonly RenameHint[] },
   ): ProjectChange => {
     revision += 1;
     open.projector = undefined;
     open.diagnoser = undefined;
+    open.memo = new Map();
+    const sidecar = carry ? finishCarry(open, carry.before, carry.renames) : [];
     return {
       revision,
-      files,
-      remodelled,
+      files: sidecar.length > 0 ? [...files, ...sidecar] : files,
+      remodelled:
+        sidecar.length > 0 ? [...remodelled, LAYOUT_PATH].sort() : remodelled,
       workflows: projectorOf(open).workflows(),
     };
   };
@@ -136,6 +298,7 @@ export function createEngineService(
         revision += 1;
         open.projector = undefined;
         open.diagnoser = undefined;
+        open.memo = new Map();
         return refusal(
           "internal",
           `The engine failed unexpectedly while changing the project (${reason}). The project may be partly changed; use the new revision and check its files.`,
@@ -151,16 +314,29 @@ export function createEngineService(
           `The project changed (revision ${revision}, not ${given}). Nothing was changed.`,
         );
 
+  const sidecarRefusal = (): EngineRefusal => ({
+    ...refusal("invalid", SIDECAR_REFUSAL),
+    path: LAYOUT_PATH,
+  });
+
   const accept = (
     open: Open,
     result: Extract<CommandResult, { ok: true }>,
     startedChanging: () => void,
+    command?: EditCommand,
   ): ApplyOutcome => {
+    const before = prepareCarry(
+      open,
+      result.files.map((f) => f.path),
+    );
     startedChanging();
     const remodelled = commit(open.state, result);
     return {
       ok: true,
-      ...changed(open, result.files, remodelled),
+      ...changed(open, result.files, remodelled, {
+        before,
+        renames: renamesOf(command),
+      }),
       patches: result.patches,
       inverse: result.inverse,
     };
@@ -201,6 +377,9 @@ export function createEngineService(
           state,
           lints,
           catalogue,
+          memo: new Map(),
+          removed: new RemovedPositions(),
+          ...readLayout(state.model.file(LAYOUT_PATH)?.source.text),
         };
         current = open;
         revision += 1;
@@ -222,11 +401,19 @@ export function createEngineService(
           version: request.version,
           files,
           workflows: projectorOf(open).workflows(),
+          layout: open.layoutStatus,
         };
       }),
 
     writeFiles: (files) =>
       guarded((open, startedChanging) => {
+        const imported = files.filter((f) => f.path === LAYOUT_PATH).at(-1);
+        const before = imported
+          ? null
+          : prepareCarry(
+              open,
+              files.map((f) => f.path),
+            );
         startedChanging();
         const touched = new Set<string>();
         for (const file of files) {
@@ -236,7 +423,15 @@ export function createEngineService(
               : open.state.model.setFile(file.path, file.text);
           for (const p of change.remodelled) touched.add(p);
         }
-        return changed(open, files, [...touched].sort());
+        if (imported) {
+          // a written sidecar replaces the layout; its keys are not carried
+          Object.assign(open, readLayout(imported.text));
+          open.removed = new RemovedPositions();
+        }
+        return changed(open, files, [...touched].sort(), {
+          before,
+          renames: [],
+        });
       }),
 
     apply: (command, given) =>
@@ -244,15 +439,18 @@ export function createEngineService(
         const old = stale(given);
         if (old) return old;
         const result = applyCommand(open.state, command);
-        return result.ok
-          ? accept(open, result, startedChanging)
-          : { ...result, revision };
+        if (!result.ok) return { ...result, revision };
+        if (result.files.some((f) => f.path === LAYOUT_PATH))
+          return sidecarRefusal();
+        return accept(open, result, startedChanging, command);
       }),
 
     applyPatches: (patches, given) =>
       guarded((open, startedChanging): ApplyOutcome => {
         const old = stale(given);
         if (old) return old;
+        if (patches.some((p: TextPatch) => p.path === LAYOUT_PATH))
+          return sidecarRefusal();
         let result: Extract<CommandResult, { ok: true }>;
         try {
           result = patchResult(open.state.model, patches);
@@ -265,12 +463,68 @@ export function createEngineService(
       }),
 
     project: (path, workflow) =>
-      guarded(
-        (open): ProjectionResult => ({
+      guarded((open): ProjectionResult => {
+        const projection = projectionOf(open, path, workflow);
+        return {
           revision,
-          projection: projectorOf(open).project(path, workflow),
-        }),
-      ),
+          projection,
+          positions: projection
+            ? workflowPositions(
+                open.layout,
+                path,
+                workflow,
+                projection.nodes.map((n) => n.id),
+              )
+            : {},
+        };
+      }),
+
+    setLayout: (write) =>
+      guarded((open, startedChanging): LayoutChange | EngineRefusal => {
+        const projection = projectionOf(open, write.path, write.workflow);
+        if (!projection)
+          return refusal(
+            "not-found",
+            `There is no workflow to lay out at ${write.path}.`,
+          );
+        const ids = new Set(projection.nodes.map((n) => n.id));
+        for (const [id, p] of Object.entries(write.positions)) {
+          if (!ids.has(id))
+            return refusal(
+              "invalid",
+              `${id} isn't a node of that workflow. Nothing was saved.`,
+            );
+          if (!sane(p))
+            return refusal(
+              "invalid",
+              `The position of ${id} isn't a usable number. Nothing was saved.`,
+            );
+        }
+        const nothing = (): LayoutChange => ({
+          revision,
+          files: [],
+          layout: open.layoutStatus,
+        });
+        if (open.layoutStatus.state === "newer") return nothing();
+        const next = writePositions(open.layout, write);
+        const text = formatLayout(next);
+        const present = open.state.model.file(LAYOUT_PATH)?.source.text;
+        if (present === text) {
+          open.layout = next;
+          return nothing();
+        }
+        if (present === undefined && Object.keys(next.nodes).length === 0)
+          return nothing();
+        startedChanging();
+        open.state.model.setFile(LAYOUT_PATH, text);
+        open.layout = next;
+        open.layoutStatus = OK;
+        return {
+          revision,
+          files: [{ path: LAYOUT_PATH, text }],
+          layout: OK,
+        };
+      }),
 
     diagnostics: () =>
       guarded(

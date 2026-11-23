@@ -39,6 +39,7 @@ const summaryOf = (workflows: WorkflowRef[], revision = 1): ProjectSummary => ({
   version: "26.10",
   files: [],
   workflows,
+  layout: { state: "absent", message: null },
 });
 
 /** A fake engine; `project` answers from `answers` or waits on `gates`. */
@@ -78,6 +79,7 @@ function fake(
           found === undefined || key === options.nullFor
             ? null
             : projectionOf(found),
+        positions: {},
       };
     },
   } as unknown as EngineApi;

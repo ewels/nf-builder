@@ -13,6 +13,12 @@ import type {
   TextPatch,
   WorkflowRef,
 } from "@nf-builder/lang-core";
+import type {
+  LayoutChange,
+  LayoutStatus,
+  LayoutWrite,
+  Positions,
+} from "../layout";
 import type { ProjectFile } from "../model/project";
 import type { TemplateList } from "../templates";
 
@@ -43,6 +49,8 @@ export interface ProjectSummary {
   readonly version: string;
   readonly files: readonly FileSummary[];
   readonly workflows: readonly WorkflowRef[];
+  /** How the layout sidecar read at open (F-207). */
+  readonly layout: LayoutStatus;
 }
 
 export interface ProjectChange {
@@ -77,6 +85,8 @@ export type ApplyOutcome = Applied | EngineRefusal;
 export interface ProjectionResult {
   readonly revision: number;
   readonly projection: Projection | null;
+  /** The stored positions of this projection's nodes; empty when the sidecar is unreadable (F-207). */
+  readonly positions: Positions;
 }
 
 export interface DiagnosticsResult {
@@ -107,6 +117,12 @@ export interface EngineApi {
     workflow: string | null,
   ): Promise<ProjectionResult | EngineRefusal>;
   diagnostics(): Promise<DiagnosticsResult | EngineRefusal>;
+  /**
+   * The only writer of `.nf-builder/layout.json` (F-207). Merges or replaces one workflow's positions and returns the
+   * sidecar's new text in `files` (empty when nothing changed or the file is newer than this build). It doesn't advance
+   * the revision.
+   */
+  setLayout(write: LayoutWrite): Promise<LayoutChange | EngineRefusal>;
   /** The current text of a file, or null with no project or no such file. */
   readFile(path: string): Promise<string | null>;
   /** Drops the open project; later calls answer `no-project` until the next `open`. The revision counter keeps counting. */

@@ -165,7 +165,11 @@ describe("F-113 engine service", () => {
     expect(nodes(after).filter((n) => n.kind === "call")).toHaveLength(2);
     expect("revision" in after && after.revision).toBe(applied.revision);
     const missing = await service.project("main.nf", "NOPE");
-    expect(missing).toEqual({ revision: applied.revision, projection: null });
+    expect(missing).toEqual({
+      revision: applied.revision,
+      projection: null,
+      positions: {},
+    });
     expect(applied.workflows.map((w) => w.name)).toEqual([null]);
   });
 
