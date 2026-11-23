@@ -113,6 +113,37 @@ function lcs(a: readonly string[], b: readonly string[]): [number, number][] {
 }
 
 /**
+ * `ids` and, transitively, every unassigned node that has outgoing edges all leading to nodes in the set: a command that
+ * deletes (or an undo that restores) a call also removes (restores) the nodes nested in its statement.
+ */
+function withNested(
+  projection: Projection,
+  ids: readonly string[] | undefined,
+): Set<string> {
+  const set = new Set(ids);
+  if (set.size === 0) return set;
+  const targets = new Map<string, string[]>();
+  for (const e of projection.edges) {
+    const list = targets.get(e.from.node);
+    if (list) list.push(e.to.node);
+    else targets.set(e.from.node, [e.to.node]);
+  }
+  const nested = projection.nodes.filter(
+    (n) => parseNodeKey(n.id)?.local.kind === "unassigned",
+  );
+  for (let grew = true; grew; ) {
+    grew = false;
+    for (const n of nested) {
+      const out = targets.get(n.id);
+      if (set.has(n.id) || !out || !out.every((t) => set.has(t))) continue;
+      set.add(n.id);
+      grew = true;
+    }
+  }
+  return set;
+}
+
+/**
  * Pairs the nodes of `before` with those of `after`: old id to new id. Each pass works on the nodes still unmatched, in
  * projection order. Passes: (1) a unique strong signature (kind, name, assigned variable, variables read); (2) the longest
  * common subsequence of strong signatures; (3) a unique name, with `renames` applied to the old callees; (4) the longest
@@ -136,8 +167,8 @@ export function matchNodes(
   };
   const old = describe(before, renamed);
   const next = describe(after, nodeName);
-  const deleted = new Set(hints.deleted);
-  const inserted = new Set(hints.inserted);
+  const deleted = withNested(before, hints.deleted);
+  const inserted = withNested(after, hints.inserted);
   const oldLeft = new Set(
     old.flatMap((d, i) => (deleted.has(d.node.id) ? [] : [i])),
   );

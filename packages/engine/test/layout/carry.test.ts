@@ -256,6 +256,34 @@ describe("F-207 carry", () => {
     expect(u1.doc).toEqual(start);
   });
 
+  it("F-207 AR-23: deleting a call also removes its nested factory, so another call's factory keeps its position and undo restores all", async () => {
+    const state = await fixtureState("f111-start-typed", {
+      "main.nf":
+        "nextflow.enable.types = true\n\ninclude { COUNT } from './modules/local/count/main.nf'\ninclude { ALIGN } from './modules/local/align/main.nf'\n\nworkflow {\n    COUNT(channel.fromPath('x'))\n    ALIGN(channel.fromPath('y'))\n}\n",
+    });
+    const removed = new RemovedPositions();
+    const start = seedLayout(snapshot(state));
+    const ids = (snapshot(state).projections.get("main.nf#")?.nodes ?? []).map(
+      (n) => n.id,
+    );
+    const factories = ids.filter((id) => id.includes("channel.fromPath"));
+    expect(factories).toHaveLength(2);
+    const call = "main.nf#/COUNT@1";
+    const del = step(
+      state,
+      start,
+      { kind: "deleteNode", target: entry, node: call },
+      removed,
+    );
+    expect(del.doc.nodes[factories[0] as string]).toEqual(
+      start.nodes[factories[1] as string],
+    );
+    const undone = stepPatches(state, del.doc, del.inverse, removed, {
+      inserted: [call],
+    });
+    expect(undone.doc).toEqual(start);
+  });
+
   it("F-207 F-111: AddCall leaves exactly the new node unplaced", async () => {
     const state = await fixtureState();
     const doc = seedLayout(snapshot(state));
