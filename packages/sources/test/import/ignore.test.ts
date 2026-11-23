@@ -86,4 +86,31 @@ describe("import ignore list", () => {
     expect(isIgnored(list, "keep.nf")).toBe(false);
     expect(isIgnored(list, "work/a")).toBe(true);
   });
+
+  it("F-403 IO-11: a pattern with many wildcards on a long path is answered quickly", () => {
+    const list = parseIgnore("*a*a*a*a*a*a*a*b\n**a**a**a**a**a**a**b\n");
+    expect(list.problems).toEqual([]);
+    const started = performance.now();
+    expect(isIgnored(list, "a".repeat(40))).toBe(false);
+    expect(isIgnored(list, `${"a/".repeat(150)}a`)).toBe(false);
+    expect(isIgnored(list, `${"a".repeat(300)}b`)).toBe(true);
+    expect(performance.now() - started).toBeLessThan(200);
+  });
+
+  it("F-403 IO-12: * stops at a slash, ** crosses it, **/ is zero or more folders and ? is one non-slash character", () => {
+    expect(ignored("a/*/c\n", "a/b/c", "a/b/b/c", "a//c")).toEqual([
+      true,
+      false,
+      true,
+    ]);
+    expect(ignored("a/**/c\n", "a/c", "a/b/c", "a/b/b/c", "ac")).toEqual([
+      true,
+      true,
+      true,
+      false,
+    ]);
+    expect(ignored("a**c\n", "abc", "a/b/c", "ac")).toEqual([true, true, true]);
+    expect(ignored("a?c\n", "abc", "ac", "a/c")).toEqual([true, false, false]);
+    expect(ignored("***x\n", "ax", "a/x")).toEqual([true, true]);
+  });
 });
