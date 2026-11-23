@@ -105,8 +105,21 @@ test("F-207 step 3 ADR-0008 AR-11: renaming a process through the app keeps its 
 }) => {
   await openStoredProject(page);
   await waitSaved(page);
+  // COUNT is dragged to a spot ELK would not choose, so TALLY can only land there through the carry
+  const placed = await nodePosition(page, KEY.count);
+  await dragNode(page, KEY.count, 80, 90);
+  await expect
+    .poll(async () => (await nodePosition(page, KEY.count)).x)
+    .not.toBe(placed.x);
+  const dragged = await nodePosition(page, KEY.count);
+  expect(dragged).not.toEqual(placed);
+  await expect
+    .poll(async () => (await readSidecar(page))?.nodes[KEY.count])
+    .toEqual(dragged);
+  await waitSaved(page);
   const before: Record<string, { x: number; y: number }> = {};
   for (const id of ALL_KEYS) before[id] = await nodePosition(page, id);
+  expect(before[KEY.count]).toEqual(dragged);
   const outcome = await page.evaluate(() =>
     (
       window as unknown as {
