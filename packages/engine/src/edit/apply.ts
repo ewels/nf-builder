@@ -128,7 +128,7 @@ export function patchResult(
 /** Writes an accepted result into the model; returns the files the model recomputed, sorted. */
 export function commit(
   state: EditState,
-  result: Extract<CommandResult, { ok: true }>,
+  result: { readonly files: readonly FileText[] },
 ): readonly string[] {
   const touched = new Set<string>();
   for (const file of result.files) {
@@ -142,4 +142,33 @@ export function commit(
       touched.add(p);
   }
   return [...touched].sort();
+}
+
+/**
+ * Applies patch lists in order to copies of the model's current texts, without writing them (F-209). Returns the final
+ * text of each touched path, null when deleted; a path absent before and after is omitted. Throws `PatchError` before
+ * anything is written. A step of several commands is a sequence because one list may patch a path only once.
+ */
+export function patchSequence(
+  model: ProjectModel,
+  lists: readonly (readonly TextPatch[])[],
+): readonly FileText[] {
+  const working = new Map<string, string | null>();
+  const textOf = (path: string): string | null | undefined =>
+    working.has(path) ? working.get(path) : model.file(path)?.source.text;
+  for (const list of lists) {
+    const current = new Map<string, string>();
+    for (const { path } of list) {
+      const text = textOf(path);
+      if (typeof text === "string") current.set(path, text);
+    }
+    const applied = applyPatches(current, list);
+    for (const { path } of list)
+      working.set(path, applied.files.get(path) ?? null);
+  }
+  const files: FileText[] = [];
+  for (const [path, text] of working)
+    if (text !== null || model.file(path) !== undefined)
+      files.push({ path, text });
+  return files;
 }

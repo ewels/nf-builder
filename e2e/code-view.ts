@@ -44,6 +44,16 @@ export const F208_AFTER = join(
 /** The Monaco editor of the open code view. */
 export const editor = (page: Page): Locator => page.locator(".monaco-editor");
 
+/** The Graph, Split or Code option of the active tab's view-mode toggle. */
+export const radio = (page: Page, name: string): Locator =>
+  page.getByRole("radiogroup", { name: "View mode" }).getByRole("radio", {
+    name,
+  });
+
+/** The code pane's sync status (`data-sync`). */
+export const syncStatus = (page: Page): Locator =>
+  page.locator(".code-pane-status");
+
 /** Opens the f208 project (before the valid edit) in the UI. */
 export const openCodeFixture = (page: Page) =>
   openProject(page, readProject(F208_BEFORE));
