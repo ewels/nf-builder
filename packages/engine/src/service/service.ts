@@ -103,6 +103,7 @@ export function createEngineService(
     return open.diagnoser;
   };
 
+  /** Reports a change already written; callers update the history first, so the change carries its new status. */
   const changed = (
     open: Open,
     files: readonly FileText[],
@@ -162,27 +163,12 @@ export function createEngineService(
           `The project changed (revision ${revision}, not ${given}). Nothing was changed.`,
         );
 
-  /** Writes `files` into the model and reports the change; `afterCommit` updates the history before its status is read. */
-  const commitFiles = (
-    open: Open,
-    files: readonly FileText[],
-    startedChanging: () => void,
-    afterCommit: () => void = () => undefined,
-  ): ProjectChange => {
-    startedChanging();
-    const remodelled = commit(open.state, { files });
-    afterCommit();
-    return changed(open, files, remodelled);
-  };
-
   const accept = (
     open: Open,
     result: Extract<CommandResult, { ok: true }>,
-    startedChanging: () => void,
-    afterCommit?: () => void,
   ): ApplyOutcome => ({
     ok: true,
-    ...commitFiles(open, result.files, startedChanging, afterCommit),
+    ...changed(open, result.files, commit(open.state, result)),
     patches: result.patches,
     inverse: result.inverse,
   });
@@ -213,12 +199,14 @@ export function createEngineService(
         `${direction === "undo" ? "Undo" : "Redo"} failed (${error.message}). Nothing was changed, and the undo history was cleared.`,
       );
     }
-    let label = "";
-    const change = commitFiles(open, files, startedChanging, () => {
-      label =
-        direction === "undo" ? open.history.undone() : open.history.redone();
-    });
-    return { ok: true, label, ...change };
+    startedChanging();
+    const label =
+      direction === "undo" ? open.history.undone() : open.history.redone();
+    return {
+      ok: true,
+      label,
+      ...changed(open, files, commit(open.state, { files })),
+    };
   };
 
   return {
@@ -302,13 +290,13 @@ export function createEngineService(
         if (old) return old;
         const result = applyCommand(open.state, command);
         if (!result.ok) return { ...result, revision };
-        return accept(open, result, startedChanging, () =>
-          open.history.record(
-            { patches: result.patches, inverse: result.inverse },
-            applyOptions?.label ?? commandLabel(command),
-            applyOptions?.group ?? null,
-          ),
+        startedChanging();
+        open.history.record(
+          { patches: result.patches, inverse: result.inverse },
+          applyOptions?.label ?? commandLabel(command),
+          applyOptions?.group ?? null,
         );
+        return accept(open, result);
       }),
 
     undo: (given) =>
@@ -336,9 +324,9 @@ export function createEngineService(
             return refusal("invalid", error.message);
           throw error;
         }
-        return accept(open, result, startedChanging, () =>
-          open.history.clear(),
-        );
+        startedChanging();
+        open.history.clear();
+        return accept(open, result);
       }),
 
     project: (path, workflow) =>

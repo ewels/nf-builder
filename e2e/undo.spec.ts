@@ -1,6 +1,6 @@
 import { expect, type Page, test } from "@playwright/test";
 import { canvasReady } from "./canvas.ts";
-import { canvasIds, editor } from "./code-view.ts";
+import { canvasIds, editor, radio, syncStatus } from "./code-view.ts";
 import { readProject } from "./engine.ts";
 import {
   applyThroughStore,
@@ -17,13 +17,8 @@ import {
 import { readFile } from "./projects.ts";
 
 const entry = { path: "main.nf", workflow: null };
-const radio = (page: Page, name: string) =>
-  page.getByRole("radiogroup", { name: "View mode" }).getByRole("radio", {
-    name,
-  });
 const button = (page: Page, name: "Undo" | "Redo") =>
   page.getByRole("button", { name, exact: true });
-const syncStatus = (page: Page) => page.locator(".code-pane-status");
 
 /** Waits for the undo count to reach `n`. */
 const undoCountIs = (page: Page, n: number) =>

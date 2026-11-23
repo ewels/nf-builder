@@ -7,9 +7,11 @@ import { editor } from "./code-view.ts";
 import { readProject } from "./engine.ts";
 import {
   createProjectInUi,
+  readFile,
   readStoredDatabase,
   saveState,
   switcher,
+  type WorkspaceHook,
 } from "./projects.ts";
 
 /** Already oracle-clean (F-111): typed, with ALIGN, COUNT and PAIR included and unused. */
@@ -93,23 +95,16 @@ export function portRef(
 }
 
 /** The engine's text of each of `paths` that exists. */
-export function engineFiles(
+export async function engineFiles(
   page: Page,
   paths: readonly string[],
 ): Promise<Record<string, string>> {
-  return page.evaluate(async (paths) => {
-    const engine = (
-      window as unknown as {
-        nfBuilderEngine: { readFile(path: string): Promise<string | null> };
-      }
-    ).nfBuilderEngine;
-    const out: Record<string, string> = {};
-    for (const path of [...paths].sort()) {
-      const text = await engine.readFile(path);
-      if (text !== null) out[path] = text;
-    }
-    return out;
-  }, paths);
+  const out: Record<string, string> = {};
+  for (const path of [...paths].sort()) {
+    const text = await readFile(page, path);
+    if (text !== null) out[path] = text;
+  }
+  return out;
 }
 
 const storedNow = async (page: Page): Promise<Record<string, string>> => {
@@ -162,14 +157,9 @@ export async function openStoredFixture(
   await createProjectInUi(page, name);
   const files = readProject(HISTORY_FIXTURE);
   await page.evaluate(async (files) => {
-    const engine = (
-      window as unknown as {
-        nfBuilderEngine: {
-          writeFiles(f: { path: string; text: string }[]): Promise<unknown>;
-        };
-      }
-    ).nfBuilderEngine;
-    await engine.writeFiles(files);
+    await (
+      window as unknown as { nfBuilderEngine: WorkspaceHook }
+    ).nfBuilderEngine.writeFiles(files);
   }, files);
   await canvasReady(page);
   await storedFiles(page);

@@ -32,9 +32,8 @@ export interface StepPart {
   readonly inverse: readonly TextPatch[];
 }
 
-export interface HistoryStep {
+interface HistoryStep {
   readonly label: string;
-  readonly group: string | null;
   readonly parts: readonly StepPart[];
   readonly units: number;
 }
@@ -50,9 +49,6 @@ export function patchUnits(patches: readonly TextPatch[]): number {
   }
   return units;
 }
-
-const partUnits = (part: StepPart): number =>
-  patchUnits(part.patches) + patchUnits(part.inverse);
 
 export class History {
   readonly #limits: HistoryLimits;
@@ -70,7 +66,7 @@ export class History {
    */
   record(part: StepPart, label: string, group: string | null): void {
     if (part.patches.length === 0) return;
-    const units = partUnits(part);
+    const units = patchUnits(part.patches) + patchUnits(part.inverse);
     const top = this.#undo[this.#undo.length - 1];
     if (group !== null && group === this.#open && top) {
       this.#undo[this.#undo.length - 1] = {
@@ -79,7 +75,7 @@ export class History {
         units: top.units + units,
       };
     } else {
-      this.#undo.push({ label, group, parts: [part], units });
+      this.#undo.push({ label, parts: [part], units });
       this.#redo = [];
     }
     this.#open = group;

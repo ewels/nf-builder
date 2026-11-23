@@ -1,18 +1,10 @@
 // Keyboard shortcuts of undo and redo (F-209, UX-70). Pure: the platform is passed in.
-import { behindDialog, isEditableTarget } from "../views/view-mode";
+import { ignoredByShortcuts, type ViewModeKey } from "../views/view-mode";
 
 export type HistoryAction = "undo" | "redo";
 
-export interface HistoryKeyEvent {
-  readonly key: string;
-  readonly ctrlKey: boolean;
-  readonly metaKey: boolean;
-  readonly altKey: boolean;
+export interface HistoryKeyEvent extends ViewModeKey {
   readonly shiftKey: boolean;
-  readonly repeat: boolean;
-  readonly isComposing: boolean;
-  readonly defaultPrevented: boolean;
-  readonly target: EventTarget | null;
 }
 
 export const isApplePlatform = (platform: string): boolean =>
@@ -26,9 +18,8 @@ export function historyActionForKey(
   e: HistoryKeyEvent,
   apple: boolean,
 ): HistoryAction | null {
-  if (e.altKey || e.repeat || e.isComposing || e.defaultPrevented) return null;
+  if (e.altKey || ignoredByShortcuts(e)) return null;
   if (apple ? e.ctrlKey || !e.metaKey : e.metaKey || !e.ctrlKey) return null;
-  if (isEditableTarget(e.target) || behindDialog(e.target)) return null;
   const key = e.key.toLowerCase();
   if (key === "z") return e.shiftKey ? "redo" : "undo";
   if (key === "y" && !apple && !e.shiftKey) return "redo";

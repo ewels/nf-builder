@@ -97,20 +97,13 @@ export {
   commit,
   createEditState,
   type EditState,
-  patchSequence,
 } from "./edit/apply";
 export { applyPatches, PatchError } from "./edit/patches";
 export {
   EMPTY_HISTORY,
-  HISTORY_LIMITS,
-  History,
   type HistoryLimits,
   type HistoryStatus,
-  type HistoryStep,
-  patchUnits,
-  type StepPart,
 } from "./history/history";
-export { commandLabel } from "./history/labels";
 export type {
   Binding,
   ConfigIncludeModel,

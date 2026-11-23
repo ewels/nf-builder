@@ -21,7 +21,7 @@ export function isEditableTarget(target: EventTarget | null): boolean {
 }
 
 /** Whether `target` is inside a dialog, or a modal dialog is open anywhere, so the page behind it is inert (UX-70). */
-export function behindDialog(target: EventTarget | null): boolean {
+function behindDialog(target: EventTarget | null): boolean {
   const el = target as { closest?: (selector: string) => unknown } | null;
   if (typeof el?.closest === "function" && el.closest("dialog") !== null)
     return true;
@@ -42,11 +42,20 @@ export interface ViewModeKey {
   readonly target: EventTarget | null;
 }
 
+/** Whether a page shortcut must leave a key press alone: a repeat, a composition, already handled, text entry or a dialog. */
+export function ignoredByShortcuts(e: ViewModeKey): boolean {
+  return (
+    e.repeat ||
+    e.isComposing ||
+    e.defaultPrevented ||
+    isEditableTarget(e.target) ||
+    behindDialog(e.target)
+  );
+}
+
 /** The mode a key press switches to (UX-70), or null when the press is not a plain G, S or C outside text entry. */
 export function viewModeForKey(e: ViewModeKey): ViewMode | null {
-  if (e.ctrlKey || e.metaKey || e.altKey) return null;
-  if (e.repeat || e.isComposing || e.defaultPrevented) return null;
-  if (isEditableTarget(e.target) || behindDialog(e.target)) return null;
+  if (e.ctrlKey || e.metaKey || e.altKey || ignoredByShortcuts(e)) return null;
   const key = e.key.toLowerCase();
   return VIEW_MODES.find((m) => m.key === key)?.mode ?? null;
 }

@@ -153,8 +153,7 @@ function renamedTabs(
   before: readonly WorkflowRef[],
   after: readonly WorkflowRef[],
 ): Map<string, WorkflowRef> {
-  const key = (w: { path: string; name: string | null }) =>
-    `${w.path}#${w.name ?? ""}`;
+  const key = (w: WorkflowRef) => tabFor(w).id;
   const had = new Set(before.map(key));
   const has = new Set(after.map(key));
   const out = new Map<string, WorkflowRef>();
@@ -199,7 +198,7 @@ export function createCanvasStore(
     // apply, undo and redo run one at a time, each at the revision the previous one produced
     let queue: Promise<unknown> = Promise.resolve();
     const enqueue = <T>(task: () => Promise<T>): Promise<T> => {
-      const run = queue.then(task, task);
+      const run = queue.then(task);
       queue = run.catch(() => undefined);
       return run;
     };
@@ -289,13 +288,41 @@ export function createCanvasStore(
     }
 
     /** A refusal that reports a newer revision: another writer got in first, so adopt it and show what it left. */
-    async function adoptNewer(outcome: EngineRefusal): Promise<void> {
+    async function adoptNewer(
+      outcome: ApplyOutcome | HistoryOutcome,
+    ): Promise<void> {
       const now = get().summary;
-      if (now === null || outcome.revision === null) return;
+      if (outcome.ok || now === null || outcome.revision === null) return;
       if (outcome.revision <= now.revision) return;
       set({ summary: { ...now, revision: outcome.revision } });
       const active = get().tabs.find((t) => t.id === get().activeTab);
       if (active !== undefined) await load(active, true);
+    }
+
+    /**
+     * Sends one change at the current revision, after every earlier one, and adopts the engine's answer. `after` runs in
+     * the same turn, only when the engine was called and the project is still shown.
+     */
+    function send<T extends ApplyOutcome | HistoryOutcome>(
+      session: number | undefined,
+      call: (revision: number) => Promise<T>,
+      after: (outcome: T) => Promise<void> | void = adoptNewer,
+    ): Promise<T | EngineRefusal> {
+      return enqueue(async () => {
+        const { summary } = get();
+        if (session !== undefined && session !== get().session)
+          return refusal("no-project", "The project changed.");
+        if (summary === null)
+          return refusal("no-project", "No project is open.");
+        const outcome = await call(summary.revision);
+        const now = get().summary;
+        if (now === null) return outcome;
+        // the engine client announces changes to `changed` already; this covers an engine that doesn't
+        if (outcome.ok && outcome.revision > now.revision)
+          await get().changed(outcome);
+        await after(outcome);
+        return outcome;
+      });
     }
 
     async function stepHistory(
@@ -306,21 +333,16 @@ export function createCanvasStore(
         return refusal("no-project", "The project changed.");
       // pending code edits become the step that gets undone; outside the queue, as their send is queued itself
       await Promise.all([...flushes].map((flush) => flush().catch(() => {})));
-      return enqueue(async () => {
-        const { summary } = get();
-        if (session !== undefined && session !== get().session)
-          return refusal("no-project", "The project changed.");
-        if (summary === null)
-          return refusal("no-project", "No project is open.");
-        const outcome = await engine()[kind](summary.revision);
-        if (get().summary === null) return outcome;
-        if (outcome.ok) {
-          if (outcome.revision > (get().summary?.revision ?? 0))
-            await get().changed(outcome);
-          set({
-            historyNotice: `${kind === "undo" ? "Undone" : "Redone"}: ${outcome.label}`,
-          });
-        } else {
+      return send(
+        session,
+        (revision) => engine()[kind](revision),
+        async (outcome) => {
+          if (outcome.ok) {
+            set({
+              historyNotice: `${kind === "undo" ? "Undone" : "Redone"}: ${outcome.label}`,
+            });
+            return;
+          }
           // no retry: the top step may no longer be the one the user saw
           set({ historyNotice: outcome.message });
           await adoptNewer(outcome);
@@ -329,9 +351,8 @@ export function createCanvasStore(
           } catch {
             // the status stays as it was; the next change carries it
           }
-        }
-        return outcome;
-      });
+        },
+      );
     }
 
     return {
@@ -401,11 +422,8 @@ export function createCanvasStore(
           return to === undefined ? t : { ...tabFor(to), mode: t.mode };
         });
         const current = get().activeTab;
-        const activeTab =
-          current === null
-            ? null
-            : (tabs[get().tabs.findIndex((t) => t.id === current)]?.id ??
-              current);
+        const moved = current === null ? undefined : renamed.get(current);
+        const activeTab = moved === undefined ? current : tabFor(moved).id;
         set({
           tabs,
           activeTab,
@@ -457,27 +475,8 @@ export function createCanvasStore(
         set({ portLabels });
       },
 
-      apply(command, session, options) {
-        return enqueue(async () => {
-          const { summary } = get();
-          if (session !== undefined && session !== get().session)
-            return refusal("no-project", "The project changed.");
-          if (summary === null)
-            return refusal("no-project", "No project is open.");
-          const outcome = await engine().apply(
-            command,
-            summary.revision,
-            options,
-          );
-          const now = get().summary;
-          if (now === null) return outcome;
-          if (outcome.ok) {
-            // the engine client announces changes to `changed` already; this covers an engine that doesn't
-            if (outcome.revision > now.revision) await get().changed(outcome);
-          } else await adoptNewer(outcome);
-          return outcome;
-        });
-      },
+      apply: (command, session, options) =>
+        send(session, (revision) => engine().apply(command, revision, options)),
 
       undo: (session) => stepHistory("undo", session),
       redo: (session) => stepHistory("redo", session),
