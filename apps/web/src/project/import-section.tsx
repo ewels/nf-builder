@@ -33,6 +33,7 @@ export function ImportSection(props: {
   const ids = useId();
   const { state } = props.view;
   const helpId = `${ids}-help`;
+  const problemsId = `${ids}-problems`;
   return (
     <>
       <fieldset className="dialog-group">
@@ -55,16 +56,11 @@ export function ImportSection(props: {
             onChange={(event) => takeChosenFile(props.view, event.target)}
           />
         </label>
-        {state.status === "reading" ? (
-          <p className="muted" role="status">
-            Reading {state.name}…
-          </p>
-        ) : null}
-        {state.status === "ready" && state.updating ? (
-          <p className="muted" role="status">
-            Updating…
-          </p>
-        ) : null}
+        {/* one live region that stays in the page, so its changes are announced */}
+        <p className="muted" role="status">
+          {state.status === "reading" ? `Reading ${state.name}…` : null}
+          {state.status === "ready" && state.updating ? "Updating…" : null}
+        </p>
         {state.status === "refused" ? (
           <p className="dialog-error" role="alert">
             {state.message}
@@ -124,7 +120,11 @@ export function ImportSection(props: {
             rows={6}
             spellCheck={false}
             value={state.ignore}
-            aria-describedby={helpId}
+            aria-describedby={
+              state.summary.ignoreProblems.length > 0
+                ? `${problemsId} ${helpId}`
+                : helpId
+            }
             aria-invalid={state.summary.ignoreProblems.length > 0}
             onChange={(event) => props.view.setIgnore(event.target.value)}
           />
@@ -134,7 +134,7 @@ export function ImportSection(props: {
             over 1 MB are always skipped.
           </p>
           {state.summary.ignoreProblems.length > 0 ? (
-            <ul className="dialog-error">
+            <ul className="dialog-error" id={problemsId}>
               {state.summary.ignoreProblems.map((problem) => (
                 <li key={problem.line}>
                   Line {problem.line}: {problem.message}

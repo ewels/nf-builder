@@ -344,6 +344,17 @@ describe("F-203 new project dialog", () => {
       updating: true,
     } as ZipImportState);
     expect(updating).toMatch(/role="status"[^>]*>Updating…/);
+    // the live region is in the page in every state, empty when there is nothing to say
+    for (const zip of [EMPTY_ZIP, readyZip()])
+      expect(dialog({ initialRoute: "import" }, zip)).toMatch(
+        /<p[^>]*role="status"[^>]*><\/p>/,
+      );
+    const described = /<textarea[^>]*aria-describedby="([^"]+)"/.exec(
+      problem,
+    )?.[1];
+    const listId = /<ul[^>]*id="([^"]+)"[^>]*>\s*<li>Line 2/.exec(problem)?.[1];
+    expect(listId).toBeTruthy();
+    expect(described?.split(" ")).toContain(listId);
   });
 
   it("F-403 UX-60 IO-12: newProjectRequest for Import needs a read zip with files and no list problems, and carries its id and ignore text without a template", () => {
