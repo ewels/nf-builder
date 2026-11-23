@@ -182,7 +182,7 @@ test("F-206 UX-24 UX-30: a port-labels toggle and a refresh keep the selection a
   }
 });
 
-test("F-206 UX-30 QA-11: Enter on a focused node selects it, Escape clears", async ({
+test("F-206 UX-30 QA-11: Enter or Space on a focused node selects it, Escape clears", async ({
   page,
 }) => {
   await page.goto("./");
@@ -199,6 +199,10 @@ test("F-206 UX-30 QA-11: Enter on a focused node selects it, Escape clears", asy
     "data-details-state",
     "summary",
   );
+  await node(page, NODE.counted).focus();
+  await page.keyboard.press(" ");
+  await expect(node(page, NODE.counted)).toHaveClass(/selected/);
+  await expect(node(page, NODE.greeted)).not.toHaveClass(/selected/);
 });
 
 test("F-206 step 1 UX-30: clicking each node kind shows its name, kind, file, and ports with types and connections", async ({

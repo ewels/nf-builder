@@ -326,7 +326,7 @@ describe("F-206 selection", () => {
     expect(store.getState().details).toEqual({ status: "idle" });
   });
 
-  it("F-206: a details result for an older selection, tab or revision is ignored or marked unavailable; a null result clears the selection", async () => {
+  it("F-206 UX-30: a details result for an older selection, tab or revision is ignored or marked unavailable; a null result clears the selection", async () => {
     let release: () => void = () => undefined;
     const gate = new Promise<void>((resolve) => {
       release = resolve;
@@ -375,7 +375,7 @@ describe("F-206 selection", () => {
     expect(store.getState().details).toEqual({ status: "idle" });
   });
 
-  it("F-206: opening a project, opening a workflow or switching tabs clears the selection", async () => {
+  it("F-206 UX-30 UX-31: opening a project, opening a workflow or switching tabs clears the selection", async () => {
     const store = createCanvasStore(() => fake(wf).engine);
     await store.getState().open(request);
     await store.getState().select("a");
@@ -404,7 +404,7 @@ describe("F-206 selection", () => {
     expect(d.status === "ready" && d.revision).toBe(2);
   });
 
-  it("F-206 UX-31: details at a newer revision than the canvas show loading, not a stale-selection message", async () => {
+  it("F-206 UX-30: details at a newer revision than the canvas show loading, not a stale-selection message", async () => {
     const options: Parameters<typeof fake>[1] = {};
     const store = createCanvasStore(() => fake(wf, options).engine);
     await store.getState().open(request);
