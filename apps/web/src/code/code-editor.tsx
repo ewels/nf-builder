@@ -113,6 +113,7 @@ export default function CodeEditor({
         automaticLayout: true,
         fixedOverflowWidgets: true,
         minimap: { enabled: false },
+        renderLineHighlightOnlyWhenFocus: true,
         ariaLabel: `Code of ${path}`,
         cursorBlinking: reduced ? "solid" : "blink",
         smoothScrolling: !reduced,

@@ -344,6 +344,28 @@ test("F-208 UX-27: switching to Split fits the whole graph in the half-width pan
   await expect.poll(async () => (await inside()).every(Boolean)).toBe(true);
 });
 
+test("F-208 UX-27: the editor paints no current-line highlight while it is not focused", async ({
+  page,
+}) => {
+  await openSplit(page);
+  // a painted highlight is a `.current-line` element with a background colour
+  const painted = () =>
+    page
+      .locator(".monaco-editor .current-line")
+      .evaluateAll(
+        (els) =>
+          els.filter(
+            (el) =>
+              getComputedStyle(el).backgroundColor !== "rgba(0, 0, 0, 0)" &&
+              el.getBoundingClientRect().height > 0,
+          ).length,
+      );
+  await page.locator(".monaco-editor .view-lines").click();
+  await expect.poll(painted).toBeGreaterThan(0);
+  await page.evaluate(() => (document.activeElement as HTMLElement)?.blur());
+  await expect.poll(painted).toBe(0);
+});
+
 /** Waits for the editor, Shiki's token colours and a settled layout, then hides what blinks or follows focus. */
 async function visualReady(page: Page): Promise<Locator[]> {
   await expect(editor(page)).toBeVisible();
@@ -358,11 +380,7 @@ async function visualReady(page: Page): Promise<Locator[]> {
     .toBeGreaterThan(2);
   await layoutSettled(page);
   await page.evaluate(() => (document.activeElement as HTMLElement)?.blur());
-  return [
-    page.locator(".monaco-editor .cursors-layer"),
-    page.locator(".monaco-editor .current-line"),
-    page.locator(".monaco-editor .current-line-margin"),
-  ];
+  return [page.locator(".monaco-editor .cursors-layer")];
 }
 
 test.describe("F-208 views, visual", () => {
