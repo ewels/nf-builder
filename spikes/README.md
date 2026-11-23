@@ -1,6 +1,6 @@
 # Spikes
 
-Throwaway spike pages that needn't be deployed use `spikes/<id>/` (ADR 0024). They are outside the pnpm workspace and are not built by `pnpm build`. A deployed probe, like S4's, follows ADR 0023 and lives in `e2e/s4-probe/`.
+Throwaway spike pages that needn't be deployed use `spikes/<id>/` (ADR 0024). They are outside the pnpm workspace and are not built by `pnpm build`. A deployed probe follows ADR 0023; S4's was deleted by F-502.
 
 - Only `e2e/` and `test/` import them.
 - Each `spikes/<id>/` has a README saying how to run it and which feature and ADR it serves.

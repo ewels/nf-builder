@@ -1,0 +1,18 @@
+{
+  "plugins": [
+    {
+      "id": "nf-schema",
+      "downloadCount": 100,
+      "downloadGhCount": 0
+    },
+    {
+      "id": "nf-brand-new",
+      "downloadCount": 1,
+      "downloadGhCount": 0
+    }
+  ],
+  "page": 1,
+  "size": 100,
+  "totalSize": 2,
+  "last": true
+}

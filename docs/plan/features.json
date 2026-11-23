@@ -170,7 +170,7 @@
         "ADR 0009 updated with the outcome"
       ],
       "passes": true,
-      "notes": "Verified 2026-11-22 on PR #14: S4 probe run 44983841745 against deploy preview #14 (commit dd44cf4) in Chromium 159, Firefox 159 and WebKit 27.2 recorded status, CORS headers and timing for 16 targets (step 1); the @openapi test matched all 10 registry targets to OpenAPI 0.14.0 (step 2); ADR 0009 spike result appended (step 3). Report: docs/research/2026-11-22-spike-s4-cors.md. pnpm test:e2e -- --grep F-008 runs the two local page tests; the deployed probe runs under e2e/s4-probe.config.ts. Probe kept for re-runs until F-502. From F-011: the S4 probe runs on dispatch only, against the Pages site, and its deployed run strips the meta policy (ADR 0040)."
+      "notes": "Verified 2026-11-22 on PR #14: S4 probe run 44983841745 against deploy preview #14 (commit dd44cf4) in Chromium 159, Firefox 159 and WebKit 27.2 recorded status, CORS headers and timing for 16 targets (step 1); the @openapi test matched all 10 registry targets to OpenAPI 0.14.0 (step 2); ADR 0009 spike result appended (step 3). Report: docs/research/2026-11-22-spike-s4-cors.md. pnpm test:e2e -- --grep F-008 runs the two local page tests; the deployed probe runs under e2e/s4-probe.config.ts. Probe kept for re-runs until F-502. From F-011: the S4 probe runs on dispatch only, against the Pages site, and its deployed run strips the meta policy (ADR 0040). From F-502: the S4 probe, its workflow and its tests are deleted (ADR 0023's lifetime, ADR 0050); `--grep F-008` now matches no test. Re-check CORS with the `curl` in ADR 0050."
     },
     {
       "id": "F-010",
@@ -215,7 +215,7 @@
         "A successful `Registry snapshot` run on `main` triggers a Pages deploy that serves the snapshot at `/registry/` without any secret, and `verify` passes `pnpm check:registry --url` against the deployed site"
       ],
       "passes": true,
-      "notes": "Verified 2026-11-22: step 2 by the CI `site` job (`pnpm check:site` on a `/nf-builder/` build), test/check-site.test.ts, test/security-policy*.test.ts and e2e/pages-hosting.spec.ts; step 3 by `pnpm test:e2e` under `/nf-builder/` (pages-hosting.spec.ts and the F-002/F-011 preview test in app-shell.spec.ts); step 4 by the cross-origin iframe test in e2e/pages-hosting.spec.ts (ADR 0044). Steps 1 and 5 are confirmed after merge by `pages.yml`'s `verify` job: the push run, then the first `workflow_run` after a Registry snapshot run (Q11). Merge only once Pages' source is \"GitHub Actions\" (#35)."
+      "notes": "Verified 2026-11-22: step 2 by the CI `site` job (`pnpm check:site` on a `/nf-builder/` build), test/check-site.test.ts, test/security-policy*.test.ts and e2e/pages-hosting.spec.ts; step 3 by `pnpm test:e2e` under `/nf-builder/` (pages-hosting.spec.ts and the F-002/F-011 preview test in app-shell.spec.ts); step 4 by the cross-origin iframe test in e2e/pages-hosting.spec.ts (ADR 0044). Steps 1 and 5 are confirmed after merge by `pages.yml`'s `verify` job: the push run, then the first `workflow_run` after a Registry snapshot run (Q11). Merge only once Pages' source is \"GitHub Actions\" (#35). From F-502: step 2's end-to-end test checks the app page only, now the only built page; stamping public HTML stays covered by `test/security-policy-meta.test.ts` and the `site` job scans every page."
     },
     {
       "id": "F-101",
@@ -1113,8 +1113,8 @@
         "Block the registry host in Playwright: palette still lists modules from the snapshot and says so",
         "With live access (if S4 allowed it): palette shows live"
       ],
-      "passes": false,
-      "notes": "From F-008 (S4, 2026-11-22): the registry sends no CORS headers, so the live client can't work from the browser today; step 2 applies only if a re-run of the S4 probe (dispatch the S4 probe workflow) shows access. Delete the probe page and workflow here (ADR 0023). From F-501: read /registry/index.json and check format === 1 and a JSON content type (the SPA fallback returns HTML 200 when it's missing, and the site serves no snapshot until issue #31 is resolved); the age is generatedAt; ports are in /registry/ports.json; Playwright's preview serves the fixture snapshot from REGISTRY_SNAPSHOT_DIR (tools/registry-snapshot/test/fixtures/expected). From F-011: fetch the snapshot with `import.meta.env.BASE_URL`, never `/registry/`; there is no SPA fallback, so a missing file is a 404, but keep the JSON content-type check; fetch in the document, not a worker (QA-30, ADR 0040)."
+      "passes": true,
+      "notes": "From F-008 (S4, 2026-11-22): the registry sends no CORS headers, so the live client can't work from the browser today; step 2 applies only if a re-run of the S4 probe (dispatch the S4 probe workflow) shows access. Delete the probe page and workflow here (ADR 0023). From F-501: read /registry/index.json and check format === 1 and a JSON content type (the SPA fallback returns HTML 200 when it's missing, and the site serves no snapshot until issue #31 is resolved); the age is generatedAt; ports are in /registry/ports.json; Playwright's preview serves the fixture snapshot from REGISTRY_SNAPSHOT_DIR (tools/registry-snapshot/test/fixtures/expected). From F-011: fetch the snapshot with `import.meta.env.BASE_URL`, never `/registry/`; there is no SPA fallback, so a missing file is a 404, but keep the JSON content-type check; fetch in the document, not a worker (QA-30, ADR 0040). Verified 2026-11-23 (ADR 0050): step 1 by the `packages/sources` registry tests (snapshot validation, live client against recorded responses, fallback, one snapshot read per refresh, parallel paging) and `e2e/registry-palette.spec.ts` (source line and age, refresh, no snapshot, failed read, in a cross-origin frame); step 2's condition (\"if S4 allowed it\") is false: the S4 re-run 45093395128 and a `curl` on 2026-11-23 show `registry.nextflow.io` still sends no CORS header, so `LIVE_REGISTRY` stays off, and the routed e2e test drives the live path through `window.nfBuilderRegistry`. The S4 probe and its workflow are deleted (ADR 0023)."
     },
     {
       "id": "F-503",
@@ -1133,7 +1133,7 @@
         "Scrolling the module list loads more without blocking input"
       ],
       "passes": false,
-      "notes": "From F-501: namespace is the first segment of name; kind is process or workflow; typed is true, false or null (unknown); search over name, description and keywords; ports.json holds meta.yml ports per module."
+      "notes": "From F-501: namespace is the first segment of name; kind is process or workflow; typed is true, false or null (unknown); search over name, description and keywords; ports.json holds meta.yml ports per module. From F-502: `useRegistry` and `registryStore` live in `apps/web/src/registry/`; replace the interim lists (`REGISTRY_LIST_LIMIT`, `RegistryList`) and keep the heading, refresh button and source line; registry rows use `registry-item*`, never `.palette-item`; F-204 tests are scoped to the generic region; registry search joins UX-11 (lists are hidden while searching today); `version: null` means live-only with no typed tag, `typed: null` means unknown; names can have three segments (`cellgeni/anndata/concat`); add `ports(name)` to the client."
     },
     {
       "id": "F-504",
@@ -1153,7 +1153,7 @@
         "Drop it again: the bundle is not duplicated"
       ],
       "passes": false,
-      "notes": "From F-005 (S1): typed workflows may call legacy registry modules across files with no warning; tuple inputs as tuple(...), outputs by assignment (LA-14). .module-info isn't written until its checksum algorithm is verified with the oracle (ADR 0009 spike result). From F-105: registry includes need modules/<scope>/<name>/main.nf and meta.yml, under the project root or, for scripts under a modules/ directory, under that directory (nested vendoring); .module-info isn't needed to resolve (ADR 0034). From F-501: modules/<name>/<version>.json holds every file of the registry bundle (base64 for non-UTF-8), the include name (component), the pinned requires (each present as its own bundle) and the registry tar.gz checksum; .module-info records the installed directory's checksum (ADR 0009 spike result), which F-504 computes. From F-112: LA-14 tuple arity is checked at connection time here or in F-302; nextflow lint doesn't check it. From F-203: both templates are typed and use local modules only, so a registry insert into a template project is the first registry include."
+      "notes": "From F-005 (S1): typed workflows may call legacy registry modules across files with no warning; tuple inputs as tuple(...), outputs by assignment (LA-14). .module-info isn't written until its checksum algorithm is verified with the oracle (ADR 0009 spike result). From F-105: registry includes need modules/<scope>/<name>/main.nf and meta.yml, under the project root or, for scripts under a modules/ directory, under that directory (nested vendoring); .module-info isn't needed to resolve (ADR 0034). From F-501: modules/<name>/<version>.json holds every file of the registry bundle (base64 for non-UTF-8), the include name (component), the pinned requires (each present as its own bundle) and the registry tar.gz checksum; .module-info records the installed directory's checksum (ADR 0009 spike result), which F-504 computes. From F-112: LA-14 tuple arity is checked at connection time here or in F-302; nextflow lint doesn't check it. From F-203: both templates are typed and use local modules only, so a registry insert into a template project is the first registry include. From F-502: add `bundle(name, version)` to the registry client, snapshot only; `encodeURIComponent` module names in registry API paths; fetch in the document and pass files to the worker; a `version: null` module isn't insertable."
     },
     {
       "id": "F-505",
@@ -1170,7 +1170,7 @@
         "Add nf-schema: `nextflow.config` gains the plugin line; its functions appear in the palette"
       ],
       "passes": false,
-      "notes": "From F-501: plugins/<id>/<version>.json holds the description and definitions; the version is already chosen as the highest published release admitted by the pack's pinned Nextflow."
+      "notes": "From F-501: plugins/<id>/<version>.json holds the description and definitions; the version is already chosen as the highest published release admitted by the pack's pinned Nextflow. From F-502: add `plugin(id, version)` to the registry client; plugin rows use `summary` (plugins have no description); live data can only prune plugins."
     },
     {
       "id": "F-506",

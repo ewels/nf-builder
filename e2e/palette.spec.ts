@@ -71,6 +71,7 @@ test("F-204 step 1 UX-12: every category expands and collapses with its button",
 }) => {
   await open(page);
   const headings = await palette(page)
+    .getByRole("region", { name: /^Nextflow language · / })
     .getByRole("heading", { level: 3 })
     .allInnerTexts();
   expect(headings.map((h) => h.trim())).toEqual(CATEGORIES);

@@ -30,21 +30,19 @@ async function headStart(
   });
 }
 
-test("F-011 step 2 QA-30: the app page and the S4 page start <head> with the CSP and referrer meta elements, with no console error", {
+test("F-011 step 2 QA-30: the app page starts <head> with the CSP and referrer meta elements, with no console error", {
   tag: SMOKE_TAG,
 }, async ({ page }) => {
   expect(policyMetaHtml()).toContain("Content-Security-Policy");
-  for (const path of ["./", "spike/s4/"]) {
-    const watch = await watchForCspViolations(page);
-    await page.goto(path);
-    await page.waitForLoadState("load");
-    expect(await headStart(page), path).toEqual({
-      first: ["META", "Content-Security-Policy", CONTENT_SECURITY_POLICY],
-      second: ["META", "referrer", REFERRER_POLICY],
-    });
-    expect(await watch.violations(), path).toEqual([]);
-    expect(watch.consoleErrors, path).toEqual([]);
-  }
+  const watch = await watchForCspViolations(page);
+  await page.goto("./");
+  await page.waitForLoadState("load");
+  expect(await headStart(page)).toEqual({
+    first: ["META", "Content-Security-Policy", CONTENT_SECURITY_POLICY],
+    second: ["META", "referrer", REFERRER_POLICY],
+  });
+  expect(await watch.violations()).toEqual([]);
+  expect(watch.consoleErrors).toEqual([]);
 });
 
 test("F-011 step 3 ADR-0040: the site is served under the base path: /version.json is 404, version.json is 200, and / redirects to the base", async ({

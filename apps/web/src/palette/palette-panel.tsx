@@ -1,5 +1,6 @@
 import { paletteItemCount, searchPalette } from "@nf-builder/engine";
 import { type JSX, useMemo, useState } from "react";
+import { RegistrySection } from "../registry/registry-section";
 import "./palette.css";
 import { PaletteMessage } from "./palette-message";
 import { PaletteSearch } from "./palette-search";
@@ -42,6 +43,7 @@ export function PalettePanel({
           onToggle={toggleCategory}
         />
       )}
+      <RegistrySection searching={searching} />
     </div>
   );
 }

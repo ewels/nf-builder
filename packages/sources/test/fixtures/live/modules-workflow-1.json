@@ -1,0 +1,20 @@
+{
+  "modules": [
+    {
+      "id": "5",
+      "name": "nf-core/bam_applybqsr",
+      "repositoryPath": "nf-core/bam_applybqsr",
+      "commitId": "5555555",
+      "revoked": false,
+      "description": "Apply Base Quality Score Recalibration (BQSR) to a BAM or CRAM file",
+      "downloadCount": 5,
+      "createdAt": "2026-01-01T00:00:00Z",
+      "updatedAt": "2026-01-02T00:00:00Z",
+      "kind": "Workflow"
+    }
+  ],
+  "page": 1,
+  "size": 100,
+  "totalSize": 1,
+  "last": true
+}

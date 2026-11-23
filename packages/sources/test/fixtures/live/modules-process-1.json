@@ -1,0 +1,56 @@
+{
+  "modules": [
+    {
+      "id": "1",
+      "name": "nextflow-io/hello",
+      "repositoryPath": "nextflow-io/hello",
+      "commitId": "1111111",
+      "revoked": false,
+      "description": "Print a greeting to standard output",
+      "downloadCount": 10,
+      "createdAt": "2026-01-01T00:00:00Z",
+      "updatedAt": "2026-01-02T00:00:00Z",
+      "kind": "Process"
+    },
+    {
+      "id": "2",
+      "name": "nf-core/fastqc",
+      "repositoryPath": "nf-core/fastqc",
+      "commitId": "2222222",
+      "revoked": false,
+      "description": "Run FastQC on sequenced reads",
+      "downloadCount": 20,
+      "createdAt": "2026-01-01T00:00:00Z",
+      "updatedAt": "2026-01-02T00:00:00Z",
+      "kind": "Process"
+    },
+    {
+      "id": "3",
+      "name": "nf-core/newtool",
+      "repositoryPath": "nf-core/newtool",
+      "commitId": "3333333",
+      "revoked": false,
+      "description": "A module published after the last snapshot",
+      "downloadCount": 0,
+      "createdAt": "2026-11-23T00:00:00Z",
+      "updatedAt": "2026-11-23T00:00:00Z",
+      "kind": "Process"
+    },
+    {
+      "id": "4",
+      "name": "nf-core/revokedtool",
+      "repositoryPath": "nf-core/revokedtool",
+      "commitId": "4444444",
+      "revoked": true,
+      "description": "A revoked module",
+      "downloadCount": 0,
+      "createdAt": "2026-11-23T00:00:00Z",
+      "updatedAt": "2026-11-23T00:00:00Z",
+      "kind": "Process"
+    }
+  ],
+  "page": 1,
+  "size": 100,
+  "totalSize": 4,
+  "last": true
+}
