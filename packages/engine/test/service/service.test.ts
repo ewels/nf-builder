@@ -12,6 +12,7 @@ import {
   type LoadProgress,
   loadPalette,
   type ModelEvent,
+  type NodeDetailsResult,
   type ProjectChange,
   type ProjectionResult,
 } from "../../src";
@@ -338,6 +339,7 @@ describe("F-113 engine service", () => {
       await service.writeFiles([]),
       await service.project("main.nf", null),
       await service.diagnostics(),
+      await service.details("main.nf", null, "x"),
     ])
       expect(r).toMatchObject({
         ok: false,
@@ -347,5 +349,65 @@ describe("F-113 engine service", () => {
     await service.close();
     const summary = await service.open({ version, files });
     expect(summary.revision).toBeGreaterThan(1);
+  });
+
+  it("F-206 AR-04: details returns the node's declaration details and diagnostics at the current revision", async () => {
+    const service = createEngineService();
+    const summary = await service.open({
+      version,
+      files: [
+        {
+          path: "main.nf",
+          text: "include { A } from './a.nf'\nworkflow {\n    main:\n    A(Channel.of(1))\n}\n",
+        },
+        {
+          path: "a.nf",
+          text: "/** Does A. */\nprocess A {\n    cpus 2\n    input:\n    val x\n    script:\n    'true'\n}\n",
+        },
+      ],
+    });
+    const projected = await service.project("main.nf", null);
+    const call = nodes(projected).find((n) => n.kind === "call");
+    if (call === undefined) throw new Error("no call");
+    const result = (await service.details(
+      "main.nf",
+      null,
+      call.id,
+    )) as NodeDetailsResult;
+    expect(result.revision).toBe(summary.revision);
+    expect(result.details?.node).toBe(call.id);
+    expect(result.details?.declaration).toMatchObject({
+      path: "a.nf",
+      description: "Does A.",
+      directives: [{ name: "cpus", value: "2" }],
+    });
+    const factory = nodes(projected).find((n) => n.kind === "factory");
+    const fresult = (await service.details(
+      "main.nf",
+      null,
+      factory?.id ?? "",
+    )) as NodeDetailsResult;
+    expect(fresult.details?.diagnostics.map((d) => d.code)).toContain(
+      "deprecated-channel",
+    );
+  });
+
+  it("F-206: details for an unknown node is null; without a project it is a no-project refusal; the result survives structuredClone", async () => {
+    const { service } = await opened();
+    const projected = await service.project("main.nf", null);
+    const id = nodes(projected)[0]?.id ?? "";
+    const known = await service.details("main.nf", null, id);
+    expect(structuredClone(known)).toEqual(known);
+    expect(await service.details("main.nf", null, "nope")).toMatchObject({
+      details: null,
+    });
+    expect(await service.details("missing.nf", null, id)).toMatchObject({
+      details: null,
+    });
+    await service.close();
+    expect(await service.details("main.nf", null, id)).toMatchObject({
+      ok: false,
+      code: "no-project",
+    });
   });
 });

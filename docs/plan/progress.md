@@ -557,3 +557,16 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - F-202's "stored in this browser" check moved to the dialog's unit test; the IndexedDB record test now compares the blank template's files.
   - The F-201 UX-01 test expects an enabled Templates button, and the app-shell baseline is re-approved from CI (ADR 0021).
 - Blockers: none.
+
+## 2026-11-23 · F-206 · Claude (autonomous)
+- Did:
+  - Selecting a node on the canvas highlights it and its edges and shows its details: kind, file, description, ports with types and connections, directives, topics, a script preview and its problems. With nothing selected, the pane shows the workflow summary.
+  - The view comes from the projection on the main thread; declarations and diagnostics come from a new `details` call to the worker.
+  - The review found that the canvas stopped re-fitting after a port-labels toggle; fixed, and F-205's baselines are unchanged.
+- State: passing once CI is green.
+- Next: F-207; F-209 after F-208.
+- Decisions:
+  - [ADR 0049](../adr/0049-details-pane.md): the main-thread and worker split, `EngineApi.details` (amends ADR 0043's API list), the AR-30 reading (excerpts with length caps), single selection and its lifetime, the UX-24 highlight, the UX-30 to UX-32 readings (spec clauses added), and two colour tokens.
+  - Task 0 wasn't needed: F-112 had already wired the diagnoser into the service.
+  - The two details-pane baselines are approved from CI (ADR 0021).
+- Blockers: none.

@@ -54,6 +54,22 @@ export async function openProject(
   );
 }
 
+/** Rewrites the fixture's main.nf through the engine hook with a trailing comment, so the canvas refreshes with the same nodes. */
+export function touchMain(page: Page): Promise<unknown> {
+  const main = readProject(F205_FIXTURE).find((f) => f.path === "main.nf");
+  if (main === undefined) throw new Error("the fixture has no main.nf");
+  return page.evaluate(async (text) => {
+    const engine = (
+      window as unknown as {
+        nfBuilderEngine: {
+          writeFiles(files: { path: string; text: string }[]): Promise<unknown>;
+        };
+      }
+    ).nfBuilderEngine;
+    await engine.writeFiles([{ path: "main.nf", text }]);
+  }, `${main.text}\n// touched\n`);
+}
+
 export const openFixture = (page: Page) =>
   openProject(page, readProject(F205_FIXTURE));
 
@@ -87,6 +103,16 @@ export async function canvasReady(page: Page): Promise<void> {
 
 export const node = (page: Page, id: string): Locator =>
   page.locator(`.react-flow__node[data-id="${id}"]`);
+
+/** Clicks the empty pane, clear of the controls, the minimap and the attribution (clears the selection). */
+export async function clickEmptyCanvas(page: Page): Promise<void> {
+  await page.locator(".react-flow__pane").click({ position: { x: 8, y: 8 } });
+}
+
+/** Clicks a node's title bar, which selects it. */
+export async function selectNode(page: Page, id: string): Promise<void> {
+  await node(page, id).locator(".canvas-node-title").first().click();
+}
 
 /** The viewport's zoom, read from its transform. */
 export function viewportZoom(page: Page): Promise<number> {

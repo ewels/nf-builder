@@ -2,6 +2,8 @@ import { installedPackVersions } from "@nf-builder/engine";
 import type { JSX } from "react";
 import { CanvasHost } from "./canvas/canvas-host";
 import { type CanvasContent, useWorkspace } from "./canvas/canvas-store";
+import { DetailsHeader } from "./details/details-header";
+import { DetailsPane } from "./details/details-pane";
 import { COLLAPSED_WIDTH, useLayout } from "./layout/layout-store";
 import { ProjectControls } from "./project/project-controls";
 import { saveLabel } from "./project/project-status";
@@ -69,12 +71,8 @@ export function AppShell(): JSX.Element {
         {right.collapsed ? null : (
           <ColumnSeparator side="right" label="Resize details" />
         )}
-        <SideColumn
-          side="right"
-          label="Details"
-          header={<h2 className="column-title">Details</h2>}
-        >
-          <p className="muted">Nothing selected</p>
+        <SideColumn side="right" label="Details" header={<DetailsHeader />}>
+          <DetailsPane />
         </SideColumn>
       </div>
       <StatusBar

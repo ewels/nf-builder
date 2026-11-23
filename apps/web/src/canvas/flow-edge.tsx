@@ -8,7 +8,7 @@ export function FlowEdge(props: EdgeProps<CanvasFlowEdge>): JSX.Element {
     <BaseEdge
       id={props.id}
       path={path}
-      className={`edge-${props.data?.dataflow ?? "unknown"}`}
+      className={`edge-${props.data?.dataflow ?? "unknown"}${props.data?.highlighted === true ? " is-highlighted" : ""}`}
     />
   );
 }

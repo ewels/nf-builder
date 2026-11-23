@@ -65,6 +65,22 @@ export type {
   EdgeDataflow,
 } from "./canvas";
 export { CANVAS_METRICS, canvasView } from "./canvas";
+export { nodeView } from "./details/node-view";
+export { workflowSummary } from "./details/summary";
+export type {
+  DeclarationDetails,
+  DetailRow,
+  NodeDetails,
+  NodeView,
+  OperatorDetail,
+  PortConnection,
+  PortDetail,
+  Preview,
+  SummaryCall,
+  SummaryModule,
+  SummaryPort,
+  WorkflowSummary,
+} from "./details/types";
 export {
   compareDiagnostics,
   countDiagnostics,
@@ -129,6 +145,7 @@ export type {
   FileSummary,
   LoadPhase,
   LoadProgress,
+  NodeDetailsResult,
   OpenRequest,
   ProjectChange,
   ProjectionResult,

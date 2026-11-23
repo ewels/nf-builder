@@ -41,9 +41,9 @@ Mockup: [docs/mockup](../mockup/README.md). Where the mockup and this file disag
 
 | ID | Requirement |
 |---|---|
-| UX-30 | A single click selects a node and shows read-only details: name, kind, file, description, inputs and outputs with types and connections, key directives, topics, a short script preview, and diagnostics for that node. |
-| UX-31 | With nothing selected, it shows the open workflow's summary: take, emit, calls, registry modules used. |
-| UX-32 | Header buttons: Edit (opens popup) and Code (opens popup on the Code tab). For registry modules: version, upstream link, "update available" if newer. |
+| UX-30 | A single click selects a node and shows read-only details: name, kind, file, description, inputs and outputs with types and connections, key directives, topics, a short script preview, and diagnostics for that node. Key directives are every directive in source order; the script preview is the first 8 lines; the node's diagnostics are those inside its call or declaration (ADR 0049). |
+| UX-31 | With nothing selected, it shows the open workflow's summary: take, emit, calls, registry modules used. The entry workflow, which has no take or emit, lists its parameters and outputs instead (ADR 0049). |
+| UX-32 | Header buttons: Edit (opens popup) and Code (opens popup on the Code tab). For registry modules: version, upstream link, "update available" if newer. Edit and Code show disabled until F-303 and F-304 add the popup (ADR 0049). |
 
 ## Edit popup
 

@@ -47,7 +47,10 @@ function fake(
   options: {
     refuse?: boolean;
     nullFor?: string;
+    /** The revision the engine answers with (default 1); change it between calls to simulate an edit. */
+    revision?: number;
     gates?: Map<string, Promise<void>>;
+    details?: (node: string) => Promise<unknown>;
   } = {},
 ) {
   const calls: string[] = [];
@@ -73,13 +76,32 @@ function fake(
         (w) => w.path === path && w.name === workflow,
       );
       return {
-        revision: 1,
+        revision: options.revision ?? 1,
         projection:
           found === undefined || key === options.nullFor
             ? null
             : projectionOf(found),
       };
     },
+    details: async (_path: string, _workflow: string | null, node: string) =>
+      options.details === undefined
+        ? {
+            revision: options.revision ?? 1,
+            details: {
+              node,
+              declaration: {
+                path: null,
+                line: null,
+                description: null,
+                directives: [],
+                topics: [],
+                operators: [],
+                preview: null,
+              },
+              diagnostics: [],
+            },
+          }
+        : options.details(node),
   } as unknown as EngineApi;
   return { engine, calls };
 }
@@ -256,5 +278,158 @@ describe("F-205 canvas store", () => {
       .getState()
       .changed({ revision: 1, files: [], remodelled: [], workflows: [] });
     expect(store.getState().summary).toBeNull();
+  });
+});
+
+describe("F-206 selection", () => {
+  const wf = [ref("main.nf", null), ref("lib.nf", "LIB")];
+
+  it("F-206 UX-30 AR-30: selecting a node stores it and loads its details", async () => {
+    const store = createCanvasStore(() => fake(wf).engine);
+    await store.getState().open(request);
+    expect(store.getState().selected).toBeNull();
+    expect(store.getState().details).toEqual({ status: "idle" });
+    const pending = store.getState().select("main.nf#/a");
+    expect(store.getState().selected).toBe("main.nf#/a");
+    expect(store.getState().details).toEqual({
+      status: "loading",
+      node: "main.nf#/a",
+    });
+    await pending;
+    const d = store.getState().details;
+    expect(d.status === "ready" && [d.node, d.revision]).toEqual([
+      "main.nf#/a",
+      1,
+    ]);
+  });
+
+  it("F-206 UX-31: clearing the selection drops pending details", async () => {
+    let release: () => void = () => undefined;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const store = createCanvasStore(
+      () =>
+        fake(wf, {
+          details: async (node) => {
+            await gate;
+            return { revision: 1, details: { node } };
+          },
+        }).engine,
+    );
+    await store.getState().open(request);
+    const pending = store.getState().select("main.nf#/a");
+    await store.getState().select(null);
+    release();
+    await pending;
+    expect(store.getState().selected).toBeNull();
+    expect(store.getState().details).toEqual({ status: "idle" });
+  });
+
+  it("F-206 UX-30: a details result for an older selection, tab or revision is ignored or marked unavailable; a null result clears the selection", async () => {
+    let release: () => void = () => undefined;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const store = createCanvasStore(
+      () =>
+        fake(wf, {
+          details: async (node) => {
+            if (node === "slow") await gate;
+            if (node === "gone") return { revision: 1, details: null };
+            if (node === "old") return { revision: 0, details: { node } };
+            if (node === "refused")
+              return { ok: false, code: "no-project", message: "No project." };
+            return { revision: 1, details: { node } };
+          },
+        }).engine,
+    );
+    await store.getState().open(request);
+    const slow = store.getState().select("slow");
+    await store.getState().select("fast");
+    release();
+    await slow;
+    expect(store.getState().selected).toBe("fast");
+    const fastDetails = store.getState().details;
+    expect(fastDetails.status === "ready" && fastDetails.node).toBe("fast");
+    await store.getState().select("old");
+    expect(store.getState().details).toEqual({
+      status: "unavailable",
+      node: "old",
+      message: "The project changed. Select the node again.",
+    });
+    await store.getState().select("refused");
+    expect(store.getState().details).toEqual({
+      status: "unavailable",
+      node: "refused",
+      message: "No project.",
+    });
+    await store.getState().select("gone");
+    expect(store.getState().selected).toBeNull();
+    expect(store.getState().details).toEqual({ status: "idle" });
+    // a tab switch while a request is in flight drops the result
+    const again = store.getState().select("slow");
+    await store.getState().openWorkflow("lib.nf", "LIB");
+    await again;
+    expect(store.getState().selected).toBeNull();
+    expect(store.getState().details).toEqual({ status: "idle" });
+  });
+
+  it("F-206 UX-30 UX-31: opening a project, opening a workflow or switching tabs clears the selection", async () => {
+    const store = createCanvasStore(() => fake(wf).engine);
+    await store.getState().open(request);
+    await store.getState().select("a");
+    await store.getState().openWorkflow("lib.nf", "LIB");
+    expect(store.getState().selected).toBeNull();
+    await store.getState().select("b");
+    await store.getState().selectTab("main.nf#");
+    expect(store.getState().selected).toBeNull();
+    await store.getState().select("c");
+    await store.getState().open(request);
+    expect(store.getState().selected).toBeNull();
+    expect(store.getState().details).toEqual({ status: "idle" });
+  });
+
+  it("F-206 UX-30: a refresh keeps the selection and loads its details again at the new revision", async () => {
+    const options: Parameters<typeof fake>[1] = {};
+    const store = createCanvasStore(() => fake(wf, options).engine);
+    await store.getState().open(request);
+    await store.getState().select("a");
+    options.revision = 2;
+    await store
+      .getState()
+      .changed({ revision: 2, files: [], remodelled: [], workflows: wf });
+    expect(store.getState().selected).toBe("a");
+    const d = store.getState().details;
+    expect(d.status === "ready" && d.revision).toBe(2);
+  });
+
+  it("F-206 UX-30: details at a newer revision than the canvas show loading, not a stale-selection message", async () => {
+    const options: Parameters<typeof fake>[1] = {};
+    const store = createCanvasStore(() => fake(wf, options).engine);
+    await store.getState().open(request);
+    options.revision = 2;
+    await store.getState().select("a");
+    expect(store.getState().selected).toBe("a");
+    expect(store.getState().details).toEqual({ status: "loading", node: "a" });
+    await store
+      .getState()
+      .changed({ revision: 2, files: [], remodelled: [], workflows: wf });
+    const d = store.getState().details;
+    expect(d.status === "ready" && d.revision).toBe(2);
+  });
+
+  it("F-206 UX-30: a refresh that leaves no canvas (unparseable) clears the selection", async () => {
+    const options: Parameters<typeof fake>[1] = {};
+    const store = createCanvasStore(() => fake(wf, options).engine);
+    await store.getState().open(request);
+    await store.getState().select("a");
+    options.nullFor = "main.nf#";
+    await store
+      .getState()
+      .changed({ revision: 2, files: [], remodelled: [], workflows: wf });
+    expect(store.getState().content.status).toBe("unavailable");
+    expect(store.getState().selected).toBeNull();
+    expect(store.getState().details).toEqual({ status: "idle" });
   });
 });
