@@ -30,6 +30,12 @@ fixtures:
     expect:
       unparsed: [workflow]
       modelled: [process SAY_HELLO]
+  - file: late-error-after-stub.nf
+    breaks: the entry workflow has a stray closing parenthesis; process FOO, with a blank line before stub:, is valid.
+    lint: error
+    expect:
+      unparsed: [workflow]
+      modelled: [process FOO]
   - file: typed-legacy-mixed.nf
     breaks: types are enabled, so the legacy process GOODBYE is not allowed in this script.
     lint: error

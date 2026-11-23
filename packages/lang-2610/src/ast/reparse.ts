@@ -1,15 +1,14 @@
 // Ported from nextflow-io/nextflow v26.10.7, modules/nf-lang/src/main/java/nextflow/script/parser/ScriptAstBuilder.java
 // `reparseScriptDeclaration` (Apache-2.0; see ../../grammar/NOTICE).
-import {
-  type CommonTokenStream,
-  ParseCancellationException,
-  type ParserATNSimulator,
-  PredictionMode,
-} from "antlr4ng";
+import { type CommonTokenStream, ParseCancellationException } from "antlr4ng";
 import type { StatementContext } from "../generated/ScriptParser.ts";
 import { ScriptParser } from "../generated/ScriptParser.ts";
 import { DescriptiveErrorStrategy } from "../parser/descriptive-error-strategy.ts";
-import { FirstErrorListener, type ParseError } from "../parser/parse.ts";
+import {
+  FirstErrorListener,
+  LlSimulator,
+  type ParseError,
+} from "../parser/parse.ts";
 
 /**
  * Parse the statement again from its first token as a script declaration, in full LL mode, to find the syntax error
@@ -23,7 +22,11 @@ export function reparseDeclaration(
 ): { rejected: boolean; error: ParseError | null } {
   const parser = new ScriptParser(tokens);
   parser.errorHandler = new DescriptiveErrorStrategy();
-  (parser.interpreter as ParserATNSimulator).predictionMode = PredictionMode.LL;
+  parser.interpreter = new LlSimulator(
+    parser,
+    parser.atn,
+    parser.interpreter.decisionToDFA,
+  );
   parser.removeErrorListeners();
   const listener = new FirstErrorListener();
   parser.addErrorListener(listener);
