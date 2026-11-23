@@ -1,35 +1,7 @@
-import {
-  createEngineService,
-  type ElkGraphIn,
-  type ElkGraphOut,
-  installedPackVersions,
-  type Positions,
-  type Projection,
-} from "@nf-builder/engine";
+import type { ElkGraphIn, ElkGraphOut, Positions } from "@nf-builder/engine";
 import { describe, expect, it } from "vitest";
 import { autoLayout, placeMissing } from "../src/layout/layout-flow";
-
-const PREFIX = "../../../tools/oracle/cases/f111-start-typed/";
-const raw = import.meta.glob<string>(
-  "../../../tools/oracle/cases/f111-start-typed/**/*",
-  { query: "?raw", import: "default", eager: true },
-);
-const FIXTURE = Object.entries(raw).map(([path, text]) => ({
-  path: path.slice(PREFIX.length),
-  text,
-}));
-
-async function entryProjection(): Promise<Projection> {
-  const service = createEngineService();
-  await service.open({
-    version: installedPackVersions()[0] as string,
-    files: FIXTURE,
-  });
-  const result = await service.project("main.nf", null);
-  if (!("projection" in result) || result.projection === null)
-    throw new Error("no projection");
-  return result.projection;
-}
+import { entryProjection } from "./f111-fixture";
 
 /** A fake ELK: node i goes to (1000 + 100 i, 50 i); records the graphs it was given. */
 function fakeElk() {

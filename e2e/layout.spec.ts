@@ -7,7 +7,7 @@ import {
 } from "../scripts/check-bundle-budget.ts";
 import { WEB_DIST } from "../scripts/check-common.ts";
 import { SMOKE_TAG } from "./browsers.ts";
-import { selectNode } from "./canvas.ts";
+import { canvasReady, node, selectNode } from "./canvas.ts";
 import { watchForCspViolations } from "./csp.ts";
 import {
   dragNode,
@@ -79,7 +79,7 @@ test("F-207 step 2 IO-02 IO-01: a moved node is at the same position after reloa
     .poll(async () => (await readSidecar(page))?.nodes[KEY.reads])
     .toEqual(moved);
   await page.reload();
-  await page.locator('.workflow-canvas[data-canvas-state="ready"]').waitFor();
+  await canvasReady(page);
   expect(await nodePosition(page, KEY.reads)).toEqual(moved);
 });
 
@@ -89,7 +89,7 @@ test("F-207 UX-30 IO-02: a node moved with the arrow keys is saved", async ({
   await openStoredProject(page);
   await selectNode(page, KEY.more);
   const before = await nodePosition(page, KEY.more);
-  await page.locator(`.react-flow__node[data-id="${KEY.more}"]`).focus();
+  await node(page, KEY.more).focus();
   await page.keyboard.press("ArrowRight");
   await expect
     .poll(async () => (await nodePosition(page, KEY.more)).x)
@@ -122,9 +122,7 @@ test("F-207 step 3 ADR-0008 AR-11: renaming a process through the app keeps its 
     }),
   );
   expect(outcome.ok).toBe(true);
-  await expect(
-    page.locator(`.react-flow__node[data-id="${KEY.tally}"]`),
-  ).toBeVisible();
+  await expect(node(page, KEY.tally)).toBeVisible();
   const check = async () => {
     expect(await nodePosition(page, KEY.tally)).toEqual(before[KEY.count]);
     for (const id of ALL_KEYS.filter((k) => k !== KEY.count))
@@ -139,7 +137,7 @@ test("F-207 step 3 ADR-0008 AR-11: renaming a process through the app keeps its 
     before[KEY.count],
   );
   await page.reload();
-  await page.locator('.workflow-canvas[data-canvas-state="ready"]').waitFor();
+  await canvasReady(page);
   await check();
 });
 

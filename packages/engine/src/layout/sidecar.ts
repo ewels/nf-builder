@@ -34,7 +34,8 @@ const invalid = (reason: string): ParsedLayout => ({
   message: `The layout file couldn't be read (${reason}). Nodes are laid out automatically, and the file will be replaced when the layout is saved.`,
 });
 
-const inRange = (n: unknown): n is number =>
+/** A coordinate the sidecar keeps: a finite number within ±1e6. */
+export const inRange = (n: unknown): n is number =>
   typeof n === "number" && Number.isFinite(n) && Math.abs(n) <= LIMIT;
 
 /** Adding zero turns -0 into 0. */

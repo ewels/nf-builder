@@ -1,38 +1,14 @@
 import {
   canvasView,
-  createEngineService,
   type ElkGraphIn,
   type ElkGraphOut,
   elkGraph,
   elkPositions,
-  installedPackVersions,
-  type Projection,
 } from "@nf-builder/engine";
 import ELK from "elkjs/lib/elk.bundled.js";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { disposeElk, runElk } from "../src/layout/elk-client";
-
-const PREFIX = "../../../tools/oracle/cases/f111-start-typed/";
-const raw = import.meta.glob<string>(
-  "../../../tools/oracle/cases/f111-start-typed/**/*",
-  { query: "?raw", import: "default", eager: true },
-);
-const FIXTURE = Object.entries(raw).map(([path, text]) => ({
-  path: path.slice(PREFIX.length),
-  text,
-}));
-
-async function entryProjection(): Promise<Projection> {
-  const service = createEngineService();
-  await service.open({
-    version: installedPackVersions()[0] as string,
-    files: FIXTURE,
-  });
-  const result = await service.project("main.nf", null);
-  if (!("projection" in result) || result.projection === null)
-    throw new Error("no projection");
-  return result.projection;
-}
+import { entryProjection } from "./f111-fixture";
 
 /** A Worker that answers ELK's protocol with the bundled (in-thread) ELK. */
 class FakeElkWorker {

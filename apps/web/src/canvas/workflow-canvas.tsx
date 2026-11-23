@@ -31,6 +31,7 @@ import "./canvas.css";
 import { runElk } from "../layout/elk-client";
 import { autoLayout, placeMissing } from "../layout/layout-flow";
 import { NODE_TYPES } from "./canvas-nodes";
+import type { Placement } from "./canvas-store";
 import { EDGE_TYPES } from "./flow-edge";
 import {
   type CanvasFlowEdge,
@@ -79,12 +80,7 @@ interface WorkflowCanvasProps {
   /** Nodes the user moved (drag stop or keyboard); the store rounds and saves them. */
   readonly onMove: (moves: Positions) => void;
   /** The result of a layout run on this canvas. */
-  readonly onPlace: (placement: {
-    readonly positions: Positions;
-    readonly saved: Positions;
-    readonly replace: boolean;
-    readonly notice: string | null;
-  }) => void;
+  readonly onPlace: (placement: Placement) => void;
 }
 
 function CanvasInner({
@@ -108,8 +104,8 @@ function CanvasInner({
     () => unplaced(view, positions).length > 0,
     [view, positions],
   );
-  const latest = useRef({ positions, onPlace, onMove });
-  latest.current = { positions, onPlace, onMove };
+  const latest = useRef({ positions, onPlace });
+  latest.current = { positions, onPlace };
   useEffect(() => {
     if (!waiting) return;
     let cancelled = false;

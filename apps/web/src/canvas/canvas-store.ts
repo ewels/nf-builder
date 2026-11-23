@@ -5,7 +5,6 @@ import type {
   ApplyOutcome,
   EditCommand,
   EngineApi,
-  LayoutStatus,
   NodeDetails,
   OpenRequest,
   Point,
@@ -115,18 +114,21 @@ export interface WorkspaceActions {
    */
   moveNodes(moves: Positions): Promise<void>;
   /**
-   * Takes the result of a layout run on the canvas: every node's position, and what to save (`saved`, merged, or
-   * replacing the workflow's entries). Dropped when the tab or the projection it was computed for is no longer shown.
+   * Takes the result of a layout run on the canvas. Dropped when the tab or the projection it was computed for is no
+   * longer shown.
    */
   placeNodes(
     at: { readonly tab: string; readonly revision: number },
-    placement: {
-      readonly positions: Positions;
-      readonly saved: Positions;
-      readonly replace: boolean;
-      readonly notice: string | null;
-    },
+    placement: Placement,
   ): Promise<void>;
+}
+
+/** A layout run on the canvas: every node's position, and what to save (`saved`, merged, or replacing the workflow's entries). */
+export interface Placement {
+  readonly positions: Positions;
+  readonly saved: Positions;
+  readonly replace: boolean;
+  readonly notice: string | null;
 }
 
 /** The workflow a project opens with: main.nf's entry, else the first entry workflow, else the first named one. */
@@ -156,11 +158,6 @@ export function tabFor(ref: {
     mode: "graph",
   };
 }
-
-const problemOf = (layout: LayoutStatus): string | null =>
-  layout.state === "invalid" || layout.state === "newer"
-    ? layout.message
-    : null;
 
 const EMPTY: CanvasContent = { status: "empty" };
 const IDLE: DetailsContent = { status: "idle" };
@@ -285,7 +282,7 @@ export function createCanvasStore(
             set({
               summary: { ...summary, layout: result.layout },
               // a file newer than this build is a problem for the rest of the session; a replaced one stays reported
-              layoutNotice: problemOf(result.layout) ?? get().layoutNotice,
+              layoutNotice: result.layout.message ?? get().layoutNotice,
             });
         }
       } catch (error) {
@@ -334,7 +331,7 @@ export function createCanvasStore(
           activeTab: null,
           content: EMPTY,
           lastChange: null,
-          layoutNotice: problemOf(summary.layout),
+          layoutNotice: summary.layout.message,
         });
         if (tab !== null) await load(tab);
       },

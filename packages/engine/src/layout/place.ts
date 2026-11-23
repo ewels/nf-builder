@@ -1,7 +1,7 @@
 // Placing nodes that have no stored position (ADR 0008, F-207). Pure: this builds the graph ELK lays out and merges its
 // answer with the positions already stored. elkjs itself runs in a worker in apps/web; the types here are plain JSON.
 
-import { CANVAS_METRICS } from "../canvas/metrics";
+import { CANVAS_METRICS, portY } from "../canvas/metrics";
 import type { CanvasNodeView, CanvasView } from "../canvas/types";
 import type { Point, Positions } from "./types";
 
@@ -63,28 +63,22 @@ const portId = (node: string, side: "in" | "out", port: string) =>
   `${node}\u0000${side}\u0000${port}`;
 
 function elkNode(node: CanvasNodeView): ElkNodeIn {
-  // card ports sit in rows under the header; a pill's sit at its middle
-  const rowY = (i: number) =>
-    node.shape === "card"
-      ? CANVAS_METRICS.headerHeight + i * node.rowHeight + node.rowHeight / 2
-      : node.height / 2;
-  const ports: ElkPortIn[] = [
-    ...node.inputs.map((p, i) => ({
-      id: portId(node.id, "in", p.id),
-      x: 0,
-      y: rowY(i),
-      width: 0 as const,
-      height: 0 as const,
-      layoutOptions: { [SIDE]: "WEST", [INDEX]: String(i) },
-    })),
-    ...node.outputs.map((p, i) => ({
-      id: portId(node.id, "out", p.id),
-      x: node.width,
-      y: rowY(i),
-      width: 0 as const,
-      height: 0 as const,
-      layoutOptions: { [SIDE]: "EAST", [INDEX]: String(i) },
-    })),
+  const port =
+    (side: "in" | "out") =>
+    (p: { id: string }, i: number): ElkPortIn => ({
+      id: portId(node.id, side, p.id),
+      x: side === "in" ? 0 : node.width,
+      y: portY(node, i),
+      width: 0,
+      height: 0,
+      layoutOptions: {
+        [SIDE]: side === "in" ? "WEST" : "EAST",
+        [INDEX]: String(i),
+      },
+    });
+  const ports = [
+    ...node.inputs.map(port("in")),
+    ...node.outputs.map(port("out")),
   ];
   const first = node.kind === "take" || node.kind === "params";
   const last = node.kind === "emit" || node.kind === "output";

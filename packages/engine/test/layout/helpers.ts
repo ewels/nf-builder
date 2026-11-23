@@ -16,10 +16,12 @@ import {
 import {
   carryLayout,
   type LayoutDocument,
-  pairWorkflows,
   type RemovedPositions,
   type RenameHint,
+  renameHints,
   type WorkflowPair,
+  workflowKey,
+  workflowPairs,
 } from "../../src/layout";
 import { createProjector } from "../../src/projection/project";
 import { stateFor } from "../edit/helpers";
@@ -45,9 +47,6 @@ export interface Snapshot {
   readonly projections: ReadonlyMap<string, Projection>;
 }
 
-export const workflowKey = (w: { path: string; name: string | null }) =>
-  `${w.path}#${w.name ?? ""}`;
-
 export function snapshot(state: EditState): Snapshot {
   const projector = createProjector(state.model, state.catalogue);
   const workflows = projector.workflows();
@@ -69,42 +68,6 @@ export function seedLayout(snap: Snapshot): LayoutDocument {
       i += 1;
     }
   return { version: 1, nodes };
-}
-
-export function hintsOf(command: EditCommand): RenameHint[] {
-  return command.kind === "renameDeclaration"
-    ? [{ path: command.path, from: command.name, to: command.newName }]
-    : [];
-}
-
-/** The pairs the service builds from a snapshot taken before a change and one taken after it. */
-export function pairsBetween(
-  before: Snapshot,
-  after: Snapshot,
-  changed: ReadonlySet<string>,
-  renames: readonly RenameHint[],
-): WorkflowPair[] {
-  const paired = pairWorkflows(
-    before.workflows,
-    after.workflows,
-    changed,
-    renames,
-  );
-  const pairs: WorkflowPair[] = [];
-  for (const w of before.workflows) {
-    const b = before.projections.get(workflowKey(w));
-    if (!b) continue;
-    const target = paired.get(workflowKey(w));
-    if (target === undefined) continue;
-    if (target === null) {
-      pairs.push({ before: b, after: null });
-      continue;
-    }
-    const a = after.projections.get(workflowKey(target));
-    // a workflow that is present but unmodelled is left alone
-    if (a) pairs.push({ before: b, after: a });
-  }
-  return pairs;
 }
 
 export interface Stepped {
@@ -129,9 +92,10 @@ function carried(
   const before = snapshot(state);
   commit(state, result);
   const after = snapshot(state);
-  const pairs = pairsBetween(
+  const pairs = workflowPairs(
     before,
-    after,
+    after.workflows,
+    (w) => after.projections.get(workflowKey(w)) ?? null,
     new Set(result.files.map((f) => f.path)),
     renames,
   );
@@ -163,5 +127,5 @@ export function step(
 ): Stepped {
   const result = applyCommand(state, command);
   if (!result.ok) throw new Error(`refused: ${result.code}: ${result.message}`);
-  return carried(state, doc, result, hintsOf(command), removed);
+  return carried(state, doc, result, renameHints(command), removed);
 }

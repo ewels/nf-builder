@@ -1,10 +1,6 @@
 // Main-thread side of the Comlink bridge (F-113, ADR 0003). The worker starts on the first `getEngine()`, never at import.
 
-import type {
-  EngineRefusal,
-  LayoutChange,
-  ProjectChange,
-} from "@nf-builder/engine";
+import type { EngineRefusal, ProjectChange } from "@nf-builder/engine";
 import { type Endpoint, proxy, releaseProxy, wrap } from "comlink";
 import type { WorkspaceApi } from "../workspace/types";
 

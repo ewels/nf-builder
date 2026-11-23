@@ -2,7 +2,12 @@
 // order among same-callee nodes changes, and node offsets can't be mapped through a workflow reprint, so the nodes of the
 // projection before a change are matched with those after it. Pure and deterministic.
 
-import type { GraphNode, Projection, WorkflowRef } from "@nf-builder/lang-core";
+import type {
+  EditCommand,
+  GraphNode,
+  Projection,
+  WorkflowRef,
+} from "@nf-builder/lang-core";
 import { parseNodeKey } from "../projection/keys";
 import { workflowPositions } from "./sidecar";
 import type { LayoutDocument, Point, Positions } from "./types";
@@ -97,11 +102,6 @@ function lcs(a: readonly string[], b: readonly string[]): [number, number][] {
   return pairs;
 }
 
-const iteratee = <T>(
-  list: readonly T[],
-  ok: (i: number) => boolean,
-): number[] => list.map((_, i) => i).filter(ok);
-
 /**
  * Pairs the nodes of `before` with those of `after`: old id to new id. Each pass works on the nodes still unmatched, in
  * projection order. Passes: (1) a unique strong signature (kind, name, assigned variable, variables read); (2) the longest
@@ -148,8 +148,8 @@ export function matchNodes(
     }
   };
   const sequence = (sig: (d: Described) => string) => {
-    const is = iteratee(old, (i) => oldLeft.has(i));
-    const js = iteratee(next, (j) => newLeft.has(j));
+    const is = [...oldLeft];
+    const js = [...newLeft];
     const pairs = lcs(
       is.map((i) => sig(old[i] as Described)),
       js.map((j) => sig(next[j] as Described)),
@@ -173,8 +173,15 @@ function push(map: Map<string, number[]>, key: string, value: number) {
   else map.set(key, [value]);
 }
 
-const workflowKey = (w: { path: string; name: string | null }): string =>
+/** `path#name`, the name empty for an entry workflow. */
+export const workflowKey = (w: { path: string; name: string | null }): string =>
   `${w.path}#${w.name ?? ""}`;
+
+/** The rename hint of a `renameDeclaration` command; none for any other. */
+export const renameHints = (command: EditCommand | undefined): RenameHint[] =>
+  command?.kind === "renameDeclaration"
+    ? [{ path: command.path, from: command.name, to: command.newName }]
+    : [];
 
 /**
  * For each workflow in `before`, the workflow it became in `after`, or null when it vanished. A workflow with the same
@@ -202,10 +209,9 @@ export function pairWorkflows(
   const rest: WorkflowRef[] = [];
   for (const w of vanished) {
     const hint = renames.find((h) => h.path === w.path && h.from === w.name);
-    const target =
-      hint && w.name !== null
-        ? present.get(workflowKey({ path: w.path, name: hint.to }))
-        : undefined;
+    const target = hint
+      ? present.get(workflowKey({ path: w.path, name: hint.to }))
+      : undefined;
     if (target && !claimed.has(workflowKey(target))) {
       result.set(workflowKey(w), target);
       claimed.add(workflowKey(target));
@@ -234,6 +240,35 @@ export interface WorkflowPair {
   readonly before: Projection;
   /** Null when the workflow vanished. */
   readonly after: Projection | null;
+}
+
+/**
+ * The pairs to carry: each workflow of `before` with a projection, and the projection of the workflow it became (null
+ * when it vanished). One that became an unmodelled workflow is left out, so its entries stay.
+ */
+export function workflowPairs(
+  before: {
+    readonly workflows: readonly WorkflowRef[];
+    readonly projections: ReadonlyMap<string, Projection>;
+  },
+  after: readonly WorkflowRef[],
+  project: (w: WorkflowRef) => Projection | null,
+  changed: ReadonlySet<string>,
+  renames: readonly RenameHint[],
+): WorkflowPair[] {
+  const paired = pairWorkflows(before.workflows, after, changed, renames);
+  const pairs: WorkflowPair[] = [];
+  for (const w of before.workflows) {
+    const old = before.projections.get(workflowKey(w));
+    const target = paired.get(workflowKey(w));
+    if (!old || target === undefined) continue;
+    if (target === null) pairs.push({ before: old, after: null });
+    else {
+      const now = target.modelled ? project(target) : null;
+      if (now) pairs.push({ before: old, after: now });
+    }
+  }
+  return pairs;
 }
 
 const REMEMBERED = 500;
@@ -266,9 +301,7 @@ export class RemovedPositions {
 }
 
 /** The signature a removed node is remembered under: kind, name, variable and variables read. */
-export function nodeSignatures(
-  projection: Projection,
-): ReadonlyMap<string, string> {
+function nodeSignatures(projection: Projection): ReadonlyMap<string, string> {
   return new Map(
     describe(projection, nodeName).map((d) => [d.node.id, d.strong]),
   );

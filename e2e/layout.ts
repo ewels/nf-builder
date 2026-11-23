@@ -3,7 +3,7 @@
 import { join } from "node:path";
 import { expect, type Page } from "@playwright/test";
 import { REPO_ROOT } from "../scripts/check-common.ts";
-import { canvasReady } from "./canvas.ts";
+import { canvasReady, node } from "./canvas.ts";
 import { readProject } from "./engine.ts";
 import {
   readFile,
@@ -12,10 +12,7 @@ import {
   switcher,
 } from "./projects.ts";
 
-export const LAYOUT_FIXTURE = join(
-  REPO_ROOT,
-  "tools/oracle/cases/f111-start-typed",
-);
+const LAYOUT_FIXTURE = join(REPO_ROOT, "tools/oracle/cases/f111-start-typed");
 export const SIDECAR = ".nf-builder/layout.json";
 
 /** The node ids of the fixture's entry workflow (projection keys, ADR 0036). */
@@ -28,7 +25,7 @@ export const KEY = {
   tally: "main.nf#/TALLY@1",
 } as const;
 
-export interface Point {
+interface Point {
   x: number;
   y: number;
 }
@@ -37,12 +34,11 @@ export interface Point {
 export async function openStoredProject(
   page: Page,
   extra: { path: string; text: string }[] = [],
-  dir: string = LAYOUT_FIXTURE,
 ): Promise<void> {
   await page.goto("./");
   await expect(switcher(page)).toBeEnabled();
   const version = await page.getByLabel("Nextflow version").inputValue();
-  const files = [...readProject(dir), ...extra];
+  const files = [...readProject(LAYOUT_FIXTURE), ...extra];
   await page.evaluate(
     async ({ files, version }) => {
       const engine = (
@@ -70,13 +66,13 @@ export async function openStoredProject(
 
 /** A node's top-left corner in flow coordinates, from its transform. */
 export function nodePosition(page: Page, id: string): Promise<Point> {
-  return page.locator(`.react-flow__node[data-id="${id}"]`).evaluate((el) => {
+  return node(page, id).evaluate((el) => {
     const m = new DOMMatrixReadOnly(getComputedStyle(el).transform);
     return { x: m.m41, y: m.m42 };
   });
 }
 
-export interface Box extends Point {
+interface Box extends Point {
   id: string;
   width: number;
   height: number;
@@ -121,9 +117,7 @@ export async function dragNode(
   dx: number,
   dy: number,
 ): Promise<void> {
-  const title = page
-    .locator(`.react-flow__node[data-id="${id}"] .canvas-node-title`)
-    .first();
+  const title = node(page, id).locator(".canvas-node-title").first();
   const box = await title.boundingBox();
   if (box === null) throw new Error(`${id} has no title box`);
   const x = box.x + box.width / 2;
@@ -135,7 +129,7 @@ export async function dragNode(
   await page.mouse.up();
 }
 
-export interface Sidecar {
+interface Sidecar {
   version: number;
   nodes: Record<string, Point>;
 }

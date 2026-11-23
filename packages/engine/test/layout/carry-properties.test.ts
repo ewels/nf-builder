@@ -2,11 +2,11 @@ import { join } from "node:path";
 import * as fc from "fast-check";
 import { describe, expect, it } from "vitest";
 import { applyCommand } from "../../src/edit/apply";
-import { matchNodes } from "../../src/layout";
+import { matchNodes, renameHints } from "../../src/layout";
 import { buildCommand, reset, sequenceArb } from "../edit/harness";
 import { stateFor } from "../edit/helpers";
 import { readTree } from "../model/read-tree";
-import { hintsOf, seedLayout, snapshot, step } from "./helpers";
+import { seedLayout, snapshot, step } from "./helpers";
 
 const root = new URL("../../../../", import.meta.url).pathname;
 const runs = Number(process.env.F207_RUNS ?? 25);
@@ -34,7 +34,7 @@ describe("F-207 carry properties", () => {
               accepted += 1;
               for (const { before: b, after: a } of next.pairs) {
                 if (a === null) continue;
-                const map = matchNodes(b, a, hintsOf(command));
+                const map = matchNodes(b, a, renameHints(command));
                 const kinds = new Map(a.nodes.map((n) => [n.id, n.kind]));
                 const old = new Map(b.nodes.map((n) => [n.id, n.kind]));
                 expect(new Set(map.values()).size, "injective").toBe(map.size);

@@ -21,24 +21,25 @@ import {
   patchResult,
 } from "../edit/apply";
 import { PatchError } from "../edit/patches";
-import type { LayoutChange } from "../layout";
 import {
   carryLayout,
   EMPTY_LAYOUT,
   formatLayout,
   LAYOUT_PATH,
+  type LayoutChange,
   type LayoutDocument,
   type LayoutStatus,
-  type Point,
-  pairWorkflows,
   parseLayout,
   RemovedPositions,
   type RenameHint,
+  renameHints,
   trackedWorkflows,
-  type WorkflowPair,
+  workflowKey,
+  workflowPairs,
   workflowPositions,
   writePositions,
 } from "../layout";
+import { inRange } from "../layout/sidecar";
 import type { ModelEvent } from "../model/project";
 import { installedPacks } from "../packs";
 import { loadPalette } from "../palette";
@@ -99,26 +100,12 @@ function readLayout(text: string | null | undefined): {
   return { layout: parsed.document, layoutStatus: OK };
 }
 
-const workflowKey = (w: { path: string; name: string | null }): string =>
-  `${w.path}#${w.name ?? ""}`;
-
 /** The state of the tracked workflows before a change, taken before `commit` because the projector reads the live model. */
 interface BeforeCarry {
   readonly workflows: readonly WorkflowRef[];
   readonly projections: ReadonlyMap<string, Projection>;
   readonly changed: ReadonlySet<string>;
 }
-
-const renamesOf = (command: EditCommand | undefined): RenameHint[] =>
-  command?.kind === "renameDeclaration"
-    ? [{ path: command.path, from: command.name, to: command.newName }]
-    : [];
-
-const sane = (p: Point): boolean =>
-  Number.isFinite(p.x) &&
-  Number.isFinite(p.y) &&
-  Math.abs(p.x) <= 1e6 &&
-  Math.abs(p.y) <= 1e6;
 
 export function createEngineService(
   options: EngineServiceOptions = {},
@@ -220,28 +207,13 @@ export function createEngineService(
   ): FileText[] => {
     if (!before) return [];
     try {
-      const paired = pairWorkflows(
-        before.workflows,
+      const pairs = workflowPairs(
+        before,
         projectorOf(open).workflows(),
+        (w) => projectionOf(open, w.path, w.name),
         before.changed,
         renames,
       );
-      const pairs: WorkflowPair[] = [];
-      for (const w of before.workflows) {
-        const old = before.projections.get(workflowKey(w));
-        if (!old) continue;
-        const target = paired.get(workflowKey(w));
-        if (target === undefined) continue;
-        if (target === null) {
-          pairs.push({ before: old, after: null });
-          continue;
-        }
-        // a workflow that is present but unmodelled is left alone
-        const now = target.modelled
-          ? projectionOf(open, target.path, target.name)
-          : null;
-        if (now) pairs.push({ before: old, after: now });
-      }
       const next = carryLayout(open.layout, pairs, renames, open.removed);
       const text = formatLayout(next);
       if (text === formatLayout(open.layout)) return [];
@@ -254,17 +226,23 @@ export function createEngineService(
     }
   };
 
-  const changed = (
-    open: Open,
-    files: readonly FileText[],
-    remodelled: readonly string[],
-    carry?: { before: BeforeCarry | null; renames: readonly RenameHint[] },
-  ): ProjectChange => {
+  /** The model changed: the revision moves on and everything built from the old model is dropped. */
+  const invalidate = (open: Open): void => {
     revision += 1;
     open.projector = undefined;
     open.diagnoser = undefined;
     open.memo = new Map();
-    const sidecar = carry ? finishCarry(open, carry.before, carry.renames) : [];
+  };
+
+  const changed = (
+    open: Open,
+    files: readonly FileText[],
+    remodelled: readonly string[],
+    before: BeforeCarry | null,
+    renames: readonly RenameHint[],
+  ): ProjectChange => {
+    invalidate(open);
+    const sidecar = finishCarry(open, before, renames);
     return {
       revision,
       files: sidecar.length > 0 ? [...files, ...sidecar] : files,
@@ -297,10 +275,7 @@ export function createEngineService(
             "internal",
             `The engine failed unexpectedly (${reason}). Nothing was changed.`,
           );
-        revision += 1;
-        open.projector = undefined;
-        open.diagnoser = undefined;
-        open.memo = new Map();
+        invalidate(open);
         return refusal(
           "internal",
           `The engine failed unexpectedly while changing the project (${reason}). The project may be partly changed; use the new revision and check its files.`,
@@ -335,10 +310,7 @@ export function createEngineService(
     const remodelled = commit(open.state, result);
     return {
       ok: true,
-      ...changed(open, result.files, remodelled, {
-        before,
-        renames: renamesOf(command),
-      }),
+      ...changed(open, result.files, remodelled, before, renameHints(command)),
       patches: result.patches,
       inverse: result.inverse,
     };
@@ -410,12 +382,10 @@ export function createEngineService(
     writeFiles: (files) =>
       guarded((open, startedChanging) => {
         const imported = files.filter((f) => f.path === LAYOUT_PATH).at(-1);
-        const before = imported
-          ? null
-          : prepareCarry(
-              open,
-              files.map((f) => f.path),
-            );
+        const before = prepareCarry(
+          open,
+          files.map((f) => f.path),
+        );
         startedChanging();
         const touched = new Set<string>();
         for (const file of files) {
@@ -430,10 +400,7 @@ export function createEngineService(
           Object.assign(open, readLayout(imported.text));
           open.removed = new RemovedPositions();
         }
-        return changed(open, files, [...touched].sort(), {
-          before,
-          renames: [],
-        });
+        return changed(open, files, [...touched].sort(), before, []);
       }),
 
     apply: (command, given) =>
@@ -496,7 +463,7 @@ export function createEngineService(
               "invalid",
               `${id} isn't a node of that workflow. Nothing was saved.`,
             );
-          if (!sane(p))
+          if (!inRange(p.x) || !inRange(p.y))
             return refusal(
               "invalid",
               `The position of ${id} isn't a usable number. Nothing was saved.`,
