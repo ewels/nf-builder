@@ -16,3 +16,160 @@
   outline: 2px solid var(--color-accent);
   outline-offset: -2px;
 }
+
+.problems-panel {
+  flex: 0 0 auto;
+  height: clamp(160px, 30%, 280px);
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--color-border);
+  background: var(--color-surface-muted);
+  font-size: 12px;
+}
+
+.problems-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 0 var(--space-2);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.problems-tabs {
+  display: flex;
+}
+
+.problems-tab,
+.problems-close,
+.problem-fix {
+  font: inherit;
+  color: var(--color-text);
+  background: transparent;
+  border: 0;
+  padding: var(--space-1) var(--space-3);
+  cursor: pointer;
+}
+
+.problems-tab[aria-selected="true"] {
+  font-weight: 600;
+  box-shadow: inset 0 -2px 0 var(--color-accent);
+}
+
+.problems-tab-count,
+.problems-file-count {
+  color: var(--color-muted);
+}
+
+.problems-notice {
+  flex: 1;
+  margin: 0;
+  color: var(--color-muted);
+}
+
+.problems-close {
+  margin-left: auto;
+}
+
+.problems-tab:focus-visible,
+.problems-close:focus-visible,
+.problem-go:focus-visible,
+.problem-fix:focus-visible,
+.problems-list:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: -2px;
+}
+
+.problems-list {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+.problems-empty {
+  margin: var(--space-3);
+  color: var(--color-muted);
+}
+
+.problems-file {
+  margin: 0;
+  padding: var(--space-1) var(--space-3);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.problems-rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.problem-row {
+  display: flex;
+  align-items: center;
+}
+
+.problem-go {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  font: inherit;
+  text-align: left;
+  color: var(--color-text);
+  background: transparent;
+  border: 0;
+  padding: var(--space-1) var(--space-3);
+  cursor: pointer;
+}
+
+.problem-go:hover,
+.problem-fix:hover {
+  background: var(--color-surface);
+}
+
+.problem-severity {
+  flex: 0 0 auto;
+  font-weight: 600;
+}
+
+.problem-row.is-error .problem-severity {
+  color: var(--color-error);
+}
+
+.problem-row.is-warning .problem-severity {
+  color: var(--color-warning);
+}
+
+.problem-row.is-suggestion .problem-severity {
+  color: var(--color-suggestion);
+}
+
+.problem-message {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.problem-location,
+.problem-code {
+  flex: 0 0 auto;
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+}
+
+.problem-fix {
+  flex: 0 0 auto;
+  margin-right: var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background: var(--color-surface);
+}
+
+.problem-fix:disabled {
+  cursor: progress;
+  color: var(--color-muted);
+}

@@ -5,6 +5,7 @@ import { DetailsHeader } from "./details/details-header";
 import { DetailsPane } from "./details/details-pane";
 import { useHistoryKeys } from "./history/use-history-keys";
 import { COLLAPSED_WIDTH, useLayout } from "./layout/layout-store";
+import { ProblemsPanel, problemsTabId } from "./problems/problems-panel";
 import { useProblems } from "./problems/problems-store";
 import { ProjectControls } from "./project/project-controls";
 import { saveLabel } from "./project/project-status";
@@ -47,7 +48,13 @@ function useProblemsStatus(hasProject: boolean): StatusProblems | null {
     counts: sections.counts,
     message,
     open: open ? view : null,
-    onToggle: toggle,
+    onToggle: (v) => {
+      const opening = !(open && view === v);
+      toggle(v);
+      // opening moves the focus to the tab, once the panel has rendered
+      if (opening)
+        setTimeout(() => document.getElementById(problemsTabId(v))?.focus(), 0);
+    },
   };
 }
 
@@ -92,6 +99,7 @@ export function AppShell(): JSX.Element {
         <main className="column column-centre" aria-label="Canvas and editor">
           <TabStrip />
           <TabPanel />
+          <ProblemsPanel />
         </main>
         {right.collapsed ? null : (
           <ColumnSeparator side="right" label="Resize details" />

@@ -26,6 +26,18 @@ export const statusCount = (
   kind: "problems" | "suggestions",
 ): Locator => page.locator(`.status-bar #status-${kind}`);
 
+/** The panel, at the bottom of the centre column. */
+export const problemsPanel = (page: Page): Locator =>
+  page.locator("main #problems-panel");
+
+/** The rows of the panel's current tab whose code is `code` (all rows when omitted). */
+export const problemRow = (page: Page, code?: string): Locator => {
+  const rows = problemsPanel(page).locator(".problem-row");
+  return code === undefined
+    ? rows
+    : rows.filter({ has: page.locator(".problem-code", { hasText: code }) });
+};
+
 /** The engine's own diagnostics, through the test hook. */
 export function engineDiagnostics(page: Page) {
   return page.evaluate(async () => {
