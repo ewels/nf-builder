@@ -45,6 +45,48 @@ describe("DescriptiveErrorStrategy", () => {
     });
   });
 
+  // Positions from `nextflow lint -o json` 26.10.7. nf-lang runs on Groovy's optimised ANTLR runtime, which hands over to
+  // full LL at the first conflict; antlr4ng's SLL used to take the lowest alternative that left `sep` and fail at the label.
+  it("LA-30 ADR-0005: an error after a blank line before stub: or emit: is reported where nextflow lint reports it", () => {
+    const stubProcess =
+      "process FOO {\n    input:\n    val x\n\n    output:\n    stdout\n\n    script:\n" +
+      '    """\n    echo $x\n    """\n\n    stub:\n    """\n    echo stub\n    """\n}\n\n';
+    const v11 = `${stubProcess}workflow {\n    FOO(channel.of(1)) )\n}\n`;
+    expect(errorOf(parseScript(v11))).toMatchObject({
+      message: "Unexpected input: ')'",
+      line: 20,
+      column: 24,
+    });
+
+    const v4 =
+      "workflow SUB {\n    take:\n    xs\n\n    main:\n    ys = xs.map { it * 2 }\n\n    emit:\n    ys\n}\n\n" +
+      "workflow {\n    SUB(channel.of(1)) )\n}\n";
+    expect(errorOf(parseScript(v4))).toMatchObject({
+      message: "Unexpected input: ')'",
+      line: 13,
+      column: 24,
+    });
+
+    const typed = (name: string, input: string, call: string) =>
+      `process ${name} {\n    input:\n    ${input}: String\n\n    output:\n    out: String = stdout()\n\n    script:\n` +
+      `    """\n    echo '\${${input}}'\n    """\n\n    stub:\n    """\n    echo '\${${input}}'\n    """\n}\n\n${call}`;
+    const head = `// A typed entry workflow with one process call.\n// The invalid edit leaves a line that does not parse.\nnextflow.enable.types = true\n\n${typed("GREET", "name", "")}${typed("SHOUT", "line", "")}`;
+    const entry =
+      "workflow {\n    names = channel.of('ada', 'grace')\n    greeted = GREET(names)";
+    const v1 = errorOf(parseScript(`${head}${entry} )\n}\n`));
+    expect(v1).toMatchObject({
+      message: "Unexpected input: ')'",
+      line: 43,
+      column: 28,
+    });
+    const v8 = errorOf(parseScript(`${head}${entry}\n`));
+    expect(v8).toMatchObject({
+      message: EOF_ERROR_MESSAGE,
+      line: 44,
+      column: 1,
+    });
+  });
+
   it("F-101 LA-30 ADR-0005: whitespace in the offending token is escaped", () => {
     const text =
       "process hello {\n    debug true:\n\n    script:\n    echo\n}\n";
