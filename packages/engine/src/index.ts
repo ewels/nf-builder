@@ -130,7 +130,6 @@ export {
   type ProblemSections,
   type ProblemsView,
   type ProblemTarget,
-  problemCounts,
   problemKey,
   problemSections,
   problemsView,

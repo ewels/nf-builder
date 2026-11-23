@@ -166,13 +166,10 @@ const fileName = (path: string): string =>
   path.slice(path.lastIndexOf("/") + 1);
 
 /** The tab label of a file: its name, with the folder too for the many `main.nf` of a project (`legacy_count/main.nf`). */
-function fileLabel(path: string): string {
-  const parts = path.split("/");
-  const name = parts.at(-1) ?? path;
-  return name === "main.nf" && parts.length > 1
-    ? `${parts.at(-2)}/${name}`
-    : name;
-}
+const fileLabel = (path: string): string =>
+  path.endsWith("/main.nf")
+    ? path.split("/").slice(-2).join("/")
+    : fileName(path);
 
 /** A code-only tab for a file (F-309, UX-20). */
 export function fileTabFor(path: string): WorkflowTab {
@@ -397,6 +394,23 @@ export function createCanvasStore(
       }
     }
 
+    /** After an apply or a fix: adopt a newer revision; an internal refusal can follow a write that cleared the history. */
+    async function afterApply(outcome: ApplyOutcome): Promise<void> {
+      await adoptNewer(outcome);
+      if (!outcome.ok && outcome.code === "internal") await refreshHistory();
+    }
+
+    /** Sends the code panes' pending edits; outside the queue, as their send is queued itself. */
+    const flushPending = () =>
+      Promise.all([...flushes].map((flush) => flush().catch(() => {})));
+
+    /** Adds `tab` once and shows it. */
+    async function openTab(tab: WorkflowTab): Promise<void> {
+      if (!get().tabs.some((t) => t.id === tab.id))
+        set({ tabs: [...get().tabs, tab] });
+      await load(tab);
+    }
+
     async function stepHistory(
       kind: "undo" | "redo",
       session: number | undefined,
@@ -405,8 +419,8 @@ export function createCanvasStore(
       const mine = session ?? get().session;
       if (mine !== get().session)
         return refusal("no-project", "The project changed.");
-      // pending code edits become the step that gets undone; outside the queue, as their send is queued itself
-      await Promise.all([...flushes].map((flush) => flush().catch(() => {})));
+      // pending code edits become the step that gets undone
+      await flushPending();
       return send(
         mine,
         async (revision) => {
@@ -540,26 +554,16 @@ export function createCanvasStore(
         await load(tab);
       },
 
-      async openWorkflow(path, workflow) {
-        const tab = tabFor({ path, name: workflow });
-        if (!get().tabs.some((t) => t.id === tab.id))
-          set({ tabs: [...get().tabs, tab] });
-        await load(tab);
-      },
+      openWorkflow: (path, workflow) =>
+        openTab(tabFor({ path, name: workflow })),
 
       async openFile(path) {
         const { summary } = get();
         if (summary === null) return;
-        const inside = summary.workflows.filter((w) => w.path === path);
-        const workflow = inside.find((w) => w.name === null) ?? inside[0];
-        if (workflow !== undefined) {
-          await get().openWorkflow(path, workflow.name);
-          return;
-        }
-        const tab = fileTabFor(path);
-        if (!get().tabs.some((t) => t.id === tab.id))
-          set({ tabs: [...get().tabs, tab] });
-        await load(tab);
+        const workflow = defaultWorkflow(
+          summary.workflows.filter((w) => w.path === path),
+        );
+        await openTab(workflow === null ? fileTabFor(path) : tabFor(workflow));
       },
 
       revealCode(path, range) {
@@ -593,27 +597,18 @@ export function createCanvasStore(
         send(
           session,
           (revision) => engine().apply(command, revision, options),
-          async (outcome) => {
-            await adoptNewer(outcome);
-            // an internal refusal can follow a write that cleared the engine's history
-            if (!outcome.ok && outcome.code === "internal")
-              await refreshHistory();
-          },
+          afterApply,
         ),
 
       async applyFix(fix, revision, session, options) {
         const mine = session ?? get().session;
         if (mine !== get().session)
           return refusal("no-project", "The project changed.");
-        await Promise.all([...flushes].map((flush) => flush().catch(() => {})));
+        await flushPending();
         return send(
           mine,
-          (_current) => engine().applyFix(fix, revision, options),
-          async (outcome) => {
-            await adoptNewer(outcome);
-            if (!outcome.ok && outcome.code === "internal")
-              await refreshHistory();
-          },
+          () => engine().applyFix(fix, revision, options),
+          afterApply,
         );
       },
 

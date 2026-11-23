@@ -1,5 +1,3 @@
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import { expect, test } from "@playwright/test";
 import { VISUAL_TAG } from "./browsers.ts";
 import {
@@ -10,6 +8,7 @@ import {
   openBadDeclaration,
   openFixture,
 } from "./canvas.ts";
+import { fileText } from "./code-view.ts";
 import { watchForCspViolations } from "./csp.ts";
 import { historyStatus } from "./history.ts";
 import {
@@ -26,7 +25,6 @@ import {
 import { readFile } from "./projects.ts";
 
 const FIX_TITLE = "Replace `Channel` with `channel`";
-const mainOf = (dir: string) => readFileSync(join(dir, "main.nf"), "utf8");
 
 test("F-309 step 1 UX-03 LA-34 LA-35: the legacy fixture counts 1 problem and 2 suggestions separately, and the panel lists each under its own tab", async ({
   page,
@@ -99,7 +97,7 @@ test("F-309 step 2 ADR-0042 AR-23: applying the Channel.of quick fix removes the
   await page.goto("./");
   await openProblemsFixture(page);
   await expect(problemsReady(page)).toBeVisible();
-  const before = mainOf(F309_FIXTURE);
+  const before = fileText(F309_FIXTURE);
   expect(await readFile(page, "main.nf")).toBe(before);
   await statusCount(page, "problems").click();
   await problemsPanel(page).getByRole("button", { name: FIX_TITLE }).click();
@@ -112,7 +110,7 @@ test("F-309 step 2 ADR-0042 AR-23: applying the Channel.of quick fix removes the
   );
   await expect(problemsPanel(page).getByText("No problems")).toBeVisible();
   await expect(problemsPanel(page)).toContainText(`Applied: ${FIX_TITLE}`);
-  expect(await readFile(page, "main.nf")).toBe(mainOf(F309_FIXED));
+  expect(await readFile(page, "main.nf")).toBe(fileText(F309_FIXED));
   const status = await historyStatus(page);
   expect(status.undoCount).toBe(1);
   expect(status.undo).toBe(FIX_TITLE);

@@ -165,7 +165,6 @@ export function ProblemsPanelView({
       }}
     >
       <div className="problems-header">
-        {/* biome-ignore lint/a11y/useSemanticElements: the tabs follow the left column's tab pattern */}
         <div
           role="tablist"
           aria-label="Problem kinds"
@@ -205,7 +204,6 @@ export function ProblemsPanelView({
           Close
         </button>
       </div>
-      {/* biome-ignore lint/a11y/useSemanticElements: a tab panel is not a <section> */}
       <div
         ref={list}
         role="tabpanel"

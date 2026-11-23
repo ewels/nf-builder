@@ -6,7 +6,7 @@ export interface RowFocus {
   readonly part: "go" | "fix";
 }
 
-export interface FocusRow {
+interface FocusRow {
   readonly key: string;
   readonly fixable: boolean;
 }

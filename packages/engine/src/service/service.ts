@@ -29,6 +29,7 @@ import { loadPalette } from "../palette";
 import { createProjector, type Projector } from "../projection/project";
 import { templateList } from "../templates";
 import type {
+  ApplyOptions,
   ApplyOutcome,
   DiagnosticsResult,
   EngineApi,
@@ -188,18 +189,12 @@ export function createEngineService(
     fix: QuickFix,
     given: number,
   ): EngineRefusal | null => {
+    if (given < open.openedAt || given > revision) return stale(given);
     const changedAt = open.changedAt.get(fix.path);
-    if (
-      given >= open.openedAt &&
-      given <= revision &&
-      (changedAt === undefined || changedAt <= given)
-    )
-      return null;
+    if (changedAt === undefined || changedAt <= given) return null;
     return refusal(
       "stale",
-      given < open.openedAt || given > revision
-        ? `The project changed (revision ${revision}, not ${given}). Nothing was changed.`
-        : `${fix.path} changed after its problems were checked (revision ${given}). Nothing was changed.`,
+      `${fix.path} changed after its problems were checked (revision ${given}). Nothing was changed.`,
     );
   };
 
@@ -208,7 +203,7 @@ export function createEngineService(
     open: Open,
     command: EditCommand,
     startedChanging: () => void,
-    applyOptions: { label?: string; group?: string } | undefined,
+    applyOptions: ApplyOptions | undefined,
   ): ApplyOutcome => {
     const result = applyCommand(open.state, command);
     if (!result.ok) return { ...result, revision };
@@ -293,12 +288,11 @@ export function createEngineService(
           lints,
           catalogue,
           history: new History(options.historyLimits),
-          openedAt: 0,
+          openedAt: revision + 1,
           changedAt: new Map(),
         };
         current = open;
         revision += 1;
-        open.openedAt = revision;
         const files = state.model.paths().flatMap((path) => {
           const source = state.model.file(path)?.source;
           return source
@@ -361,10 +355,7 @@ export function createEngineService(
           open,
           { kind: "replaceFileText", path: fix.path, text: fixed },
           startedChanging,
-          {
-            label: applyOptions?.label ?? fix.title,
-            group: applyOptions?.group,
-          },
+          { ...applyOptions, label: applyOptions?.label ?? fix.title },
         );
       }),
 

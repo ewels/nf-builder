@@ -23,7 +23,7 @@ export function ProblemRow({
   readonly applying: boolean;
   readonly onGo: () => void;
   readonly onFix: () => void;
-  readonly onFocusPart?: (part: "go" | "fix") => void;
+  readonly onFocusPart: (part: "go" | "fix") => void;
 }): JSX.Element {
   return (
     <li className={`problem-row is-${d.severity}`}>
@@ -34,7 +34,7 @@ export function ProblemRow({
         data-part="go"
         tabIndex={tabIndexGo}
         onClick={onGo}
-        onFocus={() => onFocusPart?.("go")}
+        onFocus={() => onFocusPart("go")}
       >
         <span className="problem-severity">
           <span aria-hidden="true">{SEVERITY_GLYPHS[d.severity]} </span>
@@ -58,7 +58,7 @@ export function ProblemRow({
           tabIndex={tabIndexFix}
           disabled={applying}
           onClick={onFix}
-          onFocus={() => onFocusPart?.("fix")}
+          onFocus={() => onFocusPart("fix")}
         >
           {d.fix.title}
         </button>

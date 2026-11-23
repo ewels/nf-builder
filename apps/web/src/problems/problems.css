@@ -12,11 +12,6 @@
   text-decoration: underline;
 }
 
-.status-link:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: -2px;
-}
-
 .problems-panel {
   flex: 0 0 auto;
   height: clamp(160px, 30%, 280px);
@@ -41,6 +36,7 @@
 
 .problems-tab,
 .problems-close,
+.problem-go,
 .problem-fix {
   font: inherit;
   color: var(--color-text);
@@ -70,6 +66,7 @@
   margin-left: auto;
 }
 
+.status-link:focus-visible,
 .problems-tab:focus-visible,
 .problems-close:focus-visible,
 .problem-go:focus-visible,
@@ -117,13 +114,7 @@
   display: flex;
   align-items: baseline;
   gap: var(--space-3);
-  font: inherit;
   text-align: left;
-  color: var(--color-text);
-  background: transparent;
-  border: 0;
-  padding: var(--space-1) var(--space-3);
-  cursor: pointer;
 }
 
 .problem-go:hover,

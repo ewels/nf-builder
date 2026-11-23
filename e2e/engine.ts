@@ -69,15 +69,4 @@ export interface EngineHook {
     }[];
     code?: string;
   }>;
-  applyFix(
-    fix: unknown,
-    revision: number,
-    options?: { label?: string },
-  ): Promise<{
-    ok: boolean;
-    revision: number | null;
-    code?: string;
-    message?: string;
-    history?: { undo: string | null; undoCount: number };
-  }>;
 }

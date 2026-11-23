@@ -47,7 +47,6 @@ export interface ProblemsState {
 }
 
 export interface ProblemsActions {
-  refresh(): Promise<void>;
   show(view: ProblemsView, focus?: string | null): void;
   /** Opens the panel on `view`, or closes it when it is already open there. */
   toggle(view: ProblemsView): void;
@@ -87,7 +86,7 @@ export function createProblemsStore(options: {
 }): StoreApi<ProblemsState & ProblemsActions> {
   const { engine, workspace } = options;
   const schedule = options.schedule ?? ((fn) => void setTimeout(fn, 0));
-  const store = createStore<ProblemsState & ProblemsActions>()((set, get) => {
+  return createStore<ProblemsState & ProblemsActions>()((set, get) => {
     let inFlight = false;
     let again = false;
 
@@ -166,8 +165,6 @@ export function createProblemsStore(options: {
     return {
       ...INITIAL,
 
-      refresh: pull,
-
       show(view, focus = null) {
         set({ open: true, view, focus });
       },
@@ -186,11 +183,10 @@ export function createProblemsStore(options: {
         const ws = () => workspace.getState();
         const summary = ws().summary;
         if (summary === null) return;
-        const range = { start: d.range.start, end: d.range.end };
         const target = problemTarget(d, summary.workflows);
         if (target.kind === "file") {
           await ws().openFile(target.path);
-          ws().revealCode(target.path, range);
+          ws().revealCode(target.path, d.range);
           return;
         }
         // an active tab is not reloaded, so its selection and viewport are kept
@@ -204,16 +200,16 @@ export function createProblemsStore(options: {
         if (tab === undefined) return;
         const node =
           content.status === "ready"
-            ? nodeAtRange(content.projection, d.path, range)
+            ? nodeAtRange(content.projection, d.path, d.range)
             : null;
         if (node !== null) {
           await ws().select(node);
           ws().focusOn(node);
-          if (tab.mode !== "graph") ws().revealCode(d.path, range);
+          if (tab.mode !== "graph") ws().revealCode(d.path, d.range);
           return;
         }
         if (tab.mode === "graph") ws().setMode(tab.id, "split");
-        ws().revealCode(d.path, range);
+        ws().revealCode(d.path, d.range);
       },
 
       async applyFix(d) {
@@ -229,7 +225,7 @@ export function createProblemsStore(options: {
             notice: outcome.ok ? `Applied: ${d.fix.title}` : outcome.message,
           });
           // no retry: the file changed, so the user decides again on fresh problems
-          if (!outcome.ok) void get().refresh();
+          if (!outcome.ok) void pull();
           return outcome;
         } finally {
           set({ applying: null });
@@ -237,7 +233,6 @@ export function createProblemsStore(options: {
       },
     };
   });
-  return store;
 }
 
 export const problemsStore = createProblemsStore({

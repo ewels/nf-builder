@@ -1,4 +1,4 @@
-import type { Diagnostic } from "@nf-builder/engine";
+import { type Diagnostic, problemKey } from "@nf-builder/engine";
 import type { JSX } from "react";
 import { SEVERITY_GLYPHS, SEVERITY_WORDS } from "../problems/severity";
 
@@ -19,7 +19,7 @@ export function DiagnosticList({
       <ul className="details-list">
         {diagnostics.map((d) => (
           <li
-            key={`${d.path}:${d.range.start}:${d.range.end}:${d.code}:${d.message}`}
+            key={problemKey(d)}
             className={`details-problem is-${d.severity}`}
           >
             <span className="details-problem-severity">

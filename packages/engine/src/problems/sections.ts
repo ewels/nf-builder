@@ -16,7 +16,7 @@ export function problemCounts(list: readonly Diagnostic[]): ProblemCounts {
   return { ...c, problems: c.errors + c.warnings };
 }
 
-/** The key that tells diagnostics apart (the same as F-206's de-duplication key); survives structuredClone. */
+/** The key that tells diagnostics apart (also F-206's de-duplication key); survives structuredClone. */
 export const problemKey = (d: Diagnostic): string =>
   `${d.path}\0${d.range.start}\0${d.range.end}\0${d.code}\0${d.message}`;
 

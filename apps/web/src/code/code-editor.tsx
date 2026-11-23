@@ -138,13 +138,9 @@ export default function CodeEditor({
         )
           return;
         handledReveal = request.seq;
-        const from = model.getPositionAt(request.start);
-        const to = model.getPositionAt(request.end);
-        const range = new monaco.Range(
-          from.lineNumber,
-          from.column,
-          to.lineNumber,
-          to.column,
+        const range = monaco.Range.fromPositions(
+          model.getPositionAt(request.start),
+          model.getPositionAt(request.end),
         );
         editor.setSelection(range);
         editor.revealRangeInCenterIfOutsideViewport(range);
