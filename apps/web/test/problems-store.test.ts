@@ -270,6 +270,40 @@ describe("problems store", () => {
     expect(await problems.getState().applyFix(suggestion)).toBeNull();
   });
 
+  it("F-309 ADR-0042: when two quick fixes overlap, the first to finish leaves the second still applying", async () => {
+    const other: Diagnostic = {
+      ...warning,
+      range: { ...range, start: 120, end: 127 },
+      code: "other-fix",
+    };
+    const releases: (() => void)[] = [];
+    const { workspace, problems, settle } = setup({
+      applyFix: () =>
+        new Promise<ApplyOutcome>((resolve) =>
+          releases.push(() => resolve(refusal("stale", "changed"))),
+        ),
+    });
+    await workspace.getState().show(summaryAt(1));
+    await settle();
+    const first = problems.getState().applyFix(warning);
+    const second = problems.getState().applyFix(other);
+    expect(problems.getState().applying).toBe(problemKey(other));
+    // the engine takes them one at a time
+    const reached = async (n: number) => {
+      for (let i = 0; i < 20 && releases.length < n; i++)
+        await new Promise((r) => setTimeout(r, 0));
+      expect(releases).toHaveLength(n);
+    };
+    await reached(1);
+    releases[0]?.();
+    await first;
+    expect(problems.getState().applying).toBe(problemKey(other));
+    await reached(2);
+    releases[1]?.();
+    await second;
+    expect(problems.getState().applying).toBeNull();
+  });
+
   it("F-309 UX-03: toggle opens the panel on a tab, switches tabs, and closes it on the open tab", () => {
     const { problems } = setup();
     const s = () => problems.getState();

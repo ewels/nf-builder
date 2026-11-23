@@ -160,7 +160,7 @@
   background: var(--color-surface);
 }
 
-.problem-fix:disabled {
+.problem-fix[aria-disabled="true"] {
   cursor: progress;
   color: var(--color-muted);
 }

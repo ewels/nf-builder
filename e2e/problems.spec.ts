@@ -25,6 +25,8 @@ import {
 import { readFile } from "./projects.ts";
 
 const FIX_TITLE = "Replace `Channel` with `channel`";
+// the panel shows the backticked words in code, so the accessible name has no backticks
+const FIX_NAME = FIX_TITLE.replaceAll("`", "");
 
 test("F-309 step 1 UX-03 LA-34 LA-35: the legacy fixture counts 1 problem and 2 suggestions separately, and the panel lists each under its own tab", async ({
   page,
@@ -100,7 +102,7 @@ test("F-309 step 2 ADR-0042 AR-23: applying the Channel.of quick fix removes the
   const before = fileText(F309_FIXTURE);
   expect(await readFile(page, "main.nf")).toBe(before);
   await statusCount(page, "problems").click();
-  await problemsPanel(page).getByRole("button", { name: FIX_TITLE }).click();
+  await problemsPanel(page).getByRole("button", { name: FIX_NAME }).click();
 
   await expect(statusCount(page, "problems")).toHaveAccessibleName(
     "No problems",
@@ -109,13 +111,17 @@ test("F-309 step 2 ADR-0042 AR-23: applying the Channel.of quick fix removes the
     "2 suggestions",
   );
   await expect(problemsPanel(page).getByText("No problems")).toBeVisible();
-  await expect(problemsPanel(page)).toContainText(`Applied: ${FIX_TITLE}`);
+  await expect(problemsPanel(page)).toContainText(`Applied: ${FIX_NAME}`);
+  await expect(problemsPanel(page).locator(".problems-notice code")).toHaveText(
+    ["Channel", "channel"],
+  );
   expect(await readFile(page, "main.nf")).toBe(fileText(F309_FIXED));
   const status = await historyStatus(page);
   expect(status.undoCount).toBe(1);
   expect(status.undo).toBe(FIX_TITLE);
 
   // focus is in the panel (the list, now empty), which does not take the undo key
+  await expect(page.locator("#problems-tabpanel")).toBeFocused();
   await page.keyboard.press("ControlOrMeta+z");
   await expect(statusCount(page, "problems")).toHaveAccessibleName("1 problem");
   expect(await readFile(page, "main.nf")).toBe(before);
@@ -125,7 +131,7 @@ test("F-309 step 2 ADR-0042 AR-23: applying the Channel.of quick fix removes the
   expect(watch.consoleErrors).toEqual([]);
 });
 
-test("F-309 UX-70 QA-11: the status bar, the panel's tabs, rows and fix buttons work by keyboard, and Escape returns focus to the status bar", async ({
+test("F-309 UX-70 QA-11: the status bar, the panel's tabs, rows and fix buttons work by keyboard, and Escape returns focus to the status-bar button that opened the panel", async ({
   page,
 }) => {
   await page.goto("./");
@@ -153,7 +159,8 @@ test("F-309 UX-70 QA-11: the status bar, the panel's tabs, rows and fix buttons 
   await expect(goButtons.nth(1)).toBeFocused();
   await page.keyboard.press("Escape");
   await expect(problemsPanel(page)).toHaveCount(0);
-  await expect(statusCount(page, "suggestions")).toBeFocused();
+  // the control that opened the panel (the problems count), though the panel ended on the Suggestions tab
+  await expect(statusCount(page, "problems")).toBeFocused();
 
   // the fix button by keyboard
   await statusCount(page, "problems").focus();
@@ -217,6 +224,26 @@ test("F-309 UX-30: activating a problem inside a node selects and centres that n
   );
   // the focus stays in the panel
   await expect(go).toBeFocused();
+});
+
+test("F-309 UX-03 UX-70: the details pane's link opens the panel on the problem, and Escape returns focus to that link", async ({
+  page,
+}) => {
+  await page.goto("./");
+  await openProblemsFixture(page);
+  await canvasReady(page);
+  await expect(problemsReady(page)).toBeVisible();
+  await node(page, "main.nf#/numbers").click();
+  const link = page.locator(".details-show-problems");
+  await expect(link).toBeVisible();
+  await link.click();
+  await expect(problemsPanel(page)).toBeVisible();
+  await expect(
+    problemRow(page, "deprecated-channel").locator(".problem-go"),
+  ).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(problemsPanel(page)).toHaveCount(0);
+  await expect(link).toBeFocused();
 });
 
 test("F-309 UX-27: activating a problem outside every node shows its file's code in Split view with the problem selected", async ({

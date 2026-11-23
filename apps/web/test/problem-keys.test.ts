@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { focusAfterRemoval, nextRowFocus } from "../src/problems/problem-keys";
+import {
+  focusAfterFix,
+  focusAfterRemoval,
+  nextRowFocus,
+} from "../src/problems/problem-keys";
 
 const rows = [
   { key: "a", fixable: true },
@@ -42,5 +46,21 @@ describe("problem list keys", () => {
     expect(focusAfterRemoval(["a", "b", "c"], ["a", "b"], "c")).toBe("b");
     expect(focusAfterRemoval(["a"], [], "a")).toBeNull();
     expect(focusAfterRemoval(["a", "b"], ["a", "b"], "z")).toBeNull();
+  });
+
+  it("F-309 QA-11: after a refused fix its row stays and gets the focus on its fix button; after an applied one focus follows the removal", () => {
+    expect(focusAfterFix(["a", "b", "c"], ["a", "b", "c"], "b")).toEqual({
+      key: "b",
+      part: "fix",
+    });
+    expect(focusAfterFix(["a", "b", "c"], ["b", "d"], "b")).toEqual({
+      key: "b",
+      part: "fix",
+    });
+    expect(focusAfterFix(["a", "b", "c"], ["a", "c"], "b")).toEqual({
+      key: "c",
+      part: "go",
+    });
+    expect(focusAfterFix(["a"], [], "a")).toBeNull();
   });
 });

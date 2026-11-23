@@ -35,6 +35,7 @@ export function formatCount(
 }
 
 export const PROBLEMS_PANEL_ID = "problems-panel";
+const PROBLEMS_FAILURE_ID = "problems-failure";
 export const statusLinkId = (view: ProblemsView): string => `status-${view}`;
 
 function ProblemsGlyph({ counts }: { counts: ProblemCounts }): JSX.Element {
@@ -53,8 +54,17 @@ function ProblemCounters({
     return <span className="status-item">Checking for problems…</span>;
   if (status === "failed")
     return (
-      <span className="status-item" title={diagnostics.message ?? undefined}>
+      <span
+        className="status-item"
+        title={diagnostics.message ?? undefined}
+        aria-describedby={diagnostics.message ? PROBLEMS_FAILURE_ID : undefined}
+      >
         Problems unavailable
+        {diagnostics.message ? (
+          <span id={PROBLEMS_FAILURE_ID} className="visually-hidden">
+            {`: ${diagnostics.message}`}
+          </span>
+        ) : null}
       </span>
     );
   const link = (view: ProblemsView, title?: string) => ({

@@ -77,3 +77,17 @@ export function focusAfterRemoval(
   }
   return null;
 }
+
+/**
+ * Where the focus goes once a fix has settled and the list has changed: the fixed row's own fix button when the row is
+ * still listed (the fix was refused), else the row in its place or the one before, else null (the list).
+ */
+export function focusAfterFix(
+  before: readonly string[],
+  after: readonly string[],
+  fixed: string,
+): RowFocus | null {
+  if (after.includes(fixed)) return { key: fixed, part: "fix" };
+  const next = focusAfterRemoval(before, after, fixed);
+  return next === null ? null : { key: next, part: "go" };
+}

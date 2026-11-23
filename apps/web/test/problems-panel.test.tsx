@@ -77,14 +77,18 @@ describe("problems panel", () => {
     );
   });
 
-  it("F-309 ADR-0042: a fixable row has a button named by the fix title, disabled while that fix is applying", () => {
+  it("F-309 ADR-0042: a fixable row has a button named by the fix title, with its backticked words in code, and aria-disabled (still focusable) while that fix is applying", () => {
     const idle = render([warning, error]);
     expect(idle).toMatch(
-      /<button[^>]*class="problem-fix"[^>]*>Replace `Channel` with `channel`<\/button>/,
+      /<button[^>]*class="problem-fix"[^>]*>Replace <code>Channel<\/code> with <code>channel<\/code><\/button>/,
     );
-    expect(idle).not.toMatch(/class="problem-fix"[^>]*disabled/);
+    expect(idle.slice(idle.indexOf('class="problem-fix"'))).not.toContain("`");
+    expect(idle).not.toMatch(
+      /class="problem-fix"[^>]*(disabled|aria-disabled)/,
+    );
     const busy = render([warning, error], { applying: problemKey(warning) });
-    expect(busy).toMatch(/class="problem-fix"[^>]*disabled=""/);
+    expect(busy).toMatch(/class="problem-fix"[^>]*aria-disabled="true"/);
+    expect(busy).not.toMatch(/class="problem-fix"[^>]*\sdisabled/);
     // the syntax error has no fix button
     expect(idle.match(/class="problem-fix"/g)).toHaveLength(1);
   });
@@ -104,6 +108,19 @@ describe("problems panel", () => {
       /role="status"[^>]*>Applied: x</,
     );
     expect(render([])).toMatch(/role="status"/);
+    // the notice shows backticked words in code, too
+    expect(
+      render([], { notice: "Applied: Replace `Channel` with `channel`" }),
+    ).toContain(
+      "Applied: Replace <code>Channel</code> with <code>channel</code>",
+    );
+  });
+
+  it("F-309 QA-11: an empty list takes the tab stop itself, as it has no focusable content", () => {
+    const empty = render([]);
+    expect(empty.slice(empty.indexOf('role="tabpanel"'))).toMatch(
+      /^role="tabpanel"[^>]*tabindex="0"/,
+    );
   });
 
   it("F-309 QA-11: the list has exactly one tab stop", () => {

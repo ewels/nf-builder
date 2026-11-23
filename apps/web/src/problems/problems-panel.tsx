@@ -8,13 +8,16 @@ import {
   type JSX,
   type KeyboardEvent,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
 } from "react";
+import { focusTarget } from "../project/focus-target";
 import { PROBLEMS_PANEL_ID, statusLinkId } from "../shell/status-bar";
-import { focusAfterRemoval, nextRowFocus, type RowFocus } from "./problem-keys";
+import { focusAfterFix, nextRowFocus, type RowFocus } from "./problem-keys";
 import { ProblemRow } from "./problem-row";
 import { useProblems } from "./problems-store";
+import { QuotedText } from "./quoted-text";
 import "./problems.css";
 
 const VIEWS: readonly {
@@ -95,14 +98,13 @@ export function ProblemsPanelView({
     const pending = fixed.current;
     if (pending === null || before.join("\0") === keys.join("\0")) return;
     fixed.current = null;
-    if (keys.includes(pending.key)) return;
     const inside = root.current?.contains(document.activeElement) ?? false;
     if (!inside && document.activeElement !== document.body) return;
-    const next = focusAfterRemoval(pending.before, keys, pending.key);
+    const next = focusAfterFix(pending.before, keys, pending.key);
     if (next === null) document.getElementById(TABPANEL_ID)?.focus();
     else {
-      setActive({ key: next, part: "go" });
-      focusPart({ key: next, part: "go" });
+      setActive(next);
+      focusPart(next);
     }
   });
 
@@ -193,7 +195,7 @@ export function ProblemsPanelView({
           ))}
         </div>
         <p className="problems-notice" role="status">
-          {notice}
+          {notice === null ? null : <QuotedText text={notice} />}
         </p>
         <button
           type="button"
@@ -210,7 +212,8 @@ export function ProblemsPanelView({
         id={TABPANEL_ID}
         className="problems-list"
         aria-labelledby={problemsTabId(view)}
-        tabIndex={rows.length === 0 ? -1 : undefined}
+        // an empty list has no focusable content, so the panel itself is the stop
+        tabIndex={rows.length === 0 ? 0 : undefined}
         onKeyDown={onListKey}
       >
         {groups.length === 0 ? (
@@ -268,6 +271,11 @@ export function ProblemsPanel(): JSX.Element | null {
   const focus = useProblems((s) => s.focus);
   const show = useProblems((s) => s.show);
   const close = useProblems((s) => s.close);
+  // the control that opened the panel (the status-bar button or the details link), recorded before focus moves into it
+  const opener = useRef<HTMLElement | null>(null);
+  useLayoutEffect(() => {
+    if (open) opener.current = document.activeElement as HTMLElement | null;
+  }, [open]);
   const goTo = useProblems((s) => s.goTo);
   const applyFix = useProblems((s) => s.applyFix);
   if (!open) return null;
@@ -282,8 +290,11 @@ export function ProblemsPanel(): JSX.Element | null {
       onView={(v) => show(v)}
       onClose={() => {
         close();
-        // back to the status-bar button that opens this tab
-        document.getElementById(statusLinkId(view))?.focus();
+        // back to the control that opened the panel, else the status-bar button of this tab
+        focusTarget(
+          opener.current,
+          document.getElementById(statusLinkId(view)),
+        )?.focus();
       }}
       onGo={(d) => void goTo(d)}
       onFix={(d) => void applyFix(d)}

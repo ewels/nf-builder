@@ -114,6 +114,10 @@ describe("status bar", () => {
     );
     expect(failed).toContain("Problems unavailable");
     expect(failed).toContain('title="worker gone"');
+    // the reason is also in the page, not only in a tooltip
+    expect(failed).toMatch(
+      /aria-describedby="problems-failure"[\s\S]*id="problems-failure"[^>]*>: worker gone</,
+    );
     const file = render(diagnostics(), null);
     expect(file).not.toContain("node");
     expect(file).not.toContain("channel");

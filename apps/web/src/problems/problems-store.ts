@@ -228,7 +228,8 @@ export function createProblemsStore(options: {
           if (!outcome.ok) void pull();
           return outcome;
         } finally {
-          set({ applying: null });
+          // an overlapping fix that started later keeps its own marker
+          if (get().applying === problemKey(d)) set({ applying: null });
         }
       },
     };

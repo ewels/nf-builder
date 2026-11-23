@@ -1,5 +1,6 @@
 import type { Diagnostic } from "@nf-builder/engine";
 import type { JSX } from "react";
+import { QuotedText } from "./quoted-text";
 import { SEVERITY_GLYPHS, SEVERITY_WORDS } from "./severity";
 
 /**
@@ -56,11 +57,11 @@ export function ProblemRow({
           data-problem-index={index}
           data-part="fix"
           tabIndex={tabIndexFix}
-          disabled={applying}
-          onClick={onFix}
+          aria-disabled={applying ? true : undefined}
+          onClick={applying ? undefined : onFix}
           onFocus={() => onFocusPart("fix")}
         >
-          {d.fix.title}
+          <QuotedText text={d.fix.title} />
         </button>
       )}
     </li>
