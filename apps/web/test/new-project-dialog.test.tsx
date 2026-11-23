@@ -49,7 +49,7 @@ const readyZip = (over: Partial<ImportSummary> = {}): ZipImportState => ({
   updating: false,
   summary: {
     source: "rnaseq-nf-main.zip",
-    stripped: "rnaseq-nf-main/",
+    stripped: "rnaseq-nf-main",
     files: 22,
     bytes: 30562,
     skipped: [
@@ -366,7 +366,7 @@ describe("F-203 new project dialog", () => {
         form({ status: "refused", name: "a.zip", message: "No." }),
         null,
       ),
-    ).toEqual({ error: "No." });
+    ).toEqual({ error: "Choose a zip file to import." });
     expect(
       newProjectRequest(
         form(

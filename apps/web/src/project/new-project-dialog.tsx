@@ -51,11 +51,11 @@ export function newProjectRequest(
     return { error: `Enter a name of 1 to ${PROJECT_NAME_MAX} characters.` };
   if (form.route === "import") {
     const { zip } = form;
-    if (zip.status === "empty")
+    // a refusal is already on screen in the Import section, so Create only asks for another file
+    if (zip.status === "empty" || zip.status === "refused")
       return { error: "Choose a zip file to import." };
     if (zip.status === "reading")
       return { error: `Reading ${zip.name}. Try again in a moment.` };
-    if (zip.status === "refused") return { error: zip.message };
     const problem = importProblem(zip.summary);
     if (problem !== null) return { error: problem };
     return {

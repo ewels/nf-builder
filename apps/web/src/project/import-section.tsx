@@ -67,7 +67,7 @@ export function ImportSection(props: {
           </p>
           {state.summary.stripped !== null ? (
             <p className="muted">
-              Removed the top-level folder {state.summary.stripped}.
+              Removed the top-level folder {state.summary.stripped}/.
             </p>
           ) : null}
           {state.summary.skipped.length > 0 ? (
