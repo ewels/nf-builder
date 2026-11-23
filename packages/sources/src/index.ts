@@ -39,3 +39,5 @@ export type {
   RegistryReadOptions,
   RegistrySource,
 } from "./registry/types.ts";
+export type { ReadZipOptions, ZipRead } from "./zip/read-zip.ts";
+export { checkArchiveSize, readZip } from "./zip/read-zip.ts";
