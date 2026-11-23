@@ -22,6 +22,7 @@ import {
   operatorDescription,
   plainText,
 } from "../palette-view";
+import { spansWorkflow } from "./node-range";
 import type {
   DeclarationDetails,
   DetailRow,
@@ -139,12 +140,6 @@ export function previewText(
     truncated: all.length > lines,
   };
 }
-
-/** A params or output node without its block takes the whole workflow's range, which is not its own. */
-export const spansWorkflow = (projection: Projection, node: GraphNode) =>
-  (node.kind === "params" || node.kind === "output") &&
-  node.range.start === projection.workflow.range.start &&
-  node.range.end === projection.workflow.range.end;
 
 export interface DetailsInput {
   readonly model: ProjectModel;

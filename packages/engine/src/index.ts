@@ -123,6 +123,19 @@ export {
 export { installedPackVersions } from "./packs";
 export { loadPalette } from "./palette";
 export { paletteItemCount, searchPalette } from "./palette-search";
+export {
+  nodeAtRange,
+  type ProblemCounts,
+  type ProblemGroup,
+  type ProblemSections,
+  type ProblemsView,
+  type ProblemTarget,
+  problemCounts,
+  problemKey,
+  problemSections,
+  problemsView,
+  problemTarget,
+} from "./problems";
 export { projectionCoverage } from "./projection/coverage";
 export type {
   FreeRead,

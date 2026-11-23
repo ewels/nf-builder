@@ -8,7 +8,8 @@ import type {
   Range,
 } from "@nf-builder/lang-core";
 import { compareDiagnostics } from "../diagnostics/diagnose";
-import { type CalleeDeclaration, spansWorkflow } from "./declaration";
+import type { CalleeDeclaration } from "./declaration";
+import { rangeContains, spansWorkflow } from "./node-range";
 
 export interface DiagnosticScope {
   readonly path: string;
@@ -46,12 +47,7 @@ export function diagnosticsWithin(
   const out: Diagnostic[] = [];
   for (const d of diagnostics) {
     if (
-      !scopes.some(
-        (s) =>
-          s.path === d.path &&
-          d.range.start >= s.range.start &&
-          d.range.end <= s.range.end,
-      )
+      !scopes.some((s) => s.path === d.path && rangeContains(s.range, d.range))
     )
       continue;
     const key = `${d.path}\0${d.range.start}\0${d.range.end}\0${d.code}\0${d.message}`;
