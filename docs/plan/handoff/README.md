@@ -2,7 +2,7 @@
 
 Plans written by the planner agent on 2026-11-22 for features not yet merged, kept here so the next session can resume without re-planning. They are inputs, not decisions of record: the open points are settled below and still have to be recorded (ADR, `open-questions.md`, `progress.md`) when each feature lands. Delete a plan in the PR that merges its feature. Paths under `/tmp/...scratchpad...` in the plans pointed at session scratch files and may be gone; where it matters, the files were copied into the repo or the worktree.
 
-## State on 2026-11-22
+## State on 2026-11-23
 
 | Feature | Branch | State |
 |---|---|---|
@@ -21,9 +21,12 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-205 canvas | merged, PR #41 | |
 | F-203 new project dialog | merged, PR #43 | |
 | F-206 details pane | merged, PR #45 | |
-| F-207 layout sidecar | not started | [plan](plan-F-207.md). After F-205 and F-202. |
-| F-208 view modes and Code | `feat/F-208` (`/home/user/wt-F-208`) | Tasks 1–2 building. [plan](plan-F-208.md). |
-| F-209 undo and redo | not started | [plan](plan-F-209.md). After F-202, F-205 and F-208. |
+| F-207 layout sidecar | `feat/F-207` (`/home/user/wt-F-207`) | Tasks 1–5 committed (engine layout, service, ELK worker); task 6 (canvas wiring) after F-208 merges. [plan](plan-F-207.md). |
+| F-208 view modes and Code | `feat/F-208`, PR #46 | Reviewed; final CI after merging F-206. [plan](plan-F-208.md). |
+| F-209 undo and redo | not started | [plan](plan-F-209.md). After F-208. |
+| F-309 problems panel | not started | [plan](plan-F-309.md). After F-208 and F-209. |
+| F-502 registry client | `feat/F-502` | [plan](plan-F-502.md). |
+| Parser error position | `fix/parser-error-position` | A blank line before `stub:` or `emit:` moved a later syntax error to that keyword (antlr4ng and Groovy's optimised ANTLR runtime differ); fix building. |
 | F-501 registry snapshot | merged, PR #29; passing | Confirmed on live data after the snapshot-triggered Pages deploy. |
 | F-011 GitHub Pages hosting | merged, PR #37 | Live at https://ewels.github.io/nf-builder/; first `verify` passed. |
 
@@ -192,3 +195,26 @@ Next free ADR number: 0050 (0047 is F-203's, 0048 F-208's, 0049 F-206's).
   - full-file byte checks, sidecar included;
   - node moves stay outside the history.
 
+### F-309 — [plan](plan-F-309.md)
+- Accept every recommendation in section 6:
+  - start after F-208 and F-209; F-209's PR adds F-209 to F-309's `depends_on`;
+  - the panel at the bottom of the centre column, closed by default, fixed height, open state for the session only (no stored format);
+  - diagnostics pulled per revision for the whole project;
+  - `EngineApi.applyFix` with a per-file stale check (amends ADR 0043's API list, clarifies ADR 0042's staleness);
+  - code-only file tabs (UX-20), reused by F-210, F-605 and F-601;
+  - the navigation rules, grouping and sorting, and keyboard model;
+  - the UX-03 reading, amended in the spec;
+  - step 2 read as "the diagnostic disappears" (`deprecated-channel` is a warning), recorded in the ADR and notes;
+  - refused Code-view drafts not listed; mismatch red left to F-302;
+  - a "Show in problems panel" button in the details pane;
+  - the 64-character cap on fix edits.
+
+### F-502 — [plan](plan-F-502.md)
+- Accept every recommendation in section 6:
+  - live registry access gated off by a constant (`LIVE_REGISTRY = false`), recorded in an ADR, with the test hook driving the live path;
+  - step 2's condition ("if S4 allowed it") is false, so `passes` can be set with notes citing the task 0 run, the `curl` check and the live-path test; the step isn't reworded;
+  - delete the S4 probe and its workflow after task 0 (ADR 0023; a workflow edit, recorded);
+  - interim lists of 50 names, the 2.8 copy, no staleness warning, HTTP cache only offline, no `/registry/` in `pnpm dev`;
+  - `index()` only for now;
+  - the F-204 locator change and the shell baseline re-approval, recorded in the PR;
+  - extend the recorded-registry-data licences row to the live fixtures.
