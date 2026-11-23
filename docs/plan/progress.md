@@ -589,6 +589,15 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - The two details-pane baselines are approved from CI (ADR 0021).
 - Blockers: none.
 
+## 2026-11-23 · Parser error position fix · Claude (autonomous)
+- Did: fixed the parser's first error landing on an earlier `stub:` or `emit:` keyword when a blank line precedes it and a syntax error comes later in the file; such positions now match `nextflow lint`. Two out-of-order-section cases on the reparse path remain (see the spike S2 addendum). Found through F-208's refused-edit baseline.
+- State: fix only; no feature changes `passes`.
+- Next: F-208, F-207, F-502, then F-403 and F-209.
+- Decisions:
+  - The cause is a runtime difference (antlr4ng against Groovy's optimised ANTLR runtime), recorded as an addendum to the [spike S2 note](../research/2026-11-22-spike-s2-parser.md); stage 2 decides SLL fallbacks with two or more exiting alternatives by full LL. ADR 0020 stands.
+  - A new malformed fixture, `late-error-after-stub.nf`, and a position check against lint in the corpus test (ADR 0017).
+- Blockers: none.
+
 ## 2026-11-23 · F-209 · Claude (autonomous)
 - Did:
   - Undo and redo in the engine worker: one step per command, groups for multi-command actions, limits, and clearing on raw writes. Every change reports the history's labels.

@@ -117,7 +117,7 @@ describe("F-104 step 1: the round trip over the corpus", () => {
         state.lint.get(id)?.filesChecked,
       );
     expect(state.rows.filter((r) => r.id !== "fixtures")).toHaveLength(570);
-    expect(state.rows.filter((r) => r.id === "fixtures")).toHaveLength(9);
+    expect(state.rows.filter((r) => r.id === "fixtures")).toHaveLength(10);
   });
 
   it("F-104 step 1 IO-20 ADR-0004: every corpus file prints back byte for byte and equivalent with no edits", () => {
