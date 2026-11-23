@@ -65,7 +65,10 @@ export function AppShell(): JSX.Element {
   const right = useLayout((s) => s.right);
   const leftWidth = left.collapsed ? COLLAPSED_WIDTH : left.width;
   const content = useWorkspace((s) => s.content);
-  const counts = canvasCounts(content);
+  const onFile = useWorkspace(
+    (s) => s.tabs.find((t) => t.id === s.activeTab)?.kind === "file",
+  );
+  const counts = onFile ? null : canvasCounts(content);
   const hasProject = useWorkspace((s) => s.summary !== null);
   const diagnostics = useProblemsStatus(hasProject);
   const projects = useProjects((s) => s.status);
@@ -110,8 +113,8 @@ export function AppShell(): JSX.Element {
       </div>
       <StatusBar
         diagnostics={diagnostics}
-        nodes={counts.nodes}
-        channels={counts.channels}
+        nodes={counts?.nodes ?? null}
+        channels={counts?.channels ?? null}
         languageVersion={languageVersions[0]}
       />
     </div>
