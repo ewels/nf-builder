@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { createRegistryClient, LIVE_REGISTRY } from "../src/index";
+import {
+  createRegistryClient,
+  LIVE_REGISTRY,
+  RegistryError,
+  toFailure,
+} from "../src/index";
 import { jsonResponse, rejection, SNAPSHOT_URL, serve } from "./helpers";
 
 const REGISTRY = "https://registry.test";
@@ -56,5 +61,23 @@ describe("registry client", () => {
 
   it("F-502 ADR-0050: LIVE_REGISTRY is off until the registry sends CORS headers", () => {
     expect(LIVE_REGISTRY).toBe(false);
+  });
+
+  it("F-502 IO-30: one refresh with live on makes exactly one snapshot request", async () => {
+    const f = serve();
+    await make(f, true).index({ refresh: true });
+    expect(f.calls.filter((c) => c.url.startsWith(SNAPSHOT_URL))).toHaveLength(
+      1,
+    );
+  });
+
+  it("F-502 IO-30: toFailure maps RegistryError as is, a TypeError to network and any other error to invalid", () => {
+    expect(toFailure(new RegistryError("http", "u", "m", 500))).toEqual({
+      code: "http",
+      message: "m",
+    });
+    expect(toFailure(new TypeError("Failed to fetch")).code).toBe("network");
+    expect(toFailure(new RangeError("bug")).code).toBe("invalid");
+    expect(toFailure("odd")).toEqual({ code: "invalid", message: "odd" });
   });
 });

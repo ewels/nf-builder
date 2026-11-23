@@ -1,5 +1,5 @@
 import { toFailure } from "./errors.ts";
-import { createLiveClient, type LiveClientOptions } from "./live.ts";
+import { type LiveReadOptions, overlayLive, readLiveLists } from "./live.ts";
 import {
   createSnapshotClient,
   fromSnapshot,
@@ -12,8 +12,9 @@ export const LIVE_REGISTRY = false;
 
 export interface RegistryClientOptions
   extends SnapshotClientOptions,
-    Omit<LiveClientOptions, "snapshot"> {
+    LiveReadOptions {
   readonly live?: boolean; // LIVE_REGISTRY
+  readonly now?: () => Date;
 }
 
 /** The snapshot always; live on top of it when enabled, falling back to the snapshot (with liveFailure) if live fails. */
@@ -22,15 +23,19 @@ export function createRegistryClient(
 ): RegistryClient {
   const snapshot = createSnapshotClient(options);
   const live = options.live ?? LIVE_REGISTRY;
-  const liveClient = live ? createLiveClient({ ...options, snapshot }) : null;
+  const now = options.now ?? (() => new Date());
   return {
     source: live ? "live" : "snapshot",
     async index(opts) {
       // Rejects with the snapshot's error when it fails: no live-only index.
       const base = await snapshot.snapshot(opts);
-      if (!liveClient) return fromSnapshot(base);
+      if (!live) return fromSnapshot(base);
       try {
-        return await liveClient.index(opts);
+        return overlayLive(
+          base,
+          await readLiveLists(options),
+          now().toISOString(),
+        );
       } catch (error) {
         return fromSnapshot(base, toFailure(error));
       }

@@ -18,13 +18,21 @@ export class RegistryError extends Error implements RegistryFailure {
   }
 }
 
-/** A RegistryError as plain data; anything else becomes { code: "network", message }. */
+const isAbort = (error: unknown) => {
+  const name = (error as { name?: string } | null)?.name;
+  return name === "TimeoutError" || name === "AbortError";
+};
+
+/**
+ * A RegistryError as plain data. A TypeError (what `fetch` throws offline or on CORS) becomes "network"; any other
+ * error is unexpected and becomes "invalid", so a bug doesn't tell users to check their connection.
+ */
 export function toFailure(error: unknown): RegistryFailure {
   if (error instanceof RegistryError) {
     return { code: error.code, message: error.message };
   }
   return {
-    code: "network",
+    code: error instanceof TypeError ? "network" : "invalid",
     message: error instanceof Error ? error.message : String(error),
   };
 }
@@ -39,8 +47,7 @@ export async function request(
   try {
     return await doFetch(url, init);
   } catch (error) {
-    const name = (error as { name?: string } | null)?.name;
-    if (name === "TimeoutError" || name === "AbortError") {
+    if (isAbort(error)) {
       throw new RegistryError("timeout", url, `${what} timed out.`);
     }
     throw new RegistryError(
@@ -76,7 +83,10 @@ export async function readJson(
   }
   try {
     return await response.json();
-  } catch {
+  } catch (error) {
+    if (isAbort(error)) {
+      throw new RegistryError("timeout", url, `${what} timed out.`);
+    }
     throw new RegistryError("invalid", url, `${what} is not valid JSON.`);
   }
 }

@@ -38,7 +38,9 @@ describe("registry live client", () => {
     >;
     const f = serve((url) => {
       if (url.includes("/plugins?size=100&page=1"))
-        return jsonResponse(JSON.stringify({ ...page2, last: false }));
+        return jsonResponse(
+          JSON.stringify({ ...page2, totalSize: 101, last: false }),
+        );
       if (url.includes("/plugins?size=100&page=2"))
         return jsonResponse(
           JSON.stringify({ plugins: [{ id: "nf-more" }], last: true }),
@@ -164,5 +166,81 @@ describe("registry live client", () => {
     expect((await rejection(liveClient(slow, 20).index())).code).toBe(
       "timeout",
     );
+  });
+
+  const pageOf = (url: string) => Number(/page=(\d+)/.exec(url)?.[1]);
+  const modulePage = (names: string[], extra: object) =>
+    jsonResponse(
+      JSON.stringify({
+        modules: names.map((name) => ({ name, kind: "Process" })),
+        ...extra,
+      }),
+    );
+
+  it("F-502 IO-30: after page 1 the other pages of a long list are read in parallel, at most 6 in flight, and all are kept", async () => {
+    let inFlight = 0;
+    let peak = 0;
+    const f = serve();
+    const slow = fakeFetch(async (url, init) => {
+      if (!url.includes("kind=Process")) return f.fetch(url, init);
+      const page = pageOf(url);
+      inFlight++;
+      peak = Math.max(peak, inFlight);
+      await new Promise((r) => setTimeout(r, 5));
+      inFlight--;
+      return modulePage([`nf-core/p${page}`], {
+        totalSize: 2200,
+        last: page === 22,
+      });
+    });
+    const index = await liveClient({ ...f, fetch: slow.fetch }).index();
+    const pages = slow.calls
+      .map((c) => c.url)
+      .filter((u) => u.includes("kind=Process"))
+      .map(pageOf)
+      .sort((a, b) => a - b);
+    expect(pages).toEqual(Array.from({ length: 22 }, (_, i) => i + 1));
+    expect(peak).toBeGreaterThan(1);
+    expect(peak).toBeLessThanOrEqual(6);
+    expect(
+      index.modules.filter((m) => m.name.startsWith("nf-core/p")),
+    ).toHaveLength(22);
+  });
+
+  it("F-502 IO-30: a list that says it is not last without a page count stops at an empty page instead of looping", async () => {
+    const f = serve((url) => {
+      if (!url.includes("kind=Process")) return undefined;
+      return pageOf(url) === 1
+        ? modulePage(["nf-core/a"], { last: false })
+        : modulePage([], { last: false });
+    });
+    const index = await liveClient(f).index();
+    expect(index.modules.map((m) => m.name)).toContain("nf-core/a");
+    expect(f.calls.filter((c) => c.url.includes("kind=Process")).length).toBe(
+      2,
+    );
+  });
+
+  it("F-502 IO-30: a module listed as both Process and Workflow appears once", async () => {
+    const f = serve((url) =>
+      url.includes("kind=Workflow") && url.startsWith(REGISTRY)
+        ? modulePage(["nf-core/fastqc"], { last: true })
+        : undefined,
+    );
+    const index = await liveClient(f).index();
+    expect(
+      index.modules.filter((m) => m.name === "nf-core/fastqc"),
+    ).toHaveLength(1);
+  });
+
+  it("F-502 IO-30: a timeout while the body is being read reports timeout, not invalid", async () => {
+    const f = serve((url) => {
+      if (!url.startsWith(REGISTRY)) return undefined;
+      const response = jsonResponse("{}");
+      response.json = () =>
+        Promise.reject(new DOMException("aborted", "TimeoutError"));
+      return response;
+    });
+    expect((await rejection(liveClient(f).index())).code).toBe("timeout");
   });
 });
