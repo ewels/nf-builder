@@ -103,6 +103,30 @@ test("F-208 step 1 UX-70: G, S and C switch the mode; the same letters typed int
   await expect(mode(page)).toHaveAttribute("data-view-mode", "graph");
 });
 
+test("F-208 UX-27: a Code view that fails to load leaves the rest of the app working", async ({
+  page,
+}) => {
+  await page.route("**/code-editor-*.js", (route) => route.abort());
+  await page.goto("./");
+  await openFixture(page);
+  await canvasReady(page);
+  const message = page.getByText(
+    "The code editor couldn't load. Reload the page.",
+  );
+  await radio(page, "Split").click();
+  await expect(message).toBeVisible();
+  await expect(page.locator(".canvas-area .react-flow")).toBeVisible();
+  await expect(page.getByRole("tab", { name: "main.nf" })).toBeVisible();
+  await radio(page, "Code").click();
+  await expect(message).toBeVisible();
+  await expect(page.getByRole("tab", { name: "main.nf" })).toBeVisible();
+  await expect(
+    page.getByRole("radiogroup", { name: "View mode" }),
+  ).toBeVisible();
+  await radio(page, "Graph").click();
+  await expect(page.locator(".canvas-area .react-flow")).toBeVisible();
+});
+
 const syncStatus = (page: Page) => page.locator(".code-pane-status");
 
 async function openSplit(page: Page): Promise<void> {

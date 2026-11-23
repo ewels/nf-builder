@@ -1,5 +1,6 @@
 import type { JSX } from "react";
 import { lazy, Suspense, useState } from "react";
+import { CanvasErrorBoundary } from "../canvas/canvas-error-boundary";
 import "./code.css";
 import type { PaneSyncState } from "./text-sync";
 
@@ -36,9 +37,11 @@ export function CodePane({ path }: { readonly path: string }): JSX.Element {
         </span>
       </header>
       <div className="code-pane-body">
-        <Suspense fallback={<p className="muted">Loading editor…</p>}>
-          <CodeEditor path={path} onSync={setState} />
-        </Suspense>
+        <CanvasErrorBoundary message="The code editor couldn't load. Reload the page.">
+          <Suspense fallback={<p className="muted">Loading editor…</p>}>
+            <CodeEditor path={path} onSync={setState} />
+          </Suspense>
+        </CanvasErrorBoundary>
       </div>
     </section>
   );
