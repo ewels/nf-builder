@@ -5,6 +5,7 @@ import { AppShell } from "./app-shell";
 import { canvasStore } from "./canvas/canvas-store";
 import { getEngine } from "./engine/engine-client";
 import { startProjects } from "./project/project-store";
+import { registryStore } from "./registry/registry-store";
 import "./styles.css";
 
 const root = document.getElementById("root");
@@ -25,6 +26,14 @@ Object.defineProperty(window, "nfBuilderWorkspace", {
       history: () => canvasStore.getState().history,
     };
   },
+});
+
+// Test hook (F-502): forces the live or snapshot registry path, then reads again. Does nothing unless called.
+Object.defineProperty(window, "nfBuilderRegistry", {
+  get: () => ({
+    reload: (options: { live: boolean }) =>
+      registryStore.getState().reload(options),
+  }),
 });
 
 startProjects();

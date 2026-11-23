@@ -25,7 +25,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-208 view modes and Code | merged, PR #46 | |
 | F-209 undo and redo | merged, PR #50 | |
 | F-309 problems panel | not started | [plan](plan-F-309.md). After F-208 and F-209. |
-| F-502 registry client | `feat/F-502` | [plan](plan-F-502.md). |
+| F-502 registry client | merged, PR #48 | |
 | Parser error position | `fix/parser-error-position` | A blank line before `stub:` or `emit:` moved a later syntax error to that keyword (antlr4ng and Groovy's optimised ANTLR runtime differ); fix building. |
 | F-501 registry snapshot | merged, PR #29; passing | Confirmed on live data after the snapshot-triggered Pages deploy. |
 | F-011 GitHub Pages hosting | merged, PR #37 | Live at https://ewels.github.io/nf-builder/; first `verify` passed. |
@@ -209,7 +209,7 @@ Next free ADR number: 0052 (0050 is F-502's, 0051 F-209's).
   - a "Show in problems panel" button in the details pane;
   - the 64-character cap on fix edits.
 
-### F-502 — [plan](plan-F-502.md)
+### F-502 (merged with its PR)
 - Accept every recommendation in section 6:
   - live registry access gated off by a constant (`LIVE_REGISTRY = false`), recorded in an ADR, with the test hook driving the live path;
   - step 2's condition ("if S4 allowed it") is false, so `passes` can be set with notes citing the task 0 run, the `curl` check and the live-path test; the step isn't reworded;

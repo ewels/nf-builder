@@ -44,6 +44,9 @@ importers:
       '@nf-builder/engine':
         specifier: workspace:*
         version: link:../../packages/engine
+      '@nf-builder/sources':
+        specifier: workspace:*
+        version: link:../../packages/sources
       '@shikijs/monaco':
         specifier: 4.6.0
         version: 4.6.0
@@ -119,7 +122,15 @@ importers:
 
   packages/lang-core: {}
 
-  packages/sources: {}
+  packages/sources:
+    dependencies:
+      '@nf-builder/lang-core':
+        specifier: workspace:*
+        version: link:../lang-core
+    devDependencies:
+      '@types/node':
+        specifier: 22.20.5
+        version: 22.20.5
 
   tools/corpus:
     devDependencies:
