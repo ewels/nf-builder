@@ -383,3 +383,34 @@ describe("F-209 engine history", () => {
     expect((await service.history()).undoCount).toBe(2);
   });
 });
+
+describe("F-209 AR-23 line endings", () => {
+  it("F-209 AR-23: undo and redo round-trip CRLF text and a file with no final newline byte for byte", async () => {
+    const crlf = [
+      {
+        path: "main.nf",
+        text: "include { A } from './a.nf'\r\n\r\nworkflow {\r\n    A()\r\n}\r\n",
+      },
+      // no final newline byte
+      { path: "a.nf", text: "process A {\r\n    script:\r\n    'A'\r\n}" },
+    ];
+    const p = await open(crlf);
+    const before = p.snapshot();
+    await p.apply({
+      kind: "renameDeclaration",
+      path: "a.nf",
+      name: "A",
+      newName: "AA",
+    });
+    const after = p.snapshot();
+    expect(after).not.toEqual(before);
+    await p.undo();
+    expect(p.snapshot()).toEqual(before);
+    expect(await p.service.readFile("a.nf")).toBe(crlf[1]?.text);
+    await p.redo();
+    expect(p.snapshot()).toEqual(after);
+    await p.undo();
+    expect(p.snapshot()).toEqual(before);
+    expect(await p.service.readFile("main.nf")).toBe(crlf[0]?.text);
+  });
+});
