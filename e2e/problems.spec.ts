@@ -1,8 +1,11 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { expect, test } from "@playwright/test";
+import { VISUAL_TAG } from "./browsers.ts";
 import {
   canvasReady,
+  expectBaseline,
+  layoutSettled,
   node,
   openBadDeclaration,
   openFixture,
@@ -292,3 +295,23 @@ test("F-309 LA-30: a syntax error is listed under Problems as an error and opens
     .poll(async () => (await editorSelection(page))?.split("-")[0])
     .toBe(location);
 });
+
+test(
+  "F-309 UX-03: the problems panel and the status-bar counts match their approved baselines @visual",
+  { tag: VISUAL_TAG },
+  async ({ page }, testInfo) => {
+    await page.goto("./");
+    await openProblemsFixture(page);
+    await canvasReady(page);
+    await expect(problemsReady(page)).toBeVisible();
+    await statusCount(page, "problems").click();
+    await expect(problemRow(page)).toHaveCount(1);
+    await layoutSettled(page);
+    await expectBaseline(page, testInfo, "problems-panel.png", {
+      target: problemsPanel(page),
+    });
+    await expectBaseline(page, testInfo, "problems-status-bar.png", {
+      target: page.locator("footer.status-bar"),
+    });
+  },
+);
