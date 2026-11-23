@@ -3,7 +3,6 @@
 import type {
   Catalogue,
   CommandResult,
-  EditCommand,
   FileText,
   PackLints,
   Projection,
