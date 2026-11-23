@@ -218,3 +218,28 @@ Next free ADR number: 0050 (0047 is F-203's, 0048 F-208's, 0049 F-206's).
   - `index()` only for now;
   - the F-204 locator change and the shell baseline re-approval, recorded in the PR;
   - extend the recorded-registry-data licences row to the live fixtures.
+
+### F-403 — [plan](plan-F-403.md)
+- Accept every recommendation in section 6:
+  - fflate 0.8.3, pinned, as a runtime dependency of `@nf-builder/sources` (`unzipSync` only), plus root dev fflate and `sources` dev fast-check 4.11.0;
+  - unzipping in the engine worker with `sources` loaded lazily;
+  - the 2.2 size guards, without CRC checks;
+  - binary files skipped and listed, schema v1 unchanged; add the deferred M8 feature "Binary files in projects" (schema v2, import and export passthrough) with `scope-change`;
+  - the 2.5 default ignore list and `.gitignore` subset; unsupported lines block Create;
+  - SI units; every central-directory record counts as an entry; a 200 MB cap on the zip itself (IO-12);
+  - the one-level folder rule, path rules, and a damaged entry aborting the import;
+  - F-403 builds the summary half of UX-61; the Import route with an "Import from" group;
+  - add F-403 to F-404's `depends_on` (`scope-change`);
+  - fixtures built with `git archive` from the corpus cache; step 1 read as "the pinned tree after the IO-12 rules"; tag the small-zip test `@smoke`.
+- F-403 lands before F-401, which then builds on the shared `packages/sources` import module and the Import route.
+
+### F-401 — [plan](plan-F-401.md)
+- Accept every recommendation in section 6, with one change: the default ignore list is F-403's (2.5 in plan-F-403), shared by both routes, rather than point 4's list. One list keeps both routes' summaries consistent and reads ADR 0009's "test data" one way.
+  - fetching in the document, bytes transferred to the worker as `ArrayBuffer`s (an AR-30 reading);
+  - `ProjectMeta.source` as an optional field with no schema version bump, and the rule for when a bump is needed (amends ADR 0045);
+  - `EngineApi.report()` and `WorkspaceApi.importProject()`;
+  - the limit semantics, binaries skipped (as F-403), the report's definitions (UX-61), no token field until F-402, Publish docs hidden on Import;
+  - body length checked against the tree size, no SHA-1 in the app;
+  - the `web-worker-no-github-client` dependency-cruiser rule;
+  - mocked e2e evidence with blob SHAs checked against the corpus, an opt-in `F401_LIVE=1` test, the git-generated tree fixture;
+  - 8 requests in flight, one retry on network errors or 5xx; the accepted input forms (IO-10); session-only report; the repository name as the default project name; warn but allow a repository with no `.nf` files.
