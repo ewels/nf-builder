@@ -5,6 +5,7 @@ import type {
   PaletteItem,
   PaletteView,
   PaletteViewItem,
+  ScriptCatalogue,
 } from "@nf-builder/lang-core";
 
 const READ_MORE = /^\[Read more\]\([^)]*\)$/;
@@ -30,11 +31,11 @@ export function firstParagraph(text: string): string {
   return text.split("\n\n")[0] ?? "";
 }
 
-function operatorDescription(catalogue: Catalogue, name: string) {
-  const modern = catalogue.script.operators.filter(
+export function operatorDescription(script: ScriptCatalogue, name: string) {
+  const modern = script.operators.filter(
     (o) => o.name === name && !o.deprecated,
   );
-  const entries = catalogue.script.operators.filter((o) => o.name === name);
+  const entries = script.operators.filter((o) => o.name === name);
   return (
     modern.find((o) => o.receiver === "Channel") ??
     modern[0] ??
@@ -42,8 +43,8 @@ function operatorDescription(catalogue: Catalogue, name: string) {
   )?.description;
 }
 
-function factoryDescription(catalogue: Catalogue, name: string) {
-  const entries = catalogue.script.factories.filter((f) => f.name === name);
+export function factoryDescription(script: ScriptCatalogue, name: string) {
+  const entries = script.factories.filter((f) => f.name === name);
   return (entries.find((f) => !f.deprecated) ?? entries[0])?.description;
 }
 
@@ -65,9 +66,9 @@ function resolveItem(
     label = item.name;
     markdown =
       item.kind === "operator"
-        ? operatorDescription(catalogue, item.name)
+        ? operatorDescription(catalogue.script, item.name)
         : item.kind === "factory"
-          ? factoryDescription(catalogue, item.name)
+          ? factoryDescription(catalogue.script, item.name)
           : catalogue.config.scopes.find((n) => n.name === item.name)
               ?.description;
     if (markdown === undefined)

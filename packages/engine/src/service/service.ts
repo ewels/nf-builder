@@ -6,6 +6,7 @@ import type {
   FileText,
   PackLints,
 } from "@nf-builder/lang-core";
+import { nodeDetails } from "../details/details";
 import { createDiagnoser, type Diagnoser } from "../diagnostics/diagnose";
 import { loadLints } from "../diagnostics/lints";
 import {
@@ -28,6 +29,7 @@ import type {
   EngineRefusal,
   EngineRefusalCode,
   LoadProgress,
+  NodeDetailsResult,
   ProjectChange,
   ProjectionResult,
   ProjectSummary,
@@ -279,6 +281,25 @@ export function createEngineService(
           diagnostics: diagnoserOf(open).all(),
         }),
       ),
+
+    details: (path, workflow, node) =>
+      guarded((open): NodeDetailsResult => {
+        const projection = projectorOf(open).project(path, workflow);
+        if (projection === null) return { revision, details: null };
+        const diagnoser = diagnoserOf(open);
+        return {
+          revision,
+          details: nodeDetails(
+            {
+              model: open.state.model,
+              catalogue: open.catalogue.script,
+              projection,
+              diagnostics: (p) => diagnoser.file(p),
+            },
+            node,
+          ),
+        };
+      }),
 
     readFile: (path) =>
       serial(() => current?.state.model.file(path)?.source.text ?? null),

@@ -20,7 +20,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-202 projects in IndexedDB | merged, PR #42 | |
 | F-205 canvas | merged, PR #41 | |
 | F-203 new project dialog | merged, PR #43 | |
-| F-206 details pane | `feat/F-206` (`/home/user/wt-F-206`) | Tasks 1–2 building; task 0 done by F-112. [plan](plan-F-206.md). |
+| F-206 details pane | merged, PR #45 | |
 | F-207 layout sidecar | not started | [plan](plan-F-207.md). After F-205 and F-202. |
 | F-208 view modes and Code | merged, PR #46 | |
 | F-209 undo and redo | not started | [plan](plan-F-209.md). After F-202, F-205 and F-208. |
@@ -31,7 +31,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 
 Branches are stacked: `feat/F-108` → `feat/F-107`; `feat/F-111` also merges F-107. Open PRs for F-108, F-107 and F-111 against `main` in that order (merge `main` into each first), each green before the next. Worktrees: `/home/user/wt-F-1xx`.
 
-Next free ADR number: 0049 (0047 is F-203's, 0048 is F-208's).
+Next free ADR number: 0050 (0047 is F-203's, 0048 F-208's, 0049 F-206's).
 
 ## Decisions already taken on the plans' open points
 
@@ -134,7 +134,7 @@ Next free ADR number: 0049 (0047 is F-203's, 0048 is F-208's).
 - `smol-toml` stays (section 6).
 - The plan's mention of #33 is stale: Actions runs again.
 
-### F-206 — [plan](plan-F-206.md)
+### F-206 (merged with its PR)
 - Accept every recommendation in section 6:
   - Edit and Code are shown disabled while a node is selected;
   - every directive is shown in source order;

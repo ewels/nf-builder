@@ -8,7 +8,7 @@ import type {
   WorkflowRef,
 } from "@nf-builder/lang-core";
 import { describe, expect, it } from "vitest";
-import { CANVAS_METRICS, canvasView } from "../../src/canvas";
+import { CANVAS_METRICS, canvasView, nodeTitle } from "../../src/canvas";
 
 const range = {
   start: 0,
@@ -317,5 +317,33 @@ describe("F-205 canvas view", () => {
       expect(t?.inputs.map((x) => x.id)).toContain(e.targetPort);
     }
     expect(structuredClone(v)).toEqual(v);
+  });
+
+  it("F-206 F-205: nodeTitle equals each canvas node's title", () => {
+    const nodes: GraphNode[] = [
+      call("a", { name: "ALIGN" }),
+      call("u", { status: "unparsed" }),
+      {
+        ...base("c", ".map.collect", [port("in")], [port("out")]),
+        kind: "chain",
+        steps: [
+          { operator: "map", range, known: true },
+          { operator: "collect", range, known: true },
+        ],
+      },
+      { ...base("p", "params", [], [port("x")]), kind: "params" },
+      { ...base("o", "output", [port("x")], []), kind: "output" },
+      { ...base("t", "reads", [], [port("out")]), kind: "take", name: "reads" },
+      {
+        ...base("k", "log.info 'x'", [], []),
+        kind: "code",
+        text: "log.info 'x'",
+      },
+    ];
+    const view = canvasView(projection(nodes), { portLabels: true });
+    for (const node of nodes)
+      expect(nodeTitle(node), node.id).toBe(
+        view.nodes.find((n) => n.id === node.id)?.title,
+      );
   });
 });

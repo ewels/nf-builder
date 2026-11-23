@@ -15,6 +15,8 @@ export function CanvasHost(): JSX.Element {
   const content = useWorkspace((s) => s.content);
   const portLabels = useWorkspace((s) => s.portLabels);
   const setPortLabels = useWorkspace((s) => s.setPortLabels);
+  const selected = useWorkspace((s) => s.selected);
+  const select = useWorkspace((s) => s.select);
   if (summary === null)
     return (
       <div className="canvas-area">
@@ -31,6 +33,8 @@ export function CanvasHost(): JSX.Element {
             projection={content.projection}
             portLabels={portLabels}
             onPortLabelsChange={setPortLabels}
+            selected={selected}
+            onSelect={(id) => void select(id)}
           />
         </Suspense>
       </CanvasErrorBoundary>
