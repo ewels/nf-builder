@@ -1,6 +1,7 @@
 // The undo history of one open project (F-209, AR-23): steps made of one or more accepted commands, an undo and a redo
 // stack, and bounds on both. Pure data and no knowledge of Nextflow; the service decides when to record and apply.
 import type { TextPatch } from "@nf-builder/lang-core";
+import type { CarryHints, RenameHint } from "../layout";
 
 export interface HistoryStatus {
   /** The label of the step an undo would take back, or null. */
@@ -30,6 +31,9 @@ export const HISTORY_LIMITS: HistoryLimits = { steps: 100, units: 8_000_000 };
 export interface StepPart {
   readonly patches: readonly TextPatch[];
   readonly inverse: readonly TextPatch[];
+  /** What the command told the layout carry (F-207): the declarations it renamed and the nodes it deleted. */
+  readonly renames?: readonly RenameHint[];
+  readonly deleted?: readonly string[];
 }
 
 interface HistoryStep {
@@ -48,6 +52,19 @@ export function patchUnits(patches: readonly TextPatch[]): number {
       for (const edit of patch.edits) units += edit.text.length;
   }
   return units;
+}
+
+/** Renames in the order made, with a chain through one name joined: A to B then B to C becomes A to C. */
+function composeRenames(renames: readonly RenameHint[]): RenameHint[] {
+  const out: RenameHint[] = [];
+  for (const r of renames) {
+    const at = out.findIndex((x) => x.path === r.path && x.to === r.from);
+    const chained = out[at];
+    if (chained === undefined) out.push(r);
+    else if (chained.from === r.to) out.splice(at, 1);
+    else out[at] = { path: r.path, from: chained.from, to: r.to };
+  }
+  return out;
 }
 
 export class History {
@@ -92,6 +109,36 @@ export class History {
   redoLists(): readonly (readonly TextPatch[])[] | null {
     const top = this.#redo[this.#redo.length - 1];
     return top ? top.parts.map((p) => p.patches) : null;
+  }
+
+  /**
+   * What an undo of the top step tells the layout carry: its renames reversed (a chain composed, so A to B then B to C
+   * undoes as C to A), and, for a one-part step, the nodes its command deleted as the ones the undo restores.
+   */
+  undoHints(): CarryHints {
+    const top = this.#undo[this.#undo.length - 1];
+    if (!top) return {};
+    const renames = composeRenames(top.parts.flatMap((p) => p.renames ?? []))
+      .reverse()
+      .map((r) => ({ path: r.path, from: r.to, to: r.from }));
+    const only = top.parts.length === 1 ? top.parts[0] : undefined;
+    return only?.deleted?.length
+      ? { renames, inserted: only.deleted }
+      : { renames };
+  }
+
+  /**
+   * What a redo of the top undone step tells the layout carry: its renames (composed) and deleted nodes, oldest first.
+   * The ids of nodes deleted by a later part of a group are those before that part, so they are exact only for the
+   * first deleting part.
+   */
+  redoHints(): CarryHints {
+    const top = this.#redo[this.#redo.length - 1];
+    if (!top) return {};
+    return {
+      renames: composeRenames(top.parts.flatMap((p) => p.renames ?? [])),
+      deleted: top.parts.flatMap((p) => p.deleted ?? []),
+    };
   }
 
   /** Moves the top step to the redo stack after its undo was applied; returns its label. */

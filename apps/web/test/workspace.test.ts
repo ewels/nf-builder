@@ -187,6 +187,51 @@ describe("F-202 workspace", () => {
     db.close();
   });
 
+  it("F-207 IO-01: setLayout's sidecar text is autosaved like a command's files, and a later session reads the positions back", async () => {
+    const s = setup();
+    await s.watching;
+    const main =
+      "process A {\n    script:\n    'A'\n}\n\nworkflow {\n    A()\n}\n";
+    const meta = await s.workspace.createProject({
+      name: "P",
+      languageVersion: version,
+      files: [{ path: "main.nf", text: main }],
+    });
+    const opened = await s.workspace.openProject(meta.id);
+    const position = { "main.nf#/A@1": { x: 12, y: 34 } };
+    const change = ok(
+      await s.workspace.setLayout({
+        revision: opened.summary.revision,
+        path: "main.nf",
+        workflow: null,
+        positions: position,
+        replace: false,
+      }),
+    ) as { files: { path: string; text: string }[] };
+    expect(change.files.map((f) => f.path)).toEqual([
+      ".nf-builder/layout.json",
+    ]);
+    // a refused write saves nothing
+    const refused = await s.workspace.setLayout({
+      revision: opened.summary.revision,
+      path: "main.nf",
+      workflow: null,
+      positions: { "main.nf#/NOPE@1": { x: 1, y: 1 } },
+      replace: false,
+    });
+    expect(refused).toMatchObject({ ok: false, code: "invalid" });
+    expect(await s.workspace.flush()).toEqual({ status: "saved", error: null });
+    expect(s.saves).toHaveLength(1);
+    expect(s.saves[0]?.map((c) => c.path)).toEqual([".nf-builder/layout.json"]);
+    const b = setup(s.factory);
+    await b.watching;
+    await b.workspace.openProject(meta.id);
+    const again = (await b.workspace.project("main.nf", null)) as {
+      positions: unknown;
+    };
+    expect(again.positions).toEqual(position);
+  });
+
   it("F-209 IO-01: undo and redo are autosaved like apply, including a deleted file; a refused undo saves nothing", async () => {
     const s = setup();
     await s.watching;

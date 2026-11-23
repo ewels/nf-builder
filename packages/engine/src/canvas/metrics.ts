@@ -1,5 +1,7 @@
 // Sizes of canvas nodes in pixels. The web components set the same numbers through `style`, so layout and CSS can't drift.
 
+import type { CanvasNodeView } from "./types";
+
 export const CANVAS_METRICS = {
   cardWidth: 208,
   headerHeight: 44,
@@ -17,3 +19,12 @@ export const CANVAS_METRICS = {
   columnGap: 64,
   rowGap: 24,
 } as const;
+
+/** The y of a node's i-th port, from its top: a card's ports sit in rows under the header, a pill's at its middle. */
+export const portY = (
+  node: Pick<CanvasNodeView, "shape" | "height" | "rowHeight">,
+  i: number,
+): number =>
+  node.shape === "pill"
+    ? node.height / 2
+    : CANVAS_METRICS.headerHeight + i * node.rowHeight + node.rowHeight / 2;

@@ -1,4 +1,4 @@
-export { CANVAS_METRICS } from "./metrics";
+export { CANVAS_METRICS, portY } from "./metrics";
 export type {
   CanvasAppearance,
   CanvasEdgeView,

@@ -7,6 +7,7 @@ import {
   type EngineApi,
   type EngineRefusal,
   installedPackVersions,
+  type LayoutChange,
   type ProjectChange,
   templateFiles,
 } from "@nf-builder/engine";
@@ -98,7 +99,7 @@ export function createWorkspace(options: WorkspaceOptions): WorkspaceApi {
   };
 
   /** A change that is recorded for autosave when it succeeds; a refusal has no `files`. */
-  const change = <R extends ProjectChange | EngineRefusal>(
+  const change = <R extends ProjectChange | LayoutChange | EngineRefusal>(
     call: () => Promise<R>,
   ): Promise<R> =>
     serial(async () => {
@@ -142,6 +143,7 @@ export function createWorkspace(options: WorkspaceOptions): WorkspaceApi {
     redo: (revision) => change(() => engine.redo(revision)),
     applyPatches: (patches, revision) =>
       change(() => engine.applyPatches(patches, revision)),
+    setLayout: (write) => change(() => engine.setLayout(write)),
 
     watch: async (next) => {
       listener = next;

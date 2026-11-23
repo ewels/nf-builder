@@ -55,3 +55,4 @@ Process: [0001](0001-record-decisions-as-adrs.md). Template: [template.md](templ
 | [0049](0049-details-pane.md) | Show node details from the projection on the main thread, with declarations and diagnostics from the worker | Accepted (agent) |
 | [0050](0050-registry-client.md) | Read the registry from the snapshot, with a live client gated off until the registry allows cross-origin reads | Accepted (agent) |
 | [0051](0051-undo-and-redo.md) | Keep undo and redo history in the engine worker, one step per command | Accepted (agent) |
+| [0052](0052-layout-sidecar.md) | Store node positions in a layout sidecar owned by the engine, and place new nodes with ELK in its own worker | Accepted (agent) |
