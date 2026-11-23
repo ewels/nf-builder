@@ -81,7 +81,10 @@ test("F-113 step 2 QA-01 ADR-0033: the parser and the catalogue are built only i
     }
   }
   expect(worker.some((c) => c.src?.endsWith(".json"))).toBe(true);
-  const entry = worker.find((c) => c.isEntry);
+  const entry = worker.find(
+    (c) => c.isEntry && c.src === "src/engine/engine.worker.ts",
+  );
+  expect(entry).toBeDefined();
   expect(entry?.dynamicImports.some((f) => parser.includes(f))).toBe(true);
 });
 

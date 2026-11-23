@@ -35,6 +35,7 @@ export type {
   PaletteViewCategory,
   PaletteViewItem,
   ParamsNode,
+  ParseProblem,
   ParseStatus,
   PlainSourceFile,
   Port,

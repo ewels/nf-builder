@@ -632,7 +632,7 @@
         "Rename a process through the app: its position is kept"
       ],
       "passes": false,
-      "notes": "From F-111: node ids can change after variable introduction, a statement move or a rename; diff the projections to carry layout keys (ADR 0008). From F-202: .nf-builder/layout.json written through the workspace is autosaved like any file. From F-205: replace layeredLayout inside canvasView with ELK and stored positions; enable dragging; re-approve the canvas baselines, and keep the per-kind test's zoom-1 assertion. From F-203: re-approve the `template-*` baselines in `e2e/__screenshots__/new-project.spec.ts/` too; `.nf-builder/layout.json` written on open is not part of a template's files. From F-206: decide whether a port-labels toggle and a refresh keep or re-fit the viewport (both re-fit today, as in F-205; selecting keeps it). The screen-fixed dot grid on `.canvas-area` shows under React Flow's own grid, so every node clip depends on the pan; remove it when re-approving the canvas baselines."
+      "notes": "From F-111: node ids can change after variable introduction, a statement move or a rename; diff the projections to carry layout keys (ADR 0008). From F-202: .nf-builder/layout.json written through the workspace is autosaved like any file. From F-205: replace layeredLayout inside canvasView with ELK and stored positions; enable dragging; re-approve the canvas baselines, and keep the per-kind test's zoom-1 assertion. From F-203: re-approve the `template-*` baselines in `e2e/__screenshots__/new-project.spec.ts/` too; `.nf-builder/layout.json` written on open is not part of a template's files. From F-206: decide whether a port-labels toggle and a refresh keep or re-fit the viewport (both re-fit today, as in F-205; selecting keeps it). The screen-fixed dot grid on `.canvas-area` shows under React Flow's own grid, so every node clip depends on the pan; remove it when re-approving the canvas baselines. From F-208: the graph re-fits on every pane resize (`apps/web/src/canvas/use-refit-on-resize.ts`), including window and column resizes, which resets the user's pan and zoom; decide with the stored positions whether to keep the viewport instead."
     },
     {
       "id": "F-208",
@@ -651,8 +651,8 @@
         "Edit code in Split mode: the graph updates after a valid edit; an invalid edit shows a diagnostic and leaves the graph unchanged",
         "Monaco is absent from the initial bundle (bundle report)"
       ],
-      "passes": false,
-      "notes": "From F-111: show a ReplaceFileText refusal's problems as diagnostics. From F-113: edits go through getEngine().apply(command, revision); a refusal comes back in the ApplyOutcome as an EngineRefusal with the code and message. From F-202: readFile(path) gives the current text; a code edit is autosaved through apply. From F-205: workflow tabs (tab-strip.tsx, canvas-store.ts) gain a view mode."
+      "passes": true,
+      "notes": "From F-111: show a ReplaceFileText refusal's problems as diagnostics. From F-113: edits go through getEngine().apply(command, revision); a refusal comes back in the ApplyOutcome as an EngineRefusal with the code and message. From F-202: readFile(path) gives the current text; a code edit is autosaved through apply. From F-205: workflow tabs (tab-strip.tsx, canvas-store.ts) gain a view mode. Verified 2026-11-22 (ADR 0048): step 1 by `e2e/view-modes.spec.ts` (toggle, G/S/C shortcuts, per-tab modes, the guard inside Monaco and its context menu) and the @visual Split, Code and refused baselines; step 2 by `e2e/view-modes.spec.ts` (an edit in Split re-projects the graph; a refused edit keeps its draft and the saved file; a draft never crosses projects) and the oracle cases `f208-code-edit`/`-after`; step 3 by `e2e/code-view.spec.ts`, the QA-01 budget job (Monaco only in lazy chunks, initial JS 83.2 kB gzipped) and the @smoke CSP test."
     },
     {
       "id": "F-209",
@@ -669,7 +669,7 @@
         "Redo five times: back to the edited state"
       ],
       "passes": false,
-      "notes": "From F-111: keep the inverse lists from applyCommand; redo is the original patches. From F-113: undo applies the inverse returned by apply through getEngine().applyPatches(patches, revision); redo re-applies the original patches."
+      "notes": "From F-111: keep the inverse lists from applyCommand; redo is the original patches. From F-113: undo applies the inverse returned by apply through getEngine().applyPatches(patches, revision); redo re-applies the original patches. From F-208: `canvasStore.apply(command, session?)` is the single UI path for commands; the revision is `summary.revision` (also `content.revision`, `lastChange.revision`); the store's `session` counter refuses commands for a project that is no longer open. Monaco's own undo stays local to the editor; flush the text sync (`TextSync.flush`) before an undo. e2e helpers: `e2e/code-view.ts` (`editor`, `openCodeFixture`, `appendToLine`, `insertAfterLine`, `fileText`, `lineNumberOf`) and `e2e/projects.ts` (`readFile`, `saveState`)."
     },
     {
       "id": "F-210",
@@ -689,7 +689,7 @@
         "A registry module folder shows the `registry` tag and a file with a syntax error shows an error badge"
       ],
       "passes": false,
-      "notes": "Added 2026-11-22 (F-204 PR, scope-change; Q16): UX-16 had no owning feature; F-301 step 1 relies on the Files view. Dropping a zip reuses F-403's zip import. From F-111: there is no create, delete or rename file command yet. From F-202: IndexedDB schema v1 stores text only; binary files need a schema version bump (ADR 0045)."
+      "notes": "Added 2026-11-22 (F-204 PR, scope-change; Q16): UX-16 had no owning feature; F-301 step 1 relies on the Files view. Dropping a zip reuses F-403's zip import. From F-111: there is no create, delete or rename file command yet. From F-202: IndexedDB schema v1 stores text only; binary files need a schema version bump (ADR 0045). From F-208: an entry file with no workflows gets no tab, so there is no toggle to reach its Code view."
     },
     {
       "id": "F-211",
@@ -796,7 +796,7 @@
         "Format produces the same text as the oracle formatter for that declaration"
       ],
       "passes": false,
-      "notes": "From F-206: enable the details header's Code button."
+      "notes": "From F-206: enable the details header's Code button.From F-208: reuse `apps/web/src/code/monaco.ts`, `nextflow-language.ts` and `markers.ts`. Refusal markers use the owner `nf-builder-refusal`; use another owner for the file's own diagnostics."
     },
     {
       "id": "F-305",
@@ -899,7 +899,7 @@
         "Apply a quick fix (for example `Channel.of` → `channel.of`): the suggestion disappears and one undo step reverts it"
       ],
       "passes": false,
-      "notes": "From F-201: the status bar's suggestions count is plain text until the problems panel exists; F-309 makes it link to the panel (UX-03). From F-112: Diagnostic.severity includes `suggestion`; countDiagnostics separates errors, warnings and suggestions (UX-03); the pack's lints.codes give severity, spec and fixability for grouping; a QuickFix is { title, path, edits }: apply it with applyTextEdits into F-111's ReplaceFileText as one undo step (F-209), refuse it if the file changed since it was diagnosed, then re-diagnose. Step 2's example is `deprecated-channel`. From F-205: draw mismatch red over the edge-<dataflow> class; status-bar node and channel counts come from canvasCounts. From F-206: the details pane lists a node's problems; it could link each to the problems panel."
+      "notes": "From F-201: the status bar's suggestions count is plain text until the problems panel exists; F-309 makes it link to the panel (UX-03). From F-112: Diagnostic.severity includes `suggestion`; countDiagnostics separates errors, warnings and suggestions (UX-03); the pack's lints.codes give severity, spec and fixability for grouping; a QuickFix is { title, path, edits }: apply it with applyTextEdits into F-111's ReplaceFileText as one undo step (F-209), refuse it if the file changed since it was diagnosed, then re-diagnose. Step 2's example is `deprecated-channel`. From F-205: draw mismatch red over the edge-<dataflow> class; status-bar node and channel counts come from canvasCounts. From F-206: the details pane lists a node's problems; it could link each to the problems panel. From F-208: the problems of a refused Code view edit are transient (status line and markers) and aren't diagnostics of the saved file."
     },
     {
       "id": "F-310",
@@ -1283,7 +1283,7 @@
         "A .png in the project is listed but not opened"
       ],
       "passes": false,
-      "notes": ""
+      "notes": "From F-208: the markdown sanitiser must strip `<style>` elements and `style` attributes, because the policy allows inline styles for Monaco (ADR 0048); reuse the Monaco modules in `apps/web/src/code/`."
     },
     {
       "id": "F-606",
@@ -1357,7 +1357,7 @@
         "axe reports no violations on the main screens"
       ],
       "passes": false,
-      "notes": "From F-201: drag-to-resize columns needs a single-pointer alternative for WCAG 2.5.7 (keyboard resizing alone doesn't satisfy it). From F-205: the F shortcut for fit view, keyboard parity for edge tooltips, and the canvas ariaLabelConfig and node descriptions need an audit. From F-203: audit the New project dialog's two radio groups and its focus order; Hello world is a small typed project for keyboard tests. From F-206: announce selection changes to screen readers; Enter and Space select a focused node, Escape clears. Edges are focusable but not selectable: give keyboard users a way to read an edge's type."
+      "notes": "From F-201: drag-to-resize columns needs a single-pointer alternative for WCAG 2.5.7 (keyboard resizing alone doesn't satisfy it). From F-205: the F shortcut for fit view, keyboard parity for edge tooltips, and the canvas ariaLabelConfig and node descriptions need an audit. From F-203: audit the New project dialog's two radio groups and its focus order; Hello world is a small typed project for keyboard tests. From F-206: announce selection changes to screen readers; Enter and Space select a focused node, Escape clears. Edges are focusable but not selectable: give keyboard users a way to read an edge's type. From F-208: G, S and C are done and don't fire in text fields, the code editor or dialogs; Ctrl+M then Tab leaves Monaco; audit the view-mode radio group and Monaco. Switching to Code from a focused canvas node drops focus to the page body."
     },
     {
       "id": "F-702",
@@ -1394,7 +1394,7 @@
         "At 390 px wide: canvas and details visible, no editing controls, note shown"
       ],
       "passes": false,
-      "notes": "From F-202: tabs don't coordinate writes (last write wins per file); consider Web Locks if needed. From F-206: hide the details header's Edit and Code buttons in read-only mode."
+      "notes": "From F-202: tabs don't coordinate writes (last write wins per file); consider Web Locks if needed. From F-206: hide the details header's Edit and Code buttons in read-only mode. From F-208: set Monaco `readOnly` below 1024 px."
     },
     {
       "id": "F-704",
@@ -1413,7 +1413,7 @@
         "Tag v0.1.0; https://ewels.github.io/nf-builder/ (or the custom domain that replaces it, ADR 0040) serves the release build; README explains what the app does and where projects are stored"
       ],
       "passes": false,
-      "notes": "Hosting moved to GitHub Pages (ADR 0040); the URL is a placeholder until a custom domain is decided (#35)."
+      "notes": "Hosting moved to GitHub Pages (ADR 0040); the URL is a placeholder until a custom domain is decided (#35). From F-208: the notices page carries the texts for Monaco (its ThirdPartyNotices), DOMPurify (Apache-2.0), marked, the codicons (CC-BY-4.0) and the Shiki Nextflow grammars, because minification strips their licence comments."
     },
     {
       "id": "F-705",

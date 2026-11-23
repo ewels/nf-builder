@@ -1,4 +1,4 @@
-// Keeps a failed lazy chunk load (offline, a stale deploy) from unmounting the whole app (F-205).
+// Keeps a failed lazy chunk load (offline, a stale deploy) from unmounting the whole app (F-205, F-208).
 import { Component, type JSX, type ReactNode } from "react";
 
 interface State {
@@ -6,7 +6,7 @@ interface State {
 }
 
 export class CanvasErrorBoundary extends Component<
-  { readonly children: ReactNode },
+  { readonly children: ReactNode; readonly message?: string },
   State
 > {
   state: State = { failed: false };
@@ -18,7 +18,9 @@ export class CanvasErrorBoundary extends Component<
   render(): JSX.Element | ReactNode {
     if (this.state.failed)
       return (
-        <p className="muted">The canvas couldn't load. Reload the page.</p>
+        <p className="muted">
+          {this.props.message ?? "The canvas couldn't load. Reload the page."}
+        </p>
       );
     return this.props.children;
   }

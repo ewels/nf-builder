@@ -22,7 +22,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-203 new project dialog | merged, PR #43 | |
 | F-206 details pane | merged, PR #45 | |
 | F-207 layout sidecar | `feat/F-207` (`/home/user/wt-F-207`) | Tasks 1–5 committed (engine layout, service, ELK worker); task 6 (canvas wiring) after F-208 merges. [plan](plan-F-207.md). |
-| F-208 view modes and Code | `feat/F-208`, PR #46 | Reviewed; final CI after merging F-206. [plan](plan-F-208.md). |
+| F-208 view modes and Code | merged, PR #46 | |
 | F-209 undo and redo | not started | [plan](plan-F-209.md). After F-208. |
 | F-309 problems panel | not started | [plan](plan-F-309.md). After F-208 and F-209. |
 | F-502 registry client | `feat/F-502` | [plan](plan-F-502.md). |
@@ -167,7 +167,7 @@ Next free ADR number: 0050 (0047 is F-203's, 0048 F-208's, 0049 F-206's).
 - Point 10: add F-202 to F-207's `depends_on`, with the `scope-change` label and the ADR.
 - One ADR at landing for the sidecar v1 format. It also records that history is F-209's and autosave F-202's, correcting ADR 0039's attribution.
 
-### F-208 — [plan](plan-F-208.md)
+### F-208 (merged with its PR)
 - Accept every recommendation in section 6:
   - `style-src 'self' 'unsafe-inline'` for Monaco, as ADR 0014 anticipated. It amends ADR 0040's policy line with a new ADR, and adds a `cspProblems` rule allowing only those two style sources. The probe found 31 violations under the strict policy and none with inline styles.
   - `monaco-editor` 0.57.0, pinned, with lean imports and no React wrapper.

@@ -12,11 +12,11 @@ if (!root) throw new Error("nf-builder: #root element missing");
 // Test hook (F-113): the engine API, started on first access. Same-origin under the strict CSP.
 Object.defineProperty(window, "nfBuilderEngine", { get: getEngine });
 
-// Test hook (F-205): opens a project in the UI. Same rationale.
+// Test hook (F-205, F-208): opens a project in the UI and edits it as the Code view does. Same rationale.
 Object.defineProperty(window, "nfBuilderWorkspace", {
   get: () => {
-    const { open, openWorkflow } = canvasStore.getState();
-    return { open, openWorkflow };
+    const { open, openWorkflow, apply } = canvasStore.getState();
+    return { open, openWorkflow, apply };
   },
 });
 
