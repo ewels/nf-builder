@@ -21,7 +21,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-205 canvas | merged, PR #41 | |
 | F-203 new project dialog | merged, PR #43 | |
 | F-206 details pane | merged, PR #45 | |
-| F-207 layout sidecar | `feat/F-207` (`/home/user/wt-F-207`) | Tasks 1–5 committed (engine layout, service, ELK worker); task 6 (canvas wiring) after F-208 merges. [plan](plan-F-207.md). |
+| F-207 layout sidecar | merged, PR #49 | |
 | F-208 view modes and Code | merged, PR #46 | |
 | F-209 undo and redo | merged, PR #50 | |
 | F-309 problems panel | not started | [plan](plan-F-309.md). After F-208 and F-209. |
@@ -34,7 +34,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 
 Branches are stacked: `feat/F-108` → `feat/F-107`; `feat/F-111` also merges F-107. Open PRs for F-108, F-107 and F-111 against `main` in that order (merge `main` into each first), each green before the next. Worktrees: `/home/user/wt-F-1xx`.
 
-Next free ADR number: 0052 (0050 is F-502's, 0051 F-209's).
+Next free ADR number: 0053 (0052 is F-207's).
 
 ## Decisions already taken on the plans' open points
 
@@ -150,7 +150,7 @@ Next free ADR number: 0052 (0050 is F-502's, 0051 F-209's).
   - the plan's wording.
 - Task 0, wiring the diagnoser into the service, is done in F-112's PR, since F-112 merges after F-113.
 
-### F-207 — [plan](plan-F-207.md)
+### F-207 (merged with its PR)
 - Accept every recommendation in section 6:
   - elkjs 0.12.1, pinned, as a web runtime dependency under its EPL-2.0 option, in its own lazily started worker;
   - `setLayout` as the only writer of the sidecar, and layout writes don't advance the revision (clarifies ADR 0043);

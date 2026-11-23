@@ -15,6 +15,7 @@ The main thread keeps only pack versions and palette search; parsing, modelling,
 
 - The UI never edits text or AST directly. It sends edit commands and renders projections.
 - The engine runs in a Web Worker behind a Comlink API. The UI keeps a read-only copy of the latest projection and diagnostics.
+- The engine worker owns the layout sidecar and carries node positions on every change; ELK runs in its own worker, started lazily from the canvas chunk (ADR 0052).
 
 ## Engine model
 
