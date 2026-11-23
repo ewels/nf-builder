@@ -24,7 +24,8 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-207 layout sidecar | merged, PR #49 | |
 | F-208 view modes and Code | merged, PR #46 | |
 | F-209 undo and redo | merged, PR #50 | |
-| F-309 problems panel | not started | [plan](plan-F-309.md). After F-208 and F-209. |
+| F-309 problems panel | `feat/F-309`, PR #52 (draft) | Built and reviewed; review fixes were building when work paused on 2026-11-23. Then: commit the CI baselines `problems-panel` (re-render after the fix-title change) and `problems-status-bar`, write the records (ADR draft below), merge main, CI, merge. |
+| F-403 zip import | `feat/F-403`, PR #51 | Reviewed, fixed and recorded (ADR 0053); merge once CI is green. |
 | F-502 registry client | merged, PR #48 | |
 | Parser error position | `fix/parser-error-position` | A blank line before `stub:` or `emit:` moved a later syntax error to that keyword (antlr4ng and Groovy's optimised ANTLR runtime differ); fix building. |
 | F-501 registry snapshot | merged, PR #29; passing | Confirmed on live data after the snapshot-triggered Pages deploy. |
@@ -297,3 +298,12 @@ Next free ADR number: 0053 (0052 is F-207's).
   - `EngineApi.configView` and `configSchema` (amends ADR 0043's API list), excerpts capped at 160 characters;
   - Form, Split and Code modes on config tabs reusing `ViewMode` (UX-27 amended); new top-level blocks appended at the end;
   - step 2's "imported" read as "a project created from existing files"; the Nextflow grammar for highlighting; collapsed selector cards over 20.
+
+## Paused on 2026-11-23
+
+Work paused at the maintainer's request (usage limits). To resume:
+- **PR #51 (F-403):** ready; merge when CI is green, then update its handoff row.
+- **PR #52 (F-309):** the review-fix builder may have left commits on `feat/F-309`. Check `git log`, run `pnpm check` and the F-309 e2e tests, then do the steps in its row. The ADR is drafted as 0054 (next free after F-403's 0053).
+- **Next features, plans ready:** F-703 (read-only below 1024 px; start from main), F-210 (Files view; reuse F-309's `openFile`), F-605 (Markdown and other files; after F-309), F-601 (config editor; tasks 1 to 6 independent of F-309), F-401 (GitHub import; after F-403).
+- Then plan M3 from F-301 onwards.
+
