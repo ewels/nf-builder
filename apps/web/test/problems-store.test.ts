@@ -36,6 +36,7 @@ const summaryAt = (
   version: "26.10",
   files: [],
   workflows,
+  layout: { state: "absent", message: null },
 });
 const fix: QuickFix = {
   title: "Replace `Channel` with `channel`",
