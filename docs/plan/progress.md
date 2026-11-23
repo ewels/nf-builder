@@ -559,7 +559,7 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
 - Blockers: none.
 
 ## 2026-11-23 · Parser error position fix · Claude (autonomous)
-- Did: fixed the parser's first error landing on an earlier `stub:` or `emit:` keyword when a blank line precedes it and a syntax error comes later; positions now match `nextflow lint`. Found through F-208's refused-edit baseline.
+- Did: fixed the parser's first error landing on an earlier `stub:` or `emit:` keyword when a blank line precedes it and a syntax error comes later in the file; such positions now match `nextflow lint`. Two out-of-order-section cases on the reparse path remain (see the spike S2 addendum). Found through F-208's refused-edit baseline.
 - State: fix only; no feature changes `passes`.
 - Next: F-208, F-207, F-502, then F-403 and F-209.
 - Decisions:
