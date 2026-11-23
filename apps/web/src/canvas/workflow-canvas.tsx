@@ -24,7 +24,7 @@ import {
   toFlowNodes,
 } from "./flow-elements";
 
-/** Sentence-case labels with no delete wording (nodes can't be deleted yet). */
+/** Sentence-case labels with no delete wording (nodes can't be deleted yet) and none that offers to select an edge (edges aren't selectable). */
 const CANVAS_ARIA_LABELS = {
   "node.a11yDescription.default": "Press enter or space to select this node.",
   "node.a11yDescription.keyboardDisabled":
@@ -39,7 +39,7 @@ const CANVAS_ARIA_LABELS = {
     y: number;
   }) => `Moved selected node ${direction}. New position x ${x}, y ${y}`,
   "edge.a11yDescription.default":
-    "Press enter or space to select this connection.",
+    "A channel between two nodes; hover to see its type.",
   "controls.ariaLabel": "Canvas controls",
   "controls.zoomIn.ariaLabel": "Zoom in",
   "controls.zoomOut.ariaLabel": "Zoom out",

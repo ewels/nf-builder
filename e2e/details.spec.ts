@@ -115,6 +115,17 @@ test("F-206 UX-24: edges touching the selected node are highlighted until the se
   await expect(page.locator(".react-flow__node.selected")).toHaveCount(0);
 });
 
+test("F-206 UX-24 QA-11: an edge's screen-reader description says it is a channel, not that it can be selected", async ({
+  page,
+}) => {
+  await page.goto("./");
+  await openFixture(page);
+  await canvasReady(page);
+  await expect(page.locator('[id^="react-flow__edge-desc"]')).toHaveText(
+    "A channel between two nodes; hover to see its type.",
+  );
+});
+
 test("F-206 UX-30: selecting a node keeps the viewport", async ({ page }) => {
   await page.goto("./");
   await openFixture(page);
