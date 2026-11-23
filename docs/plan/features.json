@@ -755,7 +755,7 @@
         "Delete an edge: the call argument is removed and the code still parses"
       ],
       "passes": false,
-      "notes": "From F-005 (S1): nextflow lint doesn't check a legacy tuple input's arity, so connecting to a legacy tuple input compares arity with its declaration (LA-14). From F-111: a refused Connect serves as the invalid-target dry run; type checks and LA-14 arity are F-112's. Disconnect writes null for a missing earlier positional input (ADR 0039). From F-112: lints.connection(source, node, port) dims invalid targets while dragging; a type-mismatch diagnostic's range is the port's argument, used to draw the edge red (UX-24). LA-14 tuple arity is yours (and F-504's): nextflow lint doesn't check it. From F-205: draw mismatch red over the edge-<dataflow> class. From F-206: mismatch red must take precedence over the selection highlight (`.is-highlighted`, 3 px accent); add the rule after it in `canvas.css`."
+      "notes": "From F-005 (S1): nextflow lint doesn't check a legacy tuple input's arity, so connecting to a legacy tuple input compares arity with its declaration (LA-14). From F-111: a refused Connect serves as the invalid-target dry run; type checks and LA-14 arity are F-112's. Disconnect writes null for a missing earlier positional input (ADR 0039). From F-112: lints.connection(source, node, port) dims invalid targets while dragging; a type-mismatch diagnostic's range is the port's argument, used to draw the edge red (UX-24). LA-14 tuple arity is yours (and F-504's): nextflow lint doesn't check it. From F-205: draw mismatch red over the edge-<dataflow> class. From F-206: mismatch red must take precedence over the selection highlight (`.is-highlighted`, 3 px accent); add the rule after the highlight and hover rules in `canvas.css`."
     },
     {
       "id": "F-303",
@@ -1357,7 +1357,7 @@
         "axe reports no violations on the main screens"
       ],
       "passes": false,
-      "notes": "From F-201: drag-to-resize columns needs a single-pointer alternative for WCAG 2.5.7 (keyboard resizing alone doesn't satisfy it). From F-205: the F shortcut for fit view, keyboard parity for edge tooltips, and the canvas ariaLabelConfig and node descriptions need an audit. From F-203: audit the New project dialog's two radio groups and its focus order; Hello world is a small typed project for keyboard tests. From F-206: announce selection changes to screen readers; Enter and Space select a focused node, Escape clears."
+      "notes": "From F-201: drag-to-resize columns needs a single-pointer alternative for WCAG 2.5.7 (keyboard resizing alone doesn't satisfy it). From F-205: the F shortcut for fit view, keyboard parity for edge tooltips, and the canvas ariaLabelConfig and node descriptions need an audit. From F-203: audit the New project dialog's two radio groups and its focus order; Hello world is a small typed project for keyboard tests. From F-206: announce selection changes to screen readers; Enter and Space select a focused node, Escape clears. Edges are focusable but not selectable: give keyboard users a way to read an edge's type."
     },
     {
       "id": "F-702",
