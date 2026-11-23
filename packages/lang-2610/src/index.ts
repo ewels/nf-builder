@@ -2,6 +2,7 @@ import type {
   ConfigCatalogue,
   LanguagePack,
   ScriptCatalogue,
+  TemplateSet,
 } from "@nf-builder/lang-core";
 import { includes } from "./includes/index.ts";
 import { legacyOperators } from "./legacy-operators.ts";
@@ -32,4 +33,7 @@ export const pack: LanguagePack = {
   loadParser: async () => (await import("./source/index.ts")).parser,
   // Import the lints only dynamically here: they stay a lazy chunk (QA-01, F-112).
   loadLints: async () => (await import("./lints/index.ts")).lints,
+  // Import the generated templates JSON only dynamically here: the pack stays erasable under plain Node, and the templates stay a lazy chunk (F-203).
+  loadTemplates: async () =>
+    (await import("../templates.json")).default as TemplateSet,
 };

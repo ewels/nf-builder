@@ -11,6 +11,7 @@ import {
   stubStorage,
   switcher,
 } from "./projects.ts";
+import { templateFilesOnDisk } from "./templates.ts";
 import { PREVIEW_URL } from "./urls.ts";
 
 const warning = (page: Page) =>
@@ -204,9 +205,21 @@ test("F-202 ADR-0002 IO-01: the stored records match the recorded IndexedDB form
     "updatedAt",
   ]);
   expect(projects[0]?.name).toBe("Format");
-  expect(db.stores.files?.records).toEqual([
-    { projectId: projects[0]?.id, path: "README.md", text: "y\n" },
-  ]);
+  // F-203: Start blank stores the blank template's files; the edit replaced README.md.
+  const byPath = (a: { path: string }, b: { path: string }) =>
+    a.path < b.path ? -1 : a.path > b.path ? 1 : 0;
+  const files = ((db.stores.files?.records ?? []) as { path: string }[]).sort(
+    byPath,
+  );
+  expect(files).toEqual(
+    templateFilesOnDisk("blank")
+      .map((f) => ({
+        projectId: projects[0]?.id,
+        path: f.path,
+        text: f.path === "README.md" ? "y\n" : f.text,
+      }))
+      .sort(byPath),
+  );
 });
 
 test("F-202 QA-10: focus returns to the switcher after Escape, Cancel, Create and choosing a project", async ({

@@ -50,4 +50,5 @@ Process: [0001](0001-record-decisions-as-adrs.md). Template: [template.md](templ
 | [0044](0044-embeddable-in-frames.md) | Let the app load and work inside frames | Accepted |
 | [0045](0045-projects-in-indexeddb.md) | Store projects in IndexedDB from the engine worker, without a library | Accepted (agent) |
 | [0046](0046-canvas-rendering.md) | Render projections with React Flow 13 in a lazily loaded canvas, with view logic in the engine and an interim layered layout | Accepted (agent) |
+| [0047](0047-project-templates.md) | Ship project templates as pack-owned file trees, bundled as a lazy JSON chunk and checked by the oracle | Accepted (agent) |
 | [0048](0048-code-view-monaco.md) | Edit code in a lazily loaded Monaco with Shiki highlighting, allowing inline styles in the policy | Accepted (agent) |

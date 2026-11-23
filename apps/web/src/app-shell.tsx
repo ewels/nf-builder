@@ -39,6 +39,7 @@ export function AppShell(): JSX.Element {
   const projects = useProjects((s) => s.status);
   const storageWarning = useProjects((s) => s.storageWarning);
   const persisted = useProjects((s) => s.persisted);
+  const showDialog = useProjects((s) => s.showDialog);
   const rightWidth = right.collapsed ? COLLAPSED_WIDTH : right.width;
   return (
     <div className="app-shell">
@@ -51,6 +52,7 @@ export function AppShell(): JSX.Element {
         }
         storageWarning={storageWarning}
         storageNote={persisted === false}
+        onTemplates={() => showDialog({ kind: "new", route: "template" })}
       />
       <div
         className="app-columns"
