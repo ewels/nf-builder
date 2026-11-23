@@ -1,4 +1,12 @@
 export {
+  carryLayout,
+  matchNodes,
+  pairWorkflows,
+  RemovedPositions,
+  type RenameHint,
+  type WorkflowPair,
+} from "./carry";
+export {
   EMPTY_LAYOUT,
   formatLayout,
   LAYOUT_MIGRATIONS,
