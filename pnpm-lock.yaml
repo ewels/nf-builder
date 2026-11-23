@@ -59,6 +59,9 @@ importers:
       comlink:
         specifier: 4.4.2
         version: 4.4.2
+      elkjs:
+        specifier: 0.12.1
+        version: 0.12.1
       monaco-editor:
         specifier: 0.57.0
         version: 0.57.0
@@ -661,6 +664,9 @@ packages:
 
   dompurify@3.4.15:
     resolution: {integrity: sha512-EUBjM+B+lkDE41iE82DDSCfkoPGfXx8IxFxPMjNzm/Uk4xDet77rTN9wqlxlVg71kK7XGuUMv6wUxJUwwv+Xyw==}
+
+  elkjs@0.12.1:
+    resolution: {integrity: sha512-IhMYKHE4S2vtx0QrhBP3lYOIKDeIiJXBrdq9MGYkuB8ZHqhrBnHNfSUndjXFewrX1CPK8chwq+2NA0K0hliYuw==}
 
   enhanced-resolve@5.27.0:
     resolution: {integrity: sha512-Do6BB2xzlcc/odFg+XEYyneAx4T/WfywO71yw9ePS2tVfRsf7JVR4mUeELadIeHzixkzbG5DpluiEFPi2WGfYQ==}
@@ -1632,6 +1638,8 @@ snapshots:
   dompurify@3.4.15:
     optionalDependencies:
       '@types/trusted-types': 2.0.7
+
+  elkjs@0.12.1: {}
 
   enhanced-resolve@5.27.0:
     dependencies:

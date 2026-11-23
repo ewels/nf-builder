@@ -307,8 +307,6 @@ html.is-resizing body * {
   min-height: 0;
   display: grid;
   place-items: center;
-  background-image: radial-gradient(#c3c9d6 1px, transparent 1px);
-  background-size: 20px 20px;
 }
 
 .status-bar {

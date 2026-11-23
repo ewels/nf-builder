@@ -120,6 +120,43 @@ describe("F-113 engine client", () => {
     close();
   });
 
+  it("F-207 ADR-0003: setLayout crosses the Comlink bridge, and project() returns the stored positions", async () => {
+    const { engine, close } = connected();
+    const summary = await engine.open({
+      version,
+      files: [
+        {
+          path: "main.nf",
+          text: "process A {\n    script:\n    'A'\n}\n\nworkflow {\n    A()\n}\n",
+        },
+      ],
+    });
+    const position = { "main.nf#/A@1": { x: 5, y: 6 } };
+    const change = await engine.setLayout({
+      revision: summary.revision,
+      path: "main.nf",
+      workflow: null,
+      positions: position,
+      replace: false,
+    });
+    expect(change).toMatchObject({
+      layout: { state: "ok" },
+      files: [{ path: ".nf-builder/layout.json" }],
+    });
+    expect(await engine.project("main.nf", null)).toMatchObject({
+      positions: position,
+    });
+    const refused = await engine.setLayout({
+      revision: summary.revision,
+      path: "main.nf",
+      workflow: null,
+      positions: { nope: { x: 1, y: 1 } },
+      replace: false,
+    });
+    expect(refused).toMatchObject({ ok: false, code: "invalid" });
+    close();
+  });
+
   it("F-113: a service error rejects the client call with its message; a refusal crosses as data", async () => {
     const { engine, close } = connected();
     await expect(engine.open({ version: "0.0", files })).rejects.toThrow(

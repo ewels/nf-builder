@@ -148,4 +148,94 @@ describe("F-209 history", () => {
       ]),
     ).toBe(2 + 3 + 1 + 4 + 2);
   });
+
+  describe("carry hints", () => {
+    const rename = (from: string, to: string) => ({
+      path: "main.nf",
+      from,
+      to,
+    });
+    const withHints = (
+      tag: string,
+      hints: Pick<StepPart, "renames" | "deleted">,
+    ): StepPart => ({ ...part(tag), ...hints });
+
+    it("F-209 F-207: an empty history has no hints", () => {
+      const h = new History();
+      expect(h.undoHints()).toEqual({});
+      expect(h.redoHints()).toEqual({});
+    });
+
+    it("F-209 F-207: undo hints reverse a rename, and name the nodes a one-part step deleted as restored", () => {
+      const h = new History();
+      h.record(
+        withHints("a", {
+          renames: [rename("A", "B")],
+          deleted: ["main.nf#/x"],
+        }),
+        "One",
+        null,
+      );
+      expect(h.undoHints()).toEqual({
+        renames: [rename("B", "A")],
+        inserted: ["main.nf#/x"],
+      });
+      expect(h.redoHints()).toEqual({});
+    });
+
+    it("F-209 F-207: a step that deleted nothing names no restored nodes", () => {
+      const h = new History();
+      h.record(withHints("a", { renames: [], deleted: [] }), "One", null);
+      expect(h.undoHints()).toEqual({ renames: [] });
+    });
+
+    it("F-209 F-207: a grouped step composes a rename chain, so A to B then B to C undoes as C to A", () => {
+      const h = new History();
+      h.record(withHints("a", { renames: [rename("A", "B")] }), "Rename", "g");
+      h.record(withHints("b", { renames: [rename("B", "C")] }), "Rename", "g");
+      h.record(withHints("c", { renames: [rename("X", "Y")] }), "Rename", "g");
+      expect(h.status().undoCount).toBe(1);
+      expect(h.undoHints().renames).toEqual([
+        rename("Y", "X"),
+        rename("C", "A"),
+      ]);
+      expect(h.undoHints().inserted).toBeUndefined();
+    });
+
+    it("F-209 F-207: a rename chain that returns to its start undoes as nothing", () => {
+      const h = new History();
+      h.record(withHints("a", { renames: [rename("A", "B")] }), "Rename", "g");
+      h.record(withHints("b", { renames: [rename("B", "A")] }), "Rename", "g");
+      expect(h.undoHints().renames).toEqual([]);
+    });
+
+    it("F-209 F-207: a grouped step's undo doesn't claim restored nodes, as its later parts' ids aren't those after the undo", () => {
+      const h = new History();
+      h.record(withHints("a", { deleted: ["n1"] }), "Delete", "g");
+      h.record(withHints("b", { deleted: ["n2"] }), "Delete", "g");
+      expect(h.undoHints().inserted).toBeUndefined();
+    });
+
+    it("F-209 F-207: redo hints list the renames (composed) and deleted nodes of the undone step, oldest first", () => {
+      const h = new History();
+      h.record(
+        withHints("a", { renames: [rename("A", "B")], deleted: ["n1"] }),
+        "Edit",
+        "g",
+      );
+      h.record(
+        withHints("b", { renames: [rename("B", "C")], deleted: ["n2"] }),
+        "Edit",
+        "g",
+      );
+      h.undone();
+      expect(h.undoHints()).toEqual({});
+      expect(h.redoHints()).toEqual({
+        renames: [rename("A", "C")],
+        deleted: ["n1", "n2"],
+      });
+      h.redone();
+      expect(h.redoHints()).toEqual({});
+    });
+  });
 });

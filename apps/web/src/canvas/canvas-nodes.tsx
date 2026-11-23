@@ -1,5 +1,9 @@
 // Presentational node components (AR-31): they draw what `canvasView` computed and hold no logic.
-import { CANVAS_METRICS, type CanvasAppearance } from "@nf-builder/engine";
+import {
+  CANVAS_METRICS,
+  type CanvasAppearance,
+  portY,
+} from "@nf-builder/engine";
 import { Handle, type NodeProps, Position } from "@xyflow/react";
 import type { CSSProperties, JSX } from "react";
 import { type Glyph, GlyphIcon, PALETTE_GLYPHS } from "../glyphs";
@@ -46,10 +50,6 @@ function NodeGlyph({
 
 function Handles({ data }: { data: NodeData }): JSX.Element {
   const { view } = data;
-  const top = (i: number) =>
-    view.shape === "pill"
-      ? view.height / 2
-      : CANVAS_METRICS.headerHeight + i * view.rowHeight + view.rowHeight / 2;
   return (
     <>
       {view.inputs.map((p, i) => (
@@ -58,7 +58,7 @@ function Handles({ data }: { data: NodeData }): JSX.Element {
           id={inputHandle(p)}
           type="target"
           position={Position.Left}
-          style={{ top: top(i) }}
+          style={{ top: portY(view, i) }}
         />
       ))}
       {view.outputs.map((p, i) => (
@@ -67,7 +67,7 @@ function Handles({ data }: { data: NodeData }): JSX.Element {
           id={outputHandle(p)}
           type="source"
           position={Position.Right}
-          style={{ top: top(i) }}
+          style={{ top: portY(view, i) }}
         />
       ))}
     </>
