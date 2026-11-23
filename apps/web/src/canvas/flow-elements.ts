@@ -28,7 +28,6 @@ export const outputHandle = (port: Pick<CanvasPortView, "id">): string =>
 export function toFlowNodes(
   view: CanvasView,
   portLabels: boolean,
-  selected: string | null,
 ): CanvasFlowNode[] {
   return view.nodes.map((n) => ({
     id: n.id,
@@ -37,7 +36,6 @@ export function toFlowNodes(
     initialWidth: n.width,
     initialHeight: n.height,
     data: { view: n, portLabels },
-    selected: n.id === selected,
     ariaLabel: n.ariaLabel,
   }));
 }

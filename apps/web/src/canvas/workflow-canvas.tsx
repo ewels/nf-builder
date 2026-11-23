@@ -70,7 +70,7 @@ function CanvasInner({
     [projection, portLabels],
   );
   const initialNodes = useMemo(
-    () => toFlowNodes(view, portLabels, null),
+    () => toFlowNodes(view, portLabels),
     [view, portLabels],
   );
   // controlled nodes: React Flow reports each node's measured size through onNodesChange

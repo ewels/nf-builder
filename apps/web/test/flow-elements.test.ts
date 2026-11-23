@@ -59,7 +59,7 @@ const view: CanvasView = {
 
 describe("F-205 flow elements", () => {
   it("F-205 AR-31: toFlowNodes keeps ids, positions and sizes and passes the view as data", () => {
-    const nodes = toFlowNodes(view, false, null);
+    const nodes = toFlowNodes(view, false);
     expect(
       nodes.map((n) => [
         n.id,
@@ -126,15 +126,6 @@ describe("F-205 flow elements", () => {
       "e1",
       "e2",
       "e3",
-    ]);
-  });
-
-  it("F-206 UX-30: only the selected node is marked selected", () => {
-    const nodes = toFlowNodes(view, true, "main.nf#/:emit:r");
-    expect(nodes.map((n) => n.selected)).toEqual([false, true]);
-    expect(toFlowNodes(view, true, null).map((n) => n.selected)).toEqual([
-      false,
-      false,
     ]);
   });
 });
