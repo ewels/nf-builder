@@ -846,6 +846,38 @@ describe("F-206 selection", () => {
       expect(c.notice).toBe(NOTICE);
     });
 
+    it("F-207 ADR-0008: a placement keeps the positions the user set while the layout ran", async () => {
+      const { engine, writes } = fake(wf, {
+        positions: stored,
+        nodes: ["a", "b", "c"],
+      });
+      const store = createCanvasStore(() => engine);
+      await store.getState().open(request);
+      // the layout run started here, then the user moved a
+      await store.getState().moveNodes({ a: { x: 5, y: 5 } });
+      await store.getState().placeNodes(
+        { tab, revision: 1 },
+        {
+          positions: {
+            a: { x: 1, y: 2 },
+            b: { x: 30, y: 40 },
+            c: { x: 9, y: 9 },
+          },
+          saved: { c: { x: 9, y: 9 } },
+          replace: false,
+          notice: null,
+        },
+      );
+      const c = store.getState().content;
+      if (c.status !== "ready") throw new Error("not ready");
+      expect(c.positions).toEqual({
+        a: { x: 5, y: 5 },
+        b: stored.b,
+        c: { x: 9, y: 9 },
+      });
+      expect(writes.at(-1)?.positions).toEqual({ c: { x: 9, y: 9 } });
+    });
+
     it("F-207 ADR-0008: a placement is stored and saved; with nothing added nothing is sent, and a replace sends the whole set", async () => {
       const { engine, writes } = fake(wf);
       const store = createCanvasStore(() => engine);

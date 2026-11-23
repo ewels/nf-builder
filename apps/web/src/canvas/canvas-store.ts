@@ -684,10 +684,22 @@ export function createCanvasStore(
           content.revision !== at.revision
         )
           return;
+        // a node the user moved while the layout ran keeps its place; a replace overrides on purpose
+        const present = new Set(content.projection.nodes.map((n) => n.id));
+        const positions = placement.replace
+          ? placement.positions
+          : {
+              ...placement.positions,
+              ...Object.fromEntries(
+                Object.entries(content.positions).filter(([id]) =>
+                  present.has(id),
+                ),
+              ),
+            };
         set({
           content: {
             ...content,
-            positions: placement.positions,
+            positions,
             notice: placement.notice,
           },
         });
