@@ -11,6 +11,7 @@ import {
   templateFiles,
 } from "@nf-builder/engine";
 import { createAutosaver, type Timer } from "./autosave";
+import { createImportStager, type ImportStager } from "./import-stage";
 import type { ProjectDb } from "./project-db";
 import { normaliseProjectName } from "./project-name";
 import {
@@ -29,6 +30,8 @@ interface WorkspaceOptions {
   readonly now?: () => number;
   readonly newId?: () => string;
   readonly timer?: Timer;
+  /** Stages zip imports (F-403); the default loads `@nf-builder/sources` on first use. */
+  readonly importer?: ImportStager;
 }
 
 /** `crypto.randomUUID` exists only in secure contexts, and a frame inside an insecure page isn't one (ADR 0044). */
@@ -45,6 +48,7 @@ export function createWorkspace(options: WorkspaceOptions): WorkspaceApi {
   const { engine } = options;
   const now = options.now ?? (() => Date.now());
   const newId = options.newId ?? randomId;
+  const importer = options.importer ?? createImportStager();
 
   let db: ProjectDb | null = null;
   let currentId: string | null = null;
@@ -145,6 +149,11 @@ export function createWorkspace(options: WorkspaceOptions): WorkspaceApi {
       return status;
     },
 
+    // Staging touches neither the database nor the open project, so it stays off the queue.
+    stageZip: (file, name) => importer.stageZip(file, name),
+    restageImport: (id, ignore) => importer.restage(id, ignore),
+    discardImport: async (id) => importer.discard(id),
+
     createProject: (input: NewProject) =>
       serial(async (): Promise<ProjectMeta> => {
         const store = needDb();
@@ -155,10 +164,26 @@ export function createWorkspace(options: WorkspaceOptions): WorkspaceApi {
           throw new Error(`No language pack for ${input.languageVersion}.`);
         if (input.template !== undefined && input.files.length > 0)
           throw new Error("A template can't be combined with files.");
-        const files =
-          input.template === undefined
+        if (
+          input.import !== undefined &&
+          (input.template !== undefined || input.files.length > 0)
+        )
+          throw new Error(
+            "An import can't be combined with a template or files.",
+          );
+        const files = await (async () => {
+          if (input.import !== undefined) {
+            const chosen = await importer.files(
+              input.import.id,
+              input.import.ignore,
+            );
+            if (!chosen.ok) throw new Error(chosen.message);
+            return chosen.files;
+          }
+          return input.template === undefined
             ? input.files
-            : await templateFiles(input.languageVersion, input.template);
+            : templateFiles(input.languageVersion, input.template);
+        })();
         const time = now();
         const meta: ProjectMeta = {
           id: newId(),
@@ -169,6 +194,7 @@ export function createWorkspace(options: WorkspaceOptions): WorkspaceApi {
           openedAt: time,
         };
         await store.createProject(meta, files);
+        if (input.import !== undefined) importer.discard(input.import.id);
         await refresh();
         return meta;
       }),

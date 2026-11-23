@@ -1,6 +1,7 @@
 import "fake-indexeddb/auto";
 import { createEngineService, type LoadProgress } from "@nf-builder/engine";
 import { IDBFactory } from "fake-indexeddb";
+import { zipSync } from "fflate";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { connectEngine, getEngine } from "../src/engine/engine-client";
 import { exposeEngine } from "../src/engine/expose";
@@ -190,5 +191,27 @@ describe("F-113 engine client failures", () => {
     expect(workers).toHaveLength(2);
     workers[1]?.dispatchEvent(new Event("messageerror"));
     await expect(second.palette(version)).rejects.toThrow(/messageerror/);
+  });
+
+  it("F-403 ADR-0003: stageZip, restageImport and discardImport cross the bridge with a Blob and a name", async () => {
+    const { engine, close } = connected();
+    const blob = new Blob([
+      zipSync({ "t/main.nf": new TextEncoder().encode("x") }),
+    ]);
+    const staged = await engine.stageZip(blob, "t.zip");
+    if (!staged.ok) throw new Error(staged.message);
+    expect(staged.summary).toMatchObject({
+      source: "t.zip",
+      stripped: "t",
+      files: 1,
+    });
+    const again = await engine.restageImport(staged.id, "*.nf");
+    expect(again).toMatchObject({ ok: true, summary: { files: 0 } });
+    await engine.discardImport(staged.id);
+    expect(await engine.restageImport(staged.id, "")).toMatchObject({
+      ok: false,
+      code: "gone",
+    });
+    close();
   });
 });
