@@ -44,6 +44,9 @@ importers:
       '@nf-builder/engine':
         specifier: workspace:*
         version: link:../../packages/engine
+      '@nf-builder/sources':
+        specifier: workspace:*
+        version: link:../../packages/sources
       '@xyflow/react':
         specifier: 13.0.2
         version: 13.0.2(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
