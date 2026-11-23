@@ -2,7 +2,7 @@
 
 Plans written by the planner agent on 2026-11-22 for features not yet merged, kept here so the next session can resume without re-planning. They are inputs, not decisions of record: the open points are settled below and still have to be recorded (ADR, `open-questions.md`, `progress.md`) when each feature lands. Delete a plan in the PR that merges its feature. Paths under `/tmp/...scratchpad...` in the plans pointed at session scratch files and may be gone; where it matters, the files were copied into the repo or the worktree.
 
-## State on 2026-11-22
+## State on 2026-11-23
 
 | Feature | Branch | State |
 |---|---|---|
@@ -20,10 +20,13 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-202 projects in IndexedDB | merged, PR #42 | |
 | F-205 canvas | merged, PR #41 | |
 | F-203 new project dialog | merged, PR #43 | |
-| F-206 details pane | `feat/F-206` (`/home/user/wt-F-206`) | Tasks 1–2 building; task 0 done by F-112. [plan](plan-F-206.md). |
-| F-207 layout sidecar | not started | [plan](plan-F-207.md). After F-205 and F-202. |
-| F-208 view modes and Code | `feat/F-208` (`/home/user/wt-F-208`) | Tasks 1–2 building. [plan](plan-F-208.md). |
-| F-209 undo and redo | not started | [plan](plan-F-209.md). After F-202, F-205 and F-208. |
+| F-206 details pane | merged, PR #45 | |
+| F-207 layout sidecar | `feat/F-207` (`/home/user/wt-F-207`) | Tasks 1–5 committed (engine layout, service, ELK worker); task 6 (canvas wiring) after F-208 merges. [plan](plan-F-207.md). |
+| F-208 view modes and Code | merged, PR #46 | |
+| F-209 undo and redo | not started | [plan](plan-F-209.md). After F-208. |
+| F-309 problems panel | not started | [plan](plan-F-309.md). After F-208 and F-209. |
+| F-502 registry client | `feat/F-502` | [plan](plan-F-502.md). |
+| Parser error position | `fix/parser-error-position` | A blank line before `stub:` or `emit:` moved a later syntax error to that keyword (antlr4ng and Groovy's optimised ANTLR runtime differ); fix building. |
 | F-501 registry snapshot | merged, PR #29; passing | Confirmed on live data after the snapshot-triggered Pages deploy. |
 | F-011 GitHub Pages hosting | merged, PR #37 | Live at https://ewels.github.io/nf-builder/; first `verify` passed. |
 
@@ -31,7 +34,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 
 Branches are stacked: `feat/F-108` → `feat/F-107`; `feat/F-111` also merges F-107. Open PRs for F-108, F-107 and F-111 against `main` in that order (merge `main` into each first), each green before the next. Worktrees: `/home/user/wt-F-1xx`.
 
-Next free ADR number: 0048 (0047 is F-203's).
+Next free ADR number: 0050 (0047 is F-203's, 0048 F-208's, 0049 F-206's).
 
 ## Decisions already taken on the plans' open points
 
@@ -134,7 +137,7 @@ Next free ADR number: 0048 (0047 is F-203's).
 - `smol-toml` stays (section 6).
 - The plan's mention of #33 is stale: Actions runs again.
 
-### F-206 — [plan](plan-F-206.md)
+### F-206 (merged with its PR)
 - Accept every recommendation in section 6:
   - Edit and Code are shown disabled while a node is selected;
   - every directive is shown in source order;
@@ -164,7 +167,7 @@ Next free ADR number: 0048 (0047 is F-203's).
 - Point 10: add F-202 to F-207's `depends_on`, with the `scope-change` label and the ADR.
 - One ADR at landing for the sidecar v1 format. It also records that history is F-209's and autosave F-202's, correcting ADR 0039's attribution.
 
-### F-208 — [plan](plan-F-208.md)
+### F-208 (merged with its PR)
 - Accept every recommendation in section 6:
   - `style-src 'self' 'unsafe-inline'` for Monaco, as ADR 0014 anticipated. It amends ADR 0040's policy line with a new ADR, and adds a `cspProblems` rule allowing only those two style sources. The probe found 31 violations under the strict policy and none with inline styles.
   - `monaco-editor` 0.57.0, pinned, with lean imports and no React wrapper.
@@ -192,3 +195,51 @@ Next free ADR number: 0048 (0047 is F-203's).
   - full-file byte checks, sidecar included;
   - node moves stay outside the history.
 
+### F-309 — [plan](plan-F-309.md)
+- Accept every recommendation in section 6:
+  - start after F-208 and F-209; F-209's PR adds F-209 to F-309's `depends_on`;
+  - the panel at the bottom of the centre column, closed by default, fixed height, open state for the session only (no stored format);
+  - diagnostics pulled per revision for the whole project;
+  - `EngineApi.applyFix` with a per-file stale check (amends ADR 0043's API list, clarifies ADR 0042's staleness);
+  - code-only file tabs (UX-20), reused by F-210, F-605 and F-601;
+  - the navigation rules, grouping and sorting, and keyboard model;
+  - the UX-03 reading, amended in the spec;
+  - step 2 read as "the diagnostic disappears" (`deprecated-channel` is a warning), recorded in the ADR and notes;
+  - refused Code-view drafts not listed; mismatch red left to F-302;
+  - a "Show in problems panel" button in the details pane;
+  - the 64-character cap on fix edits.
+
+### F-502 — [plan](plan-F-502.md)
+- Accept every recommendation in section 6:
+  - live registry access gated off by a constant (`LIVE_REGISTRY = false`), recorded in an ADR, with the test hook driving the live path;
+  - step 2's condition ("if S4 allowed it") is false, so `passes` can be set with notes citing the task 0 run, the `curl` check and the live-path test; the step isn't reworded;
+  - delete the S4 probe and its workflow after task 0 (ADR 0023; a workflow edit, recorded);
+  - interim lists of 50 names, the 2.8 copy, no staleness warning, HTTP cache only offline, no `/registry/` in `pnpm dev`;
+  - `index()` only for now;
+  - the F-204 locator change and the shell baseline re-approval, recorded in the PR;
+  - extend the recorded-registry-data licences row to the live fixtures.
+
+### F-403 — [plan](plan-F-403.md)
+- Accept every recommendation in section 6:
+  - fflate 0.8.3, pinned, as a runtime dependency of `@nf-builder/sources` (`unzipSync` only), plus root dev fflate and `sources` dev fast-check 4.11.0;
+  - unzipping in the engine worker with `sources` loaded lazily;
+  - the 2.2 size guards, without CRC checks;
+  - binary files skipped and listed, schema v1 unchanged; add the deferred M8 feature "Binary files in projects" (schema v2, import and export passthrough) with `scope-change`;
+  - the 2.5 default ignore list and `.gitignore` subset; unsupported lines block Create;
+  - SI units; every central-directory record counts as an entry; a 200 MB cap on the zip itself (IO-12);
+  - the one-level folder rule, path rules, and a damaged entry aborting the import;
+  - F-403 builds the summary half of UX-61; the Import route with an "Import from" group;
+  - add F-403 to F-404's `depends_on` (`scope-change`);
+  - fixtures built with `git archive` from the corpus cache; step 1 read as "the pinned tree after the IO-12 rules"; tag the small-zip test `@smoke`.
+- F-403 lands before F-401, which then builds on the shared `packages/sources` import module and the Import route.
+
+### F-401 — [plan](plan-F-401.md)
+- Accept every recommendation in section 6, with one change: the default ignore list is F-403's (2.5 in plan-F-403), shared by both routes, rather than point 4's list. One list keeps both routes' summaries consistent and reads ADR 0009's "test data" one way.
+  - fetching in the document, bytes transferred to the worker as `ArrayBuffer`s (an AR-30 reading);
+  - `ProjectMeta.source` as an optional field with no schema version bump, and the rule for when a bump is needed (amends ADR 0045);
+  - `EngineApi.report()` and `WorkspaceApi.importProject()`;
+  - the limit semantics, binaries skipped (as F-403), the report's definitions (UX-61), no token field until F-402, Publish docs hidden on Import;
+  - body length checked against the tree size, no SHA-1 in the app;
+  - the `web-worker-no-github-client` dependency-cruiser rule;
+  - mocked e2e evidence with blob SHAs checked against the corpus, an opt-in `F401_LIVE=1` test, the git-generated tree fixture;
+  - 8 requests in flight, one retry on network errors or 5xx; the accepted input forms (IO-10); session-only report; the repository name as the default project name; warn but allow a repository with no `.nf` files.

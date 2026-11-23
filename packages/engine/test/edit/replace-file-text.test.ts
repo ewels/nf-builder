@@ -1,5 +1,21 @@
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { accepted, commit, refused, stateFor } from "./helpers";
+import { readTree } from "../model/read-tree";
+import {
+  accepted,
+  commit,
+  projection,
+  refused,
+  stateFor,
+  texts,
+} from "./helpers";
+
+const cases = new URL("../../../../tools/oracle/cases/", import.meta.url)
+  .pathname;
+const tree = (id: string) =>
+  Object.fromEntries(
+    readTree(join(cases, id)).map((f) => [f.path, f.text] as const),
+  );
 
 describe("F-111 ReplaceFileText", () => {
   it("F-111 AR-21 UX-44: ReplaceFileText applies parsing text as one trimmed edit", async () => {
@@ -123,5 +139,37 @@ describe("F-111 ReplaceFileText targets the whole file", () => {
     expect(comments[0]?.text).toBe("// first workflow {");
     expect(r.patches.map((p) => p.path)).toEqual(["main.nf"]);
     expect(state.model.file("p.nf")?.source.text).toBe(other);
+  });
+});
+
+describe("F-208 the Code view fixture", () => {
+  it("F-208 step 2 AR-24 ADR-0039: the f208 invalid edit is refused with does-not-parse and a problem on the edited line; the valid edit is accepted, its text equals f208-code-edit-after, and the projection gains one node", async () => {
+    const before = tree("f208-code-edit");
+    const after = tree("f208-code-edit-after");
+    const state = await stateFor(before);
+    const nodes = projection(state).nodes.length;
+
+    const line = "    greeted = GREET(names)";
+    const lineNumber =
+      (before["main.nf"] as string).split("\n").indexOf(line) + 1;
+    const bad = refused(state, {
+      kind: "replaceFileText",
+      path: "main.nf",
+      text: (before["main.nf"] as string).replace(line, `${line} )`),
+    });
+    expect(bad.code).toBe("does-not-parse");
+    expect(bad.problems.map((p) => p.line)).toContain(lineNumber);
+    expect(texts(state)).toEqual(before);
+
+    commit(
+      state,
+      accepted(state, {
+        kind: "replaceFileText",
+        path: "main.nf",
+        text: after["main.nf"] as string,
+      }),
+    );
+    expect(texts(state)["main.nf"]).toBe(after["main.nf"]);
+    expect(projection(state).nodes.length).toBe(nodes + 1);
   });
 });

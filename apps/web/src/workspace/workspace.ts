@@ -1,7 +1,8 @@
 // The workspace (F-202): projects in IndexedDB on top of the engine service. It runs in the worker, with no Comlink, so it
 // also runs in Node. One queue serialises everything that opens, changes or removes a project, so the project id a change
-// is saved under is always the project the engine applied it to. `palette`, `project`, `diagnostics` and `readFile` pass
-// straight through. Nothing here assumes a top-level page (ADR 0044): an unavailable database becomes a status, not a crash.
+// is saved under is always the project the engine applied it to. `palette`, `project`, `diagnostics`, `details` and
+// `readFile` pass straight through. Nothing here assumes a top-level page (ADR 0044): an unavailable database becomes a
+// status, not a crash.
 import {
   type EngineApi,
   type EngineRefusal,
@@ -115,6 +116,7 @@ export function createWorkspace(options: WorkspaceOptions): WorkspaceApi {
     templates: (version) => engine.templates(version),
     project: (path, workflow) => engine.project(path, workflow),
     diagnostics: () => engine.diagnostics(),
+    details: (path, workflow, node) => engine.details(path, workflow, node),
     readFile: (path) => engine.readFile(path),
 
     open: (request, onProgress) =>

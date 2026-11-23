@@ -30,6 +30,8 @@ export function connectEngine(
       race(remote.applyPatches(patches, revision)),
     project: (path, workflow) => race(remote.project(path, workflow)),
     diagnostics: () => race(remote.diagnostics()),
+    details: (path, workflow, node) =>
+      race(remote.details(path, workflow, node)),
     setLayout: (write) => race(remote.setLayout(write)),
     readFile: (path) => race(remote.readFile(path)),
     close: () => race(remote.close()),

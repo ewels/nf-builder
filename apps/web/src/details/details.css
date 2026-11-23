@@ -1,0 +1,116 @@
+.details-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.details-action {
+  font: inherit;
+  font-size: 12px;
+  padding: 0 var(--space-2);
+  color: var(--color-muted);
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+}
+
+.details-action:disabled {
+  cursor: not-allowed;
+}
+
+.details-name {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.details-kind,
+.details-note,
+.details-none {
+  margin: var(--space-1) 0 0;
+  font-size: 12px;
+  color: var(--color-muted);
+}
+
+.details-section {
+  margin-top: var(--space-3);
+}
+
+.details-section h4 {
+  margin: 0 0 var(--space-1);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.details-file,
+.details-description {
+  margin: 0;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.details-description {
+  margin-top: var(--space-3);
+  white-space: pre-line;
+}
+
+.details-list,
+.details-connections {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 12px;
+}
+
+.details-list > li {
+  padding: 2px 0;
+}
+
+.details-connections {
+  padding-left: var(--space-3);
+  color: var(--color-muted);
+  overflow-wrap: anywhere;
+}
+
+.details-port-name {
+  font-family: var(--font-mono);
+  font-weight: 600;
+}
+
+.details-type,
+.details-value {
+  font-family: var(--font-mono);
+  color: var(--color-muted);
+  overflow-wrap: anywhere;
+}
+
+.details-preview {
+  margin: 0;
+  padding: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background: var(--color-surface-muted);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+}
+
+.details-problem-severity {
+  font-weight: 600;
+}
+
+.details-problem.is-error .details-problem-severity {
+  color: var(--color-error);
+}
+.details-problem.is-warning .details-problem-severity {
+  color: var(--color-warning);
+}
+.details-problem.is-suggestion .details-problem-severity {
+  color: var(--color-suggestion);
+}

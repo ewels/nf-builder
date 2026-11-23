@@ -61,6 +61,31 @@ describe("F-113 engine client", () => {
     close();
   });
 
+  it("F-206: the facade forwards details", async () => {
+    const { engine, close } = connected();
+    expect(await engine.details("main.nf", null, "x")).toMatchObject({
+      code: "no-project",
+    });
+    await engine.open({
+      version,
+      files: [
+        {
+          path: "main.nf",
+          text: "workflow {\n    main:\n    ch = channel.of(1)\n}\n",
+        },
+      ],
+    });
+    const projected = await engine.project("main.nf", null);
+    const id =
+      "projection" in projected ? projected.projection?.nodes[0]?.id : "";
+    const result = await engine.details("main.nf", null, id ?? "");
+    expect(result).toMatchObject({ details: { node: id } });
+    expect(await engine.details("main.nf", null, "nope")).toMatchObject({
+      details: null,
+    });
+    close();
+  });
+
   it("F-202 ADR-0003: watch receives status pushes across Comlink; a second watch releases the first listener", async () => {
     const { engine, close } = connected();
     const first: WorkspaceStatus[] = [];

@@ -13,6 +13,7 @@ import type {
   TextPatch,
   WorkflowRef,
 } from "@nf-builder/lang-core";
+import type { NodeDetails } from "../details/types";
 import type {
   LayoutChange,
   LayoutStatus,
@@ -94,6 +95,12 @@ export interface DiagnosticsResult {
   readonly diagnostics: readonly Diagnostic[];
 }
 
+export interface NodeDetailsResult {
+  readonly revision: number;
+  /** Null when the projection has no such node. */
+  readonly details: NodeDetails | null;
+}
+
 export interface EngineApi {
   palette(version: string): Promise<PaletteView>;
   /** The pack's project templates for a version, without file text (F-203). Needs no open project. */
@@ -117,6 +124,12 @@ export interface EngineApi {
     workflow: string | null,
   ): Promise<ProjectionResult | EngineRefusal>;
   diagnostics(): Promise<DiagnosticsResult | EngineRefusal>;
+  /** The declaration details and diagnostics of one node of a workflow's projection (F-206). */
+  details(
+    path: string,
+    workflow: string | null,
+    node: string,
+  ): Promise<NodeDetailsResult | EngineRefusal>;
   /**
    * The only writer of `.nf-builder/layout.json` (F-207). Merges or replaces one workflow's positions and returns the
    * sidecar's new text in `files` (empty when nothing changed or the file is newer than this build). It doesn't advance

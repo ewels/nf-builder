@@ -5,7 +5,9 @@ import {
 } from "../scripts/security-policy.ts";
 import { policyMetaHtml } from "../scripts/security-policy-meta.ts";
 import { SMOKE_TAG } from "./browsers.ts";
+import { F208_BEFORE } from "./code-view.ts";
 import { watchForCspViolations } from "./csp.ts";
+import { readProject } from "./engine.ts";
 import { E2E_BASE_PATH, PREVIEW_ORIGIN, PREVIEW_URL } from "./urls.ts";
 
 type HeadMetas = { first: string[]; second: string[] };
@@ -92,6 +94,46 @@ test("F-011 step 4 QA-30: inside a cross-origin iframe the app loads and works",
   ).toBeVisible();
   const appFrame = page.frames().find((f) => f.url() === PREVIEW_URL);
   expect(appFrame).toBeDefined();
+  expect(await appFrame?.evaluate(() => window.__cspViolations ?? [])).toEqual(
+    [],
+  );
+  expect(watch.consoleErrors).toEqual([]);
+});
+
+test("F-011 step 4 QA-30 ADR-0044 F-208: inside a cross-origin iframe the Code view opens Monaco with no CSP violation or console error", async ({
+  page,
+}) => {
+  const watch = await watchForCspViolations(page);
+  await page.setContent(
+    `<iframe id="app" src="${PREVIEW_URL}" width="1200" height="800"></iframe>`,
+  );
+  const frame = page.frameLocator("#app");
+  await expect(
+    frame.getByRole("complementary", { name: "Components and files" }),
+  ).toBeVisible();
+  const appFrame = page.frames().find((f) => f.url() === PREVIEW_URL);
+  expect(appFrame).toBeDefined();
+  const version = await frame.getByLabel("Nextflow version").inputValue();
+  await appFrame?.evaluate(
+    async ({ files, version }) => {
+      const hook = (
+        window as unknown as {
+          nfBuilderWorkspace: {
+            open(request: {
+              version: string;
+              files: { path: string; text: string }[];
+            }): Promise<unknown>;
+          };
+        }
+      ).nfBuilderWorkspace;
+      await hook.open({ version, files });
+    },
+    { files: readProject(F208_BEFORE), version },
+  );
+  await frame.getByRole("radio", { name: "Code" }).click();
+  const editor = frame.locator(".monaco-editor");
+  await expect(editor).toBeVisible();
+  await expect(editor).toContainText("nextflow.enable.types");
   expect(await appFrame?.evaluate(() => window.__cspViolations ?? [])).toEqual(
     [],
   );

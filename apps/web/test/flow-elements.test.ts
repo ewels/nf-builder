@@ -77,7 +77,7 @@ describe("F-205 flow elements", () => {
   });
 
   it("F-205 UX-24: toFlowEdges maps ports to handle ids and sets aria labels from tooltips", () => {
-    const [edge] = toFlowEdges(view);
+    const [edge] = toFlowEdges(view, null);
     expect(edge).toMatchObject({
       id: "e1",
       type: "flow",
@@ -90,5 +90,42 @@ describe("F-205 flow elements", () => {
     });
     expect(outputHandle({ id: "out" })).toBe("out:out");
     expect(inputHandle({ id: "x" })).toBe("in:x");
+  });
+
+  it("F-206 UX-24: edges touching the selected node are highlighted; edges are not selectable", () => {
+    const [edge] = toFlowEdges(view, "main.nf#/a");
+    expect(edge?.data?.highlighted).toBe(true);
+    expect(edge?.selectable).toBe(false);
+    const [target] = toFlowEdges(view, "main.nf#/:emit:r");
+    expect(target?.data?.highlighted).toBe(true);
+    const [other] = toFlowEdges(view, "main.nf#/other");
+    expect(other?.data?.highlighted).toBe(false);
+    expect(other?.selectable).toBe(false);
+    expect(toFlowEdges(view, null)[0]?.data?.highlighted).toBe(false);
+  });
+
+  it("F-206 UX-24 QA-12: highlighted edges come last, so they paint above other edges but below nodes", () => {
+    const first = view.edges[0];
+    if (first === undefined) throw new Error("no edge");
+    const wide: CanvasView = {
+      ...view,
+      edges: [
+        first,
+        { ...first, id: "e2", source: "main.nf#/other" },
+        { ...first, id: "e3" },
+      ],
+    };
+    const edges = toFlowEdges(wide, "main.nf#/a");
+    expect(edges.map((e) => [e.id, e.data?.highlighted])).toEqual([
+      ["e2", false],
+      ["e1", true],
+      ["e3", true],
+    ]);
+    expect(edges.every((e) => e.zIndex === undefined)).toBe(true);
+    expect(toFlowEdges(wide, null).map((e) => e.id)).toEqual([
+      "e1",
+      "e2",
+      "e3",
+    ]);
   });
 });

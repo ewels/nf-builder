@@ -70,3 +70,13 @@ The agent sandbox's proxy refuses or alters `codeload.github.com` and some `api.
 ## How to re-run
 
 Dispatch the `S4 probe` workflow with a `nf-builder.netlify.app` URL, or locally: `S4_PROBE_URL=https://nf-builder.netlify.app pnpm test:e2e -- --config e2e/s4-probe.config.ts`.
+
+## Addendum 2026-11-23: re-run before F-502
+
+The S4 probe ran again against the deployed site on GitHub Pages, as F-502's note required: [run 45093395128](https://github.com/ewels/nf-builder/actions/runs/45093395128), dispatched on `main` with `url=https://ewels.github.io/nf-builder/`.
+
+- Chromium, Firefox and WebKit give the same verdicts as on 2026-11-22. Every `registry.nextflow.io` target (service info, module list and search, module, releases, release, download, plugins, plugin, plugin release) is `blocked-by-cors`: the server answers 200 without `Access-Control-Allow-Origin`, the preflight with `Authorization` answers 401 without it, and the download redirects to `public-cr-prod.seqera.io`, also without it.
+- `raw.githubusercontent.com` stays `allowed` (`ACAO *`).
+- `curl -sI` against `registry.nextflow.io` on 2026-11-23 shows the same missing header.
+
+So the browser still can't read the registry directly. F-502 builds the live client behind a constant that keeps it off, and the snapshot stays the browser's only registry source (ADR 0035, ADR 0041).
