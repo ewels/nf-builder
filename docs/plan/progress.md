@@ -533,6 +533,29 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
 - State: passing.
 - Next: F-203, F-206 and F-208 in flight.
 - Decisions: none.
+
+## 2026-11-22 · F-203 · Claude (autonomous)
+- Did:
+  - Three pack-owned templates (Start blank, Hello world, Samplesheet to MultiQC), bundled by `pnpm gen:templates` into a lazily loaded `templates.json`. Each is an oracle case run in place and lint-clean.
+  - `EngineApi.templates` and `NewProject.template`: the worker copies a template's files into a new project.
+  - The New project dialog: name, version, Start blank or From a template, and Publish docs. The header's Templates button opens it.
+  - End-to-end tests create from each route; each template's canvas matches a baseline approved from CI.
+  - Fixed a race where opening a second project could blank the canvas.
+- State: passing once CI is green.
+- Next: F-206, F-208, then F-207 and F-209.
+- Decisions:
+  - [ADR 0047](../adr/0047-project-templates.md) covers:
+    - Q6 answered: Start blank, Hello world and Samplesheet to MultiQC;
+    - the template format and generator, which is not a stored format;
+    - content rules: no substitution or `manifest.name`, blank has no output block, LA-42 `eval` versions, offline test data;
+    - the oracle keys `dir`, `lint.clean` and `run.tools`;
+    - Publish docs does nothing until F-606;
+    - template content under MIT-0, with a licences row.
+  - `scope-change`: the nf-core-style skeleton and Pipeline composition move to the new deferred M8 feature F-211.
+  - Opening a project keeps the canvas until the new one is current (amends ADR 0046).
+  - Start blank works without the template list.
+  - F-202's "stored in this browser" check moved to the dialog's unit test; the IndexedDB record test now compares the blank template's files.
+  - The F-201 UX-01 test expects an enabled Templates button, and the app-shell baseline is re-approved from CI (ADR 0021).
 - Blockers: none.
 
 ## 2026-11-23 · F-206 · Claude (autonomous)

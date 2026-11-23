@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import type { NewProjectRequest } from "../src/project/new-project-dialog";
 import {
   createProjectStore,
   type ProjectStoreDeps,
@@ -25,6 +26,13 @@ const ready = (over: Partial<WorkspaceStatus> = {}): WorkspaceStatus => ({
   storage: "ready",
   ...over,
 });
+const request = (name: string, over: Partial<NewProjectRequest> = {}) => ({
+  name,
+  languageVersion: "26.10",
+  template: "blank",
+  publishDocs: true,
+  ...over,
+});
 const settle = () => new Promise((r) => setTimeout(r, 0));
 
 function fixture(
@@ -47,7 +55,7 @@ function fixture(
     }),
     openProject: vi.fn(async (id: string) => {
       calls.push(`openProject:${id}`);
-      return { revision: 7 };
+      return { summary: { revision: 7 }, seq: 0 };
     }),
     renameProject: vi.fn(async () => meta("x")),
     deleteProject: vi.fn(async () => {
@@ -58,6 +66,9 @@ function fixture(
     workspace: () => workspace,
     palette: async (v) => {
       calls.push(`palette:${v}`);
+    },
+    templates: async (v) => {
+      calls.push(`templates:${v}`);
     },
     storage: storage ?? (() => undefined),
     languageVersion: "26.10",
@@ -85,7 +96,12 @@ describe("F-202 F-205 project store and canvas", () => {
   it("F-202 F-205 UX-20: every successful openProject (auto-reopen, create, open) shows the summary on the canvas", async () => {
     const f = fixture(ready({ projects: [meta("recent")] }));
     await f.store.getState().start();
-    await f.store.getState().create("New");
+    await f.store.getState().create({
+      name: "New",
+      languageVersion: "26.10",
+      template: "blank",
+      publishDocs: true,
+    });
     await f.store.getState().open("recent");
     await settle();
     expect(f.shown).toEqual([
@@ -113,13 +129,50 @@ describe("F-202 F-205 project store and canvas", () => {
     f.push(ready({ current: null }));
     expect(f.gone.count).toBe(before + 1);
   });
+
+  it("F-203 UX-20: a status sent while a project opens does not reset the canvas, so a late one can't wipe the opened project", async () => {
+    const f = fixture(ready());
+    await f.store.getState().start();
+    const before = f.gone.count;
+    f.push(
+      ready({ current: null, opening: { project: meta("a"), progress: null } }),
+    );
+    expect(f.gone.count).toBe(before);
+  });
+});
+
+describe("F-203 status ordering", () => {
+  it("F-203 UX-20: a status older than the open's reply is ignored, so a stale push can't clear the canvas", async () => {
+    const f = fixture(ready({ seq: 1 }));
+    (f.workspace.openProject as ReturnType<typeof vi.fn>).mockImplementation(
+      async () => ({ summary: { revision: 7 }, seq: 5 }),
+    );
+    await f.store.getState().start();
+    const before = f.gone.count;
+    await f.store.getState().open("a");
+    // pushed by createProject's refresh when nothing was open, delivered after the open's reply
+    f.push(ready({ seq: 3, current: null, opening: null }));
+    expect(f.gone.count).toBe(before);
+    expect(f.store.getState().status.seq).toBe(1);
+    f.push(ready({ seq: 5, current: meta("a") }));
+    expect(f.store.getState().status.current?.id).toBe("a");
+    f.push(ready({ seq: 4, current: null }));
+    expect(f.store.getState().status.current?.id).toBe("a");
+    f.push(ready({ seq: 6, current: null }));
+    expect(f.store.getState().status.current).toBeNull();
+  });
 });
 
 describe("F-202 project store", () => {
   it("F-202 QA-03 ADR-0029: start requests the palette before reopening the most recently opened project", async () => {
     const f = fixture(ready({ projects: [meta("recent"), meta("older")] }));
     await f.store.getState().start();
-    expect(f.calls).toEqual(["palette:26.10", "watch", "openProject:recent"]);
+    expect(f.calls).toEqual([
+      "palette:26.10",
+      "templates:26.10",
+      "watch",
+      "openProject:recent",
+    ]);
   });
 
   it("F-202 QA-03 ADR-0029: start does not wait for the palette before watching", async () => {
@@ -129,6 +182,7 @@ describe("F-202 project store", () => {
     const never = createProjectStore({
       workspace: () => f.workspace,
       palette: () => new Promise(() => undefined),
+      templates: () => new Promise(() => undefined),
       storage: () => undefined,
       languageVersion: "26.10",
       canvas: { show: async () => undefined, projectGone: () => undefined },
@@ -138,13 +192,30 @@ describe("F-202 project store", () => {
     expect(deps.calls).toContain("watch");
   });
 
+  it("F-203 UX-60: start prefetches the template list, and a failed prefetch does not stop it", async () => {
+    const f = fixture(ready({ projects: [meta("a")] }));
+    const failing = createProjectStore({
+      workspace: () => f.workspace,
+      palette: async () => undefined,
+      templates: async () => {
+        throw new Error("worker failed");
+      },
+      storage: () => undefined,
+      languageVersion: "26.10",
+      canvas: { show: async () => undefined, projectGone: () => undefined },
+    });
+    await failing.getState().start();
+    expect(f.workspace.openProject).toHaveBeenCalledWith("a");
+    expect(failing.getState().status.storage).toBe("ready");
+  });
+
   it("F-202 IO-01: start opens nothing when a project is already open or none exist", async () => {
     const a = fixture(ready());
     await a.store.getState().start();
-    expect(a.calls).toEqual(["palette:26.10", "watch"]);
+    expect(a.calls).toEqual(["palette:26.10", "templates:26.10", "watch"]);
     const b = fixture(ready({ projects: [meta("a")], current: meta("a") }));
     await b.store.getState().start();
-    expect(b.calls).toEqual(["palette:26.10", "watch"]);
+    expect(b.calls).toEqual(["palette:26.10", "templates:26.10", "watch"]);
   });
 
   it("F-202 IO-01: the store mirrors pushed workspace status", async () => {
@@ -155,16 +226,35 @@ describe("F-202 project store", () => {
     expect(f.store.getState().status.current?.id).toBe("a");
   });
 
-  it("F-202 UX-01 LA-01: create stores a project with no files in the first installed version, then opens it", async () => {
+  it("F-203 UX-60: create sends the template and Publish docs, then opens the new project", async () => {
     const f = fixture(ready());
     await f.store.getState().start();
-    await f.store.getState().create("RNA");
+    await f.store
+      .getState()
+      .create(request("RNA", { template: "hello-world", publishDocs: false }));
     expect(f.workspace.createProject).toHaveBeenCalledWith({
       name: "RNA",
       languageVersion: "26.10",
       files: [],
+      template: "hello-world",
+      publishDocs: false,
     });
     expect(f.calls.slice(-2)).toEqual(["createProject", "openProject:new"]);
+  });
+
+  it("F-203 UX-60: the dialog state lives in the store: showDialog opens it on a route and closeDialog clears it", () => {
+    const f = fixture(ready());
+    const { showDialog, closeDialog } = f.store.getState();
+    expect(f.store.getState().dialog).toBeNull();
+    showDialog({ kind: "new", route: "template" });
+    expect(f.store.getState().dialog).toEqual({
+      kind: "new",
+      route: "template",
+    });
+    showDialog({ kind: "rename" });
+    expect(f.store.getState().dialog).toEqual({ kind: "rename" });
+    closeDialog();
+    expect(f.store.getState().dialog).toBeNull();
   });
 
   it("F-202 IO-03: create requests persistence and checks the quota; each saved push and each delete checks it again", async () => {
@@ -184,7 +274,7 @@ describe("F-202 project store", () => {
     await settle();
     expect(estimate).toHaveBeenCalledTimes(1); // at start
     expect(persist).not.toHaveBeenCalled();
-    await f.store.getState().create("P");
+    await f.store.getState().create(request("P"));
     await settle();
     expect(persist).toHaveBeenCalledTimes(1);
     expect(estimate).toHaveBeenCalledTimes(2);
@@ -212,20 +302,20 @@ describe("F-202 project store", () => {
     } as unknown as StorageManager;
     const f = fixture(ready(), () => refusing);
     await f.store.getState().start();
-    await f.store.getState().create("P");
+    await f.store.getState().create(request("P"));
     await settle();
     expect(f.store.getState().storageWarning).toBeNull();
     expect(f.store.getState().persisted).toBe(false);
     // no storage manager at all, and a getter that throws
     const bare = fixture(ready(), () => undefined);
-    await bare.store.getState().create("P");
+    await bare.store.getState().create(request("P"));
     await settle();
     expect(bare.store.getState().storageWarning).toBeNull();
     expect(bare.store.getState().persisted).toBeNull();
     const throwing = fixture(ready(), () => {
       throw new Error("SecurityError");
     });
-    await throwing.store.getState().create("P");
+    await throwing.store.getState().create(request("P"));
     await settle();
     expect(throwing.store.getState().storageWarning).toBeNull();
   });

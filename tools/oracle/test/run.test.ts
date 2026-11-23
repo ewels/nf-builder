@@ -3,6 +3,7 @@ import {
   mkdirSync,
   mkdtempSync,
   readFileSync,
+  statSync,
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
@@ -91,6 +92,46 @@ describe("F-005 runner", () => {
     expect(log).toContain("hello world");
     expect(log).toMatch(/exit/i);
     expect(existsSync(join(runDir, "lint.log"))).toBe(true);
+  });
+
+  it("F-203: run.tools puts an executable shim per tool first on PATH, outside the copied tree, for the run command only", () => {
+    const manifestFile = makeManifest(["c1"]);
+    const c: OracleCase = {
+      id: "c1",
+      dir: join(manifestFile, "..", "c1"),
+      about: "a",
+      spec: ["F-203"],
+      sources: ["u"],
+      lint: { expect: "ok", errors: [] },
+      run: {
+        expect: "ok",
+        output: [],
+        script: "main.nf",
+        args: ["-stub"],
+        tools: ["fastqc"],
+      },
+    };
+    const runsDir = tmp();
+    const seen: { kind: string; prefix: string | undefined }[] = [];
+    let shim = "";
+    const exec: Exec = (args, cwd, options) => {
+      seen.push({ kind: args[0] ?? "", prefix: options?.pathPrefix });
+      if (args[0] === "run" && options?.pathPrefix) {
+        shim = join(options.pathPrefix, "fastqc");
+        expect(readFileSync(shim, "utf8")).toContain("fastqc 0.0.0");
+        expect(statSync(shim).mode & 0o111).not.toBe(0);
+        expect(options.pathPrefix.startsWith(`${join(runsDir, "c1")}/`)).toBe(
+          false,
+        );
+        expect(options.pathPrefix.startsWith(`${cwd}/`)).toBe(false);
+      }
+      return args[0] === "lint" ? res({ stdout: LINT_OK }) : res();
+    };
+    runCase(c, { exec, runsDir });
+    expect(seen[0]).toEqual({ kind: "lint", prefix: undefined });
+    expect(seen[1]?.kind).toBe("run");
+    expect(seen[1]?.prefix).toBeTypeOf("string");
+    expect(shim).not.toBe("");
   });
 
   it("F-005 LA-03: the oracle stops before any case when nextflow -version doesn't report the pinned version", () => {

@@ -108,6 +108,17 @@ describe("F-113 engine client", () => {
     close();
   });
 
+  it("F-203 ADR-0003: templates crosses the bridge", async () => {
+    const { engine, close } = connected();
+    const list = await engine.templates(version);
+    expect(list.version).toBe(version);
+    expect(list.blank.id).toBe("blank");
+    expect(list.templates.map((t) => t.id)).toContain("hello-world");
+    expect(JSON.stringify(list)).not.toContain("main.nf"); // names and descriptions only, no file text
+    await expect(engine.templates("0.0")).rejects.toThrow(/0\.0/);
+    close();
+  });
+
   it("F-113: a service error rejects the client call with its message; a refusal crosses as data", async () => {
     const { engine, close } = connected();
     await expect(engine.open({ version: "0.0", files })).rejects.toThrow(

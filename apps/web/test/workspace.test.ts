@@ -1,9 +1,12 @@
 import "fake-indexeddb/auto";
 import {
+  BLANK_TEMPLATE,
   createEngineService,
   type EditCommand,
   type EngineApi,
   installedPackVersions,
+  templateFiles,
+  templateList,
 } from "@nf-builder/engine";
 import { IDBFactory } from "fake-indexeddb";
 import { describe, expect, it } from "vitest";
@@ -109,6 +112,24 @@ describe("F-202 workspace", () => {
     expect(await b.workspace.readFile("README.md")).toBe("two\n");
   });
 
+  it("F-203 UX-20: every status has a higher seq than the one before, and openProject returns the seq of the status that made the project current", async () => {
+    const s = setup();
+    await s.watching;
+    const meta = await s.workspace.createProject({
+      name: "P",
+      languageVersion: version,
+      files,
+    });
+    const opened = await s.workspace.openProject(meta.id);
+    const seqs = s.statuses.map((status) => status.seq);
+    expect(seqs.length).toBeGreaterThan(2);
+    expect(seqs).toEqual([...seqs].sort((a, b) => a - b));
+    expect(new Set(seqs).size).toBe(seqs.length);
+    const current = s.statuses.findLast((status) => status.current !== null);
+    expect(current?.current?.id).toBe(meta.id);
+    expect(opened.seq).toBe(current?.seq);
+  });
+
   it("F-202 step 2 IO-01: watch pushes saving after an applied command and saved after the write", async () => {
     const s = setup();
     await s.watching;
@@ -119,7 +140,7 @@ describe("F-202 workspace", () => {
     });
     const opened = await s.workspace.openProject(meta.id);
     s.statuses.length = 0;
-    ok(await s.workspace.apply(readme("two\n"), opened.revision));
+    ok(await s.workspace.apply(readme("two\n"), opened.summary.revision));
     expect(s.statuses.at(-1)?.save.status).toBe("saving");
     expect(s.saves).toHaveLength(0);
     s.clock.fire();
@@ -138,12 +159,15 @@ describe("F-202 workspace", () => {
     });
     const opened = await s.workspace.openProject(meta.id);
     const applied = ok(
-      await s.workspace.apply(readme("two\n"), opened.revision),
+      await s.workspace.apply(readme("two\n"), opened.summary.revision),
     ) as { revision: number; inverse: never[] };
     await s.workspace.flush();
     expect(s.saves).toHaveLength(1);
     // a stale command is refused and saves nothing
-    const refused = await s.workspace.apply(readme("x\n"), opened.revision);
+    const refused = await s.workspace.apply(
+      readme("x\n"),
+      opened.summary.revision,
+    );
     expect(refused).toMatchObject({ ok: false, code: "stale" });
     await s.workspace.flush();
     expect(s.saves).toHaveLength(1);
@@ -201,7 +225,7 @@ describe("F-202 workspace", () => {
       files,
     });
     const opened = await s.workspace.openProject(a.id);
-    ok(await s.workspace.apply(readme("edited\n"), opened.revision));
+    ok(await s.workspace.apply(readme("edited\n"), opened.summary.revision));
     expect(s.saves).toHaveLength(0);
     await s.workspace.openProject(b.id);
     expect(s.saves).toHaveLength(1);
@@ -235,7 +259,7 @@ describe("F-202 workspace", () => {
     expect(s.statuses.at(-1)?.projects.map((p) => p.name)).toContain("Alpha");
     await expect(s.workspace.renameProject(a.id, "  ")).rejects.toThrow();
     await expect(s.workspace.renameProject("nope", "x")).rejects.toThrow();
-    ok(await s.workspace.apply(readme("pending\n"), opened.revision));
+    ok(await s.workspace.apply(readme("pending\n"), opened.summary.revision));
     await s.workspace.deleteProject(a.id);
     const last = s.statuses.at(-1);
     expect(last?.current).toBeNull();
@@ -276,6 +300,89 @@ describe("F-202 workspace", () => {
       }),
     ).rejects.toThrow(/0\.0/);
     expect(s.statuses.at(-1)?.projects).toHaveLength(1);
+  });
+
+  it("F-203 UX-60 LA-02: createProject with a template stores exactly its files and the chosen version", async () => {
+    const s = setup();
+    await s.watching;
+    const list = await templateList(version);
+    for (const t of list.templates) {
+      const meta = await s.workspace.createProject({
+        name: t.name,
+        languageVersion: version,
+        files: [],
+        template: t.id,
+        publishDocs: true,
+      });
+      expect(meta.languageVersion).toBe(version);
+      const stored = await (await s.reader()).readProject(meta.id);
+      expect(stored?.files).toEqual(await templateFiles(version, t.id));
+    }
+    expect(list.templates.length).toBeGreaterThan(0);
+  });
+
+  it("F-203 UX-60: Start blank stores the pack's blank template", async () => {
+    const s = setup();
+    await s.watching;
+    const { blank } = await templateList(version);
+    const meta = await s.workspace.createProject({
+      name: "B",
+      languageVersion: version,
+      files: [],
+      template: blank.id,
+    });
+    const stored = await (await s.reader()).readProject(meta.id);
+    expect(stored?.files).toEqual(await templateFiles(version, blank.id));
+    expect(stored?.files.map((f) => f.path)).toContain("main.nf");
+    await s.workspace.openProject(meta.id);
+    expect(await s.workspace.readFile("main.nf")).toContain(
+      "nextflow.enable.types = true",
+    );
+  });
+
+  it("F-203 UX-60: Start blank needs no template id: BLANK_TEMPLATE stores the pack's blank template", async () => {
+    const s = setup();
+    await s.watching;
+    const { blank } = await templateList(version);
+    const meta = await s.workspace.createProject({
+      name: "B",
+      languageVersion: version,
+      files: [],
+      template: BLANK_TEMPLATE,
+    });
+    const stored = await (await s.reader()).readProject(meta.id);
+    expect(stored?.files).toEqual(await templateFiles(version, blank.id));
+  });
+
+  it("F-203: createProject refuses an unknown template, and a template given with files", async () => {
+    const s = setup();
+    await s.watching;
+    await expect(
+      s.workspace.createProject({
+        name: "X",
+        languageVersion: version,
+        files: [],
+        template: "nope",
+      }),
+    ).rejects.toThrow(/nope/);
+    await expect(
+      s.workspace.createProject({
+        name: "X",
+        languageVersion: version,
+        files,
+        template: "blank",
+      }),
+    ).rejects.toThrow(/template.*files/i);
+    expect(s.statuses.at(-1)?.projects ?? []).toHaveLength(0);
+  });
+
+  it("F-203: templates passes straight through", async () => {
+    const s = setup();
+    await s.watching;
+    expect(await s.workspace.templates(version)).toEqual(
+      await templateList(version),
+    );
+    await expect(s.workspace.templates("0.0")).rejects.toThrow();
   });
 
   it("F-202: a raw open is unsaved: its changes are not stored and no project is current", async () => {

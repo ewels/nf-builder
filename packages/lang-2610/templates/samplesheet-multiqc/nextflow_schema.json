@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Pipeline parameters",
+  "description": "The parameters of the Samplesheet to MultiQC pipeline.",
+  "type": "object",
+  "$defs": {
+    "input_output_options": {
+      "title": "Input/output options",
+      "type": "object",
+      "description": "Where the pipeline finds its reads.",
+      "required": ["input"],
+      "properties": {
+        "input": {
+          "type": "string",
+          "format": "file-path",
+          "exists": true,
+          "mimetype": "text/csv",
+          "pattern": "^\\S+\\.csv$",
+          "description": "The samplesheet: a CSV file with the columns id, fastq_1 and fastq_2. The fastq_2 cell may be empty for single-end reads."
+        }
+      }
+    }
+  },
+  "allOf": [{ "$ref": "#/$defs/input_output_options" }]
+}

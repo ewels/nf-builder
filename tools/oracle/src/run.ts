@@ -1,4 +1,4 @@
-import { cpSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { chmodSync, cpSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import type { Manifest, OracleCase, Outcome } from "./cases.ts";
 import {
@@ -36,8 +36,9 @@ export function runCheck(
   command: string[],
   expected: Outcome,
   evaluate: (result: ExecResult) => Evaluation,
+  pathPrefix?: string,
 ): CheckResult {
-  const result = exec(command, dir);
+  const result = exec(command, dir, pathPrefix ? { pathPrefix } : undefined);
   const logFile = join(dir, `${kind}.log`);
   writeFileSync(
     logFile,
@@ -64,6 +65,19 @@ export function runCheck(
   };
 }
 
+/** Writes an executable `<tool>` that prints `<tool> 0.0.0` into a new directory next to the case's copy; returns it. */
+function writeToolShims(runsDir: string, id: string, tools: string[]): string {
+  const dir = join(runsDir, `${id}.tools`);
+  rmSync(dir, { recursive: true, force: true });
+  mkdirSync(dir, { recursive: true });
+  for (const tool of tools) {
+    const file = join(dir, tool);
+    writeFileSync(file, `#!/bin/sh\necho "${tool} 0.0.0"\n`);
+    chmodSync(file, 0o755);
+  }
+  return dir;
+}
+
 /** In a fresh copy of the case: lint, then run. Writes lint.log and run.log. */
 export function runCase(c: OracleCase, options: RunOptions): CheckResult[] {
   const { exec, runsDir, log = () => {} } = options;
@@ -84,9 +98,17 @@ export function runCase(c: OracleCase, options: RunOptions): CheckResult[] {
   if (run) {
     const command = ["run", run.script, ...run.args];
     log(`${c.id}: nextflow ${command.join(" ")}`);
+    const shims = run.tools && writeToolShims(runsDir, c.id, run.tools);
     results.push(
-      runCheck(exec, dir, c.id, "run", command, run.expect, (r) =>
-        evaluateRun(run, r),
+      runCheck(
+        exec,
+        dir,
+        c.id,
+        "run",
+        command,
+        run.expect,
+        (r) => evaluateRun(run, r),
+        shims || undefined,
       ),
     );
   }

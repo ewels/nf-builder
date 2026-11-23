@@ -19,7 +19,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-113 engine worker | merged, PR #39 | |
 | F-202 projects in IndexedDB | merged, PR #42 | |
 | F-205 canvas | merged, PR #41 | |
-| F-203 new project dialog | `feat/F-203` (`/home/user/wt-F-203`) | Tasks 1–5 committed (oracle keys, three templates, engine `templates`); tasks 6–7 building; merge `main` (F-205) before task 8. [plan](plan-F-203.md). |
+| F-203 new project dialog | merged, PR #43 | |
 | F-206 details pane | merged, PR #45 | |
 | F-207 layout sidecar | not started | [plan](plan-F-207.md). After F-205 and F-202. |
 | F-208 view modes and Code | `feat/F-208` (`/home/user/wt-F-208`) | Tasks 1–2 building. [plan](plan-F-208.md). |
@@ -88,6 +88,20 @@ Next free ADR number: 0050 (0047 is F-203's, 0048 F-208's, 0049 F-206's).
 ### F-205 (merged with its PR)
 - Open point 1: option B. F-205 step 1 becomes "Open fixture projects covering every node kind and a corpus pipeline; visual snapshots per node kind match baselines"; F-203 step 1 gains "each template's canvas matches its approved visual baseline" and F-203 depends on F-205. The template check moves to F-203 rather than being dropped: an ADR and the `scope-change` label in F-205's PR.
 - Accept the other recommendations: `@xyflow/react` 13.0.2 pinned (12.12.1 fallback), a lazily loaded canvas, the interim layered layout until F-207 (ADR 0008's end state unchanged), view logic in the engine run on the main thread, the corpus restored in the Chromium e2e leg (ci.yml edit), `window.nfBuilderWorkspace`, plain edges dotted and unknown solid muted (UX-24), unresolved callees drawn as unparsed with "not found" (UX-22), badge when `callee.typed === true`, session-only port-labels toggle, visible attribution at bottom centre, selection highlight left to F-206, status-bar counts wired, `apps/web/src/workspace/` owned by whichever of F-202 and F-205 lands first.
+
+### F-203 (merged with its PR)
+- Accept every recommendation in section 6:
+  - **Q6 (answer at landing):** v0.1 ships Start blank, Hello world and Samplesheet to MultiQC. The nf-core skeleton and Pipeline composition move to a new M8 feature, "More project templates" (`scope-change`).
+  - **Format:** templates are pack-owned trees with generated `templates.json` (`pnpm gen:templates`), loaded lazily by `loadTemplates()`. Not a stored format.
+  - **Content:**
+    - no substitution and no `manifest.name`;
+    - blank has no output block (lint rejects an empty one);
+    - LA-42 `eval` versions, with the oracle's `run.tools` shims;
+    - Hello world has no `topic:` section;
+    - offline test data under `assets/`.
+  - **Dialog:** Publish docs is carried but does nothing until F-606; Import and the metro checkbox stay out of scope; the header's Templates button opens the dialog on From a template.
+  - **Licence:** template content is dedicated under MIT-0, with a `licences.md` row.
+  - **Checks:** the doc-comment check is test-only until F-311 and F-312; F-207 re-approves the template baselines.
 
 ### F-501 (merged with its PR)
 - Accept every recommendation in section 6: an orphan `registry-snapshot` branch fetched by each Netlify build; ship without the build-hook secret and open a `maintainer` issue for it; split `index.json` (QA-06) and `ports.json`, with IO-31 read as the pair; `tools/registry-snapshot` may import lang-core and pack entries (amends ADR 0003); make lang-2610 erasable for plain Node; ports from registry metadata in `meta.yml` order; parser wins on kind and component; every bundle file; pinned dependency closure; plugin release admitted by the pinned Nextflow; the failure policy; a path-filtered PR dry run outside "CI green"; daily at 03:23 UTC; the fixture snapshot for e2e. ADR 0035 (F-105 takes 0034).
@@ -178,16 +192,3 @@ Next free ADR number: 0050 (0047 is F-203's, 0048 F-208's, 0049 F-206's).
   - full-file byte checks, sidecar included;
   - node moves stay outside the history.
 
-### F-203 — [plan](plan-F-203.md)
-- Accept every recommendation in section 6:
-  - **Q6 (answer at landing):** v0.1 ships Start blank, Hello world and Samplesheet to MultiQC. The nf-core skeleton and Pipeline composition move to a new M8 feature, "More project templates" (`scope-change`).
-  - **Format:** templates are pack-owned trees with generated `templates.json` (`pnpm gen:templates`), loaded lazily by `loadTemplates()`. Not a stored format.
-  - **Content:**
-    - no substitution and no `manifest.name`;
-    - blank has no output block (lint rejects an empty one);
-    - LA-42 `eval` versions, with the oracle's `run.tools` shims;
-    - Hello world has no `topic:` section;
-    - offline test data under `assets/`.
-  - **Dialog:** Publish docs is carried but does nothing until F-606; Import and the metro checkbox stay out of scope; the header's Templates button opens the dialog on From a template.
-  - **Licence:** template content is dedicated under MIT-0, with a `licences.md` row.
-  - **Checks:** the doc-comment check is test-only until F-311 and F-312; F-207 re-approves the template baselines.

@@ -1,8 +1,9 @@
 import { installedPackVersions } from "@nf-builder/engine";
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { AppShell, canvasCounts } from "../src/app-shell";
 import { COLUMN_LIMITS } from "../src/layout/layout-store";
+import { AppHeader } from "../src/shell/app-header";
 
 describe("@nf-builder/web", () => {
   it("ADR-0003: the entry module loads", () => {
@@ -33,7 +34,8 @@ describe("@nf-builder/web", () => {
     const header = /<header[\s\S]*<\/header>/.exec(html)?.[0] ?? "";
     expect(header).toContain("No project");
     expect(header).toMatch(/<p[^>]*role="status"[^>]*>Nothing to save<\/p>/);
-    for (const name of ["Templates", "Import", "Export"])
+    expect(header).toMatch(/<button(?![^>]*disabled)[^>]*>Templates<\/button>/);
+    for (const name of ["Import", "Export"])
       expect(header).toMatch(
         new RegExp(`<button[^>]*disabled[^>]*>${name}</button>`),
       );
@@ -43,6 +45,37 @@ describe("@nf-builder/web", () => {
     );
     expect(options).toEqual([...installedPackVersions()]);
     expect(options.length).toBeGreaterThan(0);
+  });
+
+  it("F-203 UX-01: Templates is enabled and opens the dialog on From a template", () => {
+    const onTemplates = vi.fn();
+    const tree = AppHeader({
+      languageVersions: ["26.10"],
+      projectControls: null,
+      saveLabel: "Saved",
+      saveFailed: null,
+      storageWarning: null,
+      storageNote: false,
+      onTemplates,
+    });
+    const found: { disabled?: boolean; onClick?: () => void }[] = [];
+    const walk = (node: unknown): void => {
+      if (Array.isArray(node)) {
+        node.forEach(walk);
+        return;
+      }
+      if (typeof node !== "object" || node === null) return;
+      const props = (node as { props?: Record<string, unknown> }).props;
+      if (!props) return;
+      if (props.children === "Templates")
+        found.push(props as { onClick?: () => void });
+      walk(props.children);
+    };
+    walk(tree);
+    expect(found).toHaveLength(1);
+    expect(found[0]?.disabled).toBeFalsy();
+    found[0]?.onClick?.();
+    expect(onTemplates).toHaveBeenCalledTimes(1);
   });
 
   it("UX-02: each side column has a vertical separator with its value, limits and aria-controls naming the column", () => {

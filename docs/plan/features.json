@@ -546,8 +546,8 @@
         "Oracle job: every template passes `nextflow lint` and `nextflow run -stub`",
         "Every template has doc comments on all processes and workflows, and schema descriptions for all parameters (no documentation suggestions)"
       ],
-      "passes": false,
-      "notes": "Template list depends on open question Q6. From F-202: createProject({name, languageVersion, files}) replaces the name-only New project dialog's create; Start blank currently stores no files. From F-205 (ADR 0046): the template canvas check moved here from F-205 step 1."
+      "passes": true,
+      "notes": "Template list depends on open question Q6. From F-202: createProject({name, languageVersion, files}) replaces the name-only New project dialog's create; Start blank currently stores no files. From F-205 (ADR 0046): the template canvas check moved here from F-205 step 1. Verified 2026-11-22 (ADR 0047): step 1 by `e2e/new-project.spec.ts` (DOM checks and @visual baselines `template-hello-world` and `template-samplesheet-multiqc`) and the engine projection test; step 2 by the oracle cases `template-*` (CI job `oracle`); step 3 by the `lang-2610` template tests and the zero-diagnostics engine test. Q6 answered: the nf-core-style skeleton and Pipeline composition moved to F-211."
     },
     {
       "id": "F-204",
@@ -632,7 +632,7 @@
         "Rename a process through the app: its position is kept"
       ],
       "passes": false,
-      "notes": "From F-111: node ids can change after variable introduction, a statement move or a rename; diff the projections to carry layout keys (ADR 0008). From F-202: .nf-builder/layout.json written through the workspace is autosaved like any file. From F-205: replace layeredLayout inside canvasView with ELK and stored positions; enable dragging; re-approve the canvas baselines, and keep the per-kind test's zoom-1 assertion. From F-206: decide whether a port-labels toggle and a refresh keep or re-fit the viewport (both re-fit today, as in F-205; selecting keeps it). The screen-fixed dot grid on `.canvas-area` shows under React Flow's own grid, so every node clip depends on the pan; remove it when re-approving the canvas baselines."
+      "notes": "From F-111: node ids can change after variable introduction, a statement move or a rename; diff the projections to carry layout keys (ADR 0008). From F-202: .nf-builder/layout.json written through the workspace is autosaved like any file. From F-205: replace layeredLayout inside canvasView with ELK and stored positions; enable dragging; re-approve the canvas baselines, and keep the per-kind test's zoom-1 assertion. From F-203: re-approve the `template-*` baselines in `e2e/__screenshots__/new-project.spec.ts/` too; `.nf-builder/layout.json` written on open is not part of a template's files. From F-206: decide whether a port-labels toggle and a refresh keep or re-fit the viewport (both re-fit today, as in F-205; selecting keeps it). The screen-fixed dot grid on `.canvas-area` shows under React Flow's own grid, so every node clip depends on the pan; remove it when re-approving the canvas baselines."
     },
     {
       "id": "F-208",
@@ -690,6 +690,30 @@
       ],
       "passes": false,
       "notes": "Added 2026-11-22 (F-204 PR, scope-change; Q16): UX-16 had no owning feature; F-301 step 1 relies on the Files view. Dropping a zip reuses F-403's zip import. From F-111: there is no create, delete or rename file command yet. From F-202: IndexedDB schema v1 stores text only; binary files need a schema version bump (ADR 0045)."
+    },
+    {
+      "id": "F-211",
+      "milestone": "M8",
+      "description": "More project templates: an nf-core-style skeleton and Pipeline composition, typed, documented and lint-clean.",
+      "spec": [
+        "UX-60",
+        "LA-11",
+        "LA-40",
+        "LA-41",
+        "LA-42",
+        "LA-43",
+        "LA-50"
+      ],
+      "depends_on": [
+        "F-203"
+      ],
+      "steps": [
+        "Create from each new template; the canvas shows the expected nodes and matches its approved visual baseline",
+        "Oracle job: every new template passes `nextflow lint` and `nextflow run -stub`",
+        "Every new template has doc comments on all processes and workflows, and schema descriptions for all parameters (no documentation suggestions)"
+      ],
+      "passes": false,
+      "notes": "Split from F-203 on 2026-11-22 when Q6 was answered (ADR 0047); deferred past v0.1 (ADR 0030). The nf-core skeleton needs plugins (nf-schema, utils) that the offline oracle can't fetch, and nf-core's typed module conventions are new (ADR 0007)."
     },
     {
       "id": "F-301",
@@ -915,7 +939,7 @@
         "Docs oracle: nf-docs JSON for the result contains every description"
       ],
       "passes": false,
-      "notes": "From F-206: the details description is the doc comment's text before its first tag (`docSummary`); replace it with the comment parser and add per-port descriptions."
+      "notes": "From F-203: templates produce no LA-54 suggestion; the `lang-2610` template test checks doc comments until the engine does.From F-206: the details description is the doc comment's text before its first tag (`docSummary`); replace it with the comment parser and add per-port descriptions."
     },
     {
       "id": "F-312",
@@ -932,7 +956,7 @@
         "A fresh process from the palette shows a documentation suggestion; filling the description clears it"
       ],
       "passes": false,
-      "notes": ""
+      "notes": "From F-203: templates produce no documentation suggestion; when this lands, turn the template test's doc-comment check into an engine check."
     },
     {
       "id": "F-401",
@@ -956,7 +980,7 @@
         "The report lists parse failures and legacy share"
       ],
       "passes": false,
-      "notes": "From F-113: load an imported project with getEngine().open(request, onProgress) or getEngine().writeFiles(files). From F-202: IndexedDB schema v1 stores text only; binary imports need a schema version bump (ADR 0045)."
+      "notes": "From F-113: load an imported project with getEngine().open(request, onProgress) or getEngine().writeFiles(files). From F-202: IndexedDB schema v1 stores text only; binary imports need a schema version bump (ADR 0045). From F-203: a third radio in the New project dialog's route group can hold Import. Projects don't record their template; F-401 may add `{kind: \"template\", id, version}` as a project source (a stored-format change, ADR 0045)."
     },
     {
       "id": "F-402",
@@ -996,7 +1020,7 @@
         "A zip exceeding the limits is refused with a clear message"
       ],
       "passes": false,
-      "notes": "From F-008 (S4): codeload.github.com only allows https://render.githubusercontent.com, so zip import is a file upload; no GitHub archive URL can be fetched in the browser. From F-113: load an imported project with getEngine().open(request, onProgress) or getEngine().writeFiles(files). From F-202: IndexedDB schema v1 stores text only; binary files in a zip need a schema version bump (ADR 0045)."
+      "notes": "From F-008 (S4): codeload.github.com only allows https://render.githubusercontent.com, so zip import is a file upload; no GitHub archive URL can be fetched in the browser. From F-113: load an imported project with getEngine().open(request, onProgress) or getEngine().writeFiles(files). From F-202: IndexedDB schema v1 stores text only; binary files in a zip need a schema version bump (ADR 0045). From F-203: zip import can join the New project dialog's route group."
     },
     {
       "id": "F-404",
@@ -1129,7 +1153,7 @@
         "Drop it again: the bundle is not duplicated"
       ],
       "passes": false,
-      "notes": "From F-005 (S1): typed workflows may call legacy registry modules across files with no warning; tuple inputs as tuple(...), outputs by assignment (LA-14). .module-info isn't written until its checksum algorithm is verified with the oracle (ADR 0009 spike result). From F-105: registry includes need modules/<scope>/<name>/main.nf and meta.yml, under the project root or, for scripts under a modules/ directory, under that directory (nested vendoring); .module-info isn't needed to resolve (ADR 0034). From F-501: modules/<name>/<version>.json holds every file of the registry bundle (base64 for non-UTF-8), the include name (component), the pinned requires (each present as its own bundle) and the registry tar.gz checksum; .module-info records the installed directory's checksum (ADR 0009 spike result), which F-504 computes. From F-112: LA-14 tuple arity is checked at connection time here or in F-302; nextflow lint doesn't check it."
+      "notes": "From F-005 (S1): typed workflows may call legacy registry modules across files with no warning; tuple inputs as tuple(...), outputs by assignment (LA-14). .module-info isn't written until its checksum algorithm is verified with the oracle (ADR 0009 spike result). From F-105: registry includes need modules/<scope>/<name>/main.nf and meta.yml, under the project root or, for scripts under a modules/ directory, under that directory (nested vendoring); .module-info isn't needed to resolve (ADR 0034). From F-501: modules/<name>/<version>.json holds every file of the registry bundle (base64 for non-UTF-8), the include name (component), the pinned requires (each present as its own bundle) and the registry tar.gz checksum; .module-info records the installed directory's checksum (ADR 0009 spike result), which F-504 computes. From F-112: LA-14 tuple arity is checked at connection time here or in F-302; nextflow lint doesn't check it. From F-203: both templates are typed and use local modules only, so a registry insert into a template project is the first registry include."
     },
     {
       "id": "F-505",
@@ -1187,7 +1211,7 @@
         "An unknown option in an imported config is kept and flagged"
       ],
       "passes": false,
-      "notes": "From F-103: the config AST is syntactic. Profiles, params and env are ConfigBlocks; selectors are ConfigSelector with the kind as written; plugins is ConfigApplyBlock; mapping to catalogue/config.json is F-601's. From F-105: FI-05 links come from FileModel.includes (config includes with file targets); external sources (expressions, URLs) have no link."
+      "notes": "From F-103: the config AST is syntactic. Profiles, params and env are ConfigBlocks; selectors are ConfigSelector with the kind as written; plugins is ConfigApplyBlock; mapping to catalogue/config.json is F-601's. From F-105: FI-05 links come from FileModel.includes (config includes with file targets); external sources (expressions, URLs) have no link. From F-203: templates set no `manifest.name`; the config forms are where a user sets it."
     },
     {
       "id": "F-602",
@@ -1283,7 +1307,7 @@
         "Import a pipeline: no docs files are added until Add docs publishing is used"
       ],
       "passes": false,
-      "notes": ""
+      "notes": "From F-203: the New project dialog sends `NewProject.publishDocs` (checked by default), which does nothing yet; F-606 writes the FI-40 stubs when it is set."
     },
     {
       "id": "F-607",
@@ -1310,7 +1334,7 @@
         "Docs oracle: `nf-metro validate` passes on every template's generated map"
       ],
       "passes": false,
-      "notes": "From F-010 (S5): nf-metro renders in the browser with no patches (ADR 0013 spike result): self-host Pyodide and five wheels (nf-metro, lark, drawsvg, networkx by URL, Pillow), lazy-load the worker with a boot timeout, add 'wasm-unsafe-eval' to netlify.toml, set Pyodide's package base URL (its default CDN string would trip IO-41), add licences.md entries, and delete spikes/s5-nf-metro/. From F-011: on Pages workers aren't under the meta CSP, so no `'wasm-unsafe-eval'` is needed for Pyodide in a worker; add it to `scripts/security-policy.ts` only if the document compiles WebAssembly. Take `indexURL` from `BASE_URL`. Whether github.io serves `.wasm` as `application/wasm` is unconfirmed. From F-206: the FI-55 metro map can sit in the entry workflow's summary."
+      "notes": "From F-010 (S5): nf-metro renders in the browser with no patches (ADR 0013 spike result): self-host Pyodide and five wheels (nf-metro, lark, drawsvg, networkx by URL, Pillow), lazy-load the worker with a boot timeout, add 'wasm-unsafe-eval' to netlify.toml, set Pyodide's package base URL (its default CDN string would trip IO-41), add licences.md entries, and delete spikes/s5-nf-metro/. From F-011: on Pages workers aren't under the meta CSP, so no `'wasm-unsafe-eval'` is needed for Pyodide in a worker; add it to `scripts/security-policy.ts` only if the document compiles WebAssembly. Take `indexURL` from `BASE_URL`. Whether github.io serves `.wasm` as `application/wasm` is unconfirmed. From F-203: the metro map checkbox in the New project dialog is F-607's; the metro title comes from `manifest.name`, which templates don't set. From F-206: the FI-55 metro map can sit in the entry workflow's summary."
     },
     {
       "id": "F-701",
@@ -1333,7 +1357,7 @@
         "axe reports no violations on the main screens"
       ],
       "passes": false,
-      "notes": "From F-201: drag-to-resize columns needs a single-pointer alternative for WCAG 2.5.7 (keyboard resizing alone doesn't satisfy it). From F-205: the F shortcut for fit view, keyboard parity for edge tooltips, and the canvas ariaLabelConfig and node descriptions need an audit. From F-206: announce selection changes to screen readers; Enter and Space select a focused node, Escape clears."
+      "notes": "From F-201: drag-to-resize columns needs a single-pointer alternative for WCAG 2.5.7 (keyboard resizing alone doesn't satisfy it). From F-205: the F shortcut for fit view, keyboard parity for edge tooltips, and the canvas ariaLabelConfig and node descriptions need an audit. From F-203: audit the New project dialog's two radio groups and its focus order; Hello world is a small typed project for keyboard tests. From F-206: announce selection changes to screen readers; Enter and Space select a focused node, Escape clears."
     },
     {
       "id": "F-702",

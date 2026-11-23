@@ -120,6 +120,15 @@ export function evaluateLint(spec: LintSpec, result: ExecResult): Evaluation {
       }
     }
   }
+  if (spec.clean && warnings.length > 0) {
+    const quoted = warnings
+      .slice(0, 3)
+      .map((w) => `"${w}"`)
+      .join(", ");
+    problems.push(
+      `lint is not clean: ${warnings.length} warning(s), first ${quoted}`,
+    );
+  }
   return { actual, matched: problems.length === 0, problems, errors, warnings };
 }
 

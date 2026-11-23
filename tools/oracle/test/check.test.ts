@@ -98,3 +98,30 @@ describe("F-005 checks", () => {
     expect(r.actual).toBe("ok");
   });
 });
+
+describe("F-203 lint.clean", () => {
+  const lintOut = (warnings: string[]) =>
+    JSON.stringify(
+      { errors: [], warnings: warnings.map((message) => ({ message })) },
+      null,
+      2,
+    );
+  const ok = (stdout: string) => ({
+    status: 0,
+    signal: null,
+    stdout,
+    stderr: "",
+    durationMs: 1,
+  });
+
+  it("F-203: lint.clean fails a case whose lint reports a warning, and passes one without", () => {
+    const spec = { expect: "ok" as const, errors: [], clean: true };
+    const dirty = evaluateLint(spec, ok(lintOut(["hmm"])));
+    expect(dirty.matched).toBe(false);
+    expect(dirty.problems.join(" ")).toContain("hmm");
+    expect(evaluateLint(spec, ok(lintOut([]))).matched).toBe(true);
+    expect(
+      evaluateLint({ expect: "ok", errors: [] }, ok(lintOut(["hmm"]))).matched,
+    ).toBe(true);
+  });
+});

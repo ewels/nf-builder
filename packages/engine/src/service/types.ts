@@ -15,6 +15,7 @@ import type {
 } from "@nf-builder/lang-core";
 import type { NodeDetails } from "../details/types";
 import type { ProjectFile } from "../model/project";
+import type { TemplateList } from "../templates";
 
 export interface OpenRequest {
   readonly version: string;
@@ -92,6 +93,8 @@ export interface NodeDetailsResult {
 
 export interface EngineApi {
   palette(version: string): Promise<PaletteView>;
+  /** The pack's project templates for a version, without file text (F-203). Needs no open project. */
+  templates(version: string): Promise<TemplateList>;
   open(
     request: OpenRequest,
     onProgress?: (progress: LoadProgress) => void,

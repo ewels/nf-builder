@@ -21,6 +21,7 @@ import type { ModelEvent } from "../model/project";
 import { installedPacks } from "../packs";
 import { loadPalette } from "../palette";
 import { createProjector, type Projector } from "../projection/project";
+import { templateList } from "../templates";
 import type {
   ApplyOutcome,
   DiagnosticsResult,
@@ -169,6 +170,7 @@ export function createEngineService(
 
   return {
     palette: (version) => serial(() => loadPalette(version)),
+    templates: (version) => serial(() => templateList(version)),
 
     open: (request, onProgress) =>
       serial(async (): Promise<ProjectSummary> => {
