@@ -1,4 +1,4 @@
-import { expect, type Page, test } from "@playwright/test";
+import { expect, type Locator, type Page, test } from "@playwright/test";
 import { VISUAL_TAG } from "./browsers.ts";
 import {
   canvasReady,
@@ -81,6 +81,17 @@ test("F-206 UX-24: edges touching the selected node are highlighted until the se
       getComputedStyle(el).strokeWidth,
     ]);
   expect(stroke).toEqual(["rgb(47, 95, 208)", "3px"]);
+  // highlighted edges paint above other edges but not above nodes (no elevation on select)
+  const zIndex = (target: Locator, selector?: string) =>
+    target.evaluate(
+      (el, closest) =>
+        getComputedStyle(closest ? (el.closest(closest) ?? el) : el).zIndex,
+      selector,
+    );
+  for (const path of await highlighted.all())
+    expect(await zIndex(path, "svg")).toBe("0");
+  const other = Number(await zIndex(node(page, NODE.counted)));
+  expect(other).toBeGreaterThanOrEqual(0);
   await selectNode(page, NODE.counted);
   await expect(node(page, NODE.greeted)).not.toHaveClass(/selected/);
   await expect(node(page, NODE.counted)).toHaveClass(/selected/);
