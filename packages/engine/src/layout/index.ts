@@ -7,6 +7,20 @@ export {
   type WorkflowPair,
 } from "./carry";
 export {
+  ELK_LAYOUT_OPTIONS,
+  type ElkEdgeIn,
+  type ElkGraphIn,
+  type ElkGraphOut,
+  type ElkNodeIn,
+  type ElkPortIn,
+  elkGraph,
+  elkPositions,
+  layoutSelection,
+  placeNodes,
+  unplaced,
+  withPositions,
+} from "./place";
+export {
   EMPTY_LAYOUT,
   formatLayout,
   LAYOUT_MIGRATIONS,

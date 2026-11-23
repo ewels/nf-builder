@@ -6,7 +6,7 @@ import { matchNodes } from "../../src/layout";
 import { buildCommand, reset, sequenceArb } from "../edit/harness";
 import { stateFor } from "../edit/helpers";
 import { readTree } from "../model/read-tree";
-import { hintsOf, type Snapshot, seedLayout, snapshot, step } from "./helpers";
+import { hintsOf, seedLayout, snapshot, step } from "./helpers";
 
 const root = new URL("../../../../", import.meta.url).pathname;
 const runs = Number(process.env.F207_RUNS ?? 25);

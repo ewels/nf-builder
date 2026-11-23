@@ -11,7 +11,6 @@ import { perturbWhitespace } from "../projection/whitespace";
 import {
   entry,
   fixtureState,
-  hintsOf,
   seedLayout,
   snapshot,
   step,
