@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Pipeline parameters",
+  "description": "The parameters of the Hello world pipeline.",
+  "type": "object",
+  "$defs": {
+    "greeting_options": {
+      "title": "Greeting options",
+      "type": "object",
+      "description": "What the pipeline writes.",
+      "properties": {
+        "greeting": {
+          "type": "string",
+          "default": "Hello, world!",
+          "description": "The greeting to write to the output file."
+        }
+      }
+    }
+  },
+  "allOf": [{ "$ref": "#/$defs/greeting_options" }]
+}

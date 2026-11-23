@@ -491,7 +491,9 @@ test("F-205 F-202 UX-20 IO-01: a project created in the UI shows its canvas, and
   await page.goto("./");
   await expect(switcher(page)).toBeEnabled();
   await createProjectInUi(page, "Canvas project");
-  await expect(page.locator(".canvas-area")).toContainText("No workflow open");
+  // F-203: Start blank stores the blank template, whose entry workflow already shows its params node.
+  await canvasReady(page);
+  await expect(node(page, "main.nf#/:params")).toBeVisible();
   await writeMain(page);
   await canvasReady(page);
   await expect(page.getByRole("tab", { name: "main.nf" })).toHaveAttribute(

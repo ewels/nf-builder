@@ -23,6 +23,10 @@ export interface NewProject {
   readonly name: string;
   readonly languageVersion: string;
   readonly files: readonly ProjectFile[];
+  /** A template id from the pack, or the engine's `BLANK_TEMPLATE` (F-203): the project starts with that template's files, so `files` must be empty. */
+  readonly template?: string;
+  /** The Publish docs to GitHub Pages choice (UX-60). Carried with the request; it has no effect until F-606. */
+  readonly publishDocs?: boolean;
 }
 
 /** One file write: a `null` text deletes the file. */
@@ -38,6 +42,11 @@ export interface SaveState {
 }
 
 export interface WorkspaceStatus {
+  /**
+   * Counts the statuses the worker has pushed. Pushes and call replies travel on different ports and can overtake each
+   * other, so the page ignores a status older than one it has applied.
+   */
+  readonly seq: number;
   readonly storage: "starting" | "ready" | "unavailable";
   readonly storageError: string | null;
   readonly projects: readonly ProjectMeta[];
@@ -55,6 +64,7 @@ export interface WorkspaceStatus {
 
 /** The status before the database has opened, on both sides of the bridge. */
 export const INITIAL_STATUS: WorkspaceStatus = {
+  seq: 0,
   storage: "starting",
   storageError: null,
   projects: [],
@@ -64,10 +74,16 @@ export const INITIAL_STATUS: WorkspaceStatus = {
   save: { status: "saved", error: null },
 };
 
+/** What `openProject` returns: the summary, and the `seq` of the status that made the project current. */
+export interface OpenedProject {
+  readonly summary: ProjectSummary;
+  readonly seq: number;
+}
+
 export interface WorkspaceApi extends EngineApi {
   watch(listener: (status: WorkspaceStatus) => void): Promise<WorkspaceStatus>;
   createProject(input: NewProject): Promise<ProjectMeta>;
-  openProject(id: string): Promise<ProjectSummary>;
+  openProject(id: string): Promise<OpenedProject>;
   renameProject(id: string, name: string): Promise<ProjectMeta>;
   deleteProject(id: string): Promise<void>;
   flush(): Promise<SaveState>;

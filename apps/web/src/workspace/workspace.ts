@@ -7,7 +7,7 @@ import {
   type EngineRefusal,
   installedPackVersions,
   type ProjectChange,
-  type ProjectSummary,
+  templateFiles,
 } from "@nf-builder/engine";
 import { createAutosaver, type Timer } from "./autosave";
 import type { ProjectDb } from "./project-db";
@@ -15,6 +15,7 @@ import { normaliseProjectName } from "./project-name";
 import {
   INITIAL_STATUS,
   type NewProject,
+  type OpenedProject,
   type ProjectMeta,
   type WorkspaceApi,
   type WorkspaceStatus,
@@ -50,7 +51,7 @@ export function createWorkspace(options: WorkspaceOptions): WorkspaceApi {
   let status = INITIAL_STATUS;
 
   const push = (patch: Partial<WorkspaceStatus>) => {
-    status = { ...status, ...patch };
+    status = { ...status, ...patch, seq: status.seq + 1 };
     try {
       // across Comlink the listener returns a promise; a dead listener must not break the workspace
       Promise.resolve(listener?.(status)).catch(() => undefined);
@@ -110,6 +111,7 @@ export function createWorkspace(options: WorkspaceOptions): WorkspaceApi {
 
   return {
     palette: (version) => engine.palette(version),
+    templates: (version) => engine.templates(version),
     project: (path, workflow) => engine.project(path, workflow),
     diagnostics: () => engine.diagnostics(),
     readFile: (path) => engine.readFile(path),
@@ -149,6 +151,12 @@ export function createWorkspace(options: WorkspaceOptions): WorkspaceApi {
           throw new Error("A project name needs 1 to 100 characters.");
         if (!installedPackVersions().includes(input.languageVersion))
           throw new Error(`No language pack for ${input.languageVersion}.`);
+        if (input.template !== undefined && input.files.length > 0)
+          throw new Error("A template can't be combined with files.");
+        const files =
+          input.template === undefined
+            ? input.files
+            : await templateFiles(input.languageVersion, input.template);
         const time = now();
         const meta: ProjectMeta = {
           id: newId(),
@@ -158,13 +166,13 @@ export function createWorkspace(options: WorkspaceOptions): WorkspaceApi {
           updatedAt: time,
           openedAt: time,
         };
-        await store.createProject(meta, input.files);
+        await store.createProject(meta, files);
         await refresh();
         return meta;
       }),
 
     openProject: (id) =>
-      serial(async (): Promise<ProjectSummary> => {
+      serial(async (): Promise<OpenedProject> => {
         const store = needDb();
         await autosaver.flush();
         const stored = await store.readProject(id);
@@ -189,7 +197,7 @@ export function createWorkspace(options: WorkspaceOptions): WorkspaceApi {
             opening: null,
             projects: await store.listProjects(),
           });
-          return summary;
+          return { summary, seq: status.seq };
         } catch (error) {
           await engine.close().catch(() => undefined);
           push({

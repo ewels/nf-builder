@@ -500,6 +500,41 @@ html.is-resizing body * {
   border-radius: 6px;
 }
 
+.new-project-dialog {
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.dialog-group {
+  margin: 0 0 var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+}
+
+.dialog-choice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.dialog-description {
+  flex-basis: 100%;
+  margin-left: 22px;
+  font-size: 12px;
+}
+
+.dialog-projects {
+  margin-top: var(--space-3);
+}
+
+.dialog-projects h3 {
+  margin: 0 0 var(--space-1);
+  font-size: 13px;
+}
+
 .dialog-error {
   margin: var(--space-2) 0 0;
   color: #b42318;

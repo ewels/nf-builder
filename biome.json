@@ -13,6 +13,8 @@
       "!packages/lang-*/src/generated",
       "!packages/lang-*/catalogue",
       "!packages/lang-*/palette.json",
+      "!packages/lang-*/templates.json",
+      "!packages/lang-*/templates",
       "!tools/registry-snapshot/test/fixtures/recorded",
       "!tools/registry-snapshot/test/fixtures/expected"
     ]

@@ -12,14 +12,25 @@ import {
   type WorkspaceApi,
   type WorkspaceStatus,
 } from "../workspace/types";
+import type { NewProjectRequest, NewProjectRoute } from "./new-project-dialog";
 import {
   nearQuota,
   requestPersistence,
   type StorageUsage,
   storageUsage,
 } from "./storage-health";
+import { requestTemplates } from "./templates";
+
+/** The dialog that is open, if any; it lives here so the header can open it (F-203). */
+export type ProjectDialog =
+  | { readonly kind: "new"; readonly route: NewProjectRoute }
+  | { readonly kind: "rename" }
+  | { readonly kind: "delete" };
 
 interface ProjectUiState {
+  readonly dialog: ProjectDialog | null;
+  /** The element that had focus when the dialog was requested; focus returns to it on close (QA-10, WCAG 2.4.3). */
+  readonly opener: HTMLElement | null;
   readonly status: WorkspaceStatus;
   /** Set while usage is at or above the warning fraction. */
   readonly storageWarning: StorageUsage | null;
@@ -29,7 +40,9 @@ interface ProjectUiState {
 
 interface ProjectActions {
   start(): Promise<void>;
-  create(name: string): Promise<void>;
+  create(request: NewProjectRequest): Promise<void>;
+  showDialog(dialog: ProjectDialog): void;
+  closeDialog(): void;
   open(id: string): Promise<void>;
   rename(id: string, name: string): Promise<void>;
   remove(id: string): Promise<void>;
@@ -38,6 +51,8 @@ interface ProjectActions {
 export interface ProjectStoreDeps {
   readonly workspace: () => WorkspaceApi;
   readonly palette: (version: string) => Promise<unknown>;
+  /** The template list, requested up front like the palette so the New project dialog finds it ready (F-203). */
+  readonly templates: (version: string) => Promise<unknown>;
   readonly storage: () => StorageManager | undefined;
   readonly languageVersion: string | undefined;
   /** The canvas (F-205): shown every project the worker opens, and told when the stored project is gone. */
@@ -60,6 +75,7 @@ export function createProjectStore(
 
   return createStore<ProjectUiState & ProjectActions>()((set, get) => {
     let checks = 0;
+    let newest = 0; // the highest status `seq` applied or reported by an open
     const checkUsage = async () => {
       const id = ++checks;
       const usage = await storageUsage(storage());
@@ -71,10 +87,14 @@ export function createProjectStore(
       if (granted !== null) set({ persisted: granted });
     };
     const onStatus = (status: WorkspaceStatus) => {
+      if (status.seq < newest) return; // overtaken: an older push arriving after a newer one
+      newest = status.seq;
       const savedNow =
         get().status.save.status === "saving" && status.save.status === "saved";
       set({ status });
-      if (status.current === null) deps.canvas.projectGone();
+      // a status sent while a project opens can arrive after that open's summary; it must not clear the canvas
+      if (status.current === null && status.opening === null)
+        deps.canvas.projectGone();
       if (savedNow) {
         void askPersistence();
         void checkUsage();
@@ -83,11 +103,15 @@ export function createProjectStore(
 
     /** Opens a stored project in the worker, then shows it on the canvas. */
     const openAndShow = async (id: string) => {
-      const summary = await deps.workspace().openProject(id);
+      const { summary, seq } = await deps.workspace().openProject(id);
+      // the reply is newer than any status pushed before it, even one still on its way
+      newest = Math.max(newest, seq);
       void deps.canvas.show(summary).catch(() => undefined);
     };
 
     return {
+      dialog: null,
+      opener: null,
       status: INITIAL_STATUS,
       storageWarning: null,
       persisted: null,
@@ -97,9 +121,14 @@ export function createProjectStore(
           // the palette request goes first: the worker's queue is serial and a long open would delay it (ADR 0029)
           if (deps.languageVersion !== undefined)
             void deps.palette(deps.languageVersion).catch(() => undefined);
+          if (deps.languageVersion !== undefined)
+            void deps.templates(deps.languageVersion).catch(() => undefined);
           const workspace = deps.workspace();
           const initial = await workspace.watch(onStatus);
-          set({ status: initial });
+          if (initial.seq >= newest) {
+            newest = initial.seq;
+            set({ status: initial });
+          }
           void checkUsage();
           const first = initial.projects[0];
           if (first && !initial.current && !initial.opening)
@@ -116,14 +145,31 @@ export function createProjectStore(
         }
       },
 
-      async create(name) {
-        if (deps.languageVersion === undefined)
-          throw new Error("No Nextflow version is installed.");
+      showDialog(dialog) {
+        // read before the dialog mounts: its own effects move focus into it
+        const active =
+          typeof document === "undefined" ? null : document.activeElement;
+        set({
+          dialog,
+          opener:
+            typeof HTMLElement !== "undefined" && active instanceof HTMLElement
+              ? active
+              : null,
+        });
+      },
+
+      closeDialog() {
+        set({ dialog: null });
+      },
+
+      async create(request) {
         const workspace = deps.workspace();
         const meta = await workspace.createProject({
-          name,
-          languageVersion: deps.languageVersion,
+          name: request.name,
+          languageVersion: request.languageVersion,
           files: [],
+          template: request.template,
+          publishDocs: request.publishDocs,
         });
         void askPersistence();
         void checkUsage();
@@ -152,6 +198,7 @@ function projectStore() {
   store ??= createProjectStore({
     workspace: getEngine,
     palette: requestPaletteView,
+    templates: requestTemplates,
     storage: () =>
       typeof navigator === "undefined" ? undefined : navigator.storage,
     languageVersion: installedPackVersions()[0],

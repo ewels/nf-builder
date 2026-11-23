@@ -22,7 +22,7 @@ export const switcher = (page: Page): Locator =>
 export const saveState = (page: Page): Locator =>
   page.getByRole("banner").locator(".save-state");
 
-/** Creates and opens a project through the header panel and the New project dialog. */
+/** Creates and opens a project through the header panel and the New project dialog, by Start blank (F-203). */
 export async function createProjectInUi(
   page: Page,
   name: string,
@@ -31,6 +31,7 @@ export async function createProjectInUi(
   await page.getByRole("button", { name: "New project…" }).click();
   const dialog = page.getByRole("dialog", { name: "New project" });
   await dialog.getByLabel("Name").fill(name);
+  await dialog.getByRole("radio", { name: "Start blank" }).check();
   await dialog.getByRole("button", { name: "Create" }).click();
   await dialog.waitFor({ state: "hidden" });
   await page
