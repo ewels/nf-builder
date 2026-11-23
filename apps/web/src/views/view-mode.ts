@@ -20,6 +20,17 @@ export function isEditableTarget(target: EventTarget | null): boolean {
   return typeof el?.closest === "function" && el.closest(EDITABLE) !== null;
 }
 
+/** Whether `target` is inside a dialog, or a modal dialog is open anywhere, so the page behind it is inert (UX-70). */
+function behindDialog(target: EventTarget | null): boolean {
+  const el = target as { closest?: (selector: string) => unknown } | null;
+  if (typeof el?.closest === "function" && el.closest("dialog") !== null)
+    return true;
+  return (
+    typeof document !== "undefined" &&
+    document.querySelector("dialog:modal") !== null
+  );
+}
+
 export interface ViewModeKey {
   readonly key: string;
   readonly ctrlKey: boolean;
@@ -35,7 +46,7 @@ export interface ViewModeKey {
 export function viewModeForKey(e: ViewModeKey): ViewMode | null {
   if (e.ctrlKey || e.metaKey || e.altKey) return null;
   if (e.repeat || e.isComposing || e.defaultPrevented) return null;
-  if (isEditableTarget(e.target)) return null;
+  if (isEditableTarget(e.target) || behindDialog(e.target)) return null;
   const key = e.key.toLowerCase();
   return VIEW_MODES.find((m) => m.key === key)?.mode ?? null;
 }

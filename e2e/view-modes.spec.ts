@@ -127,6 +127,26 @@ test("F-208 UX-27: a Code view that fails to load leaves the rest of the app wor
   await expect(page.locator(".canvas-area .react-flow")).toBeVisible();
 });
 
+test("F-208 UX-70 QA-11: G, S and C do nothing while the New project dialog is open", async ({
+  page,
+}) => {
+  await page.goto("./");
+  await openFixture(page);
+  await canvasReady(page);
+  await expect(mode(page)).toHaveAttribute("data-view-mode", "graph");
+  await switcher(page).click();
+  await page.getByRole("button", { name: "New project…" }).click();
+  const dialog = page.getByRole("dialog", { name: "New project" });
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole("button", { name: "Cancel" }).focus();
+  for (const key of ["c", "s"]) {
+    await page.keyboard.press(key);
+    await expect(mode(page)).toHaveAttribute("data-view-mode", "graph");
+  }
+  await page.keyboard.press("Escape");
+  await expect(dialog).toBeHidden();
+});
+
 const syncStatus = (page: Page) => page.locator(".code-pane-status");
 
 async function openSplit(page: Page): Promise<void> {

@@ -59,4 +59,8 @@ describe("F-208 view modes", () => {
     expect(isEditableTarget({} as EventTarget)).toBe(false);
     expect(viewModeForKey(press({ target: target("nothing") }))).toBe("graph");
   });
+
+  it("F-208 UX-70: a target inside a dialog gives no mode", () => {
+    expect(viewModeForKey(press({ target: target("dialog") }))).toBeNull();
+  });
 });
