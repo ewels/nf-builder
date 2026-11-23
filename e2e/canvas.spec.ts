@@ -330,11 +330,21 @@ test("F-205 step 3 UX-24: hovering an edge shows its type and source", async ({
     const path = page.locator(`.react-flow__edge-path.edge-${cls}`).first();
     const point = await path.evaluate((el) => {
       const p = el as unknown as SVGPathElement;
-      const pt = p.getPointAtLength(p.getTotalLength() / 2);
       const m = p.getScreenCTM();
       if (m === null) throw new Error("no CTM");
-      const s = new DOMPoint(pt.x, pt.y).matrixTransform(m);
-      return { x: s.x, y: s.y };
+      // the middle of the edge, or the nearest point to it that no node covers (F-207: laid out by ELK, an edge can pass behind a node)
+      const total = p.getTotalLength();
+      for (let step = 0; step <= 40; step++) {
+        const fraction =
+          0.5 + (step % 2 === 0 ? 1 : -1) * Math.ceil(step / 2) * 0.0125;
+        const pt = p.getPointAtLength(total * fraction);
+        const s = new DOMPoint(pt.x, pt.y).matrixTransform(m);
+        const top = document.elementFromPoint(s.x, s.y);
+        const edge = p.closest(".react-flow__edge");
+        if (edge !== null && top?.closest(".react-flow__edge") === edge)
+          return { x: s.x, y: s.y };
+      }
+      throw new Error("every point of the edge is covered");
     });
     await page.mouse.move(point.x, point.y);
   };
