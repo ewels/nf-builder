@@ -193,6 +193,11 @@ test("F-202 ADR-0002 IO-01: the stored records match the recorded IndexedDB form
   await page.goto("./");
   await expect(switcher(page)).toBeEnabled();
   await createProjectInUi(page, "Format");
+  // F-207: let the canvas place its nodes and save the sidecar before the edit, so the stored files are settled
+  await canvasReady(page);
+  await expect
+    .poll(() => readFile(page, ".nf-builder/layout.json"))
+    .not.toBeNull();
   await editReadme(page, "x\n", "y\n");
   await expect(saveState(page)).toHaveText("Saved");
   const db = await readStoredDatabase(page);
