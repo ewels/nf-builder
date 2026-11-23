@@ -34,7 +34,7 @@ Mockup: [docs/mockup](../mockup/README.md). Where the mockup and this file disag
 | UX-24 | Edges are channels. Queue channels are solid, value channels dashed, plain values dotted; an edge of unknown type is solid, muted and thinner (ADR 0046). Edges touching the selected node are highlighted. Hovering an edge shows its type and source. A type mismatch is drawn red, with the diagnostic on hover. |
 | UX-25 | Connecting: drag from an output port to an input port. Invalid targets dim while dragging. Connecting creates or rewrites the call's argument (ADR 0004). |
 | UX-26 | Standard canvas controls: pan, zoom, fit, minimap, marquee and shift-click multi-select, delete, copy and paste (within and across projects), undo and redo, auto-layout (ELK) for all or selected nodes. |
-| UX-27 | View mode toggle per tab: Graph, Split (graph plus live code of the workflow's file), Code. |
+| UX-27 | View mode toggle per tab: Graph, Split (graph plus live code of the workflow's file, half each), Code. Modes are kept per tab for the session. An edit that doesn't parse keeps its text in the editor, marked with its errors and a status line, while the graph and the saved file stay at the last version that parsed; the draft lasts until the page is reloaded or another project is opened (ADR 0048). |
 | UX-28 | Chains expand and collapse in place (ADR 0008). Code nodes show their full text on hover. |
 
 ## Details pane (right)

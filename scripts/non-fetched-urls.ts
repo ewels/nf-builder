@@ -67,4 +67,51 @@ export const NON_FETCHED_URLS: readonly NonFetchedUrl[] = [
     reason:
       "Documentation links kept in the palette data (palette.json `docs`); the app does not fetch them",
   },
+  {
+    match: "exact",
+    url: "https://code.visualstudio.com/docs/editor/codebasics#_multicursor-modifier",
+    reason:
+      "A docs link in a Monaco settings description (F-208); shown as text, never fetched",
+  },
+  {
+    match: "exact",
+    url: "https://code.visualstudio.com/docs/editor/codebasics#_find-and-replace",
+    reason:
+      "A docs link in a Monaco message (F-208); shown as text, never fetched",
+  },
+  {
+    match: "exact",
+    url: "https://github.com/microsoft/monaco-editor#faq",
+    reason:
+      "A link in a Monaco console warning (F-208); logged as text, never fetched",
+  },
+  {
+    match: "exact",
+    url: "https://github.com/microsoft/vscode/issues/new",
+    reason:
+      "Monaco's product-configuration report-issue URL (F-208); never opened or fetched by the app",
+  },
+  {
+    match: "exact",
+    url: "https://github.com/microsoft/vscode/blob/main/LICENSE.txt",
+    reason:
+      "Monaco's product-configuration licence URL (F-208); never opened or fetched by the app",
+  },
+  {
+    match: "exact",
+    url: "https://github.com/markedjs/marked.",
+    reason:
+      "Text in a marked error message inside Monaco (F-208); never fetched",
+  },
+  {
+    match: "exact",
+    url: "https://microsoft.com",
+    reason: "Sample markdown in a Monaco string helper (F-208); never fetched",
+  },
+  {
+    match: "exact",
+    url: "https://github.com/microsoft/vscode/issues/103170",
+    reason:
+      "A comment in CSS inside a JavaScript string that Monaco injects for its menus (F-208); never fetched",
+  },
 ];

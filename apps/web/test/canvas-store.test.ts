@@ -281,6 +281,139 @@ describe("F-205 canvas store", () => {
   });
 });
 
+describe("F-208 view mode per tab", () => {
+  it("F-208 UX-27 AR-30: tabs open in Graph mode; setMode changes only that tab, and selecting a tab keeps its mode", async () => {
+    const wf = [ref("main.nf", null), ref("lib.nf", "LIB")];
+    const store = createCanvasStore(() => fake(wf).engine);
+    await store.getState().open(request);
+    await store.getState().openWorkflow("lib.nf", "LIB");
+    const modes = () => store.getState().tabs.map((t) => t.mode);
+    expect(modes()).toEqual(["graph", "graph"]);
+    store.getState().setMode("lib.nf#LIB", "code");
+    expect(modes()).toEqual(["graph", "code"]);
+    store.getState().setMode("main.nf#", "split");
+    await store.getState().selectTab("lib.nf#LIB");
+    expect(modes()).toEqual(["split", "code"]);
+    await store.getState().selectTab("main.nf#");
+    expect(modes()).toEqual(["split", "code"]);
+    // an unknown tab changes nothing
+    store.getState().setMode("none#", "code");
+    expect(modes()).toEqual(["split", "code"]);
+  });
+});
+
+/** A fake whose `apply` answers from `outcome`, recording the revisions it was called with. */
+function applying(workflows: WorkflowRef[], outcome: unknown) {
+  const base = fake(workflows);
+  const revisions: number[] = [];
+  const engine = {
+    ...base.engine,
+    apply: async (_command: unknown, revision: number) => {
+      revisions.push(revision);
+      return outcome;
+    },
+  } as unknown as EngineApi;
+  return { engine, revisions, calls: base.calls };
+}
+
+const command = {
+  kind: "replaceFileText",
+  path: "main.nf",
+  text: "workflow {}\n",
+} as const;
+
+describe("F-208 apply", () => {
+  it("F-208 step 2: apply sends the command at the current revision, then adopts the new revision, records the changed paths and reloads the active projection", async () => {
+    const wf = [ref("main.nf", null)];
+    const change = {
+      ok: true,
+      revision: 2,
+      files: [{ path: "main.nf", text: "x" }],
+      remodelled: ["main.nf"],
+      workflows: wf,
+      patches: [],
+      inverse: [],
+    };
+    const { engine, revisions, calls } = applying(wf, change);
+    const store = createCanvasStore(() => engine);
+    await store.getState().open(request);
+    expect(store.getState().lastChange).toBeNull();
+    const outcome = await store.getState().apply(command);
+    expect(outcome.ok).toBe(true);
+    expect(revisions).toEqual([1]);
+    expect(store.getState().summary?.revision).toBe(2);
+    expect(store.getState().lastChange).toEqual({
+      revision: 2,
+      paths: ["main.nf"],
+    });
+    expect(calls).toEqual(["main.nf#", "main.nf#"]);
+  });
+
+  it("F-208 step 2 AR-24: a refused command leaves the revision and projection unchanged", async () => {
+    const wf = [ref("main.nf", null)];
+    const refusal = {
+      ok: false,
+      revision: 1,
+      code: "does-not-parse",
+      message: "no",
+      path: "main.nf",
+      problems: [],
+    };
+    const { engine, calls } = applying(wf, refusal);
+    const store = createCanvasStore(() => engine);
+    await store.getState().open(request);
+    const before = store.getState().content;
+    const outcome = await store.getState().apply(command);
+    expect(outcome).toEqual(refusal);
+    expect(store.getState().summary?.revision).toBe(1);
+    expect(store.getState().content).toBe(before);
+    expect(store.getState().lastChange).toBeNull();
+    expect(calls).toEqual(["main.nf#"]);
+  });
+
+  it("F-208: a refusal reporting a newer revision adopts it and reloads the projection", async () => {
+    const wf = [ref("main.nf", null)];
+    const { engine, calls } = applying(wf, {
+      ok: false,
+      revision: 5,
+      code: "stale",
+      message: "stale",
+      path: null,
+      problems: [],
+    });
+    const store = createCanvasStore(() => engine);
+    await store.getState().open(request);
+    await store.getState().apply(command);
+    expect(store.getState().summary?.revision).toBe(5);
+    expect(calls).toEqual(["main.nf#", "main.nf#"]);
+  });
+
+  it("F-208: with no project apply answers no-project", async () => {
+    const store = createCanvasStore(() => fake([]).engine);
+    const outcome = await store.getState().apply(command);
+    expect(outcome.ok === false && outcome.code).toBe("no-project");
+  });
+
+  it("F-208 ADR-0004 IO-01: show and projectGone start a new session, and an apply from an old one never reaches the engine", async () => {
+    const wf = [ref("main.nf", null)];
+    const { engine, revisions } = applying(wf, { ok: true });
+    const store = createCanvasStore(() => engine);
+    await store.getState().open(request);
+    const first = store.getState().session;
+    await store.getState().show(summaryOf(wf), "project");
+    const second = store.getState().session;
+    expect(second).toBeGreaterThan(first);
+    const stale = await store.getState().apply(command, first);
+    expect(stale.ok === false && stale.code).toBe("no-project");
+    expect(revisions).toEqual([]);
+    store.getState().projectGone();
+    expect(store.getState().session).toBeGreaterThan(second);
+    await store.getState().show(summaryOf(wf), "project");
+    await store.getState().apply(command, store.getState().session);
+    expect(revisions).toEqual([1]);
+  });
+});
+
 describe("F-206 selection", () => {
   const wf = [ref("main.nf", null), ref("lib.nf", "LIB")];
 
