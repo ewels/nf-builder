@@ -28,11 +28,14 @@ const entry: WorkflowRef = {
   typed: true,
   range,
 };
-const summaryAt = (revision: number): ProjectSummary => ({
+const summaryAt = (
+  revision: number,
+  workflows: WorkflowRef[] = [entry],
+): ProjectSummary => ({
   revision,
   version: "26.10",
   files: [],
-  workflows: [entry],
+  workflows,
 });
 const fix: QuickFix = {
   title: "Replace `Channel` with `channel`",
@@ -73,18 +76,28 @@ function fake(
     diagnose?: (call: number) => Promise<Diagnostic[]> | Diagnostic[];
     revision?: () => number;
     applyFix?: () => Promise<ApplyOutcome>;
+    workflows?: WorkflowRef[];
+    nodes?: unknown[];
   } = {},
 ) {
   const calls: string[] = [];
   let pulls = 0;
   const revision = options.revision ?? (() => 1);
   const engine = {
-    open: async () => summaryAt(revision()),
-    project: async () => {
-      calls.push("project");
+    open: async () => summaryAt(revision(), options.workflows),
+    project: async (path: string, workflow: string | null) => {
+      calls.push(`project ${path}#${workflow ?? ""}`);
+      const found = (options.workflows ?? [entry]).find(
+        (w) => w.path === path && w.name === workflow,
+      );
       return {
         revision: revision(),
-        projection: { workflow: entry, nodes: [], edges: [], statements: [] },
+        projection: {
+          workflow: found ?? entry,
+          nodes: options.nodes ?? [],
+          edges: [],
+          statements: [],
+        },
       };
     },
     diagnostics: async () => {
@@ -133,7 +146,7 @@ describe("problems store", () => {
     await workspace.getState().show(summaryAt(1));
     expect(problems.getState().status).toBe("loading");
     await settle();
-    expect(calls).toEqual(["project", "diagnostics"]);
+    expect(calls).toEqual(["project main.nf#", "diagnostics"]);
     const state = problems.getState();
     expect(state.status).toBe("ready");
     expect(state.revision).toBe(1);
@@ -271,5 +284,78 @@ describe("problems store", () => {
     expect(s().focus).toBe(problemKey(warning));
     s().close();
     expect(s()).toMatchObject({ open: false, focus: null });
+  });
+
+  const wide = { ...entry, range: { ...range, start: 60, end: 200 } };
+  const lib: WorkflowRef = {
+    ...entry,
+    path: "lib.nf",
+    name: "LIB",
+    range: { ...range, start: 0, end: 50 },
+  };
+  const numbers = {
+    id: "main.nf#/numbers",
+    kind: "call",
+    range: { ...range, start: 90, end: 110 },
+  };
+  const whole = {
+    id: "main.nf#/params",
+    kind: "params",
+    range: wide.range,
+  };
+  const shown = async (options: Parameters<typeof fake>[0]) => {
+    const made = setup({ workflows: [wide, lib], ...options });
+    await made.workspace.getState().open({ version: "26.10", files: [] });
+    await made.settle();
+    return made;
+  };
+
+  it("F-309 UX-30: goTo selects the innermost node of a diagnostic inside a workflow, without reloading an active tab, and asks the canvas to centre it", async () => {
+    const { workspace, problems, calls } = await shown({
+      nodes: [whole, numbers],
+    });
+    const before = calls.filter((c) => c.startsWith("project")).length;
+    await problems.getState().goTo(warning);
+    const s = workspace.getState();
+    expect(s.selected).toBe(numbers.id);
+    expect(s.focusNode).toMatchObject({ id: numbers.id });
+    expect(calls.filter((c) => c.startsWith("project"))).toHaveLength(before);
+    // the tab keeps its mode and the panel's state is left alone
+    expect(s.tabs.find((t) => t.id === s.activeTab)?.mode).toBe("graph");
+    expect(s.reveal).toBeNull();
+  });
+
+  it("F-309 UX-27: goTo reveals a diagnostic outside every node in its file's code, switching a Graph tab to Split; a file without workflows opens a Code-only file tab", async () => {
+    const { workspace, problems } = await shown({ nodes: [whole, numbers] });
+    // inside the workflow but in no node: legacy-workflow is a modelled workflow's own keyword
+    await problems.getState().goTo(suggestion);
+    let s = workspace.getState();
+    expect(s.selected).toBeNull();
+    expect(s.focusNode).toBeNull();
+    expect(s.tabs.find((t) => t.id === s.activeTab)?.mode).toBe("split");
+    expect(s.reveal).toMatchObject({ path: "main.nf", start: 70, end: 78 });
+    // a file with no workflow
+    const process: Diagnostic = {
+      ...suggestion,
+      path: "modules/local/legacy_count/main.nf",
+      range: { ...range, start: 8, end: 20 },
+      code: "legacy-process",
+    };
+    await problems.getState().goTo(process);
+    s = workspace.getState();
+    expect(s.activeTab).toBe("file:modules/local/legacy_count/main.nf");
+    expect(s.reveal).toMatchObject({
+      path: "modules/local/legacy_count/main.nf",
+      start: 8,
+      end: 20,
+    });
+    // a diagnostic in another workflow's file opens that tab
+    const elsewhere: Diagnostic = {
+      ...warning,
+      path: "lib.nf",
+      range: { ...range, start: 10, end: 12 },
+    };
+    await problems.getState().goTo(elsewhere);
+    expect(workspace.getState().activeTab).toBe("lib.nf#LIB");
   });
 });

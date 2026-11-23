@@ -1,4 +1,4 @@
-import type { DetailRow, NodeView } from "@nf-builder/engine";
+import type { DetailRow, Diagnostic, NodeView } from "@nf-builder/engine";
 import type { JSX } from "react";
 import type { DetailsContent } from "../canvas/canvas-store";
 import { DiagnosticList } from "./diagnostic-list";
@@ -32,9 +32,12 @@ function Rows({
 export function NodeDetailsView({
   view,
   details,
+  onShowProblems,
 }: {
   readonly view: NodeView;
   readonly details: DetailsContent;
+  /** Opens the problems panel on a problem of this node (F-309). */
+  readonly onShowProblems?: (first: Diagnostic) => void;
 }): JSX.Element {
   const ready = details.status === "ready" ? details.details : null;
   const declaration = ready?.declaration ?? null;
@@ -94,7 +97,10 @@ export function NodeDetailsView({
           )}
           <section className="details-section">
             <h4>Problems</h4>
-            <DiagnosticList diagnostics={ready?.diagnostics ?? []} />
+            <DiagnosticList
+              diagnostics={ready?.diagnostics ?? []}
+              onShowProblems={onShowProblems}
+            />
           </section>
         </>
       )}

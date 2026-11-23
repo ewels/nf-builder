@@ -47,3 +47,7 @@ export function engineDiagnostics(page: Page) {
     return result.diagnostics ?? [];
   });
 }
+
+/** The code editor's selection as `line:column-line:column` (its `data-selection`), or null with no editor. */
+export const editorSelection = (page: Page): Promise<string | null> =>
+  page.locator(".code-editor-host").getAttribute("data-selection");

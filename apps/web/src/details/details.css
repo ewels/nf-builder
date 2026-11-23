@@ -114,3 +114,19 @@
 .details-problem.is-suggestion .details-problem-severity {
   color: var(--color-suggestion);
 }
+
+.details-show-problems {
+  margin-top: 6px;
+  padding: 2px 8px;
+  font: inherit;
+  color: var(--color-accent);
+  background: none;
+  border: 1px solid currentColor;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.details-show-problems:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}

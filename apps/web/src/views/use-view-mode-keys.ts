@@ -6,8 +6,13 @@ import { viewModeForKey } from "./view-mode";
 export function useViewModeKeys(): void {
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      const { activeTab, setMode } = canvasStore.getState();
-      if (activeTab === null) return;
+      const { activeTab, tabs, setMode } = canvasStore.getState();
+      // a file tab shows Code only (F-309)
+      if (
+        activeTab === null ||
+        tabs.find((t) => t.id === activeTab)?.kind === "file"
+      )
+        return;
       const mode = viewModeForKey(event);
       if (mode === null) return;
       event.preventDefault();

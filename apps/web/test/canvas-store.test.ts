@@ -962,4 +962,93 @@ describe("F-209 history", () => {
     expect(refused.ok === false && refused.code).toBe("no-project");
     expect(log.filter((l) => l.startsWith("applyFix"))).toHaveLength(1);
   });
+
+  it("F-309 UX-20: openFile adds one Code-only file tab per path; activating it loads no projection and clears the selection", async () => {
+    const wf = [ref("main.nf", null)];
+    const { engine, calls } = fake(wf);
+    const store = createCanvasStore(() => engine);
+    await store.getState().open(request);
+    await store.getState().select("main.nf#/x");
+    expect(store.getState().selected).not.toBeNull();
+    const before = calls.length;
+    await store.getState().openFile("modules/local/legacy_count/main.nf");
+    await store.getState().openFile("modules/local/legacy_count/main.nf");
+    const s = store.getState();
+    const files = s.tabs.filter((t) => t.kind === "file");
+    expect(files).toEqual([
+      {
+        id: "file:modules/local/legacy_count/main.nf",
+        kind: "file",
+        path: "modules/local/legacy_count/main.nf",
+        workflow: null,
+        label: "legacy_count/main.nf",
+        title: "modules/local/legacy_count/main.nf",
+        mode: "code",
+      },
+    ]);
+    expect(s.activeTab).toBe(files[0]?.id);
+    expect(s.content.status).toBe("empty");
+    expect(s.selected).toBeNull();
+    expect(calls).toHaveLength(before);
+    // back to the workflow tab loads it again; the file tab stays
+    await store.getState().selectTab("main.nf#");
+    expect(store.getState().content.status).toBe("ready");
+    expect(store.getState().tabs.map((t) => t.id)).toEqual([
+      "main.nf#",
+      "file:modules/local/legacy_count/main.nf",
+    ]);
+    // another file name is the label as it is
+    await store.getState().openFile("nextflow.config");
+    expect(store.getState().tabs.at(-1)?.label).toBe("nextflow.config");
+  });
+
+  it("F-309 UX-20: openFile on a .nf file that has a workflow opens that workflow's canvas tab instead", async () => {
+    const wf = [ref("main.nf", null), ref("lib.nf", "LIB")];
+    const store = createCanvasStore(() => fake(wf).engine);
+    await store.getState().open(request);
+    await store.getState().openFile("lib.nf");
+    expect(store.getState().activeTab).toBe("lib.nf#LIB");
+    expect(store.getState().tabs.some((t) => t.kind === "file")).toBe(false);
+    expect(store.getState().content.status).toBe("ready");
+  });
+
+  it("F-309: a change with a file tab active re-projects nothing", async () => {
+    const wf = [ref("main.nf", null)];
+    const { engine, calls } = fake(wf);
+    const store = createCanvasStore(() => engine);
+    await store.getState().open(request);
+    await store.getState().openFile("conf/base.config");
+    const before = calls.length;
+    await store.getState().changed({
+      revision: 2,
+      workflows: wf,
+      files: [{ path: "conf/base.config" }],
+      history: EMPTY_HISTORY,
+    } as never);
+    expect(calls).toHaveLength(before);
+    expect(store.getState().activeTab).toBe("file:conf/base.config");
+    expect(store.getState().summary?.revision).toBe(2);
+  });
+
+  it("F-309 AR-30: revealCode and focusOn record requests with rising sequence numbers, holding offsets and ids, never text", async () => {
+    const store = createCanvasStore(() => fake([ref("main.nf", null)]).engine);
+    await store.getState().open(request);
+    expect(store.getState().reveal).toBeNull();
+    store.getState().revealCode("main.nf", { start: 3, end: 9 });
+    store.getState().revealCode("main.nf", { start: 3, end: 9 });
+    expect(store.getState().reveal).toEqual({
+      path: "main.nf",
+      start: 3,
+      end: 9,
+      seq: 2,
+    });
+    store.getState().focusOn("main.nf#/x");
+    store.getState().focusOn("main.nf#/x");
+    expect(store.getState().focusNode).toEqual({ id: "main.nf#/x", seq: 4 });
+    // sequence numbers keep rising across projects
+    await store.getState().show(summaryOf([ref("main.nf", null)]));
+    expect(store.getState().reveal).toBeNull();
+    store.getState().revealCode("main.nf", { start: 0, end: 1 });
+    expect(store.getState().reveal?.seq).toBe(5);
+  });
 });

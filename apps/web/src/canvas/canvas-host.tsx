@@ -17,6 +17,7 @@ export function CanvasHost(): JSX.Element {
   const setPortLabels = useWorkspace((s) => s.setPortLabels);
   const selected = useWorkspace((s) => s.selected);
   const select = useWorkspace((s) => s.select);
+  const focus = useWorkspace((s) => s.focusNode);
   if (summary === null)
     return (
       <div className="canvas-area">
@@ -34,6 +35,7 @@ export function CanvasHost(): JSX.Element {
             portLabels={portLabels}
             onPortLabelsChange={setPortLabels}
             selected={selected}
+            focus={focus}
             onSelect={(id) => void select(id)}
           />
         </Suspense>

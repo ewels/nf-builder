@@ -57,6 +57,7 @@ export function TabStripView({
               role="tab"
               id={workflowTabId(t.id)}
               className="workflow-tab"
+              title={t.title}
               aria-selected={activeTab === t.id}
               aria-controls="canvas-panel"
               tabIndex={activeTab === t.id ? 0 : -1}
@@ -68,7 +69,7 @@ export function TabStripView({
         </div>
       )}
       {controls}
-      {active === undefined ? null : (
+      {active === undefined || active.kind === "file" ? null : (
         <ViewModeToggle
           mode={active.mode}
           onChange={(mode) => onMode(active.id, mode)}

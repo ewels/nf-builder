@@ -39,6 +39,10 @@ interface PanelProps {
   /** The key of the problem whose fix is being applied. */
   readonly applying: string | null;
   readonly notice: string | null;
+  /** The key of a problem to focus when the panel shows (the details pane's link, F-309). */
+  readonly focus?: string | null;
+  /** Called once `focus` has been acted on, so the same request can come again. */
+  onFocused?(): void;
   onView(view: ProblemsView): void;
   onClose(): void;
   onGo(d: Diagnostic): void;
@@ -51,6 +55,8 @@ export function ProblemsPanelView({
   view,
   applying,
   notice,
+  focus = null,
+  onFocused,
   onView,
   onClose,
   onGo,
@@ -99,6 +105,16 @@ export function ProblemsPanelView({
       focusPart({ key: next, part: "go" });
     }
   });
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: acts once per focus request, on the rows then listed
+  useEffect(() => {
+    if (focus === null) return;
+    if (keys.includes(focus)) {
+      setActive({ key: focus, part: "go" });
+      focusPart({ key: focus, part: "go" });
+    }
+    onFocused?.();
+  }, [focus]);
 
   const onListKey = (event: KeyboardEvent<HTMLElement>) => {
     const target = event.target as HTMLElement;
@@ -251,6 +267,7 @@ export function ProblemsPanel(): JSX.Element | null {
   const view = useProblems((s) => s.view);
   const applying = useProblems((s) => s.applying);
   const notice = useProblems((s) => s.notice);
+  const focus = useProblems((s) => s.focus);
   const show = useProblems((s) => s.show);
   const close = useProblems((s) => s.close);
   const goTo = useProblems((s) => s.goTo);
@@ -262,6 +279,8 @@ export function ProblemsPanel(): JSX.Element | null {
       view={view}
       applying={applying}
       notice={notice}
+      focus={focus}
+      onFocused={() => show(view, null)}
       onView={(v) => show(v)}
       onClose={() => {
         close();

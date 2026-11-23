@@ -5,16 +5,18 @@ import {
   type ApplyOutcome,
   type Diagnostic,
   type EngineApi,
+  nodeAtRange,
   type ProblemSections,
   type ProblemsView,
   problemKey,
   problemSections,
-  problemsView,
+  problemTarget,
 } from "@nf-builder/engine";
 import { useStore } from "zustand";
 import { createStore, type StoreApi } from "zustand/vanilla";
 import {
   canvasStore,
+  tabFor,
   type WorkspaceActions,
   type WorkspaceState,
 } from "../canvas/canvas-store";
@@ -50,7 +52,10 @@ export interface ProblemsActions {
   /** Opens the panel on `view`, or closes it when it is already open there. */
   toggle(view: ProblemsView): void;
   close(): void;
-  /** Activates a problem. */
+  /**
+   * Activates a problem (F-309, UX-30): selects and centres its node; otherwise shows its code, in Split for a Graph tab
+   * or in a code-only tab for a file without workflows. Focus stays where it is, in the panel.
+   */
   goTo(d: Diagnostic): Promise<void>;
   /** Applies the problem's quick fix as one undo step; null when it has none or no diagnostics are held. */
   applyFix(d: Diagnostic): Promise<ApplyOutcome | null>;
@@ -177,9 +182,38 @@ export function createProblemsStore(options: {
         set({ open: false, focus: null });
       },
 
-      // navigation arrives with F-309 task 6; until then a problem opens its own tab
       async goTo(d) {
-        get().show(problemsView(d), problemKey(d));
+        const ws = () => workspace.getState();
+        const summary = ws().summary;
+        if (summary === null) return;
+        const range = { start: d.range.start, end: d.range.end };
+        const target = problemTarget(d, summary.workflows);
+        if (target.kind === "file") {
+          await ws().openFile(target.path);
+          ws().revealCode(target.path, range);
+          return;
+        }
+        // an active tab is not reloaded, so its selection and viewport are kept
+        if (
+          ws().activeTab !==
+          tabFor({ path: target.path, name: target.workflow }).id
+        )
+          await ws().openWorkflow(target.path, target.workflow);
+        const { content, tabs, activeTab } = ws();
+        const tab = tabs.find((t) => t.id === activeTab);
+        if (tab === undefined) return;
+        const node =
+          content.status === "ready"
+            ? nodeAtRange(content.projection, d.path, range)
+            : null;
+        if (node !== null) {
+          await ws().select(node);
+          ws().focusOn(node);
+          if (tab.mode !== "graph") ws().revealCode(d.path, range);
+          return;
+        }
+        if (tab.mode === "graph") ws().setMode(tab.id, "split");
+        ws().revealCode(d.path, range);
       },
 
       async applyFix(d) {

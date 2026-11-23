@@ -24,12 +24,16 @@ import { getEngine, onEngineChange } from "../engine/engine-client";
 import type { ViewMode } from "../views/view-mode";
 
 export interface WorkflowTab {
-  /** `<path>#<workflow>`, the empty name for the entry workflow (the projection key prefix, ADR 0036). */
+  /** `<path>#<workflow>`, the empty name for the entry workflow (the projection key prefix, ADR 0036); `file:<path>` for a file tab. */
   readonly id: string;
+  /** A workflow's canvas tab, or a code-only tab of a file (F-309, UX-20). */
+  readonly kind: "workflow" | "file";
   readonly path: string;
   /** Null for the entry workflow. */
   readonly workflow: string | null;
   readonly label: string;
+  /** The tooltip: the full path of a file tab. */
+  readonly title?: string;
   /** The view mode of this tab, for the session (AR-30, UX-27). */
   readonly mode: ViewMode;
 }
@@ -85,6 +89,15 @@ export interface WorkspaceState {
   readonly history: HistoryStatus;
   /** The last undo or redo result or refusal, for the history live region (F-209). */
   readonly historyNotice: string | null;
+  /** The last request to show a range of a file's code: offsets only, never text; `seq` rises with each (F-309). */
+  readonly reveal: {
+    readonly path: string;
+    readonly start: number;
+    readonly end: number;
+    readonly seq: number;
+  } | null;
+  /** The last request to centre a node of the active tab's canvas (F-309). */
+  readonly focusNode: { readonly id: string; readonly seq: number } | null;
 }
 
 export interface WorkspaceActions {
@@ -97,6 +110,15 @@ export interface WorkspaceActions {
   /** The engine changed the open project: re-project the active tab, or open the default workflow of a blank project. */
   changed(change: ProjectChange): Promise<void>;
   openWorkflow(path: string, workflow: string | null): Promise<void>;
+  /**
+   * Opens a code-only tab for a file, once per path, and shows it (F-309, UX-20). A `.nf` file that has a workflow opens
+   * that workflow's canvas tab instead. F-210, F-605 and F-601 open files through this.
+   */
+  openFile(path: string): Promise<void>;
+  /** Asks the file's code editor to select and scroll to a range; the editor shows it when it is mounted (F-309). */
+  revealCode(path: string, range: { start: number; end: number }): void;
+  /** Asks the active canvas to centre a node at its current zoom (F-309). */
+  focusOn(id: string): void;
   selectTab(id: string): Promise<void>;
   setMode(tabId: string, mode: ViewMode): void;
   setPortLabels(value: boolean): void;
@@ -143,12 +165,35 @@ export function defaultWorkflow(
 const fileName = (path: string): string =>
   path.slice(path.lastIndexOf("/") + 1);
 
+/** The tab label of a file: its name, with the folder too for the many `main.nf` of a project (`legacy_count/main.nf`). */
+function fileLabel(path: string): string {
+  const parts = path.split("/");
+  const name = parts.at(-1) ?? path;
+  return name === "main.nf" && parts.length > 1
+    ? `${parts.at(-2)}/${name}`
+    : name;
+}
+
+/** A code-only tab for a file (F-309, UX-20). */
+export function fileTabFor(path: string): WorkflowTab {
+  return {
+    id: `file:${path}`,
+    kind: "file",
+    path,
+    workflow: null,
+    label: fileLabel(path),
+    title: path,
+    mode: "code",
+  };
+}
+
 export function tabFor(ref: {
   readonly path: string;
   readonly name: string | null;
 }): WorkflowTab {
   return {
     id: `${ref.path}#${ref.name ?? ""}`,
+    kind: "workflow",
     path: ref.path,
     workflow: ref.name,
     label: ref.name ?? fileName(ref.path),
@@ -205,6 +250,8 @@ export function createCanvasStore(
     let generation = 0;
     // a details result for a superseded selection is dropped
     let selection = 0;
+    // sequence numbers of reveal and focus requests: never reset, so a late editor can tell a request it has seen
+    let requests = 0;
 
     // apply, undo and redo run one at a time, each at the revision the previous one produced
     let queue: Promise<unknown> = Promise.resolve();
@@ -222,6 +269,12 @@ export function createCanvasStore(
 
     async function load(tab: WorkflowTab, quiet = false): Promise<void> {
       const mine = ++generation;
+      // a file tab has no projection: its code pane reads the file itself
+      if (tab.kind === "file") {
+        clearSelection();
+        set({ activeTab: tab.id, content: EMPTY });
+        return;
+      }
       if (!quiet) clearSelection();
       // a refresh keeps the canvas on screen (and its viewport) until the new projection arrives
       set(
@@ -391,6 +444,8 @@ export function createCanvasStore(
       details: IDLE,
       history: EMPTY_HISTORY,
       historyNotice: null,
+      reveal: null,
+      focusNode: null,
 
       async open(request) {
         generation++;
@@ -414,6 +469,8 @@ export function createCanvasStore(
           lastChange: null,
           history: EMPTY_HISTORY,
           historyNotice: null,
+          reveal: null,
+          focusNode: null,
         });
         if (tab !== null) await load(tab);
       },
@@ -432,6 +489,8 @@ export function createCanvasStore(
           lastChange: null,
           history: EMPTY_HISTORY,
           historyNotice: null,
+          reveal: null,
+          focusNode: null,
         });
       },
 
@@ -467,6 +526,7 @@ export function createCanvasStore(
           },
         });
         const active = tabs.find((t) => t.id === activeTab);
+        if (active?.kind === "file") return;
         if (active !== undefined) {
           await load(active, true);
           const { selected } = get();
@@ -487,6 +547,31 @@ export function createCanvasStore(
         await load(tab);
       },
 
+      async openFile(path) {
+        const { summary } = get();
+        if (summary === null) return;
+        const inside = summary.workflows.filter((w) => w.path === path);
+        const workflow = inside.find((w) => w.name === null) ?? inside[0];
+        if (workflow !== undefined) {
+          await get().openWorkflow(path, workflow.name);
+          return;
+        }
+        const tab = fileTabFor(path);
+        if (!get().tabs.some((t) => t.id === tab.id))
+          set({ tabs: [...get().tabs, tab] });
+        await load(tab);
+      },
+
+      revealCode(path, range) {
+        set({
+          reveal: { path, start: range.start, end: range.end, seq: ++requests },
+        });
+      },
+
+      focusOn(id) {
+        set({ focusNode: { id, seq: ++requests } });
+      },
+
       async selectTab(id) {
         const tab = get().tabs.find((t) => t.id === id);
         if (tab !== undefined) await load(tab);
@@ -494,7 +579,9 @@ export function createCanvasStore(
 
       setMode(tabId, mode) {
         set({
-          tabs: get().tabs.map((t) => (t.id === tabId ? { ...t, mode } : t)),
+          tabs: get().tabs.map((t) =>
+            t.id === tabId && t.kind === "workflow" ? { ...t, mode } : t,
+          ),
         });
       },
 

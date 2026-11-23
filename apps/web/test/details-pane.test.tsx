@@ -204,6 +204,33 @@ describe("F-206 details pane", () => {
     );
   });
 
+  it('F-309 F-206 UX-30: a node with problems offers "Show in problems panel"; a clean node doesn\'t', () => {
+    const link = "Show in problems panel";
+    const withProblems = renderToStaticMarkup(
+      <NodeDetailsView
+        view={view}
+        details={ready}
+        onShowProblems={() => undefined}
+      />,
+    );
+    expect(withProblems).toContain(link);
+    // without the handler, as in the unit renders above, there is no button
+    expect(html(ready)).not.toContain(link);
+    const clean: DetailsContent = {
+      ...ready,
+      details: { ...details, diagnostics: [] },
+    };
+    expect(
+      renderToStaticMarkup(
+        <NodeDetailsView
+          view={view}
+          details={clean}
+          onShowProblems={() => undefined}
+        />,
+      ),
+    ).not.toContain(link);
+  });
+
   it("F-206 UX-31: the summary shows take, emit, calls and registry modules", () => {
     const summary: WorkflowSummary = {
       name: "SHOUT",

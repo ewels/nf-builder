@@ -1,10 +1,16 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { expect, test } from "@playwright/test";
-import { openFixture } from "./canvas.ts";
+import {
+  canvasReady,
+  node,
+  openBadDeclaration,
+  openFixture,
+} from "./canvas.ts";
 import { watchForCspViolations } from "./csp.ts";
 import { historyStatus } from "./history.ts";
 import {
+  editorSelection,
   engineDiagnostics,
   F309_FIXED,
   F309_FIXTURE,
@@ -164,4 +170,125 @@ test("F-309 UX-70 QA-11: the status bar, the panel's tabs, rows and fix buttons 
   await expect(statusCount(page, "problems")).toHaveAccessibleName(
     "No problems",
   );
+});
+
+test("F-309 UX-30: activating a problem inside a node selects and centres that node, and the details pane lists the problem", async ({
+  page,
+}) => {
+  await page.goto("./");
+  await openProblemsFixture(page);
+  await canvasReady(page);
+  await expect(problemsReady(page)).toBeVisible();
+  // pan away first, so the node is out of view
+  const pane = page.locator(".react-flow__pane");
+  const box = await pane.boundingBox();
+  if (box === null) throw new Error("no canvas pane");
+  await page.mouse.move(box.x + 40, box.y + 40);
+  await page.mouse.down();
+  await page.mouse.move(box.x + 40 + 900, box.y + 40 + 700, { steps: 8 });
+  await page.mouse.up();
+  const numbers = node(page, "main.nf#/numbers");
+  const canvas = page.locator(".workflow-canvas");
+  const inside = async () => {
+    const n = await numbers.boundingBox();
+    const c = await canvas.boundingBox();
+    if (n === null || c === null) return false;
+    return (
+      n.x >= c.x &&
+      n.y >= c.y &&
+      n.x + n.width <= c.x + c.width &&
+      n.y + n.height <= c.y + c.height
+    );
+  };
+  expect(await inside()).toBe(false);
+
+  await statusCount(page, "problems").click();
+  const go = problemRow(page, "deprecated-channel").locator(".problem-go");
+  await go.click();
+  await expect(numbers).toHaveClass(/selected/);
+  await expect.poll(inside).toBe(true);
+  await expect(page.locator(".details-name")).toHaveText("channel.of");
+  await expect(page.locator(".details-problem")).toContainText(
+    "to access channel factories is deprecated",
+  );
+  // the focus stays in the panel
+  await expect(go).toBeFocused();
+});
+
+test("F-309 UX-27: activating a problem outside every node shows its file's code in Split view with the problem selected", async ({
+  page,
+}) => {
+  await page.goto("./");
+  await openProblemsFixture(page);
+  await canvasReady(page);
+  await expect(problemsReady(page)).toBeVisible();
+  await statusCount(page, "suggestions").click();
+  const go = problemRow(page, "legacy-workflow").locator(".problem-go");
+  await go.click();
+  await expect(page.locator(".tab-panel")).toHaveAttribute(
+    "data-view-mode",
+    "split",
+  );
+  await expect.poll(() => editorSelection(page)).toBe("3:1-3:9");
+  await expect(go).toBeFocused();
+});
+
+test("F-309 UX-20: activating a problem in a file without a workflow opens a Code tab for that file at the problem", async ({
+  page,
+}) => {
+  await page.goto("./");
+  await openProblemsFixture(page);
+  await expect(problemsReady(page)).toBeVisible();
+  await statusCount(page, "suggestions").click();
+  const go = problemRow(page, "legacy-process").locator(".problem-go");
+  await go.click();
+  const tab = page.getByRole("tab", { name: "legacy_count/main.nf" });
+  await expect(tab).toHaveAttribute("aria-selected", "true");
+  await expect(tab).toHaveAttribute(
+    "title",
+    "modules/local/legacy_count/main.nf",
+  );
+  await expect(page.locator(".tab-panel")).toHaveAttribute(
+    "data-view-mode",
+    "code",
+  );
+  await expect(page.locator(".workflow-canvas")).toHaveCount(0);
+  await expect(page.getByRole("radiogroup", { name: "View mode" })).toHaveCount(
+    0,
+  );
+  await expect.poll(() => editorSelection(page)).toBe("1:9-1:21");
+  await expect(go).toBeFocused();
+  // G, S and C do nothing on a file tab
+  await page.locator("body").press("s");
+  await expect(page.locator(".tab-panel")).toHaveAttribute(
+    "data-view-mode",
+    "code",
+  );
+  // the workflow's tab is still there
+  await page.getByRole("tab", { name: "main.nf", exact: true }).click();
+  await expect(page.locator(".tab-panel")).toHaveAttribute(
+    "data-view-mode",
+    "graph",
+  );
+});
+
+test("F-309 LA-30: a syntax error is listed under Problems as an error and opens the code at its position", async ({
+  page,
+}) => {
+  await page.goto("./");
+  await openBadDeclaration(page);
+  await expect(problemsReady(page)).toBeVisible();
+  await statusCount(page, "problems").click();
+  const errors = problemsPanel(page).locator(".problem-row.is-error");
+  await expect(errors.first()).toContainText("Error");
+  const location =
+    (await errors.first().locator(".problem-location").textContent()) ?? "";
+  await errors.first().locator(".problem-go").click();
+  await expect(page.locator(".tab-panel")).toHaveAttribute(
+    "data-view-mode",
+    "split",
+  );
+  await expect
+    .poll(async () => (await editorSelection(page))?.split("-")[0])
+    .toBe(location);
 });
