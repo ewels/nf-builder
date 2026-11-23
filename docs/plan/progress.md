@@ -611,4 +611,18 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - The F-204 locator is narrowed to the generic region and F-011 step 2's test checks the app page only; neither assertion is weakened. The base-path test now tolerates only a missing `apps/web/public`.
   - Licences row for recorded registry data extended to the hand-written live fixtures.
   - The app-shell baseline is re-approved from CI (ADR 0021).
+
+## 2026-11-23 · F-209 · Claude (autonomous)
+- Did:
+  - Undo and redo in the engine worker: one step per command, groups for multi-command actions, limits, and clearing on raw writes. Every change reports the history's labels.
+  - Undo and Redo buttons in the tab strip, platform shortcuts that leave text fields, Monaco and dialogs alone, and a live region.
+  - The store flushes pending Code-view text before an undo, and captures the session when undo is pressed.
+- State: passing once CI is green with the re-approved tab-strip baselines.
+- Next: F-207 (merges after this and carries layout keys on undo), F-502, then F-403 and F-309.
+- Decisions:
+  - [ADR 0051](../adr/0051-undo-and-redo.md): history in the worker (amends ADR 0043's API), step and group model, limits of 100 steps and 8,000,000 units, shortcuts, controls, and the test hook's `apply` signature. It corrects ADR 0039's attribution: history is F-209's and autosave F-202's.
+  - AR-23 and UX-70 updated.
+  - `scope-change`: F-202 added to F-209's `depends_on`, and F-209 to F-309's.
+  - The tab-strip baselines are re-approved from CI (ADR 0021).
+  - Commit c594543 on the branch doesn't typecheck on its own; the squash merge hides it.
 - Blockers: none.

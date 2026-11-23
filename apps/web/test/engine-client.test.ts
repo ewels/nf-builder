@@ -136,6 +136,55 @@ describe("F-113 engine client", () => {
     close();
   });
 
+  it("F-209 ADR-0003: undo, redo, history and apply options cross the Comlink bridge", async () => {
+    const { engine, close } = connected();
+    expect(await engine.history()).toEqual({
+      undo: null,
+      redo: null,
+      undoCount: 0,
+      redoCount: 0,
+    });
+    const summary = await engine.open({ version, files });
+    const edit = (text: string) => ({
+      kind: "replaceFileText" as const,
+      path: "README.md",
+      text,
+    });
+    const one = await engine.apply(edit("# one\n"), summary.revision, {
+      group: "g",
+      label: "Grouped edit",
+    });
+    if (!one.ok) throw new Error(one.message);
+    const two = await engine.apply(edit("# two\n"), one.revision, {
+      group: "g",
+    });
+    if (!two.ok) throw new Error(two.message);
+    expect(two.history).toEqual({
+      undo: "Grouped edit",
+      redo: null,
+      undoCount: 1,
+      redoCount: 0,
+    });
+    const undone = await engine.undo(two.revision);
+    if (!undone.ok) throw new Error(undone.message);
+    expect(undone.label).toBe("Grouped edit");
+    expect(await engine.readFile("README.md")).toBe("# hi\n");
+    expect((await engine.history()).redoCount).toBe(1);
+    const redone = await engine.redo(undone.revision);
+    if (!redone.ok) throw new Error(redone.message);
+    expect(await engine.readFile("README.md")).toBe("# two\n");
+    expect(await engine.undo(redone.revision - 1)).toMatchObject({
+      ok: false,
+      code: "stale",
+    });
+    await engine.undo(redone.revision);
+    expect(await engine.undo(redone.revision + 1)).toMatchObject({
+      ok: false,
+      code: "no-history",
+    });
+    close();
+  });
+
   it("F-113: importing the client starts no worker", async () => {
     let touched = false;
     const original = Object.getOwnPropertyDescriptor(globalThis, "Worker");

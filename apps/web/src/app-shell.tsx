@@ -3,6 +3,7 @@ import type { JSX } from "react";
 import { type CanvasContent, useWorkspace } from "./canvas/canvas-store";
 import { DetailsHeader } from "./details/details-header";
 import { DetailsPane } from "./details/details-pane";
+import { useHistoryKeys } from "./history/use-history-keys";
 import { COLLAPSED_WIDTH, useLayout } from "./layout/layout-store";
 import { ProjectControls } from "./project/project-controls";
 import { saveLabel } from "./project/project-status";
@@ -33,6 +34,7 @@ export function canvasCounts(content: CanvasContent): {
 
 export function AppShell(): JSX.Element {
   useViewModeKeys();
+  useHistoryKeys();
   const left = useLayout((s) => s.left);
   const right = useLayout((s) => s.right);
   const leftWidth = left.collapsed ? COLLAPSED_WIDTH : left.width;

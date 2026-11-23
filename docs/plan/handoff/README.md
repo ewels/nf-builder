@@ -23,7 +23,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-206 details pane | merged, PR #45 | |
 | F-207 layout sidecar | `feat/F-207` (`/home/user/wt-F-207`) | Tasks 1–5 committed (engine layout, service, ELK worker); task 6 (canvas wiring) after F-208 merges. [plan](plan-F-207.md). |
 | F-208 view modes and Code | merged, PR #46 | |
-| F-209 undo and redo | not started | [plan](plan-F-209.md). After F-208. |
+| F-209 undo and redo | merged, PR #50 | |
 | F-309 problems panel | not started | [plan](plan-F-309.md). After F-208 and F-209. |
 | F-502 registry client | merged, PR #48 | |
 | Parser error position | `fix/parser-error-position` | A blank line before `stub:` or `emit:` moved a later syntax error to that keyword (antlr4ng and Groovy's optimised ANTLR runtime differ); fix building. |
@@ -34,7 +34,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 
 Branches are stacked: `feat/F-108` → `feat/F-107`; `feat/F-111` also merges F-107. Open PRs for F-108, F-107 and F-111 against `main` in that order (merge `main` into each first), each green before the next. Worktrees: `/home/user/wt-F-1xx`.
 
-Next free ADR number: 0051 (0050 is F-502's).
+Next free ADR number: 0052 (0050 is F-502's, 0051 F-209's).
 
 ## Decisions already taken on the plans' open points
 
@@ -181,7 +181,7 @@ Next free ADR number: 0051 (0050 is F-502's).
   - A clean buffer follows external changes, and a dirty one wins.
   - Step 3 evidence from the Node-side marker test and the budget job.
 
-### F-209 — [plan](plan-F-209.md)
+### F-209 (merged with its PR)
 - Accept every recommendation in section 6:
   - history lives in the engine worker's service, with `undo`, `redo`, `history` and `apply` options (amends ADR 0043's API);
   - a group is a sequence of parts under a `group` token, not concatenated inverses, because `applyPatches` refuses two patches to one path;
@@ -243,3 +243,57 @@ Next free ADR number: 0051 (0050 is F-502's).
   - the `web-worker-no-github-client` dependency-cruiser rule;
   - mocked e2e evidence with blob SHAs checked against the corpus, an opt-in `F401_LIVE=1` test, the git-generated tree fixture;
   - 8 requests in flight, one retry on network errors or 5xx; the accepted input forms (IO-10); session-only report; the repository name as the default project name; warn but allow a repository with no `.nf` files.
+
+### F-703 — [plan](plan-F-703.md)
+- Accept every recommendation in section 6:
+  - start after F-207 merges (no `depends_on` change; recorded in notes);
+  - the code view isn't mounted below 1024 px: Graph only, modes kept per tab;
+  - switching projects stays; New, Templates, Import, Rename and Delete are hidden and refused; an open dialog closes;
+  - read-only writes nothing to the project (positions stay in memory; `openedAt` still updates);
+  - side by side from 640 to 1023 px with a fixed details column, stacked below 640 px; the minimap is dropped; zoom, fit and port labels stay;
+  - all header actions hidden; Export stays hidden in read-only for v0.1 (note to F-404);
+  - WCAG 1.4.4 accepted for v0.1 with an F-701 note on an "Edit anyway" override;
+  - the `read-only` refusal code (type-only) and guards in the page's stores, not the worker;
+  - flush, then guard, on narrowing;
+  - the copy in point 12; the `READ_ONLY_ALLOWED` e2e allow-list; one `@smoke` test; no prefetch change;
+  - F-202's multi-tab note answered: last write wins stands for v0.1.
+
+### F-210 — [plan](plan-F-210.md)
+- Accept every recommendation in section 6:
+  - `EngineApi.listFiles`, pulled while the panel is visible, rows built by a pure engine function;
+  - a new `CreateFile` command (one undo step; extends ADR 0039 and AR-21);
+  - empty folders as `<folder>/.gitkeep` (no format change);
+  - adding files as raw writes that clear the undo history, with the dialog saying so;
+  - IO-12 limits and binary skipping for loose files, no ignore list;
+  - a dropped zip uses F-403's staging plus a "Keep the folder" checkbox;
+  - always confirm, replace only after listing, skip clashes with reasons;
+  - the target-folder rules; refuse dropped folders;
+  - registry tags from the pack's `scriptInclude` check, excluding `local`; read-only registry files left to F-506;
+  - badges from parse status; file tabs reuse F-309's code-only tabs (F-309 lands first); a script with a workflow opens its canvas tab;
+  - rename, move and delete become a new M3 feature that depends on F-210 (`scope-change`);
+  - the 2.8 tree keyboard model; one shared `projectPathProblem` in lang-core; the document drop guard for file drags; session-only state; one `@visual` baseline.
+
+### F-605 — [plan](plan-F-605.md)
+- Accept every recommendation in section 6:
+  - FI-32's "binary files are listed but not opened" is read for v0.1 as "projects hold text files only"; step 2 moves to the deferred M8 "Binary files in projects" feature (added by F-403's PR, or by F-605's if not), with an ADR and `scope-change`;
+  - marked 18.2.1 and DOMPurify 3.4.18, pinned, as runtime dependencies; jsdom 31.0.1 as a web dev dependency;
+  - the 2.2 sanitising rules (images `data:` only); placeholders for project images (note to F-607);
+  - no heading anchors or code highlighting in the preview;
+  - Preview, Split and Code modes for Markdown, opening in Preview, with G, S and C positional (UX-27 amended);
+  - tasks 1 to 3 now, tasks 4 to 7 after F-309 merges; no `depends_on` change;
+  - the tablist label "Open workflows and files"; the 2.6 language set; `EngineApi.outline`; AR-30 extended to the preview; tab closing left to F-307; no preview size cap; the step 1 test tagged `@smoke`.
+
+### F-601 — [plan](plan-F-601.md)
+- Accept every recommendation in section 6:
+  - tasks 1 to 6 now, task 7 after F-309 merges (file tabs, `openFile`, `revealCode`); no `depends_on` change;
+  - open configs through `openFile` and a "Configuration" link in the entry workflow's summary (UX-31 amended);
+  - statement-level config edits (one `TextEdit` per command; amends ADR 0039's reprint level for configs and refines ADR 0032);
+  - port nf-lang's `ConfigFormattingVisitor` with default options, with corpus parity against `lint -format`;
+  - five new commands (AR-21 amended); Add scope, selector and profile write an empty block; no block removal in v0.1;
+  - the 2.6 placement rules; `8.GB` and `2.h` literals, single-quoted strings;
+  - expressions read-only with "Set a value"; the form read-only while the file has parse problems;
+  - `config-unknown-option` mirroring Nextflow's run-time `ConfigValidator` (FI-03 amended); FI-06 selector counts as `ConfigSelectorResolver` does (FI-06 amended);
+  - verified docs URL rules in the pack and a minimal safe renderer for catalogue Markdown;
+  - `EngineApi.configView` and `configSchema` (amends ADR 0043's API list), excerpts capped at 160 characters;
+  - Form, Split and Code modes on config tabs reusing `ViewMode` (UX-27 amended); new top-level blocks appended at the end;
+  - step 2's "imported" read as "a project created from existing files"; the Nextflow grammar for highlighting; collapsed selector cards over 20.

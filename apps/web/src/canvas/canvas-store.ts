@@ -1,16 +1,21 @@
 // The canvas store (F-205, AR-30): the open project's summary, its workflow tabs and the active tab's projection, the
 // UI's read-only copy. The engine is injected so tests use a fake; `canvasStore` uses the worker-backed one. The project
 // store (F-202) opens stored projects in the worker and hands the summary to `show`; `open` is the test hook's raw open.
-import type {
-  ApplyOutcome,
-  EditCommand,
-  EngineApi,
-  NodeDetails,
-  OpenRequest,
-  ProjectChange,
-  Projection,
-  ProjectSummary,
-  WorkflowRef,
+import {
+  type ApplyOptions,
+  type ApplyOutcome,
+  type EditCommand,
+  EMPTY_HISTORY,
+  type EngineApi,
+  type EngineRefusal,
+  type HistoryOutcome,
+  type HistoryStatus,
+  type NodeDetails,
+  type OpenRequest,
+  type ProjectChange,
+  type Projection,
+  type ProjectSummary,
+  type WorkflowRef,
 } from "@nf-builder/engine";
 import { useStore } from "zustand";
 import { createStore, type StoreApi } from "zustand/vanilla";
@@ -75,6 +80,10 @@ export interface WorkspaceState {
   /** The selected node's id, in the active tab's projection (single selection, F-206). */
   readonly selected: string | null;
   readonly details: DetailsContent;
+  /** What the engine's undo and redo stacks hold (F-209, AR-23). */
+  readonly history: HistoryStatus;
+  /** The last undo or redo result or refusal, for the history live region (F-209). */
+  readonly historyNotice: string | null;
 }
 
 export interface WorkspaceActions {
@@ -94,7 +103,16 @@ export interface WorkspaceActions {
    * The single UI path for edit commands: sends `command` at the current revision; the change then reaches `changed`.
    * With a `session`, a command from a project that is no longer shown is refused without calling the engine.
    */
-  apply(command: EditCommand, session?: number): Promise<ApplyOutcome>;
+  apply(
+    command: EditCommand,
+    session?: number,
+    options?: ApplyOptions,
+  ): Promise<ApplyOutcome>;
+  /** Undoes the newest step (F-209). Pending code edits are sent first. Applies, undos and redos run one at a time. */
+  undo(session?: number): Promise<HistoryOutcome>;
+  redo(session?: number): Promise<HistoryOutcome>;
+  /** A code pane registers its flush, awaited before an undo or redo; returns the unregister function. */
+  registerFlush(flush: () => Promise<void>): () => void;
   /** Selects a node and loads its details; null clears the selection. */
   select(id: string | null): Promise<void>;
 }
@@ -127,6 +145,41 @@ export function tabFor(ref: {
   };
 }
 
+/**
+ * Pairs each workflow that vanished from a file with the one that appeared in it, when there is exactly one of each:
+ * a rename, forwards or back (F-209). Keys are tab ids.
+ */
+function renamedTabs(
+  before: readonly WorkflowRef[],
+  after: readonly WorkflowRef[],
+): Map<string, WorkflowRef> {
+  const key = (w: WorkflowRef) => tabFor(w).id;
+  const had = new Set(before.map(key));
+  const has = new Set(after.map(key));
+  const out = new Map<string, WorkflowRef>();
+  for (const path of new Set(before.map((w) => w.path))) {
+    const gone = before.filter((w) => w.path === path && !has.has(key(w)));
+    const added = after.filter((w) => w.path === path && !had.has(key(w)));
+    const [from] = gone;
+    const [to] = added;
+    if (gone.length === 1 && added.length === 1 && from && to)
+      out.set(key(from), to);
+  }
+  return out;
+}
+
+const refusal = (
+  code: EngineRefusal["code"],
+  message: string,
+): EngineRefusal => ({
+  ok: false,
+  revision: null,
+  code,
+  message,
+  path: null,
+  problems: [],
+});
+
 const EMPTY: CanvasContent = { status: "empty" };
 const IDLE: DetailsContent = { status: "idle" };
 
@@ -141,6 +194,15 @@ export function createCanvasStore(
     let generation = 0;
     // a details result for a superseded selection is dropped
     let selection = 0;
+
+    // apply, undo and redo run one at a time, each at the revision the previous one produced
+    let queue: Promise<unknown> = Promise.resolve();
+    const enqueue = <T>(task: () => Promise<T>): Promise<T> => {
+      const run = queue.then(task);
+      queue = run.catch(() => undefined);
+      return run;
+    };
+    const flushes = new Set<() => Promise<void>>();
 
     function clearSelection(): void {
       selection++;
@@ -225,6 +287,86 @@ export function createCanvasStore(
       set({ details });
     }
 
+    /** A refusal that reports a newer revision: another writer got in first, so adopt it and show what it left. */
+    async function adoptNewer(
+      outcome: ApplyOutcome | HistoryOutcome,
+    ): Promise<void> {
+      const now = get().summary;
+      if (outcome.ok || now === null || outcome.revision === null) return;
+      if (outcome.revision <= now.revision) return;
+      set({ summary: { ...now, revision: outcome.revision } });
+      const active = get().tabs.find((t) => t.id === get().activeTab);
+      if (active !== undefined) await load(active, true);
+    }
+
+    /**
+     * Sends one change at the current revision, after every earlier one, and adopts the engine's answer. `after` runs in
+     * the same turn, only when the engine was called and the project is still shown.
+     */
+    function send<T extends ApplyOutcome | HistoryOutcome>(
+      session: number | undefined,
+      call: (revision: number) => Promise<T>,
+      after: (outcome: T) => Promise<void> | void = adoptNewer,
+    ): Promise<T | EngineRefusal> {
+      return enqueue(async () => {
+        const { summary } = get();
+        if (session !== undefined && session !== get().session)
+          return refusal("no-project", "The project changed.");
+        if (summary === null)
+          return refusal("no-project", "No project is open.");
+        const outcome = await call(summary.revision);
+        const now = get().summary;
+        if (now === null) return outcome;
+        // the engine client announces changes to `changed` already; this covers an engine that doesn't
+        if (outcome.ok && outcome.revision > now.revision)
+          await get().changed(outcome);
+        await after(outcome);
+        return outcome;
+      });
+    }
+
+    async function refreshHistory(): Promise<void> {
+      try {
+        set({ history: await engine().history() });
+      } catch {
+        // the status stays as it was; the next change carries it
+      }
+    }
+
+    async function stepHistory(
+      kind: "undo" | "redo",
+      session: number | undefined,
+    ): Promise<HistoryOutcome> {
+      // the project shown when the key was pressed, not whichever is shown once the flushes are done
+      const mine = session ?? get().session;
+      if (mine !== get().session)
+        return refusal("no-project", "The project changed.");
+      // pending code edits become the step that gets undone; outside the queue, as their send is queued itself
+      await Promise.all([...flushes].map((flush) => flush().catch(() => {})));
+      return send(
+        mine,
+        async (revision) => {
+          try {
+            return await engine()[kind](revision);
+          } catch (error) {
+            return refusal("internal", messageOf(error));
+          }
+        },
+        async (outcome) => {
+          if (outcome.ok) {
+            set({
+              historyNotice: `${kind === "undo" ? "Undone" : "Redone"}: ${outcome.label}`,
+            });
+            return;
+          }
+          // no retry: the top step may no longer be the one the user saw
+          set({ historyNotice: outcome.message });
+          await adoptNewer(outcome);
+          await refreshHistory();
+        },
+      );
+    }
+
     return {
       source: null,
       session: 0,
@@ -236,6 +378,8 @@ export function createCanvasStore(
       lastChange: null,
       selected: null,
       details: IDLE,
+      history: EMPTY_HISTORY,
+      historyNotice: null,
 
       async open(request) {
         generation++;
@@ -257,6 +401,8 @@ export function createCanvasStore(
           activeTab: null,
           content: EMPTY,
           lastChange: null,
+          history: EMPTY_HISTORY,
+          historyNotice: null,
         });
         if (tab !== null) await load(tab);
       },
@@ -273,13 +419,32 @@ export function createCanvasStore(
           activeTab: null,
           content: EMPTY,
           lastChange: null,
+          history: EMPTY_HISTORY,
+          historyNotice: null,
         });
       },
 
       async changed(change) {
-        const { summary, tabs, activeTab } = get();
+        const { summary } = get();
         if (summary === null) return;
+        // a workflow renamed (or renamed back) keeps its tab, and its view mode
+        const renamed = renamedTabs(summary.workflows, change.workflows);
+        // a stale tab that already holds a new id gives way to the renamed one
+        const taken = new Set([...renamed.values()].map((w) => tabFor(w).id));
+        const tabs = get()
+          .tabs.filter((t) => renamed.has(t.id) || !taken.has(t.id))
+          .map((t) => {
+            const to = renamed.get(t.id);
+            return to === undefined ? t : { ...tabFor(to), mode: t.mode };
+          });
+        const current = get().activeTab;
+        const moved = current === null ? undefined : renamed.get(current);
+        const activeTab = moved === undefined ? current : tabFor(moved).id;
         set({
+          tabs,
+          activeTab,
+          history: change.history,
+          historyNotice: null,
           summary: {
             ...summary,
             revision: change.revision,
@@ -326,42 +491,24 @@ export function createCanvasStore(
         set({ portLabels });
       },
 
-      async apply(command, session) {
-        const { summary } = get();
-        if (session !== undefined && session !== get().session)
-          return {
-            ok: false,
-            revision: null,
-            code: "no-project",
-            message: "The project changed.",
-            path: null,
-            problems: [],
-          };
-        if (summary === null)
-          return {
-            ok: false,
-            revision: null,
-            code: "no-project",
-            message: "No project is open.",
-            path: null,
-            problems: [],
-          };
-        const outcome = await engine().apply(command, summary.revision);
-        const now = get().summary;
-        if (now === null) return outcome;
-        if (outcome.ok) {
-          // the engine client announces changes to `changed` already; this covers an engine that doesn't
-          if (outcome.revision > now.revision) await get().changed(outcome);
-        } else if (
-          outcome.revision !== null &&
-          outcome.revision > now.revision
-        ) {
-          // another writer got in first: adopt its revision and show what it left
-          set({ summary: { ...now, revision: outcome.revision } });
-          const active = get().tabs.find((t) => t.id === get().activeTab);
-          if (active !== undefined) await load(active, true);
-        }
-        return outcome;
+      apply: (command, session, options) =>
+        send(
+          session,
+          (revision) => engine().apply(command, revision, options),
+          async (outcome) => {
+            await adoptNewer(outcome);
+            // an internal refusal can follow a write that cleared the engine's history
+            if (!outcome.ok && outcome.code === "internal")
+              await refreshHistory();
+          },
+        ),
+
+      undo: (session) => stepHistory("undo", session),
+      redo: (session) => stepHistory("redo", session),
+
+      registerFlush(flush) {
+        flushes.add(flush);
+        return () => void flushes.delete(flush);
       },
 
       async select(id) {

@@ -1,3 +1,4 @@
+import type { ApplyOptions, EditCommand } from "@nf-builder/engine";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { AppShell } from "./app-shell";
@@ -17,7 +18,13 @@ Object.defineProperty(window, "nfBuilderEngine", { get: getEngine });
 Object.defineProperty(window, "nfBuilderWorkspace", {
   get: () => {
     const { open, openWorkflow, apply } = canvasStore.getState();
-    return { open, openWorkflow, apply };
+    return {
+      open,
+      openWorkflow,
+      apply: (command: EditCommand, options?: ApplyOptions) =>
+        apply(command, undefined, options),
+      history: () => canvasStore.getState().history,
+    };
   },
 });
 
