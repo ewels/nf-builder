@@ -588,3 +588,18 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - Task 0 wasn't needed: F-112 had already wired the diagnoser into the service.
   - The two details-pane baselines are approved from CI (ADR 0021).
 - Blockers: none.
+
+## 2026-11-23 · F-502 · Claude (autonomous)
+- Did:
+  - `packages/sources`: a registry client with a snapshot implementation, a live implementation and automatic fallback. Live stays off behind `LIVE_REGISTRY = false`, because `registry.nextflow.io` still sends no CORS header (S4 re-run on 2026-11-23).
+  - The palette's registry.nextflow.io section: source and age, a refresh button, the unavailable and failure states, and interim module and plugin lists until F-503.
+  - The S4 probe, its workflow and its tests are deleted, as ADR 0023 planned.
+- State: passing once CI is green with the re-approved app-shell baseline.
+- Next: F-207, F-209, then F-403 and F-309.
+- Decisions:
+  - [ADR 0050](../adr/0050-registry-client.md): the client surface, snapshot validation, HTTP cache only, the live gate and how to turn it on, live overlay rules, the palette states, and the probe deletion (a workflow edit). Amends ADR 0009's "prefers live"; IO-30 and UX-14 updated.
+  - `@nf-builder/sources` becomes a dependency of `@nf-builder/web` (ADR 0003 already allows it); `sources` depends on `lang-core` and takes `@types/node` 22.20.5 as a dev dependency; no dependency-cruiser change.
+  - The F-204 locator is narrowed to the generic region and F-011 step 2's test checks the app page only; neither assertion is weakened. The base-path test now tolerates only a missing `apps/web/public`.
+  - Licences row for recorded registry data extended to the hand-written live fixtures.
+  - The app-shell baseline is re-approved from CI (ADR 0021).
+- Blockers: none.

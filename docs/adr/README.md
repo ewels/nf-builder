@@ -53,3 +53,4 @@ Process: [0001](0001-record-decisions-as-adrs.md). Template: [template.md](templ
 | [0047](0047-project-templates.md) | Ship project templates as pack-owned file trees, bundled as a lazy JSON chunk and checked by the oracle | Accepted (agent) |
 | [0048](0048-code-view-monaco.md) | Edit code in a lazily loaded Monaco with Shiki highlighting, allowing inline styles in the policy | Accepted (agent) |
 | [0049](0049-details-pane.md) | Show node details from the projection on the main thread, with declarations and diagnostics from the worker | Accepted (agent) |
+| [0050](0050-registry-client.md) | Read the registry from the snapshot, with a live client gated off until the registry allows cross-origin reads | Accepted (agent) |
