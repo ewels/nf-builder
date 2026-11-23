@@ -150,12 +150,14 @@ export {
 } from "./service/service";
 export type {
   Applied,
+  ApplyOptions,
   ApplyOutcome,
   DiagnosticsResult,
   EngineApi,
   EngineRefusal,
   EngineRefusalCode,
   FileSummary,
+  HistoryOutcome,
   LoadPhase,
   LoadProgress,
   NodeDetailsResult,
@@ -163,6 +165,7 @@ export type {
   ProjectChange,
   ProjectionResult,
   ProjectSummary,
+  Undone,
 } from "./service/types";
 export {
   type Equivalence,

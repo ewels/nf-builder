@@ -15,8 +15,11 @@ import {
   createEditState,
   type EditState,
   patchResult,
+  patchSequence,
 } from "../edit/apply";
 import { PatchError } from "../edit/patches";
+import { EMPTY_HISTORY, History, type HistoryLimits } from "../history/history";
+import { commandLabel } from "../history/labels";
 import type { ModelEvent } from "../model/project";
 import { installedPacks } from "../packs";
 import { loadPalette } from "../palette";
@@ -28,6 +31,7 @@ import type {
   EngineApi,
   EngineRefusal,
   EngineRefusalCode,
+  HistoryOutcome,
   LoadProgress,
   NodeDetailsResult,
   ProjectChange,
@@ -38,6 +42,8 @@ import type {
 export interface EngineServiceOptions {
   /** Called for every parse and model computation, including those of later edits (tests count work with it). */
   readonly trace?: (event: ModelEvent) => void;
+  /** Bounds of the undo history; tests inject small ones (F-209). */
+  readonly historyLimits?: HistoryLimits;
 }
 
 interface Open {
@@ -45,6 +51,7 @@ interface Open {
   readonly state: EditState;
   readonly lints: PackLints;
   readonly catalogue: Catalogue;
+  readonly history: History;
   projector?: Projector;
   diagnoser?: Diagnoser;
 }
@@ -109,6 +116,7 @@ export function createEngineService(
       files,
       remodelled,
       workflows: projectorOf(open).workflows(),
+      history: open.history.status(),
     };
   };
 
@@ -138,6 +146,7 @@ export function createEngineService(
         revision += 1;
         open.projector = undefined;
         open.diagnoser = undefined;
+        open.history.clear();
         return refusal(
           "internal",
           `The engine failed unexpectedly while changing the project (${reason}). The project may be partly changed; use the new revision and check its files.`,
@@ -153,19 +162,63 @@ export function createEngineService(
           `The project changed (revision ${revision}, not ${given}). Nothing was changed.`,
         );
 
+  /** Writes `files` into the model and reports the change; `afterCommit` updates the history before its status is read. */
+  const commitFiles = (
+    open: Open,
+    files: readonly FileText[],
+    startedChanging: () => void,
+    afterCommit: () => void = () => undefined,
+  ): ProjectChange => {
+    startedChanging();
+    const remodelled = commit(open.state, { files });
+    afterCommit();
+    return changed(open, files, remodelled);
+  };
+
   const accept = (
     open: Open,
     result: Extract<CommandResult, { ok: true }>,
     startedChanging: () => void,
-  ): ApplyOutcome => {
-    startedChanging();
-    const remodelled = commit(open.state, result);
-    return {
-      ok: true,
-      ...changed(open, result.files, remodelled),
-      patches: result.patches,
-      inverse: result.inverse,
-    };
+    afterCommit?: () => void,
+  ): ApplyOutcome => ({
+    ok: true,
+    ...commitFiles(open, result.files, startedChanging, afterCommit),
+    patches: result.patches,
+    inverse: result.inverse,
+  });
+
+  /** Undo and redo share everything but the stack they take from. */
+  const move = (
+    open: Open,
+    given: number,
+    startedChanging: () => void,
+    direction: "undo" | "redo",
+  ): HistoryOutcome => {
+    const old = stale(given);
+    if (old) return old;
+    const lists =
+      direction === "undo"
+        ? open.history.undoLists()
+        : open.history.redoLists();
+    if (!lists)
+      return refusal("no-history", `There is nothing to ${direction}.`);
+    let files: readonly FileText[];
+    try {
+      files = patchSequence(open.state.model, lists);
+    } catch (error) {
+      if (!(error instanceof PatchError)) throw error;
+      open.history.clear();
+      return refusal(
+        "internal",
+        `${direction === "undo" ? "Undo" : "Redo"} failed (${error.message}). Nothing was changed, and the undo history was cleared.`,
+      );
+    }
+    let label = "";
+    const change = commitFiles(open, files, startedChanging, () => {
+      label =
+        direction === "undo" ? open.history.undone() : open.history.redone();
+    });
+    return { ok: true, label, ...change };
   };
 
   return {
@@ -203,6 +256,7 @@ export function createEngineService(
           state,
           lints,
           catalogue,
+          history: new History(options.historyLimits),
         };
         current = open;
         revision += 1;
@@ -230,6 +284,7 @@ export function createEngineService(
     writeFiles: (files) =>
       guarded((open, startedChanging) => {
         startedChanging();
+        open.history.clear();
         const touched = new Set<string>();
         for (const file of files) {
           const change =
@@ -241,15 +296,33 @@ export function createEngineService(
         return changed(open, files, [...touched].sort());
       }),
 
-    apply: (command, given) =>
+    apply: (command, given, applyOptions) =>
       guarded((open, startedChanging): ApplyOutcome => {
         const old = stale(given);
         if (old) return old;
         const result = applyCommand(open.state, command);
-        return result.ok
-          ? accept(open, result, startedChanging)
-          : { ...result, revision };
+        if (!result.ok) return { ...result, revision };
+        return accept(open, result, startedChanging, () =>
+          open.history.record(
+            { patches: result.patches, inverse: result.inverse },
+            applyOptions?.label ?? commandLabel(command),
+            applyOptions?.group ?? null,
+          ),
+        );
       }),
+
+    undo: (given) =>
+      guarded((open, startedChanging) =>
+        move(open, given, startedChanging, "undo"),
+      ),
+
+    redo: (given) =>
+      guarded((open, startedChanging) =>
+        move(open, given, startedChanging, "redo"),
+      ),
+
+    history: () =>
+      serial(() => (current ? current.history.status() : EMPTY_HISTORY)),
 
     applyPatches: (patches, given) =>
       guarded((open, startedChanging): ApplyOutcome => {
@@ -263,7 +336,9 @@ export function createEngineService(
             return refusal("invalid", error.message);
           throw error;
         }
-        return accept(open, result, startedChanging);
+        return accept(open, result, startedChanging, () =>
+          open.history.clear(),
+        );
       }),
 
     project: (path, workflow) =>
