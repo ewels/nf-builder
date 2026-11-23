@@ -557,3 +557,13 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - F-202's "stored in this browser" check moved to the dialog's unit test; the IndexedDB record test now compares the blank template's files.
   - The F-201 UX-01 test expects an enabled Templates button, and the app-shell baseline is re-approved from CI (ADR 0021).
 - Blockers: none.
+
+## 2026-11-23 · Parser error position fix · Claude (autonomous)
+- Did: fixed the parser's first error landing on an earlier `stub:` or `emit:` keyword when a blank line precedes it and a syntax error comes later; positions now match `nextflow lint`. Found through F-208's refused-edit baseline.
+- State: fix only; no feature changes `passes`.
+- Next: F-208, F-207, F-502, then F-403 and F-209.
+- Decisions:
+  - The cause is a runtime difference (antlr4ng against Groovy's optimised ANTLR runtime), recorded as an addendum to the [spike S2 note](../research/2026-11-22-spike-s2-parser.md); stage 2 decides SLL fallbacks with two or more exiting alternatives by full LL. ADR 0020 stands.
+  - A new malformed fixture, `late-error-after-stub.nf`, and a position check against lint in the corpus test (ADR 0017).
+- Blockers: none.
+
