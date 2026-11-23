@@ -556,6 +556,37 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - Start blank works without the template list.
   - F-202's "stored in this browser" check moved to the dialog's unit test; the IndexedDB record test now compares the blank template's files.
   - The F-201 UX-01 test expects an enabled Templates button, and the app-shell baseline is re-approved from CI (ADR 0021).
+
+## 2026-11-22 · F-208 · Claude (autonomous)
+- Did:
+  - A Graph, Split and Code toggle per tab, with G, S and C shortcuts.
+  - A lazily loaded Monaco editor with Shiki highlighting. Edits go to the engine as `ReplaceFileText` after a 300 ms pause, and the graph follows. A refused edit keeps its draft, marked with its problems, and the saved file is untouched.
+  - The review found that a refused draft could reach another project's file; the store now numbers project sessions and refuses commands for a closed one.
+- State: passing once CI is green with the new baselines.
+- Next: F-206, then F-207 and F-209.
+- Decisions:
+  - [ADR 0048](../adr/0048-code-view-monaco.md):
+    - `style-src 'self' 'unsafe-inline'` for Monaco, amending ADR 0040's policy (QA-30 updated); nothing else loosened, no `'wasm-unsafe-eval'`;
+    - three runtime dependencies: `monaco-editor` 0.57.0, `shiki` and `@shikijs/monaco` 4.6.0;
+    - the editing rules, drafts per session and project, and the AR-30 reading for editor buffers;
+    - eight IO-41 entries for URLs in Monaco's chunk.
+  - UX-27 now says what Split shows and what happens to a refused edit.
+  - Licences rows for Monaco, DOMPurify, the codicons, Shiki and the Nextflow grammars (MIT), which settles the "Check during F-304" row.
+  - The `nfBuilderWorkspace` test hook gains `apply`.
+  - F-205's canvas baselines are re-approved from CI because the toggle now shows in the tab strip (ADR 0021).
+- Blockers: none.
+
+## 2026-11-23 · F-206 · Claude (autonomous)
+- Did:
+  - Selecting a node on the canvas highlights it and its edges and shows its details: kind, file, description, ports with types and connections, directives, topics, a script preview and its problems. With nothing selected, the pane shows the workflow summary.
+  - The view comes from the projection on the main thread; declarations and diagnostics come from a new `details` call to the worker.
+  - The review found that the canvas stopped re-fitting after a port-labels toggle; fixed, and F-205's baselines are unchanged.
+- State: passing once CI is green.
+- Next: F-207; F-209 after F-208.
+- Decisions:
+  - [ADR 0049](../adr/0049-details-pane.md): the main-thread and worker split, `EngineApi.details` (amends ADR 0043's API list), the AR-30 reading (excerpts with length caps), single selection and its lifetime, the UX-24 highlight, the UX-30 to UX-32 readings (spec clauses added), and two colour tokens.
+  - Task 0 wasn't needed: F-112 had already wired the diagnoser into the service.
+  - The two details-pane baselines are approved from CI (ADR 0021).
 - Blockers: none.
 
 ## 2026-11-23 · Parser error position fix · Claude (autonomous)

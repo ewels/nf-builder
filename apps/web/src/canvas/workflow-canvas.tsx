@@ -5,6 +5,7 @@ import {
   ControlButton,
   Controls,
   MiniMap,
+  type OnNodesChange,
   ReactFlow,
   ReactFlowProvider,
   useNodesInitialized,
@@ -12,13 +13,26 @@ import {
   useReactFlow,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { type JSX, type MouseEvent, useEffect, useMemo, useState } from "react";
+import {
+  type JSX,
+  type MouseEvent,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import "./canvas.css";
 import { NODE_TYPES } from "./canvas-nodes";
 import { EDGE_TYPES } from "./flow-edge";
-import { type CanvasFlowEdge, toFlowEdges, toFlowNodes } from "./flow-elements";
+import {
+  type CanvasFlowEdge,
+  type CanvasFlowNode,
+  toFlowEdges,
+  toFlowNodes,
+} from "./flow-elements";
+import { useRefitOnResize } from "./use-refit-on-resize";
 
-/** Sentence-case labels with no delete wording (nodes can't be deleted yet). */
+/** Sentence-case labels with no delete wording (nodes can't be deleted yet) and none that offers to select an edge (edges aren't selectable). */
 const CANVAS_ARIA_LABELS = {
   "node.a11yDescription.default": "Press enter or space to select this node.",
   "node.a11yDescription.keyboardDisabled":
@@ -33,7 +47,7 @@ const CANVAS_ARIA_LABELS = {
     y: number;
   }) => `Moved selected node ${direction}. New position x ${x}, y ${y}`,
   "edge.a11yDescription.default":
-    "Press enter or space to select this connection.",
+    "A channel between two nodes; hover to see its type.",
   "controls.ariaLabel": "Canvas controls",
   "controls.zoomIn.ariaLabel": "Zoom in",
   "controls.zoomOut.ariaLabel": "Zoom out",
@@ -48,12 +62,16 @@ interface WorkflowCanvasProps {
   readonly projection: Projection;
   readonly portLabels: boolean;
   readonly onPortLabelsChange: (value: boolean) => void;
+  readonly selected: string | null;
+  readonly onSelect: (id: string | null) => void;
 }
 
 function CanvasInner({
   projection,
   portLabels,
   onPortLabelsChange,
+  selected,
+  onSelect,
 }: WorkflowCanvasProps): JSX.Element {
   const view = useMemo(
     () => canvasView(projection, { portLabels }),
@@ -64,9 +82,33 @@ function CanvasInner({
     [view, portLabels],
   );
   // controlled nodes: React Flow reports each node's measured size through onNodesChange
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+  const [nodes, setNodes, applyNodeChanges] = useNodesState(initialNodes);
+  // a new view replaces the nodes, so they are measured and the view fitted again (F-205)
   useEffect(() => setNodes(initialNodes), [initialNodes, setNodes]);
-  const edges = useMemo(() => toFlowEdges(view), [view]);
+  // the selection (held in the store) is applied apart from that, so it keeps the sizes and the viewport;
+  // it also runs after each new view, which has replaced the nodes unselected
+  // biome-ignore lint/correctness/useExhaustiveDependencies: initialNodes re-applies the selection to the new nodes
+  useEffect(
+    () =>
+      setNodes((current) =>
+        current.map((n) =>
+          n.selected === (n.id === selected)
+            ? n
+            : { ...n, selected: n.id === selected },
+        ),
+      ),
+    [initialNodes, selected, setNodes],
+  );
+  // selection is the store's: only React Flow's keyboard select and deselect are forwarded (single select, UX-30)
+  const onNodesChange: OnNodesChange<CanvasFlowNode> = (changes) => {
+    const picks = changes.getByType("select");
+    const chosen = picks.find((c) => c.selected);
+    if (chosen !== undefined) onSelect(chosen.id);
+    else if (picks.some((c) => c.id === selected)) onSelect(null);
+    for (const pick of picks) changes.remove(pick);
+    applyNodeChanges(changes);
+  };
+  const edges = useMemo(() => toFlowEdges(view, selected), [view, selected]);
   // shown at the pointer, outside the zoomed viewport so it stays readable (UX-24)
   const [tooltip, setTooltip] = useState<{
     text: string;
@@ -93,8 +135,11 @@ function CanvasInner({
       cancelled = true;
     };
   }, [initialized, fitView]);
+  const host = useRef<HTMLDivElement>(null);
+  useRefitOnResize(host, FIT);
   return (
     <div
+      ref={host}
       className="workflow-canvas"
       data-canvas-state={ready ? "ready" : "loading"}
     >
@@ -102,6 +147,7 @@ function CanvasInner({
         nodes={nodes}
         onNodesChange={onNodesChange}
         edges={edges}
+        elevateEdgesOnSelect={false}
         nodeTypes={NODE_TYPES}
         edgeTypes={EDGE_TYPES}
         forceColorMode="light"
@@ -109,6 +155,10 @@ function CanvasInner({
         fitViewOptions={FIT}
         nodesDraggable={false}
         nodesConnectable={false}
+        multiSelectionKeyCode={null}
+        selectionKeyCode={null}
+        onNodeClick={(_event, n) => onSelect(n.id)}
+        onPaneClick={() => onSelect(null)}
         deleteKeyCode={null}
         ariaLabelConfig={CANVAS_ARIA_LABELS}
         attributionPosition="bottom-center"

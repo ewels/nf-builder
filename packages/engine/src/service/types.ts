@@ -13,6 +13,7 @@ import type {
   TextPatch,
   WorkflowRef,
 } from "@nf-builder/lang-core";
+import type { NodeDetails } from "../details/types";
 import type { ProjectFile } from "../model/project";
 import type { TemplateList } from "../templates";
 
@@ -84,6 +85,12 @@ export interface DiagnosticsResult {
   readonly diagnostics: readonly Diagnostic[];
 }
 
+export interface NodeDetailsResult {
+  readonly revision: number;
+  /** Null when the projection has no such node. */
+  readonly details: NodeDetails | null;
+}
+
 export interface EngineApi {
   palette(version: string): Promise<PaletteView>;
   /** The pack's project templates for a version, without file text (F-203). Needs no open project. */
@@ -107,6 +114,12 @@ export interface EngineApi {
     workflow: string | null,
   ): Promise<ProjectionResult | EngineRefusal>;
   diagnostics(): Promise<DiagnosticsResult | EngineRefusal>;
+  /** The declaration details and diagnostics of one node of a workflow's projection (F-206). */
+  details(
+    path: string,
+    workflow: string | null,
+    node: string,
+  ): Promise<NodeDetailsResult | EngineRefusal>;
   /** The current text of a file, or null with no project or no such file. */
   readFile(path: string): Promise<string | null>;
   /** Drops the open project; later calls answer `no-project` until the next `open`. The revision counter keeps counting. */

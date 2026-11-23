@@ -12,9 +12,9 @@ import {
 } from "../scripts/security-policy.ts";
 
 describe("security policy", () => {
-  it("ADR-0040 QA-30: CONTENT_SECURITY_POLICY is ADR 0014's policy without frame-ancestors, on one line", () => {
+  it("ADR-0040 QA-30 F-208: CONTENT_SECURITY_POLICY is ADR 0014's policy without frame-ancestors, on one line, with inline styles allowed for Monaco and script-src 'self'", () => {
     expect(CONTENT_SECURITY_POLICY).toBe(
-      "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com https://registry.nextflow.io; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'",
+      "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com https://registry.nextflow.io; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'",
     );
   });
 
@@ -109,5 +109,47 @@ describe("security policy", () => {
   )("QA-30: cspProblems rejects %s", (_name, directive, source) => {
     const problems = cspProblems(withScriptSource(directive, source));
     expect(problems).toContain(`${directive} allows ${source}`);
+  });
+
+  it.each([
+    ["a host", "style-src 'self' https://fonts.example"],
+    ["a data: source", "style-src 'self' data:"],
+    ["a nonce", "style-src 'self' 'nonce-abc'"],
+    ["a wildcard", "style-src *"],
+  ])("QA-30 F-208: cspProblems rejects a style-src with %s", (_name, style) => {
+    const policy = `default-src 'self'; script-src 'self'; ${style}; connect-src 'self'`;
+    expect(cspProblems(policy).join("\n")).toContain("style-src allows");
+  });
+
+  it("QA-30 F-208: cspProblems accepts style-src 'self' 'unsafe-inline'", () => {
+    const policy =
+      "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self'";
+    expect(cspProblems(policy)).toEqual([]);
+  });
+
+  it.each(["style-src-elem", "style-src-attr"])(
+    "QA-30 F-208: cspProblems checks %s as it does style-src",
+    (directive) => {
+      const base = "default-src 'self'; script-src 'self'; connect-src 'self'";
+      for (const source of [
+        "https://fonts.example",
+        "'nonce-abc'",
+        "'sha256-abc'",
+        "data:",
+        "*",
+      ])
+        expect(cspProblems(`${base}; ${directive} 'self' ${source}`)).toContain(
+          `${directive} allows ${source}`,
+        );
+      expect(
+        cspProblems(`${base}; ${directive} 'self' 'unsafe-inline'`),
+      ).toEqual([]);
+    },
+  );
+
+  it("QA-30 F-208: cspProblems rejects a hash in style-src", () => {
+    const policy =
+      "default-src 'self'; script-src 'self'; style-src 'self' 'sha256-abc'; connect-src 'self'";
+    expect(cspProblems(policy)).toContain("style-src allows 'sha256-abc'");
   });
 });

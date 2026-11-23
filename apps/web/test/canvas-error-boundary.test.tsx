@@ -11,4 +11,15 @@ describe("canvas error boundary", () => {
       "The canvas couldn&#x27;t load. Reload the page.",
     );
   });
+
+  it("F-208 UX-27: a message prop replaces the canvas text", () => {
+    const boundary = new CanvasErrorBoundary({
+      children: "code",
+      message: "The code editor couldn't load. Reload the page.",
+    });
+    boundary.state = CanvasErrorBoundary.getDerivedStateFromError();
+    expect(renderToStaticMarkup(boundary.render())).toContain(
+      "The code editor couldn&#x27;t load. Reload the page.",
+    );
+  });
 });

@@ -8,4 +8,4 @@ export type {
   CanvasViewOptions,
   EdgeDataflow,
 } from "./types";
-export { canvasView } from "./view";
+export { canvasView, nodeTitle } from "./view";

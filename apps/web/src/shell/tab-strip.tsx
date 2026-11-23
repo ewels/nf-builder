@@ -1,5 +1,6 @@
 import type { JSX, KeyboardEvent } from "react";
 import { useWorkspace } from "../canvas/canvas-store";
+import { ViewModeToggle } from "../views/view-mode-toggle";
 
 export const workflowTabId = (id: string): string => `workflow-tab-${id}`;
 
@@ -7,6 +8,8 @@ export function TabStrip(): JSX.Element {
   const tabs = useWorkspace((s) => s.tabs);
   const activeTab = useWorkspace((s) => s.activeTab);
   const selectTab = useWorkspace((s) => s.selectTab);
+  const setMode = useWorkspace((s) => s.setMode);
+  const active = tabs.find((t) => t.id === activeTab);
   if (tabs.length === 0)
     return (
       <div className="tab-strip">
@@ -52,6 +55,12 @@ export function TabStrip(): JSX.Element {
           </button>
         ))}
       </div>
+      {active === undefined ? null : (
+        <ViewModeToggle
+          mode={active.mode}
+          onChange={(mode) => setMode(active.id, mode)}
+        />
+      )}
     </div>
   );
 }
