@@ -5,8 +5,11 @@ import type {
   ApplyOutcome,
   EditCommand,
   EngineApi,
+  LayoutStatus,
   NodeDetails,
   OpenRequest,
+  Point,
+  Positions,
   ProjectChange,
   Projection,
   ProjectSummary,
@@ -35,6 +38,10 @@ export type CanvasContent =
       readonly status: "ready";
       readonly revision: number;
       readonly projection: Projection;
+      /** The node positions: stored ones from the engine, then those placed and moved here (F-207). Whole nodes only. */
+      readonly positions: Positions;
+      /** Why layout isn't as expected (ELK failed, a save was refused), or null. */
+      readonly notice: string | null;
     }
   | { readonly status: "unavailable"; readonly message: string };
 
@@ -75,6 +82,11 @@ export interface WorkspaceState {
   /** The selected node's id, in the active tab's projection (single selection, F-206). */
   readonly selected: string | null;
   readonly details: DetailsContent;
+  /**
+   * The layout file's own problem, shown for the session: it was unreadable (and is replaced at the first save) or
+   * comes from a newer nf-builder (and is never written). Null otherwise (F-207).
+   */
+  readonly layoutNotice: string | null;
 }
 
 export interface WorkspaceActions {
@@ -97,6 +109,24 @@ export interface WorkspaceActions {
   apply(command: EditCommand, session?: number): Promise<ApplyOutcome>;
   /** Selects a node and loads its details; null clears the selection. */
   select(id: string | null): Promise<void>;
+  /**
+   * Keeps and saves the nodes the user has moved (a drag stop or a keyboard move). Moves are rounded, and one that
+   * lands where the node is saves nothing. Not undoable in v0.1 (F-207).
+   */
+  moveNodes(moves: Positions): Promise<void>;
+  /**
+   * Takes the result of a layout run on the canvas: every node's position, and what to save (`saved`, merged, or
+   * replacing the workflow's entries). Dropped when the tab or the projection it was computed for is no longer shown.
+   */
+  placeNodes(
+    at: { readonly tab: string; readonly revision: number },
+    placement: {
+      readonly positions: Positions;
+      readonly saved: Positions;
+      readonly replace: boolean;
+      readonly notice: string | null;
+    },
+  ): Promise<void>;
 }
 
 /** The workflow a project opens with: main.nf's entry, else the first entry workflow, else the first named one. */
@@ -126,6 +156,11 @@ export function tabFor(ref: {
     mode: "graph",
   };
 }
+
+const problemOf = (layout: LayoutStatus): string | null =>
+  layout.state === "invalid" || layout.state === "newer"
+    ? layout.message
+    : null;
 
 const EMPTY: CanvasContent = { status: "empty" };
 const IDLE: DetailsContent = { status: "idle" };
@@ -171,6 +206,8 @@ export function createCanvasStore(
             status: "ready",
             revision: result.revision,
             projection: result.projection,
+            positions: result.positions,
+            notice: null,
           };
       } catch (error) {
         content = { status: "unavailable", message: messageOf(error) };
@@ -225,6 +262,45 @@ export function createCanvasStore(
       set({ details });
     }
 
+    /** Saves `positions` for the active tab, and keeps the sidecar's status and any refusal where the canvas shows them. */
+    async function save(
+      tab: WorkflowTab,
+      revision: number,
+      positions: Positions,
+      replace: boolean,
+    ): Promise<void> {
+      let notice: string | null = null;
+      try {
+        const result = await engine().setLayout({
+          path: tab.path,
+          workflow: tab.workflow,
+          positions,
+          replace,
+        });
+        if ("ok" in result)
+          notice = `The positions couldn't be saved (${result.message}).`;
+        else {
+          const { summary } = get();
+          if (summary !== null)
+            set({
+              summary: { ...summary, layout: result.layout },
+              // a file newer than this build is a problem for the rest of the session; a replaced one stays reported
+              layoutNotice: problemOf(result.layout) ?? get().layoutNotice,
+            });
+        }
+      } catch (error) {
+        notice = `The positions couldn't be saved (${messageOf(error)}).`;
+      }
+      if (notice === null) return;
+      const { content, activeTab } = get();
+      if (
+        content.status === "ready" &&
+        content.revision === revision &&
+        activeTab === tab.id
+      )
+        set({ content: { ...content, notice } });
+    }
+
     return {
       source: null,
       session: 0,
@@ -236,6 +312,7 @@ export function createCanvasStore(
       lastChange: null,
       selected: null,
       details: IDLE,
+      layoutNotice: null,
 
       async open(request) {
         generation++;
@@ -257,6 +334,7 @@ export function createCanvasStore(
           activeTab: null,
           content: EMPTY,
           lastChange: null,
+          layoutNotice: problemOf(summary.layout),
         });
         if (tab !== null) await load(tab);
       },
@@ -273,6 +351,7 @@ export function createCanvasStore(
           activeTab: null,
           content: EMPTY,
           lastChange: null,
+          layoutNotice: null,
         });
       },
 
@@ -372,6 +451,49 @@ export function createCanvasStore(
         const { selected, details } = get();
         if (id === selected && details.status !== "unavailable") return;
         await loadDetails(id);
+      },
+
+      async moveNodes(moves) {
+        const { content, tabs, activeTab } = get();
+        const tab = tabs.find((t) => t.id === activeTab);
+        if (content.status !== "ready" || tab === undefined) return;
+        const rounded: Record<string, Point> = {};
+        for (const [id, at] of Object.entries(moves)) {
+          const x = Math.round(at.x);
+          const y = Math.round(at.y);
+          const now = content.positions[id];
+          if (now === undefined || now.x !== x || now.y !== y)
+            rounded[id] = { x, y };
+        }
+        if (Object.keys(rounded).length === 0) return;
+        set({
+          content: {
+            ...content,
+            positions: { ...content.positions, ...rounded },
+          },
+        });
+        await save(tab, content.revision, rounded, false);
+      },
+
+      async placeNodes(at, placement) {
+        const { content, tabs, activeTab } = get();
+        const tab = tabs.find((t) => t.id === activeTab);
+        if (
+          content.status !== "ready" ||
+          tab === undefined ||
+          tab.id !== at.tab ||
+          content.revision !== at.revision
+        )
+          return;
+        set({
+          content: {
+            ...content,
+            positions: placement.positions,
+            notice: placement.notice,
+          },
+        });
+        if (placement.replace || Object.keys(placement.saved).length > 0)
+          await save(tab, content.revision, placement.saved, placement.replace);
       },
     };
   });

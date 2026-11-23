@@ -1,6 +1,8 @@
 import type {
   EngineApi,
   EngineRefusal,
+  LayoutWrite,
+  Positions,
   Projection,
   ProjectionResult,
   ProjectSummary,
@@ -52,9 +54,14 @@ function fake(
     revision?: number;
     gates?: Map<string, Promise<void>>;
     details?: (node: string) => Promise<unknown>;
+    /** The stored positions `project` answers with. */
+    positions?: Positions;
+    /** What `setLayout` answers with (default: the sidecar was written, status ok). */
+    setLayout?: (write: LayoutWrite) => Promise<unknown>;
   } = {},
 ) {
   const calls: string[] = [];
+  const writes: LayoutWrite[] = [];
   const engine = {
     open: async () => summaryOf(workflows),
     project: async (
@@ -82,8 +89,18 @@ function fake(
           found === undefined || key === options.nullFor
             ? null
             : projectionOf(found),
-        positions: {},
+        positions: options.positions ?? {},
       };
+    },
+    setLayout: async (write: LayoutWrite) => {
+      writes.push(write);
+      return options.setLayout === undefined
+        ? {
+            revision: 1,
+            files: [{ path: ".nf-builder/layout.json", text: "{}" }],
+            layout: { state: "ok", message: null },
+          }
+        : options.setLayout(write);
     },
     details: async (_path: string, _workflow: string | null, node: string) =>
       options.details === undefined
@@ -105,7 +122,7 @@ function fake(
           }
         : options.details(node),
   } as unknown as EngineApi;
-  return { engine, calls };
+  return { engine, calls, writes };
 }
 
 const request = { version: "26.10", files: [] };
@@ -566,5 +583,151 @@ describe("F-206 selection", () => {
     expect(store.getState().content.status).toBe("unavailable");
     expect(store.getState().selected).toBeNull();
     expect(store.getState().details).toEqual({ status: "idle" });
+  });
+
+  describe("F-207 positions", () => {
+    const wf = [ref("main.nf", null)];
+    const stored: Positions = { a: { x: 1, y: 2 }, b: { x: 30, y: 40 } };
+    const tab = "main.nf#";
+
+    it("F-207 IO-02: the stored positions of the projection come with it, with no notice", async () => {
+      const store = createCanvasStore(
+        () => fake(wf, { positions: stored }).engine,
+      );
+      await store.getState().open(request);
+      const c = store.getState().content;
+      if (c.status !== "ready") throw new Error("not ready");
+      expect(c.positions).toEqual(stored);
+      expect(c.notice).toBeNull();
+    });
+
+    it("F-207 IO-02: an unreadable sidecar's message is kept as the layout notice, also after the file is replaced", async () => {
+      const store = createCanvasStore(
+        () =>
+          ({
+            ...fake(wf, { positions: stored }).engine,
+            open: async () => ({
+              ...summaryOf(wf),
+              layout: {
+                state: "invalid",
+                message: "The layout file couldn't be read (x).",
+              },
+            }),
+          }) as unknown as EngineApi,
+      );
+      await store.getState().open(request);
+      expect(store.getState().layoutNotice).toBe(
+        "The layout file couldn't be read (x).",
+      );
+      await store.getState().moveNodes({ a: { x: 5, y: 5 } });
+      expect(store.getState().summary?.layout.state).toBe("ok");
+      expect(store.getState().layoutNotice).toBe(
+        "The layout file couldn't be read (x).",
+      );
+    });
+
+    it("F-207 step 2: a drag updates positions locally and sends one setLayout with rounded coordinates", async () => {
+      const { engine, writes } = fake(wf, { positions: stored });
+      const store = createCanvasStore(() => engine);
+      await store.getState().open(request);
+      await store.getState().moveNodes({ a: { x: 10.4, y: 20.6 } });
+      const c = store.getState().content;
+      if (c.status !== "ready") throw new Error("not ready");
+      expect(c.positions).toEqual({ a: { x: 10, y: 21 }, b: stored.b });
+      expect(writes).toEqual([
+        {
+          path: "main.nf",
+          workflow: null,
+          positions: { a: { x: 10, y: 21 } },
+          replace: false,
+        },
+      ]);
+      // the same place again is no move at all
+      await store.getState().moveNodes({ a: { x: 10.2, y: 20.8 } });
+      expect(writes).toHaveLength(1);
+    });
+
+    it("F-207 IO-02: the sidecar's status from a save is kept on the summary, and a refused save shows a notice", async () => {
+      const refusal = {
+        ok: false,
+        revision: null,
+        code: "invalid",
+        message: "no such node",
+        path: null,
+        problems: [],
+      };
+      let answer: unknown = {
+        revision: 1,
+        files: [],
+        layout: { state: "newer", message: "from a newer nf-builder" },
+      };
+      const store = createCanvasStore(
+        () =>
+          fake(wf, { positions: stored, setLayout: async () => answer }).engine,
+      );
+      await store.getState().open(request);
+      await store.getState().moveNodes({ a: { x: 5, y: 5 } });
+      expect(store.getState().summary?.layout).toEqual({
+        state: "newer",
+        message: "from a newer nf-builder",
+      });
+      expect(store.getState().layoutNotice).toBe("from a newer nf-builder");
+      answer = refusal;
+      await store.getState().moveNodes({ a: { x: 6, y: 6 } });
+      const c = store.getState().content;
+      if (c.status !== "ready") throw new Error("not ready");
+      expect(c.notice).toBe("The positions couldn't be saved (no such node).");
+    });
+
+    it("F-207 ADR-0008: a placement is stored and saved; with nothing added nothing is sent, and a replace sends the whole set", async () => {
+      const { engine, writes } = fake(wf);
+      const store = createCanvasStore(() => engine);
+      await store.getState().open(request);
+      const at = { tab, revision: 1 };
+      await store.getState().placeNodes(at, {
+        positions: stored,
+        saved: stored,
+        replace: false,
+        notice: null,
+      });
+      expect(writes).toHaveLength(1);
+      await store.getState().placeNodes(at, {
+        positions: stored,
+        saved: {},
+        replace: false,
+        notice: "Automatic layout isn't available (x).",
+      });
+      expect(writes).toHaveLength(1);
+      const c = store.getState().content;
+      if (c.status !== "ready") throw new Error("not ready");
+      expect(c.notice).toBe("Automatic layout isn't available (x).");
+      await store.getState().placeNodes(at, {
+        positions: stored,
+        saved: stored,
+        replace: true,
+        notice: null,
+      });
+      expect(writes[1]?.replace).toBe(true);
+    });
+
+    it("F-207: a placement for a superseded revision or tab is dropped", async () => {
+      const { engine, writes } = fake(wf);
+      const store = createCanvasStore(() => engine);
+      await store.getState().open(request);
+      const placement = {
+        positions: stored,
+        saved: stored,
+        replace: false,
+        notice: null,
+      };
+      await store.getState().placeNodes({ tab, revision: 0 }, placement);
+      await store
+        .getState()
+        .placeNodes({ tab: "other#", revision: 1 }, placement);
+      expect(writes).toEqual([]);
+      const c = store.getState().content;
+      if (c.status !== "ready") throw new Error("not ready");
+      expect(c.positions).toEqual({});
+    });
   });
 });
