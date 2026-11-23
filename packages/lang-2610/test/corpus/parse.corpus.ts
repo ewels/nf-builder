@@ -33,7 +33,12 @@ const dirOf = (id: string) => (id === "fixtures" ? FIXTURES : join(CORPUS, id));
 
 type LintFile = {
   filesChecked: number;
-  errors: { filename: string; startLine: number; message: string }[];
+  errors: {
+    filename: string;
+    startLine: number;
+    startColumn: number;
+    message: string;
+  }[];
 };
 type Parsed = {
   pipeline: string;
@@ -43,6 +48,8 @@ type Parsed = {
   ms: number;
   error?: string;
   line?: number;
+  column?: number;
+  message?: string;
 };
 type Pass = { files: Parsed[]; ms: number };
 
@@ -65,6 +72,8 @@ function parseAll(id: string): Pass {
     if (!outcome.ok) {
       parsed.error = `${outcome.error.source}: ${outcome.error.message}`;
       parsed.line = outcome.error.line;
+      parsed.column = outcome.error.column;
+      parsed.message = outcome.error.message;
     }
     files.push(parsed);
   }
@@ -197,6 +206,28 @@ describe("corpus parse", () => {
         `fixtures/${file}: lint rejects it; the parser accepts it and no cause is listed`,
       ).toBe(true);
     }
+  });
+
+  it("LA-30 ADR-0017: for each fixture lint rejects with an Unexpected message, the parser's first error has lint's line, column and message", () => {
+    const rows = known();
+    const mismatches: string[] = [];
+    let compared = 0;
+    for (const e of state.lint.get("fixtures")?.errors ?? []) {
+      if (!e.message.startsWith("Unexpected")) continue;
+      if (rows.some((r) => r.pipeline === "fixtures" && r.file === e.filename))
+        continue;
+      const parsed = parsedFiles().find(
+        (p) => p.pipeline === "fixtures" && p.file === e.filename,
+      );
+      if (parsed?.parser !== "error") continue;
+      compared++;
+      const want = `${e.startLine}:${e.startColumn} ${e.message}`;
+      const got = `${parsed.line}:${parsed.column} ${parsed.message}`;
+      if (got !== want)
+        mismatches.push(`fixtures/${e.filename}: lint ${want}; parser ${got}`);
+    }
+    expect(compared).toBeGreaterThan(0);
+    expect(mismatches).toEqual([]);
   });
 
   it("F-006 QA-03: the hybrid stage 1 tree equals the pure LL tree for every file of the small pipelines and a sample of sarek", () => {
