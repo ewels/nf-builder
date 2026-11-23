@@ -172,7 +172,11 @@ describe("readZip", () => {
     );
     const result = read(zip);
     const by = Object.fromEntries(result.candidates.map((c) => [c.path, c]));
-    expect(by["__proto__"]).toMatchObject({ reason: "unsafe-path" });
+    expect(
+      Object.getOwnPropertyDescriptor(by, "__proto__")?.value,
+    ).toMatchObject({
+      reason: "unsafe-path",
+    });
     expect(({} as { text?: string }).text).toBeUndefined();
   });
 
