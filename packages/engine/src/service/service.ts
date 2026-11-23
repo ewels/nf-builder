@@ -3,12 +3,15 @@
 import type {
   Catalogue,
   CommandResult,
+  EditCommand,
   FileText,
   PackLints,
+  QuickFix,
 } from "@nf-builder/lang-core";
 import { nodeDetails } from "../details/details";
 import { createDiagnoser, type Diagnoser } from "../diagnostics/diagnose";
 import { loadLints } from "../diagnostics/lints";
+import { applyTextEdits } from "../diagnostics/text-edits";
 import {
   applyCommand,
   commit,
@@ -52,6 +55,10 @@ interface Open {
   readonly lints: PackLints;
   readonly catalogue: Catalogue;
   readonly history: History;
+  /** The revision this project was opened at, or last partly changed at; no fix diagnosed earlier applies (F-309). */
+  openedAt: number;
+  /** The revision at which each file last changed (F-309). */
+  readonly changedAt: Map<string, number>;
   projector?: Projector;
   diagnoser?: Diagnoser;
 }
@@ -112,6 +119,7 @@ export function createEngineService(
     revision += 1;
     open.projector = undefined;
     open.diagnoser = undefined;
+    for (const file of files) open.changedAt.set(file.path, revision);
     return {
       revision,
       files,
@@ -145,6 +153,7 @@ export function createEngineService(
             `The engine failed unexpectedly (${reason}). Nothing was changed.`,
           );
         revision += 1;
+        open.openedAt = revision;
         open.projector = undefined;
         open.diagnoser = undefined;
         open.history.clear();
@@ -172,6 +181,45 @@ export function createEngineService(
     patches: result.patches,
     inverse: result.inverse,
   });
+
+  /** A fix is stale when its file changed after it was diagnosed, or the project was reopened or changed since (F-309). */
+  const staleFix = (
+    open: Open,
+    fix: QuickFix,
+    given: number,
+  ): EngineRefusal | null => {
+    const changedAt = open.changedAt.get(fix.path);
+    if (
+      given >= open.openedAt &&
+      given <= revision &&
+      (changedAt === undefined || changedAt <= given)
+    )
+      return null;
+    return refusal(
+      "stale",
+      given < open.openedAt || given > revision
+        ? `The project changed (revision ${revision}, not ${given}). Nothing was changed.`
+        : `${fix.path} changed after its problems were checked (revision ${given}). Nothing was changed.`,
+    );
+  };
+
+  /** The accept and record path that `apply` and `applyFix` share; the caller has checked the revision. */
+  const run = (
+    open: Open,
+    command: EditCommand,
+    startedChanging: () => void,
+    applyOptions: { label?: string; group?: string } | undefined,
+  ): ApplyOutcome => {
+    const result = applyCommand(open.state, command);
+    if (!result.ok) return { ...result, revision };
+    startedChanging();
+    open.history.record(
+      { patches: result.patches, inverse: result.inverse },
+      applyOptions?.label ?? commandLabel(command),
+      applyOptions?.group ?? null,
+    );
+    return accept(open, result);
+  };
 
   /** Undo and redo share everything but the stack they take from. */
   const move = (
@@ -245,9 +293,12 @@ export function createEngineService(
           lints,
           catalogue,
           history: new History(options.historyLimits),
+          openedAt: 0,
+          changedAt: new Map(),
         };
         current = open;
         revision += 1;
+        open.openedAt = revision;
         const files = state.model.paths().flatMap((path) => {
           const source = state.model.file(path)?.source;
           return source
@@ -288,15 +339,33 @@ export function createEngineService(
       guarded((open, startedChanging): ApplyOutcome => {
         const old = stale(given);
         if (old) return old;
-        const result = applyCommand(open.state, command);
-        if (!result.ok) return { ...result, revision };
-        startedChanging();
-        open.history.record(
-          { patches: result.patches, inverse: result.inverse },
-          applyOptions?.label ?? commandLabel(command),
-          applyOptions?.group ?? null,
+        return run(open, command, startedChanging, applyOptions);
+      }),
+
+    applyFix: (fix, given, applyOptions) =>
+      guarded((open, startedChanging): ApplyOutcome => {
+        const old = staleFix(open, fix, given);
+        if (old) return old;
+        const text = open.state.model.file(fix.path)?.source.text;
+        if (text === undefined)
+          return refusal("not-found", `No file ${fix.path} to fix.`);
+        let fixed: string;
+        try {
+          fixed = applyTextEdits(text, fix.edits);
+        } catch (error) {
+          if (error instanceof RangeError)
+            return refusal("invalid", `${error.message}. Nothing was changed.`);
+          throw error;
+        }
+        return run(
+          open,
+          { kind: "replaceFileText", path: fix.path, text: fixed },
+          startedChanging,
+          {
+            label: applyOptions?.label ?? fix.title,
+            group: applyOptions?.group,
+          },
         );
-        return accept(open, result);
       }),
 
     undo: (given) =>
