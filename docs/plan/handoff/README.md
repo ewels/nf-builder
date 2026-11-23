@@ -282,3 +282,18 @@ Next free ADR number: 0052 (0050 is F-502's, 0051 F-209's).
   - Preview, Split and Code modes for Markdown, opening in Preview, with G, S and C positional (UX-27 amended);
   - tasks 1 to 3 now, tasks 4 to 7 after F-309 merges; no `depends_on` change;
   - the tablist label "Open workflows and files"; the 2.6 language set; `EngineApi.outline`; AR-30 extended to the preview; tab closing left to F-307; no preview size cap; the step 1 test tagged `@smoke`.
+
+### F-601 — [plan](plan-F-601.md)
+- Accept every recommendation in section 6:
+  - tasks 1 to 6 now, task 7 after F-309 merges (file tabs, `openFile`, `revealCode`); no `depends_on` change;
+  - open configs through `openFile` and a "Configuration" link in the entry workflow's summary (UX-31 amended);
+  - statement-level config edits (one `TextEdit` per command; amends ADR 0039's reprint level for configs and refines ADR 0032);
+  - port nf-lang's `ConfigFormattingVisitor` with default options, with corpus parity against `lint -format`;
+  - five new commands (AR-21 amended); Add scope, selector and profile write an empty block; no block removal in v0.1;
+  - the 2.6 placement rules; `8.GB` and `2.h` literals, single-quoted strings;
+  - expressions read-only with "Set a value"; the form read-only while the file has parse problems;
+  - `config-unknown-option` mirroring Nextflow's run-time `ConfigValidator` (FI-03 amended); FI-06 selector counts as `ConfigSelectorResolver` does (FI-06 amended);
+  - verified docs URL rules in the pack and a minimal safe renderer for catalogue Markdown;
+  - `EngineApi.configView` and `configSchema` (amends ADR 0043's API list), excerpts capped at 160 characters;
+  - Form, Split and Code modes on config tabs reusing `ViewMode` (UX-27 amended); new top-level blocks appended at the end;
+  - step 2's "imported" read as "a project created from existing files"; the Nextflow grammar for highlighting; collapsed selector cards over 20.
