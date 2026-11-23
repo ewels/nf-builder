@@ -926,4 +926,40 @@ describe("F-209 history", () => {
     ]);
     expect(store.getState().activeTab).toBe("lib.nf#NEW");
   });
+
+  it("F-309 F-209: applyFix runs in the store queue after the registered code-pane flushes, at the given revision, and adopts the result like apply", async () => {
+    const wf = [ref("main.nf", null)];
+    const { engine, log } = historic(wf, {
+      apply: async (r) => changeAt(r + 1, wf),
+    });
+    const fixes: unknown[][] = [];
+    (engine as unknown as Record<string, unknown>).applyFix = async (
+      ...args: unknown[]
+    ) => {
+      log.push(`applyFix@${args[1]}`);
+      fixes.push(args);
+      return changeAt(3, wf, statusOf(1), { label: "Fix it" });
+    };
+    const store = createCanvasStore(() => engine);
+    await store.getState().open(request);
+    store.getState().registerFlush(async () => {
+      log.push("flush");
+      await store.getState().apply(command, store.getState().session);
+    });
+    const fix = { title: "Fix it", path: "main.nf", edits: [] };
+    const outcome = await store
+      .getState()
+      .applyFix(fix, 1, store.getState().session, { label: "Fix it" });
+    expect(outcome.ok).toBe(true);
+    expect(log).toEqual(["flush", "apply@1", "applyFix@1"]);
+    expect(fixes[0]?.[2]).toEqual({ label: "Fix it" });
+    expect(store.getState().summary?.revision).toBe(3);
+    expect(store.getState().history).toEqual(statusOf(1));
+    // a fix from a project that is no longer shown never reaches the engine
+    const old = store.getState().session;
+    await store.getState().show(summaryOf(wf), "project");
+    const refused = await store.getState().applyFix(fix, 1, old);
+    expect(refused.ok === false && refused.code).toBe("no-project");
+    expect(log.filter((l) => l.startsWith("applyFix"))).toHaveLength(1);
+  });
 });

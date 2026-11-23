@@ -15,6 +15,7 @@ import {
   type ProjectChange,
   type Projection,
   type ProjectSummary,
+  type QuickFix,
   type WorkflowRef,
 } from "@nf-builder/engine";
 import { useStore } from "zustand";
@@ -105,6 +106,16 @@ export interface WorkspaceActions {
    */
   apply(
     command: EditCommand,
+    session?: number,
+    options?: ApplyOptions,
+  ): Promise<ApplyOutcome>;
+  /**
+   * Applies a quick fix diagnosed at `revision` as one undo step (F-309, ADR 0042). Pending code edits are sent first, so
+   * the fix may then be refused as stale. Joins the queue of applies, undos and redos.
+   */
+  applyFix(
+    fix: QuickFix,
+    revision: number,
     session?: number,
     options?: ApplyOptions,
   ): Promise<ApplyOutcome>;
@@ -502,6 +513,22 @@ export function createCanvasStore(
               await refreshHistory();
           },
         ),
+
+      async applyFix(fix, revision, session, options) {
+        const mine = session ?? get().session;
+        if (mine !== get().session)
+          return refusal("no-project", "The project changed.");
+        await Promise.all([...flushes].map((flush) => flush().catch(() => {})));
+        return send(
+          mine,
+          (_current) => engine().applyFix(fix, revision, options),
+          async (outcome) => {
+            await adoptNewer(outcome);
+            if (!outcome.ok && outcome.code === "internal")
+              await refreshHistory();
+          },
+        );
+      },
 
       undo: (session) => stepHistory("undo", session),
       redo: (session) => stepHistory("redo", session),

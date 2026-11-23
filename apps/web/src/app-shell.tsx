@@ -5,6 +5,7 @@ import { DetailsHeader } from "./details/details-header";
 import { DetailsPane } from "./details/details-pane";
 import { useHistoryKeys } from "./history/use-history-keys";
 import { COLLAPSED_WIDTH, useLayout } from "./layout/layout-store";
+import { useProblems } from "./problems/problems-store";
 import { ProjectControls } from "./project/project-controls";
 import { saveLabel } from "./project/project-status";
 import { useProjects } from "./project/project-store";
@@ -12,7 +13,7 @@ import { AppHeader } from "./shell/app-header";
 import { ColumnSeparator } from "./shell/column-separator";
 import { LeftColumn } from "./shell/left-column";
 import { SideColumn } from "./shell/side-column";
-import { StatusBar } from "./shell/status-bar";
+import { StatusBar, type StatusProblems } from "./shell/status-bar";
 import { TabStrip } from "./shell/tab-strip";
 import { TabPanel } from "./views/tab-panel";
 import { useViewModeKeys } from "./views/use-view-mode-keys";
@@ -32,6 +33,24 @@ export function canvasCounts(content: CanvasContent): {
     : { nodes: 0, channels: 0 };
 }
 
+/** The status bar's problems: null with no project (plain text), else the store's counts and the panel's tab. */
+function useProblemsStatus(hasProject: boolean): StatusProblems | null {
+  const status = useProblems((s) => s.status);
+  const sections = useProblems((s) => s.sections);
+  const message = useProblems((s) => s.message);
+  const open = useProblems((s) => s.open);
+  const view = useProblems((s) => s.view);
+  const toggle = useProblems((s) => s.toggle);
+  if (!hasProject) return null;
+  return {
+    status,
+    counts: sections.counts,
+    message,
+    open: open ? view : null,
+    onToggle: toggle,
+  };
+}
+
 export function AppShell(): JSX.Element {
   useViewModeKeys();
   useHistoryKeys();
@@ -40,6 +59,8 @@ export function AppShell(): JSX.Element {
   const leftWidth = left.collapsed ? COLLAPSED_WIDTH : left.width;
   const content = useWorkspace((s) => s.content);
   const counts = canvasCounts(content);
+  const hasProject = useWorkspace((s) => s.summary !== null);
+  const diagnostics = useProblemsStatus(hasProject);
   const projects = useProjects((s) => s.status);
   const storageWarning = useProjects((s) => s.storageWarning);
   const persisted = useProjects((s) => s.persisted);
@@ -80,8 +101,7 @@ export function AppShell(): JSX.Element {
         </SideColumn>
       </div>
       <StatusBar
-        problems={0}
-        suggestions={0}
+        diagnostics={diagnostics}
         nodes={counts.nodes}
         channels={counts.channels}
         languageVersion={languageVersions[0]}
