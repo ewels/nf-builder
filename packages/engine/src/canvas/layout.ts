@@ -1,4 +1,4 @@
-// The interim layered layout (F-205); F-207 replaces it with saved positions and ELK (ADR 0008). Deterministic, O(N+E).
+// The layered layout (F-205). F-207 keeps it as the fallback when ELK fails or times out (ADR 0008). Deterministic, O(N+E).
 
 import type { GraphNodeKind } from "@nf-builder/lang-core";
 import { CANVAS_METRICS } from "./metrics";

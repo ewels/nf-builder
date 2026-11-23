@@ -331,7 +331,13 @@ describe("F-206 details pane", () => {
       edges: [],
       statements: [],
     } as unknown as Projection;
-    const content = { status: "ready", revision: 1, projection } as const;
+    const content = {
+      status: "ready",
+      revision: 1,
+      projection,
+      positions: {},
+      notice: null,
+    } as const;
     const summary = renderToStaticMarkup(
       <DetailsBody
         content={content}
@@ -349,6 +355,8 @@ describe("F-206 details pane", () => {
         content={{
           status: "ready",
           revision: 1,
+          positions: {},
+          notice: null,
           projection: {
             ...projection,
             nodes: [
@@ -378,6 +386,8 @@ describe("F-206 details pane", () => {
         content={{
           status: "ready",
           revision: 1,
+          positions: {},
+          notice: null,
           projection: {
             ...projection,
             workflow: { ...projection.workflow, name: "LIB" },

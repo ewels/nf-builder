@@ -1,4 +1,4 @@
-import type { Locator, Page } from "@playwright/test";
+import type { FrameLocator, Locator, Page } from "@playwright/test";
 import type { EngineHook } from "./engine.ts";
 
 /** The subset of the workspace API the tests call, on `window.nfBuilderEngine` (F-202). */
@@ -25,8 +25,8 @@ export const readFile = (page: Page, path: string): Promise<string | null> =>
   );
 
 /** The header button that opens the project panel. */
-export const switcher = (page: Page): Locator =>
-  page.getByRole("banner").locator(".project-switcher-button");
+export const switcher = (root: Page | FrameLocator): Locator =>
+  root.getByRole("banner").locator(".project-switcher-button");
 
 /** The save-state text in the header. */
 export const saveState = (page: Page): Locator =>

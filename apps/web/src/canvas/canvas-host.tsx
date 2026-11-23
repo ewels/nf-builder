@@ -18,6 +18,9 @@ export function CanvasHost(): JSX.Element {
   const selected = useWorkspace((s) => s.selected);
   const select = useWorkspace((s) => s.select);
   const focus = useWorkspace((s) => s.focusNode);
+  const layoutNotice = useWorkspace((s) => s.layoutNotice);
+  const moveNodes = useWorkspace((s) => s.moveNodes);
+  const placeNodes = useWorkspace((s) => s.placeNodes);
   if (summary === null)
     return (
       <div className="canvas-area">
@@ -37,6 +40,17 @@ export function CanvasHost(): JSX.Element {
             selected={selected}
             focus={focus}
             onSelect={(id) => void select(id)}
+            positions={content.positions}
+            notices={[layoutNotice, content.notice].filter(
+              (m): m is string => m !== null,
+            )}
+            onMove={(moves) => void moveNodes(moves)}
+            onPlace={(placement) =>
+              void placeNodes(
+                { tab: activeTab ?? "", revision: content.revision },
+                placement,
+              )
+            }
           />
         </Suspense>
       </CanvasErrorBoundary>

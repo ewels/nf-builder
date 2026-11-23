@@ -2,7 +2,7 @@
 import { join } from "node:path";
 import { expect, type Page } from "@playwright/test";
 import { REPO_ROOT } from "../scripts/check-common.ts";
-import { canvasReady, clickEmptyCanvas } from "./canvas.ts";
+import { canvasReady, clickEmptyCanvas, layoutSettled } from "./canvas.ts";
 import { editor } from "./code-view.ts";
 import { readProject } from "./engine.ts";
 import {
@@ -20,8 +20,11 @@ export const HISTORY_FIXTURE = join(
   "tools/oracle/cases/f111-start-typed",
 );
 
-/** Where `createProcess` REPORT puts its module, so a file the engine holds that the store doesn't yet is still compared. */
-const CREATED = ["modules/local/report/main.nf"];
+/**
+ * Files the engine can hold that the store doesn't yet: where `createProcess` REPORT puts its module, and the layout
+ * sidecar (F-207), so a save still to land is waited for.
+ */
+const CREATED = ["modules/local/report/main.nf", ".nf-builder/layout.json"];
 
 export interface HistoryStatus {
   undo: string | null;
@@ -162,6 +165,8 @@ export async function openStoredFixture(
     ).nfBuilderEngine.writeFiles(files);
   }, files);
   await canvasReady(page);
+  // the first layout run writes the sidecar; the start state includes it
+  await layoutSettled(page);
   await storedFiles(page);
 }
 

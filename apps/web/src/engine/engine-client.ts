@@ -34,9 +34,13 @@ export function connectEngine(
     diagnostics: () => race(remote.diagnostics()),
     details: (path, workflow, node) =>
       race(remote.details(path, workflow, node)),
+    setLayout: (write) => race(remote.setLayout(write)),
     readFile: (path) => race(remote.readFile(path)),
     close: () => race(remote.close()),
     watch: (listener) => race(remote.watch(proxy(listener))),
+    stageZip: (file, name) => race(remote.stageZip(file, name)),
+    restageImport: (id, ignore) => race(remote.restageImport(id, ignore)),
+    discardImport: (id) => race(remote.discardImport(id)),
     createProject: (input) => race(remote.createProject(input)),
     openProject: (id) => race(remote.openProject(id)),
     renameProject: (id, name) => race(remote.renameProject(id, name)),

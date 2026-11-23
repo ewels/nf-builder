@@ -65,7 +65,7 @@ export type {
   CanvasViewOptions,
   EdgeDataflow,
 } from "./canvas";
-export { CANVAS_METRICS, canvasView } from "./canvas";
+export { CANVAS_METRICS, canvasView, portY } from "./canvas";
 export { nodeView } from "./details/node-view";
 export { workflowSummary } from "./details/summary";
 export type {
@@ -104,6 +104,7 @@ export {
   type HistoryLimits,
   type HistoryStatus,
 } from "./history/history";
+export * from "./layout";
 export type {
   Binding,
   ConfigIncludeModel,

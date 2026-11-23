@@ -626,3 +626,28 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - The tab-strip baselines are re-approved from CI (ADR 0021).
   - Commit c594543 on the branch doesn't typecheck on its own; the squash merge hides it.
 - Blockers: none.
+
+## 2026-11-23 · F-207 · Claude (autonomous)
+- Did:
+  - A layout sidecar, `.nf-builder/layout.json` (format v1), owned and written only by the engine. Positions are carried across every change (commands, undo, redo, raw patches) by matching projections with rename and delete hints, so renames keep positions and undo restores the sidecar byte for byte.
+  - ELK (elkjs 0.12.1) in its own lazily started worker places nodes without positions; placed nodes stay drawn while it runs, with a 30 s timeout that falls back to columns.
+  - Dragging and arrow-key moves save positions; an Auto-layout control; layout notices; the screen-fixed dot grid removed.
+- State: passing once CI is green with the re-approved baselines.
+- Next: F-403, F-309, then F-703, F-210, F-605 and F-601.
+- Decisions:
+  - [ADR 0052](../adr/0052-layout-sidecar.md): the sidecar v1 format, engine ownership and `setLayout` (amends ADR 0043's API list; stale writes refused and re-sent once), the carry algorithm and hints (amends ADR 0051's `StepPart`), ELK placement, elkjs as a runtime dependency under EPL-2.0, the timeout and the layered fallback (amends ADR 0046), and the viewport rules answering the F-206 and F-208 notes.
+  - `scope-change`: F-202 added to F-207's `depends_on`.
+  - IO-02 and the architecture data flow updated; an elkjs licences row.
+  - Canvas, shell, template and view baselines re-approved from CI (ADR 0021).
+
+## 2026-11-23 · F-403 · Claude (autonomous)
+- Did:
+  - Zip import in the engine worker with fflate: the New project dialog's Import route reads a zip, strips one top-level folder, applies the shared limits, ignore list and text check, shows a summary, and creates the project from the selection.
+  - `packages/sources/import`: the import core shared with F-401 (limits, paths, ignore list with a non-backtracking matcher, text detection, selection and summary) and the zip reader with bomb guards.
+- State: passing once CI is green.
+- Next: F-207 and F-309 merging, then F-703, F-210, F-605 and F-601.
+- Decisions:
+  - [ADR 0053](../adr/0053-zip-import.md): fflate 0.8.3 as a runtime dependency of `@nf-builder/sources` (`unzipSync` only), unzipping in the engine worker from the `./import` subpath, the API additions (amends ADRs 0043 and 0045), the limits table, the folder rule, the default ignore list reading ADR 0009's "test data" as nf-core's root folders, binary files skipped, and a damaged entry aborting the import.
+  - IO-11, IO-12, QA-32 and the architecture data flow updated; an fflate licences row.
+  - `scope-change`: F-403 added to F-404's `depends_on`, and the deferred M8 feature F-407 "Binary files in projects" added.
+- Blockers: none.

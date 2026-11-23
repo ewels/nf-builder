@@ -2,6 +2,8 @@ import {
   EMPTY_HISTORY,
   type EngineApi,
   type EngineRefusal,
+  type LayoutWrite,
+  type Positions,
   type Projection,
   type ProjectionResult,
   type ProjectSummary,
@@ -40,6 +42,7 @@ const summaryOf = (workflows: WorkflowRef[], revision = 1): ProjectSummary => ({
   version: "26.10",
   files: [],
   workflows,
+  layout: { state: "absent", message: null },
 });
 
 /** A fake engine; `project` answers from `answers` or waits on `gates`. */
@@ -52,9 +55,16 @@ function fake(
     revision?: number;
     gates?: Map<string, Promise<void>>;
     details?: (node: string) => Promise<unknown>;
+    /** The stored positions `project` answers with. */
+    positions?: Positions;
+    /** The ids of the projection's nodes (default none); a function is asked at each `project`. */
+    nodes?: string[] | (() => string[]);
+    /** What `setLayout` answers with (default: the sidecar was written, status ok). */
+    setLayout?: (write: LayoutWrite) => Promise<unknown>;
   } = {},
 ) {
   const calls: string[] = [];
+  const writes: LayoutWrite[] = [];
   const engine = {
     open: async () => summaryOf(workflows),
     project: async (
@@ -81,8 +91,25 @@ function fake(
         projection:
           found === undefined || key === options.nullFor
             ? null
-            : projectionOf(found),
+            : {
+                ...projectionOf(found),
+                nodes: (typeof options.nodes === "function"
+                  ? options.nodes()
+                  : (options.nodes ?? [])
+                ).map((id) => ({ id })) as never,
+              },
+        positions: options.positions ?? {},
       };
+    },
+    setLayout: async (write: LayoutWrite) => {
+      writes.push(write);
+      return options.setLayout === undefined
+        ? {
+            revision: 1,
+            files: [{ path: ".nf-builder/layout.json", text: "{}" }],
+            layout: { state: "ok", message: null },
+          }
+        : options.setLayout(write);
     },
     details: async (_path: string, _workflow: string | null, node: string) =>
       options.details === undefined
@@ -104,7 +131,7 @@ function fake(
           }
         : options.details(node),
   } as unknown as EngineApi;
-  return { engine, calls };
+  return { engine, calls, writes };
 }
 
 const request = { version: "26.10", files: [] };
@@ -588,6 +615,326 @@ describe("F-206 selection", () => {
     expect(store.getState().selected).toBeNull();
     expect(store.getState().details).toEqual({ status: "idle" });
   });
+
+  describe("F-207 positions", () => {
+    const wf = [ref("main.nf", null)];
+    const stored: Positions = { a: { x: 1, y: 2 }, b: { x: 30, y: 40 } };
+    const tab = "main.nf#";
+
+    it("F-207 IO-02: the stored positions of the projection come with it, with no notice", async () => {
+      const store = createCanvasStore(
+        () => fake(wf, { positions: stored }).engine,
+      );
+      await store.getState().open(request);
+      const c = store.getState().content;
+      if (c.status !== "ready") throw new Error("not ready");
+      expect(c.positions).toEqual(stored);
+      expect(c.notice).toBeNull();
+    });
+
+    it("F-207 IO-02: an unreadable sidecar's message is the layout notice, and once the file is replaced it says so in the past tense", async () => {
+      const store = createCanvasStore(
+        () =>
+          ({
+            ...fake(wf, { positions: stored }).engine,
+            open: async () => ({
+              ...summaryOf(wf),
+              layout: {
+                state: "invalid",
+                message: "The layout file couldn't be read (x).",
+              },
+            }),
+          }) as unknown as EngineApi,
+      );
+      await store.getState().open(request);
+      expect(store.getState().layoutNotice).toBe(
+        "The layout file couldn't be read (x).",
+      );
+      await store.getState().moveNodes({ a: { x: 5, y: 5 } });
+      expect(store.getState().summary?.layout.state).toBe("ok");
+      expect(store.getState().layoutNotice).toBe(
+        "The layout file couldn't be read and was replaced.",
+      );
+      // later saves leave it as it is
+      await store.getState().moveNodes({ a: { x: 6, y: 6 } });
+      expect(store.getState().layoutNotice).toBe(
+        "The layout file couldn't be read and was replaced.",
+      );
+    });
+
+    it("F-207 IO-02: a notice about entries dropped from the sidecar stays after the next save", async () => {
+      const dropped = "2 layout entries couldn't be read and were dropped.";
+      const store = createCanvasStore(
+        () =>
+          ({
+            ...fake(wf, { positions: stored }).engine,
+            open: async () => ({
+              ...summaryOf(wf),
+              layout: { state: "ok", message: dropped },
+            }),
+          }) as unknown as EngineApi,
+      );
+      await store.getState().open(request);
+      expect(store.getState().layoutNotice).toBe(dropped);
+      await store.getState().moveNodes({ a: { x: 5, y: 5 } });
+      expect(store.getState().layoutNotice).toBe(dropped);
+    });
+
+    it("F-207 step 2: a drag updates positions locally and sends one setLayout with rounded coordinates", async () => {
+      const { engine, writes } = fake(wf, { positions: stored });
+      const store = createCanvasStore(() => engine);
+      await store.getState().open(request);
+      await store.getState().moveNodes({ a: { x: 10.4, y: 20.6 } });
+      const c = store.getState().content;
+      if (c.status !== "ready") throw new Error("not ready");
+      expect(c.positions).toEqual({ a: { x: 10, y: 21 }, b: stored.b });
+      expect(writes).toEqual([
+        {
+          revision: 1,
+          path: "main.nf",
+          workflow: null,
+          positions: { a: { x: 10, y: 21 } },
+          replace: false,
+        },
+      ]);
+      // the same place again is no move at all
+      await store.getState().moveNodes({ a: { x: 10.2, y: 20.8 } });
+      expect(writes).toHaveLength(1);
+    });
+
+    it("F-207 IO-02: the sidecar's status from a save is kept on the summary, and a refused save shows a notice", async () => {
+      const refusal = {
+        ok: false,
+        revision: null,
+        code: "invalid",
+        message: "no such node",
+        path: null,
+        problems: [],
+      };
+      let answer: unknown = {
+        revision: 1,
+        files: [],
+        layout: { state: "newer", message: "from a newer nf-builder" },
+      };
+      const store = createCanvasStore(
+        () =>
+          fake(wf, { positions: stored, setLayout: async () => answer }).engine,
+      );
+      await store.getState().open(request);
+      await store.getState().moveNodes({ a: { x: 5, y: 5 } });
+      expect(store.getState().summary?.layout).toEqual({
+        state: "newer",
+        message: "from a newer nf-builder",
+      });
+      expect(store.getState().layoutNotice).toBe("from a newer nf-builder");
+      answer = refusal;
+      await store.getState().moveNodes({ a: { x: 6, y: 6 } });
+      const c = store.getState().content;
+      if (c.status !== "ready") throw new Error("not ready");
+      expect(c.notice).toBe("The positions couldn't be saved (no such node).");
+    });
+
+    it("F-207 AR-11: a move the engine refuses as stale is dropped quietly, with no notice", async () => {
+      const stale = {
+        ok: false,
+        revision: 2,
+        code: "stale",
+        message:
+          "The project changed (revision 2, not 1). Nothing was changed.",
+        path: null,
+        problems: [],
+      };
+      const { engine, writes } = fake(wf, {
+        positions: stored,
+        setLayout: async () => stale,
+      });
+      const store = createCanvasStore(() => engine);
+      await store.getState().open(request);
+      await store.getState().moveNodes({ a: { x: 5, y: 5 } });
+      expect(writes).toHaveLength(1);
+      expect(writes[0]?.revision).toBe(1);
+      const c = store.getState().content;
+      if (c.status !== "ready") throw new Error("not ready");
+      expect(c.notice).toBeNull();
+    });
+
+    const staleAnswer = {
+      ok: false,
+      revision: 2,
+      code: "stale",
+      message: "The project changed (revision 2, not 1). Nothing was changed.",
+      path: null,
+      problems: [],
+    };
+    const change = {
+      revision: 2,
+      files: [],
+      remodelled: [],
+      history: EMPTY_HISTORY,
+      workflows: wf,
+    };
+    const NOTICE =
+      "Your last move couldn't be saved because the workflow changed. Move the node again.";
+
+    it("F-207 AR-11: a move refused as stale is sent again once after the next refresh, when its nodes are still there", async () => {
+      let revision = 1;
+      let calls = 0;
+      const { engine, writes } = fake(wf, {
+        positions: stored,
+        nodes: ["a", "b"],
+        get revision() {
+          return revision;
+        },
+        setLayout: async () => (++calls === 1 ? staleAnswer : { ...ok() }),
+      });
+      const store = createCanvasStore(() => engine);
+      await store.getState().open(request);
+      await store.getState().moveNodes({ a: { x: 5, y: 5 } });
+      expect(writes).toHaveLength(1);
+      revision = 2;
+      await store.getState().changed(change);
+      expect(writes).toHaveLength(2);
+      expect(writes[1]).toEqual({
+        revision: 2,
+        path: "main.nf",
+        workflow: null,
+        positions: { a: { x: 5, y: 5 } },
+        replace: false,
+      });
+      const c = store.getState().content;
+      if (c.status !== "ready") throw new Error("not ready");
+      expect(c.positions.a).toEqual({ x: 5, y: 5 });
+      expect(c.notice).toBeNull();
+      // sent once only
+      await store.getState().changed({ ...change, revision: 3 });
+      expect(writes).toHaveLength(2);
+    });
+
+    it("F-207 AR-11: a stale move whose node is gone after the refresh shows a notice and isn't sent again", async () => {
+      let present = ["a", "b"];
+      const { engine, writes } = fake(wf, {
+        positions: stored,
+        nodes: () => present,
+        revision: 2,
+        setLayout: async () => staleAnswer,
+      });
+      const store = createCanvasStore(() => engine);
+      await store.getState().open(request);
+      await store.getState().moveNodes({ a: { x: 5, y: 5 } });
+      present = ["b"];
+      await store.getState().changed(change);
+      expect(writes).toHaveLength(1);
+      const c = store.getState().content;
+      if (c.status !== "ready") throw new Error("not ready");
+      expect(c.notice).toBe(NOTICE);
+    });
+
+    it("F-207 AR-11: a move refused as stale twice shows the notice", async () => {
+      const { engine, writes } = fake(wf, {
+        positions: stored,
+        nodes: ["a", "b"],
+        revision: 2,
+        setLayout: async () => staleAnswer,
+      });
+      const store = createCanvasStore(() => engine);
+      await store.getState().open(request);
+      await store.getState().moveNodes({ a: { x: 5, y: 5 } });
+      await store.getState().changed(change);
+      expect(writes).toHaveLength(2);
+      const c = store.getState().content;
+      if (c.status !== "ready") throw new Error("not ready");
+      expect(c.notice).toBe(NOTICE);
+    });
+
+    it("F-207 ADR-0008: a placement keeps the positions the user set while the layout ran", async () => {
+      const { engine, writes } = fake(wf, {
+        positions: stored,
+        nodes: ["a", "b", "c"],
+      });
+      const store = createCanvasStore(() => engine);
+      await store.getState().open(request);
+      // the layout run started here, then the user moved a
+      await store.getState().moveNodes({ a: { x: 5, y: 5 } });
+      await store.getState().placeNodes(
+        { tab, revision: 1 },
+        {
+          positions: {
+            a: { x: 1, y: 2 },
+            b: { x: 30, y: 40 },
+            c: { x: 9, y: 9 },
+          },
+          saved: { c: { x: 9, y: 9 } },
+          replace: false,
+          notice: null,
+        },
+      );
+      const c = store.getState().content;
+      if (c.status !== "ready") throw new Error("not ready");
+      expect(c.positions).toEqual({
+        a: { x: 5, y: 5 },
+        b: stored.b,
+        c: { x: 9, y: 9 },
+      });
+      expect(writes.at(-1)?.positions).toEqual({ c: { x: 9, y: 9 } });
+    });
+
+    it("F-207 ADR-0008: a placement is stored and saved; with nothing added nothing is sent, and a replace sends the whole set", async () => {
+      const { engine, writes } = fake(wf);
+      const store = createCanvasStore(() => engine);
+      await store.getState().open(request);
+      const at = { tab, revision: 1 };
+      await store.getState().placeNodes(at, {
+        positions: stored,
+        saved: stored,
+        replace: false,
+        notice: null,
+      });
+      expect(writes).toHaveLength(1);
+      await store.getState().placeNodes(at, {
+        positions: stored,
+        saved: {},
+        replace: false,
+        notice: "Automatic layout isn't available (x).",
+      });
+      expect(writes).toHaveLength(1);
+      const c = store.getState().content;
+      if (c.status !== "ready") throw new Error("not ready");
+      expect(c.notice).toBe("Automatic layout isn't available (x).");
+      await store.getState().placeNodes(at, {
+        positions: stored,
+        saved: stored,
+        replace: true,
+        notice: null,
+      });
+      expect(writes[1]?.replace).toBe(true);
+    });
+
+    it("F-207: a placement for a superseded revision or tab is dropped", async () => {
+      const { engine, writes } = fake(wf);
+      const store = createCanvasStore(() => engine);
+      await store.getState().open(request);
+      const placement = {
+        positions: stored,
+        saved: stored,
+        replace: false,
+        notice: null,
+      };
+      await store.getState().placeNodes({ tab, revision: 0 }, placement);
+      await store
+        .getState()
+        .placeNodes({ tab: "other#", revision: 1 }, placement);
+      expect(writes).toEqual([]);
+      const c = store.getState().content;
+      if (c.status !== "ready") throw new Error("not ready");
+      expect(c.positions).toEqual({});
+    });
+  });
+});
+
+const ok = () => ({
+  revision: 1,
+  files: [],
+  layout: { state: "ok", message: null },
 });
 
 const statusOf = (undoCount: number, redoCount = 0) => ({

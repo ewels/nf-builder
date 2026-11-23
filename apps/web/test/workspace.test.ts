@@ -9,6 +9,7 @@ import {
   templateList,
 } from "@nf-builder/engine";
 import { IDBFactory } from "fake-indexeddb";
+import { zipSync } from "fflate";
 import { describe, expect, it } from "vitest";
 import type { Timer } from "../src/workspace/autosave";
 import { openProjectDb, type ProjectDb } from "../src/workspace/project-db";
@@ -185,6 +186,51 @@ describe("F-202 workspace", () => {
       { path: "notes.md", text: "n\n" },
     ]);
     db.close();
+  });
+
+  it("F-207 IO-01: setLayout's sidecar text is autosaved like a command's files, and a later session reads the positions back", async () => {
+    const s = setup();
+    await s.watching;
+    const main =
+      "process A {\n    script:\n    'A'\n}\n\nworkflow {\n    A()\n}\n";
+    const meta = await s.workspace.createProject({
+      name: "P",
+      languageVersion: version,
+      files: [{ path: "main.nf", text: main }],
+    });
+    const opened = await s.workspace.openProject(meta.id);
+    const position = { "main.nf#/A@1": { x: 12, y: 34 } };
+    const change = ok(
+      await s.workspace.setLayout({
+        revision: opened.summary.revision,
+        path: "main.nf",
+        workflow: null,
+        positions: position,
+        replace: false,
+      }),
+    ) as { files: { path: string; text: string }[] };
+    expect(change.files.map((f) => f.path)).toEqual([
+      ".nf-builder/layout.json",
+    ]);
+    // a refused write saves nothing
+    const refused = await s.workspace.setLayout({
+      revision: opened.summary.revision,
+      path: "main.nf",
+      workflow: null,
+      positions: { "main.nf#/NOPE@1": { x: 1, y: 1 } },
+      replace: false,
+    });
+    expect(refused).toMatchObject({ ok: false, code: "invalid" });
+    expect(await s.workspace.flush()).toEqual({ status: "saved", error: null });
+    expect(s.saves).toHaveLength(1);
+    expect(s.saves[0]?.map((c) => c.path)).toEqual([".nf-builder/layout.json"]);
+    const b = setup(s.factory);
+    await b.watching;
+    await b.workspace.openProject(meta.id);
+    const again = (await b.workspace.project("main.nf", null)) as {
+      positions: unknown;
+    };
+    expect(again.positions).toEqual(position);
   });
 
   it("F-209 IO-01: undo and redo are autosaved like apply, including a deleted file; a refused undo saves nothing", async () => {
@@ -637,5 +683,141 @@ describe("F-202 workspace", () => {
         configurable: true,
       });
     }
+  });
+});
+
+const zipBlob = (entries: Record<string, string>): Blob => {
+  const data: Record<string, Uint8Array> = {};
+  for (const [name, text] of Object.entries(entries))
+    data[name] = new TextEncoder().encode(text);
+  return new Blob([zipSync(data)]);
+};
+const sampleZip = () =>
+  zipBlob({
+    "pipe-1/main.nf": "workflow {}\n",
+    "pipe-1/README.md": "# pipe\n",
+    "pipe-1/data/in.txt": "reads\n",
+    "pipe-1/work/x.txt": "cache\n",
+  });
+
+describe("F-403 workspace zip import", () => {
+  it("F-403 IO-11 IO-12: stageZip gives a summary; createProject with the import stores exactly the selected files and discards the stage", async () => {
+    const s = setup();
+    await s.watching;
+    const staged = await s.workspace.stageZip(sampleZip(), "pipe.zip");
+    if (!staged.ok) throw new Error(staged.message);
+    expect(staged.summary).toMatchObject({ stripped: "pipe-1", files: 2 });
+    const meta = await s.workspace.createProject({
+      name: "Pipe",
+      languageVersion: version,
+      files: [],
+      import: { id: staged.id, ignore: staged.summary.ignore },
+    });
+    const db = await s.reader();
+    const stored = await db.readProject(meta.id);
+    expect(stored?.files).toEqual([
+      { path: "README.md", text: "# pipe\n" },
+      { path: "main.nf", text: "workflow {}\n" },
+    ]);
+    expect(s.statuses.at(-1)?.projects.map((p) => p.id)).toEqual([meta.id]);
+    expect(await s.workspace.restageImport(staged.id, "")).toMatchObject({
+      ok: false,
+      code: "gone",
+    });
+  });
+
+  it("F-403 IO-12: restageImport applies an edited list, and createProject uses the list it is given", async () => {
+    const s = setup();
+    await s.watching;
+    const staged = await s.workspace.stageZip(sampleZip(), "pipe.zip");
+    if (!staged.ok) throw new Error(staged.message);
+    const edited = await s.workspace.restageImport(staged.id, "work/\n");
+    expect(edited).toMatchObject({ ok: true, summary: { files: 3 } });
+    const meta = await s.workspace.createProject({
+      name: "Pipe",
+      languageVersion: version,
+      files: [],
+      import: { id: staged.id, ignore: "work/\n" },
+    });
+    const db = await s.reader();
+    const stored = await db.readProject(meta.id);
+    expect(stored?.files.map((f) => f.path)).toEqual([
+      "README.md",
+      "data/in.txt",
+      "main.nf",
+    ]);
+  });
+
+  it("F-403 step 2 QA-32: a refused zip comes back as data and stores nothing", async () => {
+    const s = setup();
+    await s.watching;
+    const refused = await s.workspace.stageZip(
+      new Blob([new Uint8Array(200)]),
+      "bad.zip",
+    );
+    expect(refused).toMatchObject({ ok: false, code: "not-zip" });
+    expect(s.statuses.at(-1)?.projects ?? []).toHaveLength(0);
+  });
+
+  it("F-403 IO-12: createProject refuses an unknown or discarded import, an import with a template or files, ignore-list problems and an import with no files", async () => {
+    const s = setup();
+    await s.watching;
+    const base = { name: "Pipe", languageVersion: version };
+    await expect(
+      s.workspace.createProject({
+        ...base,
+        files: [],
+        import: { id: "nope", ignore: "" },
+      }),
+    ).rejects.toThrow(/no longer available/);
+    const staged = await s.workspace.stageZip(sampleZip(), "pipe.zip");
+    if (!staged.ok) throw new Error(staged.message);
+    const choice = { id: staged.id, ignore: "" };
+    await expect(
+      s.workspace.createProject({
+        ...base,
+        files: [],
+        template: "blank",
+        import: choice,
+      }),
+    ).rejects.toThrow(/import.*template or files/i);
+    await expect(
+      s.workspace.createProject({ ...base, files, import: choice }),
+    ).rejects.toThrow(/import.*template or files/i);
+    await expect(
+      s.workspace.createProject({
+        ...base,
+        files: [],
+        import: { id: staged.id, ignore: "!main.nf" },
+      }),
+    ).rejects.toThrow(/^Fix the ignore list first\. Line 1/);
+    await expect(
+      s.workspace.createProject({
+        ...base,
+        files: [],
+        import: { id: staged.id, ignore: "*" },
+      }),
+    ).rejects.toThrow("Nothing to import: every file was skipped.");
+    expect(s.statuses.at(-1)?.projects ?? []).toHaveLength(0);
+    await s.workspace.discardImport(staged.id);
+    await expect(
+      s.workspace.createProject({ ...base, files: [], import: choice }),
+    ).rejects.toThrow(/no longer available/);
+  });
+
+  it("F-403 ADR-0003: stage results survive structuredClone", async () => {
+    const s = setup();
+    await s.watching;
+    const staged = await s.workspace.stageZip(sampleZip(), "pipe.zip");
+    expect(structuredClone(staged)).toEqual(staged);
+    const refused = await s.workspace.stageZip(
+      new Blob([new Uint8Array(30)]),
+      "x",
+    );
+    expect(structuredClone(refused)).toEqual(refused);
+    if (staged.ok)
+      expect(
+        structuredClone(await s.workspace.restageImport(staged.id, "a/")),
+      ).toBeTruthy();
   });
 });

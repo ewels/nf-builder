@@ -21,10 +21,11 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-205 canvas | merged, PR #41 | |
 | F-203 new project dialog | merged, PR #43 | |
 | F-206 details pane | merged, PR #45 | |
-| F-207 layout sidecar | `feat/F-207` (`/home/user/wt-F-207`) | Tasks 1–5 committed (engine layout, service, ELK worker); task 6 (canvas wiring) after F-208 merges. [plan](plan-F-207.md). |
+| F-207 layout sidecar | merged, PR #49 | |
 | F-208 view modes and Code | merged, PR #46 | |
 | F-209 undo and redo | merged, PR #50 | |
-| F-309 problems panel | not started | [plan](plan-F-309.md). After F-208 and F-209. |
+| F-309 problems panel | `feat/F-309`, PR #52 (draft) | Built and reviewed; review fixes were building when work paused on 2026-11-23. Then: commit the CI baselines `problems-panel` (re-render after the fix-title change) and `problems-status-bar`, write the records (ADR draft below), merge main, CI, merge. |
+| F-403 zip import | merged, PR #51 | |
 | F-502 registry client | merged, PR #48 | |
 | Parser error position | `fix/parser-error-position` | A blank line before `stub:` or `emit:` moved a later syntax error to that keyword (antlr4ng and Groovy's optimised ANTLR runtime differ); fix building. |
 | F-501 registry snapshot | merged, PR #29; passing | Confirmed on live data after the snapshot-triggered Pages deploy. |
@@ -34,7 +35,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 
 Branches are stacked: `feat/F-108` → `feat/F-107`; `feat/F-111` also merges F-107. Open PRs for F-108, F-107 and F-111 against `main` in that order (merge `main` into each first), each green before the next. Worktrees: `/home/user/wt-F-1xx`.
 
-Next free ADR number: 0052 (0050 is F-502's, 0051 F-209's).
+Next free ADR number: 0054 (0052 is F-207's, 0053 F-403's).
 
 ## Decisions already taken on the plans' open points
 
@@ -150,7 +151,7 @@ Next free ADR number: 0052 (0050 is F-502's, 0051 F-209's).
   - the plan's wording.
 - Task 0, wiring the diagnoser into the service, is done in F-112's PR, since F-112 merges after F-113.
 
-### F-207 — [plan](plan-F-207.md)
+### F-207 (merged with its PR)
 - Accept every recommendation in section 6:
   - elkjs 0.12.1, pinned, as a web runtime dependency under its EPL-2.0 option, in its own lazily started worker;
   - `setLayout` as the only writer of the sidecar, and layout writes don't advance the revision (clarifies ADR 0043);
@@ -219,7 +220,7 @@ Next free ADR number: 0052 (0050 is F-502's, 0051 F-209's).
   - the F-204 locator change and the shell baseline re-approval, recorded in the PR;
   - extend the recorded-registry-data licences row to the live fixtures.
 
-### F-403 — [plan](plan-F-403.md)
+### F-403 (merged with its PR)
 - Accept every recommendation in section 6:
   - fflate 0.8.3, pinned, as a runtime dependency of `@nf-builder/sources` (`unzipSync` only), plus root dev fflate and `sources` dev fast-check 4.11.0;
   - unzipping in the engine worker with `sources` loaded lazily;
@@ -297,3 +298,11 @@ Next free ADR number: 0052 (0050 is F-502's, 0051 F-209's).
   - `EngineApi.configView` and `configSchema` (amends ADR 0043's API list), excerpts capped at 160 characters;
   - Form, Split and Code modes on config tabs reusing `ViewMode` (UX-27 amended); new top-level blocks appended at the end;
   - step 2's "imported" read as "a project created from existing files"; the Nextflow grammar for highlighting; collapsed selector cards over 20.
+
+## Paused on 2026-11-23
+
+Work paused at the maintainer's request (usage limits). To resume:
+- **PR #52 (F-309):** the review-fix builder may have left commits on `feat/F-309`. Check `git log`, run `pnpm check` and the F-309 e2e tests, then do the steps in its row. The ADR is drafted as 0054 (next free after F-403's 0053).
+- **Next features, plans ready:** F-703 (read-only below 1024 px; start from main), F-210 (Files view; reuse F-309's `openFile`), F-605 (Markdown and other files; after F-309), F-601 (config editor; tasks 1 to 6 independent of F-309), F-401 (GitHub import; after F-403).
+- Then plan M3 from F-301 onwards.
+

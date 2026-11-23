@@ -165,6 +165,8 @@ describe("@nf-builder/web", () => {
     const counts = canvasCounts({
       status: "ready",
       revision: 1,
+      positions: {},
+      notice: null,
       projection: {
         workflow: {
           path: "main.nf",

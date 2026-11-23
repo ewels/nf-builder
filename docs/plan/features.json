@@ -624,6 +624,7 @@
         "UX-26"
       ],
       "depends_on": [
+        "F-202",
         "F-205"
       ],
       "steps": [
@@ -631,8 +632,8 @@
         "Move a node, reload: same position",
         "Rename a process through the app: its position is kept"
       ],
-      "passes": false,
-      "notes": "From F-111: node ids can change after variable introduction, a statement move or a rename; diff the projections to carry layout keys (ADR 0008). From F-202: .nf-builder/layout.json written through the workspace is autosaved like any file. From F-205: replace layeredLayout inside canvasView with ELK and stored positions; enable dragging; re-approve the canvas baselines, and keep the per-kind test's zoom-1 assertion. From F-203: re-approve the `template-*` baselines in `e2e/__screenshots__/new-project.spec.ts/` too; `.nf-builder/layout.json` written on open is not part of a template's files. From F-206: decide whether a port-labels toggle and a refresh keep or re-fit the viewport (both re-fit today, as in F-205; selecting keeps it). The screen-fixed dot grid on `.canvas-area` shows under React Flow's own grid, so every node clip depends on the pan; remove it when re-approving the canvas baselines. From F-208: the graph re-fits on every pane resize (`apps/web/src/canvas/use-refit-on-resize.ts`), including window and column resizes, which resets the user's pan and zoom; decide with the stored positions whether to keep the viewport instead. From F-209: carry layout keys on undo and redo as well as on commands (both run through the service's change path); undoing a rename must carry the sidecar back byte for byte; moves stay out of the history (ADR 0051)."
+      "passes": true,
+      "notes": "From F-111: node ids can change after variable introduction, a statement move or a rename; diff the projections to carry layout keys (ADR 0008). From F-202: .nf-builder/layout.json written through the workspace is autosaved like any file. From F-205: replace layeredLayout inside canvasView with ELK and stored positions; enable dragging; re-approve the canvas baselines, and keep the per-kind test's zoom-1 assertion. From F-203: re-approve the `template-*` baselines in `e2e/__screenshots__/new-project.spec.ts/` too; `.nf-builder/layout.json` written on open is not part of a template's files. From F-206: decide whether a port-labels toggle and a refresh keep or re-fit the viewport (both re-fit today, as in F-205; selecting keeps it). The screen-fixed dot grid on `.canvas-area` shows under React Flow's own grid, so every node clip depends on the pan; remove it when re-approving the canvas baselines. From F-208: the graph re-fits on every pane resize (`apps/web/src/canvas/use-refit-on-resize.ts`), including window and column resizes, which resets the user's pan and zoom; decide with the stored positions whether to keep the viewport instead. From F-209: carry layout keys on undo and redo as well as on commands (both run through the service's change path); undoing a rename must carry the sidecar back byte for byte; moves stay out of the history (ADR 0051). Verified 2026-11-23 (ADR 0052): step 1 by `e2e/layout.spec.ts` (a project without a sidecar is laid out by ELK and the sidecar written; placed nodes stay drawn while ELK runs; the 30 s timeout falls back to columns) and the engine sidecar tests; step 2 by the drag and keyboard-move e2e tests (reload keeps the position); step 3 by the rename e2e test (a dragged node keeps its position through `renameDeclaration`) and the engine carry tests, including undo and redo restoring the sidecar byte for byte (with F-209). Canvas, shell, template and view baselines re-approved from CI for ELK placement and the removed dot grid."
     },
     {
       "id": "F-208",
@@ -670,7 +671,7 @@
         "Redo five times: back to the edited state"
       ],
       "passes": true,
-      "notes": "From F-111: keep the inverse lists from applyCommand; redo is the original patches. From F-113: undo applies the inverse returned by apply through getEngine().applyPatches(patches, revision); redo re-applies the original patches. From F-208: `canvasStore.apply(command, session?)` is the single UI path for commands; the revision is `summary.revision` (also `content.revision`, `lastChange.revision`); the store's `session` counter refuses commands for a project that is no longer open. Monaco's own undo stays local to the editor; flush the text sync (`TextSync.flush`) before an undo. e2e helpers: `e2e/code-view.ts` (`editor`, `openCodeFixture`, `appendToLine`, `insertAfterLine`, `fileText`, `lineNumberOf`) and `e2e/projects.ts` (`readFile`, `saveState`). Verified 2026-11-23 (ADR 0051): step 1 by `e2e/undo.spec.ts` (five different edits: add call, connect, a Split-view code edit, create process, rename; undone five times, every stored and engine file byte-identical to the start) and `packages/engine/test/service/history.test.ts` (the twelve f111 golden commands from start-typed and back, CRLF and no-final-newline round trips); step 2 by the same tests redoing to the edited state, and the buttons test. The layout sidecar is covered once F-207 merges."
+      "notes": "From F-111: keep the inverse lists from applyCommand; redo is the original patches. From F-113: undo applies the inverse returned by apply through getEngine().applyPatches(patches, revision); redo re-applies the original patches. From F-208: `canvasStore.apply(command, session?)` is the single UI path for commands; the revision is `summary.revision` (also `content.revision`, `lastChange.revision`); the store's `session` counter refuses commands for a project that is no longer open. Monaco's own undo stays local to the editor; flush the text sync (`TextSync.flush`) before an undo. e2e helpers: `e2e/code-view.ts` (`editor`, `openCodeFixture`, `appendToLine`, `insertAfterLine`, `fileText`, `lineNumberOf`) and `e2e/projects.ts` (`readFile`, `saveState`). Verified 2026-11-23 (ADR 0051): step 1 by `e2e/undo.spec.ts` (five different edits: add call, connect, a Split-view code edit, create process, rename; undone five times, every stored and engine file byte-identical to the start) and `packages/engine/test/service/history.test.ts` (the twelve f111 golden commands from start-typed and back, CRLF and no-final-newline round trips); step 2 by the same tests redoing to the edited state, and the buttons test. The layout sidecar is covered once F-207 merges. From F-207: the five-undo e2e test now covers the layout sidecar too, byte for byte; undo and redo carry layout keys through their hints (ADR 0052)."
     },
     {
       "id": "F-210",
@@ -690,7 +691,7 @@
         "A registry module folder shows the `registry` tag and a file with a syntax error shows an error badge"
       ],
       "passes": false,
-      "notes": "Added 2026-11-22 (F-204 PR, scope-change; Q16): UX-16 had no owning feature; F-301 step 1 relies on the Files view. Dropping a zip reuses F-403's zip import. From F-111: there is no create, delete or rename file command yet. From F-202: IndexedDB schema v1 stores text only; binary files need a schema version bump (ADR 0045). From F-208: an entry file with no workflows gets no tab, so there is no toggle to reach its Code view. From F-209: `writeFiles` (uploads, new files written raw) clears the undo history."
+      "notes": "Added 2026-11-22 (F-204 PR, scope-change; Q16): UX-16 had no owning feature; F-301 step 1 relies on the Files view. Dropping a zip reuses F-403's zip import. From F-111: there is no create, delete or rename file command yet. From F-202: IndexedDB schema v1 stores text only; binary files need a schema version bump (ADR 0045). From F-208: an entry file with no workflows gets no tab, so there is no toggle to reach its Code view. From F-209: `writeFiles` (uploads, new files written raw) clears the undo history. From F-207: show `.nf-builder/layout.json` read-only, because commands refuse it; a sidecar added through `writeFiles` replaces the layout. From F-403: reuse `stageZip`, `restageImport` and `discardImport` for dropped zips, and `selectFiles` for loose files; writes go through `writeFiles` in the worker."
     },
     {
       "id": "F-211",
@@ -736,7 +737,7 @@
         "Exported result passes `nextflow lint`"
       ],
       "passes": false,
-      "notes": "From F-204: palette item descriptions are only a title tooltip on non-focusable rows; making items focusable here must also expose descriptions to keyboard users (QA-11). From F-111: group several commands as one undo step by committing each and concatenating the inverses in reverse. From F-111: AddCall refuses a process the workflow already calls (Nextflow can call a process once per workflow); offer to include it again under an alias (`include { X as X_2 }`) instead. From F-209: apply a drop's commands through `canvasStore.apply(cmd, session, {group, label})` so they undo as one step (this supersedes the F-111 note about concatenating inverses); a partially applied group rolls back with one undo."
+      "notes": "From F-204: palette item descriptions are only a title tooltip on non-focusable rows; making items focusable here must also expose descriptions to keyboard users (QA-11). From F-111: group several commands as one undo step by committing each and concatenating the inverses in reverse. From F-111: AddCall refuses a process the workflow already calls (Nextflow can call a process once per workflow); offer to include it again under an alias (`include { X as X_2 }`) instead. From F-209: apply a drop's commands through `canvasStore.apply(cmd, session, {group, label})` so they undo as one step (this supersedes the F-111 note about concatenating inverses); a partially applied group rolls back with one undo. From F-207: set a dropped node's position with `setLayout` (with the current revision) before the canvas refreshes, so ELK doesn't place it; keep groups that delete nodes to one part where possible, because undoing a multi-part group restores positions best effort (ADR 0052)."
     },
     {
       "id": "F-302",
@@ -778,7 +779,7 @@
         "There is no control for changing kind"
       ],
       "passes": false,
-      "notes": "From F-206: enable the details header's Edit button. React Flow's Enter selects a focused node; settle it against Enter opening the popup. From F-209: the popup's Apply is one command or one group, so one undo step."
+      "notes": "From F-206: enable the details header's Edit button. React Flow's Enter selects a focused node; settle it against Enter opening the popup. From F-209: the popup's Apply is one command or one group, so one undo step. From F-207: repeat F-207 step 3 (a rename keeps the position) through the popup once it exists."
     },
     {
       "id": "F-304",
@@ -918,7 +919,7 @@
         "Delete a multi-selection: one undo step restores all"
       ],
       "passes": false,
-      "notes": "From F-111: group several commands as one undo step by committing each and concatenating the inverses in reverse. From F-011 (ADR 0044): inside an iframe the clipboard API needs the embedder's allow=\"clipboard-read; clipboard-write\"; fall back to in-app copy and paste when it is refused. From F-206: selection is single (multi-select and marquee are off); re-enable them here and define the details pane for several nodes. From F-209: multi-node delete and paste apply their commands under one `group`, so one undo reverts them."
+      "notes": "From F-111: group several commands as one undo step by committing each and concatenating the inverses in reverse. From F-011 (ADR 0044): inside an iframe the clipboard API needs the embedder's allow=\"clipboard-read; clipboard-write\"; fall back to in-app copy and paste when it is refused. From F-206: selection is single (multi-select and marquee are off); re-enable them here and define the details pane for several nodes. From F-209: multi-node delete and paste apply their commands under one `group`, so one undo reverts them. From F-207: \"Auto-layout selected nodes\" is built but unreachable until multi-select; switch it on and add its e2e test. Redo's deleted ids for later parts of a group refer to intermediate states (ADR 0052)."
     },
     {
       "id": "F-311",
@@ -982,7 +983,7 @@
         "The report lists parse failures and legacy share"
       ],
       "passes": false,
-      "notes": "From F-113: load an imported project with getEngine().open(request, onProgress) or getEngine().writeFiles(files). From F-202: IndexedDB schema v1 stores text only; binary imports need a schema version bump (ADR 0045). From F-203: a third radio in the New project dialog's route group can hold Import. Projects don't record their template; F-401 may add `{kind: \"template\", id, version}` as a project source (a stored-format change, ADR 0045)."
+      "notes": "From F-113: load an imported project with getEngine().open(request, onProgress) or getEngine().writeFiles(files). From F-202: IndexedDB schema v1 stores text only; binary imports need a schema version bump (ADR 0045). From F-203: a third radio in the New project dialog's route group can hold Import. Projects don't record their template; F-401 may add `{kind: \"template\", id, version}` as a project source (a stored-format change, ADR 0045). From F-403: reuse `@nf-builder/sources/import` (limits, `DEFAULT_IGNORE`, `parseIgnore`, `selectFiles`, `summarise`, `importProblem`) and `ImportSection`; add \"GitHub repository\" before \"Zip file\" in the dialog's \"Import from\" group; reuse `RNASEQ_NF_SKIPPED` in e2e; binaries are skipped on both routes; record the IO-13 zip case as `{kind: \"zip\", name, sha256}` hashed in the worker (`crypto.subtle` needs a secure context); the worker imports only the `./import` subpath, which the planned `web-worker-no-github-client` rule keeps clean."
     },
     {
       "id": "F-402",
@@ -1021,8 +1022,8 @@
         "Import a GitHub archive zip of rnaseq-nf: same files as the GitHub import",
         "A zip exceeding the limits is refused with a clear message"
       ],
-      "passes": false,
-      "notes": "From F-008 (S4): codeload.github.com only allows https://render.githubusercontent.com, so zip import is a file upload; no GitHub archive URL can be fetched in the browser. From F-113: load an imported project with getEngine().open(request, onProgress) or getEngine().writeFiles(files). From F-202: IndexedDB schema v1 stores text only; binary files in a zip need a schema version bump (ADR 0045). From F-203: zip import can join the New project dialog's route group."
+      "passes": true,
+      "notes": "From F-008 (S4): codeload.github.com only allows https://render.githubusercontent.com, so zip import is a file upload; no GitHub archive URL can be fetched in the browser. From F-113: load an imported project with getEngine().open(request, onProgress) or getEngine().writeFiles(files). From F-202: IndexedDB schema v1 stores text only; binary files in a zip need a schema version bump (ADR 0045). From F-203: zip import can join the New project dialog's route group. Verified 2026-11-23 (ADR 0053): step 1 by `e2e/zip-import.spec.ts` (a `git archive` zip of the pinned rnaseq-nf tree gives the same 22 files as the pinned tree after the IO-12 rules, 12 `data/` files ignored and one PNG skipped; with `/data/` removed from the list, 34 files); step 2 by the 20,001-entry and 201 MB refusals in e2e and the `packages/sources` limit and bomb tests (a 1 GB entry recorded as 1 MB is cut to its recorded size); also the newest-stage race, the iframe case, and an `@smoke` import of the hello-world template on all three browsers. Binary files are skipped (F-407)."
     },
     {
       "id": "F-404",
@@ -1034,7 +1035,8 @@
         "UX-62"
       ],
       "depends_on": [
-        "F-401"
+        "F-401",
+        "F-403"
       ],
       "steps": [
         "Import, make one scripted edit, export: every file the edit didn't touch is equivalent to the source",
@@ -1042,7 +1044,7 @@
         "Export, clear storage, import the zip: layout identical (ADR 0008 confirmation)"
       ],
       "passes": false,
-      "notes": "From F-104: untouched files export as printSourceFile output (byte-identical); IO-20 checks use engine equivalent()."
+      "notes": "From F-104: untouched files export as printSourceFile output (byte-identical); IO-20 checks use engine equivalent(). From F-207: the export's layout checkbox filters `LAYOUT_PATH` (`.nf-builder/layout.json`); importing a sidecar through `writeFiles` replaces the layout but doesn't update the canvas store's layout notice yet. From F-403: imported projects lack binary files, symlinks (imported as text holding the target) and executable bits; `.nf-builder/` is never ignored; write with fflate `zipSync`; a file and a folder can share a path prefix (`x` and `x/y`). F-403 added to `depends_on` (step 3 imports a zip)."
     },
     {
       "id": "F-405",
@@ -1077,7 +1079,7 @@
         "Export all, clear storage, import the backup: every project restored with layout"
       ],
       "passes": false,
-      "notes": "From F-202: the backup format is its own and reads through the workspace; it is also the way to move projects to another origin (ADR 0045)."
+      "notes": "From F-202: the backup format is its own and reads through the workspace; it is also the way to move projects to another origin (ADR 0045). From F-403: a backup import may bypass the ignore list; reuse the limits and the text check."
     },
     {
       "id": "F-501",
@@ -1285,7 +1287,7 @@
         "A .png in the project is listed but not opened"
       ],
       "passes": false,
-      "notes": "From F-208: the markdown sanitiser must strip `<style>` elements and `style` attributes, because the policy allows inline styles for Monaco (ADR 0048); reuse the Monaco modules in `apps/web/src/code/`."
+      "notes": "From F-208: the markdown sanitiser must strip `<style>` elements and `style` attributes, because the policy allows inline styles for Monaco (ADR 0048); reuse the Monaco modules in `apps/web/src/code/`. From F-403: the deferred F-407 \"Binary files in projects\" exists; move F-605 step 2 there as planned."
     },
     {
       "id": "F-606",
@@ -1359,7 +1361,7 @@
         "axe reports no violations on the main screens"
       ],
       "passes": false,
-      "notes": "From F-201: drag-to-resize columns needs a single-pointer alternative for WCAG 2.5.7 (keyboard resizing alone doesn't satisfy it). From F-205: the F shortcut for fit view, keyboard parity for edge tooltips, and the canvas ariaLabelConfig and node descriptions need an audit. From F-203: audit the New project dialog's two radio groups and its focus order; Hello world is a small typed project for keyboard tests. From F-206: announce selection changes to screen readers; Enter and Space select a focused node, Escape clears. Edges are focusable but not selectable: give keyboard users a way to read an edge's type. From F-208: G, S and C are done and don't fire in text fields, the code editor or dialogs; Ctrl+M then Tab leaves Monaco; audit the view-mode radio group and Monaco. Switching to Code from a focused canvas node drops focus to the page body. From F-209: audit the Undo and Redo tooltips, `aria-keyshortcuts`, the history live region and the ignored key repeat."
+      "notes": "From F-201: drag-to-resize columns needs a single-pointer alternative for WCAG 2.5.7 (keyboard resizing alone doesn't satisfy it). From F-205: the F shortcut for fit view, keyboard parity for edge tooltips, and the canvas ariaLabelConfig and node descriptions need an audit. From F-203: audit the New project dialog's two radio groups and its focus order; Hello world is a small typed project for keyboard tests. From F-206: announce selection changes to screen readers; Enter and Space select a focused node, Escape clears. Edges are focusable but not selectable: give keyboard users a way to read an edge's type. From F-208: G, S and C are done and don't fire in text fields, the code editor or dialogs; Ctrl+M then Tab leaves Monaco; audit the view-mode radio group and Monaco. Switching to Code from a focused canvas node drops focus to the page body. From F-209: audit the Undo and Redo tooltips, `aria-keyshortcuts`, the history live region and the ignored key repeat. From F-207: nodes move with the arrow keys once selected, and their description says so; audit the \"Laying out nodes…\" status and the layout notices."
     },
     {
       "id": "F-702",
@@ -1380,7 +1382,7 @@
         "On `main`, CI fails when QA-01, QA-03 or QA-06 is exceeded, and its budget report shows the QA-02, QA-04 and QA-05 measurements"
       ],
       "passes": false,
-      "notes": "ADR 0015 excludes worker bundles from the QA-01 measurement until this feature; revisit that here. 2026-11-22, maintainer (ADR 0030): QA-02, QA-04 and QA-05 are reported, not gates. From F-113: the reference profile throttles the page 4x but Chromium can't throttle workers, so worker timings are unthrottled (ADR 0043 clarifies ADR 0029's profile this way; a cgroup CPU quota at a real 4x would put sarek near 60 s, over the 30 s ceiling). Gate QA-03 on the bench job's cold open (18.6 s locally). QA-04's edit p95 is 271 ms locally: re-projecting the 722-line SAREK workflow after each edit and the double parse (F-111's guard parse plus commit's setFile) dominate; reuse the checked SourceFile and project incrementally. Worker chunks are outside QA-01 (ADR 0015): engine.worker about 87 kB raw, parser 653 kB raw, catalogues about 105 kB raw each. From F-206: `details` reprojects the workflow per click (10 to 38 ms on sarek's SAREK, unthrottled); include it in the performance checks. From F-209: add an undo and redo row to `pnpm bench`."
+      "notes": "ADR 0015 excludes worker bundles from the QA-01 measurement until this feature; revisit that here. 2026-11-22, maintainer (ADR 0030): QA-02, QA-04 and QA-05 are reported, not gates. From F-113: the reference profile throttles the page 4x but Chromium can't throttle workers, so worker timings are unthrottled (ADR 0043 clarifies ADR 0029's profile this way; a cgroup CPU quota at a real 4x would put sarek near 60 s, over the 30 s ceiling). Gate QA-03 on the bench job's cold open (18.6 s locally). QA-04's edit p95 is 271 ms locally: re-projecting the 722-line SAREK workflow after each edit and the double parse (F-111's guard parse plus commit's setFile) dominate; reuse the checked SourceFile and project incrementally. Worker chunks are outside QA-01 (ADR 0015): engine.worker about 87 kB raw, parser 653 kB raw, catalogues about 105 kB raw each. From F-206: `details` reprojects the workflow per click (10 to 38 ms on sarek's SAREK, unthrottled); include it in the performance checks. From F-209: add an undo and redo row to `pnpm bench`. From F-207: the carry costs two projections per tracked workflow in each changed file, and the bench project has no sidecar (add a variant that seeds one); ELK takes 0.3 to 1.2 s on sarek's PREPARE_GENOME and 3.8 to 8.7 s on SAREK under load; the service memoises one projection per revision."
     },
     {
       "id": "F-703",
@@ -1434,6 +1436,27 @@
       ],
       "passes": false,
       "notes": "Requested by the maintainer on 2026-11-21."
+    },
+    {
+      "id": "F-407",
+      "milestone": "M8",
+      "description": "Binary files in projects: IndexedDB schema v2 stores binary content; both import routes and export keep binary files; binaries are listed in the Files view but not opened.",
+      "spec": [
+        "FI-32",
+        "IO-11",
+        "IO-12",
+        "IO-20"
+      ],
+      "depends_on": [
+        "F-403"
+      ],
+      "steps": [
+        "Import a zip containing a .png: the file is stored and listed in the Files view, and opening it shows a notice instead of an editor",
+        "Export the project: the .png is in the zip byte for byte",
+        "An older build opening the database is told to reload; a schema v1 database migrates to v2 without losing projects"
+      ],
+      "passes": false,
+      "notes": "Split from F-403 on 2026-11-23 (ADR 0053): v0.1 projects hold text files only and imports skip binary files; deferred past v0.1 (ADR 0030)."
     }
   ]
 }

@@ -12,6 +12,8 @@ import {
   type HistoryStatus,
   type NodeDetails,
   type OpenRequest,
+  type Point,
+  type Positions,
   type ProjectChange,
   type Projection,
   type ProjectSummary,
@@ -45,6 +47,10 @@ export type CanvasContent =
       readonly status: "ready";
       readonly revision: number;
       readonly projection: Projection;
+      /** The node positions: stored ones from the engine, then those placed and moved here (F-207). Whole nodes only. */
+      readonly positions: Positions;
+      /** Why layout isn't as expected (ELK failed, a save was refused), or null. */
+      readonly notice: string | null;
     }
   | { readonly status: "unavailable"; readonly message: string };
 
@@ -85,6 +91,11 @@ export interface WorkspaceState {
   /** The selected node's id, in the active tab's projection (single selection, F-206). */
   readonly selected: string | null;
   readonly details: DetailsContent;
+  /**
+   * The layout file's own problem, shown for the session: it was unreadable (and is replaced at the first save) or
+   * comes from a newer nf-builder (and is never written). Null otherwise (F-207).
+   */
+  readonly layoutNotice: string | null;
   /** What the engine's undo and redo stacks hold (F-209, AR-23). */
   readonly history: HistoryStatus;
   /** The last undo or redo result or refusal, for the history live region (F-209). */
@@ -148,6 +159,27 @@ export interface WorkspaceActions {
   registerFlush(flush: () => Promise<void>): () => void;
   /** Selects a node and loads its details; null clears the selection. */
   select(id: string | null): Promise<void>;
+  /**
+   * Keeps and saves the nodes the user has moved (a drag stop or a keyboard move). Moves are rounded, and one that
+   * lands where the node is saves nothing. Not undoable in v0.1 (F-207).
+   */
+  moveNodes(moves: Positions): Promise<void>;
+  /**
+   * Takes the result of a layout run on the canvas. Dropped when the tab or the projection it was computed for is no
+   * longer shown.
+   */
+  placeNodes(
+    at: { readonly tab: string; readonly revision: number },
+    placement: Placement,
+  ): Promise<void>;
+}
+
+/** A layout run on the canvas: every node's position, and what to save (`saved`, merged, or replacing the workflow's entries). */
+export interface Placement {
+  readonly positions: Positions;
+  readonly saved: Positions;
+  readonly replace: boolean;
+  readonly notice: string | null;
 }
 
 /** The workflow a project opens with: main.nf's entry, else the first entry workflow, else the first named one. */
@@ -198,6 +230,10 @@ export function tabFor(ref: {
   };
 }
 
+const REPLACED_NOTICE = "The layout file couldn't be read and was replaced.";
+
+const STALE_MOVE =
+  "Your last move couldn't be saved because the workflow changed. Move the node again.";
 /**
  * Pairs each workflow that vanished from a file with the one that appeared in it, when there is exactly one of each:
  * a rename, forwards or back (F-209). Keys are tab ids.
@@ -258,6 +294,12 @@ export function createCanvasStore(
       return run;
     };
     const flushes = new Set<() => Promise<void>>();
+    // the last layout write the engine refused as stale, sent again after the next refresh
+    let pendingMove: {
+      tab: string;
+      positions: Positions;
+      replace: boolean;
+    } | null = null;
 
     function clearSelection(): void {
       selection++;
@@ -294,6 +336,8 @@ export function createCanvasStore(
             status: "ready",
             revision: result.revision,
             projection: result.projection,
+            positions: result.positions,
+            notice: null,
           };
       } catch (error) {
         content = { status: "unavailable", message: messageOf(error) };
@@ -346,6 +390,87 @@ export function createCanvasStore(
         details = unavailable(messageOf(error));
       }
       set({ details });
+    }
+
+    /** Saves `positions` for the active tab, and keeps the sidecar's status and any refusal where the canvas shows them. */
+    async function save(
+      tab: WorkflowTab,
+      revision: number,
+      positions: Positions,
+      replace: boolean,
+      retried = false,
+    ): Promise<void> {
+      let notice: string | null = null;
+      try {
+        const result = await engine().setLayout({
+          revision,
+          path: tab.path,
+          workflow: tab.workflow,
+          positions,
+          replace,
+        });
+        // computed before a change shifted the keys: sent once more after the refresh, if its nodes are still there
+        if ("ok" in result && result.code === "stale") {
+          if (!retried) {
+            pendingMove = { tab: tab.id, positions, replace };
+            return;
+          }
+          notice = STALE_MOVE;
+        } else if ("ok" in result)
+          notice = `The positions couldn't be saved (${result.message}).`;
+        else {
+          const { summary } = get();
+          if (summary !== null)
+            set({
+              summary: { ...summary, layout: result.layout },
+              // a file newer than this build is a problem for the rest of the session; a replaced one stays reported,
+              // in the past tense
+              layoutNotice:
+                result.layout.message ??
+                (summary.layout.state === "invalid" &&
+                result.layout.state === "ok"
+                  ? REPLACED_NOTICE
+                  : get().layoutNotice),
+            });
+        }
+      } catch (error) {
+        notice = `The positions couldn't be saved (${messageOf(error)}).`;
+      }
+      if (notice === null) return;
+      const { content, activeTab } = get();
+      if (
+        content.status === "ready" &&
+        content.revision === revision &&
+        activeTab === tab.id
+      )
+        set({ content: { ...content, notice } });
+    }
+
+    /** Sends a move the engine refused as stale once more, now that the projection is refreshed; says so if it can't. */
+    async function resendMove(tab: WorkflowTab): Promise<void> {
+      const pending = pendingMove;
+      pendingMove = null;
+      if (pending === null || pending.tab !== tab.id) return;
+      const { content } = get();
+      if (content.status !== "ready") return;
+      const present = new Set(content.projection.nodes.map((n) => n.id));
+      if (!Object.keys(pending.positions).every((id) => present.has(id))) {
+        set({ content: { ...content, notice: STALE_MOVE } });
+        return;
+      }
+      set({
+        content: {
+          ...content,
+          positions: { ...content.positions, ...pending.positions },
+        },
+      });
+      await save(
+        tab,
+        content.revision,
+        pending.positions,
+        pending.replace,
+        true,
+      );
     }
 
     /** A refusal that reports a newer revision: another writer got in first, so adopt it and show what it left. */
@@ -456,6 +581,7 @@ export function createCanvasStore(
       lastChange: null,
       selected: null,
       details: IDLE,
+      layoutNotice: null,
       history: EMPTY_HISTORY,
       historyNotice: null,
       reveal: null,
@@ -463,6 +589,7 @@ export function createCanvasStore(
 
       async open(request) {
         generation++;
+        pendingMove = null;
         const summary = await engine().open(request);
         await get().show(summary, "unsaved");
         return summary;
@@ -470,6 +597,7 @@ export function createCanvasStore(
 
       async show(summary, source = "project") {
         generation++;
+        pendingMove = null;
         clearSelection();
         const first = defaultWorkflow(summary.workflows);
         const tab = first === null ? null : tabFor(first);
@@ -481,6 +609,7 @@ export function createCanvasStore(
           activeTab: null,
           content: EMPTY,
           lastChange: null,
+          layoutNotice: summary.layout.message,
           history: EMPTY_HISTORY,
           historyNotice: null,
           reveal: null,
@@ -501,6 +630,7 @@ export function createCanvasStore(
           activeTab: null,
           content: EMPTY,
           lastChange: null,
+          layoutNotice: null,
           history: EMPTY_HISTORY,
           historyNotice: null,
           reveal: null,
@@ -566,6 +696,7 @@ export function createCanvasStore(
         if (active?.kind === "file") return;
         if (active !== undefined) {
           await load(active, true);
+          await resendMove(active);
           const { selected } = get();
           if (selected !== null) await loadDetails(selected);
           return;
@@ -651,6 +782,61 @@ export function createCanvasStore(
         const { selected, details } = get();
         if (id === selected && details.status !== "unavailable") return;
         await loadDetails(id);
+      },
+
+      async moveNodes(moves) {
+        const { content, tabs, activeTab } = get();
+        const tab = tabs.find((t) => t.id === activeTab);
+        if (content.status !== "ready" || tab === undefined) return;
+        const rounded: Record<string, Point> = {};
+        for (const [id, at] of Object.entries(moves)) {
+          const x = Math.round(at.x);
+          const y = Math.round(at.y);
+          const now = content.positions[id];
+          if (now === undefined || now.x !== x || now.y !== y)
+            rounded[id] = { x, y };
+        }
+        if (Object.keys(rounded).length === 0) return;
+        set({
+          content: {
+            ...content,
+            positions: { ...content.positions, ...rounded },
+          },
+        });
+        await save(tab, content.revision, rounded, false);
+      },
+
+      async placeNodes(at, placement) {
+        const { content, tabs, activeTab } = get();
+        const tab = tabs.find((t) => t.id === activeTab);
+        if (
+          content.status !== "ready" ||
+          tab === undefined ||
+          tab.id !== at.tab ||
+          content.revision !== at.revision
+        )
+          return;
+        // a node the user moved while the layout ran keeps its place; a replace overrides on purpose
+        const present = new Set(content.projection.nodes.map((n) => n.id));
+        const positions = placement.replace
+          ? placement.positions
+          : {
+              ...placement.positions,
+              ...Object.fromEntries(
+                Object.entries(content.positions).filter(([id]) =>
+                  present.has(id),
+                ),
+              ),
+            };
+        set({
+          content: {
+            ...content,
+            positions,
+            notice: placement.notice,
+          },
+        });
+        if (placement.replace || Object.keys(placement.saved).length > 0)
+          await save(tab, content.revision, placement.saved, placement.replace);
       },
     };
   });

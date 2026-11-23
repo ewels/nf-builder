@@ -169,6 +169,7 @@ export function createProjectStore(
           languageVersion: request.languageVersion,
           files: [],
           template: request.template,
+          import: request.import,
           publishDocs: request.publishDocs,
         });
         void askPersistence();

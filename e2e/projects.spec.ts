@@ -1,5 +1,6 @@
 import { expect, type Page, test } from "@playwright/test";
 import { SMOKE_TAG } from "./browsers.ts";
+import { canvasReady } from "./canvas.ts";
 import { watchForCspViolations } from "./csp.ts";
 import {
   createProjectInUi,
@@ -57,6 +58,11 @@ test("F-202 step 2 IO-01: after an edit the header shows Saving… and then Save
   await page.goto("./");
   await expect(switcher(page)).toBeEnabled();
   await createProjectInUi(page, "Timing");
+  // F-207: the new project's canvas lays out its nodes and saves the sidecar; let that finish before timing an edit
+  await canvasReady(page);
+  await expect
+    .poll(() => readFile(page, ".nf-builder/layout.json"))
+    .not.toBeNull();
   await expect(saveState(page)).toHaveText("Saved");
   await recordSaveStates(page);
   const t0 = await editReadme(page, "a\n", "b\n");
@@ -187,6 +193,11 @@ test("F-202 ADR-0002 IO-01: the stored records match the recorded IndexedDB form
   await page.goto("./");
   await expect(switcher(page)).toBeEnabled();
   await createProjectInUi(page, "Format");
+  // F-207: let the canvas place its nodes and save the sidecar before the edit, so the stored files are settled
+  await canvasReady(page);
+  await expect
+    .poll(() => readFile(page, ".nf-builder/layout.json"))
+    .not.toBeNull();
   await editReadme(page, "x\n", "y\n");
   await expect(saveState(page)).toHaveText("Saved");
   const db = await readStoredDatabase(page);
@@ -208,9 +219,17 @@ test("F-202 ADR-0002 IO-01: the stored records match the recorded IndexedDB form
   // F-203: Start blank stores the blank template's files; the edit replaced README.md.
   const byPath = (a: { path: string }, b: { path: string }) =>
     a.path < b.path ? -1 : a.path > b.path ? 1 : 0;
-  const files = ((db.stores.files?.records ?? []) as { path: string }[]).sort(
-    byPath,
-  );
+  const stored = (db.stores.files?.records ?? []) as {
+    path: string;
+    text: string;
+  }[];
+  // F-207: showing the project's canvas laid out its nodes, so the layout sidecar is stored too, beside the template's files
+  const sidecar = stored.filter((f) => f.path === ".nf-builder/layout.json");
+  expect(sidecar).toHaveLength(1);
+  expect(JSON.parse(sidecar[0]?.text ?? "{}").version).toBe(1);
+  const files = stored
+    .filter((f) => f.path !== ".nf-builder/layout.json")
+    .sort(byPath);
   expect(files).toEqual(
     templateFilesOnDisk("blank")
       .map((f) => ({
