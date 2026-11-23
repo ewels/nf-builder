@@ -2,7 +2,7 @@
 
 Plans written by the planner agent on 2026-11-22 for features not yet merged, kept here so the next session can resume without re-planning. They are inputs, not decisions of record: the open points are settled below and still have to be recorded (ADR, `open-questions.md`, `progress.md`) when each feature lands. Delete a plan in the PR that merges its feature. Paths under `/tmp/...scratchpad...` in the plans pointed at session scratch files and may be gone; where it matters, the files were copied into the repo or the worktree.
 
-## State on 2026-11-23
+## State on 2026-11-23 (end of session 2)
 
 | Feature | Branch | State |
 |---|---|---|
@@ -27,7 +27,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-309 problems panel | merged, PR #52 | |
 | F-403 zip import | merged, PR #51 | |
 | F-502 registry client | merged, PR #48 | |
-| Parser error position | `fix/parser-error-position` | A blank line before `stub:` or `emit:` moved a later syntax error to that keyword (antlr4ng and Groovy's optimised ANTLR runtime differ); fix building. |
+| Parser error position | merged, PR #47 | |
 | F-501 registry snapshot | merged, PR #29; passing | Confirmed on live data after the snapshot-triggered Pages deploy. |
 | F-011 GitHub Pages hosting | merged, PR #37 | Live at https://ewels.github.io/nf-builder/; first `verify` passed. |
 
@@ -302,6 +302,7 @@ Next free ADR number: 0055 (0054 is F-309's).
 ## Paused on 2026-11-23
 
 Work paused at the maintainer's request (usage limits). To resume:
-- **Next features, plans ready:** F-703 (read-only below 1024 px; start from main), F-210 (Files view; reuse F-309's `openFile`), F-605 (Markdown and other files; after F-309), F-601 (config editor; tasks 1 to 6 independent of F-309), F-401 (GitHub import; after F-403).
+- No open PRs. F-309 and F-403 merged after the pause.
+- **Next features, plans ready (dependencies met):** F-703 (read-only below 1024 px), F-210 (Files view; reuse F-309's `openFile` and F-403's staging), F-605 (Markdown and other files; move its step 2 to F-407), F-601 (config editor), F-401 (GitHub import; reuse `@nf-builder/sources/import`).
 - Then plan M3 from F-301 onwards.
 
