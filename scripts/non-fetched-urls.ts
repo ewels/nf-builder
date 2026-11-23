@@ -67,4 +67,40 @@ export const NON_FETCHED_URLS: readonly NonFetchedUrl[] = [
     reason:
       "Documentation links kept in the palette data (palette.json `docs`); the app does not fetch them",
   },
+  {
+    match: "prefix",
+    url: "http://www.w3.org/2001/XMLSchema#",
+    reason:
+      "XML Schema datatype identifiers (#string, #int, ...) inside elkjs's worker (F-207); identifiers, never fetched",
+  },
+  {
+    match: "exact",
+    url: "http://www.eclipse.org/elk/ElkGraph",
+    reason:
+      "ELK Graph model namespace URI inside elkjs's worker (F-207); an identifier, never fetched",
+  },
+  {
+    match: "exact",
+    url: "http://www.eclipse.org/emf/2002/Ecore",
+    reason:
+      "Ecore namespace URI inside elkjs's worker (F-207); an identifier, never fetched",
+  },
+  {
+    match: "exact",
+    url: "http://www.eclipse.org/emf/2003/XMLType",
+    reason:
+      "EMF XMLType namespace URI inside elkjs's worker (F-207); an identifier, never fetched",
+  },
+  {
+    match: "exact",
+    url: "http:///org/eclipse/emf/ecore/util/ExtendedMetaData",
+    reason:
+      "EMF annotation source identifier inside elkjs's worker (F-207); not a network address, never fetched",
+  },
+  {
+    match: "exact",
+    url: "https://rolldown.rs/in-depth/bundling-cjs#require-external-modules",
+    reason:
+      "Text of Rolldown's `require` shim error, in the shared runtime chunk that elkjs's CommonJS entry makes necessary (F-207); shown as text, never fetched",
+  },
 ];
