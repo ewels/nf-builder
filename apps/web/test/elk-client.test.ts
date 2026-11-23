@@ -14,6 +14,8 @@ import { entryProjection } from "./f111-fixture";
 class FakeElkWorker {
   static made: FakeElkWorker[] = [];
   static failWith: string | null = null;
+  /** Layout calls are never answered (the register call still is). */
+  static silent = false;
   onmessage: ((answer: { data: unknown }) => void) | null = null;
   readonly #listeners = new Map<string, ((event: unknown) => void)[]>();
   terminated = false;
@@ -47,6 +49,7 @@ class FakeElkWorker {
       this.onmessage?.({ data: { id: msg.id, data: [] } });
       return;
     }
+    if (FakeElkWorker.silent) return;
     // biome-ignore lint/suspicious/noExplicitAny: the bundled ELK's types want its own node type
     void this.#inner.layout(msg.graph as any).then((data) => {
       this.onmessage?.({ data: { id: msg.id, data } });
@@ -62,10 +65,34 @@ afterEach(() => {
   disposeElk();
   FakeElkWorker.made = [];
   FakeElkWorker.failWith = null;
+  FakeElkWorker.silent = false;
+  vi.useRealTimers();
   vi.unstubAllGlobals();
 });
 
 describe("F-207 ELK client", () => {
+  it("F-207 ADR-0008: a layout ELK doesn't answer within 30 s rejects, the stuck worker is terminated, and the next call starts a fresh one", async () => {
+    vi.stubGlobal("Worker", FakeElkWorker);
+    const graph = elkGraph(
+      canvasView(await entryProjection(), { portLabels: true }),
+    );
+    await runElk(graph); // starts the worker and loads elk-api
+    vi.useFakeTimers();
+    FakeElkWorker.silent = true;
+    const stuck = runElk(graph);
+    const outcome = expect(stuck).rejects.toThrow(/30 seconds/);
+    await vi.advanceTimersByTimeAsync(29_999);
+    expect(FakeElkWorker.made[0]?.terminated).toBe(false);
+    await vi.advanceTimersByTimeAsync(1);
+    await outcome;
+    expect(FakeElkWorker.made[0]?.terminated).toBe(true);
+    FakeElkWorker.silent = false;
+    vi.useRealTimers();
+    const out = await runElk(graph);
+    expect(Object.keys(elkPositions(out)).length).toBe(graph.children.length);
+    expect(FakeElkWorker.made).toHaveLength(2);
+  });
+
   it("F-207 ADR-0008: ELK lays out the f111-start-typed entry workflow deterministically, with no overlaps and every edge left to right", async () => {
     const view = canvasView(await entryProjection(), { portLabels: true });
     expect(view.nodes.length).toBeGreaterThan(3);

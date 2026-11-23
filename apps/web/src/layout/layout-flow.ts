@@ -2,6 +2,7 @@
 // layout on request. Pure but for the injected runner, so it is tested with a fake one. Sizes are taken with port labels
 // shown, so turning labels off never causes overlaps.
 import {
+  type CanvasView,
   canvasView,
   elkGraph,
   elkPositions,
@@ -11,6 +12,7 @@ import {
   type Projection,
   placeNodes,
   unplaced,
+  withPositions,
 } from "@nf-builder/engine";
 import type { ElkRunner } from "./elk-client";
 
@@ -20,6 +22,17 @@ export interface PlaceResult {
   /** The positions to save: only the nodes placed here, none when ELK failed. */
   readonly added: Positions;
   readonly notice: string | null;
+}
+
+/**
+ * The nodes of `view` that have a stored position, at those positions. The others are held back until ELK has placed
+ * them, so a node added by an edit never blanks the canvas and a first open draws final positions only.
+ */
+export function placedNodes(view: CanvasView, stored: Positions): CanvasView {
+  return withPositions(
+    { ...view, nodes: view.nodes.filter((n) => stored[n.id] !== undefined) },
+    stored,
+  );
 }
 
 const messageOf = (error: unknown): string =>

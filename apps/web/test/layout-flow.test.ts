@@ -1,6 +1,11 @@
 import type { ElkGraphIn, ElkGraphOut, Positions } from "@nf-builder/engine";
+import { canvasView } from "@nf-builder/engine";
 import { describe, expect, it } from "vitest";
-import { autoLayout, placeMissing } from "../src/layout/layout-flow";
+import {
+  autoLayout,
+  placedNodes,
+  placeMissing,
+} from "../src/layout/layout-flow";
 import { entryProjection } from "./f111-fixture";
 
 /** A fake ELK: node i goes to (1000 + 100 i, 50 i); records the graphs it was given. */
@@ -20,6 +25,21 @@ function fakeElk() {
 }
 
 describe("F-207 layout flow", () => {
+  it("F-207 ADR-0008: nodes without a position are held back while ELK runs, the placed ones keep drawing at their positions, and a first open draws none", async () => {
+    const projection = await entryProjection();
+    const view = canvasView(projection, { portLabels: true });
+    const [kept, second] = view.nodes.map((n) => n.id) as [string, string];
+    const stored: Positions = { [kept]: { x: 7, y: 9 } };
+    const partial = placedNodes(view, stored);
+    expect(partial.nodes.map((n) => [n.id, n.x, n.y])).toEqual([[kept, 7, 9]]);
+    expect(partial.nodes.some((n) => n.id === second)).toBe(false);
+    expect(placedNodes(view, {}).nodes).toEqual([]);
+    const all = Object.fromEntries(
+      view.nodes.map((n) => [n.id, { x: 1, y: 2 }]),
+    );
+    expect(placedNodes(view, all).nodes).toHaveLength(view.nodes.length);
+  });
+
   it("F-207 ADR-0008: only nodes without positions are laid out, and only they are returned for saving", async () => {
     const projection = await entryProjection();
     const [kept, ...rest] = projection.nodes.map((n) => n.id);

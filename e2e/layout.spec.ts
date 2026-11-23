@@ -211,6 +211,107 @@ test("F-207 IO-02: an unreadable sidecar shows the notice and is replaced", asyn
   await expect(notices(page)).toContainText("The layout file couldn't be read");
 });
 
+const ELK_WORKER = /elk-worker/;
+
+test("F-207 ADR-0008 UX-26 ADR-0003: no ELK worker is requested while every node has a position; an edit that adds a node keeps the placed nodes on screen and shows that it is laying out until ELK answers", async ({
+  page,
+}) => {
+  const requests: string[] = [];
+  page.on("request", (r) => {
+    if (ELK_WORKER.test(r.url())) requests.push(r.url());
+  });
+  let release: () => void = () => undefined;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  // the worker's script is held back, so ELK can't answer until the test lets it
+  await page.route(ELK_WORKER, async (route) => {
+    await gate;
+    await route.continue();
+  });
+  const stored = Object.fromEntries(
+    ALL_KEYS.map((key, i) => [key, { x: 60 + i * 330, y: 40 + (i % 2) * 170 }]),
+  );
+  await openStoredProject(page, [
+    {
+      path: SIDECAR,
+      text: `${JSON.stringify({ version: 1, nodes: stored }, null, 2)}\n`,
+    },
+  ]);
+  expect(requests).toEqual([]);
+  const added = "main.nf#/ALIGN@1";
+  const outcome = await page.evaluate(() =>
+    (
+      window as unknown as {
+        nfBuilderWorkspace: {
+          apply(command: unknown): Promise<{ ok: boolean }>;
+        };
+      }
+    ).nfBuilderWorkspace.apply({
+      kind: "addCall",
+      target: { path: "main.nf", workflow: null },
+      callee: "ALIGN",
+    }),
+  );
+  expect(outcome.ok).toBe(true);
+  await expect(notices(page)).toContainText("Laying out nodes…");
+  for (const id of ALL_KEYS) {
+    await expect(node(page, id)).toBeVisible();
+    expect(await nodePosition(page, id)).toEqual(stored[id]);
+  }
+  await expect(node(page, added)).toHaveCount(0);
+  release();
+  await expect(node(page, added)).toBeVisible();
+  await expect(notices(page)).not.toContainText("Laying out nodes…");
+  for (const id of ALL_KEYS)
+    expect(await nodePosition(page, id)).toEqual(stored[id]);
+  expect(overlaps(await nodeBoxes(page))).toEqual([]);
+  expect(requests).toHaveLength(1);
+  await expect
+    .poll(async () => Object.keys((await readSidecar(page))?.nodes ?? {}))
+    .toContain(added);
+});
+
+test("F-207 ADR-0008: when ELK doesn't answer within 30 s the nodes fall back to columns with a notice and nothing is saved, and the next layout starts a fresh worker", async ({
+  page,
+}) => {
+  // the 30 s limit runs as 2 s
+  await page.addInitScript(() => {
+    const original = window.setTimeout.bind(window);
+    window.setTimeout = ((fn: TimerHandler, ms?: number, ...args: unknown[]) =>
+      original(fn, ms === 30_000 ? 2000 : ms, ...args)) as typeof setTimeout;
+  });
+  let stall = true;
+  let requests = 0;
+  await page.route(ELK_WORKER, async (route) => {
+    requests += 1;
+    if (stall)
+      await route.fulfill({
+        contentType: "text/javascript",
+        body: "self.onmessage = () => {};",
+      });
+    else await route.continue();
+  });
+  // no sidecar: the first open waits for ELK, then gives up
+  await openStoredProject(page);
+  await expect(notices(page)).toContainText("Automatic layout isn't available");
+  await expect(notices(page)).toContainText("30 seconds");
+  const boxes = await nodeBoxes(page);
+  expect(boxes.map((b) => b.id).sort()).toEqual([...ALL_KEYS].sort());
+  expect(overlaps(boxes)).toEqual([]);
+  expect(await readSidecar(page)).toBeNull();
+  expect(requests).toBe(1);
+  stall = false;
+  await page.getByRole("button", { name: "Auto-layout all nodes" }).click();
+  await expect
+    .poll(
+      async () => Object.keys((await readSidecar(page))?.nodes ?? {}).length,
+    )
+    .toBe(ALL_KEYS.length);
+  expect(requests).toBe(2);
+  await expect(notices(page)).not.toContainText("isn't available");
+});
+
 interface Projection {
   edges: { from: { node: string }; to: { node: string } }[];
 }

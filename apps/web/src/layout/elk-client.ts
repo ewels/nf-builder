@@ -67,11 +67,28 @@ function start(): Promise<Started> {
   return attempt;
 }
 
-/** Lays out `graph` in the ELK worker. Rejects when the worker can't start or fails; the next call starts a new one. */
-export const runElk: ElkRunner = async (graph) => {
+/** How long a layout may take before it is given up (the notice then says nodes are placed in columns). */
+const ELK_TIMEOUT_MS = 30_000;
+
+/**
+ * Lays out `graph` in the ELK worker. Rejects when the worker can't start or fails, or when it hasn't answered within
+ * 30 s (the stuck worker is then terminated); the next call starts a new worker.
+ */
+export const runElk: ElkRunner = (graph) => {
   started ??= start();
-  const run = await started;
-  return Promise.race([run.layout(graph), run.failed]);
+  const attempt = started;
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      if (started === attempt) disposeElk();
+      reject(
+        new Error(`ELK didn't answer within ${ELK_TIMEOUT_MS / 1000} seconds`),
+      );
+    }, ELK_TIMEOUT_MS);
+    attempt
+      .then((run) => Promise.race([run.layout(graph), run.failed]))
+      .then(resolve, reject)
+      .finally(() => clearTimeout(timer));
+  });
 };
 
 /** Stops the worker, if one is running. */

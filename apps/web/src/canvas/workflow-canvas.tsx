@@ -4,7 +4,6 @@ import {
   type Positions,
   type Projection,
   unplaced,
-  withPositions,
 } from "@nf-builder/engine";
 import {
   Background,
@@ -29,7 +28,7 @@ import {
 } from "react";
 import "./canvas.css";
 import { runElk } from "../layout/elk-client";
-import { autoLayout, placeMissing } from "../layout/layout-flow";
+import { autoLayout, placedNodes, placeMissing } from "../layout/layout-flow";
 import { NODE_TYPES } from "./canvas-nodes";
 import type { Placement } from "./canvas-store";
 import { EDGE_TYPES } from "./flow-edge";
@@ -98,43 +97,44 @@ function CanvasInner({
     () => canvasView(projection, { portLabels }),
     [projection, portLabels],
   );
-  // nodes without a stored position are laid out by ELK; until then nothing is drawn, so the first fit has the final
-  // positions (F-207)
+  // nodes without a stored position are laid out by ELK. Until it answers they are held back: the placed nodes keep
+  // drawing, and a first open (nothing placed) draws none, so the first fit has the final positions (F-207)
   const waiting = useMemo(
     () => unplaced(view, positions).length > 0,
     [view, positions],
   );
   const latest = useRef({ positions, onPlace });
   latest.current = { positions, onPlace };
+  const [placing, setPlacing] = useState(false);
+  const [arranging, setArranging] = useState(false);
   useEffect(() => {
-    if (!waiting) return;
+    if (!waiting) {
+      setPlacing(false);
+      return;
+    }
     let cancelled = false;
+    setPlacing(true);
     void placeMissing(projection, latest.current.positions, runElk).then(
       (r) => {
-        if (!cancelled)
-          latest.current.onPlace({
-            positions: r.positions,
-            saved: r.added,
-            replace: false,
-            notice: r.notice,
-          });
+        if (cancelled) return;
+        setPlacing(false);
+        latest.current.onPlace({
+          positions: r.positions,
+          saved: r.added,
+          replace: false,
+          notice: r.notice,
+        });
       },
     );
     return () => {
       cancelled = true;
     };
   }, [projection, waiting]);
-  // a new view replaces the nodes at the current positions; a move or a layout run changes positions in place below,
-  // which keeps the measured sizes and the viewport
+  // a new view replaces the nodes at the current positions (the placed ones); a move or a layout run changes positions
+  // in place below, and nodes ELK has just placed are added, which keeps the measured sizes and the viewport
   const initialNodes = useMemo(
-    () =>
-      waiting
-        ? []
-        : toFlowNodes(
-            withPositions(view, latest.current.positions),
-            portLabels,
-          ),
-    [view, portLabels, waiting],
+    () => toFlowNodes(placedNodes(view, latest.current.positions), portLabels),
+    [view, portLabels],
   );
   // controlled nodes: React Flow reports each node's measured size through onNodesChange
   const [nodes, setNodes, applyNodeChanges] = useNodesState(initialNodes);
@@ -157,7 +157,12 @@ function CanvasInner({
   useEffect(
     () =>
       setNodes((current) => {
-        let changed = false;
+        const have = new Set(current.map((n) => n.id));
+        const added = toFlowNodes(
+          placedNodes(view, positions),
+          portLabels,
+        ).filter((n) => !have.has(n.id));
+        let changed = added.length > 0;
         const next = current.map((n) => {
           const at = positions[n.id];
           if (
@@ -168,9 +173,9 @@ function CanvasInner({
           changed = true;
           return { ...n, position: { x: at.x, y: at.y } };
         });
-        return changed ? next : current;
+        return changed ? [...next, ...added] : current;
       }),
-    [positions, setNodes],
+    [positions, view, portLabels, setNodes],
   );
   // selection is the store's: only React Flow's keyboard select and deselect are forwarded (single select, UX-30)
   const onNodesChange: OnNodesChange<CanvasFlowNode> = (changes) => {
@@ -227,6 +232,7 @@ function CanvasInner({
   const chosen = nodes.filter((n) => n.selected).map((n) => n.id);
   const several = chosen.length >= 2;
   const runAutoLayout = async () => {
+    setArranging(true);
     try {
       const result = await autoLayout(
         projection,
@@ -259,6 +265,8 @@ function CanvasInner({
         replace: false,
         notice: `Auto-layout isn't available (${error instanceof Error ? error.message : String(error)}).`,
       });
+    } finally {
+      setArranging(false);
     }
   };
   return (
@@ -268,6 +276,7 @@ function CanvasInner({
       data-canvas-state={ready ? "ready" : "loading"}
     >
       <div role="status" className="canvas-notices">
+        {placing || arranging ? <p>Laying out nodes…</p> : null}
         {notices.map((text) => (
           <p key={text}>{text}</p>
         ))}
