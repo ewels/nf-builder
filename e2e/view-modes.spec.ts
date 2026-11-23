@@ -310,6 +310,40 @@ test("F-208 UX-27: the sync status of one file's code does not carry over to ano
   await expect(syncStatus(page)).toHaveText("");
 });
 
+test("F-208 UX-27: switching to Split fits the whole graph in the half-width pane", async ({
+  page,
+}) => {
+  await page.goto("./");
+  await openCodeFixture(page);
+  await canvasReady(page);
+  const inside = async () => {
+    await layoutSettled(page);
+    return page.evaluate(() => {
+      const pane = document
+        .querySelector(".canvas-area .react-flow")
+        ?.getBoundingClientRect();
+      if (pane === undefined) throw new Error("no canvas pane");
+      return [...document.querySelectorAll(".react-flow__node")].map((el) => {
+        const r = el.getBoundingClientRect();
+        return (
+          r.left >= pane.left - 1 &&
+          r.right <= pane.right + 1 &&
+          r.top >= pane.top - 1 &&
+          r.bottom <= pane.bottom + 1
+        );
+      });
+    });
+  };
+  expect((await inside()).every(Boolean)).toBe(true);
+  await radio(page, "Split").click();
+  await expect(editor(page)).toBeVisible();
+  await expect.poll(async () => (await inside()).every(Boolean)).toBe(true);
+  await radio(page, "Code").click();
+  await radio(page, "Split").click();
+  await expect(editor(page)).toBeVisible();
+  await expect.poll(async () => (await inside()).every(Boolean)).toBe(true);
+});
+
 /** Waits for the editor, Shiki's token colours and a settled layout, then hides what blinks or follows focus. */
 async function visualReady(page: Page): Promise<Locator[]> {
   await expect(editor(page)).toBeVisible();

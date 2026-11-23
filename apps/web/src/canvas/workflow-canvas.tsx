@@ -12,11 +12,19 @@ import {
   useReactFlow,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { type JSX, type MouseEvent, useEffect, useMemo, useState } from "react";
+import {
+  type JSX,
+  type MouseEvent,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import "./canvas.css";
 import { NODE_TYPES } from "./canvas-nodes";
 import { EDGE_TYPES } from "./flow-edge";
 import { type CanvasFlowEdge, toFlowEdges, toFlowNodes } from "./flow-elements";
+import { useRefitOnResize } from "./use-refit-on-resize";
 
 /** Sentence-case labels with no delete wording (nodes can't be deleted yet). */
 const CANVAS_ARIA_LABELS = {
@@ -93,8 +101,11 @@ function CanvasInner({
       cancelled = true;
     };
   }, [initialized, fitView]);
+  const host = useRef<HTMLDivElement>(null);
+  useRefitOnResize(host, FIT);
   return (
     <div
+      ref={host}
       className="workflow-canvas"
       data-canvas-state={ready ? "ready" : "loading"}
     >
