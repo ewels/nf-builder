@@ -100,8 +100,10 @@ export function ImportSection(props: {
                     {formatBytes(group.bytes)}
                   </h4>
                   <ul className="import-paths">
-                    {group.paths.map((path) => (
-                      <li key={path}>{path}</li>
+                    {group.paths.map((path, index) => (
+                      // the same path can be listed twice (duplicate entries)
+                      // biome-ignore lint/suspicious/noArrayIndexKey: the list is static between renders
+                      <li key={`${index}:${path}`}>{path}</li>
                     ))}
                     {group.count > group.paths.length ? (
                       <li className="muted">

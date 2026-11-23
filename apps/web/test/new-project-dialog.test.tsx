@@ -2,7 +2,7 @@ import type { TemplateList } from "@nf-builder/engine";
 import { BLANK_TEMPLATE } from "@nf-builder/engine";
 import type { ImportSummary } from "@nf-builder/sources";
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { takeChosenFile } from "../src/project/import-section";
 import {
   NewProjectDialog,
@@ -409,5 +409,30 @@ describe("F-203 new project dialog", () => {
       { files: null, value: "x" },
     );
     expect(chosen.at(-1)).toBeNull();
+  });
+
+  it("F-403 IO-12: a skipped group that lists the same path twice renders without duplicate keys", () => {
+    const error = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+    try {
+      const html = dialog(
+        { initialRoute: "import" },
+        readyZip({
+          skipped: [
+            {
+              reason: "duplicate",
+              count: 2,
+              bytes: 2,
+              paths: ["a.nf", "a.nf"],
+            },
+          ],
+        }),
+      );
+      expect(html.match(/<li>a\.nf<\/li>/g)).toHaveLength(2);
+      expect(error).not.toHaveBeenCalled();
+    } finally {
+      error.mockRestore();
+    }
   });
 });
