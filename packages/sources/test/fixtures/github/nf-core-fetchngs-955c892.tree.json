@@ -1,0 +1,1615 @@
+{
+  "sha": "955c892d80927cee633765e6e390f9cc6b7235c9",
+  "url": "https://api.github.com/repos/nf-core/fetchngs/git/trees/955c892d80927cee633765e6e390f9cc6b7235c9",
+  "tree": [
+    {
+      "path": ".devcontainer",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "af3a68177c4b71b08a1be17ad3c9b5760d87d23d",
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/trees/af3a68177c4b71b08a1be17ad3c9b5760d87d23d"
+    },
+    {
+      "path": ".devcontainer/devcontainer.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "237c9ed0835fb4fb80831dbbbb7440012f734a51",
+      "size": 553,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/237c9ed0835fb4fb80831dbbbb7440012f734a51"
+    },
+    {
+      "path": ".devcontainer/setup.sh",
+      "mode": "100755",
+      "type": "blob",
+      "sha": "139a29daebec51f285c07f860f00da2b32e684a8",
+      "size": 420,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/139a29daebec51f285c07f860f00da2b32e684a8"
+    },
+    {
+      "path": ".gitattributes",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7a2dabc29354bc42709be9241603cff642ce5c27",
+      "size": 154,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/7a2dabc29354bc42709be9241603cff642ce5c27"
+    },
+    {
+      "path": ".github",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "370dbd5479aa0180ae134b9cf76aba846064aa05",
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/trees/370dbd5479aa0180ae134b9cf76aba846064aa05"
+    },
+    {
+      "path": ".github/.dockstore.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "191fabd22a5c81f1db00e56be6e712ef01451512",
+      "size": 153,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/191fabd22a5c81f1db00e56be6e712ef01451512"
+    },
+    {
+      "path": ".github/ISSUE_TEMPLATE",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "8214c1436feed56057b69d1a289d7ac7215fb813",
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/trees/8214c1436feed56057b69d1a289d7ac7215fb813"
+    },
+    {
+      "path": ".github/ISSUE_TEMPLATE/bug_report.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0f8895896f1159f6bb02d40f46a548500b2e7f9a",
+      "size": 1806,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/0f8895896f1159f6bb02d40f46a548500b2e7f9a"
+    },
+    {
+      "path": ".github/ISSUE_TEMPLATE/config.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "41a8beb77491bd9f81b26ea4e9b6207984abc5d5",
+      "size": 265,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/41a8beb77491bd9f81b26ea4e9b6207984abc5d5"
+    },
+    {
+      "path": ".github/ISSUE_TEMPLATE/feature_request.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f8ea51da26f6573d495a374d11eb6dca9099c329",
+      "size": 407,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/f8ea51da26f6573d495a374d11eb6dca9099c329"
+    },
+    {
+      "path": ".github/PULL_REQUEST_TEMPLATE.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ff9ea3a05d4b255a5b7d6f1047b7e85c528d2f30",
+      "size": 1462,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/ff9ea3a05d4b255a5b7d6f1047b7e85c528d2f30"
+    },
+    {
+      "path": ".github/actions",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "b3e168c72425f0d99853d6bfc3321dd6132e0635",
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/trees/b3e168c72425f0d99853d6bfc3321dd6132e0635"
+    },
+    {
+      "path": ".github/actions/get-shards",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "ada632ca07789ea29b8904bc77424f3fc5c23987",
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/trees/ada632ca07789ea29b8904bc77424f3fc5c23987"
+    },
+    {
+      "path": ".github/actions/get-shards/action.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e2833ee979d1ad3f51c5fe3ca1c8a0bb457779e5",
+      "size": 2432,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/e2833ee979d1ad3f51c5fe3ca1c8a0bb457779e5"
+    },
+    {
+      "path": ".github/actions/nf-test",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "987f3d4dd9fd44c9d63aebad790068a2416d1b97",
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/trees/987f3d4dd9fd44c9d63aebad790068a2416d1b97"
+    },
+    {
+      "path": ".github/actions/nf-test/action.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4175e3c850706eefb40659c62e15d8f51098ff4e",
+      "size": 3875,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/4175e3c850706eefb40659c62e15d8f51098ff4e"
+    },
+    {
+      "path": ".github/workflows",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "1eccc0d2ff13489e3be50dc10ad483d6c053d949",
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/trees/1eccc0d2ff13489e3be50dc10ad483d6c053d949"
+    },
+    {
+      "path": ".github/workflows/awsfulltest.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3f96ae2bcb3c33aa5759c3acec65c7e351c09796",
+      "size": 2836,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/3f96ae2bcb3c33aa5759c3acec65c7e351c09796"
+    },
+    {
+      "path": ".github/workflows/awstest.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "eaec7b670be90ebfdef4cf07bb8d8a756d1a667b",
+      "size": 1225,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/eaec7b670be90ebfdef4cf07bb8d8a756d1a667b"
+    },
+    {
+      "path": ".github/workflows/branch.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f07ead69eb06d930876a11b03a088017d65856f6",
+      "size": 2590,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/f07ead69eb06d930876a11b03a088017d65856f6"
+    },
+    {
+      "path": ".github/workflows/clean-up.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b69401236008a9f23d575f0aa05ab8ca95c27b6a",
+      "size": 1177,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/b69401236008a9f23d575f0aa05ab8ca95c27b6a"
+    },
+    {
+      "path": ".github/workflows/download_pipeline.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ca2eb8224010783046382deca67367bb7d186bfd",
+      "size": 5990,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/ca2eb8224010783046382deca67367bb7d186bfd"
+    },
+    {
+      "path": ".github/workflows/fix_linting.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "317e5367174e8ebac5f55d4a34f048ca36e2db76",
+      "size": 3354,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/317e5367174e8ebac5f55d4a34f048ca36e2db76"
+    },
+    {
+      "path": ".github/workflows/linting.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "277f12fbb0baf65a4b58f2e24ba4bd6a16d784b4",
+      "size": 3493,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/277f12fbb0baf65a4b58f2e24ba4bd6a16d784b4"
+    },
+    {
+      "path": ".github/workflows/nf-test.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e363215b2e20a56e3d2892517f0ebd35a73fa7c1",
+      "size": 7520,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/e363215b2e20a56e3d2892517f0ebd35a73fa7c1"
+    },
+    {
+      "path": ".github/workflows/pr-comment.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ab7b59ddf118ca4a757f7be0267420f5d5b7a0a2",
+      "size": 2919,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/ab7b59ddf118ca4a757f7be0267420f5d5b7a0a2"
+    },
+    {
+      "path": ".github/workflows/release-announcements.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4974f44f2775d2727e319273dd334c52686ff062",
+      "size": 2057,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/4974f44f2775d2727e319273dd334c52686ff062"
+    },
+    {
+      "path": ".github/workflows/template-version-comment.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "149e28511b330316ed22271c7d58b95187e8337c",
+      "size": 2344,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/149e28511b330316ed22271c7d58b95187e8337c"
+    },
+    {
+      "path": ".gitignore",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c5a7261f35d317a5da0835d0c3e5efdeec523d5c",
+      "size": 158,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/c5a7261f35d317a5da0835d0c3e5efdeec523d5c"
+    },
+    {
+      "path": ".hooks",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "be8a389c35848b2bedc0987daa4c76a6ce1ce0a8",
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/trees/be8a389c35848b2bedc0987daa4c76a6ce1ce0a8"
+    },
+    {
+      "path": ".hooks/block_pipeline_outdir.sh",
+      "mode": "100755",
+      "type": "blob",
+      "sha": "e9ba4f933857df7b8a87b5294bfa059ff661adc4",
+      "size": 1490,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/e9ba4f933857df7b8a87b5294bfa059ff661adc4"
+    },
+    {
+      "path": ".nf-core.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6ff1ad75e362c445efa2ab76bb9584d74ad212ed",
+      "size": 867,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/6ff1ad75e362c445efa2ab76bb9584d74ad212ed"
+    },
+    {
+      "path": ".pre-commit-config.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e9503db1619507a2d5fff88e6a87cc9ab30c51bd",
+      "size": 1483,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/e9503db1619507a2d5fff88e6a87cc9ab30c51bd"
+    },
+    {
+      "path": ".prettierignore",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "63cde500eefbada6f2b5824a192a523ad108f32b",
+      "size": 163,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/63cde500eefbada6f2b5824a192a523ad108f32b"
+    },
+    {
+      "path": ".prettierrc.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "07dbd8bb9910c7f3722f07fb4000c3ad99ffcef7",
+      "size": 120,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/07dbd8bb9910c7f3722f07fb4000c3ad99ffcef7"
+    },
+    {
+      "path": ".vscode",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "83a2c4c79e5863169f056c12112e290d219b2112",
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/trees/83a2c4c79e5863169f056c12112e290d219b2112"
+    },
+    {
+      "path": ".vscode/settings.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a33b527cc7ce88bedb8b953e940bbd686bfdc990",
+      "size": 58,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/a33b527cc7ce88bedb8b953e940bbd686bfdc990"
+    },
+    {
+      "path": "AGENTS.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a43489a8e1d37f93aa34220f58e6c99c81e89f42",
+      "size": 378,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/a43489a8e1d37f93aa34220f58e6c99c81e89f42"
+    },
+    {
+      "path": "CHANGELOG.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4727fe789aeb37c10d79333985fdca05fdaf7600",
+      "size": 25370,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/4727fe789aeb37c10d79333985fdca05fdaf7600"
+    },
+    {
+      "path": "CITATIONS.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "30829486b6d3ccb447d4a2f88dac7649832125e5",
+      "size": 4186,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/30829486b6d3ccb447d4a2f88dac7649832125e5"
+    },
+    {
+      "path": "CODE_OF_CONDUCT.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c089ec78c43e58dd77d1f74e2df717b59a4c172d",
+      "size": 13562,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/c089ec78c43e58dd77d1f74e2df717b59a4c172d"
+    },
+    {
+      "path": "LICENSE",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9797c0342aee91c241ef77376928e3ac3194e38d",
+      "size": 1077,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/9797c0342aee91c241ef77376928e3ac3194e38d"
+    },
+    {
+      "path": "README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "43e65bb86d7346ce0455a8007545e4bdff66f2cf",
+      "size": 8164,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/43e65bb86d7346ce0455a8007545e4bdff66f2cf"
+    },
+    {
+      "path": "assets",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "c1b587c3d91c1cc1deec53443111e37b86e4430b",
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/trees/c1b587c3d91c1cc1deec53443111e37b86e4430b"
+    },
+    {
+      "path": "assets/email_template.html",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6e593a535346f4ade980ad3f7a1dee0770aacbac",
+      "size": 2516,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/6e593a535346f4ade980ad3f7a1dee0770aacbac"
+    },
+    {
+      "path": "assets/email_template.txt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e9f8bcc609bd1c4e9682d84a3d14fbadc38a4079",
+      "size": 1137,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/e9f8bcc609bd1c4e9682d84a3d14fbadc38a4079"
+    },
+    {
+      "path": "assets/metro_map.mmd",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "58eb7810fca04bcb5244d35afc45ad8da32d3b67",
+      "size": 1621,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/58eb7810fca04bcb5244d35afc45ad8da32d3b67"
+    },
+    {
+      "path": "assets/nf-core-fetchngs_logo_light.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "603f43e213d07f14ab16995e17cb8b8e8afc78e0",
+      "size": 123009,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/603f43e213d07f14ab16995e17cb8b8e8afc78e0"
+    },
+    {
+      "path": "assets/schema_input.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3719398b3fa08be2c6fb8b5cdf09c5bf9908f754",
+      "size": 538,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/3719398b3fa08be2c6fb8b5cdf09c5bf9908f754"
+    },
+    {
+      "path": "assets/sendmail_template.txt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e96125d069c467345329b4d0db585de53645846e",
+      "size": 674,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/e96125d069c467345329b4d0db585de53645846e"
+    },
+    {
+      "path": "bin",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "e6a04525611bfbffa799c882a506a7cebc141351",
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/trees/e6a04525611bfbffa799c882a506a7cebc141351"
+    },
+    {
+      "path": "bin/multiqc_mappings_config.py",
+      "mode": "100755",
+      "type": "blob",
+      "sha": "ce4dc85d0794c4a2fc27d5ac255bface9adf711e",
+      "size": 552,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/ce4dc85d0794c4a2fc27d5ac255bface9adf711e"
+    },
+    {
+      "path": "bin/sra_ids_to_runinfo.py",
+      "mode": "100755",
+      "type": "blob",
+      "sha": "0ffafba83b8456794f56a8af9e318cd9db1a75c0",
+      "size": 16375,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/0ffafba83b8456794f56a8af9e318cd9db1a75c0"
+    },
+    {
+      "path": "bin/sra_runinfo_to_ftp.py",
+      "mode": "100755",
+      "type": "blob",
+      "sha": "ef80ec80c17e05d54f05039acafca47bdc6598db",
+      "size": 6168,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/ef80ec80c17e05d54f05039acafca47bdc6598db"
+    },
+    {
+      "path": "conf",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "04a3dfa9aeb7329934742302b82e1b1da3c22ee2",
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/trees/04a3dfa9aeb7329934742302b82e1b1da3c22ee2"
+    },
+    {
+      "path": "conf/base.config",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7c3b5f644b95a9e25ea261538d5f2358cfabb1ef",
+      "size": 2758,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/7c3b5f644b95a9e25ea261538d5f2358cfabb1ef"
+    },
+    {
+      "path": "conf/test.config",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a4cd23aa22e00a726b1545246ad38b1511b72204",
+      "size": 936,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/a4cd23aa22e00a726b1545246ad38b1511b72204"
+    },
+    {
+      "path": "conf/test_full.config",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "84595dfaa2aeb4f8a3c315304c5da089f4ae2826",
+      "size": 920,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/84595dfaa2aeb4f8a3c315304c5da089f4ae2826"
+    },
+    {
+      "path": "docs",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "d6e24dc65f14afda399e71dd6785c64d22655194",
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/trees/d6e24dc65f14afda399e71dd6785c64d22655194"
+    },
+    {
+      "path": "docs/CONTRIBUTING.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e64c157a34f2451ad20c9fcadd0580e7ef5bd926",
+      "size": 10839,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/e64c157a34f2451ad20c9fcadd0580e7ef5bd926"
+    },
+    {
+      "path": "docs/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "64975d0ad0c383dc922189cf9367e08ab41178c2",
+      "size": 512,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/64975d0ad0c383dc922189cf9367e08ab41178c2"
+    },
+    {
+      "path": "docs/dev",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "9edb1ffc1c8f6dd75b2bc818f996f3832044ab8d",
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/trees/9edb1ffc1c8f6dd75b2bc818f996f3832044ab8d"
+    },
+    {
+      "path": "docs/dev/metro_map.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "15794cfe7a3d37cdc01be0728eb6c3951938d65c",
+      "size": 1259,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/15794cfe7a3d37cdc01be0728eb6c3951938d65c"
+    },
+    {
+      "path": "docs/images",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "184a219d0f13d8080b39cf867a214bd631a1baa1",
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/trees/184a219d0f13d8080b39cf867a214bd631a1baa1"
+    },
+    {
+      "path": "docs/images/nf-core-fetchngs_logo_dark.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e598c68ad5a098868c7be176b168acea62460e9a",
+      "size": 25219,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/e598c68ad5a098868c7be176b168acea62460e9a"
+    },
+    {
+      "path": "docs/images/nf-core-fetchngs_logo_dark.svg",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a6489cc5213b83c406931adc6379774e1c8a0e74",
+      "size": 857607,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/a6489cc5213b83c406931adc6379774e1c8a0e74"
+    },
+    {
+      "path": "docs/images/nf-core-fetchngs_logo_light.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6496a024b4acaddc11df93d9b415191049388f1e",
+      "size": 28668,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/6496a024b4acaddc11df93d9b415191049388f1e"
+    },
+    {
+      "path": "docs/images/nf-core-fetchngs_logo_light.svg",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "46b7e22b5fe3247c34b0689742d2634c4b5da465",
+      "size": 857659,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/46b7e22b5fe3247c34b0689742d2634c4b5da465"
+    },
+    {
+      "path": "docs/images/nf-core-fetchngs_metro_map_grey.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "38c4853d5e49ecf874b61f28eef23d092420848c",
+      "size": 159191,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/38c4853d5e49ecf874b61f28eef23d092420848c"
+    },
+    {
+      "path": "docs/images/nf-core-fetchngs_metro_map_grey.svg",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1d278972518141393d6e98d4343a2efd7351de53",
+      "size": 74138,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/1d278972518141393d6e98d4343a2efd7351de53"
+    },
+    {
+      "path": "docs/output.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4b8dd82f172d809d924f50e695e839c14e6ffc38",
+      "size": 3210,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/4b8dd82f172d809d924f50e695e839c14e6ffc38"
+    },
+    {
+      "path": "docs/usage.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "88c2386e09cceb7737c9c849a90a8a119b01844c",
+      "size": 21129,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/88c2386e09cceb7737c9c849a90a8a119b01844c"
+    },
+    {
+      "path": "main.nf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "02b1dc2fcb2496de597fd6e5dbb9bf09f57ce455",
+      "size": 2766,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/02b1dc2fcb2496de597fd6e5dbb9bf09f57ce455"
+    },
+    {
+      "path": "modules.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ec3396b8fc193ecae30c9019f110ecb701e0ab78",
+      "size": 1701,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/ec3396b8fc193ecae30c9019f110ecb701e0ab78"
+    },
+    {
+      "path": "modules",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "32abd613cc7e63d46c1ffeaadf09d48c581f9819",
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/trees/32abd613cc7e63d46c1ffeaadf09d48c581f9819"
+    },
+    {
+      "path": "modules/local",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "e1ae2128cee635acdc899f247a924044599b4d95",
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/trees/e1ae2128cee635acdc899f247a924044599b4d95"
+    },
+    {
+      "path": "modules/local/aspera_cli",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "15187574801ab787d46fb99e0c3aacc08b9e93dd",
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/trees/15187574801ab787d46fb99e0c3aacc08b9e93dd"
+    },
+    {
+      "path": "modules/local/aspera_cli/assets",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "e68301ff244e455c39cec0cb695d81602fcc819a",
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/trees/e68301ff244e455c39cec0cb695d81602fcc819a"
+    },
+    {
+      "path": "modules/local/aspera_cli/assets/aspera_bypass_rsa.pem",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "648c02e13d7e7cae27d57c27619de00fc718f01a",
+      "size": 3243,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/648c02e13d7e7cae27d57c27619de00fc718f01a"
+    },
+    {
+      "path": "modules/local/aspera_cli/environment.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3426e252ecbb0793bbc19d4eec9f22ca7c0f0896",
+      "size": 210,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/3426e252ecbb0793bbc19d4eec9f22ca7c0f0896"
+    },
+    {
+      "path": "modules/local/aspera_cli/main.nf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "16bf51bb1fc9c569e68789fafd27724c323cb4a5",
+      "size": 2794,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/16bf51bb1fc9c569e68789fafd27724c323cb4a5"
+    },
+    {
+      "path": "modules/local/aspera_cli/meta.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bfff157f9214e1a354feb7dfbe431461014cdef6",
+      "size": 1994,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/bfff157f9214e1a354feb7dfbe431461014cdef6"
+    },
+    {
+      "path": "modules/local/aspera_cli/nextflow.config",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fa2dbd90e5d804c00319fdb0fbe8d3998c985283",
+      "size": 451,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/fa2dbd90e5d804c00319fdb0fbe8d3998c985283"
+    },
+    {
+      "path": "modules/local/aspera_cli/tests",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "0a6d55ad41e1855d10cccba0b9da3ec2f274dc8c",
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/trees/0a6d55ad41e1855d10cccba0b9da3ec2f274dc8c"
+    },
+    {
+      "path": "modules/local/aspera_cli/tests/main.nf.test",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "079eb67ef524803ec26e1bfc7e5cb493f7151ee6",
+      "size": 1792,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/079eb67ef524803ec26e1bfc7e5cb493f7151ee6"
+    },
+    {
+      "path": "modules/local/aspera_cli/tests/main.nf.test.snap",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e8d6b43f91001218061366434852cfcb829a1682",
+      "size": 3553,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/e8d6b43f91001218061366434852cfcb829a1682"
+    },
+    {
+      "path": "modules/local/multiqc_mappings_config",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "f655f7082907221a3f5a09d4f7630e07f948903a",
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/trees/f655f7082907221a3f5a09d4f7630e07f948903a"
+    },
+    {
+      "path": "modules/local/multiqc_mappings_config/environment.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1d80d11a940e05215b8f23cc5de80f9b761fd403",
+      "size": 208,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/1d80d11a940e05215b8f23cc5de80f9b761fd403"
+    },
+    {
+      "path": "modules/local/multiqc_mappings_config/main.nf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bd3e7fbf358cc16397ee69bd1b31459b22cc39d5",
+      "size": 708,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/bd3e7fbf358cc16397ee69bd1b31459b22cc39d5"
+    },
+    {
+      "path": "modules/local/multiqc_mappings_config/meta.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "524f5eb62065389fc7f966ddaca8583a63f6768a",
+      "size": 1400,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/524f5eb62065389fc7f966ddaca8583a63f6768a"
+    },
+    {
+      "path": "modules/local/multiqc_mappings_config/nextflow.config",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "11c58341a142b2df204c0d9a96e18143d464212b",
+      "size": 276,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/11c58341a142b2df204c0d9a96e18143d464212b"
+    },
+    {
+      "path": "modules/local/multiqc_mappings_config/tests",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "d7f24bc00b0c15628d40542c87951e2e68e9385e",
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/trees/d7f24bc00b0c15628d40542c87951e2e68e9385e"
+    },
+    {
+      "path": "modules/local/multiqc_mappings_config/tests/main.nf.test",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "80c65e8890c9b387e358077a56c1a720af7a4967",
+      "size": 1076,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/80c65e8890c9b387e358077a56c1a720af7a4967"
+    },
+    {
+      "path": "modules/local/multiqc_mappings_config/tests/main.nf.test.snap",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f3dc0be767163f8a86ad6af3ea8d9aa6ff5644fd",
+      "size": 1189,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/f3dc0be767163f8a86ad6af3ea8d9aa6ff5644fd"
+    },
+    {
+      "path": "modules/local/sra_fastq_ftp",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "3407c18d883d412773ea15f5c518ae1a79774701",
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/trees/3407c18d883d412773ea15f5c518ae1a79774701"
+    },
+    {
+      "path": "modules/local/sra_fastq_ftp/environment.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c95813c8f72ecf7525dc13fcb10bfd4ccc18600f",
+      "size": 234,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/c95813c8f72ecf7525dc13fcb10bfd4ccc18600f"
+    },
+    {
+      "path": "modules/local/sra_fastq_ftp/main.nf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bec07ef04bd2724b0a3370bddd5d3ab44d4b0431",
+      "size": 1966,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/bec07ef04bd2724b0a3370bddd5d3ab44d4b0431"
+    },
+    {
+      "path": "modules/local/sra_fastq_ftp/meta.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2e3e24e573beebbdd8d271caa1cd05391493f84b",
+      "size": 1926,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/2e3e24e573beebbdd8d271caa1cd05391493f84b"
+    },
+    {
+      "path": "modules/local/sra_fastq_ftp/nextflow.config",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "172e93edeb76a89e34994118db0b06339e45cb46",
+      "size": 471,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/172e93edeb76a89e34994118db0b06339e45cb46"
+    },
+    {
+      "path": "modules/local/sra_fastq_ftp/tests",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "0f0ab8cfbb76605d86580e9632ca413819e5d98e",
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/trees/0f0ab8cfbb76605d86580e9632ca413819e5d98e"
+    },
+    {
+      "path": "modules/local/sra_fastq_ftp/tests/main.nf.test",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9d106d756c16cb22d165510c24b4c2f02af5b13d",
+      "size": 1714,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/9d106d756c16cb22d165510c24b4c2f02af5b13d"
+    },
+    {
+      "path": "modules/local/sra_fastq_ftp/tests/main.nf.test.snap",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e22ef1b778ca2e90191ef843b25ab601c5b3f845",
+      "size": 3539,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/e22ef1b778ca2e90191ef843b25ab601c5b3f845"
+    },
+    {
+      "path": "modules/local/sra_ids_to_runinfo",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "870c1f34e696fae4217cc75436d85d868bd7b7e6",
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/trees/870c1f34e696fae4217cc75436d85d868bd7b7e6"
+    },
+    {
+      "path": "modules/local/sra_ids_to_runinfo/environment.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1d80d11a940e05215b8f23cc5de80f9b761fd403",
+      "size": 208,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/1d80d11a940e05215b8f23cc5de80f9b761fd403"
+    },
+    {
+      "path": "modules/local/sra_ids_to_runinfo/main.nf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8e9a0361d98e40ff7ed05e6934b91efba4ea3800",
+      "size": 876,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/8e9a0361d98e40ff7ed05e6934b91efba4ea3800"
+    },
+    {
+      "path": "modules/local/sra_ids_to_runinfo/meta.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d628b4e2cf7c6e439534c487ffa8516ffbc15f69",
+      "size": 1500,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/d628b4e2cf7c6e439534c487ffa8516ffbc15f69"
+    },
+    {
+      "path": "modules/local/sra_ids_to_runinfo/nextflow.config",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9b9d0b16753c38cda1def4a525a6fafea28bef4c",
+      "size": 166,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/9b9d0b16753c38cda1def4a525a6fafea28bef4c"
+    },
+    {
+      "path": "modules/local/sra_ids_to_runinfo/tests",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "58c03aa82835665dd6628bb6e71ec6b78764e404",
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/trees/58c03aa82835665dd6628bb6e71ec6b78764e404"
+    },
+    {
+      "path": "modules/local/sra_ids_to_runinfo/tests/main.nf.test",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8f3aa5a408efd810d917d38be9d6e581cd0265ec",
+      "size": 1416,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/8f3aa5a408efd810d917d38be9d6e581cd0265ec"
+    },
+    {
+      "path": "modules/local/sra_ids_to_runinfo/tests/main.nf.test.snap",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d39664db02cc0e5986eb85a40762a591fd99282d",
+      "size": 1809,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/d39664db02cc0e5986eb85a40762a591fd99282d"
+    },
+    {
+      "path": "modules/local/sra_runinfo_to_ftp",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "d40c39d96103ccff4504e9da1c042d2db986787c",
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/trees/d40c39d96103ccff4504e9da1c042d2db986787c"
+    },
+    {
+      "path": "modules/local/sra_runinfo_to_ftp/environment.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1d80d11a940e05215b8f23cc5de80f9b761fd403",
+      "size": 208,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/1d80d11a940e05215b8f23cc5de80f9b761fd403"
+    },
+    {
+      "path": "modules/local/sra_runinfo_to_ftp/main.nf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "962fc01ec11464099e462ef4434e02c606dc8782",
+      "size": 806,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/962fc01ec11464099e462ef4434e02c606dc8782"
+    },
+    {
+      "path": "modules/local/sra_runinfo_to_ftp/meta.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9938a686e349fa4bb6b922850cab611261a65448",
+      "size": 1430,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/9938a686e349fa4bb6b922850cab611261a65448"
+    },
+    {
+      "path": "modules/local/sra_runinfo_to_ftp/nextflow.config",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "43263648b27d6c11bc6921d10443c2b2d8bde11c",
+      "size": 268,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/43263648b27d6c11bc6921d10443c2b2d8bde11c"
+    },
+    {
+      "path": "modules/local/sra_runinfo_to_ftp/tests",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "00ce6d3b253f80dc4cf543c50b8ff995fcb16b6d",
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/trees/00ce6d3b253f80dc4cf543c50b8ff995fcb16b6d"
+    },
+    {
+      "path": "modules/local/sra_runinfo_to_ftp/tests/main.nf.test",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "504af1588837bc45476c886c4b4d82ef18108ada",
+      "size": 1042,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/504af1588837bc45476c886c4b4d82ef18108ada"
+    },
+    {
+      "path": "modules/local/sra_runinfo_to_ftp/tests/main.nf.test.snap",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "563f26d152eb3d06006ef04bcfbedec40209e760",
+      "size": 1197,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/563f26d152eb3d06006ef04bcfbedec40209e760"
+    },
+    {
+      "path": "modules/nf-core",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "f0859b2d631f62581bc5b7f5a040c7f910d7f8a8",
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/trees/f0859b2d631f62581bc5b7f5a040c7f910d7f8a8"
+    },
+    {
+      "path": "modules/nf-core/custom",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "747eb07da99e24a38ddd297abee7240a3bfb8a47",
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/trees/747eb07da99e24a38ddd297abee7240a3bfb8a47"
+    },
+    {
+      "path": "modules/nf-core/custom/sratoolsncbisettings",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "772cbb3173a8559ee06f439881c2fd5b313e55f1",
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/trees/772cbb3173a8559ee06f439881c2fd5b313e55f1"
+    },
+    {
+      "path": "modules/nf-core/custom/sratoolsncbisettings/environment.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "11b84b243ef633688266a4352cc5e81295642036",
+      "size": 208,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/11b84b243ef633688266a4352cc5e81295642036"
+    },
+    {
+      "path": "modules/nf-core/custom/sratoolsncbisettings/main.nf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fb6a72bd29517fa28c069899d96c405c2a3e9a80",
+      "size": 948,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/fb6a72bd29517fa28c069899d96c405c2a3e9a80"
+    },
+    {
+      "path": "modules/nf-core/custom/sratoolsncbisettings/meta.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f488871bf59b4751a8acc2ce0316c6fb000cb7f5",
+      "size": 1487,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/f488871bf59b4751a8acc2ce0316c6fb000cb7f5"
+    },
+    {
+      "path": "modules/nf-core/custom/sratoolsncbisettings/templates",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "15a40490332e59a8191dc6a09d2d37a05e21fcab",
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/trees/15a40490332e59a8191dc6a09d2d37a05e21fcab"
+    },
+    {
+      "path": "modules/nf-core/custom/sratoolsncbisettings/templates/detect_ncbi_settings.sh",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "99e337ba2e5053f8033735006f069605450efa6f",
+      "size": 1465,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/99e337ba2e5053f8033735006f069605450efa6f"
+    },
+    {
+      "path": "modules/nf-core/fastqdl",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "f38e12b893519a16de4ffb79e73554c26b2c573c",
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/trees/f38e12b893519a16de4ffb79e73554c26b2c573c"
+    },
+    {
+      "path": "modules/nf-core/fastqdl/environment.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d7a8a379fca3d164f8ce95c25a2c4de3eaa9d99b",
+      "size": 207,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/d7a8a379fca3d164f8ce95c25a2c4de3eaa9d99b"
+    },
+    {
+      "path": "modules/nf-core/fastqdl/main.nf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d0681df4d47f5818a5eca42d78983522c79a7343",
+      "size": 1424,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/d0681df4d47f5818a5eca42d78983522c79a7343"
+    },
+    {
+      "path": "modules/nf-core/fastqdl/meta.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3dc70ea6c280fffab22c4d4384ce19428cac4a7d",
+      "size": 2743,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/3dc70ea6c280fffab22c4d4384ce19428cac4a7d"
+    },
+    {
+      "path": "modules/nf-core/fastqdl/nextflow.config",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fec8cf8213288034f76cd319db75a165b3c6ee61",
+      "size": 449,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/fec8cf8213288034f76cd319db75a165b3c6ee61"
+    },
+    {
+      "path": "modules/nf-core/sratools",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "2307dce1aeb2b33c496f25002d2d956b965226bd",
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/trees/2307dce1aeb2b33c496f25002d2d956b965226bd"
+    },
+    {
+      "path": "modules/nf-core/sratools/fasterqdump",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "643e38d3b666a8ed70e231caea0d4b9c4d38f7c6",
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/trees/643e38d3b666a8ed70e231caea0d4b9c4d38f7c6"
+    },
+    {
+      "path": "modules/nf-core/sratools/fasterqdump/environment.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "46991e9488902c6d5de50283edd9402e8915fb32",
+      "size": 234,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/46991e9488902c6d5de50283edd9402e8915fb32"
+    },
+    {
+      "path": "modules/nf-core/sratools/fasterqdump/main.nf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f095c412b5f9c4cbe1f91b9144fde622151c688e",
+      "size": 3091,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/f095c412b5f9c4cbe1f91b9144fde622151c688e"
+    },
+    {
+      "path": "modules/nf-core/sratools/fasterqdump/meta.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "45b6d6ed9b4af2aaf53bbee692bf13e434ca296d",
+      "size": 2971,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/45b6d6ed9b4af2aaf53bbee692bf13e434ca296d"
+    },
+    {
+      "path": "modules/nf-core/sratools/fasterqdump/nextflow.config",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f98b140dd2d15a6fa78c5c6bb8f732cbac03d90e",
+      "size": 267,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/f98b140dd2d15a6fa78c5c6bb8f732cbac03d90e"
+    },
+    {
+      "path": "modules/nf-core/sratools/prefetch",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "540c7877554d0d8956ffb4fc9979003548647efd",
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/trees/540c7877554d0d8956ffb4fc9979003548647efd"
+    },
+    {
+      "path": "modules/nf-core/sratools/prefetch/environment.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a1393989469b68eea0401f6dd70355c38c1ff99d",
+      "size": 237,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/a1393989469b68eea0401f6dd70355c38c1ff99d"
+    },
+    {
+      "path": "modules/nf-core/sratools/prefetch/main.nf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "576968aff2c9bce6cabef21d2ba7b5641ea3691d",
+      "size": 1429,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/576968aff2c9bce6cabef21d2ba7b5641ea3691d"
+    },
+    {
+      "path": "modules/nf-core/sratools/prefetch/meta.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6e1f907138c0aaaafe107aa5d245b918abf94f4a",
+      "size": 2807,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/6e1f907138c0aaaafe107aa5d245b918abf94f4a"
+    },
+    {
+      "path": "modules/nf-core/sratools/prefetch/nextflow.config",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a2ca8848bd4297c0d89fc40f577c15242a837f99",
+      "size": 157,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/a2ca8848bd4297c0d89fc40f577c15242a837f99"
+    },
+    {
+      "path": "modules/nf-core/sratools/prefetch/templates",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "676e944fefb6ebcf352af69982eeefc4f8fcb7ea",
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/trees/676e944fefb6ebcf352af69982eeefc4f8fcb7ea"
+    },
+    {
+      "path": "modules/nf-core/sratools/prefetch/templates/retry_with_backoff.sh",
+      "mode": "100755",
+      "type": "blob",
+      "sha": "706491139335f068d4239c456d9d592beb07a9a8",
+      "size": 1701,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/706491139335f068d4239c456d9d592beb07a9a8"
+    },
+    {
+      "path": "nextflow.config",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b08c1fb5584b52c406af1e5a760cccf4436356b2",
+      "size": 13205,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/b08c1fb5584b52c406af1e5a760cccf4436356b2"
+    },
+    {
+      "path": "nextflow_schema.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "dc21fe269c8f3a569b2a702a4b1ba2c2159738e6",
+      "size": 14353,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/dc21fe269c8f3a569b2a702a4b1ba2c2159738e6"
+    },
+    {
+      "path": "nf-test.config",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1ad67703d2066e49ae2d3cca4087fada3c61bd89",
+      "size": 1099,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/1ad67703d2066e49ae2d3cca4087fada3c61bd89"
+    },
+    {
+      "path": "ro-crate-metadata.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "722de4a4af583986d79e41b96c8317cf9b798448",
+      "size": 23279,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/722de4a4af583986d79e41b96c8317cf9b798448"
+    },
+    {
+      "path": "subworkflows",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "e4e8a7185083f0f5e2208c0c4d50fb3cf38d3c56",
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/trees/e4e8a7185083f0f5e2208c0c4d50fb3cf38d3c56"
+    },
+    {
+      "path": "subworkflows/local",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "96b8875378585894e33aabb9cac490d8e4ccd3c7",
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/trees/96b8875378585894e33aabb9cac490d8e4ccd3c7"
+    },
+    {
+      "path": "subworkflows/local/channel_sra_create_csv",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "52c32fafd50198f570f66174ed778bf2346227b8",
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/trees/52c32fafd50198f570f66174ed778bf2346227b8"
+    },
+    {
+      "path": "subworkflows/local/channel_sra_create_csv/main.nf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "eff5e4a06418eaa21eb8fe5bd337230c817daf85",
+      "size": 2683,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/eff5e4a06418eaa21eb8fe5bd337230c817daf85"
+    },
+    {
+      "path": "subworkflows/local/channel_sra_create_csv/meta.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e7d72587d30c36da33426045546d56cf1ddb6217",
+      "size": 1201,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/e7d72587d30c36da33426045546d56cf1ddb6217"
+    },
+    {
+      "path": "subworkflows/local/channel_sra_create_csv/tests",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "d245b656299cf2bce313b450009605587dab1221",
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/trees/d245b656299cf2bce313b450009605587dab1221"
+    },
+    {
+      "path": "subworkflows/local/channel_sra_create_csv/tests/main.nf.test",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c6687b062856a5be9c07bc5fe224e3ec6cf7ebcf",
+      "size": 2323,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/c6687b062856a5be9c07bc5fe224e3ec6cf7ebcf"
+    },
+    {
+      "path": "subworkflows/local/channel_sra_create_csv/tests/main.nf.test.snap",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "535872bdd8a07ff4556d98fed155e6b8d9af678b",
+      "size": 515,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/535872bdd8a07ff4556d98fed155e6b8d9af678b"
+    },
+    {
+      "path": "subworkflows/local/utils_nfcore_fetchngs_pipeline",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "33024f038e1866c1b1db49d26229e1e4402f4fc3",
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/trees/33024f038e1866c1b1db49d26229e1e4402f4fc3"
+    },
+    {
+      "path": "subworkflows/local/utils_nfcore_fetchngs_pipeline/main.nf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d90266cd4118f5e92f765724daeb7a174220c2e7",
+      "size": 7737,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/d90266cd4118f5e92f765724daeb7a174220c2e7"
+    },
+    {
+      "path": "subworkflows/local/utils_nfcore_fetchngs_pipeline/tests",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "3b9bd09ff9db9fdbf89bc26323d7f398bb6746b5",
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/trees/3b9bd09ff9db9fdbf89bc26323d7f398bb6746b5"
+    },
+    {
+      "path": "subworkflows/local/utils_nfcore_fetchngs_pipeline/tests/bad_ids.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3984ecc86d920a9b86f77bb83efbe82d5c22ac1a",
+      "size": 16,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/3984ecc86d920a9b86f77bb83efbe82d5c22ac1a"
+    },
+    {
+      "path": "subworkflows/local/utils_nfcore_fetchngs_pipeline/tests/main.function.nf.test",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "be8ef845563b08e312e3640a0081199b39e24eb3",
+      "size": 1323,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/be8ef845563b08e312e3640a0081199b39e24eb3"
+    },
+    {
+      "path": "subworkflows/local/utils_nfcore_fetchngs_pipeline/tests/main.function.nf.test.snap",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "92c37408f6601949ecd65e09552d390a310ae1ba",
+      "size": 453,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/92c37408f6601949ecd65e09552d390a310ae1ba"
+    },
+    {
+      "path": "subworkflows/local/utils_nfcore_fetchngs_pipeline/tests/main.workflow_pipeline_completion.nf.test",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "da6f9da5237d75b1ae4b2282936a55975da4f2f8",
+      "size": 854,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/da6f9da5237d75b1ae4b2282936a55975da4f2f8"
+    },
+    {
+      "path": "subworkflows/local/utils_nfcore_fetchngs_pipeline/tests/main.workflow_pipeline_initialisation.nf.test",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "673d60357cc4c28bdef58de7ee2e1a245ab4a436",
+      "size": 2628,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/673d60357cc4c28bdef58de7ee2e1a245ab4a436"
+    },
+    {
+      "path": "subworkflows/local/utils_nfcore_fetchngs_pipeline/tests/main.workflow_pipeline_initialisation.nf.test.snap",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8da31ac26efa5c7b75de9ddbfa51dbe726c1860b",
+      "size": 662,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/8da31ac26efa5c7b75de9ddbfa51dbe726c1860b"
+    },
+    {
+      "path": "subworkflows/nf-core",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "f533a507c7add8d3a9dabee0f523ddedc2fac685",
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/trees/f533a507c7add8d3a9dabee0f523ddedc2fac685"
+    },
+    {
+      "path": "subworkflows/nf-core/fastq_download_prefetch_fasterqdump_sratools",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "e2443b8abf0b818e4b1ab29840d4ff07379e12c0",
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/trees/e2443b8abf0b818e4b1ab29840d4ff07379e12c0"
+    },
+    {
+      "path": "subworkflows/nf-core/fastq_download_prefetch_fasterqdump_sratools/main.nf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "eb5ec390145f03a9dafc325c86da0aa7d4ef2fd4",
+      "size": 1167,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/eb5ec390145f03a9dafc325c86da0aa7d4ef2fd4"
+    },
+    {
+      "path": "subworkflows/nf-core/fastq_download_prefetch_fasterqdump_sratools/meta.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1b968acc9f2e1a5d38a4cefedcf542ddfa556ee5",
+      "size": 1383,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/1b968acc9f2e1a5d38a4cefedcf542ddfa556ee5"
+    },
+    {
+      "path": "subworkflows/nf-core/fastq_download_prefetch_fasterqdump_sratools/nextflow.config",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "de803a388dff0906ffb4f68705e8787c33d9299d",
+      "size": 153,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/de803a388dff0906ffb4f68705e8787c33d9299d"
+    },
+    {
+      "path": "tests",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "f8cfb4da4a774ef88c896180a6f029ca7c58a031",
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/trees/f8cfb4da4a774ef88c896180a6f029ca7c58a031"
+    },
+    {
+      "path": "tests/.nftignore",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "45b89517adcab5a81f2bb564f5553ead11fa07f7",
+      "size": 127,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/45b89517adcab5a81f2bb564f5553ead11fa07f7"
+    },
+    {
+      "path": "tests/default.nf.test",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bdff07ee4910a77e6a6223f5d11ef2908de35c80",
+      "size": 1868,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/bdff07ee4910a77e6a6223f5d11ef2908de35c80"
+    },
+    {
+      "path": "tests/default.nf.test.snap",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3caebc3daf2567e57d456f75303d53ca4ace647a",
+      "size": 8202,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/3caebc3daf2567e57d456f75303d53ca4ace647a"
+    },
+    {
+      "path": "tests/nextflow.config",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "88aed93b5242d3abd314bc0345386d47ab6d8e9c",
+      "size": 505,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/88aed93b5242d3abd314bc0345386d47ab6d8e9c"
+    },
+    {
+      "path": "tower.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7b7fd106f50b0b246a3e373284ed0d36d0b19d48",
+      "size": 324,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/7b7fd106f50b0b246a3e373284ed0d36d0b19d48"
+    },
+    {
+      "path": "workflows",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "98d90584736eb6738f9095be339c111a2174fe88",
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/trees/98d90584736eb6738f9095be339c111a2174fe88"
+    },
+    {
+      "path": "workflows/fetchngs.nf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0ea37e751845b6af2f6fdbcb6706d6a17f30aa20",
+      "size": 6118,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/0ea37e751845b6af2f6fdbcb6706d6a17f30aa20"
+    },
+    {
+      "path": "workflows/tests",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "c0470aa5e6b41f19bbff81f529bed4d39ce27c93",
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/trees/c0470aa5e6b41f19bbff81f529bed4d39ce27c93"
+    },
+    {
+      "path": "workflows/tests/main.nf.test",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "354b67c6e49c09fd0ce4e9ab1c2d33ce45ac903b",
+      "size": 2522,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/354b67c6e49c09fd0ce4e9ab1c2d33ce45ac903b"
+    },
+    {
+      "path": "workflows/tests/main.nf.test.snap",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0c0d75c5528e86ede0344f2674a29df77ce4cd1f",
+      "size": 8932,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/0c0d75c5528e86ede0344f2674a29df77ce4cd1f"
+    },
+    {
+      "path": "workflows/tests/sra_custom_ena_metadata_fields.nf.test",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "346ea6173831e2dfe676d6e359e683bec426e439",
+      "size": 2576,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/346ea6173831e2dfe676d6e359e683bec426e439"
+    },
+    {
+      "path": "workflows/tests/sra_custom_ena_metadata_fields.nf.test.snap",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9cef963474efe33b49b1a6b724f0d3b56563e51b",
+      "size": 3396,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/9cef963474efe33b49b1a6b724f0d3b56563e51b"
+    },
+    {
+      "path": "workflows/tests/sra_download_method_aspera.nf.test",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "811fd030bf5e6af713706f4a4b982283763b58aa",
+      "size": 2554,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/811fd030bf5e6af713706f4a4b982283763b58aa"
+    },
+    {
+      "path": "workflows/tests/sra_download_method_aspera.nf.test.snap",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "405f72969ffe4b07d77faaeac69c2bba337e045b",
+      "size": 8952,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/405f72969ffe4b07d77faaeac69c2bba337e045b"
+    },
+    {
+      "path": "workflows/tests/sra_download_method_fastqdl.nf.test",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d4120e234fc323d4620ff73b06ea0459d8e6d4cb",
+      "size": 2636,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/d4120e234fc323d4620ff73b06ea0459d8e6d4cb"
+    },
+    {
+      "path": "workflows/tests/sra_download_method_fastqdl.nf.test.snap",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2d549bfbca26b1a4d89c1bd6975092d3d45de685",
+      "size": 8903,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/2d549bfbca26b1a4d89c1bd6975092d3d45de685"
+    },
+    {
+      "path": "workflows/tests/sra_download_method_sratools.nf.test",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "684e5fa8d821f7a898053b321b56f5d28e76acbf",
+      "size": 2594,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/684e5fa8d821f7a898053b321b56f5d28e76acbf"
+    },
+    {
+      "path": "workflows/tests/sra_download_method_sratools.nf.test.snap",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5afe921b233e45f3e13f2ec647c00f7f386cee23",
+      "size": 9240,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/5afe921b233e45f3e13f2ec647c00f7f386cee23"
+    },
+    {
+      "path": "workflows/tests/sra_nf_core_pipeline_ampliseq.nf.test",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8edfbb38dbe504c2b52ff75176bd7edee144a018",
+      "size": 2568,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/8edfbb38dbe504c2b52ff75176bd7edee144a018"
+    },
+    {
+      "path": "workflows/tests/sra_nf_core_pipeline_ampliseq.nf.test.snap",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "49d34454da4a101a964325848351a94c5283602a",
+      "size": 8951,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/49d34454da4a101a964325848351a94c5283602a"
+    },
+    {
+      "path": "workflows/tests/sra_nf_core_pipeline_atacseq.nf.test",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e174e292a0a91e9c34c774a4c08b20edcfd6a15a",
+      "size": 2565,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/e174e292a0a91e9c34c774a4c08b20edcfd6a15a"
+    },
+    {
+      "path": "workflows/tests/sra_nf_core_pipeline_atacseq.nf.test.snap",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "96865debba9fa017515e61c74a4a85cd90e4de1e",
+      "size": 8951,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/96865debba9fa017515e61c74a4a85cd90e4de1e"
+    },
+    {
+      "path": "workflows/tests/sra_nf_core_pipeline_mag.nf.test",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "74e735b6358fe54f557edbdf912c762fd3dd2d26",
+      "size": 2583,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/74e735b6358fe54f557edbdf912c762fd3dd2d26"
+    },
+    {
+      "path": "workflows/tests/sra_nf_core_pipeline_mag.nf.test.snap",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e4c299fc2449b92a67717d7d8538462faa19acac",
+      "size": 13465,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/e4c299fc2449b92a67717d7d8538462faa19acac"
+    },
+    {
+      "path": "workflows/tests/sra_nf_core_pipeline_metatdenovo.nf.test",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b40af2a8d9ef161e11b94367e69408f478b4adb8",
+      "size": 2577,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/b40af2a8d9ef161e11b94367e69408f478b4adb8"
+    },
+    {
+      "path": "workflows/tests/sra_nf_core_pipeline_metatdenovo.nf.test.snap",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "39802f8cd2ec4df5840fc295f9c9b35b4b2c247e",
+      "size": 8955,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/39802f8cd2ec4df5840fc295f9c9b35b4b2c247e"
+    },
+    {
+      "path": "workflows/tests/sra_nf_core_pipeline_rnaseq.nf.test",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "74dede7790c74cc0e4a3fc577fba3d821ae10be6",
+      "size": 2562,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/74dede7790c74cc0e4a3fc577fba3d821ae10be6"
+    },
+    {
+      "path": "workflows/tests/sra_nf_core_pipeline_rnaseq.nf.test.snap",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "192ee2007ff2a4f1a0a6a6bfd2d0dbf04501ae61",
+      "size": 8950,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/192ee2007ff2a4f1a0a6a6bfd2d0dbf04501ae61"
+    },
+    {
+      "path": "workflows/tests/sra_nf_core_pipeline_sarek.nf.test",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "be4cd0cc6ac6c69407859d592e7ce9dc89d2edef",
+      "size": 2589,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/be4cd0cc6ac6c69407859d592e7ce9dc89d2edef"
+    },
+    {
+      "path": "workflows/tests/sra_nf_core_pipeline_sarek.nf.test.snap",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "83232d5a87fff54143b61e7ddf0989a0e5017ad1",
+      "size": 13467,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/83232d5a87fff54143b61e7ddf0989a0e5017ad1"
+    },
+    {
+      "path": "workflows/tests/sra_nf_core_pipeline_taxprofiler.nf.test",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "86b59b83b7a17672264e649eb9a4632bb630a797",
+      "size": 2577,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/86b59b83b7a17672264e649eb9a4632bb630a797"
+    },
+    {
+      "path": "workflows/tests/sra_nf_core_pipeline_taxprofiler.nf.test.snap",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6ab1f358fb471998b1610a2a3283168739e40b3c",
+      "size": 8955,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/6ab1f358fb471998b1610a2a3283168739e40b3c"
+    },
+    {
+      "path": "workflows/tests/sra_nf_core_pipeline_viralrecon.nf.test",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "82286263562bdb36f658b83ff0a7438a44da4512",
+      "size": 2574,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/82286263562bdb36f658b83ff0a7438a44da4512"
+    },
+    {
+      "path": "workflows/tests/sra_nf_core_pipeline_viralrecon.nf.test.snap",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a4b65af27f6f314b92d162f03370738eb750ccb0",
+      "size": 8954,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/a4b65af27f6f314b92d162f03370738eb750ccb0"
+    },
+    {
+      "path": "workflows/tests/sra_skip_fastq_download.nf.test",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "25f4617ef774d68505073049da785561da464a6b",
+      "size": 2523,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/25f4617ef774d68505073049da785561da464a6b"
+    },
+    {
+      "path": "workflows/tests/sra_skip_fastq_download.nf.test.snap",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "898dc56e951b8baf6a5c7e2c469d427ec6467172",
+      "size": 8813,
+      "url": "https://api.github.com/repos/nf-core/fetchngs/git/blobs/898dc56e951b8baf6a5c7e2c469d427ec6467172"
+    }
+  ],
+  "truncated": false
+}
