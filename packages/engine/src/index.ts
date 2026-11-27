@@ -99,6 +99,34 @@ export {
   type EditState,
 } from "./edit/apply";
 export { applyPatches, PatchError } from "./edit/patches";
+export { planAdd } from "./files/add";
+export { openTarget } from "./files/open";
+export {
+  ancestorsOf,
+  folderOf,
+  isManagedPath,
+  joinFolder,
+  MANAGED_DIR,
+  newFolderProblem,
+  newPathProblem,
+  projectTreeOf,
+  readOnlyReason,
+} from "./files/paths";
+export { registryFolders } from "./files/registry";
+export {
+  compareNames,
+  failedParse,
+  fileTreeRows,
+  folderSet,
+} from "./files/tree";
+export type {
+  AddConflict,
+  AddConflictReason,
+  AddPlan,
+  FileTreeRow,
+  OpenTarget,
+  ReadOnlyReason,
+} from "./files/types";
 export {
   EMPTY_HISTORY,
   type HistoryLimits,
@@ -169,8 +197,10 @@ export type {
   NodeDetailsResult,
   OpenRequest,
   ProjectChange,
+  ProjectFiles,
   ProjectionResult,
   ProjectSummary,
+  RegistryFolder,
   Undone,
 } from "./service/types";
 export {

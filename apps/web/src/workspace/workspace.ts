@@ -120,6 +120,7 @@ export function createWorkspace(options: WorkspaceOptions): WorkspaceApi {
     diagnostics: () => engine.diagnostics(),
     details: (path, workflow, node) => engine.details(path, workflow, node),
     readFile: (path) => engine.readFile(path),
+    listFiles: () => engine.listFiles(),
     history: () => engine.history(),
 
     open: (request, onProgress) =>

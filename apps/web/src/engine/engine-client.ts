@@ -36,6 +36,7 @@ export function connectEngine(
       race(remote.details(path, workflow, node)),
     setLayout: (write) => race(remote.setLayout(write)),
     readFile: (path) => race(remote.readFile(path)),
+    listFiles: () => race(remote.listFiles()),
     close: () => race(remote.close()),
     watch: (listener) => race(remote.watch(proxy(listener))),
     stageZip: (file, name) => race(remote.stageZip(file, name)),
