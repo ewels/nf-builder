@@ -70,7 +70,9 @@ export type EngineRefusalCode =
   | RefusalCode
   | "stale"
   | "no-project"
-  | "no-history";
+  | "no-history"
+  /** Returned only by the page's canvas store below 1024 px (F-703, UX-04), never by the worker. */
+  | "read-only";
 
 export interface EngineRefusal {
   readonly ok: false;

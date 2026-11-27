@@ -38,6 +38,7 @@ const settle = () => new Promise((r) => setTimeout(r, 0));
 function fixture(
   initial: WorkspaceStatus,
   storage?: () => StorageManager | undefined,
+  readOnly?: () => boolean,
 ) {
   const calls: string[] = [];
   const shown: unknown[] = [];
@@ -71,6 +72,7 @@ function fixture(
       calls.push(`templates:${v}`);
     },
     storage: storage ?? (() => undefined),
+    ...(readOnly === undefined ? {} : { readOnly }),
     languageVersion: "26.10",
     canvas: {
       show: async (summary) => {
@@ -348,5 +350,22 @@ describe("F-202 project store", () => {
       storage: "unavailable",
       storageError: "The engine worker failed (error): no detail",
     });
+  });
+});
+
+describe("F-703 read-only project store", () => {
+  it("F-703 UX-04: read-only create, rename and delete are refused without calling the workspace; open still opens a stored project", async () => {
+    const f = fixture(ready({ projects: [meta("p")] }), undefined, () => true);
+    const message = "Editing needs a larger screen or a wider window.";
+    await expect(f.store.getState().create(request("X"))).rejects.toThrow(
+      message,
+    );
+    await expect(f.store.getState().rename("p", "Y")).rejects.toThrow(message);
+    await expect(f.store.getState().remove("p")).rejects.toThrow(message);
+    expect(f.workspace.createProject).not.toHaveBeenCalled();
+    expect(f.workspace.renameProject).not.toHaveBeenCalled();
+    expect(f.workspace.deleteProject).not.toHaveBeenCalled();
+    await f.store.getState().open("p");
+    expect(f.workspace.openProject).toHaveBeenCalledWith("p");
   });
 });
