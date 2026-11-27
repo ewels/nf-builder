@@ -1,3 +1,5 @@
+import { projectPathProblem } from "@nf-builder/lang-core";
+
 export type EntryPath =
   | { readonly kind: "file" | "folder"; readonly path: string }
   | {
@@ -6,28 +8,11 @@ export type EntryPath =
       readonly problem: string;
     };
 
-const MAX_PATH = 1024;
-
-function problemWith(path: string): string | null {
-  if (path === "") return "empty path";
-  if (path.length > MAX_PATH) return "path too long";
-  if (path.startsWith("/")) return "absolute path";
-  if (/^[A-Za-z]:/.test(path)) return "drive letter";
-  // biome-ignore lint/suspicious/noControlCharactersInRegex: rejecting control characters is the point
-  if (/[\u0000-\u001f\u007f]/.test(path)) return "control character";
-  for (const segment of path.split("/")) {
-    if (segment === "" || segment === "." || segment === "..")
-      return `${segment || "empty"} segment`;
-    if (segment === "__proto__") return "reserved segment";
-  }
-  return null;
-}
-
 export function entryPath(raw: string): EntryPath {
   const slashed = raw.replaceAll("\\", "/");
   const folder = slashed.endsWith("/");
   const path = folder ? slashed.slice(0, -1) : slashed;
-  const problem = problemWith(path);
+  const problem = projectPathProblem(path);
   if (problem !== null) return { kind: "unsafe", path: raw, problem };
   return { kind: folder ? "folder" : "file", path };
 }

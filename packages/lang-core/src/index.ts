@@ -101,6 +101,7 @@ export type {
   PaletteViewGroup,
   PaletteViewItem,
 } from "./palette.ts";
+export { PATH_MAX, projectPathProblem } from "./paths.ts";
 export {
   PrintError,
   type PrintOptions,
