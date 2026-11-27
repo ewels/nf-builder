@@ -39,7 +39,7 @@ export const choiceArb: fc.Arbitrary<Choice> = fc.record({
   snippet: fc.nat(3),
 });
 
-export const sequenceArb = fc.array(choiceArb, { minLength: 1, maxLength: 4 });
+export const sequenceArb = fc.array(choiceArb, { minLength: 1, maxLength: 5 });
 
 /** What happened over a run: accepted commands per kind, refusals per kind and code, and skipped choices. */
 export class Stats {
@@ -209,6 +209,10 @@ export function buildCommand(state: EditState, c: Choice): EditCommand | null {
       else next = `${text}\n// note\n`;
       return { kind, path, text: next };
     }
+    case "createFile": {
+      const ext = [".nf", ".config", ".md", "/.gitkeep"][c.snippet % 4];
+      return { kind, path: `${c.name.toLowerCase()}${ext}` };
+    }
     default:
       return null;
   }
@@ -297,7 +301,7 @@ function checkAccepted(
     const after = createSourceFile(f.path, f.text, state.parser);
     parsed.set(f.path, after);
     // (a2) a modelled file stays modelled, and a new file is modelled
-    if (!before || before.status === "modelled")
+    if ((!before && after.status !== "plain") || before?.status === "modelled")
       expect(after.status, `${label}: ${f.path} is still modelled`).toBe(
         "modelled",
       );
@@ -387,6 +391,11 @@ function checkAccepted(
       expect(patches.map((p) => p.path)).toEqual(
         patches.length === 0 ? [] : [command.path],
       );
+      break;
+    case "createFile":
+      expect(patches).toEqual([
+        { kind: "create", path: command.path, text: "" },
+      ]);
       break;
   }
 }

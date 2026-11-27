@@ -53,6 +53,7 @@ export {
   type AddCall,
   type CommandResult,
   type Connect,
+  type CreateFile,
   type CreateProcess,
   type DeleteNode,
   type Disconnect,
