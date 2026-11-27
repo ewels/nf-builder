@@ -8,6 +8,8 @@ interface SideColumnProps {
   /** The column heading or tab control; hidden while collapsed. */
   readonly header: ReactNode;
   readonly children?: ReactNode;
+  /** False in read-only mode (F-703): no toggle, and the body shows whatever the stored layout says. Default true. */
+  readonly collapsible?: boolean;
 }
 
 export function SideColumn({
@@ -15,9 +17,11 @@ export function SideColumn({
   label,
   header,
   children,
+  collapsible = true,
 }: SideColumnProps): JSX.Element {
   const id = `column-${side}`;
-  const collapsed = useLayout((s) => s[side].collapsed);
+  const stored = useLayout((s) => s[side].collapsed);
+  const collapsed = collapsible && stored;
   const toggle = useLayout((s) => s.toggleCollapsed);
   const name = `${collapsed ? "Expand" : "Collapse"} ${label.toLowerCase()}`;
   // The chevron points where the column will move: collapsing the left column points left.
@@ -30,18 +34,20 @@ export function SideColumn({
     >
       <div className="column-header">
         {collapsed ? null : header}
-        <button
-          type="button"
-          id={`${id}-toggle`}
-          className="icon-button"
-          aria-expanded={!collapsed}
-          aria-controls={`${id}-body`}
-          aria-label={name}
-          title={name}
-          onClick={() => toggle(side)}
-        >
-          <ChevronIcon direction={direction} />
-        </button>
+        {collapsible ? (
+          <button
+            type="button"
+            id={`${id}-toggle`}
+            className="icon-button"
+            aria-expanded={!collapsed}
+            aria-controls={`${id}-body`}
+            aria-label={name}
+            title={name}
+            onClick={() => toggle(side)}
+          >
+            <ChevronIcon direction={direction} />
+          </button>
+        ) : null}
       </div>
       <div id={`${id}-body`} className="column-body" hidden={collapsed}>
         {children}
