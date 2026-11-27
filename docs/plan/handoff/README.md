@@ -306,3 +306,10 @@ Work paused at the maintainer's request (usage limits). To resume:
 - **Next features, plans ready (dependencies met):** F-703 (read-only below 1024 px), F-210 (Files view; reuse F-309's `openFile` and F-403's staging), F-605 (Markdown and other files; move its step 2 to F-407), F-601 (config editor), F-401 (GitHub import; reuse `@nf-builder/sources/import`).
 - Then plan M3 from F-301 onwards.
 
+
+## Session 3 (from 2026-11-27)
+
+ADR numbers reserved for features in flight, so parallel branches don't clash: 0055 F-210, 0056 F-703, 0057 F-401, 0058 F-503. Take the next free number after these for any other feature.
+
+### F-503 — [plan](plan-F-503.md)
+- Accept every recommendation in section 6, with one change: namespaces are ordered with `nf-core` first, then the rest in code-point order, as the mockup shows (2,296 of 2,330 modules in the deployed snapshot are nf-core's).
