@@ -57,7 +57,7 @@
 
 ## tuple-arity
 
-- Tuple with 1 components is passed to the `tuple` input `tuple(meta, reads)` of `LEGACY_COUNT`, which declares 2 -- pass one argument per declared component
+- Tuple with 1 component is passed to the `tuple` input `tuple(meta, reads)` of `LEGACY_COUNT`, which declares 2 -- pass one argument per declared component
 
 ## publish-dir
 

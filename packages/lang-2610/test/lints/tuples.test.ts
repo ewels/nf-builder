@@ -91,7 +91,7 @@ describe("F-302 LA-14 tuple arity", () => {
     expect(found).toHaveLength(1);
     expect(found[0]?.range).toMatchObject(rangeOf(wrong, "tuple('a')"));
     expect(found[0]?.message).toBe(
-      "Tuple with 1 components is passed to the `tuple` input `tuple(meta, reads)` of `LEGACY`, which declares 2 -- pass one argument per declared component",
+      "Tuple with 1 component is passed to the `tuple` input `tuple(meta, reads)` of `LEGACY`, which declares 2 -- pass one argument per declared component",
     );
     expect(
       run(typedText("LEGACY(tuple('a', 'b'))"), "tuple('a', 'b')"),

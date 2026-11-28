@@ -23,8 +23,7 @@ export function tupleArityOf(
   port: Port,
 ): { expected: number; actual: number } | null {
   const element = source?.element;
-  if (!element || element.name !== "Tuple" || element.args.length === 0)
-    return null;
+  if (element?.name !== "Tuple" || element.args.length === 0) return null;
   const expected = port.components;
   if (expected === undefined || expected === element.args.length) return null;
   return { expected, actual: element.args.length };
@@ -72,7 +71,7 @@ export const tupleArity: LintRule = {
           if (found)
             out.push({
               range: port.argument,
-              message: `Tuple with ${found.actual} components is passed to the \`tuple\` input \`${port.label}\` of \`${callee.name}\`, which declares ${found.expected} -- pass one argument per declared component`,
+              message: `Tuple with ${found.actual} ${found.actual === 1 ? "component" : "components"} is passed to the \`tuple\` input \`${port.label}\` of \`${callee.name}\`, which declares ${found.expected} -- pass one argument per declared component`,
             });
         }
       }
