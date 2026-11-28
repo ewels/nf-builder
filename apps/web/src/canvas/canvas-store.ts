@@ -407,6 +407,25 @@ function moduleFolder(path: string, name: string): string | null {
   return path === `${folder}/main.nf` ? folder : null;
 }
 
+/** Whether the declarations of a file are this process alone: a module folder moves only then (LA-12). */
+function declaresOnly(
+  items: readonly { readonly kind: string; readonly name: string }[],
+  name: string,
+): boolean {
+  const declared = items.filter((i) =>
+    [
+      "process",
+      "workflow",
+      "function",
+      "record",
+      "enum",
+      "agent",
+      "unparsed",
+    ].includes(i.kind),
+  );
+  return declared.length === 1 && declared[0]?.name === name;
+}
+
 /** The key of a node after its process was renamed: an unassigned call carries the callee in its key. */
 function nodeAfterRename(
   node: string,
@@ -759,7 +778,7 @@ export function createCanvasStore(
     }
 
     /**
-     * Applies `commands` one after another under one history group, the first with `label`, as one undo step. A refused
+     * Applies `commands` one after another under one history group with `label`, as one undo step. A refused
      * part undoes the parts before it (`discard`, so the step isn't left to redo) and its refusal is returned; else the
      * last part's outcome. Runs inside a task of the queue.
      */
@@ -778,7 +797,8 @@ export function createCanvasStore(
               return await engine().apply(
                 command,
                 revision,
-                index === 0 ? { group, label } : { group },
+                // every part carries the label: one with no patches starts no step, so a later one may
+                { group, label },
               );
             } catch (error) {
               return refusal("internal", messageOf(error));
@@ -1323,7 +1343,7 @@ export function createCanvasStore(
               if (
                 outline !== null &&
                 !("ok" in outline) &&
-                outline.items.length === 1
+                declaresOnly(outline.items, target.name)
               )
                 commands.push({
                   kind: "moveFile",

@@ -113,7 +113,13 @@ function setup(options: Options = {}) {
     },
     outline: async () => ({
       revision,
-      items: (options.outline ?? ["GREET"]).map((name) => ({ name })),
+      items: [
+        { kind: "featureFlag", name: "nextflow.enable.types" },
+        ...(options.outline ?? ["GREET"]).map((name) => ({
+          kind: "process",
+          name,
+        })),
+      ],
     }),
     apply: async (
       command: { kind: string; newName?: string },
@@ -229,7 +235,9 @@ describe("F-303 popup store", () => {
     const groups = applies.map((a) => (a.options as { group: string }).group);
     expect(groups[0]).toMatch(/^popup-/);
     expect(new Set(groups).size).toBe(1);
-    expect(applies[0]?.options).toMatchObject({ label: "Edit process SAY" });
+    // every part carries the label: a part with no patches starts no step
+    for (const a of applies)
+      expect(a.options).toMatchObject({ label: "Edit process SAY" });
     expect(popup.getState().status).toBe("closed");
   });
 

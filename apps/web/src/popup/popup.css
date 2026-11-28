@@ -1,0 +1,224 @@
+/* The edit popup (F-303, UX-40 to UX-44). */
+.edit-popup {
+  width: min(760px, 92vw);
+  max-height: 90vh;
+  padding: var(--space-4);
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  overflow-y: auto;
+}
+
+.edit-popup::backdrop {
+  background: rgb(20 26 38 / 0.45);
+}
+
+.edit-popup h2 {
+  margin: 0 0 var(--space-2);
+  font-size: 16px;
+}
+
+.popup-tabs {
+  display: flex;
+  gap: var(--space-1);
+  margin-bottom: var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.popup-tabs [role="tab"] {
+  font: inherit;
+  padding: var(--space-1) var(--space-3);
+  color: var(--color-text);
+  background: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+}
+
+.popup-tabs [role="tab"][aria-selected="true"] {
+  border-bottom-color: var(--color-accent);
+}
+
+.popup-tabs [role="tab"][aria-disabled="true"] {
+  color: var(--color-muted);
+  cursor: default;
+}
+
+.popup-section {
+  margin: 0 0 var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+}
+
+.popup-section legend {
+  padding: 0 var(--space-1);
+  font-weight: 600;
+}
+
+.popup-rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.popup-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.popup-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.popup-field-label {
+  font-size: 12px;
+  color: var(--color-muted);
+}
+
+.edit-popup input[type="text"],
+.edit-popup textarea {
+  font: inherit;
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+}
+
+.edit-popup textarea {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.edit-popup .popup-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 13px;
+}
+
+.edit-popup [aria-invalid="true"] {
+  border-color: var(--color-error);
+}
+
+.popup-problem {
+  font-size: 12px;
+  color: var(--color-error);
+}
+
+.popup-note {
+  margin: 0 0 var(--space-2);
+  font-size: 12px;
+  color: var(--color-muted);
+}
+
+.popup-kept {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.popup-row-actions {
+  display: flex;
+  gap: var(--space-1);
+  margin-left: auto;
+}
+
+.edit-popup button {
+  font: inherit;
+  font-size: 13px;
+  padding: 2px var(--space-2);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.edit-popup button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.popup-check {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  align-self: flex-end;
+  padding-bottom: var(--space-1);
+}
+
+.popup-directive-name {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  align-self: center;
+}
+
+.popup-badge {
+  padding: 0 var(--space-1);
+  font-size: 11px;
+  color: var(--tone-amber-fg);
+  background: var(--tone-amber-bg);
+  border-radius: 4px;
+}
+
+.directive-picker {
+  margin: var(--space-2) 0;
+}
+
+.directive-picker-label {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 12px;
+  color: var(--color-muted);
+}
+
+.directive-picker [role="listbox"] {
+  max-height: 11rem;
+  margin: var(--space-1) 0 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+}
+
+.directive-picker [role="option"] {
+  display: flex;
+  gap: var(--space-2);
+  padding: 2px var(--space-2);
+  cursor: pointer;
+}
+
+.directive-picker [role="option"][aria-selected="true"] {
+  background: var(--tone-blue-bg);
+}
+
+.directive-name {
+  font-weight: 600;
+}
+
+.directive-summary {
+  overflow: hidden;
+  color: var(--color-muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.directive-none {
+  margin: var(--space-1) 0 0;
+  color: var(--color-muted);
+}
+
+.popup-message {
+  min-height: 1.2em;
+  margin: var(--space-2) 0 0;
+  color: var(--color-error);
+}
+
+.popup-message:empty {
+  display: none;
+}
