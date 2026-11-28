@@ -106,10 +106,15 @@ export type PopupStore = PopupData &
     readonly refusal: string | null;
   };
 
-/** Whether the Apply button is allowed: not while the code on show doesn't parse (UX-44). */
+/** Whether the code on show was edited and doesn't parse: Apply and the Configure tab are off (UX-44). */
+export function isCodeBlocked(s: PopupData): boolean {
+  if (s.status !== "editing" && s.status !== "applying") return false;
+  return s.section === "code" && s.code.touched && s.code.check !== "valid";
+}
+
+/** Whether the Apply button is allowed (UX-44). */
 export function canApply(s: PopupData): boolean {
-  if (s.status !== "editing") return false;
-  return !(s.section === "code" && s.code.touched && s.code.check !== "valid");
+  return s.status === "editing" && !isCodeBlocked(s);
 }
 
 /** Whether Esc should ask: the code text was changed from the project's (F-304). */
@@ -233,8 +238,10 @@ export function createPopupStore(deps: {
      * The name the declaration ends with: the code's, or the Configure draft's when the form was renamed after the
      * code was last read (the render keeps the code's name, so the rename is carried here, UX-44).
      */
-    const endName = (s: { draft: TypedProcessForm; code: CodeDraft }, codeName: string) =>
-      codeName === s.code.baseForm.name ? s.draft.name : codeName;
+    const endName = (
+      s: { draft: TypedProcessForm; code: CodeDraft },
+      codeName: string,
+    ) => (codeName === s.code.baseForm.name ? s.draft.name : codeName);
     /** Renders the Configure draft over the code text, so a form edit made after a code edit isn't lost, and checks it. */
     const renderForm = async (): Promise<boolean> => {
       const s = opened();

@@ -36,6 +36,7 @@ export function DetailsHeaderView({
       <button
         type="button"
         className="details-action"
+        data-action="edit"
         disabled={!canEdit}
         title={
           canEdit
@@ -49,6 +50,7 @@ export function DetailsHeaderView({
       <button
         type="button"
         className="details-action"
+        data-action="code"
         disabled={!canCode}
         title={
           canCode
@@ -86,15 +88,13 @@ export function DetailsHeader(): JSX.Element {
         void openPopup({
           tab,
           node: selected,
-          opener: document.querySelector<HTMLElement>(".details-action"),
+          opener: document.querySelector<HTMLElement>('[data-action="edit"]'),
         }),
       onCode: () =>
         void openPopup({
           tab,
           node: selected,
-          opener:
-            document.querySelectorAll<HTMLElement>(".details-action")[1] ??
-            null,
+          opener: document.querySelector<HTMLElement>('[data-action="code"]'),
           section: "code",
         }),
     };

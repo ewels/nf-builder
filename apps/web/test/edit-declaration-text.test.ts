@@ -140,7 +140,9 @@ describe("F-304 editDeclarationText with the real engine", () => {
       .getState()
       .openPopup({ tab: "main.nf#", node: node?.id ?? "", opener: null });
     await popup.getState().showSection("code");
-    popup.getState().editCode(read.text.replace("    input:", "    cpus 2\n\n    input:"));
+    popup
+      .getState()
+      .editCode(read.text.replace("    input:", "    cpus 2\n\n    input:"));
     await popup.getState().flushCode();
     await popup.getState().showSection("configure");
     popup.getState().updateDraft((d) => ({ ...d, name: "HELLO" }));

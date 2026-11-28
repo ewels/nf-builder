@@ -200,7 +200,15 @@ test("F-304 UX-44 ADR 0066: Esc with an edited code draft asks before discarding
   await page.keyboard.press("Escape");
   const ask = dialog.getByRole("alert");
   await expect(ask).toContainText("Discard your changes to the code?");
-  await ask.getByRole("button", { name: "Keep editing" }).click();
+  const keep = ask.getByRole("button", { name: "Keep editing" });
+  await expect(keep).toBeFocused();
+  // a second Escape answers the prompt with Keep editing
+  await page.keyboard.press("Escape");
+  await expect(ask).toHaveCount(0);
+  await expect(dialog).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(ask).toBeVisible();
+  await keep.click();
   await expect(ask).toHaveCount(0);
   // the editor has scrolled to the end of the pasted text, so only its last lines are drawn
   expect(await codeText(page)).toContain("// keep the greeting short");

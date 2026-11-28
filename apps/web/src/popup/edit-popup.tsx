@@ -7,7 +7,13 @@ import { showModalOnce } from "../project/project-dialogs";
 import { CodeTab } from "./code-tab";
 import { ConfigureForm } from "./configure-form";
 import "./popup.css";
-import { canApply, popupStore, type Section, usePopup } from "./popup-store";
+import {
+  canApply,
+  isCodeBlocked,
+  popupStore,
+  type Section,
+  usePopup,
+} from "./popup-store";
 
 const REGISTRY_NOTE =
   "This is a registry module. Editing it here means an update will overwrite your changes.";
@@ -21,16 +27,13 @@ function PopupDialog(): JSX.Element | null {
   const state = usePopup((s) => s);
   const dialog = useRef<HTMLDialogElement>(null);
   const titleId = useId();
-  const [showWhole, setShowWhole] = useState(false);
-  // the Code tab mounts when first shown and then stays, so its model and undo stack live as long as the popup
-  const [codeSeen, setCodeSeen] = useState(
-    (state.status === "editing" || state.status === "applying") &&
-      state.section === "code",
-  );
   const section =
     state.status === "editing" || state.status === "applying"
       ? state.section
       : null;
+  const [showWhole, setShowWhole] = useState(false);
+  // the Code tab mounts when first shown and then stays, so its model and undo stack live as long as the popup
+  const [codeSeen, setCodeSeen] = useState(section === "code");
   useEffect(() => {
     if (section === "code") setCodeSeen(true);
   }, [section]);
@@ -53,10 +56,7 @@ function PopupDialog(): JSX.Element | null {
   if (state.status !== "editing" && state.status !== "applying") return null;
   const applying = state.status === "applying";
   const actions = popupStore.getState();
-  const codeBlocked =
-    state.section === "code" &&
-    state.code.touched &&
-    state.code.check !== "valid";
+  const codeBlocked = isCodeBlocked(state);
   return (
     <dialog
       ref={dialog}
@@ -166,7 +166,13 @@ function PopupDialog(): JSX.Element | null {
         {state.discarding ? (
           <div role="alert" className="popup-discard">
             <p>Discard your changes to the code?</p>
-            <button type="button" onClick={() => actions.keepEditing()}>
+            <button
+              type="button"
+              // the safe choice has the focus, so Enter doesn't discard
+              // biome-ignore lint/a11y/noAutofocus: the prompt appears on Esc and takes the focus from the editor
+              autoFocus
+              onClick={() => actions.keepEditing()}
+            >
               Keep editing
             </button>
             <button type="button" onClick={() => actions.closePopup()}>
