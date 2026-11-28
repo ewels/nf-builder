@@ -88,6 +88,32 @@ const goldens = {
       }),
     ],
   },
+  "template-blank -> f301-palette-adds": {
+    start: "../../../packages/lang-2610/templates/blank",
+    expected: "f301-palette-adds",
+    steps: [
+      (): EditCommand => ({
+        kind: "createProcess",
+        name: "NEW_PROCESS",
+        caller: "main.nf",
+      }),
+      (): EditCommand => ({
+        kind: "addCall",
+        target: entry,
+        callee: "NEW_PROCESS",
+      }),
+      (): EditCommand => ({
+        kind: "createWorkflow",
+        name: "NEW_WORKFLOW",
+        caller: "main.nf",
+      }),
+      (): EditCommand => ({
+        kind: "addCall",
+        target: entry,
+        callee: "NEW_WORKFLOW",
+      }),
+    ],
+  },
   "f111-start-legacy -> f111-edits-legacy": {
     start: "f111-start-legacy",
     expected: "f111-edits-legacy",
@@ -113,7 +139,7 @@ const goldens = {
 
 describe("F-111 oracle goldens", () => {
   for (const [name, g] of Object.entries(goldens))
-    it(`F-111 step 2 ADR-0011: the scripted edits on ${g.start} produce tools/oracle/cases/${g.expected} byte for byte (${name})`, async () => {
+    it(`F-111 F-301 step 2 step 3 ADR-0011: the scripted edits on ${g.start} produce tools/oracle/cases/${g.expected} byte for byte (${name})`, async () => {
       const result = await run(g.start, g.steps);
       for (const [path, text] of Object.entries(result))
         await expect(text).toMatchFileSnapshot(join(cases, g.expected, path));

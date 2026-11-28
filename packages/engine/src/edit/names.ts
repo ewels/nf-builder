@@ -42,6 +42,9 @@ export function namesInWorkflow(def: WorkflowDef): Set<string> {
 export const moduleDirectory = (name: string): string =>
   `modules/local/${name.toLowerCase()}`;
 
+export const subworkflowDirectory = (name: string): string =>
+  `subworkflows/local/${name.toLowerCase()}`;
+
 /** The include source for `toPath` as written in the script at `fromPath`: `./x/y.nf` or `../x/y.nf`. */
 export function relativeSource(fromPath: string, toPath: string): string {
   const from = fromPath.split("/").slice(0, -1);

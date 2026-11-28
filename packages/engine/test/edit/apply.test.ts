@@ -29,6 +29,7 @@ const commands: Record<EditCommand["kind"], EditCommand> = {
   },
   replaceFileText: { kind: "replaceFileText", path: "main.nf", text: "" },
   createFile: { kind: "createFile", path: "notes.txt" },
+  createWorkflow: { kind: "createWorkflow", name: "SUB", caller: "main.nf" },
 };
 
 describe("F-111 applyCommand", () => {
