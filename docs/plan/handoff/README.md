@@ -43,6 +43,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-505 registry plugins | merged, PR #64 | Plan deleted in its PR. |
 | F-303 edit popup | merged, PR #65 | Plan deleted in its PR. |
 | F-310 clipboard | merged, PR #66 | Plan deleted in its PR. |
+| F-304 popup Code tab | merged, PR #68 | Plan deleted in its PR. |
 
 ## Merge order
 
@@ -367,5 +368,5 @@ ADR numbers reserved for features in flight, so parallel branches don't clash: 0
 ### F-504 — [plan](plan-F-504.md)
 - Accept every recommendation in section 6: F-302 joins F-504's `depends_on` in its PR (`scope-change`); `.module-info` not written until the researcher reproduces the checksum (one bounded try); bundles with binary files refused (pointing to F-407); registry subworkflows count as registry folders (amends ADRs 0055 and 0063); the Hello world connection step stays lint-only with the run failure recorded, and widening `tuple-arity` becomes a follow-up note. ADR number: the next free one when F-504 starts.
 
-### F-304 — [plan](plan-F-304.md)
+### F-304 — plan deleted
 - Accept every recommendation in section 6. Point 8: Escape with an edited code draft asks before discarding (amends ADR 0066); an unedited draft closes at once. Point 7's hover-help feature is added in F-304's PR (`scope-change`). Start after F-303 merges.
