@@ -437,4 +437,4 @@ workflow {
 
 - **What happens:** `nextflow lint .` (26.10.7) reports no errors, but `nextflow run main.nf -stub` fails with `ERROR ~ No such variable: log` at the line of the emit. `log` is the script's built-in logger, which the emit's name seems to collide with.
 - **Expected:** lint reports the name, or the run accepts it like any other emit name (`report` works).
-- **nf-builder:** nothing special yet. The F-307 fixture names its second emit `report` for this reason; AddEmit does not refuse `log`.
+- **nf-builder:** the F-307 fixture names its second emit `report` for this reason, and AddEmit refuses the name `log`, saying it clashes with the built-in log and the run fails (ADR 0068).
