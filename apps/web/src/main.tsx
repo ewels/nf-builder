@@ -19,13 +19,14 @@ Object.defineProperty(window, "nfBuilderEngine", { get: getEngine });
 // Test hook (F-205, F-208): opens a project in the UI and edits it as the Code view does. Same rationale.
 Object.defineProperty(window, "nfBuilderWorkspace", {
   get: () => {
-    const { open, openWorkflow, openFile, openPath, apply } =
+    const { open, openWorkflow, openFile, openPath, openCallee, apply } =
       canvasStore.getState();
     return {
       open,
       openWorkflow,
       openFile,
       openPath,
+      openCallee,
       apply: (command: EditCommand, options?: ApplyOptions) =>
         apply(command, undefined, options),
       history: () => canvasStore.getState().history,
