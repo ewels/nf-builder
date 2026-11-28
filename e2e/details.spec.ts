@@ -338,7 +338,7 @@ test("F-206 step 2 UX-31: clicking empty canvas shows the workflow summary with 
   await expect(section("Emit")).toContainText("loud");
 });
 
-test("F-206 UX-32: Edit and Code show, disabled, only while a node is selected", async ({
+test("F-206 F-303 UX-32: Edit and Code show only while a node is selected; Edit is enabled for a typed process and Code stays disabled until F-304", async ({
   page,
 }) => {
   await page.goto("./");
@@ -347,8 +347,8 @@ test("F-206 UX-32: Edit and Code show, disabled, only while a node is selected",
   const column = detailsColumn(page);
   await expect(column.getByRole("button", { name: "Edit" })).toHaveCount(0);
   await selectNode(page, NODE.greeted);
-  for (const name of ["Edit", "Code"])
-    await expect(column.getByRole("button", { name })).toBeDisabled();
+  await expect(column.getByRole("button", { name: "Edit" })).toBeEnabled();
+  await expect(column.getByRole("button", { name: "Code" })).toBeDisabled();
   await clickEmptyCanvas(page);
   await expect(column.getByRole("button", { name: "Edit" })).toHaveCount(0);
   await expect(column.getByRole("button", { name: "Code" })).toHaveCount(0);
