@@ -359,3 +359,6 @@ ADR numbers reserved for features in flight, so parallel branches don't clash: 0
 
 ### F-310 — [plan](plan-F-310.md)
 - Accept every recommendation in section 6; point 3 splits copying operator, factory and code nodes into a new feature in F-310's PR (`scope-change`). The workspace `undo` options bug it found is fixed separately (`fix/undo-discard`). Start after F-302 merges. ADR number: the next free one when F-310 starts.
+
+### F-504 — [plan](plan-F-504.md)
+- Accept every recommendation in section 6: F-302 joins F-504's `depends_on` in its PR (`scope-change`); `.module-info` not written until the researcher reproduces the checksum (one bounded try); bundles with binary files refused (pointing to F-407); registry subworkflows count as registry folders (amends ADRs 0055 and 0063); the Hello world connection step stays lint-only with the run failure recorded, and widening `tuple-arity` becomes a follow-up note. ADR number: the next free one when F-504 starts.
