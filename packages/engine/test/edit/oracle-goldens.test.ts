@@ -1,7 +1,13 @@
 import { join } from "node:path";
-import type { EditCommand } from "@nf-builder/lang-core";
+import type {
+  EditCommand,
+  ScriptSourceFile,
+  TypedProcess,
+  TypedProcessForm,
+} from "@nf-builder/lang-core";
 import { describe, expect, it } from "vitest";
 import type { EditState } from "../../src/edit/apply";
+import { processForm } from "../../src/form/read-process";
 import { readTree } from "../model/read-tree";
 import { accepted, commit, node, port, stateFor, texts } from "./helpers";
 
@@ -12,18 +18,104 @@ const entry = { path: "main.nf", workflow: null };
 
 /** Runs `steps` one by one, each built from the projection of the state after the one before. */
 async function run(
-  start: string,
+  start: string | Record<string, string>,
   steps: ((state: EditState) => EditCommand)[],
 ): Promise<Record<string, string>> {
   const state = await stateFor(
-    Object.fromEntries(
-      readTree(join(cases, start)).map((f) => [f.path, f.text]),
-    ),
+    typeof start === "string"
+      ? Object.fromEntries(
+          readTree(join(cases, start)).map((f) => [f.path, f.text]),
+        )
+      : start,
   );
   for (const step of steps) commit(state, accepted(state, step(state)));
   expect(state.model.diagnostics()).toEqual([]);
   return texts(state);
 }
+
+/** An `updateDeclaration` of `name` in `path` built from its current form. */
+const update =
+  (
+    path: string,
+    name: string,
+    change: (form: TypedProcessForm) => TypedProcessForm,
+  ) =>
+  (s: EditState): EditCommand => {
+    const file = s.model.file(path);
+    return {
+      kind: "updateDeclaration",
+      path,
+      name,
+      form: change(
+        processForm(
+          file?.source as ScriptSourceFile,
+          file?.declarations.get(name)?.declaration as TypedProcess,
+          s.catalogue,
+        ),
+      ),
+    };
+  };
+
+const JOIN = "modules/local/join/main.nf";
+const ALL_START = {
+  "main.nf": `nextflow.enable.types = true
+
+include { JOIN } from './modules/local/join/main.nf'
+include { PAIR } from './subworkflows/local/pair/main.nf'
+
+workflow {
+    joined = JOIN('hello', 'world', record(tag: 'T'))
+    joined.view()
+    PAIR()
+}
+`,
+  "subworkflows/local/pair/main.nf": `nextflow.enable.types = true
+
+include { JOIN } from '../../../modules/local/join/main.nf'
+
+workflow PAIR {
+    main:
+    pair = JOIN('a', 'b', record(tag: 'P'))
+    pair.view()
+}
+`,
+  [JOIN]: `nextflow.enable.types = true
+
+/**
+ * Joins two words.
+ *
+ * @param left the first word
+ */
+process JOIN {
+    storeDir 'cache'
+    cpus 1
+
+    input:
+    left: String
+    right: String
+    record(tag: String)
+
+    stage:
+    env 'WORDS', left
+
+    output:
+    text: Path = file('joined.txt')
+
+    topic:
+    eval('tool --version') >> 'versions'
+
+    script:
+    """
+    echo \${left} \${right} \${tag} > joined.txt
+    """
+
+    stub:
+    """
+    touch joined.txt
+    """
+}
+`,
+};
 
 const goldens = {
   "f111-start-typed -> f111-edits-typed": {
@@ -114,6 +206,79 @@ const goldens = {
       }),
     ],
   },
+  "f303-configure-start -> f303-configure-typed": {
+    start: "f303-configure-start",
+    expected: "f303-configure-typed",
+    steps: [
+      update("modules/local/greet/main.nf", "GREET", (form) => ({
+        ...form,
+        inputs: [
+          ...form.inputs,
+          {
+            origin: null,
+            kind: "named",
+            name: "punctuation",
+            type: "String",
+            nullable: true,
+          },
+        ],
+        outputs: form.outputs.map((o) => ({ ...o, name: "message" })),
+        directives: [
+          ...form.directives,
+          {
+            origin: null,
+            kind: "named",
+            name: "cpus",
+            args: "1",
+            deprecated: false,
+            known: true,
+          },
+        ],
+      })),
+    ],
+  },
+  // every section edited once; a kept record(...) input and a kept storeDir; two callers; the stub removed, then added
+  "f303 all-sections start -> f303-configure-all": {
+    start: ALL_START,
+    expected: "f303-configure-all",
+    steps: [
+      update(JOIN, "JOIN", (form) => ({
+        ...form,
+        description: "Joins two words with a tag.",
+        directives: [
+          ...form.directives.map((d) =>
+            d.kind === "named" && d.name === "cpus" ? { ...d, args: "2" } : d,
+          ),
+          {
+            origin: null,
+            kind: "named",
+            name: "time",
+            args: "1.h",
+            deprecated: false,
+            known: true,
+          },
+        ],
+        // right first, then left renamed to first; the record input stays last
+        inputs: [
+          form.inputs[1],
+          form.inputs[0] && form.inputs[0].kind === "named"
+            ? { ...form.inputs[0], name: "first" }
+            : form.inputs[0],
+          form.inputs[2],
+        ].filter((r) => r !== undefined),
+        stage: [
+          ...form.stage,
+          { origin: null, directive: "env", args: "'LABEL', right" },
+        ],
+        outputs: form.outputs.map((o) => ({ ...o, name: "joined" })),
+        topics: form.topics.map((t) =>
+          t.kind === "emit" ? { ...t, topic: "tool_versions" } : t,
+        ),
+        stub: null,
+      })),
+      update(JOIN, "JOIN", (form) => ({ ...form, stub: "'touch joined.txt'" })),
+    ],
+  },
   "f111-start-legacy -> f111-edits-legacy": {
     start: "f111-start-legacy",
     expected: "f111-edits-legacy",
@@ -139,7 +304,7 @@ const goldens = {
 
 describe("F-111 oracle goldens", () => {
   for (const [name, g] of Object.entries(goldens))
-    it(`F-111 F-301 step 2 step 3 ADR-0011: the scripted edits on ${g.start} produce tools/oracle/cases/${g.expected} byte for byte (${name})`, async () => {
+    it(`F-111 F-301 F-303 step 2 UX-41 step 3 ADR-0011: the scripted edits on ${typeof g.start === "string" ? g.start : "an inline tree"} produce tools/oracle/cases/${g.expected} byte for byte (${name})`, async () => {
       const result = await run(g.start, g.steps);
       for (const [path, text] of Object.entries(result))
         await expect(text).toMatchFileSnapshot(join(cases, g.expected, path));

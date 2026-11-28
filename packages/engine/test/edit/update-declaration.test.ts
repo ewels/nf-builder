@@ -1,4 +1,3 @@
-import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import type {
   EditCommand,
@@ -77,14 +76,16 @@ describe("F-303 UpdateDeclaration", () => {
       ],
     };
     const r = accepted(state, update(MODULE, "GREET", next));
-    expect(r.patches.map((p) => p.path)).toEqual([MODULE]);
-    expect(r.files[0]?.text).toBe(
-      readFileSync(join(cases, "f303-configure-typed", MODULE), "utf8"),
+    expect(r.patches.map((p) => p.path).sort()).toEqual(["main.nf", MODULE]);
+    const expected = Object.fromEntries(
+      readTree(join(cases, "f303-configure-typed")).map((f) => [
+        f.path,
+        f.text,
+      ]),
     );
+    for (const file of r.files) expect(file.text).toBe(expected[file.path]);
     commit(state, r);
-    expect(state.model.diagnostics().filter((d) => d.path === MODULE)).toEqual(
-      [],
-    );
+    expect(state.model.diagnostics()).toEqual([]);
   });
 
   it("F-303 AR-22 LA-45: an unchanged form changes nothing; untouched rows keep their text and comments", async () => {
@@ -286,5 +287,37 @@ process P {
         expect(r.message.length).toBeGreaterThan(0);
       }
     }
+  });
+});
+
+describe("F-303 input renames", () => {
+  it("F-303 UX-41: renaming an input renames its uses in the rows the user didn't edit", async () => {
+    const source =
+      'nextflow.enable.types = true\n\nprocess P {\n    cpus 1\n\n    input:\n    name: String\n\n    stage:\n    env \'WHO\', name\n\n    output:\n    text: Path = file("${name}.txt")\n\n    script:\n    """\n    echo ${name} > ${name}.txt\n    """\n\n    stub:\n    """\n    touch ${name}.txt\n    """\n}\n';
+    const state = await stateFor({ "p.nf": source });
+    const form = formOf(state, "p.nf", "P");
+    const r = accepted(
+      state,
+      update("p.nf", "P", {
+        ...form,
+        inputs: form.inputs.map((i) =>
+          i.kind === "named" ? { ...i, name: "who" } : i,
+        ),
+      }),
+    );
+    expect(r.files[0]?.text).toBe(source.replaceAll("name", "who"));
+    // a row the user edits in the same step is theirs: it isn't touched
+    const edited = accepted(
+      state,
+      update("p.nf", "P", {
+        ...form,
+        inputs: form.inputs.map((i) =>
+          i.kind === "named" ? { ...i, name: "who" } : i,
+        ),
+        stage: form.stage.map((s) => ({ ...s, args: "'x', name" })),
+      }),
+    );
+    expect(edited.files[0]?.text).toContain("env 'x', name");
+    expect(edited.files[0]?.text).toContain("echo ${who} > ${who}.txt");
   });
 });

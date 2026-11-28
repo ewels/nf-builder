@@ -547,25 +547,20 @@ function checkAccepted(
       ]);
       break;
     case "updateDeclaration": {
-      // F-303: one edit, inside the declaration
-      expect(patches.map((p) => p.path)).toEqual([command.path]);
-      const before = state.model.file(command.path)?.source as SourceFile;
-      const def =
-        before.ast?.kind === "Script"
-          ? before.ast.body.find(
-              (i): i is TypedProcess =>
-                i.kind === "Process" && i.name.name === command.name,
-            )
-          : undefined;
-      const patch = patches[0];
-      if (!def || patch?.kind !== "edit") throw new Error("no target process");
-      const span = itemSpan(def);
-      for (const e of patch.edits) {
-        expect(
-          e.start,
-          `${label}: edit inside the process`,
-        ).toBeGreaterThanOrEqual(span.start);
-        expect(e.end).toBeLessThanOrEqual(span.end);
+      // F-303: the process's own file is patched, and each edit (it, and the call sites') is one top-level item
+      expect(patches.map((p) => p.path)).toContain(command.path);
+      for (const patch of patches) {
+        if (patch.kind !== "edit") throw new Error("edits only");
+        const before = state.model.file(patch.path)?.source as SourceFile;
+        const items = before.ast?.kind === "Script" ? before.ast.body : [];
+        for (const e of patch.edits)
+          expect(
+            items.some((i) => {
+              const span = itemSpan(i);
+              return e.start >= span.start && e.end <= span.end;
+            }),
+            `${label}: edit in ${patch.path} lies within one item`,
+          ).toBe(true);
       }
       break;
     }

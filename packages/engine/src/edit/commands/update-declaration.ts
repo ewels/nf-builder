@@ -5,18 +5,22 @@ import {
   type AstNode,
   type Comment,
   childFields,
+  type Declaration,
   type FieldProblem,
   type FormField,
   isAstNode,
+  type MethodCall,
   NO_RANGE,
   type ScriptSourceFile,
   type Section,
+  type TextEdit,
   type TextPatch,
   type TypedProcess,
   type TypedProcessForm,
   type UpdateDeclaration,
+  walk,
 } from "@nf-builder/lang-core";
-import { formChanged, isIdentifier } from "../../form/form-diff";
+import { formChanged, inputOrigins, isIdentifier } from "../../form/form-diff";
 import { docComment, docParts, processForm } from "../../form/read-process";
 import {
   FORM_PROCESS,
@@ -25,6 +29,8 @@ import {
   rowChanges,
 } from "../../form/write-rows";
 import type { EditState } from "../apply";
+import { processCalls, remapArguments } from "../call-sites";
+import { replaceNode, variable } from "../nodes";
 import { EditRefusal } from "../refusal";
 import { reprintDeclaration } from "../splice";
 
@@ -335,6 +341,62 @@ export function updateDeclaration(
       path,
     );
 
+  // an input renamed in the form is renamed in the rows the user didn't touch (F-303 point 4)
+  const renames = new Map<string, string>();
+  wanted.inputs.forEach((row, i) => {
+    if (row.kind !== "named" || row.origin === null || !changes.rows.inputs[i])
+      return;
+    const before = original.inputs.find((r) => r.origin === row.origin);
+    if (before?.kind === "named" && before.name !== row.name)
+      renames.set(before.name, row.name);
+  });
+  const untouched = <T extends AstNode>(
+    node: T | null,
+    kept: boolean,
+  ): T | null =>
+    node && kept && renames.size > 0 ? renameUses(node, renames) : node;
+  const keepRows = <T extends AstNode>(
+    section: Section<T> | null,
+    rows: readonly boolean[],
+    origins: readonly (number | null)[],
+  ): Section<T> | null => {
+    if (!section || renames.size === 0) return section;
+    const keptOrigins = new Set(
+      origins.filter((o, i) => o !== null && !rows[i]),
+    );
+    return {
+      ...section,
+      items: section.items.map((item, i) =>
+        keptOrigins.has(i) ? renameUses(item, renames) : item,
+      ),
+    };
+  };
+  const base: TypedProcess = {
+    ...process,
+    directives: keepRows(
+      process.directives,
+      changes.rows.directives,
+      wanted.directives.map((r) => r.origin),
+    ),
+    stage: keepRows(
+      process.stage,
+      changes.rows.stage,
+      wanted.stage.map((r) => r.origin),
+    ),
+    outputs: keepRows(
+      process.outputs,
+      changes.rows.outputs,
+      wanted.outputs.map((r) => r.origin),
+    ),
+    topics: keepRows(
+      process.topics,
+      changes.rows.topics,
+      wanted.topics.map((r) => r.origin),
+    ),
+    when: untouched(process.when, true),
+    exec: untouched(process.exec, !changes.script),
+    stub: untouched(process.stub, !changes.stub),
+  };
   const removed: AstNode[] = [];
   const keep = (section: keyof RowChanges["rows"]) =>
     (wanted[section] as readonly { origin: number | null }[]).map((r, i) => ({
@@ -342,13 +404,13 @@ export function updateDeclaration(
       keep: r.origin !== null && !changes.rows[section][i],
     }));
   const exec = changes.script
-    ? swap(process.exec, synthetic.exec, removed)
-    : process.exec;
-  let stub = process.stub;
+    ? swap(base.exec, synthetic.exec, removed)
+    : base.exec;
+  let stub = base.stub;
   if (wanted.stub === null) {
-    if (process.stub) removed.push(process.stub);
+    if (base.stub) removed.push(base.stub);
     stub = null;
-  } else if (changes.stub) stub = swap(process.stub, synthetic.stub, removed);
+  } else if (changes.stub) stub = swap(base.stub, synthetic.stub, removed);
 
   let leading = process.leadingComments;
   const doc = docComment(process);
@@ -373,22 +435,17 @@ export function updateDeclaration(
   }
 
   const updated: TypedProcess = {
-    ...process,
+    ...base,
     directives: rebuild(
-      process.directives,
+      base.directives,
       synthetic.directives,
       keep("directives"),
       removed,
     ),
-    inputs: rebuild(process.inputs, synthetic.inputs, keep("inputs"), removed),
-    stage: rebuild(process.stage, synthetic.stage, keep("stage"), removed),
-    outputs: rebuild(
-      process.outputs,
-      synthetic.outputs,
-      keep("outputs"),
-      removed,
-    ),
-    topics: rebuild(process.topics, synthetic.topics, keep("topics"), removed),
+    inputs: rebuild(base.inputs, synthetic.inputs, keep("inputs"), removed),
+    stage: rebuild(base.stage, synthetic.stage, keep("stage"), removed),
+    outputs: rebuild(base.outputs, synthetic.outputs, keep("outputs"), removed),
+    topics: rebuild(base.topics, synthetic.topics, keep("topics"), removed),
     exec,
     stub,
     ...(leading ? { leadingComments: leading } : {}),
@@ -400,7 +457,73 @@ export function updateDeclaration(
     state.parser.printer,
     removed,
   );
-  return [{ kind: "edit", path, edits: [edit] }];
+  return mergePatches([
+    { path, edit },
+    ...callSiteEdits(state, command, wanted, process),
+  ]);
+}
+
+/** One `edit` patch per path, its edits in order. */
+function mergePatches(
+  edits: readonly { path: string; edit: TextEdit }[],
+): TextPatch[] {
+  const byPath = new Map<string, TextEdit[]>();
+  for (const { path, edit } of edits)
+    byPath.set(path, [...(byPath.get(path) ?? []), edit]);
+  return [...byPath].map(([path, list]) => ({
+    kind: "edit",
+    path,
+    edits: [...list].sort((a, b) => a.start - b.start),
+  }));
+}
+
+/** The edits that make every call of the process pass what its changed inputs take (ADR 0039). */
+function callSiteEdits(
+  state: EditState,
+  command: UpdateDeclaration,
+  form: TypedProcessForm,
+  process: TypedProcess,
+): { path: string; edit: TextEdit }[] {
+  const origins = inputOrigins(form);
+  const before = process.inputs?.items.length ?? 0;
+  if (origins.length === before && origins.every((o, i) => o === i)) return [];
+  const sites = processCalls(state.model, command.path, command.name);
+  const piped = sites.find((s) => s.call === null);
+  if (piped)
+    throw new EditRefusal(
+      "invalid",
+      `${command.name} is called with a pipe in ${piped.path}; change its inputs in the Code tab. Nothing was changed.`,
+      piped.path,
+    );
+  const out: { path: string; edit: TextEdit }[] = [];
+  const items = new Map<AstNode, { path: string; calls: MethodCall[] }>();
+  for (const site of sites) {
+    const entry = items.get(site.item) ?? { path: site.path, calls: [] };
+    entry.calls.push(site.call as MethodCall);
+    items.set(site.item, entry);
+  }
+  for (const [item, { path, calls }] of items) {
+    const file = state.model.file(path)?.source as ScriptSourceFile;
+    const removed: AstNode[] = [];
+    let updated: AstNode = item;
+    for (const call of calls) {
+      const args = remapArguments(call, origins);
+      const kept = new Set<unknown>(args);
+      removed.push(...call.args.filter((a) => !kept.has(a)));
+      updated = replaceNode(updated, call, { ...call, args } as MethodCall);
+    }
+    out.push({
+      path,
+      edit: reprintDeclaration(
+        file,
+        item as Declaration,
+        updated as Declaration,
+        state.parser.printer,
+        removed,
+      ),
+    });
+  }
+  return out;
 }
 
 /** The part of a row a parse problem is about, when the row is one line: its value is the likeliest culprit. */
@@ -418,4 +541,28 @@ function partOf(field: FormField): string | null {
     default:
       return null;
   }
+}
+
+/** `node` with each `Variable` named in `renames` renamed; the node itself when it reads none. */
+function renameUses<T extends AstNode>(
+  node: T,
+  renames: ReadonlyMap<string, string>,
+): T {
+  let result: AstNode = node;
+  const found: AstNode[] = [];
+  walk(node, (n) => {
+    if (
+      n.kind === "Variable" &&
+      renames.has((n as unknown as { name: string }).name)
+    )
+      found.push(n);
+    return undefined;
+  });
+  for (const v of found) {
+    const next = variable(
+      renames.get((v as unknown as { name: string }).name) as string,
+    );
+    result = replaceNode(result, v, carry(next, v));
+  }
+  return result as T;
 }
