@@ -72,6 +72,26 @@ const commands: Record<EditCommand["kind"], EditCommand> = {
     name: "x",
     type: null,
   },
+  updateDeclaration: {
+    kind: "updateDeclaration",
+    path: "b.nf",
+    name: "B",
+    form: {
+      kind: "typedProcess",
+      name: "B",
+      description: "",
+      docTags: null,
+      inputs: [],
+      stage: [],
+      outputs: [],
+      topics: [],
+      directives: [],
+      script: { label: "script", text: "'B'" },
+      stub: null,
+      kept: [],
+    },
+  },
+  moveFile: { kind: "moveFile", path: "b.nf", newPath: "moved/b.nf" },
 };
 
 describe("F-111 applyCommand", () => {

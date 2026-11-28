@@ -9,6 +9,7 @@ export type {
   ChainNode,
   ChainStep,
   CodeNode,
+  CodeRow,
   CommandResult,
   ConfigContext,
   ConfigSelectorRef,
@@ -19,24 +20,33 @@ export type {
   CreateProcess,
   CreateWorkflow,
   Dataflow,
+  DeclarationForm,
   DeleteNode,
   Diagnostic,
   DiagnosticCode,
+  DirectiveChoice,
+  DirectiveRow,
   Disconnect,
   EditCommand,
   EmitNode,
   FactoryNode,
+  FieldProblem,
   FileText,
   FlowType,
+  FormChoices,
+  FormField,
+  FormSection,
   GraphEdge,
   GraphNode,
   GraphNodeKind,
   IncludeTarget,
+  InputRow,
   LintContext,
   LintRule,
   NodeKey,
   NodeKeyLocal,
   OutputNode,
+  OutputRow,
   PackLints,
   PaletteCategoryId,
   PaletteIcon,
@@ -61,10 +71,15 @@ export type {
   SourceFile,
   SourceLanguage,
   SourceParser,
+  StageChoice,
+  StageRow,
   TakeNode,
   TextEdit,
   TextPatch,
+  TopicRow,
+  TypedProcessForm,
   TypeExpr,
+  UpdateDeclaration,
   WorkflowRef,
   WorkflowTarget,
 } from "@nf-builder/lang-core";
@@ -122,6 +137,7 @@ export {
   type ConnectionTarget,
   connectionTargets,
 } from "./edit/connection-targets";
+export { isIdentifier } from "./edit/names";
 export { applyPatches, PatchError } from "./edit/patches";
 export { planAdd } from "./files/add";
 export {
@@ -143,6 +159,8 @@ export type {
   FileTreeRow,
   ReadOnlyReason,
 } from "./files/types";
+export { formChanged } from "./form/form-diff";
+export { type PopupTarget, popupTarget } from "./form/popup-target";
 export {
   EMPTY_HISTORY,
   type HistoryLimits,
@@ -228,6 +246,7 @@ export type {
   ConfigViewResult,
   ConnectionTargetsRequest,
   ConnectionTargetsResult,
+  DeclarationFormResult,
   DiagnosticsResult,
   EngineApi,
   EngineRefusal,

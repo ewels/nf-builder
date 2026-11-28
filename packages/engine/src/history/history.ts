@@ -1,7 +1,7 @@
 // The undo history of one open project (F-209, AR-23): steps made of one or more accepted commands, an undo and a redo
 // stack, and bounds on both. Pure data and no knowledge of Nextflow; the service decides when to record and apply.
 import type { TextPatch } from "@nf-builder/lang-core";
-import type { CarryHints, RenameHint } from "../layout";
+import type { CarryHints, MoveHint, RenameHint } from "../layout";
 
 export interface HistoryStatus {
   /** The label of the step an undo would take back, or null. */
@@ -33,6 +33,8 @@ export interface StepPart {
   readonly inverse: readonly TextPatch[];
   /** What the command told the layout carry (F-207): the declarations it renamed and the nodes it deleted. */
   readonly renames?: readonly RenameHint[];
+  /** The files or folders it moved (F-303). */
+  readonly moves?: readonly MoveHint[];
   readonly deleted?: readonly string[];
 }
 
@@ -121,10 +123,16 @@ export class History {
     const renames = composeRenames(top.parts.flatMap((p) => p.renames ?? []))
       .reverse()
       .map((r) => ({ path: r.path, from: r.to, to: r.from }));
+    const moves = top.parts
+      .flatMap((p) => p.moves ?? [])
+      .reverse()
+      .map((m) => ({ from: m.to, to: m.from }));
     const only = top.parts.length === 1 ? top.parts[0] : undefined;
-    return only?.deleted?.length
-      ? { renames, inserted: only.deleted }
-      : { renames };
+    return {
+      renames,
+      ...(moves.length > 0 ? { moves } : {}),
+      ...(only?.deleted?.length ? { inserted: only.deleted } : {}),
+    };
   }
 
   /**
@@ -135,8 +143,10 @@ export class History {
   redoHints(): CarryHints {
     const top = this.#redo[this.#redo.length - 1];
     if (!top) return {};
+    const moves = top.parts.flatMap((p) => p.moves ?? []);
     return {
       renames: composeRenames(top.parts.flatMap((p) => p.renames ?? [])),
+      ...(moves.length > 0 ? { moves } : {}),
       deleted: top.parts.flatMap((p) => p.deleted ?? []),
     };
   }

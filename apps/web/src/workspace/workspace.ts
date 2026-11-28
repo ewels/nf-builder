@@ -1,7 +1,7 @@
 // The workspace (F-202): projects in IndexedDB on top of the engine service. It runs in the worker, with no Comlink, so it
 // also runs in Node. One queue serialises everything that opens, changes or removes a project, so the project id a change
 // is saved under is always the project the engine applied it to. `palette`, `project`, `diagnostics`, and
-// `details`, `configView`, `configSchema`, `readFile` and `history` pass straight through; `undo` and `redo` are changes like `apply`, so they are autosaved
+// `details`, `declarationForm`, `configView`, `configSchema`, `readFile` and `history` pass straight through; `undo` and `redo` are changes like `apply`, so they are autosaved
 // (F-209). Nothing here assumes a top-level page (ADR 0044): an unavailable database becomes a status, not a crash.
 import {
   type EngineApi,
@@ -189,6 +189,8 @@ export function createWorkspace(options: WorkspaceOptions): WorkspaceApi {
     project: (path, workflow) => engine.project(path, workflow),
     diagnostics: () => engine.diagnostics(),
     details: (path, workflow, node) => engine.details(path, workflow, node),
+    declarationForm: (path, workflow, node) =>
+      engine.declarationForm(path, workflow, node),
     outline: (path) => engine.outline(path),
     report: () => engine.report(),
     configView: (path) => engine.configView(path),

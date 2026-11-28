@@ -131,6 +131,18 @@ export interface EngineHook {
     version: string;
     scopes: { name: string; kind: string }[];
   }>;
+  /** The Configure form of a process node (F-303): the fields the tests read. */
+  declarationForm(
+    path: string,
+    workflow: string | null,
+    node: string,
+  ): Promise<{
+    revision?: number;
+    target?: { path: string; name: string };
+    form?: { name: string; inputs: unknown[]; outputs: unknown[] };
+    ok?: false;
+    code?: string;
+  }>;
   outline(path: string): Promise<{
     revision?: number;
     items?: { kind: string; name: string; line: number }[];
