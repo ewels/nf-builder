@@ -30,7 +30,7 @@ import {
 } from "../../form/write-rows";
 import type { EditState } from "../apply";
 import { processCalls, remapArguments } from "../call-sites";
-import { replaceNode, variable } from "../nodes";
+import { identifier, replaceNode, variable } from "../nodes";
 import { EditRefusal } from "../refusal";
 import { reprintDeclaration } from "../splice";
 
@@ -459,8 +459,93 @@ export function updateDeclaration(
   );
   return mergePatches([
     { path, edit },
-    ...callSiteEdits(state, command, wanted, process),
+    ...callSiteEdits(
+      state,
+      command,
+      wanted,
+      process,
+      outputRenames(original, wanted),
+    ),
   ]);
+}
+
+/** The outputs renamed in the form, old name to new, when the process has two or more before and after: a sole output is read without its name. */
+function outputRenames(
+  original: TypedProcessForm,
+  form: TypedProcessForm,
+): Map<string, string> {
+  const out = new Map<string, string>();
+  if (original.outputs.length < 2 || form.outputs.length < 2) return out;
+  for (const row of form.outputs) {
+    const before = original.outputs.find(
+      (r) => r.origin !== null && r.origin === row.origin,
+    );
+    if (
+      before &&
+      before.name !== "" &&
+      row.name !== "" &&
+      before.name !== row.name
+    )
+      out.set(before.name, row.name);
+  }
+  return out;
+}
+
+/**
+ * `item` with every read of a renamed output changed: `r.old` where `r = CALL(...)`, and `CALL(...).old`. `item` is the
+ * original top-level item; `current` the copy being edited, whose nodes are shared with it.
+ */
+function renameReads(
+  current: AstNode,
+  calls: readonly MethodCall[],
+  renames: ReadonlyMap<string, string>,
+  item: AstNode,
+): AstNode {
+  const called = new Set<AstNode>(calls);
+  // variables the item assigns a call's result to
+  const holders = new Set<string>();
+  const reads: AstNode[] = [];
+  walk(item, (n) => {
+    const r = n as unknown as Record<string, unknown>;
+    if (
+      (n.kind === "Assignment" && called.has(r.value as AstNode)) ||
+      (n.kind === "VariableDeclaration" && called.has(r.initializer as AstNode))
+    ) {
+      const target =
+        n.kind === "Assignment" ? [r.target] : (r.targets as AstNode[]);
+      for (const t of target as { kind: string; name?: unknown }[]) {
+        const id = t.name as string | { name: string } | undefined;
+        if (typeof id === "string") holders.add(id);
+        else if (id) holders.add(id.name);
+      }
+    }
+    return undefined;
+  });
+  walk(item, (n) => {
+    if (n.kind !== "Property") return undefined;
+    const { object, property } = n as unknown as {
+      object: AstNode & { name?: string };
+      property: { kind: string; name?: string };
+    };
+    if (
+      property.kind === "Identifier" &&
+      renames.has(property.name as string) &&
+      (called.has(object) ||
+        (object.kind === "Variable" && holders.has(object.name as string)))
+    )
+      reads.push(property as unknown as AstNode);
+    return undefined;
+  });
+  let result = current;
+  for (const id of reads)
+    result = replaceNode(
+      result,
+      id,
+      identifier(
+        renames.get((id as unknown as { name: string }).name) as string,
+      ),
+    );
+  return result;
 }
 
 /** One `edit` patch per path, its edits in order. */
@@ -483,13 +568,16 @@ function callSiteEdits(
   command: UpdateDeclaration,
   form: TypedProcessForm,
   process: TypedProcess,
+  outputs: ReadonlyMap<string, string>,
 ): { path: string; edit: TextEdit }[] {
   const origins = inputOrigins(form);
   const before = process.inputs?.items.length ?? 0;
-  if (origins.length === before && origins.every((o, i) => o === i)) return [];
+  const inputsSame =
+    origins.length === before && origins.every((o, i) => o === i);
+  if (inputsSame && outputs.size === 0) return [];
   const sites = processCalls(state.model, command.path, command.name);
   const piped = sites.find((s) => s.call === null);
-  if (piped)
+  if (piped && !inputsSame)
     throw new EditRefusal(
       "invalid",
       `${command.name} is called with a pipe in ${piped.path}; change its inputs in the Code tab. Nothing was changed.`,
@@ -498,6 +586,7 @@ function callSiteEdits(
   const out: { path: string; edit: TextEdit }[] = [];
   const items = new Map<AstNode, { path: string; calls: MethodCall[] }>();
   for (const site of sites) {
+    if (site.call === null) continue;
     const entry = items.get(site.item) ?? { path: site.path, calls: [] };
     entry.calls.push(site.call as MethodCall);
     items.set(site.item, entry);
@@ -507,11 +596,14 @@ function callSiteEdits(
     const removed: AstNode[] = [];
     let updated: AstNode = item;
     for (const call of calls) {
-      const args = remapArguments(call, origins);
-      const kept = new Set<unknown>(args);
-      removed.push(...call.args.filter((a) => !kept.has(a)));
-      updated = replaceNode(updated, call, { ...call, args } as MethodCall);
+      if (!inputsSame) {
+        const args = remapArguments(call, origins);
+        const kept = new Set<unknown>(args);
+        removed.push(...call.args.filter((a) => !kept.has(a)));
+        updated = replaceNode(updated, call, { ...call, args } as MethodCall);
+      }
     }
+    if (outputs.size > 0) updated = renameReads(updated, calls, outputs, item);
     out.push({
       path,
       edit: reprintDeclaration(

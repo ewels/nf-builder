@@ -105,4 +105,62 @@ describe("F-303 call sites", () => {
       run(state, { ...form, description: "Hi." }).patches.map((p) => p.path),
     ).toEqual(["g.nf"]);
   });
+
+  const TWO =
+    "nextflow.enable.types = true\n\nprocess P {\n    input:\n    a: String\n\n    output:\n    first: String = 'x'\n    second: String = 'y'\n\n    script:\n    'x'\n}\n";
+  const MAIN =
+    "nextflow.enable.types = true\n\ninclude { P } from './p.nf'\n\nworkflow {\n    r = P('a')\n    r.first.view()\n    P('b').second.view()\n}\n";
+
+  it("F-303 point 4 LA-33: renaming an output renames its reads at call sites when there are two or more outputs", async () => {
+    const state = await stateFor({ "p.nf": TWO, "main.nf": MAIN });
+    const model = state.model.file("p.nf");
+    const form = processForm(
+      model?.source as ScriptSourceFile,
+      model?.declarations.get("P")?.declaration as TypedProcess,
+      state.catalogue,
+    );
+    const r = accepted(state, {
+      kind: "updateDeclaration",
+      path: "p.nf",
+      name: "P",
+      form: {
+        ...form,
+        outputs: form.outputs.map((o, i) =>
+          i === 0 ? { ...o, name: "one" } : i === 1 ? { ...o, name: "two" } : o,
+        ),
+      },
+    });
+    const text = out(r)["main.nf"];
+    expect(text).toContain("r.one.view()");
+    expect(text).toContain("P('b').two.view()");
+    commit(state, r);
+    expect(state.model.diagnostics()).toEqual([]);
+  });
+
+  it("F-303 point 4: a single output is read without its name, so renaming it leaves calls alone", async () => {
+    const one = TWO.replace("    second: String = 'y'\n", "");
+    const state = await stateFor({
+      "p.nf": one,
+      "main.nf": MAIN.replace("    P('b').second.view()\n", "").replace(
+        "r.first.view()",
+        "r.view()",
+      ),
+    });
+    const model = state.model.file("p.nf");
+    const form = processForm(
+      model?.source as ScriptSourceFile,
+      model?.declarations.get("P")?.declaration as TypedProcess,
+      state.catalogue,
+    );
+    const r = accepted(state, {
+      kind: "updateDeclaration",
+      path: "p.nf",
+      name: "P",
+      form: {
+        ...form,
+        outputs: form.outputs.map((o) => ({ ...o, name: "renamed" })),
+      },
+    });
+    expect(out(r)["main.nf"]).toBeUndefined();
+  });
 });
