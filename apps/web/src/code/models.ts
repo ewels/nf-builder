@@ -1,6 +1,7 @@
 // One Monaco model per path for the session (F-208), shared by the Split and Code views.
 import { canvasStore } from "../canvas/canvas-store";
-import { monaco, NEXTFLOW_LANGUAGE_ID } from "./monaco";
+import { editorLanguageOf } from "../files/file-kinds";
+import { monaco } from "./monaco";
 
 interface FileModel {
   readonly model: monaco.editor.ITextModel;
@@ -23,7 +24,7 @@ export function modelFor(path: string, text: string): FileModel {
   const made: FileModel = {
     model: monaco.editor.createModel(
       text,
-      NEXTFLOW_LANGUAGE_ID,
+      editorLanguageOf(path),
       monaco.Uri.from({ scheme: "nf-builder", path: `/${path}` }),
     ),
     synced: { text },

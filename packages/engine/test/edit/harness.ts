@@ -124,7 +124,8 @@ export function buildCommand(state: EditState, c: Choice): EditCommand | null {
     return null;
   };
   switch (kind) {
-    case "createProcess": {
+    case "createProcess":
+    case "createWorkflow": {
       const caller = pick(scripts, c.a);
       return caller ? { kind, name: c.name, caller } : null;
     }
@@ -443,7 +444,8 @@ function checkAccepted(
       }
       break;
     }
-    case "createProcess": {
+    case "createProcess":
+    case "createWorkflow": {
       const patch = patches.find((p) => p.path === command.caller);
       const before = state.model.file(command.caller)
         ?.source as ScriptSourceFile;

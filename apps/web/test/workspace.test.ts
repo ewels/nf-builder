@@ -117,6 +117,22 @@ describe("F-202 workspace", () => {
     expect(await b.workspace.readFile("README.md")).toBe("two\n");
   });
 
+  it("F-605 FI-31: the workspace passes outline straight through and saves nothing", async () => {
+    const s = setup();
+    await s.watching;
+    const meta = await s.workspace.createProject({
+      name: "P",
+      languageVersion: version,
+      files: [{ path: "lib.nf", text: "def f(x) {\n    x\n}\n" }],
+    });
+    await s.workspace.openProject(meta.id);
+    const savedBefore = s.saves.length;
+    const result = await s.workspace.outline("lib.nf");
+    expect(result).toMatchObject({ items: [{ kind: "function", name: "f" }] });
+    expect(await s.workspace.flush()).toMatchObject({ status: "saved" });
+    expect(s.saves).toHaveLength(savedBefore);
+  });
+
   it("F-203 UX-20: every status has a higher seq than the one before, and openProject returns the seq of the status that made the project current", async () => {
     const s = setup();
     await s.watching;

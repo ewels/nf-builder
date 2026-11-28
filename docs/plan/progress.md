@@ -724,4 +724,36 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - UX-14 updated.
   - F-502's e2e locator reads `data-name` and expects nf-core first; the names and counts it asserts are unchanged. F-502's interim-list unit test replaced, as F-502's note asked.
   - App-shell `@visual` baseline re-approved from CI (ADR 0021).
+## 2026-11-28 · F-605 · Claude (autonomous)
+- Did:
+  - Markdown files (`.md`, `.markdown`) open in a file tab in Preview, with Split and Code. The preview is GitHub-flavoured Markdown, raw HTML included, sanitised and built in a lazy chunk that never loads Monaco; it follows Split edits and undo, and project links open files through the new `canvasStore.openPath`.
+  - Render pipeline: marked, then a raw-HTML pre-filter that drops `on*` attributes and `<base>` from raw-HTML tokens only (to keep Chromium's CSP report log quiet; DOMPurify stays the sanitiser), then a parse into an inert `<template>` document with `createContextualFragment` (no `DOMParser`, which made Chromium report CSP violations under the page's policy), then DOMPurify with `IN_PLACE`, then the link, image and input rewrites, then import into the page. Images are `data:` only, other images become placeholders; links with backslashes are inert; `id` and `name` are prefixed `user-content-`.
+  - Other text files open in Monaco with the language from their extension (13 extra Shiki grammars in one lazy chunk); HTML, SVG and unknown files open as plain text.
+  - `.nf` files with no workflow open in Code with a "Declarations" outline in the details pane from the new `EngineApi.outline`; rows reveal the declaration.
+  - Read-only below 1024 px: a Markdown tab shows the sanitised preview only; other files keep the note; outline rows are plain text.
+  - Tests: `e2e/markdown.spec.ts` (step 1 tagged `@smoke`), unit tests in `apps/web/test/` and `packages/engine/test/`, oracle case `f605-library`. F-210's end-to-end test now expects README in Preview.
+- State: passing once CI is green with the approved baseline.
+- Next: F-301, F-601, then F-404, F-405, F-505.
+- Decisions:
+  - [ADR 0059](../adr/0059-markdown-and-text-files.md): marked 18.2.1 and DOMPurify 3.4.18 pinned as runtime dependencies of `@nf-builder/web`, jsdom 31.0.1 as a web dev dependency (licence rows added); the render pipeline, with DOMPurify `IN_PLACE` instead of the plan's `RETURN_DOM_FRAGMENT` (3.4.18 hardens `IN_PLACE`, and `RETURN_DOM_FRAGMENT` re-parses through `DOMParser`); the sanitising, link and image rules; the IO-41 reading of user links; AR-30 extended to the preview; Preview, Split and Code with positional G, S and C; the language set; `EngineApi.outline` (amends ADR 0043's API list); the read-only preview (amends ADR 0056).
+  - FI-30, FI-31, FI-32, UX-04, UX-27, AR-30 and the architecture data flow updated.
+  - `scope-change`: F-605's step 2 ("A .png in the project is listed but not opened") moved to the deferred M8 feature F-407 "Binary files in projects", since v0.1 projects hold text files only (ADR 0045).
+  - `markdown-preview` baseline approved from CI (ADR 0021).
+- Blockers: none.
+
+## 2026-11-28 · F-301 · Claude (autonomous)
+- Did:
+  - Palette rows are native buttons: tabbable while their category is open, described to keyboard users by a hidden span, draggable when they can be added. Dropping Process or Workflow on the canvas, or pressing Enter or Space on it, creates `modules/local/new_process/main.nf` or `subworkflows/local/new_workflow/main.nf`, includes it and calls it in the open workflow, as one undo step. The new node is selected, the Files view reveals the file, focus stays on the palette item, and a polite live region in the palette announces the result (repeated messages are announced again).
+  - Engine: a `CreateWorkflow` command sharing `createDefinition` with `CreateProcess`; `Scaffold.workflow` in the 26.10 pack; `paletteAction`; `EngineApi.freshName` (`NEW_PROCESS`, `NEW_WORKFLOW`, then `_2`, …); `undo(revision, { discard: true })`, which leaves no redo step.
+  - Canvas store: `addFromPalette` runs the fresh name, the create and `AddCall` as one queued task under one group; a refused or throwing `AddCall` rolls the create back with `discard`, so nothing changes. The node's centre lands on the drop point or the viewport centre, set in the same update as the projection and saved with `setLayout`, so ELK never places it; an `addsPending` counter keeps the viewport for every view while an add is pending. Adds are refused in read-only (F-703), on a file tab and with no project.
+  - Drag data uses the custom MIME type `application/x-nf-builder-palette`; F-210's drop guard still acts on `Files` drags only.
+  - Tests: `e2e/palette-add.spec.ts`; unit tests in `packages/engine`, `packages/lang-2610` and `apps/web`; oracle case `f301-palette-adds` (lint clean, `run -stub`), matched byte for byte by the e2e test and the engine golden from `template-blank`.
+- State: passing once CI is green.
+- Next: F-601, F-404, then F-302, F-303, F-307.
+- Decisions:
+  - [ADR 0060](../adr/0060-palette-adds.md): `CreateWorkflow` and `Scaffold.workflow` (amend ADR 0039 and AR-21), with the scaffold `nextflow.enable.types = true\n\nworkflow NAME {\n}\n` taken from the blank template's precedent and proved by oracle case `f301-palette-adds`, since the typed-workflow docs don't show it verbatim; `EngineApi.freshName` and `undo`'s `discard` option (amend ADR 0043's API); the discarding rollback of a half add (amends ADR 0051's history rules); the viewport kept for every view while an add is pending (amends ADR 0052's viewport rule); default names `NEW_PROCESS` and `NEW_WORKFLOW`; placement by node centre; Process and Workflow only, other items focusable and `aria-disabled`; the custom MIME type; the live region instead of a second `role="status"`.
+  - UX-15 and AR-21 updated.
+  - Step 3's "exported result" read as the project's files, checked against the oracle case; F-404 repeats it on a zip.
+  - `scope-change`: F-314 "Add the remaining palette items" (factories, records, enums, functions, includes, params, output, Exec process, Agent, Include pipeline) added to M3, depending on F-301. The F-111 alias note moved to F-310 and F-504.
+  - No visual baseline changed.
 - Blockers: none.

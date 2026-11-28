@@ -1,23 +1,41 @@
-// View modes of a workflow tab (F-208, UX-27, UX-70): the graph, the graph beside the file's code, or the code alone.
-export type ViewMode = "graph" | "split" | "code";
+import { fileEditorOf } from "../files/file-kinds";
 
-export const VIEW_MODES: readonly {
+// View modes of a tab (F-208, F-605, UX-27, UX-70): the visual pane (graph or preview), both beside the code, or the code alone.
+export type ViewMode = "graph" | "preview" | "split" | "code";
+
+export interface ModeOption {
   readonly mode: ViewMode;
   readonly label: string;
   readonly key: "g" | "s" | "c";
-}[] = [
+}
+
+export const VIEW_MODES: readonly ModeOption[] = [
   { mode: "graph", label: "Graph", key: "g" },
   { mode: "split", label: "Split", key: "s" },
   { mode: "code", label: "Code", key: "c" },
 ];
 
-/** A mode's label on a tab: a config tab shows its form where a workflow tab shows the graph (F-601, UX-27). */
-export function modeLabel(
+export const MARKDOWN_MODES: readonly ModeOption[] = [
+  { mode: "preview", label: "Preview", key: "g" },
+  { mode: "split", label: "Split", key: "s" },
+  { mode: "code", label: "Code", key: "c" },
+];
+
+/** A config tab shows its form where a workflow tab shows the graph (F-601, UX-27). */
+export const CONFIG_MODES: readonly ModeOption[] = [
+  { mode: "graph", label: "Form", key: "g" },
+  { mode: "split", label: "Split", key: "s" },
+  { mode: "code", label: "Code", key: "c" },
+];
+
+/** The modes a tab offers (UX-27): Graph, Split, Code for a workflow; Form, Split, Code for a config; Preview, Split, Code for Markdown; none for other files, which show code only. */
+export function modesFor(
   kind: "workflow" | "file" | "config",
-  mode: ViewMode,
-): string {
-  if (kind === "config" && mode === "graph") return "Form";
-  return VIEW_MODES.find((m) => m.mode === mode)?.label ?? mode;
+  path: string,
+): readonly ModeOption[] {
+  if (kind === "workflow") return VIEW_MODES;
+  if (kind === "config") return CONFIG_MODES;
+  return fileEditorOf(path) === "markdown" ? MARKDOWN_MODES : [];
 }
 
 /** The mode a tab shows: Graph only while the app is read-only, with the tab's own mode kept for when it widens (F-703, UX-04). */
@@ -67,9 +85,12 @@ export function ignoredByShortcuts(e: ViewModeKey): boolean {
   );
 }
 
-/** The mode a key press switches to (UX-70), or null when the press is not a plain G, S or C outside text entry. */
-export function viewModeForKey(e: ViewModeKey): ViewMode | null {
+/** The mode a key press switches to (UX-70), or null when the press is not a plain G, S or C outside text entry. The keys are positional: G, S and C pick the first, second and third of `modes`. */
+export function viewModeForKey(
+  e: ViewModeKey,
+  modes: readonly ModeOption[] = VIEW_MODES,
+): ViewMode | null {
   if (e.ctrlKey || e.metaKey || e.altKey || ignoredByShortcuts(e)) return null;
   const key = e.key.toLowerCase();
-  return VIEW_MODES.find((m) => m.key === key)?.mode ?? null;
+  return modes.find((m) => m.key === key)?.mode ?? null;
 }

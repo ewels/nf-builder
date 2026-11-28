@@ -70,6 +70,10 @@ const samples: Record<EditCommand["kind"], [EditCommand, string]> = {
     { kind: "createFile", path: "notes/a.txt" },
     "Create notes/a.txt",
   ],
+  createWorkflow: [
+    { kind: "createWorkflow", name: "ALIGN", caller: "main.nf" },
+    "Create workflow ALIGN",
+  ],
 };
 
 const context = (

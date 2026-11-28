@@ -15,6 +15,7 @@ export type {
   ConfigValueKind,
   Connect,
   CreateProcess,
+  CreateWorkflow,
   Dataflow,
   DeleteNode,
   Diagnostic,
@@ -84,6 +85,7 @@ export type {
   NodeDetails,
   NodeView,
   OperatorDetail,
+  OutlineItem,
   PortConnection,
   PortDetail,
   Preview,
@@ -154,6 +156,7 @@ export {
 } from "./model/project";
 export { installedPackVersions } from "./packs";
 export { loadPalette } from "./palette";
+export { type PaletteAction, paletteAction } from "./palette-actions";
 export { paletteItemCount, queryTerms, searchPalette } from "./palette-search";
 export {
   nodeAtRange,
@@ -202,11 +205,13 @@ export type {
   EngineRefusal,
   EngineRefusalCode,
   FileSummary,
+  FreshName,
   HistoryOutcome,
   LoadPhase,
   LoadProgress,
   NodeDetailsResult,
   OpenRequest,
+  OutlineResult,
   ProjectChange,
   ProjectFiles,
   ProjectionResult,

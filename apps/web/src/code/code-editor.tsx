@@ -2,10 +2,11 @@ import type { JSX } from "react";
 import { useEffect, useRef, useState } from "react";
 import { canvasStore } from "../canvas/canvas-store";
 import { getEngine } from "../engine/engine-client";
+import { editorLanguageOf } from "../files/file-kinds";
+import { NEXTFLOW_THEME, registerLanguage } from "./languages";
 import { problemsToMarkers } from "./markers";
 import { modelFor } from "./models";
 import { monaco } from "./monaco";
-import { NEXTFLOW_THEME, registerNextflow } from "./nextflow-language";
 import { createTextSync, type PaneSyncState, withoutText } from "./text-sync";
 
 const MARKER_OWNER = "nf-builder-refusal";
@@ -70,13 +71,14 @@ export default function CodeEditor({
   report.current = onSync;
   useEffect(() => {
     let cancelled = false;
+    const language = editorLanguageOf(path);
     // the project this editor belongs to: its text is never sent to another (ADR 0004, IO-01)
     const session = canvasStore.getState().session;
     const cleanup: (() => void)[] = [];
     (async () => {
       const [text] = await Promise.all([
         getEngine().readFile(path),
-        registerNextflow(),
+        registerLanguage(language),
       ]);
       if (cancelled || host.current === null) return;
       if (canvasStore.getState().session !== session) return;
@@ -113,8 +115,11 @@ export default function CodeEditor({
       const reduced = window.matchMedia(
         "(prefers-reduced-motion: reduce)",
       ).matches;
+      host.current.dataset.language = language;
       const editor = monaco.editor.create(host.current, {
         model,
+        wordWrap:
+          language === "markdown" || language === "plaintext" ? "on" : "off",
         theme: NEXTFLOW_THEME,
         automaticLayout: true,
         fixedOverflowWidgets: true,

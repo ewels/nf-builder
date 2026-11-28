@@ -158,11 +158,13 @@ export function createWorkspace(options: WorkspaceOptions): WorkspaceApi {
     project: (path, workflow) => engine.project(path, workflow),
     diagnostics: () => engine.diagnostics(),
     details: (path, workflow, node) => engine.details(path, workflow, node),
+    outline: (path) => engine.outline(path),
     report: () => engine.report(),
     configView: (path) => engine.configView(path),
     configSchema: (version) => engine.configSchema(version),
     readFile: (path) => engine.readFile(path),
     listFiles: () => engine.listFiles(),
+    freshName: (request) => engine.freshName(request),
     history: () => engine.history(),
 
     open: (request, onProgress) =>

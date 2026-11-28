@@ -15,7 +15,8 @@ import type {
   WorkflowRef,
 } from "@nf-builder/lang-core";
 import type { ConfigSchema, ConfigView } from "../config/types";
-import type { NodeDetails } from "../details/types";
+import type { NodeDetails, OutlineItem } from "../details/types";
+import type { FreshNameRequest } from "../edit/fresh-name";
 import type { ProjectFiles } from "../files/types";
 import type { HistoryStatus } from "../history/history";
 import type {
@@ -96,6 +97,13 @@ export interface Applied extends ProjectChange {
   readonly inverse: readonly TextPatch[];
 }
 
+/** A default name for a new definition and the file it would be written to (F-301). */
+export interface FreshName {
+  readonly revision: number;
+  readonly name: string;
+  readonly path: string;
+}
+
 export type ApplyOutcome = Applied | EngineRefusal;
 
 /** How `apply` records a command in the undo history (F-209). */
@@ -104,6 +112,12 @@ export interface ApplyOptions {
   readonly group?: string;
   /** The step's label; the first command of a group sets it. Defaults to the command's own label. */
   readonly label?: string;
+}
+
+/** How `undo` treats the step it takes back. */
+export interface UndoOptions {
+  /** Leave no redo step: for a rollback of a step that should never come back (F-301). */
+  readonly discard?: boolean;
 }
 
 /** A successful undo or redo: the change it made and the label of the step it moved. */
@@ -139,6 +153,12 @@ export interface ConfigViewResult {
   readonly view: ConfigView | null;
 }
 
+export interface OutlineResult {
+  readonly revision: number;
+  /** The declarations of a Nextflow file; empty for any other file (F-605, FI-31). */
+  readonly items: readonly OutlineItem[];
+}
+
 export interface EngineApi {
   palette(version: string): Promise<PaletteView>;
   /** The pack's project templates for a version, without file text (F-203). Needs no open project. */
@@ -166,7 +186,7 @@ export interface EngineApi {
     options?: ApplyOptions,
   ): Promise<ApplyOutcome>;
   /** Undoes the newest step; `revision` must be current. Advances the revision by one (F-209, AR-23). */
-  undo(revision: number): Promise<HistoryOutcome>;
+  undo(revision: number, options?: UndoOptions): Promise<HistoryOutcome>;
   /** Re-applies the newest undone step; `revision` must be current. */
   redo(revision: number): Promise<HistoryOutcome>;
   /** The undo history of the open project; empty with no project. */
@@ -193,6 +213,8 @@ export interface EngineApi {
   configView(path: string): Promise<ConfigViewResult | EngineRefusal>;
   /** The config catalogue as a clone-safe tree, for descriptions and Add scope (F-601). Needs no open project; rejects for an unknown version. */
   configSchema(version: string): Promise<ConfigSchema>;
+  /** The declarations of one file, for the details pane of a file tab (F-605, FI-31, amends ADR 0043's API list). */
+  outline(path: string): Promise<OutlineResult | EngineRefusal>;
   /**
    * The only writer of `.nf-builder/layout.json` (F-207). Merges or replaces one workflow's positions and returns the
    * sidecar's new text in `files` (empty when nothing changed or the file is newer than this build). It doesn't advance
@@ -201,6 +223,8 @@ export interface EngineApi {
   setLayout(write: LayoutWrite): Promise<LayoutChange | EngineRefusal>;
   /** Every file with its parse status, and the registry module folders, for the Files view (UX-16, F-210). */
   listFiles(): Promise<ProjectFiles | EngineRefusal>;
+  /** A name for a new process or workflow added from the palette, free in `caller`'s scope and directory (F-301). */
+  freshName(request: FreshNameRequest): Promise<FreshName | EngineRefusal>;
   /** The current text of a file, or null with no project or no such file. */
   readFile(path: string): Promise<string | null>;
   /** Drops the open project; later calls answer `no-project` until the next `open`. The revision counter keeps counting. */

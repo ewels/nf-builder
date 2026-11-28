@@ -25,7 +25,7 @@ export function connectEngine(
       race(remote.apply(command, revision, options)),
     applyFix: (fix, revision, options) =>
       race(remote.applyFix(fix, revision, options)),
-    undo: (revision) => race(remote.undo(revision)),
+    undo: (revision, options) => race(remote.undo(revision, options)),
     redo: (revision) => race(remote.redo(revision)),
     history: () => race(remote.history()),
     applyPatches: (patches, revision) =>
@@ -34,12 +34,14 @@ export function connectEngine(
     diagnostics: () => race(remote.diagnostics()),
     details: (path, workflow, node) =>
       race(remote.details(path, workflow, node)),
+    outline: (path) => race(remote.outline(path)),
     report: () => race(remote.report()),
     configView: (path) => race(remote.configView(path)),
     configSchema: (version) => race(remote.configSchema(version)),
     setLayout: (write) => race(remote.setLayout(write)),
     readFile: (path) => race(remote.readFile(path)),
     listFiles: () => race(remote.listFiles()),
+    freshName: (request) => race(remote.freshName(request)),
     close: () => race(remote.close()),
     watch: (listener) => race(remote.watch(proxy(listener))),
     stageZip: (file, name) => race(remote.stageZip(file, name)),
@@ -101,7 +103,8 @@ function withChangeEvents<E extends WorkspaceApi>(api: E): E {
       announced(await api.apply(command, revision, options)),
     applyFix: async (fix, revision, options) =>
       announced(await api.applyFix(fix, revision, options)),
-    undo: async (revision) => announced(await api.undo(revision)),
+    undo: async (revision, options) =>
+      announced(await api.undo(revision, options)),
     redo: async (revision) => announced(await api.redo(revision)),
     applyPatches: async (patches, revision) =>
       announced(await api.applyPatches(patches, revision)),

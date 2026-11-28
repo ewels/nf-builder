@@ -101,7 +101,7 @@ export const NON_FETCHED_URLS: readonly NonFetchedUrl[] = [
     match: "exact",
     url: "https://github.com/markedjs/marked.",
     reason:
-      "Text in a marked error message inside Monaco (F-208); never fetched",
+      "Text in a marked error message, inside Monaco (F-208) and in our own copy of marked (F-605); never fetched",
   },
   {
     match: "exact",

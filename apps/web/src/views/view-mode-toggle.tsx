@@ -1,20 +1,19 @@
 import type { JSX, KeyboardEvent } from "react";
-import { modeLabel, VIEW_MODES, type ViewMode } from "./view-mode";
+import type { ModeOption, ViewMode } from "./view-mode";
 
-/** The Graph, Split and Code switch of a tab (UX-27): a radio group with roving focus and arrow keys. */
+/** The mode switch of a tab (UX-27): Graph or Preview, Split and Code; a radio group with roving focus and arrow keys. */
 export function ViewModeToggle({
+  modes,
   mode,
-  labels = "workflow",
   onChange,
 }: {
+  readonly modes: readonly ModeOption[];
   readonly mode: ViewMode;
-  /** Whose labels to show: a config tab reads Form, Split and Code (F-601). */
-  readonly labels?: "workflow" | "config";
   readonly onChange: (mode: ViewMode) => void;
 }): JSX.Element {
   const move = (event: KeyboardEvent<HTMLDivElement>) => {
-    const index = VIEW_MODES.findIndex((m) => m.mode === mode);
-    const last = VIEW_MODES.length - 1;
+    const index = modes.findIndex((m) => m.mode === mode);
+    const last = modes.length - 1;
     const targets: Record<string, number> = {
       ArrowRight: index === last ? 0 : index + 1,
       ArrowDown: index === last ? 0 : index + 1,
@@ -23,7 +22,7 @@ export function ViewModeToggle({
       Home: 0,
       End: last,
     };
-    const target = VIEW_MODES[targets[event.key] ?? -1];
+    const target = modes[targets[event.key] ?? -1];
     if (!target) return;
     event.preventDefault();
     onChange(target.mode);
@@ -36,7 +35,7 @@ export function ViewModeToggle({
       className="view-mode-toggle"
       onKeyDown={move}
     >
-      {VIEW_MODES.map((m) => (
+      {modes.map((m) => (
         // biome-ignore lint/a11y/useSemanticElements: a segmented control; a native radio can't be styled as a button (UX-27)
         <button
           key={m.mode}
@@ -46,11 +45,11 @@ export function ViewModeToggle({
           className="view-mode-option"
           aria-checked={mode === m.mode}
           aria-keyshortcuts={m.key.toUpperCase()}
-          title={`${modeLabel(labels, m.mode)} (${m.key.toUpperCase()})`}
+          title={`${m.label} (${m.key.toUpperCase()})`}
           tabIndex={mode === m.mode ? 0 : -1}
           onClick={() => onChange(m.mode)}
         >
-          {modeLabel(labels, m.mode)}
+          {m.label}
         </button>
       ))}
     </div>

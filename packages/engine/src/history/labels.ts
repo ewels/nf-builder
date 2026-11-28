@@ -14,6 +14,8 @@ export function commandLabel(command: EditCommand): string {
   switch (command.kind) {
     case "createProcess":
       return `Create process ${command.name}`;
+    case "createWorkflow":
+      return `Create workflow ${command.name}`;
     case "addCall":
       return `Add call to ${command.callee}`;
     case "connect":

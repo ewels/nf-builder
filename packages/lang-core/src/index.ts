@@ -70,6 +70,7 @@ export {
   type Connect,
   type CreateFile,
   type CreateProcess,
+  type CreateWorkflow,
   type DeleteNode,
   type Disconnect,
   type DurationUnitName,

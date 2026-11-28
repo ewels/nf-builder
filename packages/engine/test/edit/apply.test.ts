@@ -59,6 +59,7 @@ const commands: Record<EditCommand["kind"], EditCommand> = {
     id: "nf-schema@2.5.1",
   },
   createFile: { kind: "createFile", path: "notes.txt" },
+  createWorkflow: { kind: "createWorkflow", name: "SUB", caller: "main.nf" },
 };
 
 describe("F-111 applyCommand", () => {

@@ -26,8 +26,8 @@ import {
   setConfigOption,
 } from "./commands/config";
 import { connect, disconnect } from "./commands/connect";
+import { createProcess, createWorkflow } from "./commands/create-definition";
 import { createFile } from "./commands/create-file";
-import { createProcess } from "./commands/create-process";
 import { deleteNode } from "./commands/delete-node";
 import { renameDeclaration } from "./commands/rename";
 import { replaceFileText } from "./commands/replace-file-text";
@@ -67,6 +67,8 @@ const build = (state: EditState, command: EditCommand): TextPatch[] => {
   switch (command.kind) {
     case "createProcess":
       return createProcess(state, command);
+    case "createWorkflow":
+      return createWorkflow(state, command);
     case "addCall":
       return addCall(state, command);
     case "replaceFileText":

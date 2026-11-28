@@ -6,7 +6,7 @@ import {
 } from "../canvas/canvas-store";
 import { HistoryControls } from "../history/history-controls";
 import { useReadOnly } from "../read-only/read-only-store";
-import type { ViewMode } from "../views/view-mode";
+import { modesFor, type ViewMode } from "../views/view-mode";
 import { ViewModeToggle } from "../views/view-mode-toggle";
 import { GlyphIcon } from "./icons";
 
@@ -36,6 +36,7 @@ export function TabStripView({
   readonly readOnly?: boolean;
 }): JSX.Element {
   const active = tabs.find((t) => t.id === activeTab);
+  const modes = active === undefined ? [] : modesFor(active.kind, active.path);
   const move = (event: KeyboardEvent<HTMLDivElement>) => {
     if (event.key === "Delete") {
       const id = (event.target as HTMLElement).id;
@@ -106,10 +107,10 @@ export function TabStripView({
         </div>
       )}
       {controls}
-      {readOnly || active === undefined || active.kind === "file" ? null : (
+      {readOnly || active === undefined || modes.length === 0 ? null : (
         <ViewModeToggle
+          modes={modes}
           mode={active.mode}
-          labels={active.kind}
           onChange={(mode) => onMode(active.id, mode)}
         />
       )}

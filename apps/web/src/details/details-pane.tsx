@@ -14,6 +14,7 @@ import {
 import { ConfigDetails } from "../config/config-details";
 import { problemsStore } from "../problems/problems-store";
 import "./details.css";
+import { FileDetails } from "./file-details";
 import { NodeDetailsView } from "./node-details";
 import { WorkflowSummaryView } from "./workflow-summary";
 
@@ -77,7 +78,9 @@ export function DetailsPane(): JSX.Element {
       : undefined,
   );
   const openFile = useWorkspace((s) => s.openFile);
+  const file = useWorkspace((s) => s.tabs.find((t) => t.id === s.activeTab));
   if (configPath !== null) return <ConfigDetails path={configPath} />;
+  if (file?.kind === "file") return <FileDetails path={file.path} />;
   return (
     <DetailsBody
       content={content}

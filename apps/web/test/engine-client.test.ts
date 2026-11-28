@@ -110,6 +110,29 @@ describe("F-113 engine client", () => {
     close();
   });
 
+  it("F-605 FI-31: the facade forwards outline across the bridge and announces no change", async () => {
+    const { engine, close } = connected();
+    const statuses: WorkspaceStatus[] = [];
+    await engine.watch((s) => void statuses.push(s));
+    expect(await engine.outline("main.nf")).toMatchObject({
+      code: "no-project",
+    });
+    await engine.open({
+      version,
+      files: [{ path: "lib.nf", text: "def f(x) {\n    x\n}\n" }],
+    });
+    await new Promise((r) => setTimeout(r, 50));
+    const before = statuses.length;
+    const result = await engine.outline("lib.nf");
+    expect(result).toMatchObject({ items: [{ kind: "function", name: "f" }] });
+    expect(await engine.outline("nope.nf")).toMatchObject({
+      code: "not-found",
+    });
+    await new Promise((r) => setTimeout(r, 50));
+    expect(statuses).toHaveLength(before);
+    close();
+  });
+
   it("F-202 ADR-0003: watch receives status pushes across Comlink; a second watch releases the first listener", async () => {
     const { engine, close } = connected();
     const first: WorkspaceStatus[] = [];

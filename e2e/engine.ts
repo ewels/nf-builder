@@ -97,6 +97,11 @@ export interface EngineHook {
     version: string;
     scopes: { name: string; kind: string }[];
   }>;
+  outline(path: string): Promise<{
+    revision?: number;
+    items?: { kind: string; name: string; line: number }[];
+    code?: string;
+  }>;
   /** The import report of the open project (F-401): the fields the tests read. */
   report(): Promise<{
     files?: number;
