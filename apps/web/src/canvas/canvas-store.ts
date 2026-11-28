@@ -6,6 +6,7 @@ import {
   type ApplyOutcome,
   type ConnectionTarget,
   canvasView,
+  defaultWorkflowRef,
   type EditCommand,
   EMPTY_HISTORY,
   type EngineApi,
@@ -327,15 +328,18 @@ export type PluginAddOutcome =
   | { readonly ok: true; readonly id: string; readonly version: string }
   | { readonly ok: false; readonly message: string };
 
-/** The workflow a project opens with: main.nf's entry, else the first entry workflow, else the first named one. */
-export function defaultWorkflow(
+/**
+ * Whether a tab can be closed: a file or config tab always; a workflow tab unless it is the project's default workflow,
+ * the one the project opens with (the engine's `defaultWorkflowRef`).
+ */
+export function closesTab(
+  tab: WorkflowTab,
   workflows: readonly WorkflowRef[],
-): WorkflowRef | null {
+): boolean {
+  if (isFileLike(tab)) return true;
+  const home = defaultWorkflowRef(workflows);
   return (
-    workflows.find((w) => w.name === null && w.path === "main.nf") ??
-    workflows.find((w) => w.name === null) ??
-    workflows[0] ??
-    null
+    home !== null && !(tab.path === home.path && tab.workflow === home.name)
   );
 }
 
@@ -1075,7 +1079,7 @@ export function createCanvasStore(
         pendingMove = null;
         pendingPlacement = null;
         clearSelection();
-        const first = defaultWorkflow(summary.workflows);
+        const first = defaultWorkflowRef(summary.workflows);
         const tab = first === null ? null : tabFor(first);
         set({
           source,
@@ -1210,7 +1214,7 @@ export function createCanvasStore(
           if (selected !== null) await loadDetails(selected);
           return;
         }
-        const first = defaultWorkflow(change.workflows);
+        const first = defaultWorkflowRef(change.workflows);
         if (first === null) return;
         const tab = tabFor(first);
         set({ tabs: [tab] });
@@ -1257,7 +1261,7 @@ export function createCanvasStore(
       async openFile(path) {
         const { summary } = get();
         if (summary === null) return;
-        const workflow = defaultWorkflow(
+        const workflow = defaultWorkflowRef(
           summary.workflows.filter((w) => w.path === path),
         );
         const language = languageOf(path);
@@ -1297,13 +1301,7 @@ export function createCanvasStore(
         const at = tabs.findIndex((t) => t.id === id);
         const tab = tabs[at];
         if (tab === undefined) return;
-        const home = defaultWorkflow(summary?.workflows ?? []);
-        if (
-          !isFileLike(tab) &&
-          (home === null ||
-            (tab.path === home.path && tab.workflow === home.name))
-        )
-          return;
+        if (!closesTab(tab, summary?.workflows ?? [])) return;
         const rest = tabs.filter((t) => t.id !== id);
         set({ tabs: rest });
         if (activeTab !== id) return;

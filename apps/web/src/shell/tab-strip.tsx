@@ -1,7 +1,7 @@
 import type { JSX, KeyboardEvent, ReactNode } from "react";
 import {
   canvasStore,
-  defaultWorkflow,
+  closesTab,
   useWorkspace,
   type WorkflowTab,
 } from "../canvas/canvas-store";
@@ -130,14 +130,11 @@ export function TabStrip(): JSX.Element {
   const closeTab = useWorkspace((s) => s.closeTab);
   const summary = useWorkspace((s) => s.summary);
   const readOnly = useReadOnly();
-  const home = defaultWorkflow(summary?.workflows ?? []);
+  const workflows = summary?.workflows ?? [];
   return (
     <TabStripView
       tabs={tabs}
-      closable={(t) =>
-        t.kind !== "workflow" ||
-        (home !== null && !(t.path === home.path && t.workflow === home.name))
-      }
+      closable={(t) => closesTab(t, workflows)}
       activeTab={activeTab}
       controls={readOnly ? null : <HistoryControls />}
       readOnly={readOnly}

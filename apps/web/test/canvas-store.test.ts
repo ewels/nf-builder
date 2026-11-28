@@ -1,5 +1,6 @@
 import {
   canvasView,
+  defaultWorkflowRef,
   EMPTY_HISTORY,
   type EngineApi,
   type EngineRefusal,
@@ -12,8 +13,10 @@ import {
 } from "@nf-builder/engine";
 import { describe, expect, it } from "vitest";
 import {
+  closesTab,
+  configTabFor,
   createCanvasStore,
-  defaultWorkflow,
+  fileTabFor,
   tabFor,
 } from "../src/canvas/canvas-store";
 
@@ -154,12 +157,22 @@ describe("F-205 canvas store", () => {
 
   it("F-205 UX-20: the default tab falls back to another entry workflow, then the first named one; none gives no tab", () => {
     expect(
-      defaultWorkflow([ref("a.nf", "A"), ref("sub/x.nf", null)])?.path,
+      defaultWorkflowRef([ref("a.nf", "A"), ref("sub/x.nf", null)])?.path,
     ).toBe("sub/x.nf");
-    expect(defaultWorkflow([ref("a.nf", "A"), ref("b.nf", "B")])?.name).toBe(
+    expect(defaultWorkflowRef([ref("a.nf", "A"), ref("b.nf", "B")])?.name).toBe(
       "A",
     );
-    expect(defaultWorkflow([])).toBeNull();
+    expect(defaultWorkflowRef([])).toBeNull();
+  });
+
+  it("F-307 F-210 UX-50: closesTab lets file and config tabs close, and a workflow tab unless it is the default workflow's", () => {
+    const workflows = [ref("main.nf", null), ref("a.nf", "A")];
+    const tab = (path: string, name: string | null) => tabFor({ path, name });
+    expect(closesTab(tab("main.nf", null), workflows)).toBe(false);
+    expect(closesTab(tab("a.nf", "A"), workflows)).toBe(true);
+    expect(closesTab(tab("main.nf", null), [])).toBe(false);
+    expect(closesTab(fileTabFor("a.txt"), workflows)).toBe(true);
+    expect(closesTab(configTabFor("nextflow.config"), [])).toBe(true);
   });
 
   it("F-205 UX-20: a project with no workflow has no tab and no canvas", async () => {

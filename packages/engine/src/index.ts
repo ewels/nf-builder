@@ -184,6 +184,7 @@ export {
   ProjectModel,
   type ProjectModelOptions,
 } from "./model/project";
+export { defaultWorkflowRef } from "./navigation";
 export { installedPackVersions } from "./packs";
 export { loadPalette } from "./palette";
 export { type PaletteAction, paletteAction } from "./palette-actions";
