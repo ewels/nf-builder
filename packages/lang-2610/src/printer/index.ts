@@ -66,6 +66,7 @@ export function printConfig(
   options: PrintOptions = {},
 ): PrintResult {
   const fmt = new Formatter(options.layout ?? FRESH_LAYOUT);
+  fmt.legacyParameters = true;
   new ConfigFormatter(fmt).config(ast);
   return {
     text: fmt.toString(),
@@ -82,6 +83,7 @@ export function printConfigStatement(
   options: PrintOptions & { readonly indent?: number } = {},
 ): PrintResult {
   const fmt = new Formatter(options.layout ?? FRESH_LAYOUT);
+  fmt.legacyParameters = true;
   for (let i = 0; i < (options.indent ?? 0); i++) fmt.incIndent();
   new ConfigFormatter(fmt).statement(node);
   return {

@@ -115,6 +115,14 @@ describe("F-601 config commands", () => {
     expect(last(r)).toBe(read("f601-config-after", P));
   });
 
+  it("F-601 FI-02 ADR-0032: reprinting a block keeps the quotes of an option name that isn't an identifier", async () => {
+    const r = await run({ [P]: "process { ext.'a.b' = 1 }\n" }, [
+      set(["process", "cpus"], int(2)),
+    ]);
+    expect(last(r)).toContain("ext.'a.b' = 1");
+    expect(last(r)).toContain("cpus = 2");
+  });
+
   it("F-601 step 2 FI-03: setConfigOption process.cpus on f601-unknown gives f601-unknown-after, and the unknown option's line is byte-identical", async () => {
     const r = await run(tree("f601-unknown"), [
       set(["process", "cpus"], int(2)),

@@ -13,6 +13,11 @@ import type { Formatter } from "./formatter.ts";
 /** L111 */
 const IDENTIFIER = /^[a-zA-Z_]+[a-zA-Z0-9_]*$/;
 
+const optionName = (name: string): string =>
+  IDENTIFIER.test(name)
+    ? name
+    : `'${name.replace(/\\/g, "\\\\").replace(/'/g, "\\'")}'`;
+
 export class ConfigFormatter {
   private readonly fmt: Formatter;
 
@@ -70,7 +75,9 @@ export class ConfigFormatter {
         // L112
         fmt.appendLeadingComments(node);
         fmt.appendIndent();
-        fmt.append(node.path.map((n) => n.name).join("."));
+        // a name that isn't an identifier keeps its quotes: `lint -format` drops them (upstream bug 26), which changes
+        // `ext.'a.b'` into `ext.a.b` or breaks the file
+        fmt.append(node.path.map((n) => optionName(n.name)).join("."));
         fmt.append(" = ");
         fmt.expression(node.value);
         fmt.appendTrailingComment(node);

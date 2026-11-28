@@ -127,6 +127,14 @@ describe("corpus config printer parity", () => {
     report();
   });
 
+  it("F-601 LA-45: what the printer writes for every corpus config parses with no errors", () => {
+    const bad = state.rows.filter((r) => {
+      const parsed = parseConfigAst(r.printed ?? "");
+      return !parsed.ok || parsed.errors.length > 0;
+    });
+    expect(bad.map((r) => `${r.pipeline}/${r.file}`)).toEqual([]);
+  });
+
   it("F-601 LA-45: printing every formatted corpus config again changes nothing", () => {
     // upstream's own output for a listed file isn't a fixed point of its formatter (it wraps a method chain by the line
     // numbers of the source it was given), so only the other files are checked
