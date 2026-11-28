@@ -113,7 +113,7 @@ function find(
 /** The "Read more" link of a node's description, when it points into the Nextflow docs. */
 const readMore = (node: ConfigNode): string | null => {
   const link = [
-    ...node.description.matchAll(/\[Read more\]\((https:\/\/[^)\s]+)\)/g),
+    ...node.description.matchAll(/\[Read more\]\((https[:][/][/][^)\s]+)\)/g),
   ].pop()?.[1];
   return link?.startsWith(BASE) ? link : null;
 };

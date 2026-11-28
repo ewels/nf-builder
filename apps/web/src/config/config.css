@@ -1,0 +1,169 @@
+.config-pane {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  padding: var(--space-3);
+  background: var(--color-surface, transparent);
+}
+
+.config-editor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-width: 880px;
+}
+
+.config-banner {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  font-size: 13px;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+}
+
+.config-card {
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: var(--space-2) var(--space-3);
+}
+
+.config-card.is-selector,
+.config-card.is-profile {
+  margin-top: var(--space-2);
+  border-style: dashed;
+}
+
+.config-card[data-selected="true"] {
+  outline: 1px solid var(--color-focus, currentColor);
+}
+
+.config-card-title {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin: 0;
+  font-size: 13px;
+}
+
+.config-card-toggle {
+  font: inherit;
+  font-weight: 600;
+  padding: 0;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.config-card-toggle::before {
+  content: "▾ ";
+}
+
+.config-card-toggle[aria-expanded="false"]::before {
+  content: "▸ ";
+}
+
+.config-card-summary,
+.config-row-note {
+  font-size: 12px;
+  color: var(--color-muted);
+}
+
+.config-card-body {
+  margin-top: var(--space-2);
+}
+
+.config-rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.config-row {
+  display: grid;
+  grid-template-columns: minmax(120px, 200px) minmax(0, 1fr);
+  align-items: center;
+  column-gap: var(--space-2);
+  font-size: 13px;
+}
+
+.config-row-label {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.config-row-value {
+  font: inherit;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  min-width: 0;
+  padding: 2px var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+}
+
+.config-row-note {
+  grid-column: 2;
+}
+
+.config-row[data-selected="true"] .config-row-value {
+  border-color: var(--color-focus, currentColor);
+}
+
+.config-code {
+  grid-column: 1 / -1;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.config-flag {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-warning, #b45309);
+}
+
+.config-link {
+  grid-column: 1 / -1;
+  justify-self: start;
+  font: inherit;
+  padding: 0;
+  color: var(--color-link, inherit);
+  background: transparent;
+  border: 0;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.config-details-docs {
+  margin: var(--space-3) 0 0;
+  font-size: 12px;
+}
+
+.config-type {
+  font-family: var(--font-mono);
+}
+
+.catalogue-text {
+  margin-top: var(--space-3);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.catalogue-text p {
+  margin: 0 0 var(--space-2);
+}
+
+.catalogue-text pre {
+  overflow: auto;
+  padding: var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+}

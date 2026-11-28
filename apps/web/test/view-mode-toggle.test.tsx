@@ -23,4 +23,19 @@ describe("F-208 view mode toggle", () => {
       ["false", "C", "-1", "Code (C)"],
     ]);
   });
+
+  it("F-601 UX-27 UX-70: a config tab's toggle reads Form, Split and Code, with the same ids, keys and states", () => {
+    const html = renderToStaticMarkup(
+      <ViewModeToggle
+        mode="graph"
+        labels="config"
+        onChange={() => undefined}
+      />,
+    );
+    const radios = [...html.matchAll(/<button[^>]*role="radio"[^>]*>(\w+)</g)];
+    expect(radios.map((m) => m[1])).toEqual(["Form", "Split", "Code"]);
+    expect(html).toContain('id="view-mode-graph"');
+    expect(html).toContain('title="Form (G)"');
+    expect(html).toContain('aria-keyshortcuts="G"');
+  });
 });

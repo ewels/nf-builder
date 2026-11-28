@@ -1,12 +1,15 @@
 import type { JSX, KeyboardEvent } from "react";
-import { VIEW_MODES, type ViewMode } from "./view-mode";
+import { modeLabel, VIEW_MODES, type ViewMode } from "./view-mode";
 
 /** The Graph, Split and Code switch of a tab (UX-27): a radio group with roving focus and arrow keys. */
 export function ViewModeToggle({
   mode,
+  labels = "workflow",
   onChange,
 }: {
   readonly mode: ViewMode;
+  /** Whose labels to show: a config tab reads Form, Split and Code (F-601). */
+  readonly labels?: "workflow" | "config";
   readonly onChange: (mode: ViewMode) => void;
 }): JSX.Element {
   const move = (event: KeyboardEvent<HTMLDivElement>) => {
@@ -43,11 +46,11 @@ export function ViewModeToggle({
           className="view-mode-option"
           aria-checked={mode === m.mode}
           aria-keyshortcuts={m.key.toUpperCase()}
-          title={`${m.label} (${m.key.toUpperCase()})`}
+          title={`${modeLabel(labels, m.mode)} (${m.key.toUpperCase()})`}
           tabIndex={mode === m.mode ? 0 : -1}
           onClick={() => onChange(m.mode)}
         >
-          {m.label}
+          {modeLabel(labels, m.mode)}
         </button>
       ))}
     </div>

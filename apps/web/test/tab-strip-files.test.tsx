@@ -1,6 +1,6 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { fileTabFor } from "../src/canvas/canvas-store";
+import { configTabFor, fileTabFor } from "../src/canvas/canvas-store";
 import { CodePane } from "../src/code/code-pane";
 import { TabStripView } from "../src/shell/tab-strip";
 
@@ -75,5 +75,18 @@ describe("F-210 file tabs", () => {
     expect(renderToStaticMarkup(<CodePane path="main.nf" />)).not.toContain(
       "Read-only",
     );
+  });
+});
+
+describe("F-601 config tabs", () => {
+  it("F-601 UX-27 UX-20: a config tab has the Form, Split and Code toggle, closes like a file tab, and shows no toggle while read-only", () => {
+    const tab = configTabFor("conf/base.config");
+    const markup = html(tab);
+    expect(markup).toContain("view-mode");
+    expect(markup).toContain(">Form<");
+    expect(markup).toContain("workflow-tab-close");
+    expect(markup).toContain('aria-keyshortcuts="Delete"');
+    expect(markup).toContain('title="conf/base.config"');
+    expect(html(tab, true)).not.toContain("view-mode");
   });
 });

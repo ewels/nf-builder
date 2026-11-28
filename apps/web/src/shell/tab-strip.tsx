@@ -40,7 +40,7 @@ export function TabStripView({
     if (event.key === "Delete") {
       const id = (event.target as HTMLElement).id;
       const tab = tabs.find((t) => workflowTabId(t.id) === id);
-      if (tab?.kind !== "file") return;
+      if (tab === undefined || tab.kind === "workflow") return;
       event.preventDefault();
       onClose(tab.id, true);
       return;
@@ -81,12 +81,12 @@ export function TabStripView({
                 title={t.title}
                 aria-selected={activeTab === t.id}
                 aria-controls="canvas-panel"
-                aria-keyshortcuts={t.kind === "file" ? "Delete" : undefined}
+                aria-keyshortcuts={t.kind === "workflow" ? undefined : "Delete"}
                 tabIndex={activeTab === t.id ? 0 : -1}
                 onClick={() => onSelect(t.id)}
               >
                 {t.label}
-                {t.kind === "file" ? (
+                {t.kind !== "workflow" ? (
                   // pointer-only: keyboard users close with Delete, so this stays out of the tab order and the a11y tree
                   <span
                     className="workflow-tab-close"
@@ -109,6 +109,7 @@ export function TabStripView({
       {readOnly || active === undefined || active.kind === "file" ? null : (
         <ViewModeToggle
           mode={active.mode}
+          labels={active.kind}
           onChange={(mode) => onMode(active.id, mode)}
         />
       )}

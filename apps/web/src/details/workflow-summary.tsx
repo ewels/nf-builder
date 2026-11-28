@@ -34,8 +34,13 @@ function Ports({
 /** The open workflow when nothing is selected (UX-31): take, emit, calls and registry modules. */
 export function WorkflowSummaryView({
   summary,
+  configPath,
+  onOpenConfig,
 }: {
   readonly summary: WorkflowSummary;
+  /** The project's root `nextflow.config`, when it has one: the entry workflow's summary links it (F-601). */
+  readonly configPath?: string;
+  readonly onOpenConfig?: (path: string) => void;
 }): JSX.Element {
   return (
     <div className="details-summary">
@@ -70,6 +75,18 @@ export function WorkflowSummaryView({
           </ul>
         )}
       </section>
+      {summary.entry && configPath !== undefined ? (
+        <section className="details-section">
+          <h4>Configuration</h4>
+          <button
+            type="button"
+            className="config-link"
+            onClick={() => onOpenConfig?.(configPath)}
+          >
+            Open {configPath}
+          </button>
+        </section>
+      ) : null}
       {summary.modules.length === 0 ? null : (
         <section className="details-section">
           <h4>Registry modules</h4>

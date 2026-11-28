@@ -11,6 +11,15 @@ export const VIEW_MODES: readonly {
   { mode: "code", label: "Code", key: "c" },
 ];
 
+/** A mode's label on a tab: a config tab shows its form where a workflow tab shows the graph (F-601, UX-27). */
+export function modeLabel(
+  kind: "workflow" | "file" | "config",
+  mode: ViewMode,
+): string {
+  if (kind === "config" && mode === "graph") return "Form";
+  return VIEW_MODES.find((m) => m.mode === mode)?.label ?? mode;
+}
+
 /** The mode a tab shows: Graph only while the app is read-only, with the tab's own mode kept for when it widens (F-703, UX-04). */
 export function shownMode(mode: ViewMode, readOnly: boolean): ViewMode {
   return readOnly ? "graph" : mode;

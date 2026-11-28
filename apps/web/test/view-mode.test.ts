@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   isEditableTarget,
+  modeLabel,
   shownMode,
   VIEW_MODES,
   type ViewModeKey,
@@ -72,5 +73,14 @@ describe("F-703 shown mode", () => {
       expect(shownMode(mode, true)).toBe("graph");
       expect(shownMode(mode, false)).toBe(mode);
     }
+  });
+});
+
+describe("F-601 view mode labels", () => {
+  it("F-601 UX-27: a config tab calls Graph mode Form; other tabs keep their labels", () => {
+    expect(modeLabel("config", "graph")).toBe("Form");
+    expect(modeLabel("config", "split")).toBe("Split");
+    expect(modeLabel("config", "code")).toBe("Code");
+    expect(modeLabel("workflow", "graph")).toBe("Graph");
   });
 });

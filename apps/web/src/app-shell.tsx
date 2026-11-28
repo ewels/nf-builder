@@ -70,9 +70,10 @@ export function AppShell(): JSX.Element {
   const right = useLayout((s) => s.right);
   const leftWidth = left.collapsed ? COLLAPSED_WIDTH : left.width;
   const content = useWorkspace((s) => s.content);
-  const onFile = useWorkspace(
-    (s) => s.tabs.find((t) => t.id === s.activeTab)?.kind === "file",
-  );
+  const onFile = useWorkspace((s) => {
+    const kind = s.tabs.find((t) => t.id === s.activeTab)?.kind;
+    return kind === "file" || kind === "config";
+  });
   const counts = onFile ? null : canvasCounts(content);
   const hasProject = useWorkspace((s) => s.summary !== null);
   const diagnostics = useProblemsStatus(hasProject);
