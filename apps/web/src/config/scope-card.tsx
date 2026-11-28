@@ -184,7 +184,6 @@ function Rows({
   const set = new Set(
     rows.flatMap((r) => (r.kind === "option" ? [r.label] : [])),
   );
-  const unset = pinned.filter((p) => !set.has(p));
   const mine = pending.filter(
     (p) =>
       p.context.profile === context.profile &&
@@ -194,31 +193,43 @@ function Rows({
       (names.length > 0 || p.option.length === 1) &&
       !set.has(p.option.slice(names.length).join(".")),
   );
-  if (rows.length === 0 && unset.length === 0 && mine.length === 0) return null;
+  if (rows.length === 0 && pinned.length === 0 && mine.length === 0)
+    return null;
+  const byLabel = new Map(
+    rows.flatMap((r) => (r.kind === "option" ? [[r.label, r] as const] : [])),
+  );
+  const rest = rows.filter(
+    (r) => r.kind !== "option" || !pinned.includes(r.label),
+  );
+  const rowView = (row: ConfigRow): JSX.Element =>
+    row.kind === "option" ? (
+      <OptionRowView
+        key={row.key}
+        row={row}
+        context={context}
+        pinned={pinned.includes(row.label)}
+        handlers={handlers}
+      />
+    ) : (
+      <OtherRow key={row.key} row={row} handlers={handlers} />
+    );
   return (
     <ul className="config-rows">
-      {unset.map((p) => (
-        <UnsetRowView
-          key={`unset:${p}`}
-          label={p}
-          names={[...names, p]}
-          context={context}
-          handlers={handlers}
-        />
-      ))}
-      {rows.map((row) =>
-        row.kind === "option" ? (
-          <OptionRowView
-            key={row.key}
-            row={row}
+      {pinned.map((p) => {
+        const row = byLabel.get(p);
+        return row === undefined ? (
+          <UnsetRowView
+            key={`unset:${p}`}
+            label={p}
+            names={[...names, p]}
             context={context}
-            pinned={pinned.includes(row.label)}
             handlers={handlers}
           />
         ) : (
-          <OtherRow key={row.key} row={row} handlers={handlers} />
-        ),
-      )}
+          rowView(row)
+        );
+      })}
+      {rest.map(rowView)}
       {mine.map((p) => (
         <PendingRowView key={p.key} row={p} handlers={handlers} />
       ))}

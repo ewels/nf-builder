@@ -1,8 +1,14 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { expect, test } from "@playwright/test";
+import { expect, type Locator, test } from "@playwright/test";
 import { REPO_ROOT } from "../scripts/check-common.ts";
-import { canvasReady, openProject } from "./canvas.ts";
+import { VISUAL_TAG } from "./browsers.ts";
+import {
+  canvasReady,
+  expectBaseline,
+  layoutSettled,
+  openProject,
+} from "./canvas.ts";
 import { editor, monacoChunks, radio } from "./code-view.ts";
 import {
   addScope,
@@ -360,3 +366,34 @@ test("F-601 UX-70 QA-11: the form, the Add scope dialog and the option fields wo
   await page.keyboard.press("ArrowDown");
   await expect(enabled).toHaveValue("true");
 });
+
+test(
+  "F-601 FI-01 FI-04: the config form and the option details match their approved baselines",
+  { tag: VISUAL_TAG },
+  async ({ page }, testInfo) => {
+    await page.setViewportSize(WIDE);
+    await page.goto("./");
+    await openConfigTab(page, F601_FORMS_AFTER);
+    await layoutSettled(page);
+    await page.evaluate(() => (document.activeElement as HTMLElement)?.blur());
+    const problems: string[] = [];
+    const check = async (name: string, target: Locator) => {
+      try {
+        await expectBaseline(page, testInfo, `config-${name}.png`, { target });
+      } catch (error) {
+        problems.push(String(error instanceof Error ? error.message : error));
+      }
+    };
+    await check("form", page.locator(".column-centre"));
+    await configCard(page, "process")
+      .locator('[data-option="resourceLimits"] input')
+      .first()
+      .focus();
+    await expect(configDetails(page)).toContainText("process.resourceLimits");
+    await check(
+      "details",
+      page.locator(".column").filter({ has: configDetails(page) }),
+    );
+    expect(problems, problems.join("\n")).toEqual([]);
+  },
+);

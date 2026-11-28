@@ -137,6 +137,23 @@ describe("F-601 config editor", () => {
     expect(out).toContain('data-option="strategy"');
   });
 
+  it("F-601 FI-02: pinned fields keep the pinned order whether they are set or not, then the other rows follow", () => {
+    const out = html(
+      viewOf([
+        {
+          kind: "scope",
+          card: card("process", {
+            form: "process",
+            pinned: ["cpus", "memory", "time"],
+            rows: [opt("ext"), opt("time"), opt("cpus")],
+          }),
+        },
+      ]),
+    );
+    const order = [...out.matchAll(/data-option="([^"]+)"/g)].map((m) => m[1]);
+    expect(order).toEqual(["cpus", "memory", "time", "ext"]);
+  });
+
   it("F-601 FI-03 QA-12: an unknown option shows Unknown option with the glyph and its value as code", () => {
     const out = html(
       viewOf([
