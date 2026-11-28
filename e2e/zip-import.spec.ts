@@ -33,6 +33,7 @@ async function stored(page: Page) {
   const projects = db.stores.projects?.records as {
     id: string;
     name: string;
+    source?: unknown;
   }[];
   const files = (db.stores.files?.records ?? []) as {
     projectId: string;
@@ -204,6 +205,12 @@ test(
     expect(filesOf(files, projects[0]?.id)).toEqual(
       [...templateFilesOnDisk("hello-world")].sort(byPath),
     );
+    // IO-13: the zip's name and hash are recorded as the source
+    expect(projects[0]?.source).toEqual({
+      kind: "zip",
+      name: "hello-world-main.zip",
+      sha256: expect.stringMatching(/^[0-9a-f]{64}$/),
+    });
   },
 );
 

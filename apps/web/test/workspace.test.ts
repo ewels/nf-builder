@@ -719,6 +719,12 @@ describe("F-403 workspace zip import", () => {
       { path: "README.md", text: "# pipe\n" },
       { path: "main.nf", text: "workflow {}\n" },
     ]);
+    // IO-13: the zip's name and hash are recorded as the source
+    expect(stored?.project.source).toEqual({
+      kind: "zip",
+      name: "pipe.zip",
+      sha256: expect.stringMatching(/^[0-9a-f]{64}$/),
+    });
     expect(s.statuses.at(-1)?.projects.map((p) => p.id)).toEqual([meta.id]);
     expect(await s.workspace.restageImport(staged.id, "")).toMatchObject({
       ok: false,

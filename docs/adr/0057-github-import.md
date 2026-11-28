@@ -41,7 +41,7 @@ Research: the [F-401 plan](https://github.com/ewels/nf-builder/blob/d5d4b7b/docs
   - GitHub is a second source, "GitHub repository", in F-403's "Import from" group on the Import route, beside "Zip file". The route takes a repository and an optional "Branch, tag or commit". Both sources share `ImportSummaryView`.
   - The Name field defaults to the repository name until edited.
   - There is no token field until F-402: an inert field would invite people to paste secrets.
-  - Publish docs is hidden for a GitHub import (F-606 step 3).
+  - Publish docs is hidden on the whole Import route, the zip source too (F-606 step 3).
   - Review makes the two API calls and shows the summary. Import downloads with a progress status and a Cancel import button. Closing the dialog, with Escape or otherwise, aborts an in-flight import. Nothing is stored unless every download succeeds.
   - After import an Import report dialog shows the files imported and skipped, parse failures, legacy syntax and suggestions. The report is session-only.
 - **Report definitions (UX-61).**
@@ -64,7 +64,7 @@ Research: the [F-401 plan](https://github.com/ewels/nf-builder/blob/d5d4b7b/docs
 - Both import routes share one ignore list, one set of limits and one summary component.
 - **Known limitation.** A 429 from raw without CORS headers is opaque to the page, so it surfaces as "Couldn't reach GitHub" rather than the rate-limit message.
 - Projects imported from GitHub lack binary files and executable bits (F-404 should mark `bin/*` executable). F-407 covers binaries.
-- Zip imports don't record a source yet: the IO-13 zip case, `{kind: "zip", name, sha256}`, is still to come.
+- Zip imports record `{kind: "zip", name, sha256}` as their source, hashed in the worker. `sha256` is absent where `crypto.subtle` is unavailable (insecure contexts, ADR 0044), so the field is optional.
 - F-402 adds the token field, an `Authorization` header (which preflights) and the blobs API on the same client.
 
 ## Alternatives

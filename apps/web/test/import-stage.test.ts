@@ -55,15 +55,32 @@ describe("F-403 import stager", () => {
     expect(await stager.files("s1", staged.summary.ignore)).toEqual({
       ok: true,
       files: [{ path: "main.nf", text: "workflow {}\n" }],
+      source: { kind: "zip", name: "top.zip", sha256: expect.any(String) },
     });
     const again = await stager.restage("s1", "work/\n");
     expect(again).toMatchObject({ ok: true, summary: { files: 2 } });
-    expect(await stager.files("s1", "work/\n")).toEqual({
+    expect(await stager.files("s1", "work/\n")).toMatchObject({
       ok: true,
       files: [
         { path: "data/a.txt", text: "data\n" },
         { path: "main.nf", text: "workflow {}\n" },
       ],
+    });
+  });
+
+  it("F-401 IO-13: files returns the zip source with the file name and the SHA-256 of the zip bytes", async () => {
+    const stager = createImportStager({ newId: () => "s1" });
+    const blob = zip({ "main.nf": "x" });
+    await stager.stageZip(blob, "my.zip");
+    const expected = Array.from(
+      new Uint8Array(
+        await crypto.subtle.digest("SHA-256", await blob.arrayBuffer()),
+      ),
+      (b) => b.toString(16).padStart(2, "0"),
+    ).join("");
+    expect(await stager.files("s1", "")).toMatchObject({
+      ok: true,
+      source: { kind: "zip", name: "my.zip", sha256: expected },
     });
   });
 

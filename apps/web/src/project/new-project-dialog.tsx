@@ -78,7 +78,7 @@ export function newProjectRequest(
     return {
       name,
       languageVersion: form.languageVersion,
-      publishDocs: form.publishDocs,
+      publishDocs: false, // hidden on the Import route (UX-60)
       import: { id: zip.id, ignore: zip.ignore },
     };
   }
@@ -375,7 +375,7 @@ export function NewProjectDialog(props: NewProjectDialogProps): JSX.Element {
             ))}
           </fieldset>
         ) : null}
-        {githubSelected ? null : (
+        {route === "import" ? null : (
           <label className="dialog-choice">
             <input
               type="checkbox"

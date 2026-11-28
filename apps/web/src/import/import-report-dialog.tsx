@@ -4,11 +4,11 @@ import { legacyShare, type ProjectReport } from "@nf-builder/engine";
 import { formatCount, type SkipGroup } from "@nf-builder/sources";
 import { type JSX, useEffect, useId, useRef } from "react";
 import { showModalOnce } from "../project/project-dialogs";
-import type { ProjectSource } from "../workspace/types";
+import type { GithubSource } from "../workspace/types";
 import { plural, SkippedList } from "./import-summary";
 
 export interface ImportReport {
-  readonly source: ProjectSource;
+  readonly source: GithubSource;
   readonly projectName: string;
   readonly imported: number;
   readonly skipped: readonly SkipGroup[];

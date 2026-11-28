@@ -23,6 +23,7 @@ import {
   type NewProject,
   type OpenedProject,
   type ProjectMeta,
+  type ProjectSource,
   type WorkspaceApi,
   type WorkspaceStatus,
 } from "./types";
@@ -182,6 +183,7 @@ export function createWorkspace(options: WorkspaceOptions): WorkspaceApi {
             "An import can't be combined with a template or files.",
           );
         let files = input.files;
+        let source: ProjectSource | undefined;
         if (input.import !== undefined) {
           const chosen = await importer.files(
             input.import.id,
@@ -189,6 +191,7 @@ export function createWorkspace(options: WorkspaceOptions): WorkspaceApi {
           );
           if (!chosen.ok) throw new Error(chosen.message);
           files = chosen.files;
+          source = chosen.source;
         } else if (input.template !== undefined)
           files = await templateFiles(input.languageVersion, input.template);
         const time = now();
@@ -199,6 +202,7 @@ export function createWorkspace(options: WorkspaceOptions): WorkspaceApi {
           createdAt: time,
           updatedAt: time,
           openedAt: time,
+          ...(source === undefined ? {} : { source }),
         };
         await store.createProject(meta, files);
         if (input.import !== undefined) importer.discard(input.import.id);

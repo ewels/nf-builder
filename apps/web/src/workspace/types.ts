@@ -8,8 +8,8 @@ import type {
 } from "@nf-builder/engine";
 import type { ImportRefusal, ImportSummary } from "@nf-builder/sources";
 
-/** Where an imported project came from (IO-13). The union stays open for zip imports (F-403). */
-export type ProjectSource = {
+/** Where an imported project came from (IO-13, ADR 0057). */
+export type GithubSource = {
   readonly kind: "github";
   /** `owner/name` as entered. */
   readonly repo: string;
@@ -18,6 +18,16 @@ export type ProjectSource = {
   /** The resolved 40-character commit SHA. */
   readonly sha: string;
 };
+
+export type ProjectSource =
+  | GithubSource
+  | {
+      readonly kind: "zip";
+      /** The file name. */
+      readonly name: string;
+      /** Hex SHA-256 of the zip; absent where `crypto.subtle` isn't available (insecure contexts, ADR 0044). */
+      readonly sha256?: string;
+    };
 
 /** A project record as stored in IndexedDB (schema v1). `source` is optional and additive: no version bump (F-401). Times are milliseconds since the epoch. */
 export interface ProjectMeta {
@@ -64,7 +74,7 @@ export interface ImportFile {
 export interface ImportProject {
   readonly name: string;
   readonly languageVersion: string;
-  readonly source: ProjectSource;
+  readonly source: GithubSource;
   readonly files: readonly ImportFile[];
 }
 

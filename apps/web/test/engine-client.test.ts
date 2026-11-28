@@ -373,7 +373,7 @@ describe("F-401 engine client import", () => {
       files: [{ path: "main.nf", bytes: buffer as ArrayBuffer }],
     });
     expect(buffer.byteLength).toBe(0);
-    expect(imported.meta.source?.repo).toBe("o/r");
+    expect(imported.meta.source).toMatchObject({ repo: "o/r" });
     expect(await engine.report()).toMatchObject({ code: "no-project" });
     await engine.openProject(imported.meta.id);
     expect(await engine.report()).toMatchObject({

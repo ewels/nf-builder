@@ -388,7 +388,7 @@ describe("F-203 new project dialog", () => {
     expect(newProjectRequest(form(readyZip()), null)).toEqual({
       name: "RNA",
       languageVersion: "26.10",
-      publishDocs: true,
+      publishDocs: false,
       import: { id: "stage-1", ignore: "data/\n" },
     });
     expect(newProjectRequest(form(EMPTY_ZIP), null)).toEqual({
@@ -477,8 +477,14 @@ describe("F-401 new project dialog, GitHub source", () => {
     expect(html).not.toMatch(/token/i);
     expect(html).not.toContain("Publish docs to GitHub Pages");
     expect(html).toContain(">Review</button>");
-    // the zip source and the other routes keep it
-    expect(dialog({ initialRoute: "import" })).toContain(
+    // the other routes keep it
+    expect(dialog({ initialRoute: "template" })).toContain(
+      "Publish docs to GitHub Pages",
+    );
+  });
+
+  it("F-401 UX-60: Publish docs is hidden on the whole Import route, the zip source too", () => {
+    expect(dialog({ initialRoute: "import" })).not.toContain(
       "Publish docs to GitHub Pages",
     );
   });
