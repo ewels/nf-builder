@@ -229,6 +229,12 @@ export function createPopupStore(deps: {
           },
         });
     };
+    /**
+     * The name the declaration ends with: the code's, or the Configure draft's when the form was renamed after the
+     * code was last read (the render keeps the code's name, so the rename is carried here, UX-44).
+     */
+    const endName = (s: { draft: TypedProcessForm; code: CodeDraft }, codeName: string) =>
+      codeName === s.code.baseForm.name ? s.draft.name : codeName;
     /** Renders the Configure draft over the code text, so a form edit made after a code edit isn't lost, and checks it. */
     const renderForm = async (): Promise<boolean> => {
       const s = opened();
@@ -253,7 +259,8 @@ export function createPopupStore(deps: {
       }
       patchCode({
         text: rendered.text,
-        baseForm: s.draft,
+        // the name stays the code's, so a rename in the draft still counts as a change
+        baseForm: { ...s.draft, name: s.code.baseForm.name },
         check: s.code.touched ? "checking" : "valid",
         problems: [],
         message: null,
@@ -274,7 +281,7 @@ export function createPopupStore(deps: {
         }
         if (formChanged(s.code.baseForm, s.draft) && !(await renderForm()))
           return;
-      } else if (s.code.check === "checking") await check();
+      } else await get().flushCode();
       s = opened();
       if (s === null) return;
       const { parsed } = s.code;
@@ -282,7 +289,8 @@ export function createPopupStore(deps: {
         set({ message: s.code.message ?? "The code doesn't parse." });
         return;
       }
-      if (s.code.text === s.code.original) {
+      const last = endName(s, parsed.name);
+      if (s.code.text === s.code.original && last === s.target.name) {
         generation++;
         set({ status: "closed" });
         return;
@@ -294,6 +302,7 @@ export function createPopupStore(deps: {
         revision: s.revision,
         text: s.code.text,
         name: parsed.name,
+        ...(last === parsed.name ? {} : { newName: last }),
         node: s.node,
       });
       if (mine !== generation) return;
@@ -447,14 +456,14 @@ export function createPopupStore(deps: {
           return;
         }
         if (s.code.touched) {
-          if (s.code.check === "checking") await check();
+          await get().flushCode();
           const now = opened();
           if (now === null) return;
           const { parsed } = now.code;
           if (now.code.check !== "valid" || parsed === null) return;
           set({
             section,
-            draft: parsed.form,
+            draft: { ...parsed.form, name: endName(now, parsed.name) },
             choices: parsed.choices,
             code: { ...now.code, baseForm: parsed.form },
             message: null,
@@ -474,7 +483,6 @@ export function createPopupStore(deps: {
             text,
             touched: true,
             check: "checking",
-            problems: s.code.problems,
             message: null,
             parsed: null,
           },

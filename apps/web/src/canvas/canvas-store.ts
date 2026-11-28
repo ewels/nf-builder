@@ -297,6 +297,8 @@ export interface DeclarationTextEdit {
   readonly text: string;
   /** The name the text gives the declaration. */
   readonly name: string;
+  /** The name to end with when it isn't the text's: a rename made in Configure after the code was edited (UX-44). */
+  readonly newName?: string;
   readonly node: string;
 }
 
@@ -836,6 +838,56 @@ export function createCanvasStore(
      * part undoes the parts before it (`discard`, so the step isn't left to redo) and its refusal is returned; else the
      * last part's outcome. Runs inside a task of the queue.
      */
+    async function applyGroup(
+      session: number | undefined,
+      group: string,
+      commands: readonly EditCommand[],
+      label: string,
+    ): Promise<ApplyOutcome> {
+      let last: ApplyOutcome | undefined;
+      // a part whose patches are empty records no step, so only the others leave a step to undo
+      let recorded = false;
+      for (const command of commands) {
+        const outcome = (await sendNow(
+          session,
+          async (revision) => {
+            try {
+              return await engine().apply(
+                command,
+                revision,
+                // every part carries the label: one with no patches starts no step, so a later one may
+                { group, label },
+              );
+            } catch (error) {
+              return refusal("internal", messageOf(error));
+            }
+          },
+          afterApply,
+        )) as ApplyOutcome;
+        if (!outcome.ok) {
+          if (recorded)
+            // the step holds the parts applied so far, so nothing is left behind
+            await sendNow(
+              session,
+              async (revision) => {
+                try {
+                  return await engine().undo(revision, { discard: true });
+                } catch (error) {
+                  return refusal("internal", messageOf(error));
+                }
+              },
+              async (undone) => {
+                if (!undone.ok) await refreshHistory();
+              },
+            );
+          return outcome;
+        }
+        if (outcome.patches?.length !== 0) recorded = true;
+        last = outcome;
+      }
+      return last as ApplyOutcome;
+    }
+
     /**
      * One popup edit of a process as a group (F-303, F-304): refused when the session or revision is stale or the page is
      * read-only, the commands built by `build` applied as one undo step labelled `Edit process <name>`, the node selected
@@ -891,22 +943,15 @@ export function createCanvasStore(
       });
     }
 
-    /** The rename of a process, and the move of its module folder when it is the only thing in it and the new folder is free. */
-    async function renameParts(
+    /** The move of a process's module folder to the one `newName` gives, when it is the only thing in it and the new folder is free. */
+    async function moveParts(
       target: { readonly path: string; readonly name: string },
       newName: string,
-    ): Promise<{ rename: EditCommand; move: EditCommand | null }> {
-      const rename: EditCommand = {
-        kind: "renameDeclaration",
-        path: target.path,
-        name: target.name,
-        newName,
-      };
+    ): Promise<EditCommand | null> {
       const folder = moduleFolder(target.path, target.name);
       const newFolder = folderOf(newName);
       // a case-only rename keeps the folder, and a folder that is taken stays where it is
-      if (folder === null || newFolder === folder)
-        return { rename, move: null };
+      if (folder === null || newFolder === folder) return null;
       const [outline, taken] = await Promise.all([
         engine()
           .outline(target.path)
@@ -921,61 +966,8 @@ export function createCanvasStore(
         !("ok" in outline) &&
         declaresOnly(outline.items, target.name)
       )
-        return {
-          rename,
-          move: { kind: "moveFile", path: folder, newPath: newFolder },
-        };
-      return { rename, move: null };
-    }
-
-    async function applyGroup(
-      session: number | undefined,
-      group: string,
-      commands: readonly EditCommand[],
-      label: string,
-    ): Promise<ApplyOutcome> {
-      let last: ApplyOutcome | undefined;
-      // a part whose patches are empty records no step, so only the others leave a step to undo
-      let recorded = false;
-      for (const command of commands) {
-        const outcome = (await sendNow(
-          session,
-          async (revision) => {
-            try {
-              return await engine().apply(
-                command,
-                revision,
-                // every part carries the label: one with no patches starts no step, so a later one may
-                { group, label },
-              );
-            } catch (error) {
-              return refusal("internal", messageOf(error));
-            }
-          },
-          afterApply,
-        )) as ApplyOutcome;
-        if (!outcome.ok) {
-          if (recorded)
-            // the step holds the parts applied so far, so nothing is left behind
-            await sendNow(
-              session,
-              async (revision) => {
-                try {
-                  return await engine().undo(revision, { discard: true });
-                } catch (error) {
-                  return refusal("internal", messageOf(error));
-                }
-              },
-              async (undone) => {
-                if (!undone.ok) await refreshHistory();
-              },
-            );
-          return outcome;
-        }
-        if (outcome.patches?.length !== 0) recorded = true;
-        last = outcome;
-      }
-      return last as ApplyOutcome;
+        return { kind: "moveFile", path: folder, newPath: newFolder };
+      return null;
     }
 
     const send = <T extends ApplyOutcome | HistoryOutcome>(
@@ -1505,8 +1497,13 @@ export function createCanvasStore(
             },
           ];
           if (form.name !== target.name) {
-            const { rename, move } = await renameParts(target, form.name);
-            commands.push(rename);
+            commands.push({
+              kind: "renameDeclaration",
+              path: target.path,
+              name: target.name,
+              newName: form.name,
+            });
+            const move = await moveParts(target, form.name);
             if (move) commands.push(move);
           }
           return commands;
@@ -1515,19 +1512,29 @@ export function createCanvasStore(
 
       editDeclarationText(request, session) {
         const { target, name, text } = request;
-        return editProcess(session, request, name, async () => {
+        // the name the declaration ends with: a rename made in Configure after the code was edited comes last
+        const last = request.newName ?? name;
+        return editProcess(session, request, last, async () => {
+          const rename = (from: string, to: string): EditCommand => ({
+            kind: "renameDeclaration",
+            path: target.path,
+            name: from,
+            newName: to,
+          });
           const commands: EditCommand[] = [];
-          const parts =
-            name === target.name ? null : await renameParts(target, name);
-          // the rename runs first, so the replace finds the declaration under its new name
-          if (parts) commands.push(parts.rename);
+          // a rename first, so the replace finds the declaration under the name its text gives
+          if (name !== target.name) commands.push(rename(target.name, name));
           commands.push({
             kind: "replaceDeclaration",
             path: target.path,
             name,
             text,
           });
-          if (parts?.move) commands.push(parts.move);
+          if (last !== name) commands.push(rename(name, last));
+          if (last !== target.name) {
+            const move = await moveParts(target, last);
+            if (move) commands.push(move);
+          }
           return commands;
         });
       },

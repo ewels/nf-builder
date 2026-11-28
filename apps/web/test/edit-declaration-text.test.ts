@@ -5,6 +5,7 @@ import {
 } from "@nf-builder/engine";
 import { describe, expect, it } from "vitest";
 import { createCanvasStore } from "../src/canvas/canvas-store";
+import { createPopupStore } from "../src/popup/popup-store";
 
 const MODULE = "modules/local/greet/main.nf";
 const GREET = `nextflow.enable.types = true
@@ -122,5 +123,36 @@ describe("F-304 editDeclarationText with the real engine", () => {
     expect(renamed.ok).toBe(false);
     expect(await service.readFile("main.nf")).toBe(MAIN);
     expect(store.getState().history.undoCount).toBe(0);
+  });
+
+  it("F-304 UX-44 AR-23: a rename made in Configure after a Code edit renames the file, folder and calls in one undo step", async () => {
+    const { service, store, read } = await setup();
+    const popup = createPopupStore({
+      canvas: store,
+      engine: () => service,
+      readOnly: () => false,
+    });
+    const projected = await service.project("main.nf", null);
+    if (!("projection" in projected) || projected.projection === null)
+      throw new Error("no projection");
+    const node = projected.projection.nodes.find((n) => n.label === "GREET");
+    await popup
+      .getState()
+      .openPopup({ tab: "main.nf#", node: node?.id ?? "", opener: null });
+    await popup.getState().showSection("code");
+    popup.getState().editCode(read.text.replace("    input:", "    cpus 2\n\n    input:"));
+    await popup.getState().flushCode();
+    await popup.getState().showSection("configure");
+    popup.getState().updateDraft((d) => ({ ...d, name: "HELLO" }));
+    await popup.getState().applyPopup();
+    expect(popup.getState().status).toBe("closed");
+    const moved = await service.readFile("modules/local/hello/main.nf");
+    expect(moved).toContain("process HELLO {");
+    expect(moved).toContain("    cpus 2\n");
+    expect(await service.readFile("main.nf")).toContain("HELLO('world')");
+    expect(store.getState().history).toMatchObject({ undoCount: 1 });
+    await store.getState().undo();
+    expect(await service.readFile(MODULE)).toBe(GREET);
+    expect(await service.readFile("main.nf")).toBe(MAIN);
   });
 });

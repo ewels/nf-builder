@@ -530,6 +530,31 @@ describe("F-304 popup store: Code tab", () => {
     expect(popup.getState().status).toBe("closed");
   });
 
+  it("F-304 UX-44: a rename made in Configure after a Code edit is applied as replace, rename and folder move, and counts as a change", async () => {
+    const { popup, applies } = await open();
+    await popup.getState().showSection("code");
+    await typeCode(popup, `${CODE}\n// mine`);
+    await popup.getState().showSection("configure");
+    draft(popup, (d) => ({ ...d, name: "SAY" }));
+    await popup.getState().showSection("code");
+    // the rename is still pending after the render, and survives a trip back to Configure
+    await popup.getState().showSection("configure");
+    expect(code(popup).draft.name).toBe("SAY");
+    await popup.getState().applyPopup();
+    expect(applies.map((a) => a.command.kind)).toEqual([
+      "replaceDeclaration",
+      "renameDeclaration",
+      "moveFile",
+    ]);
+    expect(applies[0]?.command).toMatchObject({ name: "GREET" });
+    expect(applies[1]?.command).toMatchObject({
+      name: "GREET",
+      newName: "SAY",
+    });
+    expect(new Set(applies.map((a) => JSON.stringify(a.options))).size).toBe(1);
+    expect(popup.getState().status).toBe("closed");
+  });
+
   it("F-304 UX-44: a refused Code Apply keeps the popup open with the message", async () => {
     const { popup } = await open({ refuse: ["replaceDeclaration"] });
     await popup.getState().showSection("code");
