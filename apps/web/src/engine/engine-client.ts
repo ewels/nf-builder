@@ -55,6 +55,8 @@ export function connectEngine(
     listFiles: () => race(remote.listFiles()),
     connectionTargets: (request) => race(remote.connectionTargets(request)),
     freshName: (request) => race(remote.freshName(request)),
+    calleeWorkflow: (request) => race(remote.calleeWorkflow(request)),
+    callPath: (ref) => race(remote.callPath(ref)),
     close: () => race(remote.close()),
     watch: (listener) => race(remote.watch(proxy(listener))),
     stageZip: (file, name) => race(remote.stageZip(file, name)),

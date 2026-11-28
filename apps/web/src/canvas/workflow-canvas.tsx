@@ -55,7 +55,7 @@ import {
   toFlowEdges,
   toFlowNodes,
 } from "./flow-elements";
-import { opensPopup } from "./node-keys";
+import { openNode, opensPopup } from "./node-keys";
 import { useRefitOnResize } from "./use-refit-on-resize";
 import { registerViewport } from "./viewport";
 
@@ -135,7 +135,9 @@ interface WorkflowCanvasProps {
   readonly onConnect: (from: PortRef, to: PortRef) => void;
   /** The selected or focused edge's target port is disconnected (F-302, UX-70). */
   readonly onDisconnect: (port: PortRef) => void;
-  /** A node was double-clicked, or Enter was pressed on the selected one: open its edit popup. Left out in read-only (F-303, UX-40, F-703). */
+  /** A workflow call was double-clicked, or Enter was pressed on it once selected: open its canvas tab; also read-only (F-307, UX-50). */
+  readonly onOpenCallee: (id: string) => void;
+  /** Any other node: open its edit popup. Left out in read-only (F-303, UX-40, F-703). */
   readonly onOpenNode?: (id: string, opener: HTMLElement | null) => void;
 }
 
@@ -163,6 +165,7 @@ function CanvasInner({
   onConnectionTargets,
   onConnect,
   onDisconnect,
+  onOpenCallee,
   onOpenNode,
 }: WorkflowCanvasProps): JSX.Element {
   const view = useMemo(
@@ -329,13 +332,19 @@ function CanvasInner({
     const to = portRefOfHandle(c.target, c.targetHandle);
     if (from !== null && to !== null) onConnect(from, to);
   };
+  // double-click and Enter share one route: a workflow call opens its tab, any other node its popup (F-307, F-303)
+  const open = (id: string, opener: HTMLElement | null) =>
+    openNode(view.nodes.find((n) => n.id === id)?.opens === true, id, opener, {
+      onOpenCallee,
+      onOpenNode,
+    });
   const onKeyDown = (event: KeyboardEvent) => {
     const target = event.target as HTMLElement;
     // Enter on the node that is already selected opens its popup; the first Enter only selects it (F-303, UX-40)
-    const opens = onOpenNode === undefined ? null : opensPopup(event, selected);
+    const opens = opensPopup(event, selected);
     if (opens !== null) {
       event.preventDefault();
-      onOpenNode?.(opens, target.closest<HTMLElement>(".react-flow__node"));
+      open(opens, target.closest<HTMLElement>(".react-flow__node"));
       return;
     }
     const onEdge = target.closest<HTMLElement>(".react-flow__edge");
@@ -560,12 +569,10 @@ function CanvasInner({
             if (event.shiftKey || event.ctrlKey || event.metaKey) return;
             onSelect(n.id);
           }}
-          onNodeDoubleClick={
-            onOpenNode === undefined
-              ? undefined
-              : (event, n) =>
-                  onOpenNode(n.id, event.currentTarget as HTMLElement)
+          onNodeDoubleClick={(event, n) =>
+            open(n.id, event.currentTarget as HTMLElement)
           }
+          zoomOnDoubleClick={false}
           onEdgeClick={(_event, edge) => {
             if (readOnly) return;
             setSelectedEdge(edge.id);

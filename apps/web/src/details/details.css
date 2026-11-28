@@ -176,3 +176,26 @@
 .popup-notice:empty {
   display: none;
 }
+
+.port-form {
+  display: grid;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.port-form label {
+  display: grid;
+  gap: var(--space-1);
+  font-size: 12px;
+}
+
+.port-form-actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.port-form [role="alert"] {
+  margin: 0;
+  font-size: 12px;
+  color: var(--color-error, #b3261e);
+}

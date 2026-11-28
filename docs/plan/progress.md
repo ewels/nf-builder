@@ -898,6 +898,24 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - No visual baseline changed.
 - Blockers: none.
 
+## 2026-11-28 · F-307 · Claude (autonomous)
+- Did:
+  - Opening workflows (UX-50, UX-40): one shared `openNode` handler for double-click and Enter on an already selected node. A call of a resolved workflow or pipeline opens or focuses its definition's canvas tab; any other node opens F-303's popup. A selected workflow call carries a hidden "Press Enter again to open this workflow" description. A call that can't be opened says why in the canvas notices. Works read-only.
+  - Engine: `EngineApi.calleeWorkflow` resolves aliases (and a pipeline call to its entry workflow) to the definition's `WorkflowRef`; `EngineApi.callPath` gives the shortest call path from the default workflow, used for the breadcrumb when a tab wasn't opened from a canvas. One default-workflow rule, the engine's `defaultWorkflowRef`, picks the opening tab, the breadcrumb root and the tab that can't close.
+  - Breadcrumb: `<nav aria-label="Workflow path">` above the canvas of every workflow tab, ancestors as buttons and the current workflow with `aria-current="page"`; trails are session-only and follow renames.
+  - Closing: workflow tabs close with Delete (`aria-keyshortcuts`) and the pointer-only ×, except the default workflow's tab. The canvas sets `zoomOnDoubleClick={false}`.
+  - Commands: `AddTake` (typed `name: T`, legacy `name`) and `AddEmit` (typed `name: T = null`, legacy `name = null`) from inline forms in the workflow summary. AddTake edits only the definition: each call site gets the new port and Nextflow's arity error until it is connected. AddEmit is refused when the workflow has exactly one emit (callers read the single output directly) and for the name `log` (upstream bug #27: lint passes, the run fails). The forms are hidden for the entry workflow, files without type information and in read-only.
+  - Tests: `e2e/workflow-tabs.spec.ts` (all three steps, Enter on a workflow call and on a process, an aliased call, read-only, CSP); oracle cases `f307-workflow-tabs`, `f307-add-take` (expected arity error), `f307-add-emit`, `f307-add-emit-legacy` and `f307-add-emit-legacy-unnamed` with engine goldens; unit tests in `packages/engine/test/{edit,navigation,canvas,service,history}` and `apps/web/test/`. The edit harness gives `addTake` a multi-step prelude (`createWorkflow`, then `addEmit`).
+  - Visual baselines: 21 re-approved from the CI artifact because the breadcrumb row shortens the canvas pane: the 14 `canvas-node-*` kinds, `canvas-rnaseq-nf-typed-entry` and `-rnaseq`, `connect-mismatch`, `template-hello-world`, `read-only-phone`, `view-modes-split` and `view-modes-split-refused`.
+  - Merged `main` (F-310): kept both sides in the command unions and exports, `EngineApi` (the navigation calls and the clipboard calls), the canvas store and host (`navigationNotice` beside the clipboard state and notice), the details pane and summary props, the oracle cases and the tests. The edit harness keeps one copy of the no-op `updateDeclaration` skip, and its prelude now takes lists, with F-310's `addConfigPlugin` entry. `pnpm check`, `pnpm oracle` and `pnpm test:corpus` pass.
+  - Corrected upstream bug #27's nf-builder line: AddEmit now refuses `log`.
+- State: passing once CI is green.
+- Next: F-304; then pause for the maintainer's MVP testing.
+- Decisions:
+  - [ADR 0068](../adr/0068-workflow-tabs.md): `calleeWorkflow` and `callPath` (amends ADR 0043's API list); closable workflow tabs except the default workflow's (amends ADR 0055); `zoomOnDoubleClick={false}` (amends ADR 0046); the breadcrumb rules; AddTake leaves call sites unfed; AddEmit refused from one emit and for `log`; the forms' placement and read-only rules.
+  - `features.json` (scope-change): new F-316 (M3, depends on F-307) for removing and renaming takes and emits and the workflow Configure popup, from settled point 1.
+  - Updated UX-04, UX-20, UX-21, UX-31, UX-40, UX-50, UX-51, UX-70 and AR-21.
+  - Notes appended to F-303, F-312 and F-701.
 ## 2026-11-28 · F-304 · Claude (autonomous)
 - Did:
   - The edit popup's Code tab is enabled (UX-43): its own Monaco model holding only the declaration, from its doc comment to its trailing comment, loaded as a lazy chunk so Configure-only use loads no Monaco. The details header's Code button opens the popup on the Code tab.

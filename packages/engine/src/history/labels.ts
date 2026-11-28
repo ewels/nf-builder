@@ -16,6 +16,10 @@ export function commandLabel(command: EditCommand): string {
       return `Create process ${command.name}`;
     case "createWorkflow":
       return `Create workflow ${command.name}`;
+    case "addTake":
+      return `Add take ${command.name} to ${command.target.workflow ?? "the entry workflow"}`;
+    case "addEmit":
+      return `Add emit ${command.name} to ${command.target.workflow ?? "the entry workflow"}`;
     case "addCall":
       return `Add call to ${command.callee}`;
     case "connect":

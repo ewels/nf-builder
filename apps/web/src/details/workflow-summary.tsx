@@ -5,18 +5,33 @@ import type {
   WorkflowSummary,
 } from "@nf-builder/engine";
 import type { JSX } from "react";
+import { useState } from "react";
 import { plural } from "../import/import-summary";
+import { PortForm } from "./port-form";
 
 function Ports({
   title,
   ports,
   showNone = false,
+  add,
 }: {
   readonly title: string;
   readonly ports: readonly SummaryPort[];
   /** Say "None" when there are no ports, rather than leave the section out. */
   readonly showNone?: boolean;
+  /** Adds a port of this section; left out when the workflow can't take one (F-307, UX-51). */
+  readonly add?: {
+    readonly role: "take" | "emit";
+    readonly typed: boolean;
+    readonly workflow: string;
+    readonly onAdd: (
+      name: string,
+      type: string | null,
+    ) => Promise<string | null>;
+  };
 }): JSX.Element | null {
+  const [open, setOpen] = useState(false);
+  const [announced, setAnnounced] = useState("");
   if (ports.length === 0 && !showNone) return null;
   return (
     <section className="details-section">
@@ -32,6 +47,36 @@ function Ports({
             </li>
           ))}
         </ul>
+      )}
+      {add === undefined ? null : (
+        <>
+          <button
+            type="button"
+            className="details-add-port"
+            aria-expanded={open}
+            onClick={() => setOpen(true)}
+          >
+            {`Add ${add.role}`}
+          </button>
+          {open ? (
+            <PortForm
+              role={add.role}
+              typed={add.typed}
+              onCancel={() => setOpen(false)}
+              onSubmit={async (name, type) => {
+                const problem = await add.onAdd(name, type);
+                if (problem === null) {
+                  setOpen(false);
+                  setAnnounced(`Added ${add.role} ${name} to ${add.workflow}.`);
+                }
+                return problem;
+              }}
+            />
+          ) : null}
+          <p className="visually-hidden" role="status" aria-live="polite">
+            {announced}
+          </p>
+        </>
       )}
     </section>
   );
@@ -52,6 +97,7 @@ export function WorkflowSummaryView({
   onShowSuggestions,
   configPath,
   onOpenConfig,
+  onAddPort,
   pasteNodes = null,
   onPaste,
 }: {
@@ -65,8 +111,27 @@ export function WorkflowSummaryView({
   /** The project's root `nextflow.config`, when it has one: the entry workflow's summary links it (F-601). */
   readonly configPath?: string;
   readonly onOpenConfig?: (path: string) => void;
+  /**
+   * Adds a take or an emit to this workflow and resolves to the refusal's message, or null (F-307, UX-51). Left out
+   * read-only (F-703); the forms also stay away from the entry workflow and from a file that didn't parse.
+   */
+  readonly onAddPort?: (
+    role: "take" | "emit",
+    name: string,
+    type: string | null,
+  ) => Promise<string | null>;
 }): JSX.Element {
   const first = suggestions?.[0];
+  const addTo = (role: "take" | "emit") =>
+    onAddPort === undefined || summary.typed === null
+      ? undefined
+      : {
+          role,
+          typed: summary.typed,
+          workflow: summary.name,
+          onAdd: (name: string, type: string | null) =>
+            onAddPort(role, name, type),
+        };
   return (
     <div className="details-summary">
       <h3 className="details-name">{summary.name}</h3>
@@ -116,8 +181,18 @@ export function WorkflowSummaryView({
         </>
       ) : (
         <>
-          <Ports title="Take" ports={summary.takes} showNone />
-          <Ports title="Emit" ports={summary.emits} showNone />
+          <Ports
+            title="Take"
+            ports={summary.takes}
+            showNone
+            add={addTo("take")}
+          />
+          <Ports
+            title="Emit"
+            ports={summary.emits}
+            showNone
+            add={addTo("emit")}
+          />
         </>
       )}
       <section className="details-section">

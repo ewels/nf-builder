@@ -109,6 +109,10 @@ export const visibleControls = (page: Page): Promise<string[]> =>
         found.add("switcher");
         continue;
       }
+      if (el.closest(".breadcrumb") !== null) {
+        found.add("breadcrumb");
+        continue;
+      }
       if (el.classList.contains("problem-go")) {
         found.add("problem");
         continue;
@@ -133,6 +137,7 @@ export const READ_ONLY_ALLOWED: readonly RegExp[] = [
   /^node$/,
   /^edge$/,
   /^switcher$/,
+  /^breadcrumb$/, // an ancestor in a workflow tab's path: opens a tab (F-307)
   /^tab: /, // the workflow tabs
   /^button: (Zoom in|Zoom out|Fit view|Port labels)$/,
   /^a: React Flow attribution$/,

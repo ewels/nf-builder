@@ -179,6 +179,26 @@ describe("F-205 canvas view", () => {
     }
   });
 
+  it("F-307 UX-22 UX-50: opens is true for resolved workflow and pipeline calls only", () => {
+    const rows: [Partial<Callee>, boolean][] = [
+      [{ kind: "workflow" }, true],
+      [{ kind: "pipeline" }, true],
+      [{ kind: "process" }, false],
+      [{ kind: "agent" }, false],
+      [{ kind: "workflow", status: "unparsed" }, false],
+      [{ kind: "workflow", status: "unresolved", path: null }, false],
+    ];
+    for (const [c, opens] of rows)
+      expect(one(call("a", c)).opens, JSON.stringify(c)).toBe(opens);
+    const factory = {
+      ...base("f", "channel.of", [], [port("out")]),
+      kind: "factory",
+      namespace: "channel",
+      factory: "of",
+    } as GraphNode;
+    expect(one(factory).opens).toBe(false);
+  });
+
   it("F-205 UX-22: a registry callee's subtitle is its module name", () => {
     const v = one(call("a", { module: "nf-core/fastqc" }));
     expect([v.appearance, v.subtitle]).toEqual(["module", "nf-core/fastqc"]);

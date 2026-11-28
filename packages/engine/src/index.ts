@@ -2,7 +2,9 @@ export type {
   AddCall,
   AddConfigBlock,
   AddConfigPlugin,
+  AddEmit,
   AddInclude,
+  AddTake,
   Callee,
   CallNode,
   ChainNode,
@@ -185,6 +187,7 @@ export {
   ProjectModel,
   type ProjectModelOptions,
 } from "./model/project";
+export { defaultWorkflowRef } from "./navigation";
 export { installedPackVersions } from "./packs";
 export { loadPalette } from "./palette";
 export { type PaletteAction, paletteAction } from "./palette-actions";
@@ -242,6 +245,8 @@ export type {
   Applied,
   ApplyOptions,
   ApplyOutcome,
+  CalleeRequest,
+  CallPathResult,
   ClipboardSummary,
   ConfigViewResult,
   ConnectionTargetsRequest,

@@ -29,6 +29,13 @@ export const inputHandle = (port: Pick<CanvasPortView, "id">): string =>
 export const outputHandle = (port: Pick<CanvasPortView, "id">): string =>
   `out:${port.id}`;
 
+/** The id of the hidden hint a selected workflow call carries (F-307, UX-50, QA-11). */
+export const openHintId = (node: string): string =>
+  `open-hint-${node.replace(/\s/g, "_")}`;
+
+/** React Flow's own description element of its first (only) canvas; a workflow call adds the hint to it. */
+const NODE_DESCRIPTION_ID = "react-flow__node-desc-1";
+
 export function toFlowNodes(
   view: CanvasView,
   portLabels: boolean,
@@ -41,6 +48,13 @@ export function toFlowNodes(
     initialHeight: n.height,
     data: { view: n, portLabels },
     ariaLabel: n.ariaLabel,
+    ...(n.opens
+      ? {
+          domAttributes: {
+            "aria-describedby": `${NODE_DESCRIPTION_ID} ${openHintId(n.id)}`,
+          },
+        }
+      : {}),
   }));
 }
 

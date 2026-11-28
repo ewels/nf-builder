@@ -43,6 +43,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-505 registry plugins | merged, PR #64 | Plan deleted in its PR. |
 | F-303 edit popup | merged, PR #65 | Plan deleted in its PR. |
 | F-310 clipboard | merged, PR #66 | Plan deleted in its PR. |
+| F-307 workflow tabs | merged, PR #67 | Plan deleted in its PR. |
 | F-304 popup Code tab | merged, PR #68 | Plan deleted in its PR. |
 
 ## Merge order
@@ -344,7 +345,7 @@ ADR numbers reserved for features in flight, so parallel branches don't clash: 0
 ### F-302 — plan deleted
 - Accept every recommendation in section 6. Start after F-301 merges. ADR number: the next free one when F-302 starts.
 
-### F-307 — [plan](plan-F-307.md)
+### F-307 — plan deleted
 - Accept every recommendation in section 6: the new feature for removing and renaming takes and emits (point 1) is added in F-307's PR with `scope-change`. Start after F-301 merges. ADR number: the next free one when F-307 starts.
 
 ### F-303 — plan deleted

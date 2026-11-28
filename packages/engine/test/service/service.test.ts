@@ -476,3 +476,79 @@ describe("F-209 AR-23 guarded history", () => {
     });
   });
 });
+
+describe("F-307 workflow navigation", () => {
+  const nav = [
+    {
+      path: "main.nf",
+      text: "include { W } from './w.nf'\ninclude { P } from './p.nf'\n\nworkflow {\n    W()\n    P()\n}\n",
+    },
+    {
+      path: "w.nf",
+      text: "workflow W {\n    main:\n    channel.of(1).view()\n}\n",
+    },
+    { path: "p.nf", text: proc("P") },
+  ];
+  const nodeId = (
+    projection: ProjectionResult | EngineRefusal,
+    label: string,
+  ) => {
+    const node = nodes(projection).find((n) => n.label === label);
+    if (!node) throw new Error(`no node ${label}`);
+    return node.id;
+  };
+
+  it("F-307: calleeWorkflow and callPath refuse with no project or an unknown node; results survive structuredClone", async () => {
+    const service = createEngineService();
+    const none = { path: "main.nf", workflow: null };
+    expect(await service.calleeWorkflow({ ...none, node: "x" })).toMatchObject({
+      ok: false,
+      code: "no-project",
+    });
+    expect(await service.callPath(none)).toMatchObject({
+      ok: false,
+      code: "no-project",
+    });
+    await service.open({ version, files: nav });
+    const projection = await service.project("main.nf", null);
+    expect(
+      await service.calleeWorkflow({ ...none, node: "main.nf#/nope" }),
+    ).toMatchObject({ ok: false, code: "not-found" });
+    expect(
+      await service.calleeWorkflow({
+        path: "nope.nf",
+        workflow: null,
+        node: "x",
+      }),
+    ).toMatchObject({ ok: false, code: "not-found" });
+    const process = await service.calleeWorkflow({
+      ...none,
+      node: nodeId(projection, "P"),
+    });
+    expect(process).toMatchObject({
+      ok: false,
+      code: "not-found",
+      message: "P is a process.",
+    });
+    const opened = await service.calleeWorkflow({
+      ...none,
+      node: nodeId(projection, "W"),
+    });
+    expect(opened).toMatchObject({ path: "w.nf", name: "W", modelled: true });
+    expect(structuredClone(opened)).toEqual(opened);
+    const trail = await service.callPath({ path: "w.nf", workflow: "W" });
+    if (!("trail" in trail)) throw new Error("refused");
+    expect(trail.trail.map((w) => [w.path, w.name])).toEqual([
+      ["main.nf", null],
+    ]);
+    expect(structuredClone(trail)).toEqual(trail);
+    const entry = await service.callPath(none);
+    expect(entry).toMatchObject({ trail: [] });
+    expect(
+      await service.callPath({ path: "nope.nf", workflow: null }),
+    ).toMatchObject({
+      ok: false,
+      code: "not-found",
+    });
+  });
+});

@@ -12,6 +12,7 @@ import { ConnectTargetsContext } from "./connect-targets";
 import {
   type CanvasFlowNode,
   inputHandle,
+  openHintId,
   outputHandle,
 } from "./flow-elements";
 
@@ -64,6 +65,22 @@ const TARGET_TITLES = {
 function useTargetStatus(node: string, port: string) {
   const status = useContext(ConnectTargetsContext)?.get(node)?.get(port);
   return status === "refused" || status === "mismatch" ? status : null;
+}
+
+/** What a selected workflow call adds to its description: the second Enter opens it (F-307, UX-50). */
+function OpenHint({
+  data,
+  selected,
+}: {
+  data: NodeData;
+  selected: boolean;
+}): JSX.Element | null {
+  if (!selected || !data.view.opens) return null;
+  return (
+    <span className="visually-hidden" id={openHintId(data.view.id)}>
+      Press Enter again to open this workflow
+    </span>
+  );
 }
 
 function Handles({ data }: { data: NodeData }): JSX.Element {
@@ -177,7 +194,10 @@ function InputLabel({
   );
 }
 
-export function CardNode({ data }: NodeProps<CanvasFlowNode>): JSX.Element {
+export function CardNode({
+  data,
+  selected,
+}: NodeProps<CanvasFlowNode>): JSX.Element {
   const { view } = data;
   const dimmed = useDimmed(data);
   return (
@@ -206,6 +226,7 @@ export function CardNode({ data }: NodeProps<CanvasFlowNode>): JSX.Element {
       </div>
       <PortRows data={data} />
       <Handles data={data} />
+      <OpenHint data={data} selected={selected} />
     </div>
   );
 }

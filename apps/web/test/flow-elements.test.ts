@@ -2,6 +2,7 @@ import type { CanvasView } from "@nf-builder/engine";
 import { describe, expect, it } from "vitest";
 import {
   inputHandle,
+  openHintId,
   outputHandle,
   toFlowEdges,
   toFlowNodes,
@@ -17,6 +18,7 @@ const view: CanvasView = {
       title: "A",
       subtitle: "process",
       badge: null,
+      opens: false,
       inputs: [{ id: "x", label: "x", type: null }],
       outputs: [{ id: "out", label: "out", type: null }],
       ariaLabel: "A, process, 1 input, 1 output",
@@ -34,6 +36,7 @@ const view: CanvasView = {
       title: "r",
       subtitle: "emit",
       badge: null,
+      opens: false,
       inputs: [{ id: "in", label: "in", type: null }],
       outputs: [],
       ariaLabel: "r, emit, 1 input, 0 outputs",
@@ -157,5 +160,20 @@ describe("F-205 flow elements", () => {
       selectedEdge: "nope",
     });
     expect(other?.domAttributes).toEqual({ "aria-pressed": false });
+  });
+});
+
+describe("F-307 UX-50: the open hint", () => {
+  it("F-307 UX-50: a workflow call's node is described by the default description and the hint; other nodes keep the default", () => {
+    const [first] = view.nodes;
+    if (first === undefined) throw new Error("no node");
+    const nodes = toFlowNodes(
+      { ...view, nodes: [{ ...first, opens: true }, ...view.nodes.slice(1)] },
+      true,
+    );
+    expect(nodes[0]?.domAttributes?.["aria-describedby"]).toBe(
+      `react-flow__node-desc-1 ${openHintId(first.id)}`,
+    );
+    expect(nodes[1]?.domAttributes).toBeUndefined();
   });
 });

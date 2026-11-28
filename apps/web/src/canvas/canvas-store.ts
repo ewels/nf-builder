@@ -7,6 +7,7 @@ import {
   type ClipboardSummary,
   type ConnectionTarget,
   canvasView,
+  defaultWorkflowRef,
   type EditCommand,
   EMPTY_HISTORY,
   type EngineApi,
@@ -42,6 +43,14 @@ import { fileEditorOf, openTargetOf } from "../files/file-kinds";
 import { isReadOnly, READ_ONLY_REFUSAL } from "../read-only/read-only-store";
 import { modesFor, type ViewMode } from "../views/view-mode";
 
+/** One ancestor in a workflow tab's breadcrumb (F-307, UX-50): where it opens, and what it is called. */
+export interface Crumb {
+  readonly path: string;
+  /** Null for the entry workflow. */
+  readonly workflow: string | null;
+  readonly label: string;
+}
+
 export interface WorkflowTab {
   /** `<path>#<workflow>`, the empty name for the entry workflow (the projection key prefix, ADR 0036); `file:<path>` for a file tab, `config:<path>` for a config tab (F-601). */
   readonly id: string;
@@ -57,6 +66,8 @@ export interface WorkflowTab {
   readonly mode: ViewMode;
   /** Why a file tab can't be edited (F-210, IO-02), or null. Always null for a workflow tab. */
   readonly readOnly: ReadOnlyReason | null;
+  /** The path from the entry workflow to this one, ancestors first; empty for the entry. Workflow tabs only (F-307, UX-50). Session only. */
+  readonly trail?: readonly Crumb[];
 }
 
 export type CanvasContent =
@@ -134,6 +145,8 @@ export interface WorkspaceState {
   readonly focusNode: { readonly id: string; readonly seq: number } | null;
   /** Why the last connect or disconnect was refused; the next change to the project clears it (F-302). */
   readonly canvasNotice: string | null;
+  /** Why the last attempt to open a workflow from a call node was refused; the next load clears it (F-307). */
+  readonly navigationNotice: string | null;
   /** What the engine's clipboard holds, as a summary: never the copied text (AR-30, F-310). */
   readonly clipboard: ClipboardSummary | null;
   /** A paste that needs new names, waiting for the user to confirm them (F-310, ADR 0039). */
@@ -159,7 +172,16 @@ export interface WorkspaceActions {
   projectGone(): void;
   /** The engine changed the open project: re-project the active tab, or open the default workflow of a blank project. */
   changed(change: ProjectChange): Promise<void>;
+  /**
+   * Opens a workflow's canvas tab, or focuses it. A new tab's breadcrumb is the engine's shortest call path from the
+   * default workflow, empty when it isn't reachable; an open tab keeps its own (F-307, UX-50).
+   */
   openWorkflow(path: string, workflow: string | null): Promise<void>;
+  /**
+   * Opens the definition of the call node `node` of the active workflow tab, or focuses it. The new tab's breadcrumb is
+   * the active tab's plus the active tab. A refusal sets `navigationNotice` (F-307, UX-50). Works read-only.
+   */
+  openCallee(node: string): Promise<OpenCalleeOutcome>;
   /**
    * Opens a code-only tab for a file, once per path, and shows it (F-309, UX-20). A `.nf` file that has a workflow opens
    * that workflow's canvas tab instead. F-210, F-605 and F-601 open files through this.
@@ -170,7 +192,10 @@ export interface WorkspaceActions {
    * text file in a file tab, and a path that isn't in the project nowhere. Preview links and the Files view use it.
    */
   openPath(path: string): Promise<"workflow" | "file" | "missing">;
-  /** Closes a file tab (F-210); the previous tab takes over, else the next, else none. Workflow tabs stay open (F-307). */
+  /**
+   * Closes a tab (F-210); the previous tab takes over, else the next, else none. The default workflow's tab stays open,
+   * since the breadcrumb leads back to it (F-307, ADR 0055).
+   */
   closeTab(id: string): Promise<void>;
   /** Asks the file's code editor to select and scroll to a range; the editor shows it when it is mounted (F-309). */
   revealCode(path: string, range: { start: number; end: number }): void;
@@ -314,6 +339,9 @@ export type PaletteAddOutcome =
     }
   | { readonly ok: false; readonly message: string };
 
+export type OpenCalleeOutcome =
+  | { readonly ok: true; readonly tab: string }
+  | { readonly ok: false; readonly message: string };
 /** The popup's edit of a typed process (F-303). */
 export interface DeclarationEdit {
   /** The declaration's file and name, as the form was read. */
@@ -356,15 +384,18 @@ export type PluginAddOutcome =
   | { readonly ok: true; readonly id: string; readonly version: string }
   | { readonly ok: false; readonly message: string };
 
-/** The workflow a project opens with: main.nf's entry, else the first entry workflow, else the first named one. */
-export function defaultWorkflow(
+/**
+ * Whether a tab can be closed: a file or config tab always; a workflow tab unless it is the project's default workflow,
+ * the one the project opens with (the engine's `defaultWorkflowRef`).
+ */
+export function closesTab(
+  tab: WorkflowTab,
   workflows: readonly WorkflowRef[],
-): WorkflowRef | null {
+): boolean {
+  if (isFileLike(tab)) return true;
+  const home = defaultWorkflowRef(workflows);
   return (
-    workflows.find((w) => w.name === null && w.path === "main.nf") ??
-    workflows.find((w) => w.name === null) ??
-    workflows[0] ??
-    null
+    home !== null && !(tab.path === home.path && tab.workflow === home.name)
   );
 }
 
@@ -409,10 +440,13 @@ export function configTabFor(path: string): WorkflowTab {
 export const isFileLike = (tab: { readonly kind: string }): boolean =>
   tab.kind !== "workflow";
 
-export function tabFor(ref: {
-  readonly path: string;
-  readonly name: string | null;
-}): WorkflowTab {
+export function tabFor(
+  ref: {
+    readonly path: string;
+    readonly name: string | null;
+  },
+  trail: readonly Crumb[] = [],
+): WorkflowTab {
   return {
     id: `${ref.path}#${ref.name ?? ""}`,
     kind: "workflow",
@@ -421,7 +455,29 @@ export function tabFor(ref: {
     label: ref.name ?? fileName(ref.path),
     mode: "graph",
     readOnly: null,
+    trail,
   };
+}
+
+/** The breadcrumb entry of a workflow tab. */
+const crumbOf = (tab: WorkflowTab): Crumb => ({
+  path: tab.path,
+  workflow: tab.workflow,
+  label: tab.label,
+});
+
+/** A trail through a change: crumbs of renamed workflows follow the rename, those of vanished ones are dropped (F-307). */
+function carriedTrail(
+  trail: readonly Crumb[],
+  renamed: ReadonlyMap<string, WorkflowRef>,
+  workflows: readonly WorkflowRef[],
+): readonly Crumb[] {
+  return trail.flatMap((c) => {
+    const now =
+      renamed.get(`${c.path}#${c.workflow ?? ""}`) ??
+      workflows.find((w) => w.path === c.path && w.name === c.workflow);
+    return now === undefined ? [] : [crumbOf(tabFor(now))];
+  });
 }
 
 const CONFIG_PATH = "nextflow.config";
@@ -625,15 +681,19 @@ export function createCanvasStore(
       // a file tab has no projection: its code pane reads the file itself
       if (isFileLike(tab)) {
         clearSelection();
-        set({ activeTab: tab.id, content: EMPTY });
+        set({ activeTab: tab.id, content: EMPTY, navigationNotice: null });
         return;
       }
       if (!quiet) clearSelection();
       // a refresh keeps the canvas on screen (and its viewport) until the new projection arrives
       set(
         quiet
-          ? { activeTab: tab.id }
-          : { activeTab: tab.id, content: { status: "loading" } },
+          ? { activeTab: tab.id, navigationNotice: null }
+          : {
+              activeTab: tab.id,
+              content: { status: "loading" },
+              navigationNotice: null,
+            },
       );
       let content: CanvasContent;
       try {
@@ -1062,10 +1122,36 @@ export function createCanvasStore(
     };
 
     /** Adds `tab` once and shows it. */
+    /** The breadcrumb of a workflow opened without a caller: the engine's shortest call path, none when it fails (F-307). */
+    async function trailTo(tab: WorkflowTab): Promise<readonly Crumb[]> {
+      try {
+        const result = await engine().callPath({
+          path: tab.path,
+          workflow: tab.workflow,
+        });
+        if ("ok" in result) return [];
+        return result.trail.map((w) => crumbOf(tabFor(w)));
+      } catch {
+        return [];
+      }
+    }
+
     async function openTab(tab: WorkflowTab): Promise<void> {
-      if (!get().tabs.some((t) => t.id === tab.id))
-        set({ tabs: [...get().tabs, tab] });
-      await load(tab);
+      const isNew = !get().tabs.some((t) => t.id === tab.id);
+      if (isNew) set({ tabs: [...get().tabs, tab] });
+      const loading = load(tab);
+      if (isNew && tab.kind === "workflow") {
+        // the tab is already open and loading; its breadcrumb arrives when the engine has answered
+        const mine = get().session;
+        const trail = await trailTo(tab);
+        if (get().session === mine && trail.length > 0)
+          set({
+            tabs: get().tabs.map((t) =>
+              t.id === tab.id ? { ...t, trail } : t,
+            ),
+          });
+      }
+      await loading;
     }
 
     async function stepHistory(
@@ -1190,6 +1276,7 @@ export function createCanvasStore(
       reveal: null,
       focusNode: null,
       canvasNotice: null,
+      navigationNotice: null,
       clipboard: null,
       pendingPaste: null,
       clipboardNotice: null,
@@ -1208,7 +1295,7 @@ export function createCanvasStore(
         pendingMove = null;
         pendingPlacement = null;
         clearSelection();
-        const first = defaultWorkflow(summary.workflows);
+        const first = defaultWorkflowRef(summary.workflows);
         const tab = first === null ? null : tabFor(first);
         set({
           source,
@@ -1224,6 +1311,7 @@ export function createCanvasStore(
           reveal: null,
           focusNode: null,
           canvasNotice: null,
+          navigationNotice: null,
           pendingPaste: null,
           clipboardNotice: null,
         });
@@ -1249,6 +1337,7 @@ export function createCanvasStore(
           reveal: null,
           focusNode: null,
           canvasNotice: null,
+          navigationNotice: null,
           pendingPaste: null,
           clipboardNotice: null,
         });
@@ -1286,7 +1375,15 @@ export function createCanvasStore(
           .filter((t) => !(isFileLike(t) && deleted.has(t.path)))
           .map((t) => {
             const to = renamed.get(t.id);
-            return to === undefined ? t : { ...tabFor(to), mode: t.mode };
+            if (isFileLike(t)) return t;
+            const trail = carriedTrail(
+              t.trail ?? [],
+              renamed,
+              change.workflows,
+            );
+            return to === undefined
+              ? { ...t, trail }
+              : { ...tabFor(to, trail), mode: t.mode };
           });
         const current = followed.get(get().activeTab ?? "") ?? get().activeTab;
         const moved = current === null ? undefined : renamed.get(current);
@@ -1338,7 +1435,7 @@ export function createCanvasStore(
           else pruneSelection();
           return;
         }
-        const first = defaultWorkflow(change.workflows);
+        const first = defaultWorkflowRef(change.workflows);
         if (first === null) return;
         const tab = tabFor(first);
         set({ tabs: [tab] });
@@ -1348,10 +1445,44 @@ export function createCanvasStore(
       openWorkflow: (path, workflow) =>
         openTab(tabFor({ path, name: workflow })),
 
+      async openCallee(node) {
+        const { tabs, activeTab, session } = get();
+        const active = tabs.find((t) => t.id === activeTab);
+        if (active === undefined || isFileLike(active))
+          return { ok: false, message: "Open a workflow tab first." };
+        let result: Awaited<ReturnType<EngineApi["calleeWorkflow"]>>;
+        try {
+          result = await engine().calleeWorkflow({
+            path: active.path,
+            workflow: active.workflow,
+            node,
+          });
+        } catch (error) {
+          result = refusal("internal", messageOf(error));
+        }
+        if (get().session !== session)
+          return { ok: false, message: "The project changed." };
+        if ("ok" in result) {
+          set({ navigationNotice: result.message });
+          return { ok: false, message: result.message };
+        }
+        // the path the user took replaces whatever trail an open tab had
+        const tab = tabFor(result, [...(active.trail ?? []), crumbOf(active)]);
+        set({
+          tabs: get().tabs.some((t) => t.id === tab.id)
+            ? get().tabs.map((t) =>
+                t.id === tab.id ? { ...t, trail: tab.trail } : t,
+              )
+            : [...get().tabs, tab],
+        });
+        await load(get().tabs.find((t) => t.id === tab.id) ?? tab);
+        return { ok: true, tab: tab.id };
+      },
+
       async openFile(path) {
         const { summary } = get();
         if (summary === null) return;
-        const workflow = defaultWorkflow(
+        const workflow = defaultWorkflowRef(
           summary.workflows.filter((w) => w.path === path),
         );
         const language = languageOf(path);
@@ -1387,10 +1518,11 @@ export function createCanvasStore(
       },
 
       async closeTab(id) {
-        const { tabs, activeTab } = get();
+        const { tabs, activeTab, summary } = get();
         const at = tabs.findIndex((t) => t.id === id);
         const tab = tabs[at];
-        if (tab === undefined || !isFileLike(tab)) return;
+        if (tab === undefined) return;
+        if (!closesTab(tab, summary?.workflows ?? [])) return;
         const rest = tabs.filter((t) => t.id !== id);
         set({ tabs: rest });
         if (activeTab !== id) return;
