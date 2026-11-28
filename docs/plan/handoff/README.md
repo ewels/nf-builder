@@ -31,7 +31,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-501 registry snapshot | merged, PR #29; passing | Confirmed on live data after the snapshot-triggered Pages deploy. |
 | F-011 GitHub Pages hosting | merged, PR #37 | Live at https://ewels.github.io/nf-builder/; first `verify` passed. |
 | F-703 read-only below 1024 px | merged, PR #53 | Plan deleted in its PR. |
-| F-401 GitHub import | merged, PR #TBD | Plan deleted in its PR. |
+| F-401 GitHub import | merged, PR #55 | Plan deleted in its PR. |
 
 ## Merge order
 
