@@ -9,6 +9,7 @@ import {
   ConnectTargetsContext,
   type TargetStatusMap,
 } from "../src/canvas/connect-targets";
+import { openHintId } from "../src/canvas/flow-elements";
 
 (
   globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }
@@ -48,15 +49,22 @@ const view: CanvasNodeView = {
   rowHeight: 20,
 };
 
-function render(targets: TargetStatusMap | null): void {
+function render(
+  targets: TargetStatusMap | null,
+  options: { selected?: boolean; opens?: boolean } = {},
+): void {
   act(() =>
     root.render(
       <ReactFlowProvider>
         <ConnectTargetsContext.Provider value={targets}>
           <CardNode
-            {...({ data: { view, portLabels: true } } as unknown as Parameters<
-              typeof CardNode
-            >[0])}
+            {...({
+              selected: options.selected === true,
+              data: {
+                view: { ...view, opens: options.opens === true },
+                portLabels: true,
+              },
+            } as unknown as Parameters<typeof CardNode>[0])}
           />
         </ConnectTargetsContext.Provider>
       </ReactFlowProvider>,
@@ -125,5 +133,15 @@ describe("F-302 canvas nodes", () => {
       ]),
     );
     expect(host.querySelector(".is-target-refused")).toBeNull();
+  });
+
+  it("F-307 UX-50 QA-11: a selected workflow call carries a hidden hint that Enter opens it; other nodes and unselected calls carry none", () => {
+    const hint = () => host.querySelector(`[id="${openHintId(view.id)}"]`);
+    render(null, { selected: true, opens: true });
+    expect(hint()?.textContent).toBe("Press Enter again to open this workflow");
+    render(null, { selected: false, opens: true });
+    expect(hint()).toBeNull();
+    render(null, { selected: true, opens: false });
+    expect(hint()).toBeNull();
   });
 });
