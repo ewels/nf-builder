@@ -2,6 +2,7 @@ import type { JSX, ReactNode } from "react";
 import { CanvasHost } from "../canvas/canvas-host";
 import { useWorkspace, type WorkflowTab } from "../canvas/canvas-store";
 import { CodePane } from "../code/code-pane";
+import { ConfigPane } from "../config/config-pane";
 import { fileEditorOf } from "../files/file-kinds";
 import { MarkdownPane } from "../markdown/markdown-pane";
 import { useReadOnly } from "../read-only/read-only-store";
@@ -80,13 +81,16 @@ export function TabPanel(): JSX.Element {
       aria-labelledby={workflowTabId(tab.id)}
       data-view-mode={mode}
     >
-      {tab.kind === "file" && fileMode === null ? (
+      {(tab.kind === "file" && fileMode === null) ||
+      (tab.kind === "config" && readOnly) ? (
         <ReadOnlyFileNote />
       ) : (
         <PanelLayout
           mode={mode}
           visual={
-            tab.kind === "file" ? (
+            tab.kind === "config" ? (
+              <ConfigPane key={`form:${session}:${tab.path}`} path={tab.path} />
+            ) : tab.kind === "file" ? (
               <MarkdownPane
                 key={`preview:${session}:${tab.path}`}
                 path={tab.path}

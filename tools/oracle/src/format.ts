@@ -185,7 +185,9 @@ function listFiles(dir: string, prefix = ""): string[] {
   return out;
 }
 
-const isScript = (path: string): boolean => path.endsWith(".nf");
+/** A file `lint -format` formats: a script or a config (F-601). */
+const isScript = (path: string): boolean =>
+  path.endsWith(".nf") || path.endsWith(".config");
 
 /** The first line where the texts differ, and a unified diff of the lines between the common prefix and suffix. */
 function diffOf(

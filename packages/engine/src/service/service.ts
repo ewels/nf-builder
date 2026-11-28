@@ -3,6 +3,8 @@
 import type {
   Catalogue,
   CommandResult,
+  ConfigRules,
+  ConfigSourceFile,
   EditCommand,
   FileText,
   PackLints,
@@ -11,6 +13,10 @@ import type {
   TextPatch,
   WorkflowRef,
 } from "@nf-builder/lang-core";
+import { configSchema } from "../config/schema";
+import type { ConfigSchema, ProcessUses } from "../config/types";
+import { processUses } from "../config/uses";
+import { configView } from "../config/view";
 import { nodeDetails } from "../details/details";
 import { fileOutline } from "../details/outline";
 import { createDiagnoser, type Diagnoser } from "../diagnostics/diagnose";
@@ -51,6 +57,7 @@ import {
   writePositions,
 } from "../layout";
 import { inRange } from "../layout/sidecar";
+import type { ConfigIncludeModel } from "../model/file-model";
 import type { ModelEvent, ProjectModel } from "../model/project";
 import { installedPacks } from "../packs";
 import { loadPalette } from "../palette";
@@ -60,6 +67,7 @@ import { templateList } from "../templates";
 import type {
   ApplyOptions,
   ApplyOutcome,
+  ConfigViewResult,
   ConnectionTargetsResult,
   DiagnosticsResult,
   EngineApi,
@@ -87,6 +95,7 @@ interface Open {
   readonly state: EditState;
   readonly lints: PackLints;
   readonly catalogue: Catalogue;
+  readonly configRules: ConfigRules;
   readonly history: History;
   /** The revision this project was opened at, or last partly changed at; no fix diagnosed earlier applies (F-309). */
   openedAt: number;
@@ -94,6 +103,8 @@ interface Open {
   readonly changedAt: Map<string, number>;
   projector?: Projector;
   diagnoser?: Diagnoser;
+  /** The processes the entry workflow reaches, for selector counts; dropped whenever the revision moves (F-601). */
+  uses?: ProcessUses;
   /** Projections built at the current revision, by `path#workflow`; dropped whenever the revision moves (F-207). */
   memo: Map<string, Projection | null>;
   /** The sidecar's entries; empty when it is absent, invalid or newer. */
@@ -285,6 +296,7 @@ export function createEngineService(
     revision += 1;
     open.projector = undefined;
     open.diagnoser = undefined;
+    open.uses = undefined;
     open.memo = new Map();
   };
 
@@ -459,6 +471,8 @@ export function createEngineService(
     };
   };
 
+  const schemas = new Map<string, ConfigSchema>();
+
   return {
     palette: (version) => serial(() => loadPalette(version)),
     templates: (version) => serial(() => templateList(version)),
@@ -488,12 +502,15 @@ export function createEngineService(
         const lints = await loadLints(request.version);
         const pack = installedPacks.find((p) => p.version === request.version);
         const catalogue = await pack?.loadCatalogue();
-        if (!catalogue) throw new Error(`No pack for ${request.version}`);
+        if (!catalogue || !pack)
+          throw new Error(`No pack for ${request.version}`);
+        const configRules = await pack.loadConfigRules();
         const open: Open = {
           version: request.version,
           state,
           lints,
           catalogue,
+          configRules,
           history: new History(options.historyLimits),
           openedAt: revision + 1,
           changedAt: new Map(),
@@ -707,6 +724,44 @@ export function createEngineService(
             node,
           ),
         };
+      }),
+
+    configView: (path) =>
+      guarded((open): ConfigViewResult | EngineRefusal => {
+        const file = open.state.model.file(path);
+        if (!file || file.source.language !== "config")
+          return {
+            ...refusal("not-found", `${path} isn't a config file.`),
+            path,
+          };
+        open.uses ??= processUses(open.state.model);
+        return {
+          revision,
+          view: configView({
+            file: file.source as ConfigSourceFile,
+            rules: open.configRules,
+            uses: open.uses,
+            diagnostics: diagnoserOf(open).file(path),
+            includes: file.includes.filter(
+              (i): i is ConfigIncludeModel => i.kind === "config",
+            ),
+          }),
+        };
+      }),
+
+    configSchema: (version) =>
+      serial(async () => {
+        const known = schemas.get(version);
+        if (known) return known;
+        const pack = installedPacks.find((p) => p.version === version);
+        if (!pack) throw new Error(`No language pack for ${version}`);
+        const [catalogue, rules] = await Promise.all([
+          pack.loadCatalogue(),
+          pack.loadConfigRules(),
+        ]);
+        const schema = configSchema(version, catalogue.config, rules);
+        schemas.set(version, schema);
+        return schema;
       }),
 
     outline: (path) =>

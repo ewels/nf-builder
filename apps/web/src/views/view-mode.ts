@@ -21,12 +21,20 @@ export const MARKDOWN_MODES: readonly ModeOption[] = [
   { mode: "code", label: "Code", key: "c" },
 ];
 
-/** The modes a tab offers (UX-27): Graph, Split, Code for a workflow; Preview, Split, Code for Markdown; none for other files, which show code only. */
+/** A config tab shows its form where a workflow tab shows the graph (F-601, UX-27). */
+export const CONFIG_MODES: readonly ModeOption[] = [
+  { mode: "graph", label: "Form", key: "g" },
+  { mode: "split", label: "Split", key: "s" },
+  { mode: "code", label: "Code", key: "c" },
+];
+
+/** The modes a tab offers (UX-27): Graph, Split, Code for a workflow; Form, Split, Code for a config; Preview, Split, Code for Markdown; none for other files, which show code only. */
 export function modesFor(
-  kind: "workflow" | "file",
+  kind: "workflow" | "file" | "config",
   path: string,
 ): readonly ModeOption[] {
   if (kind === "workflow") return VIEW_MODES;
+  if (kind === "config") return CONFIG_MODES;
   return fileEditorOf(path) === "markdown" ? MARKDOWN_MODES : [];
 }
 

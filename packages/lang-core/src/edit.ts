@@ -68,6 +68,92 @@ export interface ReplaceFileText {
   readonly text: string;
 }
 
+/** A process selector as the form addresses it (F-601, FI-06): `withLabel: big_mem`. */
+export interface ConfigSelectorRef {
+  readonly kind: "withName" | "withLabel";
+  readonly pattern: string;
+}
+
+/** Where in a config file an option lives: the top level or a profile, and the process selector inside it (F-601). */
+export interface ConfigContext {
+  readonly profile: string | null;
+  readonly selector: ConfigSelectorRef | null;
+}
+
+export type MemoryUnitName =
+  | "B"
+  | "KB"
+  | "MB"
+  | "GB"
+  | "TB"
+  | "PB"
+  | "EB"
+  | "ZB";
+export type DurationUnitName = "ms" | "s" | "min" | "h" | "d";
+
+/** A config value a form can write (F-601, FI-02), as the kinds of the plan's 2.4 table. */
+export type ConfigValue =
+  | { readonly kind: "string"; readonly value: string }
+  | { readonly kind: "boolean"; readonly value: boolean }
+  | { readonly kind: "integer"; readonly value: number }
+  | { readonly kind: "decimal"; readonly text: string }
+  | {
+      readonly kind: "memory";
+      readonly amount: number;
+      readonly unit: MemoryUnitName;
+    }
+  | {
+      readonly kind: "duration";
+      readonly amount: number;
+      readonly unit: DurationUnitName;
+    }
+  | { readonly kind: "stringList"; readonly values: readonly string[] }
+  | {
+      readonly kind: "map";
+      readonly entries: readonly {
+        readonly key: string;
+        readonly value: ConfigValue;
+      }[];
+    };
+
+/** Set a config option (F-601, FI-02): replaces its value where it is set, else places a new statement (plan 2.6). `option` is the full option path as the validator names it, also inside a selector. */
+export interface SetConfigOption {
+  readonly kind: "setConfigOption";
+  readonly path: string;
+  readonly context: ConfigContext;
+  readonly option: readonly string[];
+  readonly value: ConfigValue;
+}
+
+/** Remove every statement that sets an option in a context, with the comments attached to them. */
+export interface RemoveConfigOption {
+  readonly kind: "removeConfigOption";
+  readonly path: string;
+  readonly context: ConfigContext;
+  readonly option: readonly string[];
+}
+
+/** Ensures the blocks exist: `scope` within the context, or the profile or selector block itself when `scope` is empty. */
+export interface AddConfigBlock {
+  readonly kind: "addConfigBlock";
+  readonly path: string;
+  readonly context: ConfigContext;
+  readonly scope: readonly string[];
+}
+
+/** Add `id '<id>'` to the `plugins` block, which is created when there is none. */
+export interface AddConfigPlugin {
+  readonly kind: "addConfigPlugin";
+  readonly path: string;
+  readonly id: string;
+}
+
+export interface RemoveConfigPlugin {
+  readonly kind: "removeConfigPlugin";
+  readonly path: string;
+  readonly id: string;
+}
+
 /** Create an empty file (UX-16); a new folder is its `.gitkeep`. */
 export interface CreateFile {
   readonly kind: "createFile";
@@ -82,6 +168,11 @@ export type EditCommand =
   | DeleteNode
   | RenameDeclaration
   | ReplaceFileText
+  | SetConfigOption
+  | RemoveConfigOption
+  | AddConfigBlock
+  | AddConfigPlugin
+  | RemoveConfigPlugin
   | CreateFile
   | CreateWorkflow;
 
@@ -93,6 +184,11 @@ export const EDIT_COMMAND_KINDS = [
   "deleteNode",
   "renameDeclaration",
   "replaceFileText",
+  "setConfigOption",
+  "removeConfigOption",
+  "addConfigBlock",
+  "addConfigPlugin",
+  "removeConfigPlugin",
   "createFile",
   "createWorkflow",
 ] as const satisfies readonly EditCommand["kind"][];

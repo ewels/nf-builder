@@ -132,3 +132,13 @@ describe("F-112 the pack loads its lints lazily", () => {
     expect(source).toMatch(/import\(["']\.\/lints\/index\.ts["']\)/);
   });
 });
+
+describe("F-601 the pack loads its config rules lazily", () => {
+  it("F-601 FI-02 FI-03: loadConfigRules gives the same rules every time, over the config catalogue", async () => {
+    const rules = await entry.pack.loadConfigRules();
+    expect(await entry.pack.loadConfigRules()).toBe(rules);
+    expect(rules.classify(["process", "memory"]).kind).toBe("option");
+    expect(rules.classify(["process", "memmory"]).kind).toBe("unknown");
+    expect(rules.forms.scopes.map((s) => s.scope)).toContain("manifest");
+  });
+});

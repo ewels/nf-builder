@@ -7,6 +7,7 @@ import {
   unusedOutput,
 } from "./calls.ts";
 import { CODES } from "./codes.ts";
+import { configUnknownOption } from "./config.ts";
 import {
   deprecatedChannel,
   deprecatedDirective,
@@ -59,6 +60,7 @@ export const lints: PackLints = {
     featureFlag,
     pipelineIncludeTypes,
     configIncludePlacement,
+    configUnknownOption,
     agentOutput,
     includeAlias,
     duplicateName,

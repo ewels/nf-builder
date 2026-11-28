@@ -10,6 +10,7 @@ import { stateFor, texts } from "./helpers";
 
 const proc = "process B {\n    script:\n    'B'\n}\n";
 const files = {
+  "nextflow.config": "docker.enabled = false\n",
   "main.nf": `include { B } from './b.nf'\n\nworkflow {\n    B()\n}\n`,
   "b.nf": proc,
 };
@@ -28,6 +29,35 @@ const commands: Record<EditCommand["kind"], EditCommand> = {
     newName: "C",
   },
   replaceFileText: { kind: "replaceFileText", path: "main.nf", text: "" },
+  setConfigOption: {
+    kind: "setConfigOption",
+    path: "nextflow.config",
+    context: { profile: null, selector: null },
+    option: ["docker", "enabled"],
+    value: { kind: "boolean", value: true },
+  },
+  removeConfigOption: {
+    kind: "removeConfigOption",
+    path: "nextflow.config",
+    context: { profile: null, selector: null },
+    option: ["docker", "enabled"],
+  },
+  addConfigBlock: {
+    kind: "addConfigBlock",
+    path: "nextflow.config",
+    context: { profile: null, selector: null },
+    scope: ["docker"],
+  },
+  addConfigPlugin: {
+    kind: "addConfigPlugin",
+    path: "nextflow.config",
+    id: "nf-schema@2.5.1",
+  },
+  removeConfigPlugin: {
+    kind: "removeConfigPlugin",
+    path: "nextflow.config",
+    id: "nf-schema@2.5.1",
+  },
   createFile: { kind: "createFile", path: "notes.txt" },
   createWorkflow: { kind: "createWorkflow", name: "SUB", caller: "main.nf" },
 };

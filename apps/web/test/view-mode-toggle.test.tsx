@@ -1,6 +1,10 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { MARKDOWN_MODES, VIEW_MODES } from "../src/views/view-mode";
+import {
+  CONFIG_MODES,
+  MARKDOWN_MODES,
+  VIEW_MODES,
+} from "../src/views/view-mode";
 import { ViewModeToggle } from "../src/views/view-mode-toggle";
 
 describe("F-208 view mode toggle", () => {
@@ -27,6 +31,21 @@ describe("F-208 view mode toggle", () => {
       ["true", "S", "0", "Split (S)"],
       ["false", "C", "-1", "Code (C)"],
     ]);
+  });
+
+  it("F-601 UX-27 UX-70: a config tab's toggle reads Form, Split and Code, with the same ids, keys and states", () => {
+    const html = renderToStaticMarkup(
+      <ViewModeToggle
+        modes={CONFIG_MODES}
+        mode="graph"
+        onChange={() => undefined}
+      />,
+    );
+    const radios = [...html.matchAll(/<button[^>]*role="radio"[^>]*>(\w+)</g)];
+    expect(radios.map((m) => m[1])).toEqual(["Form", "Split", "Code"]);
+    expect(html).toContain('id="view-mode-graph"');
+    expect(html).toContain('title="Form (G)"');
+    expect(html).toContain('aria-keyshortcuts="G"');
   });
 
   it("F-605 UX-27: the toggle renders the modes it is given, with their shortcuts in titles and aria-keyshortcuts", () => {

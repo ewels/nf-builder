@@ -90,6 +90,26 @@
       "warnings": []
     },
     {
+      "file": "config-unknown-option/negative/conf/extra.config",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "config-unknown-option/negative/nextflow.config",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "config-unknown-option/positive/conf/extra.config",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "config-unknown-option/positive/nextflow.config",
+      "lint": [],
+      "warnings": []
+    },
+    {
       "file": "deprecated-channel/fixed/main.nf",
       "lint": [],
       "warnings": []

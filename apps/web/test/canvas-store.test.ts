@@ -1350,8 +1350,8 @@ describe("F-209 history", () => {
       "file:modules/local/legacy_count/main.nf",
     ]);
     // another file name is the label as it is
-    await store.getState().openFile("nextflow.config");
-    expect(store.getState().tabs.at(-1)?.label).toBe("nextflow.config");
+    await store.getState().openFile("notes.txt");
+    expect(store.getState().tabs.at(-1)?.label).toBe("notes.txt");
   });
 
   it("F-309 UX-20: openFile on a .nf file that has a workflow opens that workflow's canvas tab instead", async () => {
@@ -1369,16 +1369,16 @@ describe("F-209 history", () => {
     const { engine, calls } = fake(wf);
     const store = createCanvasStore(() => engine);
     await store.getState().open(request);
-    await store.getState().openFile("conf/base.config");
+    await store.getState().openFile("conf/base.txt");
     const before = calls.length;
     await store.getState().changed({
       revision: 2,
       workflows: wf,
-      files: [{ path: "conf/base.config" }],
+      files: [{ path: "conf/base.txt" }],
       history: EMPTY_HISTORY,
     } as never);
     expect(calls).toHaveLength(before);
-    expect(store.getState().activeTab).toBe("file:conf/base.config");
+    expect(store.getState().activeTab).toBe("file:conf/base.txt");
     expect(store.getState().summary?.revision).toBe(2);
   });
 
@@ -1423,30 +1423,108 @@ describe("F-209 history", () => {
     const { engine, calls } = fake(wf);
     const store = createCanvasStore(() => engine);
     await store.getState().open(request);
-    await store.getState().openFile("a.config");
-    await store.getState().openFile("b.config");
-    await store.getState().openFile("c.config");
+    await store.getState().openFile("a.txt");
+    await store.getState().openFile("b.txt");
+    await store.getState().openFile("c.txt");
     // a background tab goes without moving the active one
-    await store.getState().closeTab("file:a.config");
-    expect(store.getState().activeTab).toBe("file:c.config");
+    await store.getState().closeTab("file:a.txt");
+    expect(store.getState().activeTab).toBe("file:c.txt");
     // the active tab goes: the previous tab takes over
-    await store.getState().closeTab("file:c.config");
-    expect(store.getState().activeTab).toBe("file:b.config");
+    await store.getState().closeTab("file:c.txt");
+    expect(store.getState().activeTab).toBe("file:b.txt");
     // a workflow tab can't be closed here
     await store.getState().closeTab("main.nf#");
     expect(store.getState().tabs.map((t) => t.id)).toEqual([
       "main.nf#",
-      "file:b.config",
+      "file:b.txt",
     ]);
-    await store.getState().closeTab("file:b.config");
+    await store.getState().closeTab("file:b.txt");
     expect(store.getState().activeTab).toBe("main.nf#");
     expect(store.getState().content.status).toBe("ready");
     // the first tab goes when it is active: the next takes over, and with none left nothing is active
-    await store.getState().openFile("d.config");
-    await store.getState().selectTab("file:d.config");
-    await store.getState().closeTab("file:d.config");
+    await store.getState().openFile("d.txt");
+    await store.getState().selectTab("file:d.txt");
+    await store.getState().closeTab("file:d.txt");
     expect(store.getState().activeTab).toBe("main.nf#");
     expect(calls.length).toBeGreaterThan(0);
+  });
+
+  it("F-601 UX-20: openFile opens a .config file once as a config tab in Form mode, and other files as file tabs", async () => {
+    const wf = [ref("main.nf", null)];
+    const { engine, calls } = fake(wf);
+    const store = createCanvasStore(() => engine);
+    await store.getState().open(request);
+    const before = calls.length;
+    await store.getState().openFile("conf/base.config");
+    await store.getState().openFile("conf/base.config");
+    await store.getState().openFile("notes.txt");
+    const tabs = store.getState().tabs;
+    expect(tabs.map((t) => [t.id, t.kind, t.mode])).toEqual([
+      ["main.nf#", "workflow", "graph"],
+      ["config:conf/base.config", "config", "graph"],
+      ["file:notes.txt", "file", "code"],
+    ]);
+    expect(tabs[1]).toMatchObject({
+      label: "base.config",
+      title: "conf/base.config",
+      workflow: null,
+      readOnly: null,
+    });
+    // a config tab is never projected
+    expect(calls).toHaveLength(before);
+    await store.getState().selectTab("config:conf/base.config");
+    expect(store.getState().content.status).toBe("empty");
+    expect(calls).toHaveLength(before);
+  });
+
+  it("F-601: changed() never projects a config tab, a deleted file takes its config tab with it, and modes are kept per config tab", async () => {
+    const wf = [ref("main.nf", null)];
+    const { engine, calls } = fake(wf);
+    const store = createCanvasStore(() => engine);
+    await store.getState().open(request);
+    await store.getState().openFile("nextflow.config");
+    await store.getState().openFile("conf/a.config");
+    const id = "config:nextflow.config";
+    store.getState().setMode(id, "split");
+    store.getState().setMode("config:conf/a.config", "code");
+    const modes = () =>
+      Object.fromEntries(store.getState().tabs.map((t) => [t.id, t.mode]));
+    expect(modes()).toMatchObject({
+      [id]: "split",
+      "config:conf/a.config": "code",
+    });
+    await store.getState().selectTab(id);
+    const before = calls.length;
+    const change = (files: { path: string; text: string | null }[]) =>
+      ({
+        revision: 2,
+        workflows: wf,
+        files,
+        history: EMPTY_HISTORY,
+      }) as never;
+    await store
+      .getState()
+      .changed(change([{ path: "nextflow.config", text: "x" }]));
+    expect(calls).toHaveLength(before);
+    expect(store.getState().activeTab).toBe(id);
+    await store
+      .getState()
+      .changed(change([{ path: "conf/a.config", text: null }]));
+    expect(store.getState().tabs.map((t) => t.id)).toEqual(["main.nf#", id]);
+    await store
+      .getState()
+      .changed(change([{ path: "nextflow.config", text: null }]));
+    expect(store.getState().activeTab).toBe("main.nf#");
+    expect(store.getState().content.status).toBe("ready");
+  });
+
+  it("F-601 F-210: closeTab closes a config tab like a file tab", async () => {
+    const store = createCanvasStore(() => fake([ref("main.nf", null)]).engine);
+    await store.getState().open(request);
+    await store.getState().openFile("nextflow.config");
+    await store.getState().closeTab("config:nextflow.config");
+    expect(store.getState().tabs.map((t) => t.id)).toEqual(["main.nf#"]);
+    expect(store.getState().activeTab).toBe("main.nf#");
   });
 
   it("F-210 IO-02: a .nf-builder/ file tab is read-only, any other is not", async () => {

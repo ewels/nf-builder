@@ -219,5 +219,5 @@ Branch `feat/F-505`. Run `pnpm check` before every commit. Settle section 6 firs
 
 - docs.seqera.io/nextflow/plugins/using-plugins and /developing-plugins, fetched 2026-11-28 (quotes in 1.2).
 - Fixture snapshot plugin files and their definitions, read from `origin/main`.
-- `feat/F-601` at `c39046a` and `plan-F-601.md` sections 2.5 to 2.7 and 7; `feat/F-301` plan sections 2 to 6.
+- `feat/F-601` at `c39046a` and the F-601 plan (plan deleted; see ADR 0061) sections 2.5 to 2.7 and 7; `feat/F-301` plan sections 2 to 6.
 - No local Nextflow run: the `f505-plugin` case is proved by `pnpm oracle` in task 4.

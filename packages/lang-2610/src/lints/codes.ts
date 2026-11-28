@@ -191,6 +191,16 @@ export const CODES: readonly DiagnosticCode[] = [
       /^Config includes are only allowed at the top-level or in a profile/,
   }),
   code({
+    code: "config-unknown-option",
+    severity: "warning",
+    spec: ["FI-03"],
+    origin: "ours",
+    // Nextflow's run-time validator; `nextflow lint` doesn't run it (F-601)
+    upstream: [
+      "modules/nextflow/src/main/groovy/nextflow/config/ConfigValidator.groovy#L107-L231",
+    ],
+  }),
+  code({
     code: "agent-output",
     severity: "error",
     spec: ["LA-31"],

@@ -61,6 +61,12 @@ describe("F-111 properties", () => {
             path,
             text,
           }));
+      // the start trees have no config, so they get one for the config commands (F-601)
+      if (tree.start)
+        files.push({
+          path: "nextflow.config",
+          text: "docker {\n    enabled = true\n}\n\nplugins {\n    id 'nf-schema@2.5.1'\n}\n",
+        });
       const state = await createEditState(version, files);
       assertSequences(
         state,

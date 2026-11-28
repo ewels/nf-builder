@@ -94,3 +94,14 @@ describe("F-703 shown mode", () => {
     expect(viewModeForKey(press({ key: "g" }), [])).toBeNull();
   });
 });
+
+describe("F-601 view mode labels", () => {
+  const label = (kind: "workflow" | "file" | "config", mode: string) =>
+    modesFor(kind, "x").find((m) => m.mode === mode)?.label;
+  it("F-601 UX-27: a config tab calls Graph mode Form; other tabs keep their labels", () => {
+    expect(label("config", "graph")).toBe("Form");
+    expect(label("config", "split")).toBe("Split");
+    expect(label("config", "code")).toBe("Code");
+    expect(label("workflow", "graph")).toBe("Graph");
+  });
+});

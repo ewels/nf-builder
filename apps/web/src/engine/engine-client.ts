@@ -37,6 +37,8 @@ export function connectEngine(
       race(remote.details(path, workflow, node)),
     outline: (path) => race(remote.outline(path)),
     report: () => race(remote.report()),
+    configView: (path) => race(remote.configView(path)),
+    configSchema: (version) => race(remote.configSchema(version)),
     setLayout: (write) => race(remote.setLayout(write)),
     readFile: (path) => race(remote.readFile(path)),
     listFiles: () => race(remote.listFiles()),

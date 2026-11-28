@@ -4,11 +4,12 @@
 // with no lint error.
 import { existsSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
-import type { Declaration } from "@nf-builder/lang-core";
+import type { Declaration, ScriptAst } from "@nf-builder/lang-core";
 import { describe, expect, it } from "vitest";
-import { parseScriptAst } from "../../src/ast/index.ts";
+import { parseConfigAst, parseScriptAst } from "../../src/ast/index.ts";
 import {
   createLayout,
+  printConfig,
   printDeclaration,
   printScript,
 } from "../../src/printer/index.ts";
@@ -48,7 +49,16 @@ const read = (
   path: string,
 ) => readFileSync(join(dirOf(tree, key), path), "utf8");
 
-function print(text: string) {
+function print(text: string, path = "x.nf") {
+  if (path.endsWith(".config")) {
+    const parsed = parseConfigAst(text);
+    expect(parsed.ok && parsed.errors).toEqual([]);
+    if (!parsed.ok) throw new Error("parse failed");
+    return {
+      ...printConfig(parsed.ast, { layout: createLayout(text) }),
+      ast: parsed.ast,
+    };
+  }
   const parsed = parseScriptAst(text);
   expect(parsed.ok && parsed.errors).toEqual([]);
   if (!parsed.ok) throw new Error("parse failed");
@@ -69,14 +79,14 @@ describe("printer fixtures", () => {
     const formatted = read(f.tree, "formatted", f.path);
 
     if (!f.knownDifference) {
-      it(`F-110 step 1 LA-45 ADR-0005: ${label} prints as nextflow lint -format formats it`, () => {
-        const result = print(input);
+      it(`${f.path.endsWith(".config") ? "F-601 ADR-0032 LA-45" : "F-110 step 1 LA-45 ADR-0005"}: ${label} prints as nextflow lint -format formats it`, () => {
+        const result = print(input, f.path);
         expect(result.text).toBe(formatted);
         expect(result.missingComments).toEqual([]);
       });
     } else {
       it(`F-110 step 1 ADR-0005: ${label} differs from lint -format only as ${f.knownDifference} says`, async () => {
-        const result = print(input);
+        const result = print(input, f.path);
         await expect(result.text).toMatchFileSnapshot(
           join(dirOf(f.tree, "printed"), f.path),
         );
@@ -95,7 +105,7 @@ describe("printer fixtures", () => {
         : formatted;
 
     it(`F-110 LA-45: printing ${label} again changes nothing`, () => {
-      expect(print(expected).text).toBe(expected);
+      expect(print(expected, f.path).text).toBe(expected);
     });
 
     it(`F-110 LA-45: ${label} keeps every comment`, () => {
@@ -103,14 +113,20 @@ describe("printer fixtures", () => {
     });
 
     it(`F-110 step 2: ${label} as printed parses with no errors`, () => {
-      expect(parseScriptAst(print(input).text)).toMatchObject({
+      expect(
+        (f.path.endsWith(".config") ? parseConfigAst : parseScriptAst)(
+          print(input, f.path).text,
+        ),
+      ).toMatchObject({
         ok: true,
         errors: [],
       });
     });
 
+    if (f.path.endsWith(".config")) continue;
+
     it(`F-110 LA-45: printDeclaration prints each declaration of ${label} as printScript does`, () => {
-      const { ast } = print(expected);
+      const ast = print(expected, f.path).ast as ScriptAst;
       const lines = expected.split("\n");
       for (const item of ast.body) {
         if (
