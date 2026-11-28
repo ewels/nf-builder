@@ -3,12 +3,11 @@
 import { useStore } from "zustand";
 import { createStore, type StoreApi } from "zustand/vanilla";
 
-export const EDIT_MIN_WIDTH = 1024;
+const EDIT_MIN_WIDTH = 1024;
 export const WIDE_QUERY = `(min-width: ${EDIT_MIN_WIDTH}px)`;
-export const READ_ONLY_TEXT =
-  "Read-only view: editing needs a larger screen or a wider window.";
 export const READ_ONLY_REFUSAL =
   "Editing needs a larger screen or a wider window.";
+export const READ_ONLY_TEXT = `Read-only view: ${READ_ONLY_REFUSAL.toLowerCase()}`;
 
 interface MediaEvent {
   readonly matches: boolean;
@@ -20,11 +19,11 @@ export interface MediaWatch {
   removeEventListener(type: "change", listener: (e: MediaEvent) => void): void;
 }
 
-export interface ReadOnlyState {
+interface ReadOnlyState {
   readonly readOnly: boolean;
 }
 
-export interface ReadOnlyActions {
+interface ReadOnlyActions {
   /**
    * Follows the media query until the returned `stop` is called. Narrowing sends pending code edits first (`flush`),
    * then turns read-only and calls `onEnter`; widening turns it off at once.

@@ -49,7 +49,7 @@ export function ProjectControls(): JSX.Element {
         onRename={() => showDialog({ kind: "rename" })}
         onDelete={() => showDialog({ kind: "delete" })}
       />
-      {readOnly ? null : dialog?.kind === "new" ? (
+      {!readOnly && dialog?.kind === "new" ? (
         <NewProjectDialog
           languageVersions={languageVersions}
           useTemplates={useTemplates}

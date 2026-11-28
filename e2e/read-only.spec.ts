@@ -325,6 +325,26 @@ test("F-703 UX-04 ADR-0004 ADR-0048: narrowing during a code edit sends it first
   await expect(undo).toHaveAttribute("title", /Edit main\.nf/);
 });
 
+test("F-703 UX-04 UX-70: view-mode keys pressed while read-only do not change the mode that returns on widening", async ({
+  page,
+}) => {
+  await openStoredFixture(page, "Blocked");
+  await expect(page.locator(".tab-panel")).toHaveAttribute(
+    "data-view-mode",
+    "graph",
+  );
+  await resize(page, PHONE);
+  await expect(readOnlyNote(page)).toHaveText(NOTE_TEXT);
+  await clickEmptyCanvas(page);
+  await page.keyboard.press("s");
+  await resize(page, WIDE);
+  await expect(readOnlyNote(page)).toHaveCount(0);
+  await expect(page.locator(".tab-panel")).toHaveAttribute(
+    "data-view-mode",
+    "graph",
+  );
+});
+
 test("F-703 UX-04 ADR-0044: inside a 390 px cross-origin iframe the app is read-only", async ({
   page,
 }) => {
@@ -400,7 +420,7 @@ test("F-703 UX-04 UX-20 F-309: read-only, a problem in a file without a workflow
     "This file opens in the code view on screens 1024 px or wider.",
   );
   await expect(page.locator(".workflow-canvas")).toHaveCount(0);
-  await expect(page.locator(".cm-editor")).toHaveCount(0);
+  await expect(editor(page)).toHaveCount(0);
   await expect(page.getByText("No workflow open")).toHaveCount(0);
 });
 
