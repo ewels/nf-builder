@@ -195,6 +195,7 @@ export function createWorkspace(options: WorkspaceOptions): WorkspaceApi {
     configSchema: (version) => engine.configSchema(version),
     readFile: (path) => engine.readFile(path),
     listFiles: () => engine.listFiles(),
+    connectionTargets: (request) => engine.connectionTargets(request),
     freshName: (request) => engine.freshName(request),
     history: () => engine.history(),
 

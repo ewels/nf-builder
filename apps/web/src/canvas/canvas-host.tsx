@@ -1,6 +1,8 @@
+import { edgeMismatches } from "@nf-builder/engine";
 import type { JSX } from "react";
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useMemo } from "react";
 import { paletteAdd } from "../palette/use-palette-add";
+import { useProblems } from "../problems/problems-store";
 import { CanvasPlaceholder } from "../project/project-status";
 import { useProjects } from "../project/project-store";
 import { useReadOnly } from "../read-only/read-only-store";
@@ -24,6 +26,23 @@ export function CanvasHost(): JSX.Element {
   const readOnly = useReadOnly();
   const moveNodes = useWorkspace((s) => s.moveNodes);
   const placeNodes = useWorkspace((s) => s.placeNodes);
+  const connect = useWorkspace((s) => s.connect);
+  const disconnect = useWorkspace((s) => s.disconnect);
+  const connectionTargets = useWorkspace((s) => s.connectionTargets);
+  const canvasNotice = useWorkspace((s) => s.canvasNotice);
+  const diagnostics = useProblems((s) => s.diagnostics);
+  const diagnosedAt = useProblems((s) => s.revision);
+  const shownRevision = content.status === "ready" ? content.revision : null;
+  const shownProjection =
+    content.status === "ready" ? content.projection : null;
+  // red only for diagnostics made at the revision on screen (UX-24, LA-32)
+  const mismatches = useMemo(
+    () =>
+      shownProjection === null || diagnosedAt !== shownRevision
+        ? new Map<string, string>()
+        : edgeMismatches(shownProjection, diagnostics),
+    [shownProjection, shownRevision, diagnosedAt, diagnostics],
+  );
   if (summary === null)
     return (
       <div className="canvas-area">
@@ -48,7 +67,11 @@ export function CanvasHost(): JSX.Element {
             focus={focus}
             onSelect={(id) => void select(id)}
             positions={content.positions}
-            notices={[layoutNotice, content.notice].filter(
+            mismatches={mismatches}
+            onConnectionTargets={connectionTargets}
+            onConnect={(from, to) => void connect(from, to)}
+            onDisconnect={(port) => void disconnect(port)}
+            notices={[layoutNotice, content.notice, canvasNotice].filter(
               (m): m is string => m !== null,
             )}
             onMove={(moves) => void moveNodes(moves)}

@@ -38,6 +38,26 @@ const withEndings = (file: ScriptSourceFile, text: string): string =>
 const withoutFinalNewline = (text: string): string =>
   text.replace(/\r?\n$/, "");
 
+/** Refuses an edit from `original` to `updated` that would drop a comment attached under `original`, apart from those in `removed`. */
+export function assertCommentsKept(
+  file: ScriptSourceFile,
+  original: Declaration,
+  updated: Declaration,
+  removed: readonly AstNode[] = [],
+): void {
+  const kept = new Set(attachedComments(updated));
+  const gone = new Set(removed.flatMap((n) => attachedComments(n)));
+  const lost = attachedComments(original).filter(
+    (c) => !kept.has(c) && !gone.has(c),
+  );
+  if (lost.length > 0)
+    throw new EditRefusal(
+      "internal",
+      `This edit would drop the comment ${JSON.stringify(lost[0]?.text)} in ${file.path}. Nothing was changed.`,
+      file.path,
+    );
+}
+
 /**
  * The edit that replaces `original`'s span with the printed `updated`. Every comment attached under `original` must
  * still be attached under `updated`, unless it sits in one of the `removed` nodes; otherwise the edit is refused.
@@ -50,17 +70,7 @@ export function reprintDeclaration(
   removed: readonly AstNode[] = [],
 ): TextEdit {
   const span = itemSpan(original);
-  const kept = new Set(attachedComments(updated));
-  const gone = new Set(removed.flatMap((n) => attachedComments(n)));
-  const lost = attachedComments(original).filter(
-    (c) => !kept.has(c) && !gone.has(c),
-  );
-  if (lost.length > 0)
-    throw new EditRefusal(
-      "internal",
-      `This edit would drop the comment ${JSON.stringify(lost[0]?.text)} in ${file.path}. Nothing was changed.`,
-      file.path,
-    );
+  assertCommentsKept(file, original, updated, removed);
   const layout = printer.createLayout(
     maskOutside(file.text, span.start, span.end),
   );

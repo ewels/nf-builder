@@ -39,6 +39,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-404 zip export | merged, PR #59 | Plan deleted in its PR. |
 | F-601 config editor | merged, PR #60 | Plan deleted in its PR. |
 | F-405 legacy import summary | merged, PR #61 | Plan deleted in its PR. |
+| F-302 connect ports | merged, PR #62 | Plan deleted in its PR. |
 
 ## Merge order
 
@@ -336,7 +337,7 @@ ADR numbers reserved for features in flight, so parallel branches don't clash: 0
 ### F-404 — plan deleted
 - Accept every recommendation in section 6. For point 3, give module binaries under `resources/usr/bin/` the executable bit too, once the builder has confirmed that folder name in the Nextflow docs (module binaries); otherwise root `bin/` only. ADR number: the next free one when F-404 starts.
 
-### F-302 — [plan](plan-F-302.md)
+### F-302 — plan deleted
 - Accept every recommendation in section 6. Start after F-301 merges. ADR number: the next free one when F-302 starts.
 
 ### F-307 — [plan](plan-F-307.md)

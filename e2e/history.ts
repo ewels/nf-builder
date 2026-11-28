@@ -154,11 +154,12 @@ export async function currentFiles(
 export async function openStoredFixture(
   page: Page,
   name: string,
+  dir: string = HISTORY_FIXTURE,
 ): Promise<void> {
   await page.goto("./");
   await expect(switcher(page)).toBeEnabled();
   await createProjectInUi(page, name);
-  const files = readProject(HISTORY_FIXTURE);
+  const files = readProject(dir);
   await page.evaluate(async (files) => {
     await (
       window as unknown as { nfBuilderEngine: WorkspaceHook }
