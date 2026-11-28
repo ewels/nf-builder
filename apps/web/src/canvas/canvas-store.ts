@@ -10,6 +10,7 @@ import {
   EMPTY_HISTORY,
   type EngineApi,
   type EngineRefusal,
+  type FieldProblem,
   formatNodeKey,
   type HistoryOutcome,
   type HistoryStatus,
@@ -23,9 +24,11 @@ import {
   type Projection,
   type ProjectSummary,
   paletteAction,
+  parseNodeKey,
   type QuickFix,
   type ReadOnlyReason,
   readOnlyReason,
+  type TypedProcessForm,
   type WorkflowRef,
   type WorkflowTarget,
 } from "@nf-builder/engine";
@@ -208,6 +211,16 @@ export interface WorkspaceActions {
     session?: number,
   ): Promise<PaletteAddOutcome>;
   /**
+   * Applies the popup's edit of a typed process (F-303, UX-44): one `UpdateDeclaration`, or, when the name changes, that
+   * update, `RenameDeclaration` and the move of the module folder as one undo step (AR-23, ADR 0051). A refused part
+   * undoes the parts before it, so a refusal changes nothing. Refused as stale when the project moved on since
+   * `request.revision`. Runs as one task of the queue of applies, undos and redos.
+   */
+  editDeclaration(
+    request: DeclarationEdit,
+    session?: number,
+  ): Promise<EditOutcome>;
+  /**
    * Feeds the `from` output port into the `to` input port of the active workflow tab as one undo step (F-302, UX-25).
    * A refusal sets `canvasNotice`. The view that follows keeps the viewport (ADR 0052).
    */
@@ -250,6 +263,25 @@ export type PaletteAddOutcome =
       readonly node: string;
     }
   | { readonly ok: false; readonly message: string };
+
+/** The popup's edit of a typed process (F-303). */
+export interface DeclarationEdit {
+  /** The declaration's file and name, as the form was read. */
+  readonly target: { readonly path: string; readonly name: string };
+  /** The revision the form was read at. */
+  readonly revision: number;
+  readonly form: TypedProcessForm;
+  /** The node the popup was opened from; selected again afterwards. */
+  readonly node: string;
+}
+
+export type EditOutcome =
+  | { readonly ok: true; readonly node: string }
+  | {
+      readonly ok: false;
+      readonly message: string;
+      readonly fields: readonly FieldProblem[];
+    };
 
 /** The workflow a project opens with: main.nf's entry, else the first entry workflow, else the first named one. */
 export function defaultWorkflow(
@@ -321,6 +353,7 @@ export function tabFor(ref: {
 
 const NO_PROJECT_ADD = "Open or create a project to add components.";
 const FILE_TAB_ADD = "Open a workflow tab to add components to it.";
+const NO_PROJECT_EDIT = "Open a project to edit it.";
 const NO_ACTION_ADD = "That item can't be added from the palette yet.";
 
 const REPLACED_NOTICE = "The layout file couldn't be read and was replaced.";
@@ -368,10 +401,39 @@ const IDLE: DetailsContent = { status: "idle" };
 const messageOf = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
 
+/** `modules/local/<lower name>`, the folder of a process whose file is its module's `main.nf` (LA-12); else null. */
+function moduleFolder(path: string, name: string): string | null {
+  const folder = `modules/local/${name.toLowerCase()}`;
+  return path === `${folder}/main.nf` ? folder : null;
+}
+
+/** The key of a node after its process was renamed: an unassigned call carries the callee in its key. */
+function nodeAfterRename(
+  node: string,
+  from: string,
+  to: string,
+  content: CanvasContent,
+): string {
+  if (from === to) return node;
+  const key = parseNodeKey(node);
+  if (key?.local.kind !== "unassigned" || key.local.callee !== from)
+    return node;
+  const renamed = formatNodeKey({
+    ...key,
+    local: { ...key.local, callee: to },
+  });
+  return content.status === "ready" &&
+    content.projection.nodes.some((n) => n.id === renamed)
+    ? renamed
+    : node;
+}
+
+export type CanvasStore = StoreApi<WorkspaceState & WorkspaceActions>;
+
 export function createCanvasStore(
   engine: () => EngineApi,
   readOnly: () => boolean = () => false,
-): StoreApi<WorkspaceState & WorkspaceActions> {
+): CanvasStore {
   return createStore<WorkspaceState & WorkspaceActions>()((set, get) => {
     // a result for a superseded tab or project is dropped
     let generation = 0;
@@ -402,6 +464,7 @@ export function createCanvasStore(
       at: Point;
     } | null = null;
     let adds = 0;
+    let edits = 0;
     // palette adds in flight: every view they cause keeps the viewport, the intermediate one included (F-301)
     let addsPending = 0;
 
@@ -693,6 +756,57 @@ export function createCanvasStore(
         await get().changed(outcome);
       await after(outcome);
       return outcome;
+    }
+
+    /**
+     * Applies `commands` one after another under one history group, the first with `label`, as one undo step. A refused
+     * part undoes the parts before it (`discard`, so the step isn't left to redo) and its refusal is returned; else the
+     * last part's outcome. Runs inside a task of the queue.
+     */
+    async function applyGroup(
+      session: number | undefined,
+      group: string,
+      commands: readonly EditCommand[],
+      label: string,
+    ): Promise<ApplyOutcome> {
+      let last: ApplyOutcome | undefined;
+      for (const [index, command] of commands.entries()) {
+        const outcome = (await sendNow(
+          session,
+          async (revision) => {
+            try {
+              return await engine().apply(
+                command,
+                revision,
+                index === 0 ? { group, label } : { group },
+              );
+            } catch (error) {
+              return refusal("internal", messageOf(error));
+            }
+          },
+          afterApply,
+        )) as ApplyOutcome;
+        if (!outcome.ok) {
+          if (index > 0)
+            // the step holds the parts applied so far, so nothing is left behind
+            await sendNow(
+              session,
+              async (revision) => {
+                try {
+                  return await engine().undo(revision, { discard: true });
+                } catch (error) {
+                  return refusal("internal", messageOf(error));
+                }
+              },
+              async (undone) => {
+                if (!undone.ok) await refreshHistory();
+              },
+            );
+          return outcome;
+        }
+        last = outcome;
+      }
+      return last as ApplyOutcome;
     }
 
     const send = <T extends ApplyOutcome | HistoryOutcome>(
@@ -1141,65 +1255,103 @@ export function createCanvasStore(
                 `Couldn't add ${fresh.name}: ${outcome.message} Nothing was changed.`,
               );
             };
-            const creating = await sendNow(
+            const applied = await applyGroup(
               mine,
-              (revision) =>
-                engine().apply(
-                  {
-                    kind:
-                      action.kind === "process"
-                        ? "createProcess"
-                        : "createWorkflow",
-                    name: fresh.name,
-                    caller: tab.path,
-                  },
-                  revision,
-                  { group, label },
-                ),
-              afterApply,
-            );
-            if (!creating.ok) return refused(creating);
-            const calling = await sendNow(
-              mine,
-              async (revision) => {
-                try {
-                  return await engine().apply(
-                    {
-                      kind: "addCall",
-                      target: { path: tab.path, workflow: tab.workflow },
-                      callee: fresh.name,
-                    },
-                    revision,
-                    { group },
-                  );
-                } catch (error) {
-                  return refusal("internal", messageOf(error));
-                }
-              },
-              afterApply,
-            );
-            if (!calling.ok) {
-              // only the group's first part is undone, so nothing is left behind
-              await sendNow(
-                mine,
-                async (revision) => {
-                  try {
-                    return await engine().undo(revision, { discard: true });
-                  } catch (error) {
-                    return refusal("internal", messageOf(error));
-                  }
+              group,
+              [
+                {
+                  kind:
+                    action.kind === "process"
+                      ? "createProcess"
+                      : "createWorkflow",
+                  name: fresh.name,
+                  caller: tab.path,
                 },
-                async (outcome) => {
-                  if (!outcome.ok) await refreshHistory();
+                {
+                  kind: "addCall",
+                  target: { path: tab.path, workflow: tab.workflow },
+                  callee: fresh.name,
                 },
-              );
-              return refused(calling);
-            }
+              ],
+              label,
+            );
+            if (!applied.ok) return refused(applied);
             await get().select(key);
             return { ok: true, name: fresh.name, path: fresh.path, node: key };
           } finally {
             addsPending--;
           }
+        });
+      },
+
+      editDeclaration(request, session) {
+        const mine = session ?? get().session;
+        const { target, form } = request;
+        const fail = (
+          message: string,
+          fields: readonly FieldProblem[] = [],
+        ): EditOutcome => ({ ok: false, message, fields });
+        if (mine !== get().session || get().summary === null)
+          return Promise.resolve(fail(NO_PROJECT_EDIT));
+        if (readOnly()) return Promise.resolve(fail(READ_ONLY_REFUSAL));
+        return enqueue(async () => {
+          if (get().summary?.revision !== request.revision)
+            return fail(
+              `${target.name} changed since the popup opened. Close it and open it again.`,
+            );
+          const renamed = form.name !== target.name;
+          const commands: EditCommand[] = [
+            {
+              kind: "updateDeclaration",
+              path: target.path,
+              name: target.name,
+              form,
+            },
+          ];
+          if (renamed) {
+            commands.push({
+              kind: "renameDeclaration",
+              path: target.path,
+              name: target.name,
+              newName: form.name,
+            });
+            const folder = moduleFolder(target.path, target.name);
+            if (folder !== null) {
+              const outline = await engine()
+                .outline(target.path)
+                .catch(() => null);
+              if (
+                outline !== null &&
+                !("ok" in outline) &&
+                outline.items.length === 1
+              )
+                commands.push({
+                  kind: "moveFile",
+                  path: folder,
+                  newPath: `modules/local/${form.name.toLowerCase()}`,
+                });
+            }
+          }
+          const label = `Edit process ${form.name}`;
+          const outcome = await applyGroup(
+            mine,
+            `popup-${mine}-${++edits}`,
+            commands,
+            label,
+          );
+          if (!outcome.ok)
+            return fail(
+              `Couldn't apply: ${outcome.message} Nothing was changed.`,
+              outcome.fields ?? [],
+            );
+          const node = nodeAfterRename(
+            request.node,
+            target.name,
+            form.name,
+            get().content,
+          );
+          await get().select(node);
+          return { ok: true, node };
         });
       },
 
