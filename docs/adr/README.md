@@ -61,3 +61,4 @@ Process: [0001](0001-record-decisions-as-adrs.md). Template: [template.md](templ
 | [0055](0055-files-view.md) | List project files in the worker and draw the tree on the main thread, create files and folders with a CreateFile command, and add files through the import stage | Accepted (agent) |
 | [0056](0056-read-only-below-1024.md) | Make the app read-only below 1024 px with a width media query, canvas and details only, and refusals in the page's stores | Accepted (agent) |
 | [0057](0057-github-import.md) | Import public GitHub repositories from the document: two API calls, raw downloads, shared filters and a recorded source | Accepted (agent) |
+| [0058](0058-registry-palette.md) | List registry modules by namespace in scroll-loaded windows, share the palette search, and read ports from the snapshot on demand | Accepted (agent) |

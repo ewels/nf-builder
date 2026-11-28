@@ -710,3 +710,18 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - `scope-change`: F-313 "Files view: rename, move and delete files and folders" added to M3, depending on F-210.
   - `files-view-registry-error` baseline approved from CI (ADR 0021).
 - Blockers: none.
+
+## 2026-11-28 · F-503 · Claude (autonomous)
+- Did:
+  - Registry modules grouped by namespace in the palette, `nf-core` first and the rest in code-point order, each group a collapsible heading with its count; rows show the short name with the full name in `data-name`, the process or workflow glyph with hidden text, and a `typed` tag on typed modules that have a version. Plugins list their ids with `summary` as the title.
+  - Lazy loading as windows of 100 rows with a real "Show N more (of T)" button that an `IntersectionObserver` presses as the palette scrolls; growth runs in a transition, and a group's window resets when the group closes.
+  - The palette's one search box filters registry modules (name, description, keywords) and plugins (id, summary) through a deferred query; the lists stay visible while searching. The single "No components match" status appears only when nothing matches anywhere; the placeholder reads "Search components and modules".
+  - `ports(name)` on the registry client: snapshot-only, `ports.json` read on demand, failed reads retried, concurrent re-reads of a stale file shared.
+- State: passing once CI is green with the approved baseline.
+- Next: F-605, F-601 and F-301.
+- Decisions:
+  - [ADR 0058](../adr/0058-registry-palette.md): namespace groups and order, short labels, 100-row scroll-loaded windows with no new dependency, shared search, the message rule, session-only group state, and snapshot-only `ports()` (amends ADR 0050: interim lists replaced, `ports` added).
+  - UX-14 updated.
+  - F-502's e2e locator reads `data-name` and expects nf-core first; the names and counts it asserts are unchanged. F-502's interim-list unit test replaced, as F-502's note asked.
+  - App-shell `@visual` baseline re-approved from CI (ADR 0021).
+- Blockers: none.

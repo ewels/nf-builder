@@ -1,11 +1,13 @@
-import type { RegistryErrorCode } from "@nf-builder/sources";
-import { type JSX, useEffect, useState } from "react";
-import { ChevronIcon, RefreshIcon } from "../shell/icons";
+import {
+  groupModules,
+  type RegistryErrorCode,
+  type RegistryMatches,
+} from "@nf-builder/sources";
+import { type JSX, useEffect, useMemo, useState } from "react";
+import { RefreshIcon } from "../shell/icons";
 import { formatAge, formatBuildTime, sourceName } from "./age";
+import { RegistryModules, RegistryPlugins } from "./registry-lists";
 import { type RegistryState, useRegistry } from "./registry-store";
-
-/** The interim lists show this many names each; F-503 replaces them. */
-export const REGISTRY_LIST_LIMIT = 50;
 
 const SOURCE_ID = "registry-source";
 
@@ -22,75 +24,34 @@ const FAILURE_MESSAGES: Record<RegistryErrorCode, string> = {
 interface RegistrySectionViewProps {
   readonly state: RegistryState;
   readonly now: Date;
-  readonly searching: boolean;
+  readonly query: string;
+  /** Null until the registry is ready; the whole index when the query is empty. */
+  readonly matches: RegistryMatches | null;
   readonly open: { readonly modules: boolean; readonly plugins: boolean };
+  /** Namespaces the user has collapsed. */
+  readonly collapsed: ReadonlySet<string>;
   readonly onToggle: (list: "modules" | "plugins") => void;
+  readonly onToggleNamespace: (namespace: string) => void;
   readonly onRefresh: () => void;
-}
-
-interface Row {
-  readonly label: string;
-  readonly title: string;
-}
-
-function RegistryList({
-  id,
-  label,
-  rows,
-  total,
-  open,
-  onToggle,
-}: {
-  readonly id: string;
-  readonly label: string;
-  readonly rows: readonly Row[];
-  readonly total: number;
-  readonly open: boolean;
-  readonly onToggle: () => void;
-}): JSX.Element {
-  const listId = `registry-${id}`;
-  return (
-    <div className="registry-list">
-      <h3 className="palette-category-heading">
-        <button
-          type="button"
-          className="palette-category-button"
-          aria-expanded={open}
-          aria-controls={listId}
-          onClick={onToggle}
-        >
-          <ChevronIcon direction={open ? "down" : "right"} />
-          {label}
-        </button>
-      </h3>
-      <div id={listId} hidden={!open}>
-        <ul className="registry-items" aria-label={label}>
-          {rows.map((row) => (
-            <li key={row.label} className="registry-item" title={row.title}>
-              <span className="registry-item-label">{row.label}</span>
-            </li>
-          ))}
-        </ul>
-        {total > rows.length ? (
-          <p className="registry-note">
-            Showing {rows.length.toLocaleString("en-GB")} of{" "}
-            {total.toLocaleString("en-GB")} {id}.
-          </p>
-        ) : null}
-      </div>
-    </div>
-  );
 }
 
 /** Presentational: the registry.nextflow.io section of the palette (UX-14). */
 export function RegistrySectionView({
   state,
   now,
-  searching,
+  query,
+  matches,
   open,
+  collapsed,
   onToggle,
+  onToggleNamespace,
   onRefresh,
 }: RegistrySectionViewProps): JSX.Element {
+  const searching = query.trim() !== "";
+  const groups = useMemo(
+    () => (matches ? groupModules(matches.modules) : []),
+    [matches],
+  );
   const index = state.status === "ready" ? state.index : null;
   const canRefresh = state.status === "ready" || state.status === "failed";
   const refreshing = canRefresh && state.refreshing;
@@ -138,31 +99,32 @@ export function RegistrySectionView({
       {state.status === "ready" && state.refreshFailure ? (
         <p className="registry-note">Couldn't refresh the registry data.</p>
       ) : null}
-      {index && !searching ? (
-        <>
-          <RegistryList
-            id="modules"
-            label="Modules"
-            rows={index.modules.slice(0, REGISTRY_LIST_LIMIT).map((m) => ({
-              label: m.name,
-              title: m.description,
-            }))}
-            total={index.modules.length}
-            open={open.modules}
-            onToggle={() => onToggle("modules")}
-          />
-          <RegistryList
-            id="plugins"
-            label="Plugins"
-            rows={index.plugins.slice(0, REGISTRY_LIST_LIMIT).map((p) => ({
-              label: p.id,
-              title: p.summary,
-            }))}
-            total={index.plugins.length}
-            open={open.plugins}
-            onToggle={() => onToggle("plugins")}
-          />
-        </>
+      {index && matches ? (
+        searching && matches.modules.length + matches.plugins.length === 0 ? (
+          <p className="registry-note">No registry modules or plugins match.</p>
+        ) : (
+          <>
+            {!searching || matches.modules.length > 0 ? (
+              <RegistryModules
+                groups={groups}
+                total={matches.modules.length}
+                open={open.modules}
+                searching={searching}
+                collapsed={collapsed}
+                onToggle={() => onToggle("modules")}
+                onToggleNamespace={onToggleNamespace}
+              />
+            ) : null}
+            {!searching || matches.plugins.length > 0 ? (
+              <RegistryPlugins
+                plugins={matches.plugins}
+                open={open.plugins}
+                searching={searching}
+                onToggle={() => onToggle("plugins")}
+              />
+            ) : null}
+          </>
+        )
       ) : null}
     </section>
   );
@@ -170,15 +132,18 @@ export function RegistrySectionView({
 
 /** Wires the store, a 60 s clock and session-only open state. */
 export function RegistrySection({
-  searching,
+  query,
+  matches,
 }: {
-  readonly searching: boolean;
+  readonly query: string;
+  readonly matches: RegistryMatches | null;
 }): JSX.Element {
   const state = useRegistry((s) => s.state);
   const load = useRegistry((s) => s.load);
   const refresh = useRegistry((s) => s.refresh);
   const [now, setNow] = useState(() => new Date());
   const [open, setOpen] = useState({ modules: true, plugins: false });
+  const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(new Set());
   useEffect(() => {
     load();
   }, [load]);
@@ -190,9 +155,18 @@ export function RegistrySection({
     <RegistrySectionView
       state={state}
       now={now}
-      searching={searching}
+      query={query}
+      matches={matches}
       open={open}
+      collapsed={collapsed}
       onToggle={(list) => setOpen((o) => ({ ...o, [list]: !o[list] }))}
+      onToggleNamespace={(ns) =>
+        setCollapsed((c) => {
+          const next = new Set(c);
+          if (!next.delete(ns)) next.add(ns);
+          return next;
+        })
+      }
       onRefresh={refresh}
     />
   );

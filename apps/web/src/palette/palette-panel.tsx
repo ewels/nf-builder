@@ -1,8 +1,16 @@
-import { paletteItemCount, searchPalette } from "@nf-builder/engine";
-import { type JSX, useMemo, useState } from "react";
+import {
+  paletteItemCount,
+  queryTerms,
+  searchPalette,
+} from "@nf-builder/engine";
+import { createRegistrySearch } from "@nf-builder/sources";
+import { type JSX, useDeferredValue, useMemo, useState } from "react";
 import { RegistrySection } from "../registry/registry-section";
+import { useRegistry } from "../registry/registry-store";
 import "./palette.css";
+import { PaletteHeading } from "./palette-heading";
 import { PaletteMessage } from "./palette-message";
+import { paletteMessage } from "./palette-message-rule";
 import { PaletteSearch } from "./palette-search";
 import { usePaletteStore } from "./palette-store";
 import { PaletteTree } from "./palette-tree";
@@ -23,6 +31,24 @@ export function PalettePanel({
     [view, query],
   );
   const searching = query.trim() !== "";
+  const registryState = useRegistry((s) => s.state);
+  const index = registryState.status === "ready" ? registryState.index : null;
+  // The registry filter reads a deferred query, so a keystroke never waits for a registry re-render.
+  const deferredQuery = useDeferredValue(query);
+  const search = useMemo(
+    () => (index ? createRegistrySearch(index) : null),
+    [index],
+  );
+  const matches = useMemo(
+    () => (search ? search(queryTerms(deferredQuery)) : null),
+    [search, deferredQuery],
+  );
+  const message = shown
+    ? paletteMessage(
+        paletteItemCount(shown),
+        matches ? matches.modules.length + matches.plugins.length : null,
+      )
+    : "none";
   return (
     <div className="palette">
       <PaletteSearch value={query} onChange={setQuery} />
@@ -33,8 +59,13 @@ export function PalettePanel({
         </PaletteMessage>
       ) : shown === undefined ? (
         <PaletteMessage>Loading components…</PaletteMessage>
-      ) : paletteItemCount(shown) === 0 ? (
+      ) : message === "no-match" ? (
         <PaletteMessage>No components match "{query.trim()}".</PaletteMessage>
+      ) : message === "no-language-match" ? (
+        <section aria-labelledby="palette-heading" className="palette-tree">
+          <PaletteHeading version={shown.version} />
+          <p className="registry-note">No language components match.</p>
+        </section>
       ) : (
         <PaletteTree
           view={shown}
@@ -43,7 +74,7 @@ export function PalettePanel({
           onToggle={toggleCategory}
         />
       )}
-      <RegistrySection searching={searching} />
+      <RegistrySection query={deferredQuery} matches={matches} />
     </div>
   );
 }

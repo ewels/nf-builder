@@ -27,6 +27,7 @@ function fake(
   const reads: { refresh: boolean }[] = [];
   const client: RegistryClient = {
     source,
+    ports: async () => null,
     async index(options) {
       reads.push({ refresh: options?.refresh === true });
       const next = script.shift();
@@ -130,6 +131,7 @@ describe("registry store", () => {
     let reject: (error: unknown) => void = () => undefined;
     const client: RegistryClient = {
       source: "snapshot",
+      ports: async () => null,
       index: () =>
         new Promise<RegistryIndex>((res, rej) => {
           resolve = res;
