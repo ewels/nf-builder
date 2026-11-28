@@ -61,6 +61,54 @@ export interface ReplaceFileText {
   readonly text: string;
 }
 
+/** A process selector as the form addresses it (F-601, FI-06): `withLabel: big_mem`. */
+export interface ConfigSelectorRef {
+  readonly kind: "withName" | "withLabel";
+  readonly pattern: string;
+}
+
+/** Where in a config file an option lives: the top level or a profile, and the process selector inside it (F-601). */
+export interface ConfigContext {
+  readonly profile: string | null;
+  readonly selector: ConfigSelectorRef | null;
+}
+
+export type MemoryUnitName =
+  | "B"
+  | "KB"
+  | "MB"
+  | "GB"
+  | "TB"
+  | "PB"
+  | "EB"
+  | "ZB";
+export type DurationUnitName = "ms" | "s" | "min" | "h" | "d";
+
+/** A config value a form can write (F-601, FI-02), as the kinds of the plan's 2.4 table. */
+export type ConfigValue =
+  | { readonly kind: "string"; readonly value: string }
+  | { readonly kind: "boolean"; readonly value: boolean }
+  | { readonly kind: "integer"; readonly value: number }
+  | { readonly kind: "decimal"; readonly text: string }
+  | {
+      readonly kind: "memory";
+      readonly amount: number;
+      readonly unit: MemoryUnitName;
+    }
+  | {
+      readonly kind: "duration";
+      readonly amount: number;
+      readonly unit: DurationUnitName;
+    }
+  | { readonly kind: "stringList"; readonly values: readonly string[] }
+  | {
+      readonly kind: "map";
+      readonly entries: readonly {
+        readonly key: string;
+        readonly value: ConfigValue;
+      }[];
+    };
+
 export type EditCommand =
   | CreateProcess
   | AddCall

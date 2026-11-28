@@ -6,7 +6,10 @@ export type {
   ChainStep,
   CodeNode,
   CommandResult,
+  ConfigContext,
+  ConfigSelectorRef,
   ConfigSourceFile,
+  ConfigValue,
   Connect,
   CreateProcess,
   Dataflow,
@@ -66,6 +69,7 @@ export type {
   EdgeDataflow,
 } from "./canvas";
 export { CANVAS_METRICS, canvasView, portY } from "./canvas";
+export * from "./config";
 export { nodeView } from "./details/node-view";
 export { workflowSummary } from "./details/summary";
 export type {
