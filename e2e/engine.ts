@@ -57,6 +57,18 @@ export interface EngineHook {
     revision: number,
   ): Promise<{ ok: boolean; revision: number | null }>;
   project(path: string, workflow: string | null): Promise<unknown>;
+  /** The Files view's list (F-210): every file with its parse status, and the registry module folders. */
+  listFiles(): Promise<{
+    revision?: number;
+    files?: {
+      path: string;
+      language: string;
+      status: string;
+      problems: number;
+    }[];
+    registry?: { path: string; module: string }[];
+    code?: string;
+  }>;
   diagnostics(): Promise<{
     revision?: number;
     diagnostics?: {

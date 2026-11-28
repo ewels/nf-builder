@@ -18,5 +18,7 @@ export function commandLabel(command: EditCommand): string {
       return `Rename ${command.name} to ${command.newName}`;
     case "replaceFileText":
       return `Edit ${command.path}`;
+    case "createFile":
+      return `Create ${command.path}`;
   }
 }

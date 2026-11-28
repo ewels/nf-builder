@@ -25,6 +25,7 @@ import {
   patchSequence,
 } from "../edit/apply";
 import { PatchError } from "../edit/patches";
+import { registryFolders } from "../files/registry";
 import { EMPTY_HISTORY, History, type HistoryLimits } from "../history/history";
 import { commandLabel } from "../history/labels";
 import {
@@ -46,7 +47,7 @@ import {
   writePositions,
 } from "../layout";
 import { inRange } from "../layout/sidecar";
-import type { ModelEvent } from "../model/project";
+import type { ModelEvent, ProjectModel } from "../model/project";
 import { installedPacks } from "../packs";
 import { loadPalette } from "../palette";
 import { createProjector, type Projector } from "../projection/project";
@@ -59,6 +60,7 @@ import type {
   EngineApi,
   EngineRefusal,
   EngineRefusalCode,
+  FileSummary,
   HistoryOutcome,
   LoadProgress,
   NodeDetailsResult,
@@ -94,6 +96,23 @@ interface Open {
   layoutStatus: LayoutStatus;
   /** Positions of nodes a change removed, for undo (session only). */
   removed: RemovedPositions;
+}
+
+/** Each file's language, parse status and whole-file problem count, sorted by path. */
+function fileSummaries(model: ProjectModel): FileSummary[] {
+  return model.paths().flatMap((path) => {
+    const source = model.file(path)?.source;
+    return source
+      ? [
+          {
+            path,
+            language: source.language,
+            status: source.status,
+            problems: source.problems.length,
+          },
+        ]
+      : [];
+  });
 }
 
 const ABSENT: LayoutStatus = { state: "absent", message: null };
@@ -476,23 +495,10 @@ export function createEngineService(
         };
         current = open;
         revision += 1;
-        const files = state.model.paths().flatMap((path) => {
-          const source = state.model.file(path)?.source;
-          return source
-            ? [
-                {
-                  path,
-                  language: source.language,
-                  status: source.status,
-                  problems: source.problems.length,
-                },
-              ]
-            : [];
-        });
         return {
           revision,
           version: request.version,
-          files,
+          files: fileSummaries(state.model),
           workflows: projectorOf(open).workflows(),
           layout: open.layoutStatus,
         };
@@ -701,6 +707,19 @@ export function createEngineService(
         if (file === undefined)
           return { ...refusal("not-found", `No file ${path}.`), path };
         return { revision, items: fileOutline(file.source) ?? [] };
+      }),
+
+    listFiles: () =>
+      guarded((open) => {
+        const pack = installedPacks.find((p) => p.version === open.version);
+        const model = open.state.model;
+        return {
+          revision,
+          files: fileSummaries(model),
+          registry: pack
+            ? registryFolders(model.paths(), pack.includes, model.tree)
+            : [],
+        };
       }),
 
     readFile: (path) =>

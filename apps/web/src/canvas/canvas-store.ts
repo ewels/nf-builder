@@ -18,6 +18,8 @@ import {
   type Projection,
   type ProjectSummary,
   type QuickFix,
+  type ReadOnlyReason,
+  readOnlyReason,
   type WorkflowRef,
 } from "@nf-builder/engine";
 import { useStore } from "zustand";
@@ -39,6 +41,8 @@ export interface WorkflowTab {
   readonly title?: string;
   /** The view mode of this tab, for the session (AR-30, UX-27). */
   readonly mode: ViewMode;
+  /** Why a file tab can't be edited (F-210, IO-02), or null. Always null for a workflow tab. */
+  readonly readOnly: ReadOnlyReason | null;
 }
 
 export type CanvasContent =
@@ -127,6 +131,8 @@ export interface WorkspaceActions {
    * that workflow's canvas tab instead. F-210, F-605 and F-601 open files through this.
    */
   openFile(path: string): Promise<void>;
+  /** Closes a file tab (F-210); the previous tab takes over, else the next, else none. Workflow tabs stay open (F-307). */
+  closeTab(id: string): Promise<void>;
   /** Asks the file's code editor to select and scroll to a range; the editor shows it when it is mounted (F-309). */
   revealCode(path: string, range: { start: number; end: number }): void;
   /** Asks the active canvas to centre a node at its current zoom (F-309). */
@@ -216,6 +222,7 @@ export function fileTabFor(path: string): WorkflowTab {
     label: fileLabel(path),
     title: path,
     mode: "code",
+    readOnly: readOnlyReason(path),
   };
 }
 
@@ -230,6 +237,7 @@ export function tabFor(ref: {
     workflow: ref.name,
     label: ref.name ?? fileName(ref.path),
     mode: "graph",
+    readOnly: null,
   };
 }
 
@@ -727,6 +735,24 @@ export function createCanvasStore(
           summary.workflows.filter((w) => w.path === path),
         );
         await openTab(workflow === null ? fileTabFor(path) : tabFor(workflow));
+      },
+
+      async closeTab(id) {
+        const { tabs, activeTab } = get();
+        const at = tabs.findIndex((t) => t.id === id);
+        const tab = tabs[at];
+        if (tab === undefined || tab.kind !== "file") return;
+        const rest = tabs.filter((t) => t.id !== id);
+        set({ tabs: rest });
+        if (activeTab !== id) return;
+        const next = rest[at - 1] ?? rest[at];
+        if (next !== undefined) {
+          await load(next);
+          return;
+        }
+        generation++;
+        clearSelection();
+        set({ activeTab: null, content: EMPTY });
       },
 
       revealCode(path, range) {

@@ -1,8 +1,11 @@
 // Shared shapes of the workspace (F-202): stored records, the autosave state and the status the worker pushes to the page.
 // Everything is plain data, so it survives structuredClone (ADR 0003).
 import type {
+  AddConflict,
   EngineApi,
+  EngineRefusal,
   LoadProgress,
+  ProjectChange,
   ProjectFile,
   ProjectSummary,
 } from "@nf-builder/engine";
@@ -52,6 +55,36 @@ export interface ImportChoice {
 export type ImportStageResult =
   | { readonly ok: true; readonly id: string; readonly summary: ImportSummary }
   | ImportRefusal;
+
+/** A file chosen or dropped into the page, with its name: a cloned `Blob` loses it (F-210). */
+export interface NamedBlob {
+  readonly blob: Blob;
+  readonly name: string;
+}
+
+/** What to add from a staged import (F-210): the stage, the zip's ignore list, whether a stripped folder is kept, and the target folder ("" is the project root). */
+export interface AddChoice {
+  readonly id: string;
+  readonly ignore: string;
+  readonly keepFolder: boolean;
+  readonly folder: string;
+}
+
+/** What adding would do. `replaced` and `conflicts` list at most 100 entries; the counts are complete. */
+export interface AddPreview {
+  readonly ok: true;
+  readonly id: string;
+  readonly summary: ImportSummary;
+  readonly folder: string;
+  /** Files that would be written, including the ones that replace others. */
+  readonly adds: number;
+  readonly replaced: readonly string[];
+  readonly replacedCount: number;
+  readonly conflicts: readonly AddConflict[];
+  readonly conflictCount: number;
+}
+
+export type AddPreviewResult = AddPreview | ImportRefusal | EngineRefusal;
 
 export interface NewProject {
   readonly name: string;
@@ -145,6 +178,12 @@ export interface WorkspaceApi extends EngineApi {
   /** The summary of the staged import under another ignore list. */
   restageImport(id: string, ignore: string): Promise<ImportStageResult>;
   discardImport(id: string): Promise<void>;
+  /** Reads loose files in the worker and stages them like a zip, without an ignore list (F-210). */
+  stageFiles(files: readonly NamedBlob[]): Promise<ImportStageResult>;
+  /** What `addFiles` would do with the staged import, without changing the project (F-210). */
+  previewAdd(choice: AddChoice): Promise<AddPreviewResult>;
+  /** Writes the staged import into a folder of the open project as raw writes: they replace files and clear the undo history (ADR 0051). */
+  addFiles(choice: AddChoice): Promise<ProjectChange | EngineRefusal>;
   createProject(input: NewProject): Promise<ProjectMeta>;
   /** Stores a project from downloaded bytes with its source, in one transaction (F-401). Stores nothing when it throws. */
   importProject(input: ImportProject): Promise<ImportedProject>;

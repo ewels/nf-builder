@@ -5,6 +5,7 @@ export { checkArchiveSize, readZip } from "../zip/read-zip.ts";
 export { binaryByName } from "./binary.ts";
 export { DEFAULT_IGNORE, parseIgnore } from "./ignore.ts";
 export { formatBytes, formatCount, IMPORT_LIMITS } from "./limits.ts";
+export { checkLooseFiles, looseCandidates } from "./loose.ts";
 export { refuse } from "./messages.ts";
 export { entryPath } from "./paths.ts";
 export type {

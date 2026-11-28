@@ -18,6 +18,7 @@ The main thread keeps only pack versions and palette search; parsing, modelling,
 - The engine worker owns the layout sidecar and carries node positions on every change; ELK runs in its own worker, started lazily from the canvas chunk (ADR 0052).
 - Zip import reads and unpacks the file in the engine worker; the page sees only the summary (ADR 0053).
 - GitHub import fetches in the document, which lists the repository and downloads raw files, then transfers the bytes to the engine worker in one `importProject` call; the worker decodes and stores them, and never reaches the GitHub client (ADR 0057).
+- The Files view pulls the project's file list from the engine worker (`listFiles`) while it is visible and builds its rows on the main thread; files dropped or uploaded into an open project are staged and checked in the worker like a zip import, and added as raw writes (ADR 0055).
 
 ## Engine model
 
@@ -44,7 +45,7 @@ The main thread keeps only pack versions and palette search; parsing, modelling,
 | ID | Requirement |
 |---|---|
 | AR-20 | Edit commands are a discriminated union in `lang-core`. Each has a pure `apply(model) → TextPatch[]` in the engine, implemented with pack printer rules. |
-| AR-21 | Minimum set for v1: `CreateProcess`, `CreateWorkflow`, `CreateRecord`, `CreateFunction`, `AddCall`, `AddChain`, `AddFactory`, `Connect`, `Disconnect`, `DeleteNode`, `RenameDeclaration`, `UpdateDeclaration` (from the popup), `SetDirective`, `AddInclude`, `InsertRegistryModule`, `AddTake`, `AddEmit`, `UpdateParams`, `UpdateOutputs`, `ReplaceFileText` (from code editors). |
+| AR-21 | Minimum set for v1: `CreateProcess`, `CreateWorkflow`, `CreateRecord`, `CreateFunction`, `AddCall`, `AddChain`, `AddFactory`, `Connect`, `Disconnect`, `DeleteNode`, `RenameDeclaration`, `UpdateDeclaration` (from the popup), `SetDirective`, `AddInclude`, `InsertRegistryModule`, `AddTake`, `AddEmit`, `UpdateParams`, `UpdateOutputs`, `ReplaceFileText` (from code editors), `CreateFile` (new files and folders from the Files view, ADR 0055). |
 | AR-22 | Applying a command leaves every declaration it doesn't target equivalent (see glossary), apart from added includes and new files. Whitespace next to the edit may change (property test, ADR 0011). |
 | AR-23 | Every command is one undo step; a user action that applies several commands (F-301, F-310) is one step. Undo restores exact bytes. History is kept in memory per open project; raw file writes clear it (ADR 0051). |
 | AR-24 | A command that would produce code that fails to parse is rejected before it touches any file. A problem the file already had doesn't count, so partial imports stay editable (ADR 0039). |

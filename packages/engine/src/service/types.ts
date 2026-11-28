@@ -15,6 +15,7 @@ import type {
   WorkflowRef,
 } from "@nf-builder/lang-core";
 import type { NodeDetails, OutlineItem } from "../details/types";
+import type { ProjectFiles } from "../files/types";
 import type { HistoryStatus } from "../history/history";
 import type {
   LayoutChange,
@@ -40,6 +41,8 @@ export interface LoadProgress {
   readonly total: number;
   readonly path: string | null;
 }
+
+export type { ProjectFiles, RegistryFolder } from "../files/types";
 
 export interface FileSummary {
   readonly path: string;
@@ -192,6 +195,8 @@ export interface EngineApi {
    * the revision.
    */
   setLayout(write: LayoutWrite): Promise<LayoutChange | EngineRefusal>;
+  /** Every file with its parse status, and the registry module folders, for the Files view (UX-16, F-210). */
+  listFiles(): Promise<ProjectFiles | EngineRefusal>;
   /** The current text of a file, or null with no project or no such file. */
   readFile(path: string): Promise<string | null>;
   /** Drops the open project; later calls answer `no-project` until the next `open`. The revision counter keeps counting. */

@@ -102,6 +102,26 @@ export {
   type EditState,
 } from "./edit/apply";
 export { applyPatches, PatchError } from "./edit/patches";
+export { planAdd } from "./files/add";
+export {
+  ancestorsOf,
+  folderOf,
+  isManagedPath,
+  joinFolder,
+  newFolderProblem,
+  newPathProblem,
+  projectTreeOf,
+  readOnlyReason,
+} from "./files/paths";
+export {
+  fileTreeRows,
+  folderSet,
+} from "./files/tree";
+export type {
+  AddConflict,
+  FileTreeRow,
+  ReadOnlyReason,
+} from "./files/types";
 export {
   EMPTY_HISTORY,
   type HistoryLimits,
@@ -180,8 +200,10 @@ export type {
   OpenRequest,
   OutlineResult,
   ProjectChange,
+  ProjectFiles,
   ProjectionResult,
   ProjectSummary,
+  RegistryFolder,
   Undone,
 } from "./service/types";
 export {

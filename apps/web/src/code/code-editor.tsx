@@ -57,9 +57,12 @@ let handledReveal = 0;
 
 export default function CodeEditor({
   path,
+  readOnly = false,
   onSync,
 }: {
   readonly path: string;
+  /** No edits and no sending: the buffer only follows the project (F-210, IO-02). */
+  readonly readOnly?: boolean;
   readonly onSync: (state: PaneSyncState) => void;
 }): JSX.Element {
   const host = useRef<HTMLDivElement>(null);
@@ -125,6 +128,10 @@ export default function CodeEditor({
         ariaLabel: `Code of ${path}`,
         cursorBlinking: reduced ? "solid" : "blink",
         smoothScrolling: !reduced,
+        readOnly,
+        readOnlyMessage: {
+          value: "nf-builder keeps this file up to date itself.",
+        },
       });
       // the selection as line:column pairs, for the end-to-end tests
       const publishSelection = () => {
@@ -158,24 +165,26 @@ export default function CodeEditor({
           if (state.reveal !== before.reveal) showReveal();
         }),
       );
-      const onContent = model.onDidChangeContent(() =>
-        sync.edit(model.getValue()),
-      );
-      const onBlur = editor.onDidBlurEditorWidget(() => void sync.flush());
-      cleanup.push(
-        () => editor.dispose(),
-        () => onContent.dispose(),
-        () => onBlur.dispose(),
-        // a flush within the same project still sends; after a project change the sync is already disposed
-        () => void sync.flush(),
-        // an undo or redo first sends what is pending, so a pending edit is the step that gets undone (F-209)
-        canvasStore.getState().registerFlush(() => sync.flush()),
-        canvasStore.subscribe((state) => {
-          if (state.session !== session) sync.dispose();
-        }),
-      );
+      cleanup.push(() => editor.dispose());
+      if (!readOnly) {
+        const onContent = model.onDidChangeContent(() =>
+          sync.edit(model.getValue()),
+        );
+        const onBlur = editor.onDidBlurEditorWidget(() => void sync.flush());
+        cleanup.push(
+          () => onContent.dispose(),
+          () => onBlur.dispose(),
+          // a flush within the same project still sends; after a project change the sync is already disposed
+          () => void sync.flush(),
+          // an undo or redo first sends what is pending, so a pending edit is the step that gets undone (F-209)
+          canvasStore.getState().registerFlush(() => sync.flush()),
+          canvasStore.subscribe((state) => {
+            if (state.session !== session) sync.dispose();
+          }),
+        );
+      }
       // a draft left in the model (refused earlier) is sent again, so its markers and status come back
-      if (model.getValue() !== file.synced.text) {
+      if (!readOnly && model.getValue() !== file.synced.text) {
         sync.edit(model.getValue());
         void sync.flush();
       }
@@ -207,7 +216,7 @@ export default function CodeEditor({
       cancelled = true;
       for (const undo of cleanup.reverse()) undo();
     };
-  }, [path]);
+  }, [path, readOnly]);
   return (
     <>
       {problem === null ? null : <p className="muted">{problem}</p>}

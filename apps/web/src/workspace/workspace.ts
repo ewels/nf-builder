@@ -10,6 +10,8 @@ import {
   type LayoutChange,
   type ProjectChange,
   type ProjectFile,
+  planAdd,
+  projectTreeOf,
   templateFiles,
 } from "@nf-builder/engine";
 import { createAutosaver, type Timer } from "./autosave";
@@ -17,6 +19,8 @@ import { createImportStager } from "./import-stage";
 import type { ProjectDb } from "./project-db";
 import { normaliseProjectName } from "./project-name";
 import {
+  type AddChoice,
+  type AddPreviewResult,
   type ImportedProject,
   type ImportProject,
   INITIAL_STATUS,
@@ -43,6 +47,12 @@ export function randomId(): string {
   const bytes = crypto.getRandomValues(new Uint8Array(16));
   return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
 }
+
+/** Replaced and conflicting paths listed for a preview (UX-61 style cap). */
+const LIST_MAX = 100;
+
+const NOTHING_TO_ADD =
+  "Nothing to add: every file was skipped or clashes with the project.";
 
 const message = (error: unknown) =>
   error instanceof Error ? error.message : String(error);
@@ -115,6 +125,31 @@ export function createWorkspace(options: WorkspaceOptions): WorkspaceApi {
       return result;
     });
 
+  const invalid = (text: string, revision: number | null): EngineRefusal => ({
+    ok: false,
+    revision,
+    code: "invalid",
+    message: text,
+    path: null,
+    problems: [],
+  });
+
+  /** The files a staged import would write into `choice.folder`, planned against the open project (F-210). */
+  const planFor = async (choice: AddChoice) => {
+    const listed = await engine.listFiles();
+    if ("ok" in listed) return listed;
+    const chosen = await importer.files(choice.id, choice.ignore, {
+      keepFolder: choice.keepFolder,
+    });
+    if (!chosen.ok) return { chosen, listed };
+    const plan = planAdd({
+      paths: chosen.files.map((f) => f.path),
+      folder: choice.folder,
+      tree: projectTreeOf(listed.files.map((f) => f.path)),
+    });
+    return { chosen, listed, plan };
+  };
+
   const flushAll = async () => (db ? autosaver.flush() : status.save);
 
   return {
@@ -126,6 +161,7 @@ export function createWorkspace(options: WorkspaceOptions): WorkspaceApi {
     outline: (path) => engine.outline(path),
     report: () => engine.report(),
     readFile: (path) => engine.readFile(path),
+    listFiles: () => engine.listFiles(),
     history: () => engine.history(),
 
     open: (request, onProgress) =>
@@ -165,6 +201,45 @@ export function createWorkspace(options: WorkspaceOptions): WorkspaceApi {
     stageZip: (file, name) => importer.stageZip(file, name),
     restageImport: (id, ignore) => importer.restage(id, ignore),
     discardImport: async (id) => importer.discard(id),
+    stageFiles: (files) => importer.stageFiles(files),
+
+    previewAdd: async (choice): Promise<AddPreviewResult> => {
+      const staged = await importer.restage(choice.id, choice.ignore);
+      if (!staged.ok) return staged;
+      const planned = await planFor(choice);
+      if ("ok" in planned) return planned;
+      const { plan } = planned;
+      return {
+        ok: true,
+        id: choice.id,
+        summary: staged.summary,
+        folder: choice.folder,
+        adds: plan?.writes.length ?? 0,
+        replaced: plan?.replaced.slice(0, LIST_MAX) ?? [],
+        replacedCount: plan?.replaced.length ?? 0,
+        conflicts: plan?.conflicts.slice(0, LIST_MAX) ?? [],
+        conflictCount: plan?.conflicts.length ?? 0,
+      };
+    },
+
+    addFiles: (choice) =>
+      change(async () => {
+        const planned = await planFor(choice);
+        if ("ok" in planned) return planned;
+        const { chosen, listed, plan } = planned;
+        if (!chosen.ok) return invalid(chosen.message, listed.revision);
+        if (!plan || plan.writes.length === 0)
+          return invalid(NOTHING_TO_ADD, listed.revision);
+        const text = new Map(chosen.files.map((f) => [f.path, f.text]));
+        const result = await engine.writeFiles(
+          plan.writes.map((w) => ({
+            path: w.to,
+            text: text.get(w.from) as string,
+          })),
+        );
+        if ("files" in result) importer.discard(choice.id);
+        return result;
+      }),
 
     createProject: (input: NewProject) =>
       serial(async (): Promise<ProjectMeta> => {

@@ -13,6 +13,7 @@ const strip = (tabs: Parameters<typeof TabStripView>[0]["tabs"]) =>
     controls,
     onSelect: noop,
     onMode: noop,
+    onClose: noop,
   });
 
 const children = (element: ReactElement): ReactNode[] =>
@@ -30,6 +31,7 @@ describe("F-209 QA-10 tab strip", () => {
           workflow: null,
           label: "main.nf",
           mode: "graph",
+          readOnly: null,
         },
       ]),
     );
@@ -48,6 +50,7 @@ describe("F-703 read-only tab strip", () => {
       workflow: null,
       label: "main.nf",
       mode: "split",
+      readOnly: null,
     } as const;
     const html = (readOnly: boolean) =>
       renderToStaticMarkup(
@@ -57,6 +60,7 @@ describe("F-703 read-only tab strip", () => {
           controls: readOnly ? null : <b className="history-controls" />,
           onSelect: noop,
           onMode: noop,
+          onClose: noop,
           readOnly,
         }),
       );

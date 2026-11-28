@@ -1,9 +1,14 @@
 import type { JSX, KeyboardEvent, ReactNode } from "react";
-import { useWorkspace, type WorkflowTab } from "../canvas/canvas-store";
+import {
+  canvasStore,
+  useWorkspace,
+  type WorkflowTab,
+} from "../canvas/canvas-store";
 import { HistoryControls } from "../history/history-controls";
 import { useReadOnly } from "../read-only/read-only-store";
 import type { ViewMode } from "../views/view-mode";
 import { ViewModeToggle } from "../views/view-mode-toggle";
+import { GlyphIcon } from "./icons";
 
 export const workflowTabId = (id: string): string => `workflow-tab-${id}`;
 
@@ -17,6 +22,7 @@ export function TabStripView({
   controls,
   onSelect,
   onMode,
+  onClose,
   readOnly = false,
 }: {
   readonly tabs: readonly WorkflowTab[];
@@ -24,11 +30,21 @@ export function TabStripView({
   readonly controls: ReactNode;
   readonly onSelect: (id: string) => void;
   readonly onMode: (id: string, mode: ViewMode) => void;
+  /** `byKeyboard`: closed with Delete, so focus should move to the tab that takes over. */
+  readonly onClose: (id: string, byKeyboard?: boolean) => void;
   /** Below 1024 px (F-703, UX-04): the workflow tabs only, with no view-mode toggle. */
   readonly readOnly?: boolean;
 }): JSX.Element {
   const active = tabs.find((t) => t.id === activeTab);
   const move = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === "Delete") {
+      const id = (event.target as HTMLElement).id;
+      const tab = tabs.find((t) => workflowTabId(t.id) === id);
+      if (tab?.kind !== "file") return;
+      event.preventDefault();
+      onClose(tab.id, true);
+      return;
+    }
     const index = tabs.findIndex((t) => t.id === activeTab);
     const last = tabs.length - 1;
     const targets: Record<string, number> = {
@@ -48,28 +64,45 @@ export function TabStripView({
       {tabs.length === 0 ? (
         <span className="muted">No files open</span>
       ) : (
-        <div
-          role="tablist"
-          aria-label="Workflows"
-          className="workflow-tabs"
-          onKeyDown={move}
-        >
-          {tabs.map((t) => (
-            <button
-              key={t.id}
-              type="button"
-              role="tab"
-              id={workflowTabId(t.id)}
-              className="workflow-tab"
-              title={t.title}
-              aria-selected={activeTab === t.id}
-              aria-controls="canvas-panel"
-              tabIndex={activeTab === t.id ? 0 : -1}
-              onClick={() => onSelect(t.id)}
-            >
-              {t.label}
-            </button>
-          ))}
+        <div className="workflow-tabs">
+          <div
+            role="tablist"
+            aria-label="Open workflows and files"
+            className="workflow-tablist"
+            onKeyDown={move}
+          >
+            {tabs.map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                role="tab"
+                id={workflowTabId(t.id)}
+                className="workflow-tab"
+                title={t.title}
+                aria-selected={activeTab === t.id}
+                aria-controls="canvas-panel"
+                aria-keyshortcuts={t.kind === "file" ? "Delete" : undefined}
+                tabIndex={activeTab === t.id ? 0 : -1}
+                onClick={() => onSelect(t.id)}
+              >
+                {t.label}
+                {t.kind === "file" ? (
+                  // pointer-only: keyboard users close with Delete, so this stays out of the tab order and the a11y tree
+                  <span
+                    className="workflow-tab-close"
+                    aria-hidden="true"
+                    title={`Close ${t.label}`}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      onClose(t.id);
+                    }}
+                  >
+                    <GlyphIcon name="close" />
+                  </span>
+                ) : null}
+              </button>
+            ))}
+          </div>
         </div>
       )}
       {controls}
@@ -88,6 +121,7 @@ export function TabStrip(): JSX.Element {
   const activeTab = useWorkspace((s) => s.activeTab);
   const selectTab = useWorkspace((s) => s.selectTab);
   const setMode = useWorkspace((s) => s.setMode);
+  const closeTab = useWorkspace((s) => s.closeTab);
   const readOnly = useReadOnly();
   return (
     <TabStripView
@@ -97,6 +131,15 @@ export function TabStrip(): JSX.Element {
       readOnly={readOnly}
       onSelect={(id) => void selectTab(id)}
       onMode={setMode}
+      onClose={(id, byKeyboard) =>
+        void closeTab(id).then(() => {
+          const next = canvasStore.getState().activeTab;
+          if (byKeyboard && next !== null)
+            requestAnimationFrame(() =>
+              document.getElementById(workflowTabId(next))?.focus(),
+            );
+        })
+      }
     />
   );
 }
