@@ -94,6 +94,8 @@ export function AppShell(): JSX.Element {
         storageWarning={storageWarning}
         storageNote={persisted === false}
         onTemplates={() => showDialog({ kind: "new", route: "template" })}
+        onExport={() => showDialog({ kind: "export" })}
+        canExport={projects.current !== null && projects.opening === null}
       />
       <ReadOnlyNote />
       <div

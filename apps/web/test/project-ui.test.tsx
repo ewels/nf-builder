@@ -202,6 +202,8 @@ describe("F-202 project UI", () => {
         storageWarning={null}
         storageNote={false}
         onTemplates={noop}
+        onExport={noop}
+        canExport={false}
       />,
     );
     expect(html).toMatch(/class="visually-hidden"[^>]*>[^<]*disk full/);
