@@ -132,6 +132,10 @@ test("F-307 UX-70 UX-40: Enter on a selected workflow node opens its tab", async
   await page.keyboard.press("Enter");
   await expect(node(page, ALIGNED)).toHaveClass(/selected/);
   await expect(tabNamed(page, "ALIGN")).toHaveCount(0);
+  // the selected call's description tells the keyboard user that a second Enter opens it (plan 2.1)
+  await expect(node(page, ALIGNED)).toHaveAccessibleDescription(
+    /Press Enter again to open this workflow/,
+  );
   await page.keyboard.press("Enter");
   await expect(tabNamed(page, "ALIGN")).toHaveAttribute(
     "aria-selected",
