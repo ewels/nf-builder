@@ -1,6 +1,8 @@
 // The details of several selected nodes (F-310, UX-30): how many, which, and what to do with them.
 import type { JSX } from "react";
 
+import { DetailsActions } from "./details-actions";
+
 export function SelectionSummary({
   nodes,
   onSelect,
@@ -32,20 +34,7 @@ export function SelectionSummary({
           </li>
         ))}
       </ul>
-      {onCopy === undefined && onDelete === undefined ? null : (
-        <div className="details-actions">
-          {onCopy === undefined ? null : (
-            <button type="button" className="details-action" onClick={onCopy}>
-              Copy
-            </button>
-          )}
-          {onDelete === undefined ? null : (
-            <button type="button" className="details-action" onClick={onDelete}>
-              Delete
-            </button>
-          )}
-        </div>
-      )}
+      <DetailsActions onCopy={onCopy} onDelete={onDelete} />
     </div>
   );
 }

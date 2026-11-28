@@ -76,7 +76,7 @@ export function DetailsBody({
       return v === null ? [] : [{ id, label: v.name, kind: v.kindLabel }];
     });
     return (
-      <div className="details-pane" data-details-state="selection">
+      <div className="details-pane">
         <SelectionSummary
           nodes={nodes}
           onSelect={(id) => onSelectNode?.(id)}
@@ -100,7 +100,7 @@ export function DetailsBody({
           onShowSuggestions={onShowProblems}
           configPath={configPath}
           onOpenConfig={onOpenConfig}
-          pasteNodes={onPaste === undefined ? null : pasteNodes}
+          pasteNodes={pasteNodes}
           onPaste={onPaste}
         />
       </div>

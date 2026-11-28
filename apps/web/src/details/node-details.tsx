@@ -1,6 +1,7 @@
 import type { DetailRow, Diagnostic, NodeView } from "@nf-builder/engine";
 import type { JSX } from "react";
 import type { DetailsContent } from "../canvas/canvas-store";
+import { DetailsActions } from "./details-actions";
 import { DiagnosticList } from "./diagnostic-list";
 import { PortList } from "./port-list";
 
@@ -51,20 +52,7 @@ export function NodeDetailsView({
     <div className="details-node">
       <h3 className="details-name">{view.name}</h3>
       <p className="details-kind">{view.kindLabel}</p>
-      {onCopy === undefined && onDelete === undefined ? null : (
-        <div className="details-actions">
-          {onCopy === undefined ? null : (
-            <button type="button" className="details-action" onClick={onCopy}>
-              Copy
-            </button>
-          )}
-          {onDelete === undefined ? null : (
-            <button type="button" className="details-action" onClick={onDelete}>
-              Delete
-            </button>
-          )}
-        </div>
-      )}
+      <DetailsActions onCopy={onCopy} onDelete={onDelete} />
       <section className="details-section">
         <h4>File</h4>
         <p className="details-file">

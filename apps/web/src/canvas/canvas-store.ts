@@ -751,9 +751,7 @@ export function createCanvasStore(
     }
 
     /** After an apply or a fix: adopt a newer revision; an internal refusal can follow a write that cleared the history. */
-    async function afterApply(
-      outcome: ApplyOutcome | Pasted | EngineRefusal,
-    ): Promise<void> {
+    async function afterApply(outcome: ApplyOutcome | Pasted): Promise<void> {
       await adoptNewer(outcome);
       if (!outcome.ok && outcome.code === "internal") await refreshHistory();
     }
@@ -857,11 +855,10 @@ export function createCanvasStore(
           afterApply,
         );
         if (!outcome.ok) {
-          if (outcome.code === "read-only") return failed(outcome.message);
-          say(outcome.message);
+          if (outcome.code !== "read-only") say(outcome.message);
           return failed(outcome.message);
         }
-        const pasted = (outcome as { pasted?: readonly string[] }).pasted ?? [];
+        const { pasted } = outcome;
         await get().selectNodes(pasted);
         const connections = get().clipboard?.connections ?? 0;
         say(
