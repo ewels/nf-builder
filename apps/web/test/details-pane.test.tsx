@@ -375,6 +375,7 @@ describe("F-206 details pane", () => {
       outputs: [],
       calls: [],
       modules: [],
+      coverage: { statements: 0, modelled: 0, percent: null },
     };
     const link = (over: Partial<WorkflowSummary>, configPath?: string) =>
       renderToStaticMarkup(
