@@ -157,10 +157,6 @@ export function createPopupStore(deps: {
           set({ status: "closed", refusal: result.message });
           return;
         }
-        if (result.form.kind !== "typedProcess") {
-          set({ status: "closed", refusal: "Nothing to edit here yet." });
-          return;
-        }
         set({
           status: "editing",
           refusal: null,

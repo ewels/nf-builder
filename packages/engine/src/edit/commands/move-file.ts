@@ -45,16 +45,16 @@ export function moveFile(state: EditState, command: MoveFile): TextPatch[] {
 
   // the edits to include sources, by file as it is now
   const edits = new Map<string, TextEdit[]>();
-  const rewrite = (from: string, file: string): void => {
+  const rewrite = (file: string): void => {
     const model_ = model.file(file);
     if (model_?.source.language !== "nextflow") return;
     for (const include of model_.includes) {
       if (include.kind !== "script" || include.target.kind !== "file") continue;
       const to = include.target.path;
-      const touched = movedSet.has(from) || movedSet.has(to);
+      const touched = movedSet.has(file) || movedSet.has(to);
       if (!touched) continue;
-      const before = relativeSource(from, to);
-      const after = relativeSource(mapped(from), mapped(to));
+      const before = relativeSource(file, to);
+      const after = relativeSource(mapped(file), mapped(to));
       if (before === after) continue;
       const { range, text } = include.node.source;
       const list = edits.get(file) ?? [];
@@ -66,10 +66,11 @@ export function moveFile(state: EditState, command: MoveFile): TextPatch[] {
       edits.set(file, list);
     }
   };
-  for (const p of moved) rewrite(p, p);
+  // the moved scripts, and every script outside the move that includes one of them
+  const rewritten = new Set(moved);
   for (const p of moved)
-    for (const dependant of model.dependants(p))
-      if (!movedSet.has(dependant)) rewrite(dependant, dependant);
+    for (const dependant of model.dependants(p)) rewritten.add(dependant);
+  for (const file of rewritten) rewrite(file);
 
   const patches: TextPatch[] = [];
   const unmoved = new Map<string, TextEdit[]>();

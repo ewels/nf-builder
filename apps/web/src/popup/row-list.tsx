@@ -2,22 +2,22 @@
 // (and Move up and Move down where order matters) and an Add button. A row the form can't model is shown as written.
 import type { JSX, ReactNode } from "react";
 
-export const KEPT_ROW_NOTE = "Kept as written. Edit it in the Code tab.";
+const KEPT_ROW_NOTE = "Kept as written. Edit it in the Code tab.";
 
-export interface RowListProps<T> {
+interface RowListProps<T> {
   readonly legend: string;
   /** The section's name in the buttons: "input" gives "Add input" and "Remove input name". */
   readonly noun: string;
   readonly rows: readonly T[];
   /** The row's name for the buttons' labels. */
   readonly label: (row: T, index: number) => string;
-  /** The text of a row the form keeps as code; null for a row it edits. */
-  readonly code: (row: T) => string | null;
+  /** The text of a row the form keeps as code; null for a row it edits. Left out for a list whose rows are all edited. */
+  readonly code?: (row: T) => string | null;
   readonly render: (row: T, index: number) => ReactNode;
   readonly onRemove: (index: number) => void;
   /** Moves a row up (-1) or down (1); left out where the order doesn't matter. */
   readonly onMove?: (index: number, by: -1 | 1) => void;
-  /** Left out for a section the user can't add to (stage and topics have their own button names). */
+  /** Appends a new row. */
   readonly onAdd: () => void;
   readonly addLabel?: string;
   readonly children?: ReactNode;
@@ -41,7 +41,7 @@ export function RowList<T>({
       <legend>{legend}</legend>
       <ul className="popup-rows">
         {rows.map((row, i) => {
-          const kept = code(row);
+          const kept = code?.(row) ?? null;
           const name = label(row, i);
           return (
             // rows have no stable identity of their own; the draft is replaced as a whole on every change

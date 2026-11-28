@@ -21,7 +21,7 @@ import {
   type UpdateDeclaration,
   walk,
 } from "@nf-builder/lang-core";
-import { formChanged, inputOrigins, isIdentifier } from "../../form/form-diff";
+import { formChanged, inputOrigins } from "../../form/form-diff";
 import { docComment, docParts, processForm } from "../../form/read-process";
 import {
   FORM_PROCESS,
@@ -31,9 +31,16 @@ import {
 } from "../../form/write-rows";
 import type { EditState } from "../apply";
 import { processCalls, remapArguments } from "../call-sites";
+import { isIdentifier } from "../names";
 import { identifier, replaceNode, variable } from "../nodes";
 import { EditRefusal } from "../refusal";
 import { reprintDeclaration } from "../splice";
+
+const COMMENT_SLOTS = [
+  "leadingComments",
+  "trailingComments",
+  "danglingComments",
+] as const;
 
 /** A copy of `node` and everything under it with `NO_RANGE`, so the printer lays it out freshly (ADR 0032). */
 function detach<T extends AstNode>(node: T): T {
@@ -48,11 +55,7 @@ function detach<T extends AstNode>(node: T): T {
     else if (key.endsWith("Range") && typeof value === "object" && value)
       copy[key] = NO_RANGE;
   }
-  for (const slot of [
-    "leadingComments",
-    "trailingComments",
-    "danglingComments",
-  ] as const) {
+  for (const slot of COMMENT_SLOTS) {
     const comments = node[slot];
     if (comments) copy[slot] = comments.map((c) => ({ ...c, range: NO_RANGE }));
   }
@@ -63,12 +66,7 @@ function detach<T extends AstNode>(node: T): T {
 function carry<T extends AstNode>(node: T, from: AstNode | undefined): T {
   if (!from) return node;
   const copy = { ...node } as unknown as Record<string, unknown>;
-  for (const slot of [
-    "leadingComments",
-    "trailingComments",
-    "danglingComments",
-  ] as const)
-    if (from[slot]) copy[slot] = from[slot];
+  for (const slot of COMMENT_SLOTS) if (from[slot]) copy[slot] = from[slot];
   return copy as unknown as T;
 }
 
@@ -78,6 +76,9 @@ const holder = (comments: readonly Comment[]): AstNode => ({
   range: NO_RANGE,
   leadingComments: comments,
 });
+
+const invalidName = (name: string): string =>
+  `"${name}" isn't a valid name. Use letters, digits and underscores, starting with a letter or underscore.`;
 
 const problem = (
   section: FormField["section"],
@@ -99,14 +100,7 @@ function checkForm(
       return;
     }
     if (!isIdentifier(row.name))
-      out.push(
-        problem(
-          "inputs",
-          i,
-          "name",
-          `"${row.name}" isn't a valid name. Use letters, digits and underscores, starting with a letter or underscore.`,
-        ),
-      );
+      out.push(problem("inputs", i, "name", invalidName(row.name)));
     else if (seen.has(row.name))
       out.push(
         problem(
@@ -125,14 +119,7 @@ function checkForm(
     if (row.name === "" && form.outputs.length > 1)
       out.push(problem("outputs", i, "name", "Name this output."));
     else if (row.name !== "" && !isIdentifier(row.name))
-      out.push(
-        problem(
-          "outputs",
-          i,
-          "name",
-          `"${row.name}" isn't a valid name. Use letters, digits and underscores, starting with a letter or underscore.`,
-        ),
-      );
+      out.push(problem("outputs", i, "name", invalidName(row.name)));
     if (row.value.trim() === "")
       out.push(
         problem(
@@ -358,12 +345,13 @@ export function updateDeclaration(
     node && kept && renames.size > 0 ? renameUses(node, renames) : node;
   const keepRows = <T extends AstNode>(
     section: Section<T> | null,
-    rows: readonly boolean[],
-    origins: readonly (number | null)[],
+    key: keyof RowChanges["rows"],
   ): Section<T> | null => {
     if (!section || renames.size === 0) return section;
     const keptOrigins = new Set(
-      origins.filter((o, i) => o !== null && !rows[i]),
+      (wanted[key] as readonly { origin: number | null }[])
+        .map((r) => r.origin)
+        .filter((o, i) => o !== null && !changes.rows[key][i]),
     );
     return {
       ...section,
@@ -374,26 +362,10 @@ export function updateDeclaration(
   };
   const base: TypedProcess = {
     ...process,
-    directives: keepRows(
-      process.directives,
-      changes.rows.directives,
-      wanted.directives.map((r) => r.origin),
-    ),
-    stage: keepRows(
-      process.stage,
-      changes.rows.stage,
-      wanted.stage.map((r) => r.origin),
-    ),
-    outputs: keepRows(
-      process.outputs,
-      changes.rows.outputs,
-      wanted.outputs.map((r) => r.origin),
-    ),
-    topics: keepRows(
-      process.topics,
-      changes.rows.topics,
-      wanted.topics.map((r) => r.origin),
-    ),
+    directives: keepRows(process.directives, "directives"),
+    stage: keepRows(process.stage, "stage"),
+    outputs: keepRows(process.outputs, "outputs"),
+    topics: keepRows(process.topics, "topics"),
     when: untouched(process.when, true),
     exec: untouched(process.exec, !changes.script),
     stub: untouched(process.stub, !changes.stub),
@@ -462,9 +434,10 @@ export function updateDeclaration(
     { path, edit },
     ...callSiteEdits(
       state,
-      command,
+      path,
+      name,
       wanted,
-      process,
+      process.inputs?.items.length ?? 0,
       outputRenames(original, wanted),
     ),
   ]);
@@ -578,22 +551,22 @@ function mergePatches(
 /** The edits that make every call of the process pass what its changed inputs take (ADR 0039). */
 function callSiteEdits(
   state: EditState,
-  command: UpdateDeclaration,
+  path: string,
+  name: string,
   form: TypedProcessForm,
-  process: TypedProcess,
+  inputCount: number,
   outputs: ReadonlyMap<string, string>,
 ): { path: string; edit: TextEdit }[] {
   const origins = inputOrigins(form);
-  const before = process.inputs?.items.length ?? 0;
   const inputsSame =
-    origins.length === before && origins.every((o, i) => o === i);
+    origins.length === inputCount && origins.every((o, i) => o === i);
   if (inputsSame && outputs.size === 0) return [];
-  const sites = processCalls(state.model, command.path, command.name);
+  const sites = processCalls(state.model, path, name);
   const piped = sites.find((s) => s.call === null);
   if (piped && !inputsSame)
     throw new EditRefusal(
       "invalid",
-      `${command.name} is called with a pipe in ${piped.path}; change its inputs in the Code tab. Nothing was changed.`,
+      `${name} is called with a pipe in ${piped.path}; change its inputs in the Code tab. Nothing was changed.`,
       piped.path,
     );
   const out: { path: string; edit: TextEdit }[] = [];
@@ -604,26 +577,25 @@ function callSiteEdits(
     entry.calls.push(site.call as MethodCall);
     items.set(site.item, entry);
   }
-  for (const [item, { path, calls }] of items) {
-    const file = state.model.file(path)?.source as ScriptSourceFile;
+  for (const [item, { path: callerPath, calls }] of items) {
+    const file = state.model.file(callerPath)?.source as ScriptSourceFile;
     const removed: AstNode[] = [];
     let updated: AstNode = item;
-    for (const call of calls) {
-      if (!inputsSame) {
+    if (!inputsSame)
+      for (const call of calls) {
         const args = remapArguments(call, origins);
         const kept = new Set<unknown>(args);
         removed.push(...call.args.filter((a) => !kept.has(a)));
         updated = replaceNode(updated, call, { ...call, args } as MethodCall);
       }
-    }
     if (outputs.size > 0) {
       const names = new Set(
-        sites.filter((s) => s.path === path).map((s) => s.localName),
+        sites.filter((s) => s.path === callerPath).map((s) => s.localName),
       );
       updated = renameReads(updated, calls, outputs, item, names);
     }
     out.push({
-      path,
+      path: callerPath,
       edit: reprintDeclaration(
         file,
         item as Declaration,
@@ -640,12 +612,11 @@ function callSiteEdits(
 function partOf(field: FormField): string | null {
   switch (field.section) {
     case "outputs":
+    case "topics":
       return "value";
     case "directives":
     case "stage":
       return "args";
-    case "topics":
-      return "value";
     case "inputs":
       return "type";
     default:
@@ -660,8 +631,9 @@ function declaredIn(statements: readonly AstNode[]): string[] {
     walk(statement, (n) => {
       if (n.kind === "Closure") return false;
       if (n.kind === "VariableDeclaration")
-        for (const t of (n as unknown as { targets: { name: { name: string } }[] })
-          .targets)
+        for (const t of (
+          n as unknown as { targets: { name: { name: string } }[] }
+        ).targets)
           names.push(t.name.name);
       return undefined;
     });

@@ -12,6 +12,7 @@ import { RowList } from "./row-list";
 
 type Draft = TypedProcessForm;
 export type DraftChange = (draft: Draft) => Draft;
+type RowSection = "inputs" | "stage" | "outputs" | "topics" | "directives";
 
 const fieldName = (
   section: string,
@@ -121,6 +122,22 @@ export function ConfigureForm({
   );
   const set = <K extends keyof Draft>(key: K, value: Draft[K]) =>
     onChange((d) => ({ ...d, [key]: value }));
+  /** Replaces row `i` of a section of the draft. */
+  const setRow = <K extends RowSection>(
+    key: K,
+    i: number,
+    row: Draft[K][number],
+  ) =>
+    set(
+      key,
+      replaceAt(draft[key] as readonly Draft[K][number][], i, row) as Draft[K],
+    );
+  /** Adds a row at the end of a section of the draft. */
+  const append = <K extends RowSection>(key: K, row: Draft[K][number]) =>
+    onChange((d) => ({
+      ...d,
+      [key]: [...(d[key] as readonly Draft[K][number][]), row],
+    }));
   const text = (
     section: string,
     row: number | null,
@@ -215,19 +232,13 @@ export function ConfigureForm({
           }
           code={(row) => (row.kind === "code" ? row.text : null)}
           onAdd={() =>
-            onChange((d) => ({
-              ...d,
-              inputs: [
-                ...d.inputs,
-                {
-                  origin: null,
-                  kind: "named",
-                  name: "",
-                  type: "String",
-                  nullable: false,
-                },
-              ],
-            }))
+            append("inputs", {
+              origin: null,
+              kind: "named",
+              name: "",
+              type: "String",
+              nullable: false,
+            })
           }
           onRemove={(i) => set("inputs", withoutAt(draft.inputs, i))}
           onMove={(i, by) => set("inputs", moved(draft.inputs, i, by))}
@@ -235,10 +246,7 @@ export function ConfigureForm({
             row.kind !== "named" ? null : (
               <>
                 {text("inputs", i, "name", "Input name", row.name, (v) =>
-                  set(
-                    "inputs",
-                    replaceAt(draft.inputs, i, { ...row, name: v }),
-                  ),
+                  setRow("inputs", i, { ...row, name: v }),
                 )}
                 {text(
                   "inputs",
@@ -246,11 +254,7 @@ export function ConfigureForm({
                   "type",
                   "Input type",
                   row.type,
-                  (v) =>
-                    set(
-                      "inputs",
-                      replaceAt(draft.inputs, i, { ...row, type: v }),
-                    ),
+                  (v) => setRow("inputs", i, { ...row, type: v }),
                   { list: typesId },
                 )}
                 <label className="popup-check">
@@ -258,13 +262,10 @@ export function ConfigureForm({
                     type="checkbox"
                     checked={row.nullable}
                     onChange={(event) =>
-                      set(
-                        "inputs",
-                        replaceAt(draft.inputs, i, {
-                          ...row,
-                          nullable: event.target.checked,
-                        }),
-                      )
+                      setRow("inputs", i, {
+                        ...row,
+                        nullable: event.target.checked,
+                      })
                     }
                   />
                   Nullable
@@ -280,17 +281,11 @@ export function ConfigureForm({
           label={(row) => row.directive}
           code={() => null}
           onAdd={() =>
-            onChange((d) => ({
-              ...d,
-              stage: [
-                ...d.stage,
-                {
-                  origin: null,
-                  directive: choices.stage[0]?.name ?? "env",
-                  args: "",
-                },
-              ],
-            }))
+            append("stage", {
+              origin: null,
+              directive: choices.stage[0]?.name ?? "env",
+              args: "",
+            })
           }
           onRemove={(i) => set("stage", withoutAt(draft.stage, i))}
           render={(row, i) => (
@@ -301,11 +296,7 @@ export function ConfigureForm({
                 "directive",
                 "Stage directive",
                 row.directive,
-                (v) =>
-                  set(
-                    "stage",
-                    replaceAt(draft.stage, i, { ...row, directive: v }),
-                  ),
+                (v) => setRow("stage", i, { ...row, directive: v }),
                 { list: stageId },
               )}
               {text(
@@ -314,8 +305,7 @@ export function ConfigureForm({
                 "args",
                 "Stage arguments",
                 row.args,
-                (v) =>
-                  set("stage", replaceAt(draft.stage, i, { ...row, args: v })),
+                (v) => setRow("stage", i, { ...row, args: v }),
                 { mono: true },
               )}
             </>
@@ -328,23 +318,14 @@ export function ConfigureForm({
           label={(row, i) => row.name || `${i + 1}`}
           code={() => null}
           onAdd={() =>
-            onChange((d) => ({
-              ...d,
-              outputs: [
-                ...d.outputs,
-                { origin: null, name: "", type: "", value: "" },
-              ],
-            }))
+            append("outputs", { origin: null, name: "", type: "", value: "" })
           }
           onRemove={(i) => set("outputs", withoutAt(draft.outputs, i))}
           onMove={(i, by) => set("outputs", moved(draft.outputs, i, by))}
           render={(row, i) => (
             <>
               {text("outputs", i, "name", "Output name", row.name, (v) =>
-                set(
-                  "outputs",
-                  replaceAt(draft.outputs, i, { ...row, name: v }),
-                ),
+                setRow("outputs", i, { ...row, name: v }),
               )}
               {text(
                 "outputs",
@@ -352,11 +333,7 @@ export function ConfigureForm({
                 "type",
                 "Output type",
                 row.type,
-                (v) =>
-                  set(
-                    "outputs",
-                    replaceAt(draft.outputs, i, { ...row, type: v }),
-                  ),
+                (v) => setRow("outputs", i, { ...row, type: v }),
                 { list: typesId },
               )}
               {text(
@@ -365,11 +342,7 @@ export function ConfigureForm({
                 "value",
                 "Output value",
                 row.value,
-                (v) =>
-                  set(
-                    "outputs",
-                    replaceAt(draft.outputs, i, { ...row, value: v }),
-                  ),
+                (v) => setRow("outputs", i, { ...row, value: v }),
                 { mono: true },
               )}
             </>
@@ -384,13 +357,12 @@ export function ConfigureForm({
           }
           code={(row) => (row.kind === "code" ? row.text : null)}
           onAdd={() =>
-            onChange((d) => ({
-              ...d,
-              topics: [
-                ...d.topics,
-                { origin: null, kind: "emit", value: "", topic: "" },
-              ],
-            }))
+            append("topics", {
+              origin: null,
+              kind: "emit",
+              value: "",
+              topic: "",
+            })
           }
           onRemove={(i) => set("topics", withoutAt(draft.topics, i))}
           render={(row, i) =>
@@ -402,18 +374,11 @@ export function ConfigureForm({
                   "value",
                   "Topic value",
                   row.value,
-                  (v) =>
-                    set(
-                      "topics",
-                      replaceAt(draft.topics, i, { ...row, value: v }),
-                    ),
+                  (v) => setRow("topics", i, { ...row, value: v }),
                   { mono: true },
                 )}
                 {text("topics", i, "topic", "Topic name", row.topic, (v) =>
-                  set(
-                    "topics",
-                    replaceAt(draft.topics, i, { ...row, topic: v }),
-                  ),
+                  setRow("topics", i, { ...row, topic: v }),
                 )}
               </>
             )
@@ -446,11 +411,7 @@ export function ConfigureForm({
                   "args",
                   `Value of ${row.name}`,
                   row.args,
-                  (v) =>
-                    set(
-                      "directives",
-                      replaceAt(draft.directives, i, { ...row, args: v }),
-                    ),
+                  (v) => setRow("directives", i, { ...row, args: v }),
                   { mono: true },
                 )}
               </>
@@ -466,20 +427,14 @@ export function ConfigureForm({
                   draft.directives.length,
                   "args",
                 );
-                onChange((d) => ({
-                  ...d,
-                  directives: [
-                    ...d.directives,
-                    {
-                      origin: null,
-                      kind: "named",
-                      name: choice.name,
-                      args: choice.defaultArgs,
-                      deprecated: false,
-                      known: true,
-                    },
-                  ],
-                }));
+                append("directives", {
+                  origin: null,
+                  kind: "named",
+                  name: choice.name,
+                  args: choice.defaultArgs,
+                  deprecated: false,
+                  known: true,
+                });
               }}
             />
           </div>

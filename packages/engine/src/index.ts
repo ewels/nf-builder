@@ -135,6 +135,7 @@ export {
   type ConnectionTarget,
   connectionTargets,
 } from "./edit/connection-targets";
+export { isIdentifier } from "./edit/names";
 export { applyPatches, PatchError } from "./edit/patches";
 export { planAdd } from "./files/add";
 export {
@@ -156,7 +157,7 @@ export type {
   FileTreeRow,
   ReadOnlyReason,
 } from "./files/types";
-export { formChanged, inputOrigins, isIdentifier } from "./form/form-diff";
+export { formChanged } from "./form/form-diff";
 export { type PopupTarget, popupTarget } from "./form/popup-target";
 export {
   EMPTY_HISTORY,

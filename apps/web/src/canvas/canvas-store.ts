@@ -415,7 +415,8 @@ function movedPath(
 }
 
 /** `modules/local/<lower name>`, the folder of a module of that name (LA-12). */
-const folderOf = (name: string): string => `modules/local/${name.toLowerCase()}`;
+const folderOf = (name: string): string =>
+  `modules/local/${name.toLowerCase()}`;
 
 /** The module folder of a process whose file is its module's `main.nf`; else null. */
 function moduleFolder(path: string, name: string): string | null {
@@ -805,7 +806,7 @@ export function createCanvasStore(
       label: string,
     ): Promise<ApplyOutcome> {
       let last: ApplyOutcome | undefined;
-      // a part with no patches records no step, so only a recorded one leaves a step to undo
+      // a part whose patches are empty records no step, so only the others leave a step to undo
       let recorded = false;
       for (const command of commands) {
         const outcome = (await sendNow(
@@ -842,7 +843,7 @@ export function createCanvasStore(
             );
           return outcome;
         }
-        if (outcome.patches.length > 0) recorded = true;
+        if (outcome.patches?.length !== 0) recorded = true;
         last = outcome;
       }
       return last as ApplyOutcome;
