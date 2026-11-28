@@ -1,5 +1,9 @@
-import type { RegistrySnapshotIndex } from "@nf-builder/lang-core";
+import type {
+  RegistrySnapshotIndex,
+  RegistrySnapshotPorts,
+} from "@nf-builder/lang-core";
 import { RegistryError, readJson, request } from "./errors.ts";
+import { parseSnapshotPorts } from "./ports.ts";
 import type {
   RegistryClient,
   RegistryFailure,
@@ -108,9 +112,61 @@ export function createSnapshotClient(
     return held;
   }
 
+  const portsUrl = new URL("ports.json", options.snapshotUrl).href;
+  let heldPorts: Promise<RegistrySnapshotPorts> | null = null;
+
+  async function readPorts(refresh: boolean): Promise<RegistrySnapshotPorts> {
+    const response = await request(
+      doFetch,
+      portsUrl,
+      { credentials: "omit", cache: refresh ? "no-cache" : "default" },
+      "Registry ports",
+    );
+    if (response.status === 404 || response.status === 410) {
+      throw new RegistryError(
+        "unavailable",
+        portsUrl,
+        "This registry snapshot has no ports file.",
+        response.status,
+      );
+    }
+    return parseSnapshotPorts(
+      await readJson(response, portsUrl, "Registry ports"),
+      portsUrl,
+    );
+  }
+
+  /** The held ports.json, re-read once with no-cache when it isn't from the index's snapshot. */
+  async function loadPorts(
+    opts?: RegistryReadOptions,
+  ): Promise<RegistrySnapshotPorts> {
+    const generatedAt = (await snapshot(opts)).generatedAt;
+    const current = heldPorts ?? readPorts(false);
+    heldPorts = current;
+    current.catch(() => {
+      if (heldPorts === current) heldPorts = null;
+    });
+    const first = await current;
+    if (first.generatedAt === generatedAt) return first;
+    const next = readPorts(true);
+    const again = await next;
+    if (again.generatedAt !== generatedAt) {
+      throw new RegistryError(
+        "invalid",
+        portsUrl,
+        "Registry ports are out of step with the index.",
+      );
+    }
+    heldPorts = next;
+    return again;
+  }
+
   return {
     source: "snapshot",
     snapshot,
+    async ports(name, opts) {
+      return (await loadPorts(opts)).modules[name] ?? null;
+    },
     async index(opts) {
       return fromSnapshot(await snapshot(opts));
     },

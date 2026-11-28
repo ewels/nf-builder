@@ -193,6 +193,7 @@ export function createLiveClient(options: LiveClientOptions): RegistryClient {
   const now = options.now ?? (() => new Date());
   return {
     source: "live",
+    ports: (name, opts) => options.snapshot.ports(name, opts),
     async index(opts?: RegistryReadOptions) {
       const snapshot = await options.snapshot.snapshot(opts);
       return overlayLive(

@@ -1,3 +1,4 @@
+export type { SnapshotModulePorts } from "@nf-builder/lang-core";
 export * from "./import/index.ts";
 export { createRegistryClient, LIVE_REGISTRY } from "./registry/client.ts";
 export { RegistryError, toFailure } from "./registry/errors.ts";
