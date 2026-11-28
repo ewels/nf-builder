@@ -6,7 +6,7 @@ import type {
   ImportSummary,
   ZipRead,
 } from "@nf-builder/sources/import";
-import type { ImportStageResult } from "./types";
+import type { ImportStageResult, NamedBlob } from "./types";
 
 export type SourcesModule = typeof import("@nf-builder/sources/import");
 
@@ -18,7 +18,14 @@ type ImportFilesResult =
 export interface ImportStager {
   stageZip(file: Blob, name: string): Promise<ImportStageResult>;
   restage(id: string, ignore: string): Promise<ImportStageResult>;
-  files(id: string, ignore: string): Promise<ImportFilesResult>;
+  /** Stages loose files (F-210): the same limits and text check as a zip, with no ignore list. */
+  stageFiles(files: readonly NamedBlob[]): Promise<ImportStageResult>;
+  /** `keepFolder` puts a stripped top-level folder back on every path (F-210). */
+  files(
+    id: string,
+    ignore: string,
+    options?: { readonly keepFolder?: boolean },
+  ): Promise<ImportFilesResult>;
   discard(id: string): void;
 }
 
@@ -26,6 +33,8 @@ interface Stage {
   readonly id: string;
   readonly source: string;
   readonly read: ZipRead;
+  /** Loose files take no ignore list: the user chose each of them. */
+  readonly loose: boolean;
 }
 
 /** `getRandomValues` works in insecure contexts, where `crypto.randomUUID` doesn't (ADR 0044). */
@@ -57,7 +66,7 @@ export function createImportStager(options: StagerOptions = {}): ImportStager {
       source: s.source,
       stripped: s.read.stripped,
       candidates: s.read.candidates,
-      ignore,
+      ignore: s.loose ? "" : ignore,
     });
   const result = (s: Stage, summary: ImportSummary): ImportStageResult => ({
     ok: true,
@@ -76,9 +85,38 @@ export function createImportStager(options: StagerOptions = {}): ImportStager {
       if (mine !== generation) return m.refuse("gone");
       const read = m.readZip(bytes);
       if (!read.ok) return read;
-      const staged: Stage = { id: newId(), source: name, read };
+      const staged: Stage = { id: newId(), source: name, read, loose: false };
       stage = staged;
       return result(staged, summaryOf(m, staged, m.DEFAULT_IGNORE));
+    },
+
+    stageFiles: async (files) => {
+      const mine = ++generation;
+      const m = await module();
+      stage = undefined;
+      const total = files.reduce((sum, f) => sum + f.blob.size, 0);
+      const refused = m.checkLooseFiles(files.length, total);
+      if (refused) return refused;
+      const entries = await Promise.all(
+        files.map(async (f) => ({
+          name: f.name,
+          size: f.blob.size,
+          bytes:
+            f.blob.size > m.IMPORT_LIMITS.maxTextFileBytes
+              ? null
+              : new Uint8Array(await f.blob.arrayBuffer()),
+        })),
+      );
+      if (mine !== generation) return m.refuse("gone");
+      const staged: Stage = {
+        id: newId(),
+        source:
+          files.length === 1 ? (files[0]?.name ?? "") : `${files.length} files`,
+        read: m.looseCandidates(entries),
+        loose: true,
+      };
+      stage = staged;
+      return result(staged, summaryOf(m, staged, ""));
     },
 
     restage: async (id, ignore) => {
@@ -87,14 +125,22 @@ export function createImportStager(options: StagerOptions = {}): ImportStager {
       return result(stage, summaryOf(m, stage, ignore));
     },
 
-    files: async (id, ignore) => {
+    files: async (id, ignore, options = {}) => {
       const m = await module();
       if (stage?.id !== id) return m.refuse("gone");
       const problem = m.importProblem(summaryOf(m, stage, ignore));
       if (problem !== null) return { ok: false, message: problem };
+      const chosen = m.selectFiles(
+        stage.read.candidates,
+        m.parseIgnore(stage.loose ? "" : ignore),
+      );
+      const { stripped } = stage.read;
       return {
         ok: true,
-        files: m.selectFiles(stage.read.candidates, m.parseIgnore(ignore)),
+        files:
+          options.keepFolder && stripped !== null
+            ? chosen.map((f) => ({ ...f, path: `${stripped}/${f.path}` }))
+            : chosen,
       };
     },
 

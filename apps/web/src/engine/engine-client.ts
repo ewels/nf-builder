@@ -42,6 +42,9 @@ export function connectEngine(
     stageZip: (file, name) => race(remote.stageZip(file, name)),
     restageImport: (id, ignore) => race(remote.restageImport(id, ignore)),
     discardImport: (id) => race(remote.discardImport(id)),
+    stageFiles: (files) => race(remote.stageFiles(files)),
+    previewAdd: (choice) => race(remote.previewAdd(choice)),
+    addFiles: (choice) => race(remote.addFiles(choice)),
     createProject: (input) => race(remote.createProject(input)),
     openProject: (id) => race(remote.openProject(id)),
     renameProject: (id, name) => race(remote.renameProject(id, name)),
@@ -59,6 +62,16 @@ export function onEngineChange(
 ): () => void {
   changeListeners.add(listener);
   return () => changeListeners.delete(listener);
+}
+
+const layoutListeners = new Set<(paths: readonly string[]) => void>();
+
+/** Calls `listener` with the paths a `setLayout` made through `getEngine()` wrote (the sidecar), so the Files view can list a new one (F-210). */
+export function onLayoutWritten(
+  listener: (paths: readonly string[]) => void,
+): () => void {
+  layoutListeners.add(listener);
+  return () => layoutListeners.delete(listener);
 }
 
 const announced = <R extends ProjectChange | EngineRefusal>(result: R): R => {
@@ -80,6 +93,15 @@ function withChangeEvents<E extends WorkspaceApi>(api: E): E {
     redo: async (revision) => announced(await api.redo(revision)),
     applyPatches: async (patches, revision) =>
       announced(await api.applyPatches(patches, revision)),
+    addFiles: async (choice) => announced(await api.addFiles(choice)),
+    setLayout: async (write) => {
+      const result = await api.setLayout(write);
+      if ("files" in result && result.files.length > 0) {
+        const paths = result.files.map((f) => f.path);
+        for (const listener of layoutListeners) listener(paths);
+      }
+      return result;
+    },
   };
 }
 

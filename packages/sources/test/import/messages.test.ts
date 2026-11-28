@@ -28,6 +28,12 @@ describe("import messages", () => {
     expect(refuse("too-slow").message).toBe(
       "This zip took more than 30 seconds to unpack and was stopped. It may be damaged.",
     );
+    expect(refuse("too-many-files").message).toBe(
+      "That's more than 20,000 files. Uploads take up to 20,000 at a time.",
+    );
+    expect(refuse("files-too-large").message).toBe(
+      "These files add up to more than 200 MB. Uploads take up to 200 MB at a time.",
+    );
     expect(refuse("gone").message).toBe(
       "That import is no longer available. Choose the zip file again.",
     );
