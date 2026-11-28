@@ -24,6 +24,10 @@ export function commandLabel(command: EditCommand): string {
       return "Disconnect";
     case "deleteNode":
       return "Delete node";
+    case "deleteNodes":
+      return command.nodes.length === 1
+        ? "Delete node"
+        : `Delete ${command.nodes.length} nodes`;
     case "renameDeclaration":
       return `Rename ${command.name} to ${command.newName}`;
     case "replaceFileText":
@@ -42,6 +46,10 @@ export function commandLabel(command: EditCommand): string {
       return `Add plugin ${command.id}`;
     case "removeConfigPlugin":
       return `Remove plugin ${command.id}`;
+    case "addInclude":
+      return command.alias === null
+        ? `Include ${command.name}`
+        : `Include ${command.name} as ${command.alias}`;
     case "createFile":
       return `Create ${command.path}`;
     case "updateDeclaration":

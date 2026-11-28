@@ -28,7 +28,7 @@ const isProcess = (d: ScriptNode | null): boolean =>
     (d.kind === "Unparsed" && d.head?.keyword === "process"));
 
 /** Whether the workflow already calls `name` (a call, a pipe or a mention of its outputs). */
-function callsAlready(def: WorkflowDef, name: string): boolean {
+export function callsAlready(def: WorkflowDef, name: string): boolean {
   if (mentionedNames(def).has(name)) return true;
   let found = false;
   walk(def, (node) => {

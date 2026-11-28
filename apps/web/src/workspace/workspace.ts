@@ -205,6 +205,9 @@ export function createWorkspace(options: WorkspaceOptions): WorkspaceApi {
     connectionTargets: (request) => engine.connectionTargets(request),
     freshName: (request) => engine.freshName(request),
     history: () => engine.history(),
+    copy: (request) => engine.copy(request),
+    clipboard: () => engine.clipboard(),
+    planPaste: (request) => engine.planPaste(request),
 
     open: (request, onProgress) =>
       serial(async () => {
@@ -231,6 +234,7 @@ export function createWorkspace(options: WorkspaceOptions): WorkspaceApi {
     redo: (revision) => change(() => engine.redo(revision)),
     applyPatches: (patches, revision) =>
       change(() => engine.applyPatches(patches, revision)),
+    paste: (request, revision) => change(() => engine.paste(request, revision)),
     setLayout: (write) => change(() => engine.setLayout(write)),
 
     watch: async (next) => {

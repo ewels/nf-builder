@@ -406,6 +406,63 @@ describe("F-202 workspace", () => {
     });
   });
 
+  it("F-310 UX-26 IO-01: copy and planPaste pass through, and a paste is autosaved as one change", async () => {
+    const s = setup();
+    await s.watching;
+    const text = `process MAKE {
+    output:
+    val('x')
+
+    exec:
+    true
+}
+
+workflow {
+    MAKE()
+}
+
+workflow OTHER {
+}
+`;
+    const meta = await s.workspace.createProject({
+      name: "P",
+      languageVersion: version,
+      files: [{ path: "main.nf", text }],
+    });
+    const opened = await s.workspace.openProject(meta.id);
+    const projected = ok(await s.workspace.project("main.nf", null)) as {
+      projection: { nodes: { id: string; kind: string }[] };
+    };
+    const call = projected.projection.nodes.find((n) => n.id.includes("MAKE"));
+    if (!call) throw new Error("no call node");
+    const copied = ok(
+      await s.workspace.copy({
+        path: "main.nf",
+        workflow: null,
+        nodes: [call.id],
+        positions: { [call.id]: { x: 0, y: 0 } },
+      }),
+    ) as { summary: { nodes: number } };
+    expect(copied.summary.nodes).toBe(1);
+    expect(await s.workspace.clipboard()).toMatchObject({ nodes: 1 });
+    const target = { path: "main.nf", workflow: "OTHER" };
+    const plan = ok(await s.workspace.planPaste({ target })) as {
+      aliases: { name: string; alias: string; reason: "called" | "taken" }[];
+    };
+    await s.workspace.flush();
+    const saved = s.saves.length;
+    const pasted = ok(
+      await s.workspace.paste(
+        { target, aliases: plan.aliases, at: null },
+        opened.summary.revision,
+      ),
+    ) as { pasted: string[] };
+    expect(pasted.pasted).toHaveLength(1);
+    await s.workspace.flush();
+    expect(s.saves.length).toBe(saved + 1);
+    expect(s.saves.at(-1)?.some((f) => f.path === "main.nf")).toBe(true);
+  });
+
   it("F-309 IO-01: applyFix is autosaved like apply; a refused fix saves nothing", async () => {
     const s = setup();
     await s.watching;

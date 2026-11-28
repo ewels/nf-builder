@@ -29,6 +29,10 @@ export function connectEngine(
     undo: (revision, options) => race(remote.undo(revision, options)),
     redo: (revision) => race(remote.redo(revision)),
     history: () => race(remote.history()),
+    copy: (request) => race(remote.copy(request)),
+    clipboard: () => race(remote.clipboard()),
+    planPaste: (request) => race(remote.planPaste(request)),
+    paste: (request, revision) => race(remote.paste(request, revision)),
     applyPatches: (patches, revision) =>
       race(remote.applyPatches(patches, revision)),
     project: (path, workflow) => race(remote.project(path, workflow)),
@@ -117,6 +121,8 @@ function withChangeEvents<E extends WorkspaceApi>(api: E): E {
     redo: async (revision) => announced(await api.redo(revision)),
     applyPatches: async (patches, revision) =>
       announced(await api.applyPatches(patches, revision)),
+    paste: async (request, revision) =>
+      announced(await api.paste(request, revision)),
     addFiles: async (choice) => announced(await api.addFiles(choice)),
     setLayout: async (write) => {
       const result = await api.setLayout(write);

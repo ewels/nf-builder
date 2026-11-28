@@ -129,14 +129,18 @@ export const namedOutput = (name: string, value: Expression): NamedOutput => ({
   range: NO_RANGE,
 });
 
-/** `include { name } from 'source'`. */
-export const includeOf = (name: string, source: string): Include => ({
+/** `include { name } from 'source'`, or `include { name as alias } from 'source'`. */
+export const includeOf = (
+  name: string,
+  source: string,
+  alias: string | null = null,
+): Include => ({
   kind: "Include",
   entries: [
     {
       kind: "IncludeEntry",
       name: identifier(name),
-      alias: null,
+      alias: alias === null ? null : identifier(alias),
       range: NO_RANGE,
     },
   ],

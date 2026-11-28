@@ -22,6 +22,7 @@ import { expect } from "vitest";
 import { applyCommand, commit, type EditState } from "../../src/edit/apply";
 import { plugins } from "../../src/edit/config/locate";
 import { definitionStyles, problemKeys } from "../../src/edit/guards";
+import { freshName, relativeSource } from "../../src/edit/names";
 import { applyPatches } from "../../src/edit/patches";
 import { itemSpan } from "../../src/edit/splice";
 import { folderOf, isManagedPath } from "../../src/files/paths";
@@ -210,6 +211,16 @@ export function buildCommand(state: EditState, c: Choice): EditCommand | null {
       const n = w && pick(w.projection.nodes, c.b);
       return w && n ? { kind, target: w.target, node: n.id } : null;
     }
+    case "deleteNodes": {
+      // one to three nodes of one workflow, from `b` on
+      const w = workflow((p) => p.nodes.length > 0);
+      if (!w) return null;
+      const all = w.projection.nodes;
+      const nodes = [0, 1, 2]
+        .slice(0, 1 + (c.a % 3))
+        .flatMap((i) => all[(c.b + i * 5) % all.length]?.id ?? []);
+      return { kind, target: w.target, nodes };
+    }
     case "renameDeclaration": {
       const decls = scripts.flatMap((path) =>
         [...(state.model.file(path)?.declarations.keys() ?? [])].map(
@@ -299,6 +310,28 @@ export function buildCommand(state: EditState, c: Choice): EditCommand | null {
       const id = pick(CONFIG_PLUGINS, c.a + c.b);
       return id ? { kind, path, id } : null;
     }
+    case "addInclude": {
+      // a declaration of another script, as it is when the caller doesn't bind its name, else under a fresh alias
+      const caller = pick(scripts, c.a);
+      if (!caller) return null;
+      const decls = scripts
+        .filter((p) => p !== caller)
+        .flatMap((path) =>
+          [...(state.model.file(path)?.declarations.keys() ?? [])].map(
+            (name) => ({ path, name }),
+          ),
+        );
+      const d = pick(decls, c.b);
+      if (!d) return null;
+      const taken = new Set(state.model.file(caller)?.scope.keys() ?? []);
+      return {
+        kind,
+        caller,
+        name: d.name,
+        alias: taken.has(d.name) ? freshName(`${d.name}_2`, taken) : null,
+        source: relativeSource(caller, d.path),
+      };
+    }
     case "createFile": {
       const ext = [".nf", ".config", ".md", "/.gitkeep"][c.snippet % 4];
       return { kind, path: `${c.name.toLowerCase()}${ext}` };
@@ -381,6 +414,8 @@ export function buildCommand(state: EditState, c: Choice): EditCommand | null {
           { ...form, outputs: [...form.outputs].reverse() },
         ] as TypedProcessForm[]
       )[c.b % 8] as TypedProcessForm;
+      // a "change" that leaves the form as it was (reversing one output, dropping from an empty list) is no edit
+      if (JSON.stringify(changed) === JSON.stringify(form)) return null;
       return { kind, path: p.path, name: p.name, form: changed };
     }
     case "replaceDeclaration": {
@@ -526,7 +561,8 @@ function checkAccepted(
     case "addCall":
     case "connect":
     case "disconnect":
-    case "deleteNode": {
+    case "deleteNode":
+    case "deleteNodes": {
       expect(patches.map((p) => p.path)).toEqual([command.target.path]);
       const before = state.model.file(command.target.path)?.source;
       const def = workflowDef(before, command.target.workflow);
@@ -554,7 +590,8 @@ function checkAccepted(
       break;
     }
     case "createProcess":
-    case "createWorkflow": {
+    case "createWorkflow":
+    case "addInclude": {
       const patch = patches.find((p) => p.path === command.caller);
       const before = state.model.file(command.caller)
         ?.source as ScriptSourceFile;
@@ -719,9 +756,14 @@ export function assertSequences(
   );
 }
 
-/** What has to happen first for a kind to have something to act on: a plugin is removed after one is added, a process is edited after one is created. */
+/**
+ * What has to happen first for a kind to have something to act on: a plugin is removed after one is added, and added
+ * after the one the fixed choices pick is removed (a config that already has it refuses the add); a process is edited
+ * after one is created.
+ */
 const PRELUDE: Partial<Record<string, string>> = {
   removeConfigPlugin: "addConfigPlugin",
+  addConfigPlugin: "removeConfigPlugin",
   // a pin with no typed process gets a real typed scaffold first (F-301), then edits it
   updateDeclaration: "createProcess",
   replaceDeclaration: "createProcess",

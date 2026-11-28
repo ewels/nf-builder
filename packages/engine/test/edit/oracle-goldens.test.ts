@@ -519,3 +519,25 @@ describe("F-302 oracle goldens", () => {
     expect((await errorsOf(result)).map((d) => d.code)).toEqual(["call-arity"]);
   });
 });
+
+describe("F-310 oracle goldens", () => {
+  const delete_ =
+    (...locals: string[]) =>
+    (s: EditState): EditCommand => ({
+      kind: "deleteNodes",
+      target: entry,
+      nodes: locals.map((l) => node(s, l).id),
+    });
+
+  it("F-310 step 2 UX-26 AR-23: DeleteNodes of SIZE and STAMP on f310-delete-start equals f310-delete-multi", async () => {
+    const result = await run("f310-delete-start", [
+      delete_("SIZE@1", "STAMP@1"),
+    ]);
+    expect(result).toEqual(tree("f310-delete-multi"));
+  });
+
+  it("F-310 ADR-0064: DeleteNodes of SIZE on f310-delete-start turns `make = MAKE()` into `MAKE()`, equal to f310-delete-unread", async () => {
+    const result = await run("f310-delete-start", [delete_("SIZE@1")]);
+    expect(result).toEqual(tree("f310-delete-unread"));
+  });
+});

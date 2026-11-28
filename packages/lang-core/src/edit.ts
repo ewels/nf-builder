@@ -54,6 +54,17 @@ export interface DeleteNode {
   readonly node: string;
 }
 
+/**
+ * Remove the statements of several nodes in one command (F-310, UX-26, AR-23), clearing the arguments they fed and
+ * turning an assignment nothing reads any more into a bare call.
+ */
+export interface DeleteNodes {
+  readonly kind: "deleteNodes";
+  readonly target: WorkflowTarget;
+  /** Projection node ids of the target workflow. */
+  readonly nodes: readonly string[];
+}
+
 /** Rename a declaration, its references and the include entries that name it. */
 export interface RenameDeclaration {
   readonly kind: "renameDeclaration";
@@ -179,10 +190,23 @@ export interface RemoveConfigPlugin {
   readonly id: string;
 }
 
-/** Create an empty file (UX-16); a new folder is its `.gitkeep`. */
+/** Create a file (UX-16): empty unless `text` is given (F-310, a pasted module); a new folder is its `.gitkeep`. */
 export interface CreateFile {
   readonly kind: "createFile";
   readonly path: string;
+  readonly text?: string;
+}
+
+/**
+ * Add `include { name as alias } from 'source'` to the script `caller` (F-310, AR-21). `source` is as written in the
+ * include, relative to `caller`; `alias` is null to include the name as it is.
+ */
+export interface AddInclude {
+  readonly kind: "addInclude";
+  readonly caller: string;
+  readonly name: string;
+  readonly alias: string | null;
+  readonly source: string;
 }
 
 /**
@@ -201,6 +225,7 @@ export type EditCommand =
   | Connect
   | Disconnect
   | DeleteNode
+  | DeleteNodes
   | RenameDeclaration
   | ReplaceFileText
   | SetConfigOption
@@ -210,6 +235,7 @@ export type EditCommand =
   | RemoveConfigPlugin
   | CreateFile
   | CreateWorkflow
+  | AddInclude
   | UpdateDeclaration
   | ReplaceDeclaration
   | MoveFile;
@@ -220,6 +246,7 @@ export const EDIT_COMMAND_KINDS = [
   "connect",
   "disconnect",
   "deleteNode",
+  "deleteNodes",
   "renameDeclaration",
   "replaceFileText",
   "setConfigOption",
@@ -229,6 +256,7 @@ export const EDIT_COMMAND_KINDS = [
   "removeConfigPlugin",
   "createFile",
   "createWorkflow",
+  "addInclude",
   "updateDeclaration",
   "replaceDeclaration",
   "moveFile",

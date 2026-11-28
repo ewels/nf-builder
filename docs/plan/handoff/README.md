@@ -42,6 +42,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-302 connect ports | merged, PR #62 | Plan deleted in its PR. |
 | F-505 registry plugins | merged, PR #64 | Plan deleted in its PR. |
 | F-303 edit popup | merged, PR #65 | Plan deleted in its PR. |
+| F-310 clipboard | merged, PR #66 | Plan deleted in its PR. |
 
 ## Merge order
 
@@ -360,7 +361,7 @@ ADR numbers reserved for features in flight, so parallel branches don't clash: 0
 - Merge check: `check_suite.completed` fires per workflow, so verify every check run on the PR head (`gh api repos/ewels/nf-builder/commits/<sha>/check-runs`) before merging.
 - Next: F-307, F-406, then F-304, F-305, F-306, F-311 (after F-303), F-308 and F-310 (after F-302), F-504, F-602.
 
-### F-310 — [plan](plan-F-310.md)
+### F-310 — plan deleted
 - Accept every recommendation in section 6; point 3 splits copying operator, factory and code nodes into a new feature in F-310's PR (`scope-change`). The workspace `undo` options bug it found is fixed separately (`fix/undo-discard`). Start after F-302 merges. ADR number: the next free one when F-310 starts.
 
 ### F-504 — [plan](plan-F-504.md)

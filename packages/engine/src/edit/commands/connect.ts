@@ -21,6 +21,7 @@ import {
 } from "../nodes";
 import { EditRefusal } from "../refusal";
 import { assertCommentsKept, reprintDeclaration } from "../splice";
+import { callableIn, dropUnreadAssignments } from "../unread";
 import {
   assignedNames,
   clearArgument,
@@ -232,7 +233,7 @@ export function disconnect(state: EditState, command: Disconnect): TextPatch[] {
   const edit = reprintDeclaration(
     file,
     def,
-    cleared.def,
+    dropUnreadAssignments(def, cleared.def, callableIn(state, file.path)),
     state.parser.printer,
     [cleared.removed],
   );

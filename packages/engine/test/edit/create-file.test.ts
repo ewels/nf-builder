@@ -63,4 +63,32 @@ describe("F-210 CreateFile", () => {
         { path, text: "" },
       ]);
   });
+
+  it("F-310 ADR-0055: CreateFile with text writes it; an existing path still refuses", async () => {
+    const state = await stateFor(files);
+    const text = "process B {\n    script:\n    'b'\n}\n";
+    const r = accepted(state, {
+      kind: "createFile",
+      path: "modules/local/b/main.nf",
+      text,
+    });
+    expect(r.patches).toEqual([
+      { kind: "create", path: "modules/local/b/main.nf", text },
+    ]);
+    expect(r.inverse).toEqual([
+      { kind: "delete", path: "modules/local/b/main.nf" },
+    ]);
+    expect(
+      refused(state, { kind: "createFile", path: "README.md", text: "x" })
+        .message,
+    ).toBe("README.md already exists.");
+    // the new file must parse, as for every command
+    expect(
+      refused(state, {
+        kind: "createFile",
+        path: "bad.nf",
+        text: "process {",
+      }).code,
+    ).toBe("does-not-parse");
+  });
 });

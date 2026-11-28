@@ -9,7 +9,8 @@ import { readTree } from "../model/read-tree";
 import { seedLayout, snapshot, step } from "./helpers";
 
 const root = new URL("../../../../", import.meta.url).pathname;
-const runs = Number(process.env.F207_RUNS ?? 25);
+// enough runs that seed 207 draws an accepted rename on both starts as the command list grows
+const runs = Number(process.env.F207_RUNS ?? 100);
 
 describe("F-207 carry properties", () => {
   for (const name of ["f111-start-typed", "f111-start-legacy"])
