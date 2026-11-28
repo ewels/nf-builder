@@ -327,3 +327,6 @@ ADR numbers reserved for features in flight, so parallel branches don't clash: 0
 
 ### F-505 — [plan](plan-F-505.md)
 - Accept every recommendation in section 6: add F-601 and F-301 to F-505's `depends_on` in its PR (`scope-change`); tasks 1 to 3 may start before they merge, tasks 4 to 7 after.
+
+### F-404 — [plan](plan-F-404.md)
+- Accept every recommendation in section 6. For point 3, give module binaries under `resources/usr/bin/` the executable bit too, once the builder has confirmed that folder name in the Nextflow docs (module binaries); otherwise root `bin/` only. ADR number: the next free one when F-404 starts.
