@@ -124,4 +124,23 @@ describe("F-505 engine service plugins", () => {
     await service.setPluginScopes([]);
     expect(await names()).not.toContain("validation");
   });
+
+  it("F-505 FI-04: a plugin scope's docs link is the plugin's project URL, else none; core scopes keep theirs", async () => {
+    const service = createEngineService();
+    await service.open({ version, files });
+    const url = "https://nextflow-io.github.io/nf-schema/";
+    await service.setPluginScopes([
+      { ...scopes()[0], projectUrl: url } as never,
+    ]);
+    const withUrl = await service.configSchema(version);
+    const at = (name: string) => withUrl.scopes.find((s) => s.name === name);
+    expect(at("validation")?.docsUrl).toBe(url);
+    expect(at("validation")?.children[0]?.docsUrl).toBe(url);
+    expect(at("process")?.docsUrl).toContain("docs.seqera.io");
+    await service.setPluginScopes(scopes());
+    const none = await service.configSchema(version);
+    const validation = none.scopes.find((s) => s.name === "validation");
+    expect(validation?.docsUrl).toBeNull();
+    expect(validation?.children[0]?.docsUrl).toBeNull();
+  });
 });

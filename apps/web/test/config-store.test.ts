@@ -7,6 +7,7 @@ import {
   type WorkflowRef,
 } from "@nf-builder/engine";
 import { describe, expect, it } from "vitest";
+import { createStore } from "zustand/vanilla";
 import { createCanvasStore } from "../src/canvas/canvas-store";
 import { createConfigStore } from "../src/config/config-store";
 
@@ -100,9 +101,13 @@ function setup(
   } as unknown as EngineApi;
   const workspace = createCanvasStore(() => engine);
   const queue: (() => void)[] = [];
+  const plugins = createStore<{ pluginsKey: string }>()(() => ({
+    pluginsKey: "",
+  }));
   const config = createConfigStore({
     engine: () => engine,
     workspace,
+    pluginsKey: plugins,
     schedule: (fn) => queue.push(fn),
   });
   const settle = async () => {
@@ -124,7 +129,7 @@ function setup(
   workspace.getState().registerFlush(async () => {
     calls.push("flush");
   });
-  return { workspace, config, calls, settle, bump };
+  return { workspace, config, calls, settle, bump, plugins };
 }
 
 describe("config store", () => {
@@ -146,6 +151,22 @@ describe("config store", () => {
     expect(calls.filter((c) => c.startsWith("schema"))).toEqual([
       "schema 26.10",
     ]);
+    expect(calls.filter((c) => c.startsWith("view"))).toHaveLength(2);
+  });
+
+  it("F-505 FI-01: a new plugin scopes key pulls the schema and the open views again without a new revision", async () => {
+    const { workspace, config, calls, settle, plugins } = setup();
+    await workspace.getState().show(summaryAt(1));
+    await workspace.getState().openFile("nextflow.config");
+    await settle();
+    expect(calls.filter((c) => c.startsWith("view"))).toHaveLength(1);
+    plugins.setState({ pluginsKey: "nf-schema@3.1.0" });
+    await settle();
+    expect(calls.filter((c) => c.startsWith("view"))).toHaveLength(2);
+    expect(calls.filter((c) => c.startsWith("schema"))).toHaveLength(2);
+    expect(config.getState().tabs["nextflow.config"]?.status).toBe("ready");
+    plugins.setState({ pluginsKey: "nf-schema@3.1.0" });
+    await settle();
     expect(calls.filter((c) => c.startsWith("view"))).toHaveLength(2);
   });
 

@@ -11,6 +11,8 @@ export interface PluginScopes {
   readonly id: string;
   readonly version: string;
   readonly nodes: readonly ConfigNode[];
+  /** The plugin's project page from the registry index: the docs link of its scopes' options (FI-04); none when absent. */
+  readonly projectUrl?: string | null;
 }
 
 type ScopeNode = Extract<ConfigNode, { kind: "scope" }>;
@@ -98,4 +100,20 @@ export function mergePluginScopes(
   };
   memo = { base: config, key, value };
   return value;
+}
+
+/** The docs link of each scope only a plugin defines (a core scope keeps the pack's): its project URL, or null (FI-04). */
+export function pluginDocs(
+  base: ConfigCatalogue,
+  scopes: readonly PluginScopes[],
+): Map<string, string | null> {
+  const docs = new Map<string, string | null>();
+  for (const plugin of scopes)
+    for (const node of plugin.nodes)
+      if (
+        node.kind === "scope" &&
+        !base.scopes.some((s) => s.name === node.name)
+      )
+        docs.set(node.name, plugin.projectUrl ?? null);
+  return docs;
 }

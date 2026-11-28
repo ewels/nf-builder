@@ -10,6 +10,7 @@ import {
   type WorkflowRef,
 } from "@nf-builder/engine";
 import { describe, expect, it } from "vitest";
+import { createStore } from "zustand/vanilla";
 import { createCanvasStore } from "../src/canvas/canvas-store";
 import { createProblemsStore } from "../src/problems/problems-store";
 
@@ -132,9 +133,13 @@ function setup(
   const { engine, calls } = fake(options);
   const workspace = createCanvasStore(() => engine);
   const queue: (() => void)[] = [];
+  const plugins = createStore<{ pluginsKey: string }>()(() => ({
+    pluginsKey: "",
+  }));
   const problems = createProblemsStore({
     engine: () => engine,
     workspace,
+    pluginsKey: plugins,
     schedule: (fn) => queue.push(fn),
     ...(options.readOnly === undefined ? {} : { readOnly: options.readOnly }),
   });
@@ -145,7 +150,7 @@ function setup(
       await new Promise((r) => setTimeout(r, 0));
     }
   };
-  return { engine, calls, workspace, problems, settle };
+  return { engine, calls, workspace, problems, settle, plugins };
 }
 
 describe("problems store", () => {
@@ -186,6 +191,20 @@ describe("problems store", () => {
       ["z.nf", null],
       ["modules/nf-core/a/main.nf", "nf-core/a"],
     ]);
+  });
+
+  it("F-505 FI-03: a new plugin scopes key pulls the diagnostics again at the same revision", async () => {
+    const { workspace, problems, calls, settle, plugins } = setup();
+    await workspace.getState().show(summaryAt(1));
+    await settle();
+    expect(calls.filter((c) => c === "diagnostics")).toHaveLength(1);
+    plugins.setState({ pluginsKey: "nf-schema@3.1.0" });
+    await settle();
+    expect(calls.filter((c) => c === "diagnostics")).toHaveLength(2);
+    expect(problems.getState().status).toBe("ready");
+    plugins.setState({ pluginsKey: "nf-schema@3.1.0" });
+    await settle();
+    expect(calls.filter((c) => c === "diagnostics")).toHaveLength(2);
   });
 
   it("F-309: each new revision pulls again; one pull is in flight, the latest revision wins and an older result is dropped", async () => {

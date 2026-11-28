@@ -71,6 +71,14 @@ export function findSchemaNode(
   return found;
 }
 
+/** The docs link of a schema node: the reference for an unknown name, none when the node says it has no page. */
+const nodeDocs = (schemaNode: ConfigSchemaNode | null): JSX.Element | null =>
+  schemaNode === null
+    ? docsLink(CONFIG_REFERENCE)
+    : schemaNode.docsUrl === null
+      ? null
+      : docsLink(schemaNode.docsUrl);
+
 const docsLink = (url: string): JSX.Element => (
   <p className="config-details-docs">
     <a href={url} target="_blank" rel="noopener noreferrer">
@@ -130,7 +138,7 @@ export function ConfigDetailsView({
         {schemaNode === null ? null : (
           <CatalogueText markdown={withoutReadMore(schemaNode.description)} />
         )}
-        {docsLink(schemaNode?.docsUrl ?? CONFIG_REFERENCE)}
+        {nodeDocs(schemaNode)}
       </div>
     );
   }
@@ -164,7 +172,7 @@ export function ConfigDetailsView({
       {schemaNode === null ? null : (
         <CatalogueText markdown={withoutReadMore(schemaNode.description)} />
       )}
-      {docsLink(schemaNode?.docsUrl ?? CONFIG_REFERENCE)}
+      {nodeDocs(schemaNode)}
     </div>
   );
 }

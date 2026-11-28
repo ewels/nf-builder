@@ -23,6 +23,7 @@ import {
 } from "../canvas/canvas-store";
 import { getEngine } from "../engine/engine-client";
 import { isReadOnly } from "../read-only/read-only-store";
+import { pluginStore } from "../registry/plugin-store";
 
 export type DiagnosticsStatus =
   | "idle"
@@ -86,6 +87,8 @@ const messageOf = (error: unknown): string =>
 export function createProblemsStore(options: {
   engine: () => EngineApi;
   workspace: StoreApi<WorkspaceState & WorkspaceActions>;
+  /** The plugin store's key: a new key pulls the diagnostics again at the same revision (F-505, FI-03). */
+  pluginsKey?: StoreApi<{ readonly pluginsKey: string }>;
   /** Defers a pull by one macrotask, so the canvas store's projection request reaches the worker first. */
   schedule?: (fn: () => void) => void;
   /** Whether the app is read-only (F-703): navigation then never changes a tab's mode or asks for the code. */
@@ -171,6 +174,15 @@ export function createProblemsStore(options: {
       follow(workspace.getState());
     });
 
+    let scopesKey = options.pluginsKey?.getState().pluginsKey ?? "";
+    options.pluginsKey?.subscribe(({ pluginsKey }) => {
+      if (pluginsKey === scopesKey) return;
+      scopesKey = pluginsKey;
+      if (workspace.getState().summary === null) return;
+      if (get().status === "ready") set({ status: "refreshing" });
+      schedule(() => void pull());
+    });
+
     return {
       ...INITIAL,
 
@@ -250,6 +262,7 @@ export function createProblemsStore(options: {
 export const problemsStore = createProblemsStore({
   engine: getEngine,
   workspace: canvasStore,
+  pluginsKey: pluginStore,
 });
 
 export function useProblems<T>(

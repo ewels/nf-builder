@@ -33,6 +33,8 @@ export interface LoadedPlugin {
   /** The declared version isn't the one `spec` is from. */
   readonly approximate: boolean;
   readonly spec: PluginSpec;
+  /** The plugin's project page from the index; the docs link of its config options (FI-04). */
+  readonly projectUrl: string | null;
 }
 
 export interface PluginSpecState {
@@ -125,6 +127,7 @@ export function createPluginStore(options: {
                       version: listed.version,
                       approximate: declared.version !== listed.version,
                       spec,
+                      projectUrl: listed.projectUrl,
                     });
                   } catch (error) {
                     failures.push({
@@ -152,6 +155,7 @@ export function createPluginStore(options: {
             id: s.id,
             version: s.version,
             nodes: pluginConfigNodes(s.spec),
+            projectUrl: s.projectUrl,
           }));
           const key = pluginsKey(scopes);
           if (key !== sentKey) {

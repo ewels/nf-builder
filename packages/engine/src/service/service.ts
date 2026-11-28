@@ -65,6 +65,7 @@ import { loadPalette } from "../palette";
 import {
   mergePluginScopes,
   type PluginScopes,
+  pluginDocs,
   pluginsKey,
 } from "../plugins/config-scopes";
 import { declaredPlugins } from "../plugins/declared";
@@ -792,6 +793,7 @@ export function createEngineService(
             current.catalogue.config,
             current.configRules,
             pluginsKey(pluginScopes),
+            pluginDocs(current.base.catalogue.config, pluginScopes),
           );
         const known = schemas.get(version);
         if (known) return known;

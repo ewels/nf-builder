@@ -21,6 +21,7 @@ import {
 } from "../canvas/canvas-store";
 import { getEngine } from "../engine/engine-client";
 import { isReadOnly } from "../read-only/read-only-store";
+import { pluginStore } from "../registry/plugin-store";
 
 /** An option the user picked in Add option or Add parameter, shown as an empty row until a value is committed. */
 export interface PendingRow {
@@ -104,6 +105,8 @@ const messageOf = (error: unknown): string =>
 export function createConfigStore(options: {
   engine: () => EngineApi;
   workspace: StoreApi<WorkspaceState & WorkspaceActions>;
+  /** The plugin store's key: a new key pulls the schema and the open views again (F-505, FI-01). */
+  pluginsKey?: StoreApi<{ readonly pluginsKey: string }>;
   /** Defers a pull by one macrotask, so the canvas store's own requests reach the worker first. */
   schedule?: (fn: () => void) => void;
   readOnly?: () => boolean;
@@ -226,6 +229,23 @@ export function createConfigStore(options: {
       workspace.subscribe(follow);
       follow(workspace.getState());
     });
+    // the plugins' scopes changed what the rules and the schema know: the same revision is viewed again
+    let scopesKey = options.pluginsKey?.getState().pluginsKey ?? "";
+    options.pluginsKey?.subscribe(({ pluginsKey }) => {
+      if (pluginsKey === scopesKey) return;
+      scopesKey = pluginsKey;
+      const tabs = get().tabs;
+      set({
+        schema: null,
+        tabs: Object.fromEntries(
+          Object.entries(tabs).map(([path, tab]) => [
+            path,
+            { ...tab, revision: null },
+          ]),
+        ),
+      });
+      schedule(() => void pull());
+    });
 
     return {
       schema: null,
@@ -298,6 +318,7 @@ export function createConfigStore(options: {
 export const configStore = createConfigStore({
   engine: getEngine,
   workspace: canvasStore,
+  pluginsKey: pluginStore,
 });
 
 export function useConfig<T>(
