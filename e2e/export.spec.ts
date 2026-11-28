@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { expect, test } from "@playwright/test";
 import { canvasReady, node } from "./canvas.ts";
 import { F208_AFTER, F208_BEFORE } from "./code-view.ts";
@@ -28,6 +30,7 @@ import {
   writeZip,
 } from "./zips.ts";
 
+const RENAME_TOUCHED = ["modules/fastqc/main.nf", "modules/rnaseq.nf"];
 const decode = (bytes: Uint8Array | undefined) =>
   new TextDecoder().decode(bytes ?? new Uint8Array());
 const byPath = (a: { path: string }, b: { path: string }) =>
@@ -72,12 +75,12 @@ test("F-404 step 1 IO-20: import rnaseq-nf from a zip, rename FASTQC, export: ev
   const files = stripFolder(out.files, "rnaseq nf");
   const pinned = readProject(dir).filter((f) => !RNASEQ_NF_SKIPPED(f.path));
   expect(Object.keys(files).sort()).toEqual(pinned.map((f) => f.path).sort());
-  const changed = pinned.filter((f) => decode(files[f.path]) !== f.text);
+  const raw = (path: string) => new Uint8Array(readFileSync(join(dir, path)));
+  const changed = pinned.filter(
+    (f) => !Buffer.from(files[f.path] ?? []).equals(raw(f.path)),
+  );
   // the rename touches the declaration and its includes and calls, and nothing else
-  expect(changed.map((f) => f.path)).toContain("modules/fastqc/main.nf");
-  expect(changed.length).toBeLessThan(pinned.length);
-  for (const f of pinned.filter((f) => !changed.includes(f)))
-    expect(decode(files[f.path]), f.path).toBe(f.text);
+  expect(changed.map((f) => f.path).sort()).toEqual(RENAME_TOUCHED);
   for (const f of changed) expect(decode(files[f.path])).toContain("FASTQC_QC");
   // ADR 0057: bin/ files are executable, on Unix
   const mode = new Map(out.entries.map((e) => [e.name, e]));
@@ -116,7 +119,7 @@ test("F-404 step 2 IO-21: f208-code-edit imported, the Code edit applied, the ex
 test("F-404 step 3 IO-02 ADR-0008: export with the layout, import the zip in a fresh browser context: the sidecar bytes and every node position are identical", async ({
   page,
   browser,
-}, testInfo) => {
+}) => {
   await page.goto("./");
   await expect(switcher(page)).toBeEnabled();
   await createFromTemplate(page, "Hello world", "Round trip");
@@ -141,17 +144,6 @@ test("F-404 step 3 IO-02 ADR-0008: export with the layout, import the zip in a f
   const out = await exportZip(page);
   const files = stripFolder(out.files, "Round trip");
   expect(decode(files[SIDECAR])).toBe(sidecar);
-  const zip = testInfo.outputPath("round-trip.zip");
-  writeZip(
-    Object.fromEntries(
-      Object.entries(files).map(([path, bytes]) => [
-        `Round trip/${path}`,
-        bytes,
-      ]),
-    ),
-    zip,
-  );
-
   // a fresh browser context has empty storage
   const context = await browser.newContext({ baseURL: PREVIEW_URL });
   try {
@@ -159,7 +151,7 @@ test("F-404 step 3 IO-02 ADR-0008: export with the layout, import the zip in a f
     await fresh.goto("./");
     await expect(switcher(fresh)).toBeEnabled();
     await expect(switcher(fresh)).toHaveText(/No project/);
-    await importZip(fresh, zip, "Round trip");
+    await importZip(fresh, out.path, "Round trip");
     await canvasReady(fresh);
     expect(await canvasNodeIds(fresh)).toEqual(ids);
     expect(await readFile(fresh, SIDECAR)).toBe(sidecar);
@@ -176,7 +168,7 @@ test("F-404 step 3 IO-02 ADR-0008: export with the layout, import the zip in a f
 
 test("F-404 UX-62: unticking the layout leaves .nf-builder/ out; re-importing lays the graph out with ELK", async ({
   page,
-}, testInfo) => {
+}) => {
   await page.goto("./");
   await expect(switcher(page)).toBeEnabled();
   await createFromTemplate(page, "Hello world", "No layout");
@@ -188,18 +180,7 @@ test("F-404 UX-62: unticking the layout leaves .nf-builder/ out; re-importing la
   expect(names.some((n) => n.includes(".nf-builder/"))).toBe(false);
   const withLayout = await exportZip(page, { layout: true });
   expect(Object.keys(withLayout.files)).toContain(`No layout/${SIDECAR}`);
-  const files = stripFolder(out.files, "No layout");
-  const zip = testInfo.outputPath("no-layout.zip");
-  writeZip(
-    Object.fromEntries(
-      Object.entries(files).map(([path, bytes]) => [
-        `No layout/${path}`,
-        bytes,
-      ]),
-    ),
-    zip,
-  );
-  await importZip(page, zip, "No layout again");
+  await importZip(page, out.path, "No layout again");
   await canvasReady(page);
   // ELK places every node again, and writes a sidecar
   await expect.poll(() => readFile(page, SIDECAR)).not.toBeNull();

@@ -1,6 +1,6 @@
 // Helpers for the export end-to-end tests (F-404): the header's Export dialog, the downloaded zip read back with fflate.
 import { readFileSync } from "node:fs";
-import type { Page } from "@playwright/test";
+import { expect, type Page } from "@playwright/test";
 import { unzipSync } from "fflate";
 import {
   type CentralEntry,
@@ -9,6 +9,8 @@ import {
 
 export interface ExportedZip {
   readonly fileName: string;
+  /** Where Playwright saved the download, so a test can import the real file. */
+  readonly path: string;
   /** Every entry's bytes by its full name in the zip. */
   readonly files: Record<string, Uint8Array>;
   /** The central directory: creator OS and Unix mode per entry. */
@@ -26,17 +28,23 @@ export async function exportZip(
     .click();
   const dialog = page.getByRole("dialog", { name: "Export project" });
   await dialog.waitFor();
+  const button = dialog.getByRole("button", { name: "Export", exact: true });
+  // the file list loads after the dialog opens; until then the checkbox is disabled and the button too
+  await expect(button).toBeEnabled();
   const box = dialog.getByRole("checkbox");
-  if (options.layout !== undefined && (await box.isEnabled()))
+  if (options.layout !== undefined && (await box.isEnabled())) {
     await box.setChecked(options.layout);
+    await expect(box).toBeChecked({ checked: options.layout });
+  }
   const download = page.waitForEvent("download");
-  await dialog.getByRole("button", { name: "Export", exact: true }).click();
+  await button.click();
   const saved = await download;
   await dialog.waitFor({ state: "hidden" });
   const path = await saved.path();
   const bytes = new Uint8Array(readFileSync(path));
   return {
     fileName: saved.suggestedFilename(),
+    path,
     files: unzipSync(bytes),
     entries: centralEntries(bytes),
   };
