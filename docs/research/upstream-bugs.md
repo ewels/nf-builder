@@ -397,3 +397,15 @@ process {
 - **What happens:** `nextflow lint -format .` (26.10.7) rewrites the closure to `{ token -> token }`. In a script the formatter keeps a closure parameter's type.
 - **Expected:** the type stays, or the formatter says why a config closure differs from a script one.
 - **nf-builder:** the config printer keeps the type (as `token: String`, the form it prints in scripts). Three rnaseq configs differ for this reason alone, listed in `packages/lang-2610/test/corpus/known-config-format-differences.json` (F-601, ADR 0032).
+
+### 26. The config formatter drops the quotes of a quoted option name
+
+`nextflow.config`:
+
+```nextflow
+ext.'my-key' = 1
+```
+
+- **What happens:** `nextflow lint` accepts it, but `nextflow lint -format .` (26.10.7) rewrites it to `ext.my-key = 1`, which no longer parses ("Unexpected input: '-'"). The same happens inside `process { ext.'a-b' = 2 }`.
+- **Expected:** the quotes stay when the name isn't an identifier.
+- **nf-builder:** the config edit commands refuse a name that needs quotes rather than print it (F-601), so the printed config always parses.
