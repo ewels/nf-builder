@@ -311,3 +311,140 @@ describe("F-601 config editor", () => {
     expect(out).toContain("2.5.1");
   });
 });
+
+const schemaNode = (name: string, kind: "scope" | "option" = "scope") => ({
+  kind,
+  name,
+  path: [name],
+  description: "",
+  docsUrl: null,
+  types: [],
+  valueKind: null,
+  children: [],
+});
+const editing = (
+  over: Partial<
+    NonNullable<Parameters<typeof ConfigEditorView>[0]["edit"]>
+  > = {},
+): NonNullable<Parameters<typeof ConfigEditorView>[0]["edit"]> => ({
+  editable: true,
+  schema: {
+    version: "26.10",
+    forms: { scopes: [], maps: {} },
+    scopes: [schemaNode("process"), schemaNode("docker")],
+  },
+  pending: [],
+  onSet: async () => undefined,
+  onRemove: async () => undefined,
+  onRemovePlugin: async () => undefined,
+  onDiscard: () => undefined,
+  onEditInCode: () => undefined,
+  ask: () => undefined,
+  ...over,
+});
+
+describe("F-601 config editor editing", () => {
+  it("F-601 FI-03: an editable form offers Add scope, and each card its own Add button", () => {
+    const out = html(
+      viewOf([
+        {
+          kind: "scope",
+          card: card("process", { form: "process", pinned: ["cpus"] }),
+        },
+        { kind: "scope", card: card("docker") },
+        { kind: "scope", card: card("profiles", { form: "profiles" }) },
+        { kind: "scope", card: card("plugins", { form: "plugins" }) },
+        { kind: "scope", card: card("params", { form: "params" }) },
+      ]),
+      { edit: editing() },
+    );
+    for (const label of [
+      "Add scope…",
+      "Add selector…",
+      "Add profile…",
+      "Add plugin…",
+      "Add parameter…",
+    ])
+      expect(out, label).toContain(label);
+    expect(out.match(/Add option…/g)).toHaveLength(2);
+    expect(out).not.toMatch(/<button[^>]*disabled=""[^>]*>Add scope…/);
+  });
+
+  it("F-601 FI-02: a file with errors keeps every field and button disabled", () => {
+    const out = html(
+      viewOf(
+        [
+          {
+            kind: "scope",
+            card: card("process", {
+              form: "process",
+              pinned: ["cpus"],
+              rows: [opt("memory")],
+            }),
+          },
+        ],
+        { editable: false },
+      ),
+      { edit: editing() },
+    );
+    expect(out).toMatch(/<button[^>]*disabled=""[^>]*>Add scope…/);
+    expect(out).toMatch(/<button[^>]*disabled=""[^>]*>Add selector…/);
+    expect(out).not.toContain("Remove");
+    for (const input of out.match(/<input[^>]*config-row-value[^>]*>/g) ?? [])
+      expect(input).toContain("disabled");
+  });
+
+  it("F-601: a dynamic value is read-only code with Edit in code and Set a value; an unknown option has Remove but no Set a value", () => {
+    const out = html(
+      viewOf([
+        {
+          kind: "scope",
+          card: card("process", {
+            rows: [
+              opt("memory", {
+                value: null,
+                code: "{ 2.GB * task.attempt }",
+                valueKind: "memory",
+              }),
+              opt("memmory", {
+                class: "unknown",
+                value: null,
+                code: "'4 GB'",
+                valueKind: "string",
+              }),
+            ],
+          }),
+        },
+      ]),
+      { edit: editing() },
+    );
+    expect(out).toContain("{ 2.GB * task.attempt }");
+    expect(out.match(/Edit in code/g)).toHaveLength(2);
+    expect(out.match(/Set a value/g)).toHaveLength(1);
+    expect(out).toContain('aria-label="Remove process.memmory"');
+    expect(out).toContain('aria-label="Remove process.memory"');
+  });
+
+  it("F-601 FI-02: pending rows show under their card, with a Discard button", () => {
+    const out = html(viewOf([{ kind: "scope", card: card("docker") }]), {
+      edit: editing({
+        pending: [
+          {
+            key: "pending:::docker.enabled",
+            context: { profile: null, selector: null },
+            option: ["docker", "enabled"],
+            valueKind: "boolean",
+          },
+        ],
+      }),
+    });
+    expect(out).toContain('data-option="enabled"');
+    expect(out).toContain('aria-label="Discard docker.enabled"');
+    expect(out).toContain("<select");
+  });
+
+  it("F-601 FI-02 QA-12: an applied edit and a refusal show in a status line", () => {
+    const out = html(viewOf([]), { notice: "Set process.memory" });
+    expect(out).toMatch(/<p[^>]*role="status"[^>]*>Set process.memory</);
+  });
+});

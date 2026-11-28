@@ -43,7 +43,7 @@ export const configCard = (page: Page, scope: string): Locator =>
 /** The value field of an option row directly in `card`, not in a selector or profile nested in it. */
 export const optionField = (card: Locator, label: string): Locator =>
   card.locator(
-    `:scope > .config-card-body > .config-rows [data-option="${label}"] input`,
+    `:scope > .config-card-body > .config-rows [data-option="${label}"] :is(input, select, textarea)`,
   );
 
 /** The selector card written `written` (`withLabel: big_mem`). */
@@ -55,3 +55,42 @@ export const selectorCard = (page: Page, written: string): Locator =>
 /** The details pane's config content. */
 export const configDetails = (page: Page): Locator =>
   page.locator(".config-details");
+
+/** Add scope… in the form's toolbar, then the scope's button in the dialog. */
+export async function addScope(page: Page, scope: string): Promise<void> {
+  await page.getByRole("button", { name: "Add scope…" }).first().click();
+  const dialog = page.getByRole("dialog", { name: "Add scope" });
+  await dialog
+    .getByRole("button", { name: new RegExp(`^${scope}\\b`) })
+    .first()
+    .click();
+  await dialog.waitFor({ state: "hidden" });
+}
+
+/** Add selector… on the process card, then its kind and pattern. */
+export async function addSelector(
+  page: Page,
+  kind: "withName" | "withLabel",
+  pattern: string,
+): Promise<void> {
+  await configCard(page, "process")
+    .getByRole("button", { name: "Add selector…" })
+    .click();
+  const dialog = page.getByRole("dialog", { name: "Add selector" });
+  await dialog.getByLabel("Kind").selectOption(kind);
+  await dialog.getByLabel("Pattern").fill(pattern);
+  await dialog.getByRole("button", { name: "Add" }).click();
+  await dialog.waitFor({ state: "hidden" });
+}
+
+/** The current text of a project file in the engine, which the tests compare with a fixture's bytes. */
+export const projectFile = (page: Page, path: string): Promise<string | null> =>
+  page.evaluate(
+    (p) =>
+      (
+        window as unknown as {
+          nfBuilderEngine: { readFile(p: string): Promise<string | null> };
+        }
+      ).nfBuilderEngine.readFile(p),
+    path,
+  );

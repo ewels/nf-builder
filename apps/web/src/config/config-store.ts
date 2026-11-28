@@ -1,10 +1,16 @@
 // The config store (F-601, AR-30): the page's read-only copy of each open config tab's view, pulled from the engine once
 // per revision, and the tabs' session-only state (selection, collapsed cards). The engine is injected so tests use a fake.
-import type {
-  ConfigSchema,
-  ConfigView,
-  EngineApi,
-  OptionRow,
+import {
+  type ApplyOutcome,
+  type ConfigContext,
+  type ConfigSchema,
+  type ConfigValue,
+  type ConfigValueKind,
+  type ConfigView,
+  commandLabel,
+  type EditCommand,
+  type EngineApi,
+  type OptionRow,
 } from "@nf-builder/engine";
 import { useStore } from "zustand";
 import { createStore, type StoreApi } from "zustand/vanilla";
@@ -16,6 +22,14 @@ import {
 import { getEngine } from "../engine/engine-client";
 import { isReadOnly } from "../read-only/read-only-store";
 
+/** An option the user picked in Add option or Add parameter, shown as an empty row until a value is committed. */
+export interface PendingRow {
+  readonly key: string;
+  readonly context: ConfigContext;
+  readonly option: readonly string[];
+  readonly valueKind: ConfigValueKind;
+}
+
 export interface ConfigTabState {
   readonly status: "loading" | "ready" | "failed";
   /** The revision `view` was made at. */
@@ -26,6 +40,9 @@ export interface ConfigTabState {
   readonly selected: string | null;
   /** The keys of cards whose collapsed state differs from their default: scope cards start open, and selector cards start collapsed in a process card of more than 20. */
   readonly toggled: readonly string[];
+  readonly pending: readonly PendingRow[];
+  /** What the last edit did or why it was refused, for a status line. */
+  readonly notice: string | null;
 }
 
 export interface ConfigState {
@@ -36,6 +53,27 @@ export interface ConfigState {
 export interface ConfigActions {
   /** Pulls the views of the open config tabs that are not at the current revision, and the schema once. */
   refresh(): Promise<void>;
+  /** Each sends one command as one undo step, after the pending code edits; null when no project is open. */
+  set(
+    path: string,
+    context: ConfigContext,
+    option: readonly string[],
+    value: ConfigValue,
+  ): Promise<ApplyOutcome | null>;
+  remove(
+    path: string,
+    context: ConfigContext,
+    option: readonly string[],
+  ): Promise<ApplyOutcome | null>;
+  addBlock(
+    path: string,
+    context: ConfigContext,
+    scope: readonly string[],
+  ): Promise<ApplyOutcome | null>;
+  addPlugin(path: string, id: string): Promise<ApplyOutcome | null>;
+  removePlugin(path: string, id: string): Promise<ApplyOutcome | null>;
+  addPending(path: string, row: PendingRow): void;
+  discardPending(path: string, key: string): void;
   select(path: string, key: string | null): void;
   toggle(path: string, cardKey: string): void;
   /** Shows a range of the file in Split (F-309's reveal); nothing while the app is read-only. */
@@ -49,7 +87,16 @@ const NEW_TAB: ConfigTabState = {
   message: null,
   selected: null,
   toggled: [],
+  pending: [],
+  notice: null,
 };
+
+/** The key of a pending row: its context and full option path. */
+export const pendingKey = (
+  context: ConfigContext,
+  option: readonly string[],
+): string =>
+  `pending:${context.profile ?? ""}:${context.selector === null ? "" : `${context.selector.kind}:${context.selector.pattern}`}:${option.join(".")}`;
 
 const messageOf = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
@@ -139,6 +186,25 @@ export function createConfigStore(options: {
       }
     }
 
+    /** Sends one command: pending code edits first, so they can't overwrite the change later. */
+    async function send(
+      path: string,
+      command: EditCommand,
+    ): Promise<ApplyOutcome | null> {
+      const ws = workspace.getState();
+      if (ws.summary === null) return null;
+      const mine = ws.session;
+      await ws.flushEdits();
+      const outcome = await workspace.getState().apply(command, mine);
+      if (workspace.getState().session !== mine) return outcome;
+      if (outcome.ok) update(path, { notice: commandLabel(command) });
+      else {
+        update(path, { notice: outcome.message, revision: null });
+        schedule(() => void pull());
+      }
+      return outcome;
+    }
+
     const follow = (state: WorkspaceState): void => {
       if (state.session !== session) {
         session = state.session;
@@ -166,6 +232,51 @@ export function createConfigStore(options: {
       tabs: {},
 
       refresh: pull,
+
+      set: async (path, context, option, value) => {
+        const outcome = await send(path, {
+          kind: "setConfigOption",
+          path,
+          context,
+          option,
+          value,
+        });
+        if (outcome?.ok) {
+          const key = pendingKey(context, option);
+          update(path, {
+            pending: (get().tabs[path]?.pending ?? []).filter(
+              (p) => p.key !== key,
+            ),
+          });
+        }
+        return outcome;
+      },
+
+      remove: (path, context, option) =>
+        send(path, { kind: "removeConfigOption", path, context, option }),
+
+      addBlock: (path, context, scope) =>
+        send(path, { kind: "addConfigBlock", path, context, scope }),
+
+      addPlugin: (path, id) =>
+        send(path, { kind: "addConfigPlugin", path, id }),
+
+      removePlugin: (path, id) =>
+        send(path, { kind: "removeConfigPlugin", path, id }),
+
+      addPending(path, row) {
+        const pending = get().tabs[path]?.pending ?? [];
+        if (pending.some((p) => p.key === row.key)) return;
+        update(path, { pending: [...pending, row] });
+      },
+
+      discardPending(path, key) {
+        update(path, {
+          pending: (get().tabs[path]?.pending ?? []).filter(
+            (p) => p.key !== key,
+          ),
+        });
+      },
 
       select(path, key) {
         update(path, { selected: key });

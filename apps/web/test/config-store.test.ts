@@ -55,7 +55,10 @@ const schema: ConfigSchema = {
 };
 
 function setup(
-  options: { gate?: (call: number) => Promise<void> | undefined } = {},
+  options: {
+    gate?: (call: number) => Promise<void> | undefined;
+    apply?: () => unknown;
+  } = {},
 ) {
   const calls: string[] = [];
   let revision = 1;
@@ -70,6 +73,21 @@ function setup(
     configSchema: async (version: string) => {
       calls.push(`schema ${version}`);
       return schema;
+    },
+    apply: async (command: { kind: string }) => {
+      calls.push(`apply ${command.kind}`);
+      return (
+        options.apply?.() ?? {
+          ok: true,
+          revision: revision + 1,
+          files: [],
+          remodelled: [],
+          workflows: [entry],
+          history: EMPTY_HISTORY,
+          patches: [],
+          inverse: [],
+        }
+      );
     },
     configView: async (path: string) => {
       const call = ++pulls;
@@ -102,6 +120,9 @@ function setup(
       history: EMPTY_HISTORY,
     } as never);
   };
+  workspace.getState().registerFlush(async () => {
+    calls.push("flush");
+  });
   return { workspace, config, calls, settle, bump };
 }
 
@@ -201,5 +222,103 @@ describe("config store", () => {
         .tabs.find((t) => t.id === "config:nextflow.config")?.mode,
     ).toBe("graph");
     expect(calls.workspace.getState().reveal).toBeNull();
+  });
+});
+
+const top = { profile: null, selector: null };
+
+describe("config store edits", () => {
+  it("F-601 F-209: set flushes pending code, then sends one setConfigOption through the canvas store", async () => {
+    const { workspace, config, calls, settle } = setup();
+    await workspace.getState().show(summaryAt(1));
+    await workspace.getState().openFile("nextflow.config");
+    await settle();
+    const before = calls.length;
+    const outcome = await config
+      .getState()
+      .set("nextflow.config", top, ["process", "memory"], {
+        kind: "memory",
+        amount: 8,
+        unit: "GB",
+      });
+    expect(outcome?.ok).toBe(true);
+    expect(calls.slice(before)).toEqual(["flush", "apply setConfigOption"]);
+    expect(config.getState().tabs["nextflow.config"]?.notice).toBe(
+      "Set process.memory",
+    );
+  });
+
+  it("F-601: remove, addBlock, addPlugin and removePlugin send their commands", async () => {
+    const { workspace, config, calls, settle } = setup();
+    await workspace.getState().show(summaryAt(1));
+    await workspace.getState().openFile("nextflow.config");
+    await settle();
+    const before = calls.length;
+    const s = config.getState();
+    await s.remove("nextflow.config", top, ["docker", "enabled"]);
+    await s.addBlock("nextflow.config", top, ["process"]);
+    await s.addPlugin("nextflow.config", "nf-schema@2.5.1");
+    await s.removePlugin("nextflow.config", "nf-schema@2.5.1");
+    expect(calls.slice(before).filter((c) => c.startsWith("apply"))).toEqual([
+      "apply removeConfigOption",
+      "apply addConfigBlock",
+      "apply addConfigPlugin",
+      "apply removeConfigPlugin",
+    ]);
+  });
+
+  it("F-601: a refusal becomes the tab's notice and pulls the view again at the same revision", async () => {
+    const refused = {
+      ok: false,
+      revision: 1,
+      code: "does-not-parse",
+      message: "nextflow.config has errors that this edit can't work around.",
+      path: "nextflow.config",
+      problems: [],
+    };
+    const { workspace, config, calls, settle } = setup({
+      apply: () => refused,
+    });
+    await workspace.getState().show(summaryAt(1));
+    await workspace.getState().openFile("nextflow.config");
+    await settle();
+    const views = () => calls.filter((c) => c.startsWith("view")).length;
+    const before = views();
+    const outcome = await config
+      .getState()
+      .set("nextflow.config", top, ["cleanup"], {
+        kind: "boolean",
+        value: true,
+      });
+    expect(outcome?.ok).toBe(false);
+    expect(config.getState().tabs["nextflow.config"]?.notice).toBe(
+      refused.message,
+    );
+    await settle();
+    expect(views()).toBe(before + 1);
+  });
+
+  it("F-601: a pending row is UI state until its value is committed, and goes when it is committed or discarded", async () => {
+    const { workspace, config, settle } = setup();
+    await workspace.getState().show(summaryAt(1));
+    await workspace.getState().openFile("nextflow.config");
+    await settle();
+    const row = {
+      key: "pending:::cleanup",
+      context: top,
+      option: ["cleanup"],
+      valueKind: "boolean" as const,
+    };
+    config.getState().addPending("nextflow.config", row);
+    config.getState().addPending("nextflow.config", row);
+    expect(config.getState().tabs["nextflow.config"]?.pending).toEqual([row]);
+    await config.getState().set("nextflow.config", top, ["cleanup"], {
+      kind: "boolean",
+      value: true,
+    });
+    expect(config.getState().tabs["nextflow.config"]?.pending).toEqual([]);
+    config.getState().addPending("nextflow.config", row);
+    config.getState().discardPending("nextflow.config", row.key);
+    expect(config.getState().tabs["nextflow.config"]?.pending).toEqual([]);
   });
 });

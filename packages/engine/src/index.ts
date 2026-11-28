@@ -12,6 +12,7 @@ export type {
   ConfigSelectorRef,
   ConfigSourceFile,
   ConfigValue,
+  ConfigValueKind,
   Connect,
   CreateProcess,
   Dataflow,
@@ -133,6 +134,7 @@ export {
   type HistoryLimits,
   type HistoryStatus,
 } from "./history/history";
+export { commandLabel } from "./history/labels";
 export * from "./layout";
 export type {
   Binding,
