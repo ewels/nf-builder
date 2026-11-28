@@ -24,9 +24,11 @@ import {
   patchResult,
   patchSequence,
 } from "../edit/apply";
+import { connectionTargets } from "../edit/connection-targets";
 import { freshDefinitionName } from "../edit/fresh-name";
 import { definitionPath } from "../edit/names";
 import { PatchError } from "../edit/patches";
+import { EditRefusal } from "../edit/refusal";
 import { registryFolders } from "../files/registry";
 import { EMPTY_HISTORY, History, type HistoryLimits } from "../history/history";
 import { commandLabel } from "../history/labels";
@@ -58,6 +60,7 @@ import { templateList } from "../templates";
 import type {
   ApplyOptions,
   ApplyOutcome,
+  ConnectionTargetsResult,
   DiagnosticsResult,
   EngineApi,
   EngineRefusal,
@@ -725,6 +728,26 @@ export function createEngineService(
             ? registryFolders(model.paths(), pack.includes, model.tree)
             : [],
         };
+      }),
+
+    connectionTargets: (request) =>
+      guarded((open): ConnectionTargetsResult | EngineRefusal => {
+        try {
+          return {
+            revision,
+            from: request.from,
+            targets: connectionTargets(
+              open.state,
+              open.lints,
+              { path: request.path, workflow: request.workflow },
+              request.from,
+            ),
+          };
+        } catch (error) {
+          if (error instanceof EditRefusal)
+            return refusal(error.code, error.message);
+          throw error;
+        }
       }),
 
     freshName: (request) =>

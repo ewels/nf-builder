@@ -100,6 +100,11 @@ export {
   createEditState,
   type EditState,
 } from "./edit/apply";
+export {
+  type ConnectionStatus,
+  type ConnectionTarget,
+  connectionTargets,
+} from "./edit/connection-targets";
 export { applyPatches, PatchError } from "./edit/patches";
 export { planAdd } from "./files/add";
 export {
@@ -188,6 +193,8 @@ export type {
   Applied,
   ApplyOptions,
   ApplyOutcome,
+  ConnectionTargetsRequest,
+  ConnectionTargetsResult,
   DiagnosticsResult,
   EngineApi,
   EngineRefusal,

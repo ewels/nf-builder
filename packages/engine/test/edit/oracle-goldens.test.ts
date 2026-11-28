@@ -2,6 +2,7 @@ import { join } from "node:path";
 import type { EditCommand } from "@nf-builder/lang-core";
 import { describe, expect, it } from "vitest";
 import type { EditState } from "../../src/edit/apply";
+import { diagnoseFiles } from "../diagnostics/open";
 import { readTree } from "../model/read-tree";
 import { accepted, commit, node, port, stateFor, texts } from "./helpers";
 
@@ -148,4 +149,57 @@ describe("F-111 oracle goldens", () => {
         Object.keys(result).sort(),
       );
     });
+});
+
+/** The text of every file of a state, and the diagnoser's errors for it. */
+async function errorsOf(files: Record<string, string>) {
+  const { diagnoser } = await diagnoseFiles(
+    Object.entries(files).map(([path, text]) => ({ path, text })),
+  );
+  return diagnoser.all().filter((d) => d.severity === "error");
+}
+const tree = (name: string) =>
+  Object.fromEntries(readTree(join(cases, name)).map((f) => [f.path, f.text]));
+const connectInto = (from: [string, string]) => (s: EditState) =>
+  ({
+    kind: "connect",
+    target: entry,
+    from: port(s, ...from),
+    to: port(s, "DESCRIBE@1", "sample"),
+  }) as EditCommand;
+
+describe("F-302 oracle goldens", () => {
+  it("F-302 step 1 UX-25: Connect params.input to DESCRIBE.sample on f302-connect-start equals f302-connect-typed, with no diagnostics", async () => {
+    const result = await run("f302-connect-start", [
+      connectInto([":params", "input"]),
+    ]);
+    expect(result).toEqual(tree("f302-connect-typed"));
+    expect(await errorsOf(result)).toEqual([]);
+  });
+
+  it("F-302 step 2 LA-32: Connect TOUCH's output to DESCRIBE.sample equals f302-connect-mismatch, with one type-mismatch error at the argument", async () => {
+    const result = await run("f302-connect-start", [
+      connectInto(["TOUCH@1", "out"]),
+    ]);
+    expect(result).toEqual(tree("f302-connect-mismatch"));
+    const errors = await errorsOf(result);
+    expect(errors.map((d) => d.code)).toEqual(["type-mismatch"]);
+    const [only] = errors;
+    expect(only?.path).toBe("main.nf");
+    expect(result["main.nf"]?.slice(only?.range.start, only?.range.end)).toBe(
+      "touch",
+    );
+  });
+
+  it("F-302 step 3: Disconnect DESCRIBE.sample on f302-connect-typed equals f302-connect-start byte for byte, parses, and has the call-arity error only", async () => {
+    const result = await run("f302-connect-typed", [
+      (s) => ({
+        kind: "disconnect",
+        target: entry,
+        port: port(s, "DESCRIBE@1", "sample"),
+      }),
+    ]);
+    expect(result).toEqual(tree("f302-connect-start"));
+    expect((await errorsOf(result)).map((d) => d.code)).toEqual(["call-arity"]);
+  });
 });

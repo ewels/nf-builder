@@ -81,6 +81,21 @@ export interface EngineHook {
     }[];
     code?: string;
   }>;
+  /** What connecting an output port to each input port of a workflow would do (F-302, UX-25). */
+  connectionTargets(request: {
+    path: string;
+    workflow: string | null;
+    from: { node: string; port: string };
+  }): Promise<{
+    revision?: number;
+    targets?: {
+      node: string;
+      port: string;
+      status: "ok" | "mismatch" | "refused";
+      message: string | null;
+    }[];
+    code?: string;
+  }>;
   outline(path: string): Promise<{
     revision?: number;
     items?: { kind: string; name: string; line: number }[];
