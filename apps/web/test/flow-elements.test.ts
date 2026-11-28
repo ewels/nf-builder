@@ -145,9 +145,17 @@ describe("F-205 flow elements", () => {
       "Value<Path> · params.fasta\nType mismatch: Path into Sample.. Press Delete to disconnect.",
     );
     expect(edge?.selectable).toBe(false);
+    expect(edge?.ariaRole).toBe("button");
+    expect(edge?.domAttributes).toEqual({ "aria-pressed": true });
     const [plain] = toFlowEdges(view, null);
     expect(plain?.data?.mismatch).toBeNull();
     expect(plain?.data?.selected).toBe(false);
     expect(plain?.ariaLabel).toBe("Value<Path> · params.fasta");
+    expect(plain?.ariaRole).toBeUndefined();
+    const [other] = toFlowEdges(view, null, undefined, {
+      deletable: true,
+      selectedEdge: "nope",
+    });
+    expect(other?.domAttributes).toEqual({ "aria-pressed": false });
   });
 });

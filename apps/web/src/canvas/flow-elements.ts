@@ -80,6 +80,13 @@ export function toFlowEdges(
           ? `${tooltip}. Press Delete to disconnect.`
           : tooltip,
       selectable: false,
+      // an edge you can disconnect is pressed to select it (Enter), so its state is `aria-pressed` (QA-11)
+      ...(options.deletable === true
+        ? {
+            ariaRole: "button" as const,
+            domAttributes: { "aria-pressed": options.selectedEdge === e.id },
+          }
+        : {}),
     };
   });
   const order = (e: CanvasFlowEdge): number =>

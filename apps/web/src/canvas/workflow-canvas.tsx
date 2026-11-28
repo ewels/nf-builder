@@ -25,6 +25,7 @@ import {
 import "@xyflow/react/dist/style.css";
 import {
   type DragEvent,
+  type FocusEvent,
   type JSX,
   type KeyboardEvent,
   type MouseEvent,
@@ -310,14 +311,13 @@ function CanvasInner({
       target.closest("input, textarea, select, button, [contenteditable]")
     )
       return;
-    const edge = id ?? selectedEdge;
     const action = edgeKeyAction(event.key, readOnly);
-    if (action === null || (edge === null && action !== "clear")) return;
+    if (action === null) return;
     if (action === "clear") {
       setSelectedEdge(null);
       return;
     }
-    const found = view.edges.find((e) => e.id === edge);
+    const found = view.edges.find((e) => e.id === (id ?? selectedEdge));
     if (found === undefined) return;
     event.preventDefault();
     if (action === "select") {
@@ -327,6 +327,17 @@ function CanvasInner({
       setSelectedEdge(null);
       onDisconnect({ node: found.target, port: found.targetPort });
     }
+  };
+  // Delete acts on the edge that has the focus: once focus moves to a node or outside the canvas, none is selected
+  const onFocus = (event: FocusEvent) => {
+    const onEdge = (event.target as HTMLElement).closest<HTMLElement>(
+      ".react-flow__edge",
+    );
+    if (onEdge?.getAttribute("data-id") !== selectedEdge) setSelectedEdge(null);
+  };
+  const onBlur = (event: FocusEvent) => {
+    if (!event.currentTarget.contains(event.relatedTarget as Node | null))
+      setSelectedEdge(null);
   };
   // shown at the pointer, outside the zoomed viewport so it stays readable (UX-24)
   const [tooltip, setTooltip] = useState<{
@@ -465,6 +476,8 @@ function CanvasInner({
       onDragOver={onDragOver}
       onDrop={onDrop}
       onKeyDown={onKeyDown}
+      onFocus={onFocus}
+      onBlur={onBlur}
       data-canvas-state={ready ? "ready" : "loading"}
     >
       <div role="status" className="canvas-notices">

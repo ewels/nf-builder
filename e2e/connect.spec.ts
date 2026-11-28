@@ -205,6 +205,46 @@ test("F-302 UX-70 QA-11: focusing an edge and pressing Delete disconnects it", a
   await expect.poll(() => main(page)).toBe(mainOf(F302_START));
 });
 
+test("F-302 UX-70 QA-11: Enter selects a focused edge and says so to assistive tech, and Escape clears it", async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name !== "chromium", "one browser is enough");
+  await openStoredFixture(page, "connect-enter-escape", F302_TYPED);
+  const edge = edgeInto(page, DESCRIBE, "sample");
+  const path = edge.locator(".react-flow__edge-path");
+  await edge.focus();
+  await expect(edge).toHaveAttribute("aria-pressed", "false");
+  await page.keyboard.press("Enter");
+  await expect(path).toHaveClass(/is-selected/);
+  await expect(edge).toHaveAttribute("aria-pressed", "true");
+  await page.keyboard.press("Escape");
+  await expect(path).not.toHaveClass(/is-selected/);
+  await expect(edge).toHaveAttribute("aria-pressed", "false");
+  expect(await main(page)).toBe(mainOf(F302_TYPED));
+});
+
+test("F-302 UX-70: Delete after focus moves from the selected edge to a node disconnects nothing", async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name !== "chromium", "one browser is enough");
+  await openStoredFixture(page, "connect-focus-moves", F302_TYPED);
+  const edge = edgeInto(page, DESCRIBE, "sample");
+  await edge.focus();
+  await page.keyboard.press("Enter");
+  await expect(edge.locator(".react-flow__edge-path")).toHaveClass(
+    /is-selected/,
+  );
+  await node(page, TOUCH).focus();
+  await expect(node(page, TOUCH)).toBeFocused();
+  await expect(edge.locator(".react-flow__edge-path")).not.toHaveClass(
+    /is-selected/,
+  );
+  await page.keyboard.press("Delete");
+  await page.waitForTimeout(500);
+  expect(await main(page)).toBe(mainOf(F302_TYPED));
+  await expect(edge).toHaveCount(1);
+});
+
 test("F-302 ADR-0052: connecting keeps the viewport", async ({
   page,
 }, testInfo) => {
