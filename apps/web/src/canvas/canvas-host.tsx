@@ -1,5 +1,6 @@
 import type { JSX } from "react";
 import { lazy, Suspense } from "react";
+import { paletteAdd } from "../palette/use-palette-add";
 import { CanvasPlaceholder } from "../project/project-status";
 import { useProjects } from "../project/project-store";
 import { useReadOnly } from "../read-only/read-only-store";
@@ -36,6 +37,9 @@ export function CanvasHost(): JSX.Element {
         <Suspense fallback={<p className="muted">Loading canvas…</p>}>
           <WorkflowCanvas
             key={activeTab ?? ""}
+            tab={activeTab ?? ""}
+            refit={content.refit}
+            onPaletteDrop={(key, at) => void paletteAdd({ key }, at)}
             projection={content.projection}
             readOnly={readOnly}
             portLabels={portLabels}

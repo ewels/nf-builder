@@ -59,6 +59,7 @@ const render = (open: PaletteCategoryId[], searching = false) =>
       open={open}
       searching={searching}
       onToggle={() => {}}
+      onAdd={() => {}}
     />,
   );
 
@@ -92,8 +93,12 @@ describe("palette tree", () => {
   it("F-204 UX-11: while searching, every category shown is open and its button is aria-disabled", () => {
     const html = render([], true);
     expect(html).not.toMatch(/ hidden=/);
-    expect(html.match(/aria-disabled="true"/g)).toHaveLength(2);
-    expect(render([], false)).not.toContain("aria-disabled");
+    // the category buttons; palette items are aria-disabled when they have no action yet (F-301)
+    const category = /<button[^>]*palette-category-button[^>]*>/g;
+    const disabled = (h: string) =>
+      (h.match(category) ?? []).filter((b) => b.includes("aria-disabled"));
+    expect(disabled(html)).toHaveLength(2);
+    expect(disabled(render([], false))).toHaveLength(0);
   });
 
   it("F-204 LA-02: the section heading shows the view's version", () => {

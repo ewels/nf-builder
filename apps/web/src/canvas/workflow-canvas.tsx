@@ -19,6 +19,7 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import {
+  type DragEvent,
   type JSX,
   type MouseEvent,
   useEffect,
@@ -29,6 +30,7 @@ import {
 import "./canvas.css";
 import { runElk } from "../layout/elk-client";
 import { autoLayout, placedNodes, placeMissing } from "../layout/layout-flow";
+import { hasPaletteDrag, readPaletteDrag } from "../palette/palette-drag";
 import { NODE_TYPES } from "./canvas-nodes";
 import type { Placement } from "./canvas-store";
 import { EDGE_TYPES } from "./flow-edge";
@@ -39,6 +41,7 @@ import {
   toFlowNodes,
 } from "./flow-elements";
 import { useRefitOnResize } from "./use-refit-on-resize";
+import { registerViewport } from "./viewport";
 
 const NODE_DESCRIPTION =
   "Press enter or space to select this node, then use the arrow keys to move it.";
@@ -77,6 +80,12 @@ const READ_ONLY_ARIA_LABELS = {
 const FIT = { maxZoom: 1 } as const;
 
 interface WorkflowCanvasProps {
+  /** The workflow tab this canvas shows (the viewport bridge looks it up, F-301). */
+  readonly tab: string;
+  /** False for the one view that shows a node added from the palette: the viewport stays where it is (F-301). */
+  readonly refit: boolean;
+  /** A palette item was dropped here, at this flow point (F-301, UX-15). */
+  readonly onPaletteDrop: (key: string, at: { x: number; y: number }) => void;
   /** Below 1024 px (F-703, UX-04): nodes don't move, and there is no Auto-layout or minimap. */
   readonly readOnly: boolean;
   readonly projection: Projection;
@@ -100,6 +109,9 @@ interface WorkflowCanvasProps {
 let handledFocus = 0;
 
 function CanvasInner({
+  tab,
+  refit,
+  onPaletteDrop,
   readOnly,
   projection,
   portLabels,
@@ -226,10 +238,18 @@ function CanvasInner({
     });
   };
   const initialized = useNodesInitialized();
-  const { fitView, getNode, getZoom, setCenter } = useReactFlow();
+  const { fitView, getNode, getZoom, setCenter, screenToFlowPosition } =
+    useReactFlow();
+  const keepViewport = useRef(!refit);
+  keepViewport.current = !refit;
   const [ready, setReady] = useState(false);
   useEffect(() => {
     if (!initialized) return;
+    // a node dropped or added from the palette keeps the viewport where the user has it (F-301)
+    if (keepViewport.current) {
+      setReady(true);
+      return;
+    }
     let cancelled = false;
     void fitView(FIT).then(() => {
       if (!cancelled) setReady(true);
@@ -256,6 +276,36 @@ function CanvasInner({
   }, [ready, focus, getNode, getZoom, setCenter]);
   const host = useRef<HTMLDivElement>(null);
   useRefitOnResize(host, FIT);
+  // the palette reaches the viewport through this bridge (F-301)
+  useEffect(
+    () =>
+      registerViewport({
+        tab,
+        toFlow: (client) => screenToFlowPosition(client),
+        centre() {
+          const box = host.current?.getBoundingClientRect();
+          return screenToFlowPosition({
+            x: (box?.left ?? 0) + (box?.width ?? 0) / 2,
+            y: (box?.top ?? 0) + (box?.height ?? 0) / 2,
+          });
+        },
+      }),
+    [tab, screenToFlowPosition],
+  );
+  const onDragOver = (event: DragEvent) => {
+    if (!hasPaletteDrag(event.dataTransfer)) return;
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "copy";
+  };
+  const onDrop = (event: DragEvent) => {
+    const key = readPaletteDrag(event.dataTransfer);
+    if (key === null) return;
+    event.preventDefault();
+    onPaletteDrop(
+      key,
+      screenToFlowPosition({ x: event.clientX, y: event.clientY }),
+    );
+  };
   // Auto-layout moves nodes in place, so the viewport is fitted again once React Flow has them
   const fitNext = useRef(false);
   // biome-ignore lint/correctness/useExhaustiveDependencies: nodes is the trigger: it changes when the layout lands
@@ -305,9 +355,12 @@ function CanvasInner({
     }
   };
   return (
+    // biome-ignore lint/a11y/noStaticElementInteractions: a drop target for palette drags; the keyboard way is Enter on the palette item (UX-15)
     <div
       ref={host}
       className="workflow-canvas"
+      onDragOver={onDragOver}
+      onDrop={onDrop}
       data-canvas-state={ready ? "ready" : "loading"}
     >
       <div role="status" className="canvas-notices">
