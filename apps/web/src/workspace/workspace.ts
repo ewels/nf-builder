@@ -220,7 +220,7 @@ export function createWorkspace(options: WorkspaceOptions): WorkspaceApi {
       change(() => engine.apply(command, revision, options)),
     applyFix: (fix, revision, options) =>
       change(() => engine.applyFix(fix, revision, options)),
-    undo: (revision) => change(() => engine.undo(revision)),
+    undo: (revision, options) => change(() => engine.undo(revision, options)),
     redo: (revision) => change(() => engine.redo(revision)),
     applyPatches: (patches, revision) =>
       change(() => engine.applyPatches(patches, revision)),
