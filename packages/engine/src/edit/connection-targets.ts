@@ -55,6 +55,7 @@ export function connectionTargets(
         : found?.entry.declaration;
     return declaration?.kind === "Record";
   };
+  const typed = file.ast?.typesEnabled === true;
   const out: ConnectionTarget[] = [];
   for (const node of projection.nodes) {
     for (const input of node.inputs) {
@@ -66,7 +67,14 @@ export function connectionTargets(
         out.push({ ...to, status: "refused", message: error.message });
         continue;
       }
-      if (
+      const arity = typed ? lints.tupleArity(source.type, input) : null;
+      if (arity)
+        out.push({
+          ...to,
+          status: "mismatch",
+          message: `A tuple with ${arity.actual} ${arity.actual === 1 ? "component" : "components"} is passed to ${input.label} of ${node.label}, which declares ${arity.expected}, so connecting it is an error.`,
+        });
+      else if (
         lints.connection(source.type, node, input, isRecord) === "incompatible"
       )
         out.push({

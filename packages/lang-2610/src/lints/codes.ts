@@ -121,6 +121,12 @@ export const CODES: readonly DiagnosticCode[] = [
     origin: "ours",
   }),
   code({
+    code: "tuple-arity",
+    severity: "error",
+    spec: ["LA-14", "LA-32"],
+    origin: "ours",
+  }),
+  code({
     code: "publish-dir",
     severity: "suggestion",
     spec: ["LA-36"],

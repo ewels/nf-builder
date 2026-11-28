@@ -76,6 +76,22 @@ describe("F-107 LA-21 legacy process ports", () => {
     ]);
   });
 
+  it("F-302 LA-14 LA-21: a legacy tuple input carries its component count", () => {
+    const counts = (s: LegacySignature["inputs"]) =>
+      s.map((p) => [p.id, p.components]);
+    expect(counts(signatureOf(io, "io.nf", "ALIGN").inputs)).toEqual([
+      ["$1", 2],
+      ["index", undefined],
+      ["legacy_file", undefined],
+      ["$4", undefined],
+      ["$5", undefined],
+      ["mode", undefined],
+    ]);
+    expect(
+      counts(signatureOf(cases, QUALIFIERS, "ALL_INPUTS").inputs)[3],
+    ).toEqual(["$4", 3]);
+  });
+
   it("F-107 LA-21: legacy outputs are named by emit:, else out when alone, else [i]; topic and optional outputs stay ports", () => {
     expect(show(signatureOf(io, "io.nf", "ALIGN").outputs)).toEqual([
       ["bam", "bam", "Tuple"],

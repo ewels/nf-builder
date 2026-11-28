@@ -60,6 +60,7 @@ describe("F-112 lint registry", () => {
         "legacy-workflow",
         "legacy-params",
         "params-outside-entry",
+        "tuple-arity",
         "tuple-where-record",
         "publish-dir",
         "missing-type",

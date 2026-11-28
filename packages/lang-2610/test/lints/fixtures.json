@@ -567,6 +567,26 @@
       "warnings": []
     },
     {
+      "file": "tuple-arity/negative/main.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "tuple-arity/negative/modules/local/legacy_count/main.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "tuple-arity/positive/main.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
+      "file": "tuple-arity/positive/modules/local/legacy_count/main.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
       "file": "tuple-where-record/negative/main.nf",
       "lint": [],
       "warnings": []

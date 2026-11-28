@@ -180,10 +180,10 @@ export const connection: PackLints["connection"] = (
   }
 };
 
-type EdgeIndex = ReadonlyMap<string, readonly GraphEdge[]>;
+export type EdgeIndex = ReadonlyMap<string, readonly GraphEdge[]>;
 const key = (node: string, port: string): string => `${node}\u0000${port}`;
 
-function indexEdges(projection: Projection): EdgeIndex {
+export function indexEdges(projection: Projection): EdgeIndex {
   const index = new Map<string, GraphEdge[]>();
   for (const edge of projection.edges) {
     const k = key(edge.to.node, edge.to.port);
@@ -195,7 +195,7 @@ function indexEdges(projection: Projection): EdgeIndex {
 }
 
 /** What flows into a port: the one direct edge's type, else the inline argument's type; null when not known. */
-function sourceOf(index: EdgeIndex, node: GraphNode, port: Port) {
+export function sourceOf(index: EdgeIndex, node: GraphNode, port: Port) {
   const edges = index.get(key(node.id, port.id)) ?? [];
   if (edges.length === 0) return port.argumentType;
   const [only] = edges;

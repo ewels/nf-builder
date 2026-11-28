@@ -55,6 +55,10 @@
 
 - A tuple is matched by position -- use a record (`record(...)`) so values are matched by name
 
+## tuple-arity
+
+- Tuple with 1 components is passed to the `tuple` input `tuple(meta, reads)` of `LEGACY_COUNT`, which declares 2 -- pass one argument per declared component
+
 ## publish-dir
 
 - The `publishDir` directive is discouraged -- publish outputs from the entry workflow (`publish:` and the `output` block) instead

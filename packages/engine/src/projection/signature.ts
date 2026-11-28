@@ -25,6 +25,8 @@ export interface PortSpec {
   readonly id: string;
   readonly label: string;
   readonly type: FlowType | null;
+  /** A legacy `tuple` input: the number of components it declares (LA-14). */
+  readonly components?: number;
 }
 
 export interface Signature {
@@ -284,7 +286,12 @@ export function legacyProcessSignature(
     if (q.name === "stdin") return { id: fallback, label: "stdin", type };
     if (q.name === "tuple") {
       const parts = positional(q.args).map(componentLabel);
-      return { id: fallback, label: `tuple(${parts.join(", ")})`, type };
+      return {
+        id: fallback,
+        label: `tuple(${parts.join(", ")})`,
+        type,
+        components: parts.length,
+      };
     }
     // `each path(x)` declares x through the inner qualifier
     if (q.name === "each") repeats = true;

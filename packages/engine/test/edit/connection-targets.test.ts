@@ -109,4 +109,35 @@ describe("F-302 connectionTargets", () => {
           }))
             expect(t.status).not.toBe("mismatch");
   });
+
+  it("F-302 LA-14: a Channel<Tuple<A>> output into a two-component legacy tuple input is a mismatch", async () => {
+    const legacy = readTree(
+      join(cases, "s1-typed-legacy-tuple-arity/modules/local/legacy_count"),
+    )[0]?.text as string;
+    const make = (types: string) =>
+      stateFor({
+        "legacy.nf": legacy,
+        "main.nf": `nextflow.enable.types = true\n\ninclude { LEGACY_COUNT } from './legacy.nf'\n\nworkflow W {\n    take:\n    t: ${types}\n\n    main:\n    LEGACY_COUNT()\n}\n`,
+      });
+    const w = { path: "main.nf", workflow: "W" };
+    const one = await make("Channel<Tuple<String>>");
+    const wrong = connectionTargets(
+      one,
+      lints,
+      w,
+      port(one, ":take:t", "out", "main.nf", "W"),
+    );
+    const found = find(wrong, "LEGACY_COUNT@1", "$1");
+    expect(found.status).toBe("mismatch");
+    expect(found.message).toMatch(/1 component/);
+    expect(found.message).toMatch(/declares 2/);
+    const two = await make("Channel<Tuple<String, Path>>");
+    const right = connectionTargets(
+      two,
+      lints,
+      w,
+      port(two, ":take:t", "out", "main.nf", "W"),
+    );
+    expect(find(right, "LEGACY_COUNT@1", "$1").status).toBe("ok");
+  });
 });
