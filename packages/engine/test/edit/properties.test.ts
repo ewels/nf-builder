@@ -1,7 +1,10 @@
 import { join } from "node:path";
 import { EDIT_COMMAND_KINDS } from "@nf-builder/lang-core";
 import { describe, expect, it } from "vitest";
-import { createEditState } from "../../src/edit/apply";
+import { loadLints } from "../../src/diagnostics/lints";
+import { applyCommand, createEditState } from "../../src/edit/apply";
+import { connectionTargets } from "../../src/edit/connection-targets";
+import { createProjector } from "../../src/projection/project";
 import { readTree } from "../model/read-tree";
 import { assertSequences, Stats, sequenceArb } from "./harness";
 import { version } from "./helpers";
@@ -73,5 +76,41 @@ describe("F-111 properties", () => {
         startStats.accepted.get(kind) ?? 0,
         `${kind} accepted`,
       ).toBeGreaterThan(0);
+  });
+
+  it("F-302 UX-25: a target the dry run marks refused is refused by apply; one apply accepts is never marked refused", async () => {
+    const lints = await loadLints(version);
+    const target = { path: "main.nf", workflow: null };
+    let refused = 0;
+    let accepted = 0;
+    for (const name of [
+      "f111-start-typed",
+      "f111-start-legacy",
+      "f302-connect-start",
+    ]) {
+      const state = await createEditState(version, readTree(oracle(name)));
+      const projection = createProjector(state.model, state.catalogue).project(
+        "main.nf",
+        null,
+      );
+      for (const from of projection?.nodes ?? [])
+        for (const out of from.outputs) {
+          const ref = { node: from.id, port: out.id };
+          for (const t of connectionTargets(state, lints, target, ref)) {
+            const result = applyCommand(state, {
+              kind: "connect",
+              target,
+              from: ref,
+              to: { node: t.node, port: t.port },
+            });
+            if (t.status === "refused") {
+              refused++;
+              expect(result.ok, `${name} ${from.id} -> ${t.node}`).toBe(false);
+            } else if (result.ok) accepted++;
+          }
+        }
+    }
+    expect(refused).toBeGreaterThan(0);
+    expect(accepted).toBeGreaterThan(0);
   });
 });

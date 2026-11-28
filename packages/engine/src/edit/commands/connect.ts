@@ -5,6 +5,7 @@ import type {
   Expression,
   MethodCall,
   NamedOutput,
+  ScriptSourceFile,
   Statement,
   TextPatch,
   WorkflowDef,
@@ -56,8 +57,19 @@ function setValue(
   return replaceNode(def, item, namedOutput(name, expression));
 }
 
-/** Feeds the output port `from` into the input port `to` of the same workflow (UX-25). */
-export function connect(state: EditState, command: Connect): TextPatch[] {
+/** Everything a Connect decides before it prints: the workflow rewritten in the AST, and the nodes it replaced. */
+export interface ConnectPlan {
+  readonly file: ScriptSourceFile;
+  readonly def: WorkflowDef;
+  readonly next: WorkflowDef;
+  readonly removed: readonly AstNode[];
+}
+
+/**
+ * Makes every check and decision of Connect (UX-25) and builds the rewritten workflow in the AST, without printing
+ * or reparsing it; refuses exactly as `connect` does (F-302). What only the reprint finds is not predicted.
+ */
+export function planConnect(state: EditState, command: Connect): ConnectPlan {
   const { file, def, projection } = locateWorkflow(state, command.target);
   const { node: from, port: out } = portOf(projection, command.from, "outputs");
   const { node: to, port: input } = portOf(projection, command.to, "inputs");
@@ -178,10 +190,16 @@ export function connect(state: EditState, command: Connect): TextPatch[] {
     ];
   }
   const main = updated.main && { ...updated.main, items: list };
+  return { file, def, next: { ...updated, main: main ?? null }, removed };
+}
+
+/** Feeds the output port `from` into the input port `to` of the same workflow (UX-25). */
+export function connect(state: EditState, command: Connect): TextPatch[] {
+  const { file, def, next, removed } = planConnect(state, command);
   const edit = reprintDeclaration(
     file,
     def,
-    { ...updated, main: main ?? null },
+    next,
     state.parser.printer,
     removed,
   );
