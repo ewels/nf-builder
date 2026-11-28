@@ -12,3 +12,11 @@ export type {
   RegistryReadOptions,
   RegistrySource,
 } from "./registry/types.ts";
+export type { ModuleGroup, RegistryMatches } from "./registry/view.ts";
+export {
+  createRegistrySearch,
+  groupModules,
+  moduleMarks,
+  namespaceOf,
+  shortName,
+} from "./registry/view.ts";

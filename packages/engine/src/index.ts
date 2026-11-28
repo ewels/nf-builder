@@ -123,7 +123,7 @@ export {
 } from "./model/project";
 export { installedPackVersions } from "./packs";
 export { loadPalette } from "./palette";
-export { paletteItemCount, searchPalette } from "./palette-search";
+export { paletteItemCount, queryTerms, searchPalette } from "./palette-search";
 export {
   nodeAtRange,
   type ProblemCounts,
