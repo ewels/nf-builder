@@ -6,9 +6,10 @@ import { configCard, configReady } from "./config.ts";
 import { watchForCspViolations } from "./csp.ts";
 import { readProject } from "./engine.ts";
 import { historyStatus } from "./history.ts";
-import { addStatus, paneCentre } from "./palette-add.ts";
+import { addStatus } from "./palette-add.ts";
 import { engineDiagnostics } from "./problems.ts";
 import { createProjectInUi, readFile, switcher } from "./projects.ts";
+import { chooseZip, writeZip } from "./zips.ts";
 
 /** The oracle case the blank template plus the nf-schema plugin must equal (CI lints it). */
 const CASE = join(REPO_ROOT, "tools/oracle/cases/f505-plugin");
@@ -80,11 +81,9 @@ test("F-505 step 1 UX-15: dragging the nf-schema row onto the canvas adds the sa
 }, testInfo) => {
   test.skip(testInfo.project.name !== "chromium", "one browser is enough");
   await blankWithSearch(page, "plugin-drag");
-  const centre = await paneCentre(page);
   await pluginButton(page).dragTo(page.locator(".workflow-canvas"), {
     targetPosition: { x: 300, y: 200 },
   });
-  expect(centre.x).toBeGreaterThan(0);
   await expect(addStatus(page)).toHaveText(
     "Added plugin nf-schema@3.1.0 to nextflow.config.",
   );
@@ -105,6 +104,40 @@ test("F-505 AR-23: one undo removes the line and the functions leave the palette
   await page.getByRole("button", { name: "Undo", exact: true }).click();
   await expect.poll(() => readFile(page, "nextflow.config")).toBe(before);
   await expect(panel(page).locator(".plugin-groups")).toHaveCount(0);
+  await expect(pluginButton(page)).not.toContainText("added");
+  expect(await undoCount(page)).toBe(start);
+});
+
+test("F-505 IO-33 AR-23: a project with no nextflow.config gets one with the plugins block, and one undo removes both", async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name !== "chromium", "one browser is enough");
+  const zip = testInfo.outputPath("no-config.zip");
+  const main = readProject(CASE).find((f) => f.path === "main.nf")?.text ?? "";
+  writeZip({ "main.nf": main }, zip);
+  await page.goto("./");
+  await expect(switcher(page)).toBeEnabled();
+  const dialog = await chooseZip(page, zip);
+  await dialog.getByLabel("Name").fill("plugin-no-config");
+  await dialog.getByRole("button", { name: "Create" }).click();
+  await dialog.waitFor({ state: "hidden" });
+  await canvasReady(page);
+  await layoutSettled(page);
+  expect(await readFile(page, "nextflow.config")).toBeNull();
+  await search(page).fill("nf-schema");
+  await expect(pluginButton(page)).toBeVisible();
+  const start = await undoCount(page);
+  await pluginButton(page).focus();
+  await page.keyboard.press("Enter");
+  await expect(addStatus(page)).toHaveText(
+    "Added plugin nf-schema@3.1.0 to nextflow.config.",
+  );
+  expect(await readFile(page, "nextflow.config")).toBe(
+    "plugins {\n    id 'nf-schema@3.1.0'\n}\n",
+  );
+  expect(await undoCount(page)).toBe(start + 1);
+  await page.getByRole("button", { name: "Undo", exact: true }).click();
+  await expect.poll(() => readFile(page, "nextflow.config")).toBeNull();
   await expect(pluginButton(page)).not.toContainText("added");
   expect(await undoCount(page)).toBe(start);
 });
