@@ -668,12 +668,17 @@ export function createEngineService(
       }),
 
     diagnostics: () =>
-      guarded(
-        (open): DiagnosticsResult => ({
+      guarded((open): DiagnosticsResult => {
+        const pack = installedPacks.find((p) => p.version === open.version);
+        const model = open.state.model;
+        return {
           revision,
           diagnostics: diagnoserOf(open).all(),
-        }),
-      ),
+          registry: pack
+            ? registryFolders(model.paths(), pack.includes, model.tree)
+            : [],
+        };
+      }),
 
     report: () =>
       guarded(

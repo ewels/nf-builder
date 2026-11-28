@@ -16,7 +16,7 @@ import type {
 } from "@nf-builder/lang-core";
 import type { NodeDetails, OutlineItem } from "../details/types";
 import type { FreshNameRequest } from "../edit/fresh-name";
-import type { ProjectFiles } from "../files/types";
+import type { ProjectFiles, RegistryFolder } from "../files/types";
 import type { HistoryStatus } from "../history/history";
 import type {
   LayoutChange,
@@ -137,6 +137,8 @@ export interface ProjectionResult {
 export interface DiagnosticsResult {
   readonly revision: number;
   readonly diagnostics: readonly Diagnostic[];
+  /** The registry module folders, so the Suggestions tab can list their files last (F-405). */
+  readonly registry: readonly RegistryFolder[];
 }
 
 export interface NodeDetailsResult {
