@@ -2,6 +2,8 @@ export type {
   AddCall,
   AddConfigBlock,
   AddConfigPlugin,
+  AddEmit,
+  AddTake,
   Callee,
   CallNode,
   ChainNode,

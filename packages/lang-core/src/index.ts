@@ -66,6 +66,8 @@ export {
   type AddCall,
   type AddConfigBlock,
   type AddConfigPlugin,
+  type AddEmit,
+  type AddTake,
   type CommandResult,
   type ConfigContext,
   type ConfigSelectorRef,

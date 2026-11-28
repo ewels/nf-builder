@@ -23,6 +23,28 @@ export interface CreateWorkflow {
   readonly caller: string;
 }
 
+/**
+ * Append a take to a named workflow (F-307, UX-51). `type` is the type text of a typed workflow (`Channel<Path>`) and
+ * null for a legacy one. Call sites are not edited: the projection gives each call the new, unfed input port.
+ */
+export interface AddTake {
+  readonly kind: "addTake";
+  readonly target: WorkflowTarget;
+  readonly name: string;
+  readonly type: string | null;
+}
+
+/**
+ * Append an emit to a named workflow (F-307, UX-51), with `null` as its value until it is connected. `type` is as in
+ * `AddTake`.
+ */
+export interface AddEmit {
+  readonly kind: "addEmit";
+  readonly target: WorkflowTarget;
+  readonly name: string;
+  readonly type: string | null;
+}
+
 /** Append a bare call of `callee` to the target workflow's `main`. */
 export interface AddCall {
   readonly kind: "addCall";
@@ -174,7 +196,9 @@ export type EditCommand =
   | AddConfigPlugin
   | RemoveConfigPlugin
   | CreateFile
-  | CreateWorkflow;
+  | CreateWorkflow
+  | AddTake
+  | AddEmit;
 
 export const EDIT_COMMAND_KINDS = [
   "createProcess",
@@ -191,6 +215,8 @@ export const EDIT_COMMAND_KINDS = [
   "removeConfigPlugin",
   "createFile",
   "createWorkflow",
+  "addTake",
+  "addEmit",
 ] as const satisfies readonly EditCommand["kind"][];
 
 /** Replace `text.slice(start, end)`: UTF-16 offsets into the file as it was before the patch. */

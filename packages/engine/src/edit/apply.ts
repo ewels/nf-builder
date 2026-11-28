@@ -31,6 +31,7 @@ import { createFile } from "./commands/create-file";
 import { deleteNode } from "./commands/delete-node";
 import { renameDeclaration } from "./commands/rename";
 import { replaceFileText } from "./commands/replace-file-text";
+import { addEmit, addTake } from "./commands/take-emit";
 import { checkResult } from "./guards";
 import { applyPatches } from "./patches";
 import { EditRefusal } from "./refusal";
@@ -69,6 +70,10 @@ const build = (state: EditState, command: EditCommand): TextPatch[] => {
       return createProcess(state, command);
     case "createWorkflow":
       return createWorkflow(state, command);
+    case "addTake":
+      return addTake(state, command);
+    case "addEmit":
+      return addEmit(state, command);
     case "addCall":
       return addCall(state, command);
     case "replaceFileText":

@@ -129,6 +129,32 @@ export function buildCommand(state: EditState, c: Choice): EditCommand | null {
       const caller = pick(scripts, c.a);
       return caller ? { kind, name: c.name, caller } : null;
     }
+    case "addTake":
+    case "addEmit": {
+      // a named workflow the command can act on: a take needs a main or an emit after it, a second emit is refused
+      // while the workflow has exactly one
+      const w = workflow((_, target) => {
+        const def = workflowDef(
+          state.model.file(target.path)?.source,
+          target.workflow,
+        );
+        if (!def || def.name === null) return false;
+        return kind === "addTake"
+          ? def.main !== null || def.emits !== null
+          : def.emits?.items.length !== 1;
+      });
+      const def =
+        w &&
+        workflowDef(state.model.file(w.target.path)?.source, w.target.workflow);
+      if (!w || !def) return null;
+      return {
+        kind,
+        target: w.target,
+        // a take and an emit of one choice must not share a name
+        name: `${c.name.toLowerCase()}${kind === "addTake" ? "_in" : ""}`,
+        type: def.typed ? "Channel<String>" : null,
+      };
+    }
     case "addCall": {
       // Usually a callee that is fine to add: a workflow (Nextflow runs one called twice) or a process the target doesn't
       // call yet (AddCall refuses a second call of a process: `invalid`). One choice in four takes any name in scope, to
@@ -415,6 +441,8 @@ function checkAccepted(
   }
   switch (command.kind) {
     case "addCall":
+    case "addTake":
+    case "addEmit":
     case "connect":
     case "disconnect":
     case "deleteNode": {
@@ -441,6 +469,22 @@ function checkAccepted(
         const now = after?.main?.items ?? [];
         expect(now.length, "addCall adds one statement").toBe(old.length + 1);
         expect(structure(now.slice(0, old.length))).toEqual(structure(old));
+      }
+      // F-307: AddTake and AddEmit add exactly one item to their section and keep the rest of the workflow
+      if (command.kind === "addTake" || command.kind === "addEmit") {
+        const after = workflowDef(
+          parsed.get(command.target.path),
+          command.target.workflow,
+        );
+        const key = command.kind === "addTake" ? "takes" : "emits";
+        const old = def[key]?.items ?? [];
+        const now = after?.[key]?.items ?? [];
+        expect(now.length, `${command.kind} adds one item`).toBe(
+          old.length + 1,
+        );
+        expect(structure(now.slice(0, old.length))).toEqual(structure(old));
+        expect(structure(after?.main)).toEqual(structure(def.main));
+        expect(after?.typed).toBe(def.typed);
       }
       break;
     }
@@ -579,9 +623,14 @@ export function assertSequences(
   );
 }
 
-/** What has to happen first for a kind to have something to act on: a plugin is removed after one is added. */
-const PRELUDE: Partial<Record<string, string>> = {
-  removeConfigPlugin: "addConfigPlugin",
+/**
+ * What has to happen first for a kind to have something to act on: a plugin is removed after one is added; a take needs
+ * a workflow with a main or an emit, so a new (empty) workflow gets an emit first (F-307).
+ */
+const PRELUDE: Partial<Record<string, readonly string[]>> = {
+  removeConfigPlugin: ["addConfigPlugin"],
+  addEmit: ["createWorkflow"],
+  addTake: ["createWorkflow", "addEmit"],
 };
 
 /**
@@ -592,8 +641,8 @@ const PRELUDE: Partial<Record<string, string>> = {
 function runFixedExamples(state: EditState, stats: Stats) {
   const base = snapshot(state);
   EDIT_COMMAND_KINDS.forEach((kind, index) => {
-    const before = EDIT_COMMAND_KINDS.indexOf(
-      PRELUDE[kind] as (typeof EDIT_COMMAND_KINDS)[number],
+    const before = (PRELUDE[kind] ?? []).map((k) =>
+      EDIT_COMMAND_KINDS.indexOf(k as (typeof EDIT_COMMAND_KINDS)[number]),
     );
     for (let i = 0; i < 40; i++) {
       const choice: Choice = {
@@ -603,8 +652,7 @@ function runFixedExamples(state: EditState, stats: Stats) {
         name: `FIX${i}`,
         snippet: i,
       };
-      const sequence =
-        before >= 0 ? [{ ...choice, kind: before }, choice] : [choice];
+      const sequence = [...before.map((k) => ({ ...choice, kind: k })), choice];
       // search on a scratch tally; a sequence that accepted the kind is run again for the real one
       const scratch = new Stats();
       try {
