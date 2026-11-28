@@ -42,7 +42,11 @@ export const pack: LanguagePack = {
   loadTemplates: async () =>
     (await import("../templates.json")).default as TemplateSet,
   // The rules read the config catalogue, so they stay a lazy chunk too (F-601); the promise is kept.
-  loadConfigRules: () => {
+  loadConfigRules: (catalogue?: ConfigCatalogue) => {
+    if (catalogue)
+      return import("./config/index.ts").then((rules) =>
+        rules.createConfigRules(catalogue),
+      );
     configRules ??= Promise.all([
       import("./config/index.ts"),
       import("../catalogue/config.json"),

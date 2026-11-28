@@ -826,3 +826,22 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - Notes appended to F-308, F-310, F-504 and F-701.
   - The `connect-mismatch` baseline is approved from CI (ADR 0021); no existing baseline changed.
 - Blockers: none.
+
+## 2026-11-28 · F-505 · Claude (autonomous)
+- Did:
+  - Registry plugins (IO-33, UX-15): registry plugin rows are draggable buttons; Enter or a drop on the canvas runs F-601's `AddConfigPlugin` with the snapshot's version as one undo step ("Add plugin nf-schema@3.1.0"). With no `nextflow.config`, `CreateFile` runs first in the same undo group, and a refusal or a throw discards the group. A plugin already declared at any version is refused ("nf-schema is already in nextflow.config."); its row shows an "added" text badge matched by id. Read-only: rows are `aria-disabled`, not draggable, and add nothing.
+  - Sources: `RegistryClient.plugin(id, version)` reads `plugins/<id>/<version>.json` from the snapshot only, same-origin (ADR 0002), with the spec shape-checked and malformed definitions dropped; cached per `id@version`, failed reads retried.
+  - Engine: `declaredPlugins` reads `id` lines from top-level `plugins` blocks of the root `nextflow.config` only; `EngineApi.plugins()` and `setPluginScopes()`; plugin `ConfigScope` definitions merged into the catalogue the diagnoser, config rules, `configView` and `configSchema` use, with a `pluginsKey` on their results so the problems and config stores pull again. `validation.*` is no longer flagged once nf-schema is declared.
+  - Palette: a "From plugins" list at the end of "Plugins & config", grouped by plugin ("spec from <version>" when the declared version differs), found by search, items focusable and `aria-disabled` (inserting them is F-314's).
+  - FI-04: a plugin option's docs link is the plugin's `projectUrl` only when it is `https`, else none.
+  - Tests: `e2e/plugins.spec.ts` (step 1 by Enter and by drag, undo, missing `nextflow.config`, the config form's `validation` scope, duplicate refusal, CSP), oracle case `f505-plugin` with its engine golden, and unit tests in `packages/sources/test/`, `packages/engine/test/plugins/`, `packages/engine/test/service/plugins.test.ts`, `packages/lang-2610/test/` and `apps/web/test/`.
+- State: passing once CI is green.
+- Next: F-303, F-310, then F-307, F-406, F-504.
+- Decisions:
+  - [ADR 0065](../adr/0065-registry-plugins.md): snapshot-only `RegistryClient.plugin` (amends ADR 0050); `EngineApi.plugins` and `setPluginScopes` (amends ADR 0043's API list); plugin scopes merged in the worker with `pluginsKey` re-pulls beside the per-revision diagnostics pull (amends ADR 0054); the snapshot release's spec for any declared version, marked in the palette, and duplicates refused at any version; only top-level `plugins` blocks of the root `nextflow.config` count; plugin docs link is an `https` `projectUrl` or none; "From plugins" list, not insertable yet; F-601's free-text Add plugin… stays; plugin `requires` not checked (the snapshot admits only releases for the pinned Nextflow).
+  - `features.json` (scope-change): F-601 and F-301 added to F-505's `depends_on`, as F-505 reuses their command and palette add.
+  - Plugin syntax checked against docs.seqera.io/nextflow/plugins/using-plugins; oracle case `f505-plugin` is lint only, as a run downloads the plugin.
+  - IO-30, IO-33, FI-01, FI-03, FI-04 and UX-14 updated.
+  - Notes appended to F-314, F-506, F-701 and F-702.
+  - No visual baseline changed.
+- Blockers: none.

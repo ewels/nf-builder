@@ -31,10 +31,10 @@
 
 | ID | Requirement |
 |---|---|
-| IO-30 | One `RegistryClient` with live and snapshot implementations and automatic fallback to the snapshot (ADR 0009). The app reads live only once the registry allows cross-origin reads; until then the snapshot is its only source (ADR 0050). |
+| IO-30 | One `RegistryClient` with live and snapshot implementations and automatic fallback to the snapshot (ADR 0009). The app reads live only once the registry allows cross-origin reads; until then the snapshot is its only source (ADR 0050). Plugin specs are read from the snapshot only, for declared plugins (ADR 0065). |
 | IO-31 | The snapshot is built daily by a GitHub Action and served with the site: a module index (with `meta.yml` inputs and outputs, process or workflow, and legacy or typed), per-module bundles, a plugin index and plugin specs. The module index is split into `index.json` and `ports.json` (ADR 0035). |
 | IO-32 | Inserting a module copies its bundle to `modules/<namespace>/<name>/` and adds `include { NAME } from '<namespace>/<name>'`. A module already present is reused, never duplicated. |
-| IO-33 | Adding a plugin writes `id '<name>@<version>'` into the `plugins` block of `nextflow.config`. The plugin's functions, operators and factories join the palette, and its config scopes join the config editor. |
+| IO-33 | Adding a plugin writes `id '<name>@<version>'` into the `plugins` block of `nextflow.config` (the snapshot's release; the file is created if missing, in the same undo step; a plugin already declared at any version is refused). The plugin's functions, operators and factories join the palette (listed under "From plugins", not yet insertable), and its config scopes join the config editor. Plugins count when declared in top-level `plugins` blocks of the root `nextflow.config`, however they were added; a plugin declared at another version uses the snapshot release's spec (ADR 0065). |
 
 ## Privacy
 

@@ -351,3 +351,38 @@
 .registry-more:hover {
   background: var(--color-border);
 }
+
+.registry-item-button {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  padding: 0;
+  background: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: grab;
+}
+
+.registry-item-button[aria-disabled="true"] {
+  cursor: default;
+}
+
+.registry-item-button:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.registry-badge-added {
+  flex: none;
+  padding: 0 6px;
+  font-family: var(--font-sans, inherit);
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--tone-green-fg);
+  background: var(--tone-green-bg);
+  border-radius: 8px;
+}

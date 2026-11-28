@@ -64,6 +64,13 @@ import type { ConfigIncludeModel } from "../model/file-model";
 import type { ModelEvent, ProjectModel } from "../model/project";
 import { installedPacks } from "../packs";
 import { loadPalette } from "../palette";
+import {
+  mergePluginScopes,
+  type PluginScopes,
+  pluginDocs,
+  pluginsKey,
+} from "../plugins/config-scopes";
+import { declaredPlugins } from "../plugins/declared";
 import { createProjector, type Projector } from "../projection/project";
 import { type ProjectReport, projectReport } from "../report/report";
 import { templateList } from "../templates";
@@ -82,6 +89,7 @@ import type {
   LoadProgress,
   NodeDetailsResult,
   OutlineResult,
+  PluginsResult,
   ProjectChange,
   ProjectionResult,
   ProjectSummary,
@@ -98,8 +106,14 @@ interface Open {
   readonly version: string;
   readonly state: EditState;
   readonly lints: PackLints;
-  readonly catalogue: Catalogue;
-  readonly configRules: ConfigRules;
+  /** The pack's catalogue with the declared plugins' config scopes merged in (F-505); the pack's own until some are set. */
+  catalogue: Catalogue;
+  configRules: ConfigRules;
+  /** The pack's, for rebuilding the two above when the plugin scopes change. */
+  readonly base: {
+    readonly catalogue: Catalogue;
+    readonly configRules: ConfigRules;
+  };
   readonly history: History;
   /** The revision this project was opened at, or last partly changed at; no fix diagnosed earlier applies (F-309). */
   openedAt: number;
@@ -490,6 +504,8 @@ export function createEngineService(
   };
 
   const schemas = new Map<string, ConfigSchema>();
+  /** The declared plugins' config scopes the page last sent; none until it does, and none after open or close (F-505). */
+  let pluginScopes: readonly PluginScopes[] = [];
 
   return {
     palette: (version) => serial(() => loadPalette(version)),
@@ -529,6 +545,7 @@ export function createEngineService(
           lints,
           catalogue,
           configRules,
+          base: { catalogue, configRules },
           history: new History(options.historyLimits),
           openedAt: revision + 1,
           changedAt: new Map(),
@@ -537,6 +554,7 @@ export function createEngineService(
           ...readLayout(state.model.file(LAYOUT_PATH)?.source.text),
         };
         current = open;
+        pluginScopes = [];
         revision += 1;
         return {
           revision,
@@ -711,6 +729,7 @@ export function createEngineService(
           revision,
           diagnostics: diagnoserOf(open).all(),
           registry: registryOf(open),
+          pluginsKey: pluginsKey(pluginScopes),
         };
       }),
 
@@ -802,6 +821,7 @@ export function createEngineService(
         open.uses ??= processUses(open.state.model);
         return {
           revision,
+          pluginsKey: pluginsKey(pluginScopes),
           view: configView({
             file: file.source as ConfigSourceFile,
             rules: open.configRules,
@@ -816,10 +836,19 @@ export function createEngineService(
 
     configSchema: (version) =>
       serial(async () => {
-        const known = schemas.get(version);
-        if (known) return known;
         const pack = installedPacks.find((p) => p.version === version);
         if (!pack) throw new Error(`No language pack for ${version}`);
+        // with plugin scopes set for the open project, its schema is the merged one and isn't kept (F-505)
+        if (current?.version === version && pluginScopes.length > 0)
+          return configSchema(
+            version,
+            current.catalogue.config,
+            current.configRules,
+            pluginsKey(pluginScopes),
+            pluginDocs(current.base.catalogue.config, pluginScopes),
+          );
+        const known = schemas.get(version);
+        if (known) return known;
         const [catalogue, rules] = await Promise.all([
           pack.loadCatalogue(),
           pack.loadConfigRules(),
@@ -827,6 +856,39 @@ export function createEngineService(
         const schema = configSchema(version, catalogue.config, rules);
         schemas.set(version, schema);
         return schema;
+      }),
+
+    plugins: () =>
+      guarded((open): PluginsResult => {
+        const file = open.state.model.file("nextflow.config")?.source;
+        return {
+          revision,
+          plugins:
+            file?.language === "config"
+              ? declaredPlugins(file as ConfigSourceFile)
+              : [],
+        };
+      }),
+
+    setPluginScopes: (scopes) =>
+      serial(async () => {
+        pluginScopes = scopes;
+        const open = current;
+        if (open) {
+          const pack = installedPacks.find((p) => p.version === open.version);
+          const config = mergePluginScopes(open.base.catalogue.config, scopes);
+          open.catalogue =
+            scopes.length === 0
+              ? open.base.catalogue
+              : { ...open.base.catalogue, config };
+          open.configRules =
+            scopes.length === 0 || !pack
+              ? open.base.configRules
+              : await pack.loadConfigRules(config);
+          // the diagnoser holds the catalogue it was made with
+          open.diagnoser = undefined;
+        }
+        return { pluginsKey: pluginsKey(scopes) };
       }),
 
     outline: (path) =>
@@ -884,6 +946,7 @@ export function createEngineService(
     close: () =>
       serial(() => {
         current = null;
+        pluginScopes = [];
       }),
   };
 }

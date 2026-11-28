@@ -28,6 +28,7 @@ function fake(
   const client: RegistryClient = {
     source,
     ports: async () => null,
+    plugin: () => Promise.reject(new Error("no plugin specs in this fake")),
     async index(options) {
       reads.push({ refresh: options?.refresh === true });
       const next = script.shift();
@@ -132,6 +133,7 @@ describe("registry store", () => {
     const client: RegistryClient = {
       source: "snapshot",
       ports: async () => null,
+      plugin: () => Promise.reject(new Error("no plugin specs in this fake")),
       index: () =>
         new Promise<RegistryIndex>((res, rej) => {
           resolve = res;
