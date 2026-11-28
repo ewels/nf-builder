@@ -597,6 +597,11 @@
       "warnings": []
     },
     {
+      "file": "type-mismatch/negative/record.nf",
+      "lint": [],
+      "warnings": []
+    },
+    {
       "file": "type-mismatch/negative/take.nf",
       "lint": [],
       "warnings": []
@@ -630,6 +635,17 @@
           "line": 8,
           "column": 5,
           "message": "Workflow output `summary` with type Integer cannot be assigned to value with type Path"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "file": "type-mismatch/positive/record.nf",
+      "lint": [
+        {
+          "line": 22,
+          "column": 14,
+          "message": "Argument with type Path is not compatible with process input of type Sample"
         }
       ],
       "warnings": []

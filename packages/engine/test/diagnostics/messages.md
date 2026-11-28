@@ -126,6 +126,7 @@
 
 - Argument with type Channel<Integer> is not compatible with parameter of type Channel<String> -- pass a Channel<String>
 - Argument with type Integer is not compatible with process input of type String -- pass a String, or a channel or value of String
+- Argument with type Path is not compatible with process input of type Sample -- pass a Sample, or a channel or value of Sample
 - Workflow emit `greeted` with type Channel<Integer> cannot be assigned to value with type Channel<String> -- change the declared type, or emit a Channel<String>
 - Workflow output `summary` with type Integer cannot be assigned to value with type Path -- change the output's type in the output block, or publish a value of type Integer
 
