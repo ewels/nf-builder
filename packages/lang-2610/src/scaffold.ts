@@ -15,4 +15,10 @@ process ${name} {
     """
 }
 `,
+  workflow: (name) =>
+    `nextflow.enable.types = true
+
+workflow ${name} {
+}
+`,
 };

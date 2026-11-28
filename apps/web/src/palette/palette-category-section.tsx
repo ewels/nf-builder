@@ -1,4 +1,8 @@
-import type { PaletteViewCategory } from "@nf-builder/engine";
+import type {
+  PaletteViewCategory,
+  PaletteViewItem,
+  Point,
+} from "@nf-builder/engine";
 import type { JSX } from "react";
 import { ChevronIcon } from "../shell/icons";
 import { PaletteItemRow } from "./palette-item-row";
@@ -8,11 +12,13 @@ export function PaletteCategorySection({
   expanded,
   searching,
   onToggle,
+  onAdd,
 }: {
   readonly category: PaletteViewCategory;
   readonly expanded: boolean;
   readonly searching: boolean;
   readonly onToggle: () => void;
+  readonly onAdd: (item: PaletteViewItem, at: Point | null) => void;
 }): JSX.Element {
   const id = `palette-category-${category.id}`;
   const open = searching || expanded;
@@ -38,7 +44,7 @@ export function PaletteCategorySection({
         {category.groups.length === 0 ? (
           <ul className="palette-list" aria-label={category.label}>
             {category.items.map((item) => (
-              <PaletteItemRow key={item.key} item={item} />
+              <PaletteItemRow key={item.key} item={item} onAdd={onAdd} />
             ))}
           </ul>
         ) : (
@@ -54,7 +60,7 @@ export function PaletteCategorySection({
                   aria-labelledby={headingId}
                 >
                   {group.items.map((item) => (
-                    <PaletteItemRow key={item.key} item={item} />
+                    <PaletteItemRow key={item.key} item={item} onAdd={onAdd} />
                   ))}
                 </ul>
               </div>

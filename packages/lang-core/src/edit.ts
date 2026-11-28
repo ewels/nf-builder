@@ -16,6 +16,13 @@ export interface CreateProcess {
   readonly caller: string;
 }
 
+/** Create `subworkflows/local/<name>/main.nf` with a named workflow and include it from `caller` (LA-12). */
+export interface CreateWorkflow {
+  readonly kind: "createWorkflow";
+  readonly name: string;
+  readonly caller: string;
+}
+
 /** Append a bare call of `callee` to the target workflow's `main`. */
 export interface AddCall {
   readonly kind: "addCall";
@@ -75,7 +82,8 @@ export type EditCommand =
   | DeleteNode
   | RenameDeclaration
   | ReplaceFileText
-  | CreateFile;
+  | CreateFile
+  | CreateWorkflow;
 
 export const EDIT_COMMAND_KINDS = [
   "createProcess",
@@ -86,6 +94,7 @@ export const EDIT_COMMAND_KINDS = [
   "renameDeclaration",
   "replaceFileText",
   "createFile",
+  "createWorkflow",
 ] as const satisfies readonly EditCommand["kind"][];
 
 /** Replace `text.slice(start, end)`: UTF-16 offsets into the file as it was before the patch. */
@@ -141,4 +150,6 @@ export type CommandResult =
 export interface Scaffold {
   /** A new typed process in its own script (LA-12). `name` is a valid identifier. */
   process(name: string): string;
+  /** A new named workflow in its own script (LA-12). `name` is a valid identifier. */
+  workflow(name: string): string;
 }

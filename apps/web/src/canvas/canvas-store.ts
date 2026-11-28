@@ -4,10 +4,12 @@
 import {
   type ApplyOptions,
   type ApplyOutcome,
+  canvasView,
   type EditCommand,
   EMPTY_HISTORY,
   type EngineApi,
   type EngineRefusal,
+  formatNodeKey,
   type HistoryOutcome,
   type HistoryStatus,
   type NodeDetails,
@@ -17,6 +19,7 @@ import {
   type ProjectChange,
   type Projection,
   type ProjectSummary,
+  paletteAction,
   type QuickFix,
   type ReadOnlyReason,
   readOnlyReason,
@@ -55,6 +58,8 @@ export type CanvasContent =
       readonly projection: Projection;
       /** The node positions: stored ones from the engine, then those placed and moved here (F-207). Whole nodes only. */
       readonly positions: Positions;
+      /** False for the one view that shows a node just added from the palette: the canvas keeps its viewport (F-301). */
+      readonly refit: boolean;
       /** Why layout isn't as expected (ELK failed, a save was refused), or null. */
       readonly notice: string | null;
     }
@@ -187,6 +192,15 @@ export interface WorkspaceActions {
     at: { readonly tab: string; readonly revision: number },
     placement: Placement,
   ): Promise<void>;
+  /**
+   * Adds a new process or workflow from the palette: a fresh name, then `CreateProcess` or `CreateWorkflow` and
+   * `AddCall` as one undo step, the node placed at `request.at` before it is first drawn. A refused add is undone, so
+   * it changes nothing (F-301, UX-15, AR-23). Runs as one task of the queue of applies, undos and redos.
+   */
+  addFromPalette(
+    request: PaletteAdd,
+    session?: number,
+  ): Promise<PaletteAddOutcome>;
 }
 
 /** A layout run on the canvas: every node's position, and what to save (`saved`, merged, or replacing the workflow's entries). */
@@ -196,6 +210,25 @@ export interface Placement {
   readonly replace: boolean;
   readonly notice: string | null;
 }
+
+/** Adds a palette item to a workflow tab (F-301, UX-15). */
+export interface PaletteAdd {
+  /** The palette item's key. */
+  readonly item: string;
+  /** The workflow tab's id. */
+  readonly tab: string;
+  /** Where the node's centre goes, in flow coordinates; null leaves the placement to the layout. */
+  readonly at: Point | null;
+}
+
+export type PaletteAddOutcome =
+  | {
+      readonly ok: true;
+      readonly name: string;
+      readonly path: string;
+      readonly node: string;
+    }
+  | { readonly ok: false; readonly message: string };
 
 /** The workflow a project opens with: main.nf's entry, else the first entry workflow, else the first named one. */
 export function defaultWorkflow(
@@ -246,6 +279,10 @@ export function tabFor(ref: {
     readOnly: null,
   };
 }
+
+const NO_PROJECT_ADD = "Open or create a project to add components.";
+const FILE_TAB_ADD = "Open a workflow tab to add components to it.";
+const NO_ACTION_ADD = "That item can't be added from the palette yet.";
 
 const REPLACED_NOTICE = "The layout file couldn't be read and was replaced.";
 
@@ -318,6 +355,16 @@ export function createCanvasStore(
       positions: Positions;
       replace: boolean;
     } | null = null;
+    // the node an add from the palette is about to show, and where its centre goes (F-301)
+    let pendingPlacement: {
+      session: number;
+      tab: string;
+      key: string;
+      at: Point;
+    } | null = null;
+    let adds = 0;
+    // palette adds in flight: every view they cause keeps the viewport, the intermediate one included (F-301)
+    let addsPending = 0;
 
     function clearSelection(): void {
       selection++;
@@ -355,15 +402,60 @@ export function createCanvasStore(
             revision: result.revision,
             projection: result.projection,
             positions: result.positions,
+            refit: addsPending === 0,
             notice: null,
           };
       } catch (error) {
         content = { status: "unavailable", message: messageOf(error) };
       }
       if (mine !== generation) return;
-      set({ content });
-      // no canvas, so no node to select (the header and the body agree)
-      if (content.status !== "ready") clearSelection();
+      if (content.status === "ready") {
+        // the node an add from the palette shows gets its place in the same update as the projection, so it is never
+        // drawn unplaced and the layout never moves it (ADR 0052); its view never refits, as the add is pending
+        const placed = placement(tab, content);
+        set({
+          content:
+            placed === null
+              ? content
+              : {
+                  ...content,
+                  positions: { ...content.positions, [placed.key]: placed.at },
+                },
+        });
+        if (placed !== null)
+          await save(tab, content.revision, { [placed.key]: placed.at }, false);
+      } else {
+        set({ content });
+        // no canvas, so no node to select (the header and the body agree)
+        clearSelection();
+      }
+    }
+
+    /** The pending add's node and top-left corner when this projection holds it, which uses the placement up. */
+    function placement(
+      tab: WorkflowTab,
+      content: Extract<CanvasContent, { status: "ready" }>,
+    ): { key: string; at: Point } | null {
+      const pending = pendingPlacement;
+      if (
+        pending === null ||
+        pending.session !== get().session ||
+        pending.tab !== tab.id ||
+        !content.projection.nodes.some((n) => n.id === pending.key)
+      )
+        return null;
+      pendingPlacement = null;
+      const box = canvasView(content.projection, {
+        portLabels: true,
+      }).nodes.find((n) => n.id === pending.key);
+      if (box === undefined) return null;
+      return {
+        key: pending.key,
+        at: {
+          x: Math.round(pending.at.x - box.width / 2),
+          y: Math.round(pending.at.y - box.height / 2),
+        },
+      };
     }
 
     async function loadDetails(id: string): Promise<void> {
@@ -509,29 +601,33 @@ export function createCanvasStore(
      * Sends one change at the current revision, after every earlier one, and adopts the engine's answer. `after` runs in
      * the same turn, only when the engine was called and the project is still shown.
      */
-    function send<T extends ApplyOutcome | HistoryOutcome>(
+    async function sendNow<T extends ApplyOutcome | HistoryOutcome>(
       session: number | undefined,
       call: (revision: number) => Promise<T>,
       after: (outcome: T) => Promise<void> | void = adoptNewer,
     ): Promise<T | EngineRefusal> {
-      return enqueue(async () => {
-        const { summary } = get();
-        if (session !== undefined && session !== get().session)
-          return refusal("no-project", "The project changed.");
-        if (summary === null)
-          return refusal("no-project", "No project is open.");
-        // read when the task runs, so an edit flushed on the way to read-only still passes (F-703, UX-04)
-        if (readOnly()) return refusal("read-only", READ_ONLY_REFUSAL);
-        const outcome = await call(summary.revision);
-        const now = get().summary;
-        if (now === null) return outcome;
-        // the engine client announces changes to `changed` already; this covers an engine that doesn't
-        if (outcome.ok && outcome.revision > now.revision)
-          await get().changed(outcome);
-        await after(outcome);
-        return outcome;
-      });
+      const { summary } = get();
+      if (session !== undefined && session !== get().session)
+        return refusal("no-project", "The project changed.");
+      if (summary === null) return refusal("no-project", "No project is open.");
+      // read when the task runs, so an edit flushed on the way to read-only still passes (F-703, UX-04)
+      if (readOnly()) return refusal("read-only", READ_ONLY_REFUSAL);
+      const outcome = await call(summary.revision);
+      const now = get().summary;
+      if (now === null) return outcome;
+      // the engine client announces changes to `changed` already; this covers an engine that doesn't
+      if (outcome.ok && outcome.revision > now.revision)
+        await get().changed(outcome);
+      await after(outcome);
+      return outcome;
     }
+
+    const send = <T extends ApplyOutcome | HistoryOutcome>(
+      session: number | undefined,
+      call: (revision: number) => Promise<T>,
+      after?: (outcome: T) => Promise<void> | void,
+    ): Promise<T | EngineRefusal> =>
+      enqueue(() => sendNow(session, call, after));
 
     async function refreshHistory(): Promise<void> {
       try {
@@ -569,6 +665,7 @@ export function createCanvasStore(
         return refusal("no-project", "The project changed.");
       // pending code edits become the step that gets undone
       await flushPending();
+      pendingPlacement = null;
       return send(
         mine,
         async (revision) => {
@@ -613,6 +710,7 @@ export function createCanvasStore(
       async open(request) {
         generation++;
         pendingMove = null;
+        pendingPlacement = null;
         const summary = await engine().open(request);
         await get().show(summary, "unsaved");
         return summary;
@@ -621,6 +719,7 @@ export function createCanvasStore(
       async show(summary, source = "project") {
         generation++;
         pendingMove = null;
+        pendingPlacement = null;
         clearSelection();
         const first = defaultWorkflow(summary.workflows);
         const tab = first === null ? null : tabFor(first);
@@ -644,6 +743,7 @@ export function createCanvasStore(
       projectGone() {
         if (get().source !== "project") return;
         generation++;
+        pendingPlacement = null;
         clearSelection();
         set({
           source: null,
@@ -904,6 +1004,113 @@ export function createCanvasStore(
         });
         if (placement.replace || Object.keys(placement.saved).length > 0)
           await save(tab, content.revision, placement.saved, placement.replace);
+      },
+
+      addFromPalette(request, session) {
+        const mine = session ?? get().session;
+        const fail = (message: string): PaletteAddOutcome => ({
+          ok: false,
+          message,
+        });
+        const { summary, tabs } = get();
+        const tab = tabs.find((t) => t.id === request.tab);
+        const action = paletteAction({
+          key: request.item,
+        });
+        if (mine !== get().session || summary === null)
+          return Promise.resolve(fail(NO_PROJECT_ADD));
+        if (readOnly()) return Promise.resolve(fail(READ_ONLY_REFUSAL));
+        if (tab === undefined || tab.kind !== "workflow")
+          return Promise.resolve(fail(FILE_TAB_ADD));
+        if (action === null) return Promise.resolve(fail(NO_ACTION_ADD));
+        addsPending++;
+        return enqueue(async () => {
+          try {
+            const fresh = await engine()
+              .freshName({ kind: action.kind, caller: tab.path })
+              .catch((error: unknown) => refusal("internal", messageOf(error)));
+            if ("ok" in fresh) return fail(fresh.message);
+            const group = `palette-${mine}-${++adds}`;
+            const label = `Add ${action.kind} ${fresh.name}`;
+            const key = formatNodeKey({
+              path: tab.path,
+              workflow: tab.workflow,
+              local: {
+                kind: "unassigned",
+                callee: fresh.name,
+                occurrence: 1,
+              },
+            });
+            pendingPlacement =
+              request.at === null
+                ? null
+                : { session: mine, tab: tab.id, key, at: request.at };
+            const refused = (outcome: EngineRefusal): PaletteAddOutcome => {
+              pendingPlacement = null;
+              return fail(
+                `Couldn't add ${fresh.name}: ${outcome.message} Nothing was changed.`,
+              );
+            };
+            const creating = await sendNow(
+              mine,
+              (revision) =>
+                engine().apply(
+                  {
+                    kind:
+                      action.kind === "process"
+                        ? "createProcess"
+                        : "createWorkflow",
+                    name: fresh.name,
+                    caller: tab.path,
+                  },
+                  revision,
+                  { group, label },
+                ),
+              afterApply,
+            );
+            if (!creating.ok) return refused(creating);
+            const calling = await sendNow(
+              mine,
+              async (revision) => {
+                try {
+                  return await engine().apply(
+                    {
+                      kind: "addCall",
+                      target: { path: tab.path, workflow: tab.workflow },
+                      callee: fresh.name,
+                    },
+                    revision,
+                    { group },
+                  );
+                } catch (error) {
+                  return refusal("internal", messageOf(error));
+                }
+              },
+              afterApply,
+            );
+            if (!calling.ok) {
+              // only the group's first part is undone, so nothing is left behind
+              await sendNow(
+                mine,
+                async (revision) => {
+                  try {
+                    return await engine().undo(revision, { discard: true });
+                  } catch (error) {
+                    return refusal("internal", messageOf(error));
+                  }
+                },
+                async (outcome) => {
+                  if (!outcome.ok) await refreshHistory();
+                },
+              );
+              return refused(calling);
+            }
+            await get().select(key);
+            return { ok: true, name: fresh.name, path: fresh.path, node: key };
+          } finally {
+            addsPending--;
+          }
+        });
       },
     };
   });

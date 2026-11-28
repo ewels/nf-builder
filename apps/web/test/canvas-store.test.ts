@@ -1,4 +1,5 @@
 import {
+  canvasView,
   EMPTY_HISTORY,
   type EngineApi,
   type EngineRefusal,
@@ -1649,5 +1650,337 @@ describe("F-703 read-only canvas store", () => {
     await store.getState().open(request);
     await store.getState().openPath("README.md");
     expect(JSON.stringify(store.getState().tabs)).not.toContain("SECRET-TEXT");
+  });
+});
+
+describe("F-301 addFromPalette", () => {
+  const wf = [ref("main.nf", null)];
+  const NODE = "main.nf#/NEW_PROCESS@1";
+  const callNode = (id: string) => ({
+    id,
+    kind: "call",
+    label: id.slice(id.indexOf("/") + 1, id.indexOf("@")),
+    callee: { status: "unparsed" },
+    inputs: [],
+    outputs: [],
+  });
+
+  /** A fake engine where an addCall makes the node appear and bumps the revision. */
+  function adding(
+    options: {
+      refuseCall?: boolean;
+      throwCall?: boolean;
+      name?: string;
+      fresh?: EngineRefusal;
+    } = {},
+  ) {
+    const name = options.name ?? "NEW_PROCESS";
+    const log: string[] = [];
+    const applies: { command: { kind: string }; options: unknown }[] = [];
+    const writes: LayoutWrite[] = [];
+    const undos: unknown[] = [];
+    let revision = 1;
+    let called = false;
+    const engine = {
+      open: async () => summaryOf(wf),
+      project: async (): Promise<ProjectionResult> => ({
+        revision,
+        projection: {
+          ...projectionOf(wf[0] as WorkflowRef),
+          nodes: called ? [callNode(`main.nf#/${name}@1`)] : [],
+        } as never,
+        positions: {},
+      }),
+      freshName: async (request: { kind: string; caller: string }) => {
+        log.push(`fresh:${request.kind}:${request.caller}`);
+        return (
+          options.fresh ?? {
+            revision,
+            name,
+            path: `modules/local/${name.toLowerCase()}/main.nf`,
+          }
+        );
+      },
+      apply: async (
+        command: { kind: string },
+        rev: number,
+        applyOptions: unknown,
+      ) => {
+        log.push(`${command.kind}@${rev}`);
+        applies.push({ command, options: applyOptions });
+        if (options.throwCall && command.kind === "addCall")
+          throw new Error("The worker stopped.");
+        if (options.refuseCall && command.kind === "addCall")
+          return {
+            ok: false,
+            revision: rev,
+            code: "refused",
+            message: "Already called.",
+            path: "main.nf",
+            problems: [],
+          };
+        revision = rev + 1;
+        if (command.kind === "addCall") called = true;
+        return changeAt(revision, wf);
+      },
+      undo: async (rev: number, undoOptions?: unknown) => {
+        log.push(`undo@${rev}`);
+        undos.push(undoOptions);
+        revision = rev + 1;
+        called = false;
+        return changeAt(revision, wf, statusOf(0, 1), { label: "x" });
+      },
+      history: async () => EMPTY_HISTORY,
+      setLayout: async (write: LayoutWrite) => {
+        log.push("setLayout");
+        writes.push(write);
+        return {
+          revision: write.revision,
+          files: [{ path: ".nf-builder/layout.json", text: "{}" }],
+          layout: { state: "ok", message: null },
+        };
+      },
+      details: async (_p: string, _w: string | null, node: string) => {
+        log.push(`details:${node}`);
+        return { revision, details: { node, diagnostics: [] } };
+      },
+    } as unknown as EngineApi;
+    return { engine, log, applies, writes, undos };
+  }
+  const where = { x: 400, y: 300 };
+
+  it("F-301 UX-15 AR-23: addFromPalette asks for a fresh name, then applies create and addCall under one group with the step label", async () => {
+    const { engine, log, applies } = adding();
+    const store = createCanvasStore(() => engine);
+    await store.getState().open(request);
+    const out = await store
+      .getState()
+      .addFromPalette({ item: "process", tab: "main.nf#", at: where });
+    expect(out).toEqual({
+      ok: true,
+      name: "NEW_PROCESS",
+      path: "modules/local/new_process/main.nf",
+      node: NODE,
+    });
+    expect(log.slice(0, 3)).toEqual([
+      "fresh:process:main.nf",
+      "createProcess@1",
+      "addCall@2",
+    ]);
+    expect(applies.map((a) => a.command)).toEqual([
+      { kind: "createProcess", name: "NEW_PROCESS", caller: "main.nf" },
+      {
+        kind: "addCall",
+        target: { path: "main.nf", workflow: null },
+        callee: "NEW_PROCESS",
+      },
+    ]);
+    const [first, second] = applies.map((a) => a.options as { group: string });
+    expect(first?.group).toMatch(/^palette-/);
+    expect(second?.group).toBe(first?.group);
+    expect(first).toMatchObject({ label: "Add process NEW_PROCESS" });
+    expect(store.getState().selected).toBe(NODE);
+  });
+
+  it("F-301 UX-15: a workflow item creates a workflow and labels the step", async () => {
+    const { engine, applies } = adding({ name: "NEW_WORKFLOW" });
+    const store = createCanvasStore(() => engine);
+    await store.getState().open(request);
+    await store
+      .getState()
+      .addFromPalette({ item: "workflow", tab: "main.nf#", at: null });
+    expect(applies[0]?.command.kind).toBe("createWorkflow");
+    expect(applies[0]?.options).toMatchObject({
+      label: "Add workflow NEW_WORKFLOW",
+    });
+  });
+
+  it("F-301 ADR-0052: the new node's position is in content.positions in the same update as the projection, and setLayout is called with it", async () => {
+    const { engine, writes } = adding();
+    const store = createCanvasStore(() => engine);
+    await store.getState().open(request);
+    const seen: { has: boolean; placed: boolean }[] = [];
+    store.subscribe((state) => {
+      if (state.content.status !== "ready") return;
+      const has = state.content.projection.nodes.some((n) => n.id === NODE);
+      seen.push({ has, placed: state.content.positions[NODE] !== undefined });
+    });
+    await store
+      .getState()
+      .addFromPalette({ item: "process", tab: "main.nf#", at: where });
+    expect(seen.some((s) => s.has)).toBe(true);
+    expect(seen.filter((s) => s.has && !s.placed)).toEqual([]);
+    const c = store.getState().content;
+    if (c.status !== "ready") throw new Error("not ready");
+    const at = c.positions[NODE] as { x: number; y: number };
+    // the centre of the estimated box is the drop point
+    const box = canvasView(c.projection, { portLabels: true }).nodes[0];
+    expect(at).toEqual({
+      x: Math.round(where.x - (box?.width ?? 0) / 2),
+      y: Math.round(where.y - (box?.height ?? 0) / 2),
+    });
+    expect(writes).toHaveLength(1);
+    expect(writes[0]?.positions).toEqual({ [NODE]: at });
+    expect(writes[0]?.replace).toBe(false);
+  });
+
+  it("F-301 UX-15: a placed add sets refit false; a later change sets it true again", async () => {
+    const { engine } = adding();
+    const store = createCanvasStore(() => engine);
+    await store.getState().open(request);
+    const refit = () => {
+      const c = store.getState().content;
+      if (c.status !== "ready") throw new Error("not ready");
+      return c.refit;
+    };
+    expect(refit()).toBe(true);
+    await store
+      .getState()
+      .addFromPalette({ item: "process", tab: "main.nf#", at: where });
+    expect(refit()).toBe(false);
+    await store.getState().changed({
+      revision: 9,
+      files: [],
+      workflows: wf,
+      history: EMPTY_HISTORY,
+    } as never);
+    expect(refit()).toBe(true);
+  });
+
+  it("F-301: with at null no placement is recorded", async () => {
+    const { engine, writes } = adding();
+    const store = createCanvasStore(() => engine);
+    await store.getState().open(request);
+    await store
+      .getState()
+      .addFromPalette({ item: "process", tab: "main.nf#", at: null });
+    const c = store.getState().content;
+    if (c.status !== "ready") throw new Error("not ready");
+    expect(c.positions[NODE]).toBeUndefined();
+    expect(c.refit).toBe(false);
+    expect(writes).toEqual([]);
+  });
+
+  it("F-301 UX-15: no view shown while an add is pending asks for a refit, the intermediate one after createProcess included", async () => {
+    const { engine } = adding();
+    const store = createCanvasStore(() => engine);
+    await store.getState().open(request);
+    const refits: boolean[] = [];
+    store.subscribe((state, before) => {
+      const now = state.content;
+      const then = before.content;
+      // a view with a new projection is what the canvas draws and may fit
+      if (
+        now.status === "ready" &&
+        (then.status !== "ready" || now.projection !== then.projection)
+      )
+        refits.push(now.refit);
+    });
+    await store
+      .getState()
+      .addFromPalette({ item: "process", tab: "main.nf#", at: null });
+    expect(refits.length).toBeGreaterThan(0);
+    expect(refits).not.toContain(true);
+  });
+
+  it("F-301 AR-23: when addCall is refused after create, the store undoes once and returns the refusal", async () => {
+    const { engine, log } = adding({ refuseCall: true });
+    const store = createCanvasStore(() => engine);
+    await store.getState().open(request);
+    const out = await store
+      .getState()
+      .addFromPalette({ item: "process", tab: "main.nf#", at: where });
+    expect(log.slice(1)).toEqual(["createProcess@1", "addCall@2", "undo@2"]);
+    expect(out).toEqual({
+      ok: false,
+      message: "Couldn't add NEW_PROCESS: Already called. Nothing was changed.",
+    });
+    expect(store.getState().selected).toBeNull();
+  });
+
+  it("F-301 AR-23: the rollback discards the half add, so Redo cannot bring it back", async () => {
+    const { engine, undos } = adding({ refuseCall: true });
+    const store = createCanvasStore(() => engine);
+    await store.getState().open(request);
+    await store
+      .getState()
+      .addFromPalette({ item: "process", tab: "main.nf#", at: where });
+    expect(undos).toEqual([{ discard: true }]);
+  });
+
+  it("F-301 AR-23: an addCall that throws after create is rolled back too, and the add reports a refusal", async () => {
+    const { engine, log, undos } = adding({ throwCall: true });
+    const store = createCanvasStore(() => engine);
+    await store.getState().open(request);
+    const out = await store
+      .getState()
+      .addFromPalette({ item: "process", tab: "main.nf#", at: where });
+    expect(log.slice(1)).toEqual(["createProcess@1", "addCall@2", "undo@2"]);
+    expect(undos).toEqual([{ discard: true }]);
+    expect(out).toEqual({
+      ok: false,
+      message:
+        "Couldn't add NEW_PROCESS: The worker stopped. Nothing was changed.",
+    });
+  });
+
+  it("F-301: addFromPalette refuses with no project, a file tab, an older session or an item with no action, and calls no engine method", async () => {
+    const { engine, log } = adding();
+    const store = createCanvasStore(() => engine);
+    const add = (item: string, tab = "main.nf#", session?: number) =>
+      store.getState().addFromPalette({ item, tab, at: where }, session);
+    expect(await add("process")).toEqual({
+      ok: false,
+      message: "Open or create a project to add components.",
+    });
+    await store.getState().open(request);
+    await store.getState().openFile("README.md");
+    expect(await add("process", "file:README.md")).toEqual({
+      ok: false,
+      message: "Open a workflow tab to add components to it.",
+    });
+    expect(await add("channel:fromPath")).toEqual({
+      ok: false,
+      message: "That item can't be added from the palette yet.",
+    });
+    expect(await add("process", "main.nf#", 0)).toMatchObject({ ok: false });
+    expect(log).toEqual([]);
+  });
+
+  it("F-301 F-703 UX-04: a read-only add is refused with the read-only message and calls no engine method", async () => {
+    const { engine, log } = adding();
+    const store = createCanvasStore(
+      () => engine,
+      () => true,
+    );
+    await store.getState().open(request);
+    const out = await store
+      .getState()
+      .addFromPalette({ item: "process", tab: "main.nf#", at: where });
+    expect(out).toEqual({
+      ok: false,
+      message: "Editing needs a larger screen or a wider window.",
+    });
+    expect(log).toEqual([]);
+  });
+
+  it("F-301 AR-23: a refused fresh name returns its message and applies nothing", async () => {
+    const { engine, log } = adding({
+      fresh: {
+        ok: false,
+        revision: null,
+        code: "not-found",
+        message: "No such file.",
+        path: null,
+        problems: [],
+      },
+    });
+    const store = createCanvasStore(() => engine);
+    await store.getState().open(request);
+    const out = await store
+      .getState()
+      .addFromPalette({ item: "process", tab: "main.nf#", at: where });
+    expect(out).toEqual({ ok: false, message: "No such file." });
+    expect(log).toEqual(["fresh:process:main.nf"]);
   });
 });

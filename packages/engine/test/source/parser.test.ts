@@ -16,7 +16,7 @@ const fake = (load: () => Promise<SourceParser>): LanguagePack => ({
   version: "99.01",
   palette: { categories: [] },
   includes: {} as IncludeRules,
-  scaffold: { process: () => "" },
+  scaffold: { process: () => "", workflow: () => "" },
   legacyOperators: [],
   loadCatalogue: () => Promise.reject(new Error("not used here")),
   loadParser: load,

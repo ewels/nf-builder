@@ -24,6 +24,8 @@ import {
   patchResult,
   patchSequence,
 } from "../edit/apply";
+import { freshDefinitionName } from "../edit/fresh-name";
+import { definitionPath } from "../edit/names";
 import { PatchError } from "../edit/patches";
 import { registryFolders } from "../files/registry";
 import { EMPTY_HISTORY, History, type HistoryLimits } from "../history/history";
@@ -413,6 +415,7 @@ export function createEngineService(
     given: number,
     startedChanging: () => void,
     direction: "undo" | "redo",
+    discard = false,
   ): HistoryOutcome => {
     const old = stale(given);
     if (old) return old;
@@ -443,7 +446,9 @@ export function createEngineService(
     );
     startedChanging();
     const label =
-      direction === "undo" ? open.history.undone() : open.history.redone();
+      direction === "undo"
+        ? open.history.undone(discard)
+        : open.history.redone();
     return {
       ok: true,
       label,
@@ -559,9 +564,9 @@ export function createEngineService(
         );
       }),
 
-    undo: (given) =>
+    undo: (given, options) =>
       guarded((open, startedChanging) =>
-        move(open, given, startedChanging, "undo"),
+        move(open, given, startedChanging, "undo", options?.discard === true),
       ),
 
     redo: (given) =>
@@ -720,6 +725,18 @@ export function createEngineService(
             ? registryFolders(model.paths(), pack.includes, model.tree)
             : [],
         };
+      }),
+
+    freshName: (request) =>
+      guarded((open) => {
+        if (!open.state.model.file(request.caller))
+          return refusal("not-found", `There is no file ${request.caller}.`);
+        const name = freshDefinitionName(
+          open.state.model,
+          open.state.catalogue,
+          request,
+        );
+        return { revision, name, path: definitionPath(request.kind, name) };
       }),
 
     readFile: (path) =>
