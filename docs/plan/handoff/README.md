@@ -31,6 +31,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-501 registry snapshot | merged, PR #29; passing | Confirmed on live data after the snapshot-triggered Pages deploy. |
 | F-011 GitHub Pages hosting | merged, PR #37 | Live at https://ewels.github.io/nf-builder/; first `verify` passed. |
 | F-703 read-only below 1024 px | merged, PR #53 | Plan deleted in its PR. |
+| F-503 registry palette | merged, PR #56 | Plan deleted in its PR. |
 
 ## Merge order
 
@@ -312,7 +313,7 @@ Work paused at the maintainer's request (usage limits). To resume:
 
 ADR numbers reserved for features in flight, so parallel branches don't clash: 0055 F-210, 0056 F-703, 0057 F-401, 0058 F-503. Take the next free number after these for any other feature.
 
-### F-503 — [plan](plan-F-503.md)
+### F-503 — plan deleted
 - Accept every recommendation in section 6, with one change: namespaces are ordered with `nf-core` first, then the rest in code-point order, as the mockup shows (2,296 of 2,330 modules in the deployed snapshot are nf-core's).
 
 ### F-301 — [plan](plan-F-301.md)

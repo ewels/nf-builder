@@ -59,3 +59,4 @@ Process: [0001](0001-record-decisions-as-adrs.md). Template: [template.md](templ
 | [0053](0053-zip-import.md) | Import zips in the engine worker with fflate, one shared set of limits, ignore rules and text checks | Accepted (agent) |
 | [0054](0054-problems-panel.md) | List problems in a panel pulled per revision, apply quick fixes through the engine, and open files in code-only tabs | Accepted (agent) |
 | [0056](0056-read-only-below-1024.md) | Make the app read-only below 1024 px with a width media query, canvas and details only, and refusals in the page's stores | Accepted (agent) |
+| [0058](0058-registry-palette.md) | List registry modules by namespace in scroll-loaded windows, share the palette search, and read ports from the snapshot on demand | Accepted (agent) |
