@@ -22,6 +22,13 @@ import {
   SIDECAR,
   waitSaved,
 } from "./layout.ts";
+import {
+  openProblemsFixture,
+  problemRow,
+  problemsPanel,
+  problemsReady,
+  statusCount,
+} from "./problems.ts";
 import { readFile, switcher } from "./projects.ts";
 import {
   applyOutcome,
@@ -352,4 +359,24 @@ test.describe("touch", () => {
     await node(page, NODE.greeted).locator(".canvas-node-title").first().tap();
     await expect(details(page)).toContainText("GREET");
   });
+});
+
+test("F-703 UX-04 F-309: read-only, the problems panel lists problems with go buttons and no quick-fix buttons", async ({
+  page,
+}) => {
+  await page.goto("./");
+  await openProblemsFixture(page);
+  await expect(problemsReady(page)).toBeVisible();
+  await resize(page, PHONE);
+  await expect(readOnlyNote(page)).toHaveText(NOTE_TEXT);
+  await statusCount(page, "problems").click();
+  await expect(problemsPanel(page)).toBeVisible();
+  await expect(problemRow(page, "deprecated-channel")).toHaveCount(1);
+  await expect(page.locator(".problem-fix")).toHaveCount(0);
+  await expect(page.locator(".problem-go").first()).toBeVisible();
+  const unexpected = (await visibleControls(page)).filter(
+    (c) => !READ_ONLY_ALLOWED.some((allowed) => allowed.test(c)),
+  );
+  expect(unexpected).toEqual([]);
+  expect(await horizontalOverflow(page)).toBe(0);
 });

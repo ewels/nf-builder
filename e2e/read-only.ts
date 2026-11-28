@@ -109,6 +109,10 @@ export const visibleControls = (page: Page): Promise<string[]> =>
         found.add("switcher");
         continue;
       }
+      if (el.classList.contains("problem-go")) {
+        found.add("problem");
+        continue;
+      }
       const name =
         el.getAttribute("aria-label") ??
         el.textContent?.trim() ??
@@ -134,6 +138,8 @@ export const READ_ONLY_ALLOWED: readonly RegExp[] = [
   /^a: React Flow attribution$/,
   // the status bar's problem and suggestion counts open the panel, which only reads
   /^button: .*\b(problems?|suggestions?)$/,
+  /^problem$/, // a row of the panel, which goes to its place
+  /^button: Close problems panel$/,
 ];
 
 /** Sends `command` through the store's apply, as the UI does, and reports what came back instead of throwing. */

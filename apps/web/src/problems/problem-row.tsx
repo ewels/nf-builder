@@ -16,6 +16,7 @@ export function ProblemRow({
   onGo,
   onFix,
   onFocusPart,
+  readOnly = false,
 }: {
   readonly diagnostic: Diagnostic;
   readonly index: number;
@@ -25,6 +26,8 @@ export function ProblemRow({
   readonly onGo: () => void;
   readonly onFix: () => void;
   readonly onFocusPart: (part: "go" | "fix") => void;
+  /** Below 1024 px (F-703, UX-04): the quick-fix button isn't offered. */
+  readonly readOnly?: boolean;
 }): JSX.Element {
   return (
     <li className={`problem-row is-${d.severity}`}>
@@ -50,7 +53,7 @@ export function ProblemRow({
         </span>
         <span className="problem-code">{d.code}</span>
       </button>
-      {d.fix === undefined ? null : (
+      {d.fix === undefined || readOnly ? null : (
         <button
           type="button"
           className="problem-fix"

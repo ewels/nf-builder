@@ -1463,6 +1463,27 @@ describe("F-703 read-only canvas store", () => {
     expect(log).toEqual([]);
   });
 
+  it("F-703 UX-04 F-309: a read-only quick fix is refused with code read-only without calling the engine", async () => {
+    const calls: string[] = [];
+    const engine = {
+      ...fake(wf).engine,
+      applyFix: async () => {
+        calls.push("applyFix");
+        return changeAt(2, wf);
+      },
+    } as unknown as EngineApi;
+    const store = createCanvasStore(
+      () => engine,
+      () => true,
+    );
+    await store.getState().open(request);
+    const outcome = await store
+      .getState()
+      .applyFix({ title: "x", path: "main.nf", edits: [] }, 1);
+    expect(outcome.ok === false && outcome.code).toBe("read-only");
+    expect(calls).toEqual([]);
+  });
+
   it("F-703 UX-04 F-207: read-only placements are shown but never saved, and moves are ignored", async () => {
     const { engine, writes } = fake(wf, {
       positions: stored,
