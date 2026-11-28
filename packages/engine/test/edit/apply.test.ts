@@ -79,6 +79,7 @@ const commands: Record<EditCommand["kind"], EditCommand> = {
       kept: [],
     },
   },
+  moveFile: { kind: "moveFile", path: "b.nf", newPath: "moved/b.nf" },
 };
 
 describe("F-111 applyCommand", () => {

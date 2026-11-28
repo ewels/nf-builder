@@ -94,6 +94,7 @@ export {
   type EditCommand,
   type FileText,
   type MemoryUnitName,
+  type MoveFile,
   type RefusalCode,
   type RemoveConfigOption,
   type RemoveConfigPlugin,

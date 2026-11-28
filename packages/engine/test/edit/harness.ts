@@ -24,6 +24,7 @@ import { plugins } from "../../src/edit/config/locate";
 import { definitionStyles, problemKeys } from "../../src/edit/guards";
 import { applyPatches } from "../../src/edit/patches";
 import { itemSpan } from "../../src/edit/splice";
+import { folderOf, isManagedPath } from "../../src/files/paths";
 import { processForm } from "../../src/form/read-process";
 import { createProjector } from "../../src/projection/project";
 import { diffNodes } from "../../src/source/equivalent";
@@ -301,6 +302,26 @@ export function buildCommand(state: EditState, c: Choice): EditCommand | null {
       const ext = [".nf", ".config", ".md", "/.gitkeep"][c.snippet % 4];
       return { kind, path: `${c.name.toLowerCase()}${ext}` };
     }
+    case "moveFile": {
+      // a script, or the folder holding it, moved under a new top-level folder
+      // (a file that already has a problem would be refused as a new file with one, AR-24)
+      const path = pick(
+        paths.filter(
+          (p) =>
+            !isManagedPath(p) &&
+            state.model.file(p)?.source.problems.length === 0,
+        ),
+        c.a,
+      );
+      if (!path) return null;
+      const folder = folderOf(path);
+      const from = c.b % 2 === 0 && folder !== "" ? folder : path;
+      return {
+        kind,
+        path: from,
+        newPath: `moved_${c.name.toLowerCase()}/${from.split("/").pop()}`,
+      };
+    }
     case "updateDeclaration": {
       // a typed process, its form read back, with one random change to a row or a text
       const procs = scripts.flatMap((path) =>
@@ -546,6 +567,18 @@ function checkAccepted(
         { kind: "create", path: command.path, text: "" },
       ]);
       break;
+    case "moveFile": {
+      // F-303: every moved file is deleted and created once; the other patches only edit
+      const deleted = patches.filter((p) => p.kind === "delete");
+      const created = patches.filter((p) => p.kind === "create");
+      expect(created.length, `${label}: one create per delete`).toBe(
+        deleted.length,
+      );
+      expect(deleted.length).toBeGreaterThan(0);
+      for (const p of created)
+        expect(p.path.startsWith(command.newPath)).toBe(true);
+      break;
+    }
     case "updateDeclaration": {
       // F-303: the process's own file is patched, and each edit (it, and the call sites') is one top-level item
       expect(patches.map((p) => p.path)).toContain(command.path);

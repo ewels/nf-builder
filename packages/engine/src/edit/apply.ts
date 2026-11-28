@@ -29,6 +29,7 @@ import { connect, disconnect } from "./commands/connect";
 import { createProcess, createWorkflow } from "./commands/create-definition";
 import { createFile } from "./commands/create-file";
 import { deleteNode } from "./commands/delete-node";
+import { moveFile } from "./commands/move-file";
 import { renameDeclaration } from "./commands/rename";
 import { replaceFileText } from "./commands/replace-file-text";
 import { updateDeclaration } from "./commands/update-declaration";
@@ -96,6 +97,8 @@ const build = (state: EditState, command: EditCommand): TextPatch[] => {
       return createFile(state, command);
     case "updateDeclaration":
       return updateDeclaration(state, command);
+    case "moveFile":
+      return moveFile(state, command);
     default:
       throw new EditRefusal(
         "invalid",

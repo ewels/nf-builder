@@ -56,6 +56,42 @@ const update =
     };
   };
 
+const PAIR_MODULE = "modules/local/split/main.nf";
+const OUTPUTS_START = {
+  "main.nf": `nextflow.enable.types = true
+
+include { SPLIT } from './modules/local/split/main.nf'
+
+workflow {
+    parts = SPLIT('hello')
+    parts.first.view()
+    parts.second.view()
+}
+`,
+  [PAIR_MODULE]: `nextflow.enable.types = true
+
+process SPLIT {
+    input:
+    word: String
+
+    output:
+    first: Path = file('first.txt')
+    second: Path = file('second.txt')
+
+    script:
+    """
+    echo \${word} > first.txt
+    echo \${word} > second.txt
+    """
+
+    stub:
+    """
+    touch first.txt second.txt
+    """
+}
+`,
+};
+
 const JOIN = "modules/local/join/main.nf";
 const ALL_START = {
   "main.nf": `nextflow.enable.types = true
@@ -234,6 +270,38 @@ const goldens = {
             known: true,
           },
         ],
+      })),
+    ],
+  },
+  // F-303 point 5: the rename and the move of its folder, as the popup applies them
+  "f303-configure-start -> f303-rename-moved": {
+    start: "f303-configure-start",
+    expected: "f303-rename-moved",
+    steps: [
+      (): EditCommand => ({
+        kind: "renameDeclaration",
+        path: "modules/local/greet/main.nf",
+        name: "GREET",
+        newName: "SAY",
+      }),
+      (): EditCommand => ({
+        kind: "moveFile",
+        path: "modules/local/greet",
+        newPath: "modules/local/say",
+      }),
+    ],
+  },
+  // F-303 point 4: with two outputs the reads at the call sites follow the renames
+  "f303 two outputs start -> f303-outputs-renamed": {
+    start: OUTPUTS_START,
+    expected: "f303-outputs-renamed",
+    steps: [
+      update(PAIR_MODULE, "SPLIT", (form) => ({
+        ...form,
+        outputs: form.outputs.map((o, i) => ({
+          ...o,
+          name: i === 0 ? "head" : "tail",
+        })),
       })),
     ],
   },

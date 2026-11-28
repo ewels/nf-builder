@@ -127,6 +127,61 @@ describe("F-303 engine service update and rename", () => {
     expect(await snapshot(service, paths)).toEqual(start);
   });
 
+  it("F-303 point 5 LA-12 AR-23: renaming a process and moving its folder under one group is one undo step that restores the paths, the bytes and the sidecar", async () => {
+    const { service, summary, projection, files } = await opened();
+    const key = projection.nodes.find((n) => n.label === "GREET")?.id ?? "";
+    const set = must(
+      await service.setLayout({
+        path: "main.nf",
+        workflow: null,
+        positions: { [key]: { x: 10, y: 20 } },
+        replace: false,
+        revision: summary.revision,
+      }),
+    ) as { revision: number };
+    const paths = [...files.map((f) => f.path), LAYOUT_PATH];
+    const start = await snapshot(service, paths);
+    const group = { group: "popup-2", label: "Edit process HELLO" };
+    const one = must(
+      await service.apply(
+        {
+          kind: "renameDeclaration",
+          path: MODULE,
+          name: "GREET",
+          newName: "HELLO",
+        },
+        set.revision,
+        group,
+      ),
+    ) as ProjectChange;
+    const two = must(
+      await service.apply(
+        {
+          kind: "moveFile",
+          path: "modules/local/greet",
+          newPath: "modules/local/hello",
+        },
+        one.revision,
+        { group: "popup-2" },
+      ),
+    ) as ProjectChange;
+    expect(two.history).toMatchObject({
+      undo: "Edit process HELLO",
+      undoCount: 1,
+    });
+    const moved = "modules/local/hello/main.nf";
+    expect(await service.readFile(moved)).toContain("process HELLO");
+    expect(await service.readFile("main.nf")).toContain(
+      "include { HELLO } from './modules/local/hello/main.nf'",
+    );
+    expect(await service.readFile(LAYOUT_PATH)).toContain("main.nf#/greet");
+    const undone = must(await service.undo(two.revision)) as ProjectChange;
+    expect(await snapshot(service, paths)).toEqual(start);
+    expect(await service.readFile(moved)).toBeNull();
+    await service.redo(undone.revision);
+    expect(await service.readFile(moved)).toContain("process HELLO");
+  });
+
   it("F-303 AR-24 UX-44: a refused updateDeclaration comes back with its field problems and changes nothing", async () => {
     const { service, projection } = await opened();
     const key = projection.nodes.find((n) => n.label === "GREET")?.id ?? "";

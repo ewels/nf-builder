@@ -511,6 +511,20 @@ cases:
       - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/reference/process.mdx
     lint: { expect: ok, clean: true }
     run: { expect: ok }
+  - id: f303-rename-moved
+    about: The f303-configure-start tree after the popup renames GREET to SAY and its module folder moves with it; the include source and the call follow.
+    spec: [F-303, UX-41, LA-12, AR-21]
+    sources:
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/process-typed.mdx
+    lint: { expect: ok, clean: true }
+    run: { expect: ok }
+  - id: f303-outputs-renamed
+    about: A typed process with two outputs after both are renamed in the popup; both reads of the call's result follow the new names; lint warns that a typed process should have one output.
+    spec: [F-303, UX-41, AR-21]
+    sources:
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/process-typed.mdx
+    lint: { expect: ok }
+    run: { expect: ok }
   - id: f303-configure-all
     about: A typed process after one Configure edit of every section (description, directives, inputs reordered and one renamed, stage, output renamed, topic) and a second that adds the stub back; a kept record input and a kept deprecated storeDir; two callers (the entry workflow and a named workflow) with their arguments reordered; the topic's eval tool is shimmed.
     spec: [F-303, UX-41, UX-44, AR-21]

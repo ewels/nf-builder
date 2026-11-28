@@ -46,5 +46,7 @@ export function commandLabel(command: EditCommand): string {
       return `Create ${command.path}`;
     case "updateDeclaration":
       return `Edit process ${command.name}`;
+    case "moveFile":
+      return `Move ${command.path} to ${command.newPath}`;
   }
 }

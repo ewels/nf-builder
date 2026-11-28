@@ -173,6 +173,16 @@ export interface CreateFile {
   readonly path: string;
 }
 
+/**
+ * Move a file, or every file under a folder, to `newPath` (F-303, LA-12). Include sources that name a moved script are
+ * rewritten in the includers and in the moved scripts themselves.
+ */
+export interface MoveFile {
+  readonly kind: "moveFile";
+  readonly path: string;
+  readonly newPath: string;
+}
+
 export type EditCommand =
   | CreateProcess
   | AddCall
@@ -188,7 +198,8 @@ export type EditCommand =
   | RemoveConfigPlugin
   | CreateFile
   | CreateWorkflow
-  | UpdateDeclaration;
+  | UpdateDeclaration
+  | MoveFile;
 
 export const EDIT_COMMAND_KINDS = [
   "createProcess",
@@ -206,6 +217,7 @@ export const EDIT_COMMAND_KINDS = [
   "createFile",
   "createWorkflow",
   "updateDeclaration",
+  "moveFile",
 ] as const satisfies readonly EditCommand["kind"][];
 
 /** Replace `text.slice(start, end)`: UTF-16 offsets into the file as it was before the patch. */

@@ -97,6 +97,15 @@ const samples: Record<EditCommand["kind"], [EditCommand, string]> = {
     },
     "Edit process ALIGN",
   ],
+  // F-303 AR-23: moveFile is labelled with both paths
+  moveFile: [
+    {
+      kind: "moveFile",
+      path: "modules/local/a",
+      newPath: "modules/local/b",
+    },
+    "Move modules/local/a to modules/local/b",
+  ],
 };
 
 const context = (
