@@ -33,8 +33,13 @@ export function NodeDetailsView({
   view,
   details,
   onShowProblems,
+  onCopy,
+  onDelete,
 }: {
   readonly view: NodeView;
+  /** Copy and Delete for the node, each left out where it isn't offered (F-310, ADR 0056). */
+  readonly onCopy?: () => void;
+  readonly onDelete?: () => void;
   readonly details: DetailsContent;
   /** Opens the problems panel on a problem of this node (F-309). */
   readonly onShowProblems?: (first: Diagnostic) => void;
@@ -46,6 +51,20 @@ export function NodeDetailsView({
     <div className="details-node">
       <h3 className="details-name">{view.name}</h3>
       <p className="details-kind">{view.kindLabel}</p>
+      {onCopy === undefined && onDelete === undefined ? null : (
+        <div className="details-actions">
+          {onCopy === undefined ? null : (
+            <button type="button" className="details-action" onClick={onCopy}>
+              Copy
+            </button>
+          )}
+          {onDelete === undefined ? null : (
+            <button type="button" className="details-action" onClick={onDelete}>
+              Delete
+            </button>
+          )}
+        </div>
+      )}
       <section className="details-section">
         <h4>File</h4>
         <p className="details-file">

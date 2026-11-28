@@ -4,6 +4,7 @@
 import {
   type ApplyOptions,
   type ApplyOutcome,
+  type ClipboardSummary,
   type ConnectionTarget,
   canvasView,
   type EditCommand,
@@ -16,6 +17,8 @@ import {
   languageOf,
   type NodeDetails,
   type OpenRequest,
+  type PasteAlias,
+  type Pasted,
   type Point,
   type PortRef,
   type Positions,
@@ -105,6 +108,8 @@ export interface WorkspaceState {
   } | null;
   /** The selected node's id, in the active tab's projection (single selection, F-206). */
   readonly selected: string | null;
+  /** The selected nodes' ids, in the order selected; `selected` is the one of them when there is exactly one (F-310). */
+  readonly selection: readonly string[];
   readonly details: DetailsContent;
   /**
    * The layout file's own problem, shown for the session: it was unreadable (and is replaced at the first save) or
@@ -126,7 +131,21 @@ export interface WorkspaceState {
   readonly focusNode: { readonly id: string; readonly seq: number } | null;
   /** Why the last connect or disconnect was refused; the next change to the project clears it (F-302). */
   readonly canvasNotice: string | null;
+  /** What the engine's clipboard holds, as a summary: never the copied text (AR-30, F-310). */
+  readonly clipboard: ClipboardSummary | null;
+  /** A paste that needs new names, waiting for the user to confirm them (F-310, ADR 0039). */
+  readonly pendingPaste: {
+    readonly aliases: readonly PasteAlias[];
+    readonly at: Point | null;
+  } | null;
+  /** What the last copy, paste or delete did, for the live region (F-310). */
+  readonly clipboardNotice: string | null;
 }
+
+/** The result of a copy, paste or delete (F-310). */
+export type ClipboardOutcome =
+  | { readonly ok: true }
+  | { readonly ok: false; readonly message: string };
 
 export interface WorkspaceActions {
   /** The test hook: a raw, unsaved open in the engine, then `show`. */
@@ -185,6 +204,22 @@ export interface WorkspaceActions {
   flushEdits(): Promise<void>;
   /** Selects a node and loads its details; null clears the selection. */
   select(id: string | null): Promise<void>;
+  /** Replaces the selection: none clears it, one is `select`, several show the selection summary (F-310, UX-26). */
+  selectNodes(ids: readonly string[]): Promise<void>;
+  /**
+   * Deletes the selected nodes as one `DeleteNodes` command and one undo step (F-310, AR-23). Refused read-only without
+   * calling the engine; a refusal becomes the canvas notice.
+   */
+  deleteSelection(session?: number): Promise<ClipboardOutcome>;
+  /** Copies the selected call nodes to the engine's clipboard (F-310). Allowed read-only: it writes nothing. */
+  copySelection(session?: number): Promise<ClipboardOutcome>;
+  /**
+   * Pastes the clipboard into the active workflow with its centre at `at` (null: the layout places it). Callees that need
+   * new names wait in `pendingPaste` for `confirmPaste` or `cancelPaste` (F-310, ADR 0039). Refused read-only.
+   */
+  paste(at: Point | null, session?: number): Promise<ClipboardOutcome>;
+  confirmPaste(): Promise<ClipboardOutcome>;
+  cancelPaste(): void;
   /**
    * Keeps and saves the nodes the user has moved (a drag stop or a keyboard move). Moves are rounded, and one that
    * lands where the node is saves nothing. Not undoable in v0.1 (F-207).
@@ -350,6 +385,9 @@ function renamedTabs(
   return out;
 }
 
+/** What a queued change answers with: an applied command, a history step or a paste. */
+type Sent = ApplyOutcome | HistoryOutcome | Pasted;
+
 const refusal = (
   code: EngineRefusal["code"],
   message: string,
@@ -413,7 +451,7 @@ export function createCanvasStore(
 
     /** One connect or disconnect: the views it causes keep the viewport; a refusal becomes the canvas notice. */
     async function rewire(
-      verb: "connect" | "disconnect",
+      verb: "connect" | "disconnect" | "delete",
       command: (target: WorkflowTarget) => EditCommand,
       session: number | undefined,
     ): Promise<ApplyOutcome> {
@@ -441,7 +479,7 @@ export function createCanvasStore(
 
     function clearSelection(): void {
       selection++;
-      set({ selected: null, details: IDLE });
+      set({ selected: null, selection: [], details: IDLE });
     }
 
     async function load(tab: WorkflowTab, quiet = false): Promise<void> {
@@ -536,7 +574,11 @@ export function createCanvasStore(
       const tab = tabs.find((t) => t.id === activeTab);
       if (tab === undefined || content.status !== "ready") return;
       const mine = ++selection;
-      set({ selected: id, details: { status: "loading", node: id } });
+      set({
+        selected: id,
+        selection: [id],
+        details: { status: "loading", node: id },
+      });
       const unavailable = (message: string): DetailsContent => ({
         status: "unavailable",
         node: id,
@@ -659,9 +701,7 @@ export function createCanvasStore(
     }
 
     /** A refusal that reports a newer revision: another writer got in first, so adopt it and show what it left. */
-    async function adoptNewer(
-      outcome: ApplyOutcome | HistoryOutcome,
-    ): Promise<void> {
+    async function adoptNewer(outcome: Sent): Promise<void> {
       const now = get().summary;
       if (outcome.ok || now === null || outcome.revision === null) return;
       if (outcome.revision <= now.revision) return;
@@ -674,7 +714,7 @@ export function createCanvasStore(
      * Sends one change at the current revision, after every earlier one, and adopts the engine's answer. `after` runs in
      * the same turn, only when the engine was called and the project is still shown.
      */
-    async function sendNow<T extends ApplyOutcome | HistoryOutcome>(
+    async function sendNow<T extends Sent>(
       session: number | undefined,
       call: (revision: number) => Promise<T>,
       after: (outcome: T) => Promise<void> | void = adoptNewer,
@@ -695,7 +735,7 @@ export function createCanvasStore(
       return outcome;
     }
 
-    const send = <T extends ApplyOutcome | HistoryOutcome>(
+    const send = <T extends Sent>(
       session: number | undefined,
       call: (revision: number) => Promise<T>,
       after?: (outcome: T) => Promise<void> | void,
@@ -711,7 +751,9 @@ export function createCanvasStore(
     }
 
     /** After an apply or a fix: adopt a newer revision; an internal refusal can follow a write that cleared the history. */
-    async function afterApply(outcome: ApplyOutcome): Promise<void> {
+    async function afterApply(
+      outcome: ApplyOutcome | Pasted | EngineRefusal,
+    ): Promise<void> {
       await adoptNewer(outcome);
       if (!outcome.ok && outcome.code === "internal") await refreshHistory();
     }
@@ -763,6 +805,76 @@ export function createCanvasStore(
       );
     }
 
+    // the live message of the last copy, paste or delete; the same text again alternates a no-break space so it is announced
+    function say(message: string): void {
+      const now = get().clipboardNotice;
+      set({
+        clipboardNotice: now === message ? `${message}\u00A0` : message,
+      });
+    }
+
+    /** A selection of several nodes keeps the ids the view still has. */
+    function pruneSelection(): void {
+      const { selection: ids, content } = get();
+      if (ids.length < 2 || content.status !== "ready") return;
+      const present = new Set(content.projection.nodes.map((n) => n.id));
+      const kept = ids.filter((id) => present.has(id));
+      if (kept.length === ids.length) return;
+      if (kept.length === 0) clearSelection();
+      else
+        set({
+          selection: kept,
+          selected: kept.length === 1 ? (kept[0] ?? null) : null,
+        });
+    }
+
+    const nodesOf = (n: number): string => `${n} node${n === 1 ? "" : "s"}`;
+    const failed = (message: string): ClipboardOutcome => ({
+      ok: false,
+      message,
+    });
+
+    /** Pastes with `aliases` into `tab` as one task of the queue; the views it causes keep the viewport. */
+    async function pasteNow(
+      tab: WorkflowTab,
+      aliases: readonly PasteAlias[],
+      at: Point | null,
+      mine: number,
+    ): Promise<ClipboardOutcome> {
+      addsPending++;
+      try {
+        const outcome = await sendNow(
+          mine,
+          (revision) =>
+            engine().paste(
+              {
+                target: { path: tab.path, workflow: tab.workflow },
+                aliases,
+                at,
+              },
+              revision,
+            ),
+          afterApply,
+        );
+        if (!outcome.ok) {
+          if (outcome.code === "read-only") return failed(outcome.message);
+          say(outcome.message);
+          return failed(outcome.message);
+        }
+        const pasted = (outcome as { pasted?: readonly string[] }).pasted ?? [];
+        await get().selectNodes(pasted);
+        const connections = get().clipboard?.connections ?? 0;
+        say(
+          connections === 0
+            ? `Pasted ${nodesOf(pasted.length)}.`
+            : `Pasted ${nodesOf(pasted.length)} and ${connections} connection${connections === 1 ? "" : "s"}.`,
+        );
+        return { ok: true };
+      } finally {
+        addsPending--;
+      }
+    }
+
     return {
       source: null,
       session: 0,
@@ -773,6 +885,7 @@ export function createCanvasStore(
       portLabels: true,
       lastChange: null,
       selected: null,
+      selection: [],
       details: IDLE,
       layoutNotice: null,
       history: EMPTY_HISTORY,
@@ -780,6 +893,9 @@ export function createCanvasStore(
       reveal: null,
       focusNode: null,
       canvasNotice: null,
+      clipboard: null,
+      pendingPaste: null,
+      clipboardNotice: null,
 
       async open(request) {
         generation++;
@@ -811,6 +927,8 @@ export function createCanvasStore(
           reveal: null,
           focusNode: null,
           canvasNotice: null,
+          pendingPaste: null,
+          clipboardNotice: null,
         });
         if (tab !== null) await load(tab);
       },
@@ -834,6 +952,8 @@ export function createCanvasStore(
           reveal: null,
           focusNode: null,
           canvasNotice: null,
+          pendingPaste: null,
+          clipboardNotice: null,
         });
       },
 
@@ -903,6 +1023,7 @@ export function createCanvasStore(
           await resendMove(active);
           const { selected } = get();
           if (selected !== null) await loadDetails(selected);
+          else pruneSelection();
           return;
         }
         const first = defaultWorkflow(change.workflows);
@@ -1038,6 +1159,119 @@ export function createCanvasStore(
         const { selected, details } = get();
         if (id === selected && details.status !== "unavailable") return;
         await loadDetails(id);
+      },
+
+      async selectNodes(ids) {
+        const unique = [...new Set(ids)];
+        if (unique.length === 0) {
+          clearSelection();
+          return;
+        }
+        if (unique.length === 1) {
+          await get().select(unique[0] as string);
+          return;
+        }
+        selection++;
+        set({ selected: null, selection: unique, details: IDLE });
+      },
+
+      async deleteSelection(session) {
+        const ids = get().selection;
+        if (readOnly()) return failed(READ_ONLY_REFUSAL);
+        if (ids.length === 0) return failed("Nothing is selected.");
+        const outcome = await rewire(
+          "delete",
+          (target) => ({ kind: "deleteNodes", target, nodes: ids }),
+          session,
+        );
+        if (!outcome.ok) return failed(outcome.message);
+        clearSelection();
+        say(`Deleted ${nodesOf(ids.length)}.`);
+        return { ok: true };
+      },
+
+      async copySelection(session) {
+        const mine = session ?? get().session;
+        const ids = get().selection;
+        const { content } = get();
+        const tab = workflowTab();
+        if (mine !== get().session || get().summary === null)
+          return failed("No project is open.");
+        if (tab === undefined || content.status !== "ready")
+          return failed("Open a workflow tab to copy nodes.");
+        if (ids.length === 0) return failed("Nothing is selected.");
+        // pending code edits are in the project before it is read
+        await flushPending();
+        const positions: Record<string, Point> = {};
+        for (const id of ids) {
+          const at = content.positions[id];
+          if (at !== undefined) positions[id] = at;
+        }
+        return enqueue(async () => {
+          try {
+            const result = await engine().copy({
+              path: tab.path,
+              workflow: tab.workflow,
+              nodes: ids,
+              positions,
+            });
+            if ("ok" in result) {
+              say(`Couldn't copy: ${result.message}`);
+              return failed(result.message);
+            }
+            set({ clipboard: result.summary });
+            say(`Copied ${nodesOf(result.summary.nodes)}.`);
+            return { ok: true } as const;
+          } catch (error) {
+            say(`Couldn't copy: ${messageOf(error)}`);
+            return failed(messageOf(error));
+          }
+        });
+      },
+
+      async paste(at, session) {
+        const mine = session ?? get().session;
+        const tab = workflowTab();
+        if (mine !== get().session || get().summary === null)
+          return failed("No project is open.");
+        if (readOnly()) return failed(READ_ONLY_REFUSAL);
+        if (tab === undefined)
+          return failed("Open a workflow tab to paste nodes.");
+        await flushPending();
+        return enqueue(async () => {
+          let plan: Awaited<ReturnType<EngineApi["planPaste"]>>;
+          try {
+            plan = await engine().planPaste({
+              target: { path: tab.path, workflow: tab.workflow },
+            });
+          } catch (error) {
+            say(`Couldn't paste: ${messageOf(error)}`);
+            return failed(messageOf(error));
+          }
+          if ("ok" in plan) {
+            say(plan.message);
+            return failed(plan.message);
+          }
+          if (plan.aliases.length > 0) {
+            set({ pendingPaste: { aliases: plan.aliases, at } });
+            return { ok: true } as const;
+          }
+          return pasteNow(tab, [], at, mine);
+        });
+      },
+
+      async confirmPaste() {
+        const pending = get().pendingPaste;
+        const tab = workflowTab();
+        set({ pendingPaste: null });
+        if (pending === null || tab === undefined)
+          return failed("Nothing is waiting to be pasted.");
+        const mine = get().session;
+        return enqueue(() => pasteNow(tab, pending.aliases, pending.at, mine));
+      },
+
+      cancelPaste() {
+        set({ pendingPaste: null });
       },
 
       async moveNodes(moves) {
