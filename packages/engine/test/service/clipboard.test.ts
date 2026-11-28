@@ -241,33 +241,90 @@ describe("F-310 engine clipboard", () => {
     ]);
   });
 
-  it("F-310 ADR-0052: undo of a paste with `at` restores the sidecar byte for byte, or removes it", async () => {
-    for (const existed of [false, true]) {
-      const service = createEngineService();
-      await copied(service);
-      const target = await open(service, blankFiles());
-      if (existed) {
-        const text = `${JSON.stringify({ version: 1, nodes: {} }, null, 2)}\n`;
-        ok(
-          await service.writeFiles([{ path: ".nf-builder/layout.json", text }]),
-        );
-        target.texts.set(".nf-builder/layout.json", text);
-      }
-      const before = target.snapshot();
-      const current = await service.project("main.nf", null);
-      const rev = (current as { revision: number }).revision;
-      const pasted = target.take(
-        ok(
-          await service.paste(
-            { target: entry, aliases: [], at: { x: 1000, y: 500 } },
-            rev,
-          ),
-        ) as Changed,
-      );
-      expect(target.snapshot()[".nf-builder/layout.json"]).toBeTruthy();
-      target.take(ok(await service.undo(pasted.revision)) as Changed);
-      expect(target.snapshot()).toEqual(before);
-    }
+  /** Pastes MAKE and SIZE at a point into a project that already has one placed node. */
+  async function pastedAt() {
+    const service = createEngineService();
+    await copied(service);
+    const target = await open(service, caseFiles("f310-delete-start"));
+    const keep = await target.id("make");
+    const placed = ok(
+      await service.setLayout({
+        revision: target.revision,
+        path: "main.nf",
+        workflow: null,
+        positions: { [keep]: { x: 7, y: 9 } },
+        replace: true,
+      }),
+    );
+    for (const f of placed.files) target.texts.set(f.path, f.text as string);
+    const plan = ok(await service.planPaste({ target: entry }));
+    const pasted = target.take(
+      ok(
+        await service.paste(
+          { target: entry, aliases: plan.aliases, at: { x: 1000, y: 500 } },
+          plan.revision,
+        ),
+      ) as Changed,
+    );
+    const layout = () =>
+      parseLayout(target.snapshot()[".nf-builder/layout.json"] as string);
+    return { service, target, keep, pasted, layout };
+  }
+
+  const nodesOf = (l: ReturnType<typeof parseLayout>) => {
+    if (!l.ok) throw new Error(`invalid sidecar: ${l.message}`);
+    return l.document.nodes;
+  };
+
+  it("F-310 ADR-0052: paste at a point, move a node, undo: the sidecar stays valid, the moved node keeps its move and the pasted keys go", async () => {
+    const { service, target, keep, pasted, layout } = await pastedAt();
+    const pastedIds = pasted.pasted as readonly string[];
+    expect(pastedIds).toHaveLength(2);
+    for (const id of pastedIds) expect(nodesOf(layout())[id]).toBeDefined();
+    const moved = ok(
+      await service.setLayout({
+        revision: target.revision,
+        path: "main.nf",
+        workflow: null,
+        positions: { [keep]: { x: 70, y: 90 } },
+        replace: false,
+      }),
+    );
+    for (const f of moved.files) target.texts.set(f.path, f.text as string);
+    const undone = target.take(
+      ok(await service.undo(target.revision)) as Changed,
+    );
+    expect(undone.history.redo).toBe("Paste 2 nodes");
+    const nodes = nodesOf(layout());
+    expect(Object.keys(nodes)).toEqual([keep]);
+    expect(nodes[keep]).toEqual({ x: 70, y: 90 });
+    const redone = target.take(
+      ok(await service.redo(target.revision)) as Changed,
+    );
+    expect(redone.history.undo).toBe("Paste 2 nodes");
+    const back = nodesOf(layout());
+    expect(back[keep]).toEqual({ x: 70, y: 90 });
+    for (const id of pastedIds) expect(back[id]).toBeDefined();
+  });
+
+  it("F-310 ADR-0052: paste at a point then undo with no move leaves the other keys as they were", async () => {
+    const { service, target, keep, layout } = await pastedAt();
+    target.take(ok(await service.undo(target.revision)) as Changed);
+    expect(nodesOf(layout())).toEqual({ [keep]: { x: 7, y: 9 } });
+  });
+
+  it("F-310 UX-26: paste with no point writes no sidecar entries", async () => {
+    const service = createEngineService();
+    await copied(service);
+    const target = await open(service, blankFiles());
+    const pasted = ok(
+      await service.paste(
+        { target: entry, aliases: [], at: null },
+        target.revision,
+      ),
+    ) as Changed;
+    target.take(pasted);
+    expect(target.snapshot()[".nf-builder/layout.json"]).toBeUndefined();
   });
 
   it("F-310 ADR-0052: undo of a multi-node delete restores the sidecar byte for byte", async () => {
