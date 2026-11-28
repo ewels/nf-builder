@@ -8,6 +8,7 @@ import {
 import { WEB_DIST } from "../scripts/check-common.ts";
 import { SMOKE_TAG } from "./browsers.ts";
 import { canvasReady, node, selectNode } from "./canvas.ts";
+import { shiftClick } from "./clipboard.ts";
 import { watchForCspViolations } from "./csp.ts";
 import {
   dragNode,
@@ -196,6 +197,35 @@ test("F-207 UX-26: Auto-layout all nodes puts a moved node back at its ELK posit
     .poll(async () => (await readSidecar(page))?.nodes[KEY.reads])
     .toEqual(placed);
   expect(overlaps(await nodeBoxes(page))).toEqual([]);
+});
+
+test("F-310 F-207 UX-26: Auto-layout selected nodes moves only the selection and saves just those positions", async ({
+  page,
+}) => {
+  await openStoredProject(page);
+  const reads = await nodePosition(page, KEY.reads);
+  const more = await nodePosition(page, KEY.more);
+  const view = await nodePosition(page, KEY.view);
+  await dragNode(page, KEY.reads, 40, 120);
+  await dragNode(page, KEY.more, 320, 160);
+  const movedReads = await nodePosition(page, KEY.reads);
+  const movedMore = await nodePosition(page, KEY.more);
+  expect(movedReads).not.toEqual(reads);
+  const viewBefore = await nodePosition(page, KEY.view);
+  expect(viewBefore).toEqual(view);
+  await selectNode(page, KEY.reads);
+  await shiftClick(page, KEY.more);
+  await page
+    .getByRole("button", { name: "Auto-layout selected nodes" })
+    .click();
+  // the two selected nodes are laid out again (the corner of the selection stays); no other node moves
+  await expect
+    .poll(async () => await nodePosition(page, KEY.more))
+    .not.toEqual(movedMore);
+  expect(await nodePosition(page, KEY.view)).toEqual(view);
+  await waitSaved(page);
+  const stored = (await readSidecar(page))?.nodes;
+  expect(stored?.[KEY.view]).toEqual(view);
 });
 
 test("F-207 IO-02: an unreadable sidecar shows the notice and is replaced", async ({

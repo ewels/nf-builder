@@ -106,6 +106,11 @@ function setup(
       return changeAt(revision, { pasted: [A, B] });
     },
     history: async () => EMPTY_HISTORY,
+    setLayout: async () => ({
+      revision,
+      files: [],
+      layout: { state: "ok", message: null },
+    }),
   } as unknown as EngineApi;
   const store = createCanvasStore(
     () => engine,
@@ -257,5 +262,32 @@ describe("F-310 copy and paste", () => {
     const { store, names } = setup();
     expect((await store.getState().paste(null)).ok).toBe(false);
     expect(names()).toEqual([]);
+  });
+});
+
+describe("F-310 Auto-layout selected nodes", () => {
+  it("F-310 F-207 UX-26: a layout run of the selection moves those nodes on screen and keeps the others where they are", async () => {
+    const { store } = setup();
+    await store.getState().open(request);
+    const tab = store.getState().activeTab ?? "";
+    await store.getState().placeNodes(
+      { tab, revision: 1 },
+      {
+        positions: {
+          [A]: { x: 10, y: 20 },
+          [B]: { x: 10, y: 110 },
+          [C]: { x: 999, y: 999 },
+        },
+        saved: { [B]: { x: 10, y: 110 } },
+        replace: false,
+        notice: null,
+      },
+    );
+    const content = store.getState().content;
+    if (content.status !== "ready") throw new Error("not ready");
+    expect(content.positions[B]).toEqual({ x: 10, y: 110 });
+    expect(content.positions[A]).toEqual({ x: 10, y: 20 });
+    // a node with no stored position takes the run's
+    expect(content.positions[C]).toEqual({ x: 999, y: 999 });
   });
 });

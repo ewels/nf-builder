@@ -1307,7 +1307,8 @@ export function createCanvasStore(
           content.revision !== at.revision
         )
           return;
-        // a node the user moved while the layout ran keeps its place; a replace overrides on purpose
+        // a node the user moved while the layout ran keeps its place; a replace overrides on purpose, and so do the nodes
+        // a run was asked to move (`saved`: the selection of Auto-layout selected nodes, F-310)
         const present = new Set(content.projection.nodes.map((n) => n.id));
         const positions = placement.replace
           ? placement.positions
@@ -1318,6 +1319,7 @@ export function createCanvasStore(
                   present.has(id),
                 ),
               ),
+              ...placement.saved,
             };
         set({
           content: {

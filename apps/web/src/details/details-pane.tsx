@@ -180,7 +180,7 @@ export function DetailsPane(): JSX.Element {
       details={details}
       selection={selection}
       onSelectNode={(id) => void select(id)}
-      onCopy={() => void copySelection()}
+      onCopy={readOnly ? undefined : () => void copySelection()}
       onDelete={readOnly ? undefined : () => void deleteSelection()}
       pasteNodes={clipboard?.nodes ?? null}
       onPaste={readOnly ? undefined : () => void paste(centreOfCanvas())}
