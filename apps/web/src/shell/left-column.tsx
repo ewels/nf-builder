@@ -1,5 +1,9 @@
 import type { JSX, KeyboardEvent } from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useWorkspace } from "../canvas/canvas-store";
+import { FilesPanel } from "../files/files-panel";
+import { filesStore } from "../files/files-store";
+import { useLayout } from "../layout/layout-store";
 import { PalettePanel } from "../palette/palette-panel";
 import { SideColumn } from "./side-column";
 
@@ -63,6 +67,12 @@ export function LeftColumn({
   readonly languageVersion: string | undefined;
 }): JSX.Element {
   const [view, setView] = useState<LeftView>("components");
+  const collapsed = useLayout((s) => s.left.collapsed);
+  const noProject = useWorkspace((s) => s.summary === null);
+  // the Files panel pulls its list only while it can be seen
+  useEffect(() => {
+    filesStore.getState().setVisible(view === "files" && !collapsed);
+  }, [view, collapsed]);
   return (
     <SideColumn
       side="left"
@@ -81,12 +91,12 @@ export function LeftColumn({
       <div
         role="tabpanel"
         id="left-panel-files"
-        // biome-ignore lint/a11y/noNoninteractiveTabindex: WAI-ARIA tabs pattern: a panel with no focusable content is itself focusable
-        tabIndex={0}
+        // only the placeholder has nothing focusable inside, so only it is a tab stop (WAI-ARIA tabs pattern)
+        tabIndex={noProject ? 0 : undefined}
         aria-labelledby="left-tab-files"
         hidden={view !== "files"}
       >
-        <p className="muted">No project open</p>
+        <FilesPanel />
       </div>
     </SideColumn>
   );
