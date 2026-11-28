@@ -392,3 +392,102 @@ describe("F-207 engine service layout", () => {
     expect(structuredClone(refused)).toEqual(refused);
   });
 });
+
+describe("F-303 LA-12 F-207 engine service layout with moved files", () => {
+  const sub = [
+    "include { A } from './a.nf'",
+    "include { B } from './b.nf'",
+    "",
+    "workflow SUB {",
+    "    A()",
+    "    B()",
+    "}",
+    "",
+  ].join("\n");
+  const subFiles = [
+    {
+      path: "main.nf",
+      text: "include { SUB } from './sub.nf'\n\nworkflow {\n    SUB()\n}\n",
+    },
+    { path: "sub.nf", text: sub },
+    { path: "a.nf", text: proc("A") },
+    { path: "b.nf", text: proc("B") },
+  ];
+
+  it("F-303 F-207 ADR-0052: moving a file that declares a workflow keeps its nodes' positions, and an undo restores the sidecar byte for byte", async () => {
+    const service = createEngineService();
+    const summary = await service.open({ version, files: subFiles });
+    const where = { path: "sub.nf", workflow: "SUB" };
+    const first = projected(await service.project("sub.nf", "SUB"));
+    const ids = first.projection.nodes.map((n) => n.id);
+    expect(ids.length).toBeGreaterThan(1);
+    const at = Object.fromEntries(
+      ids.map((id, i) => [id, { x: 10 * (i + 1), y: 20 * (i + 1) }]),
+    );
+    const placed = must(
+      await service.setLayout({
+        ...where,
+        positions: at,
+        replace: false,
+        revision: summary.revision,
+      }),
+    );
+    const start = formatLayout({ version: 1, nodes: at });
+    expect(await service.readFile(LAYOUT_PATH)).toBe(start);
+    const moved = must(
+      (await service.apply(
+        { kind: "moveFile", path: "sub.nf", newPath: "flows/sub.nf" },
+        placed.revision,
+      )) as ApplyOutcome,
+    ) as ProjectChange;
+    const after = projected(await service.project("flows/sub.nf", "SUB"));
+    expect(after.projection.nodes.length).toBe(ids.length);
+    expect(Object.values(after.positions)).toEqual(Object.values(at));
+    expect(
+      Object.keys(after.positions).every((k) =>
+        k.startsWith("flows/sub.nf#SUB"),
+      ),
+    ).toBe(true);
+    expect(texts(moved)[LAYOUT_PATH]).not.toContain('"sub.nf#SUB');
+    const undone = must(await service.undo(moved.revision)) as ProjectChange;
+    expect(texts(undone)[LAYOUT_PATH]).toBe(start);
+    expect(await service.readFile(LAYOUT_PATH)).toBe(start);
+    const redone = must(await service.redo(undone.revision)) as ProjectChange;
+    expect(texts(redone)[LAYOUT_PATH]).toBe(texts(moved)[LAYOUT_PATH]);
+  });
+
+  it("F-303 F-207: moving a folder carries the positions of every workflow under it", async () => {
+    const service = createEngineService();
+    const files = subFiles.map((f) =>
+      f.path === "sub.nf"
+        ? { ...f, path: "old/sub.nf", text: f.text.replaceAll("./", "../") }
+        : f,
+    );
+    files[0] = {
+      path: "main.nf",
+      text: "include { SUB } from './old/sub.nf'\n\nworkflow {\n    SUB()\n}\n",
+    };
+    const summary = await service.open({ version, files });
+    const first = projected(await service.project("old/sub.nf", "SUB"));
+    const at = Object.fromEntries(
+      first.projection.nodes.map((n, i) => [n.id, { x: i + 1, y: i + 2 }]),
+    );
+    const placed = must(
+      await service.setLayout({
+        path: "old/sub.nf",
+        workflow: "SUB",
+        positions: at,
+        replace: false,
+        revision: summary.revision,
+      }),
+    );
+    must(
+      await service.apply(
+        { kind: "moveFile", path: "old", newPath: "new" },
+        placed.revision,
+      ),
+    );
+    const after = projected(await service.project("new/sub.nf", "SUB"));
+    expect(Object.values(after.positions)).toEqual(Object.values(at));
+  });
+});

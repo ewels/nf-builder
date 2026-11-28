@@ -41,6 +41,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-405 legacy import summary | merged, PR #61 | Plan deleted in its PR. |
 | F-302 connect ports | merged, PR #62 | Plan deleted in its PR. |
 | F-505 registry plugins | merged, PR #64 | Plan deleted in its PR. |
+| F-303 edit popup | merged, PR #65 | Plan deleted in its PR. |
 
 ## Merge order
 
@@ -344,7 +345,7 @@ ADR numbers reserved for features in flight, so parallel branches don't clash: 0
 ### F-307 — [plan](plan-F-307.md)
 - Accept every recommendation in section 6: the new feature for removing and renaming takes and emits (point 1) is added in F-307's PR with `scope-change`. Start after F-301 merges. ADR number: the next free one when F-307 starts.
 
-### F-303 — [plan](plan-F-303.md)
+### F-303 — plan deleted
 - Accept every recommendation in section 6, including point 5: renaming a process moves its module folder in the same undo group, superseding ADR 0039's "files don't move" line through F-303's ADR. Point 9: ask the researcher during the build whether the catalogue's missing `Boolean` and `Record` types are an upstream gap, and record it in `docs/research/upstream-bugs.md` if so. Start after F-301 merges; reuse F-601's value kinds if it has merged. ADR number: the next free one when F-303 starts.
 
 ### F-406 — [plan](plan-F-406.md)

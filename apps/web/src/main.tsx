@@ -4,6 +4,7 @@ import { createRoot } from "react-dom/client";
 import { AppShell } from "./app-shell";
 import { canvasStore } from "./canvas/canvas-store";
 import { getEngine } from "./engine/engine-client";
+import { closePopup } from "./popup/popup-store";
 import { closeProjectDialog, startProjects } from "./project/project-store";
 import { readOnlyStore } from "./read-only/read-only-store";
 import { registryStore } from "./registry/registry-store";
@@ -43,7 +44,10 @@ Object.defineProperty(window, "nfBuilderRegistry", {
 // Below 1024 px the app is read-only (F-703, UX-04): pending code edits are sent first, then edits are refused.
 readOnlyStore.getState().start({
   flush: () => canvasStore.getState().flushEdits(),
-  onEnter: closeProjectDialog,
+  onEnter: () => {
+    closeProjectDialog();
+    closePopup();
+  },
 });
 
 startProjects();

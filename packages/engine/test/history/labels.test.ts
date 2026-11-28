@@ -74,6 +74,38 @@ const samples: Record<EditCommand["kind"], [EditCommand, string]> = {
     { kind: "createWorkflow", name: "ALIGN", caller: "main.nf" },
     "Create workflow ALIGN",
   ],
+  // F-303 AR-23: updateDeclaration is labelled "Edit process <name>"
+  updateDeclaration: [
+    {
+      kind: "updateDeclaration",
+      path: "modules/local/align/main.nf",
+      name: "ALIGN",
+      form: {
+        kind: "typedProcess",
+        name: "ALIGN",
+        description: "",
+        docTags: null,
+        inputs: [],
+        stage: [],
+        outputs: [],
+        topics: [],
+        directives: [],
+        script: { label: "script", text: "'x'" },
+        stub: null,
+        kept: [],
+      },
+    },
+    "Edit process ALIGN",
+  ],
+  // F-303 AR-23: moveFile is labelled with both paths
+  moveFile: [
+    {
+      kind: "moveFile",
+      path: "modules/local/a",
+      newPath: "modules/local/b",
+    },
+    "Move modules/local/a to modules/local/b",
+  ],
 };
 
 const context = (

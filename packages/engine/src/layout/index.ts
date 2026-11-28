@@ -2,6 +2,7 @@ export {
   type CarryHints,
   carryHints,
   carryLayout,
+  type MoveHint,
   matchNodes,
   pairWorkflows,
   RemovedPositions,

@@ -133,6 +133,35 @@ describe("F-113 engine client", () => {
     close();
   });
 
+  it("F-303 UX-41: the facade forwards declarationForm across the bridge, structured-cloned, and refuses with no project", async () => {
+    const { engine, close } = connected();
+    expect(await engine.declarationForm("main.nf", null, "x")).toMatchObject({
+      code: "no-project",
+    });
+    await engine.open({
+      version,
+      files: [
+        {
+          path: "main.nf",
+          text: "nextflow.enable.types = true\n\nprocess P {\n    input:\n    x: String\n\n    script:\n    'p'\n}\n\nworkflow {\n    P('a')\n}\n",
+        },
+      ],
+    });
+    const projection = await engine.project("main.nf", null);
+    const node =
+      "projection" in projection ? projection.projection?.nodes[0] : undefined;
+    const result = await engine.declarationForm(
+      "main.nf",
+      null,
+      node?.id ?? "",
+    );
+    expect(result).toMatchObject({
+      target: { path: "main.nf", name: "P" },
+      form: { name: "P" },
+    });
+    close();
+  });
+
   it("F-202 ADR-0003: watch receives status pushes across Comlink; a second watch releases the first listener", async () => {
     const { engine, close } = connected();
     const first: WorkspaceStatus[] = [];

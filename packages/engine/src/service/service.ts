@@ -37,6 +37,8 @@ import { PatchError } from "../edit/patches";
 import { EditRefusal } from "../edit/refusal";
 import { registryFolders } from "../files/registry";
 import type { RegistryFolder } from "../files/types";
+import { popupTarget } from "../form/popup-target";
+import { formChoices, processForm } from "../form/read-process";
 import { EMPTY_HISTORY, History, type HistoryLimits } from "../history/history";
 import { commandLabel } from "../history/labels";
 import {
@@ -77,6 +79,7 @@ import type {
   ApplyOutcome,
   ConfigViewResult,
   ConnectionTargetsResult,
+  DeclarationFormResult,
   DiagnosticsResult,
   EngineApi,
   EngineRefusal,
@@ -304,6 +307,7 @@ export function createEngineService(
         (w) => projectionOf(open, w.path, w.name),
         before.changed,
         hints.renames ?? [],
+        hints.moves ?? [],
       );
       const next = carryLayout(open.layout, pairs, hints, open.removed);
       const text = formatLayout(next);
@@ -344,6 +348,7 @@ export function createEngineService(
         sidecar.length > 0 ? [...remodelled, LAYOUT_PATH].sort() : remodelled,
       workflows: projectorOf(open).workflows(),
       history: open.history.status(),
+      ...(hints.moves?.length ? { moves: hints.moves } : {}),
     };
   };
 
@@ -442,6 +447,7 @@ export function createEngineService(
         patches: result.patches,
         inverse: result.inverse,
         renames: hints.renames ?? [],
+        moves: hints.moves ?? [],
         deleted: hints.deleted ?? [],
       },
       options?.label ?? commandLabel(command),
@@ -754,6 +760,52 @@ export function createEngineService(
               diagnostics: (p) => diagnoser.file(p),
             },
             node,
+          ),
+        };
+      }),
+
+    declarationForm: (path, workflow, node) =>
+      guarded((open): DeclarationFormResult | EngineRefusal => {
+        const projection = projectorOf(open).project(path, workflow);
+        const found = projection?.nodes.find((n) => n.id === node);
+        if (!found) return refusal("not-found", `There is no node ${node}.`);
+        const target = popupTarget(found);
+        if (target.kind !== "typedProcess")
+          return refusal(
+            "invalid",
+            target.kind === "workflow"
+              ? "Workflows open in their own tab."
+              : target.reason,
+          );
+        const model = open.state.model.file(target.path);
+        const process = model?.declarations.get(target.name)?.declaration;
+        if (
+          model?.source.language !== "nextflow" ||
+          process?.kind !== "Process" ||
+          !process.typed
+        )
+          return refusal(
+            "not-found",
+            `${target.name} isn't found in ${target.path}.`,
+          );
+        // the records and enums in scope of the process's file are types an input can take
+        const local = [...(model?.scope ?? [])].flatMap(([name, binding]) => {
+          const d =
+            binding.kind === "declaration"
+              ? binding.declaration
+              : binding.entry.declaration;
+          return d?.kind === "Record" || d?.kind === "Enum" ? [name] : [];
+        });
+        return {
+          revision,
+          target: { path: target.path, name: target.name },
+          form: processForm(model.source, process, open.state.catalogue),
+          choices: formChoices(
+            open.state.catalogue,
+            open.configRules,
+            local,
+            installedPacks.find((p) => p.version === open.version)
+              ?.standardTypes,
           ),
         };
       }),
