@@ -2206,7 +2206,11 @@ describe("F-505 addPlugin", () => {
 
   /** A fake engine that records applies and undos; `config` says whether nextflow.config exists. */
   function plugging(
-    options: { config: boolean; refuse?: "second" | "first" } = {
+    options: {
+      config: boolean;
+      refuse?: "second" | "first";
+      throwOn?: string;
+    } = {
       config: true,
     },
   ) {
@@ -2238,6 +2242,7 @@ describe("F-505 addPlugin", () => {
         applyOptions: unknown,
       ) => {
         log.push({ kind: command.kind, rev, options: applyOptions });
+        if (command.kind === options.throwOn) throw new Error("Worker died.");
         if (
           (options.refuse === "second" && command.kind === "addConfigPlugin") ||
           (options.refuse === "first" && log.length === 1)
@@ -2318,6 +2323,18 @@ describe("F-505 addPlugin", () => {
     await third.getState().open(request);
     expect((await third.getState().addPlugin(plugin)).ok).toBe(false);
     expect(first.undos).toEqual([]);
+  });
+
+  it("F-505 IO-33: a throw while creating nextflow.config is a refusal, and nothing else is sent", async () => {
+    const t = plugging({ config: false, throwOn: "createFile" });
+    const store = createCanvasStore(() => t.engine);
+    await store.getState().open(request);
+    expect(await store.getState().addPlugin(plugin)).toEqual({
+      ok: false,
+      message: "Couldn't add nf-schema: Worker died. Nothing was changed.",
+    });
+    expect(t.log.map((l) => l.kind)).toEqual(["createFile"]);
+    expect(t.undos).toEqual([]);
   });
 
   it("F-505 UX-04: addPlugin is refused in read-only and calls no engine method", async () => {

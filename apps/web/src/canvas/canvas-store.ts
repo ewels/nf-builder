@@ -734,6 +734,31 @@ export function createCanvasStore(
       if (!outcome.ok && outcome.code === "internal") await refreshHistory();
     }
 
+    /** `call`, with a throw turned into an internal refusal. */
+    async function safely<T>(
+      call: () => Promise<T>,
+    ): Promise<T | EngineRefusal> {
+      try {
+        return await call();
+      } catch (error) {
+        return refusal("internal", messageOf(error));
+      }
+    }
+
+    /** Undoes only the first part of a group, so a refused second part leaves nothing behind. */
+    async function discardFirstPart(session: number): Promise<void> {
+      await sendNow(
+        session,
+        (revision) =>
+          safely(() =>
+            engine().undo(revision, { discard: true }),
+          ) as Promise<HistoryOutcome>,
+        async (outcome) => {
+          if (!outcome.ok) await refreshHistory();
+        },
+      );
+    }
+
     /** Sends the code panes' pending edits; outside the queue, as their send is queued itself. */
     const flushPending = async (): Promise<void> => {
       await Promise.all([...flushes].map((flush) => flush().catch(() => {})));
@@ -1197,20 +1222,7 @@ export function createCanvasStore(
               afterApply,
             );
             if (!calling.ok) {
-              // only the group's first part is undone, so nothing is left behind
-              await sendNow(
-                mine,
-                async (revision) => {
-                  try {
-                    return await engine().undo(revision, { discard: true });
-                  } catch (error) {
-                    return refusal("internal", messageOf(error));
-                  }
-                },
-                async (outcome) => {
-                  if (!outcome.ok) await refreshHistory();
-                },
-              );
+              await discardFirstPart(mine);
               return refused(calling);
             }
             await get().select(key);
@@ -1245,11 +1257,13 @@ export function createCanvasStore(
             const creating = await sendNow(
               mine,
               (revision) =>
-                engine().apply(
-                  { kind: "createFile", path: CONFIG_PATH },
-                  revision,
-                  { group, label },
-                ),
+                safely(() =>
+                  engine().apply(
+                    { kind: "createFile", path: CONFIG_PATH },
+                    revision,
+                    { group, label },
+                  ),
+                ) as Promise<ApplyOutcome>,
               afterApply,
             );
             if (!creating.ok) return refused(creating);
@@ -1274,21 +1288,7 @@ export function createCanvasStore(
             afterApply,
           );
           if (!adding.ok) {
-            if (missing)
-              // only the group's first part is undone, so nothing is left behind
-              await sendNow(
-                mine,
-                async (revision) => {
-                  try {
-                    return await engine().undo(revision, { discard: true });
-                  } catch (error) {
-                    return refusal("internal", messageOf(error));
-                  }
-                },
-                async (outcome) => {
-                  if (!outcome.ok) await refreshHistory();
-                },
-              );
+            if (missing) await discardFirstPart(mine);
             return refused(adding);
           }
           return { ok: true, id, version };

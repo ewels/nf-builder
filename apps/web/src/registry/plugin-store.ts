@@ -151,8 +151,8 @@ export function createPluginStore(options: {
               );
               for (const o of outcomes) {
                 if (o === null) continue;
-                if ("message" in o) failures.push(o);
-                else specs.push(o);
+                if ("spec" in o) specs.push(o);
+                else failures.push(o);
               }
             } catch (error) {
               const message = toFailure(error).message;
