@@ -9,6 +9,7 @@ export type {
   ConfigSourceFile,
   Connect,
   CreateProcess,
+  CreateWorkflow,
   Dataflow,
   DeleteNode,
   Diagnostic,
@@ -98,6 +99,7 @@ export {
   createEditState,
   type EditState,
 } from "./edit/apply";
+export type { FreshNameRequest } from "./edit/fresh-name";
 export { applyPatches, PatchError } from "./edit/patches";
 export { planAdd } from "./files/add";
 export {
@@ -143,6 +145,7 @@ export {
 } from "./model/project";
 export { installedPackVersions } from "./packs";
 export { loadPalette } from "./palette";
+export { type PaletteAction, paletteAction } from "./palette-actions";
 export { paletteItemCount, queryTerms, searchPalette } from "./palette-search";
 export {
   nodeAtRange,
@@ -190,6 +193,7 @@ export type {
   EngineRefusal,
   EngineRefusalCode,
   FileSummary,
+  FreshName,
   HistoryOutcome,
   LoadPhase,
   LoadProgress,

@@ -23,6 +23,7 @@ import {
   patchResult,
   patchSequence,
 } from "../edit/apply";
+import { definitionPath, freshDefinitionName } from "../edit/fresh-name";
 import { PatchError } from "../edit/patches";
 import { registryFolders } from "../files/registry";
 import { EMPTY_HISTORY, History, type HistoryLimits } from "../history/history";
@@ -710,6 +711,18 @@ export function createEngineService(
             ? registryFolders(model.paths(), pack.includes, model.tree)
             : [],
         };
+      }),
+
+    freshName: (request) =>
+      guarded((open) => {
+        if (!open.state.model.file(request.caller))
+          return refusal("not-found", `There is no file ${request.caller}.`);
+        const name = freshDefinitionName(
+          open.state.model,
+          open.state.catalogue,
+          request,
+        );
+        return { revision, name, path: definitionPath(request.kind, name) };
       }),
 
     readFile: (path) =>

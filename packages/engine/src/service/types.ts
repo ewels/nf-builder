@@ -15,6 +15,7 @@ import type {
   WorkflowRef,
 } from "@nf-builder/lang-core";
 import type { NodeDetails } from "../details/types";
+import type { FreshNameRequest } from "../edit/fresh-name";
 import type { ProjectFiles } from "../files/types";
 import type { HistoryStatus } from "../history/history";
 import type {
@@ -93,6 +94,13 @@ export interface Applied extends ProjectChange {
   readonly patches: readonly TextPatch[];
   /** Applying these restores the exact previous bytes (AR-23). */
   readonly inverse: readonly TextPatch[];
+}
+
+/** A default name for a new definition and the file it would be written to (F-301). */
+export interface FreshName {
+  readonly revision: number;
+  readonly name: string;
+  readonly path: string;
 }
 
 export type ApplyOutcome = Applied | EngineRefusal;
@@ -189,6 +197,8 @@ export interface EngineApi {
   setLayout(write: LayoutWrite): Promise<LayoutChange | EngineRefusal>;
   /** Every file with its parse status, and the registry module folders, for the Files view (UX-16, F-210). */
   listFiles(): Promise<ProjectFiles | EngineRefusal>;
+  /** A name for a new process or workflow added from the palette, free in `caller`'s scope and directory (F-301). */
+  freshName(request: FreshNameRequest): Promise<FreshName | EngineRefusal>;
   /** The current text of a file, or null with no project or no such file. */
   readFile(path: string): Promise<string | null>;
   /** Drops the open project; later calls answer `no-project` until the next `open`. The revision counter keeps counting. */
