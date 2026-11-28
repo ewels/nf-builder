@@ -140,4 +140,51 @@ describe("registry plugin spec", () => {
     fail = false;
     expect((await client.plugin("nf-schema", "3.1.0")).id).toBe("nf-schema");
   });
+
+  it("F-505 IO-30: malformed definitions are dropped, so nothing downstream sees a missing name or type", async () => {
+    const good = JSON.parse(pluginText("nf-schema", "3.1.0"));
+    const goodCount = good.definitions.length;
+    const bad = [
+      null,
+      "x",
+      { type: "Widget", spec: { name: "w" } },
+      { type: "Function" },
+      { type: "Function", spec: {} },
+      { type: "Function", spec: { name: "f", parameters: [{ name: "a" }] } },
+      { type: "Function", spec: { name: "f", returnType: 3 } },
+      { type: "ConfigScope", spec: { name: 4 } },
+      {
+        type: "ConfigScope",
+        spec: {
+          name: "s",
+          children: [
+            { type: "ConfigOption", spec: { name: "o" } },
+            { type: "ConfigOption", spec: { name: "ok", type: "String" } },
+          ],
+        },
+      },
+    ];
+    const body = JSON.stringify({
+      ...good,
+      definitions: [...bad, ...good.definitions],
+    });
+    const spec = await createSnapshotClient({
+      snapshotUrl: SNAPSHOT_URL,
+      fetch: serveSchema((url) =>
+        url === URL_SCHEMA ? jsonResponse(body) : undefined,
+      ).fetch,
+    }).plugin("nf-schema", "3.1.0");
+    expect(spec.definitions).toHaveLength(goodCount + 1);
+    const scope = spec.definitions[0];
+    expect(scope).toEqual({
+      type: "ConfigScope",
+      spec: {
+        name: "s",
+        children: [
+          { type: "ConfigOption", spec: { name: "ok", type: "String" } },
+        ],
+      },
+    });
+    expect(spec.definitions.slice(1)).toEqual(good.definitions);
+  });
 });

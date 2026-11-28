@@ -65,12 +65,15 @@ function mergeChildren(
   into: readonly ConfigNode[],
   from: readonly ConfigNode[],
 ): ConfigNode[] {
+  const others = new Map<string, ConfigNode>();
+  for (const f of from) if (!others.has(f.name)) others.set(f.name, f);
+  const have = new Set<string>();
   const merged = into.map((n) => {
-    const other = from.find((f) => f.name === n.name);
+    have.add(n.name);
+    const other = others.get(n.name);
     return other ? mergeNode(n, other) : n;
   });
-  for (const f of from)
-    if (!into.some((n) => n.name === f.name)) merged.push(f);
+  for (const f of from) if (!have.has(f.name)) merged.push(f);
   return merged;
 }
 
