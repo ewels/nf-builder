@@ -33,6 +33,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-703 read-only below 1024 px | merged, PR #53 | Plan deleted in its PR. |
 | F-401 GitHub import | merged, PR #55 | Plan deleted in its PR. |
 | F-210 Files view | merged, PR #54 | Plan deleted in its PR. |
+| F-605 Markdown and text files | merged, PR #57 | Plan deleted in its PR. |
 
 ## Merge order
 
@@ -277,7 +278,7 @@ Next free ADR number: 0055 (0054 is F-309's).
   - rename, move and delete become a new M3 feature that depends on F-210 (`scope-change`);
   - the 2.8 tree keyboard model; one shared `projectPathProblem` in lang-core; the document drop guard for file drags; session-only state; one `@visual` baseline.
 
-### F-605 — [plan](plan-F-605.md)
+### F-605 — plan deleted
 - Accept every recommendation in section 6:
   - FI-32's "binary files are listed but not opened" is read for v0.1 as "projects hold text files only"; step 2 moves to the deferred M8 "Binary files in projects" feature (added by F-403's PR, or by F-605's if not), with an ADR and `scope-change`;
   - marked 18.2.1 and DOMPurify 3.4.18, pinned, as runtime dependencies; jsdom 31.0.1 as a web dev dependency;
