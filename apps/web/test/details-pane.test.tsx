@@ -372,6 +372,33 @@ describe("F-206 details pane", () => {
     expect(readOnly).not.toContain("<button");
   });
 
+  it("F-304 UX-32: Code is enabled for a typed process and opens the popup on Code", () => {
+    const calls: string[] = [];
+    const editable = renderToStaticMarkup(
+      <DetailsHeaderView
+        selected
+        edit={{
+          reason: null,
+          onOpen: () => calls.push("edit"),
+          onCode: () => calls.push("code"),
+        }}
+      />,
+    );
+    expect(editable).toMatch(/<button(?![^>]*disabled)[^>]*>Code<\/button>/);
+    const refused = renderToStaticMarkup(
+      <DetailsHeaderView
+        selected
+        edit={{
+          reason: "Open a workflow from its node.",
+          onOpen: () => undefined,
+          onCode: () => undefined,
+        }}
+      />,
+    );
+    expect(refused).toMatch(/<button[^>]*disabled[^>]*>Code<\/button>/);
+    expect(refused).toContain('title="Open a workflow from its node."');
+  });
+
   it("F-703 UX-04 UX-32: read-only, the details header has no Edit or Code buttons while a node is selected", () => {
     const html = renderToStaticMarkup(<DetailsHeaderView selected readOnly />);
     expect(html).not.toContain("<button");

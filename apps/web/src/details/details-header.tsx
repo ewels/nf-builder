@@ -8,11 +8,13 @@ import { useReadOnly } from "../read-only/read-only-store";
 export interface EditAction {
   readonly reason: string | null;
   readonly onOpen: () => void;
+  /** Opens the popup on its Code tab (F-304). */
+  readonly onCode?: () => void;
 }
 
 /**
  * The column heading; while a node is selected, Edit and Code beside it (UX-32). Edit opens the popup for a typed
- * process; without an `edit` action, and for Code until the declaration editor exists, they are disabled.
+ * process, Code opens it on the Code tab; without an `edit` action they are disabled.
  */
 export function DetailsHeaderView({
   selected,
@@ -27,6 +29,7 @@ export function DetailsHeaderView({
   const title = <h2 className="column-title">Details</h2>;
   if (!selected || readOnly) return title;
   const canEdit = edit !== undefined && edit.reason === null;
+  const canCode = canEdit && edit.onCode !== undefined;
   return (
     <div className="details-header">
       {title}
@@ -46,8 +49,13 @@ export function DetailsHeaderView({
       <button
         type="button"
         className="details-action"
-        disabled
-        title="Opens the code popup (not available yet)"
+        disabled={!canCode}
+        title={
+          canCode
+            ? "Edit this process's code"
+            : (edit?.reason ?? "Opens the code popup (not available yet)")
+        }
+        onClick={canCode ? edit.onCode : undefined}
       >
         Code
       </button>
@@ -79,6 +87,15 @@ export function DetailsHeader(): JSX.Element {
           tab,
           node: selected,
           opener: document.querySelector<HTMLElement>(".details-action"),
+        }),
+      onCode: () =>
+        void openPopup({
+          tab,
+          node: selected,
+          opener:
+            document.querySelectorAll<HTMLElement>(".details-action")[1] ??
+            null,
+          section: "code",
         }),
     };
   }, [selected, content, tab]);
