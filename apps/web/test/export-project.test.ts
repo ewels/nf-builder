@@ -6,7 +6,7 @@ import {
 } from "@nf-builder/engine";
 import { readZip } from "@nf-builder/sources/import";
 import { IDBFactory } from "fake-indexeddb";
-import { zipSync } from "fflate";
+import { unzipSync, zipSync } from "fflate";
 import { describe, expect, it } from "vitest";
 import { openProjectDb } from "../src/workspace/project-db";
 import type { ExportResult } from "../src/workspace/types";
@@ -154,6 +154,21 @@ describe("F-404 workspace export", () => {
     const withLayout = filesOf(await exported(s, true));
     expect(withLayout[LAYOUT_PATH]).toBe(sidecar);
     expect(withLayout["modules/local/.gitkeep"]).toBe("");
+  });
+
+  it("F-404 IO-20: a file with a byte order mark and a CRLF file come out byte for byte as they went in", async () => {
+    const s = setup();
+    const files = {
+      "main.nf": "workflow {\n}\n",
+      "bom.config": "\uFEFFparams.x = 1\n",
+      "crlf.md": "one\r\ntwo\r\n",
+    };
+    await importTree(s, "Bytes", files);
+    const out = unzipSync((await exported(s, false)).bytes);
+    for (const [path, text] of Object.entries(files))
+      expect(out[`Bytes/${path}`], path).toEqual(
+        new TextEncoder().encode(text),
+      );
   });
 
   it("F-404: exportProject refuses with no project and with no files, and is ordered after a pending apply", async () => {
