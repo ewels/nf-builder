@@ -148,13 +148,21 @@ export function createGithubClient(o: GithubClientOptions): GithubClient {
       throw new GithubError("truncated", "The listing is truncated.");
     if (!Array.isArray(body.tree))
       throw new GithubError("unexpected", "GitHub returned no tree.");
-    return body.tree.map((e: Record<string, unknown>) => ({
-      path: String(e.path),
-      mode: String(e.mode),
-      type: e.type as TreeEntry["type"],
-      sha: String(e.sha),
-      size: typeof e.size === "number" ? e.size : null,
-    }));
+    return body.tree.map((e: unknown): TreeEntry => {
+      if (typeof e !== "object" || e === null)
+        throw new GithubError(
+          "unexpected",
+          "GitHub returned a bad tree entry.",
+        );
+      const entry = e as Record<string, unknown>;
+      return {
+        path: String(entry.path),
+        mode: String(entry.mode),
+        type: entry.type as TreeEntry["type"],
+        sha: String(entry.sha),
+        size: typeof entry.size === "number" ? entry.size : null,
+      };
+    });
   }
 
   async function fetchOne(
@@ -167,12 +175,21 @@ export function createGithubClient(o: GithubClientOptions): GithubClient {
     for (let attempt = 0; ; attempt += 1) {
       try {
         const res = await get(url, "*/*", "raw", file.path, signal);
-        const bytes = await res.arrayBuffer();
-        if (bytes.byteLength !== file.size)
-          throw new GithubError("incomplete", `${file.path} is incomplete.`, {
+        const incomplete = () =>
+          new GithubError("incomplete", `${file.path} is incomplete.`, {
             host: "raw",
             path: file.path,
           });
+        // refuse a body that is too long before it is held in memory; with a content-encoding the header counts encoded bytes
+        const length = res.headers.get("content-length");
+        if (
+          length !== null &&
+          res.headers.get("content-encoding") === null &&
+          Number(length) !== file.size
+        )
+          throw incomplete();
+        const bytes = await res.arrayBuffer();
+        if (bytes.byteLength !== file.size) throw incomplete();
         return { path: file.path, bytes };
       } catch (error) {
         const retryable =
