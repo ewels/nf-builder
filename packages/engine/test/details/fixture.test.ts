@@ -81,7 +81,9 @@ describe("F-206 step 1: the node views of the fixtures", () => {
     expect(greeted?.inputs[1]?.connections[0]?.text).toBe(
       "from params.greeting",
     );
-    const s = workflowSummary(p);
+    const s = workflowSummary(p, [
+      { path: "modules/nf-core/wordcount", module: "nf-core/wordcount" },
+    ]);
     expect(s.modules).toEqual([
       { module: "nf-core/wordcount", calls: ["WORDCOUNT"] },
     ]);

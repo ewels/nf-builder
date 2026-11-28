@@ -12,6 +12,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { plural } from "../import/import-summary";
 import { focusTarget } from "../project/focus-target";
 import { useReadOnly } from "../read-only/read-only-store";
 import { PROBLEMS_PANEL_ID, statusLinkId } from "../shell/status-bar";
@@ -157,6 +158,11 @@ export function ProblemsPanelView({
     document.getElementById(problemsTabId(target.view))?.focus();
   };
 
+  const firstRegistry = groups.findIndex((g) => g.module !== null);
+  const registryRows = groups
+    .filter((g) => g.module !== null)
+    .reduce((n, g) => n + g.diagnostics.length, 0);
+  const noun = view === "problems" ? "problem" : "suggestion";
   let index = -1;
   return (
     <section
@@ -223,13 +229,29 @@ export function ProblemsPanelView({
         {groups.length === 0 ? (
           <p className="problems-empty">{EMPTY[view]}</p>
         ) : (
-          groups.map((group) => (
+          groups.map((group, position) => (
             <section key={group.path} className="problems-group">
+              {position === firstRegistry ? (
+                <h3 className="problems-subheading">
+                  {`Registry modules (${plural(registryRows, noun, `${noun}s`)})`}
+                </h3>
+              ) : null}
               <h3 className="problems-file">
                 {`${group.path} `}
                 <span className="problems-file-count">
                   {group.diagnostics.length}
                 </span>
+                {group.module === null ? null : (
+                  <>
+                    {" "}
+                    <span
+                      className="problems-tag"
+                      title={`Registry module ${group.module}`}
+                    >
+                      registry
+                    </span>
+                  </>
+                )}
               </h3>
               <ul className="problems-rows">
                 {group.diagnostics.map((d) => {

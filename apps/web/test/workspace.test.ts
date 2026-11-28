@@ -341,6 +341,28 @@ describe("F-202 workspace", () => {
     db.close();
   });
 
+  it("F-301 ADR 0060: undo passes its options through, so a discarded step leaves no redo entry", async () => {
+    const s = setup();
+    await s.watching;
+    const meta = await s.workspace.createProject({
+      name: "P",
+      languageVersion: version,
+      files: [{ path: "main.nf", text: "workflow {\n}\n" }],
+    });
+    const opened = await s.workspace.openProject(meta.id);
+    const applied = ok(
+      await s.workspace.apply(
+        { kind: "createProcess", name: "REPORT", caller: "main.nf" },
+        opened.summary.revision,
+      ),
+    ) as { revision: number };
+    ok(await s.workspace.undo(applied.revision, { discard: true }));
+    expect(await s.workspace.history()).toMatchObject({
+      undoCount: 0,
+      redoCount: 0,
+    });
+  });
+
   it("F-309 IO-01: applyFix is autosaved like apply; a refused fix saves nothing", async () => {
     const s = setup();
     await s.watching;

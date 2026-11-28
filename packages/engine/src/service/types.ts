@@ -10,6 +10,7 @@ import type {
   PaletteView,
   ParseProblem,
   ParseStatus,
+  PortRef,
   Projection,
   QuickFix,
   RefusalCode,
@@ -19,8 +20,9 @@ import type {
 } from "@nf-builder/lang-core";
 import type { ConfigSchema, ConfigView } from "../config/types";
 import type { NodeDetails, OutlineItem } from "../details/types";
+import type { ConnectionTarget } from "../edit/connection-targets";
 import type { FreshNameRequest } from "../edit/fresh-name";
-import type { ProjectFiles } from "../files/types";
+import type { ProjectFiles, RegistryFolder } from "../files/types";
 import type { HistoryStatus } from "../history/history";
 import type {
   LayoutChange,
@@ -109,6 +111,20 @@ export interface FreshName {
   readonly path: string;
 }
 
+/** The output port being dragged, in the workflow `path`/`workflow` (null for the entry workflow) (F-302). */
+export interface ConnectionTargetsRequest {
+  readonly path: string;
+  readonly workflow: string | null;
+  readonly from: PortRef;
+}
+
+/** What connecting `from` to each input port of the workflow would do, at `revision` (F-302, UX-25). */
+export interface ConnectionTargetsResult {
+  readonly revision: number;
+  readonly from: PortRef;
+  readonly targets: readonly ConnectionTarget[];
+}
+
 export type ApplyOutcome = Applied | EngineRefusal;
 
 /** How `apply` records a command in the undo history (F-209). */
@@ -143,6 +159,8 @@ export interface ProjectionResult {
 export interface DiagnosticsResult {
   readonly revision: number;
   readonly diagnostics: readonly Diagnostic[];
+  /** The registry module folders, so the Suggestions tab can list their files last (F-405). */
+  readonly registry: readonly RegistryFolder[];
 }
 
 /** The Configure form of a node's declaration, read at `revision` (F-303, UX-41). */
@@ -243,6 +261,13 @@ export interface EngineApi {
   setLayout(write: LayoutWrite): Promise<LayoutChange | EngineRefusal>;
   /** Every file with its parse status, and the registry module folders, for the Files view (UX-16, F-210). */
   listFiles(): Promise<ProjectFiles | EngineRefusal>;
+  /**
+   * For a dragged output port, the status of every input port of the workflow: `ok`, `mismatch` (allowed, an error once
+   * connected, LA-29) or `refused` (UX-25, F-302; amends ADR 0043's API list).
+   */
+  connectionTargets(
+    request: ConnectionTargetsRequest,
+  ): Promise<ConnectionTargetsResult | EngineRefusal>;
   /** A name for a new process or workflow added from the palette, free in `caller`'s scope and directory (F-301). */
   freshName(request: FreshNameRequest): Promise<FreshName | EngineRefusal>;
   /** The current text of a file, or null with no project or no such file. */

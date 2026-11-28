@@ -55,6 +55,10 @@
 
 - A tuple is matched by position -- use a record (`record(...)`) so values are matched by name
 
+## tuple-arity
+
+- Tuple with 1 component is passed to the `tuple` input `tuple(meta, reads)` of `LEGACY_COUNT`, which declares 2 -- pass one argument per declared component
+
 ## publish-dir
 
 - The `publishDir` directive is discouraged -- publish outputs from the entry workflow (`publish:` and the `output` block) instead
@@ -134,6 +138,7 @@
 
 - Argument with type Channel<Integer> is not compatible with parameter of type Channel<String> -- pass a Channel<String>
 - Argument with type Integer is not compatible with process input of type String -- pass a String, or a channel or value of String
+- Argument with type Path is not compatible with process input of type Sample -- pass a Sample, or a channel or value of Sample
 - Workflow emit `greeted` with type Channel<Integer> cannot be assigned to value with type Channel<String> -- change the declared type, or emit a Channel<String>
 - Workflow output `summary` with type Integer cannot be assigned to value with type Path -- change the output's type in the output block, or publish a value of type Integer
 

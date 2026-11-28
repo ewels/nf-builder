@@ -2,6 +2,7 @@ import { join } from "node:path";
 import type { EditCommand, Projection } from "@nf-builder/lang-core";
 import { describe, expect, it } from "vitest";
 import {
+  type ConnectionTargetsResult,
   createEngineService,
   type EngineApi,
   type EngineRefusal,
@@ -426,6 +427,42 @@ describe("F-209 engine history", () => {
       name: "NEW_WORKFLOW",
       path: "subworkflows/local/new_workflow/main.nf",
     });
+    expect(structuredClone(ok)).toEqual(ok);
+  });
+
+  it("F-302: connectionTargets refuses with no project or an unknown workflow or port, answers at the current revision, and survives structuredClone", async () => {
+    const from = { node: "main.nf#/:params", port: "input" };
+    const none = await createEngineService().connectionTargets({
+      path: "main.nf",
+      workflow: null,
+      from,
+    });
+    expect(none).toMatchObject({ ok: false, code: "no-project" });
+    const p = await open(
+      readTree(join(cases, "f302-connect-start")).map((f) => ({
+        path: f.path,
+        text: f.text,
+      })),
+    );
+    const request = { path: "main.nf", workflow: null, from };
+    expect(
+      await p.service.connectionTargets({ ...request, path: "nope.nf" }),
+    ).toMatchObject({ ok: false, code: "not-found" });
+    expect(
+      await p.service.connectionTargets({ ...request, workflow: "NOPE" }),
+    ).toMatchObject({ ok: false, code: "not-found" });
+    expect(
+      await p.service.connectionTargets({
+        ...request,
+        from: { node: from.node, port: "nope" },
+      }),
+    ).toMatchObject({ ok: false, code: "not-found" });
+    const ok = await p.service.connectionTargets(request);
+    expect(ok).toMatchObject({ revision: p.revision, from });
+    const targets = (ok as ConnectionTargetsResult).targets;
+    expect(targets.map((t) => `${t.node}:${t.port}`)).toContain(
+      "main.nf#/DESCRIBE@1:sample",
+    );
     expect(structuredClone(ok)).toEqual(ok);
   });
 

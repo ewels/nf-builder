@@ -194,10 +194,52 @@
   stroke-width: 2.5;
 }
 
-/* Thicker as well as coloured (QA-12). It has the same specificity as the hover rule, so it goes after it to keep 3 px on hover; the extra class beats the unknown-type rule, and a mismatch rule (F-302) goes after this one. */
-.react-flow__edge .react-flow__edge-path.is-highlighted {
+/* Thicker as well as coloured (QA-12). It has the same specificity as the hover rule, so it goes after it to keep 3 px on hover; the extra class beats the unknown-type rule, and the mismatch rule below goes after this one. */
+.react-flow__edge .react-flow__edge-path.is-highlighted,
+.react-flow__edge .react-flow__edge-path.is-selected {
   stroke: var(--color-accent);
   stroke-width: 3;
+}
+
+/* A type mismatch (F-302, UX-24): red over the highlight, with an error mark at the midpoint as the second cue (QA-12). */
+.react-flow__edge .react-flow__edge-path.is-mismatch {
+  stroke: var(--color-error);
+  stroke-width: 3;
+}
+.react-flow__edge .react-flow__edge-path.is-mismatch.is-selected {
+  stroke-width: 5;
+}
+
+.edge-mismatch-glyph {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  color: #fff;
+  background: var(--color-error);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* Connection targets while a drag is in progress (F-302, UX-25). */
+.canvas-node.is-dimmed {
+  opacity: 0.45;
+}
+.canvas-node .react-flow__handle.is-target-refused,
+.canvas-node .canvas-port.is-target-refused {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.canvas-node .react-flow__handle.is-target-mismatch,
+.canvas-node .canvas-port.is-target-mismatch {
+  opacity: 0.6;
+  outline: 1.5px dashed var(--color-error);
+  outline-offset: 1px;
 }
 
 .edge-tooltip {
@@ -209,6 +251,7 @@
   color: var(--color-header-text);
   background: var(--color-header);
   border-radius: 6px;
+  white-space: pre-line;
   pointer-events: none;
 }
 

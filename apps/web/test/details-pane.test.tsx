@@ -9,7 +9,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import type { DetailsContent } from "../src/canvas/canvas-store";
 import { DetailsHeaderView } from "../src/details/details-header";
-import { DetailsBody } from "../src/details/details-pane";
+import { DetailsBody, diagnosticsAt } from "../src/details/details-pane";
 import { DiagnosticList } from "../src/details/diagnostic-list";
 import { NodeDetailsView } from "../src/details/node-details";
 import { WorkflowSummaryView } from "../src/details/workflow-summary";
@@ -22,6 +22,44 @@ const range = {
   endLine: 1,
   endColumn: 2,
 };
+
+const summaryOf = (coverage: WorkflowSummary["coverage"]): WorkflowSummary => ({
+  name: "WF",
+  path: "main.nf",
+  entry: false,
+  typed: false,
+  takes: [],
+  emits: [],
+  params: [],
+  outputs: [],
+  calls: [],
+  modules: [],
+  coverage,
+});
+
+// finds the first <button> element in a React element tree without rendering it
+type Tree = {
+  props?: { children?: unknown; onClick?: () => void };
+  type?: unknown;
+};
+function findButton(node: unknown): { props: { onClick: () => void } } {
+  const found = search(node);
+  if (found === null) throw new Error("no button");
+  return found as { props: { onClick: () => void } };
+}
+function search(node: unknown): Tree | null {
+  if (Array.isArray(node)) {
+    for (const child of node) {
+      const hit = search(child);
+      if (hit) return hit;
+    }
+    return null;
+  }
+  if (typeof node !== "object" || node === null) return null;
+  const el = node as Tree;
+  if (el.type === "button") return el;
+  return search(el.props?.children);
+}
 
 const view: NodeView = {
   id: "main.nf#/trimmed",
@@ -252,6 +290,7 @@ describe("F-206 details pane", () => {
         },
       ],
       modules: [{ module: "nf-core/wordcount", calls: ["WORDCOUNT"] }],
+      coverage: { statements: 4, modelled: 3, percent: 75 },
     };
     const out = renderToStaticMarkup(<WorkflowSummaryView summary={summary} />);
     for (const heading of ["Take", "Emit", "Calls", "Registry modules"])
@@ -336,6 +375,7 @@ describe("F-206 details pane", () => {
       outputs: [],
       calls: [],
       modules: [],
+      coverage: { statements: 0, modelled: 0, percent: null },
     };
     const link = (over: Partial<WorkflowSummary>, configPath?: string) =>
       renderToStaticMarkup(
@@ -440,5 +480,81 @@ describe("F-206 details pane", () => {
     expect(named).toContain('<h4>Emit</h4><p class="details-none">None</p>');
     expect(named).not.toContain("<h4>Parameters</h4>");
     expect(named).not.toContain("<h4>Outputs</h4>");
+  });
+
+  it("F-405 ADR-0004 UX-31: the summary shows 'N of M statements (P%)', 'All N statements (100%)' and 'No statements'", () => {
+    const base = summaryOf({ statements: 184, modelled: 165, percent: 89 });
+    const text = (c: WorkflowSummary["coverage"]) =>
+      renderToStaticMarkup(
+        <WorkflowSummaryView summary={{ ...base, coverage: c }} />,
+      );
+    const partial = text({ statements: 184, modelled: 165, percent: 89 });
+    expect(partial).toMatch(/<h4[^>]*>Modelled<\/h4>/);
+    expect(partial).toContain("165 of 184 statements (89%)");
+    expect(partial).toContain('data-coverage="165/184"');
+    expect(text({ statements: 3, modelled: 3, percent: 100 })).toContain(
+      "All 3 statements (100%)",
+    );
+    expect(text({ statements: 0, modelled: 0, percent: null })).toContain(
+      "No statements",
+    );
+  });
+
+  it("F-405 LA-35: the summary shows the workflow's suggestion count and Show suggestions calls back with the first one; it shows none while diagnostics load", () => {
+    const base = summaryOf({ statements: 1, modelled: 1, percent: 100 });
+    const first: Diagnostic = {
+      path: "main.nf",
+      range,
+      severity: "suggestion",
+      message: "Legacy workflow",
+      code: "legacy-workflow",
+    };
+    const shown = (suggestions: readonly Diagnostic[] | null) =>
+      WorkflowSummaryView({ summary: base, suggestions });
+    const html = (suggestions: readonly Diagnostic[] | null) =>
+      renderToStaticMarkup(shown(suggestions));
+    expect(html([first, first])).toContain("2 suggestions in this workflow");
+    expect(html([first])).toContain("1 suggestion in this workflow");
+    expect(html([first])).toContain("Show suggestions</button>");
+    expect(html([])).toContain("No suggestions in this workflow");
+    expect(html([])).not.toContain("Show suggestions");
+    expect(html(null)).toContain("Checking for suggestions");
+    expect(
+      renderToStaticMarkup(<WorkflowSummaryView summary={base} />),
+    ).not.toContain("suggestion");
+    let got: Diagnostic | null = null;
+    const element = WorkflowSummaryView({
+      summary: base,
+      suggestions: [first],
+      onShowSuggestions: (d) => {
+        got = d;
+      },
+    });
+    const button = findButton(element);
+    button.props.onClick();
+    expect(got).toBe(first);
+  });
+});
+
+describe("F-405 UX-31: which diagnostics the summary shows", () => {
+  const ready = (revision: number) =>
+    ({ status: "ready", revision }) as unknown as Parameters<
+      typeof diagnosticsAt
+    >[0];
+  const list = [{ code: "x" }] as unknown as readonly Diagnostic[];
+
+  it("F-405: diagnostics made at the projection's revision are shown", () => {
+    expect(diagnosticsAt(ready(3), "ready", 3, list)).toBe(list);
+  });
+
+  it("F-405: diagnostics of another revision, or no projection, are still being pulled (null)", () => {
+    expect(diagnosticsAt(ready(3), "refreshing", 2, list)).toBeNull();
+    expect(diagnosticsAt(ready(3), "loading", null, list)).toBeNull();
+    expect(diagnosticsAt({ status: "loading" }, "ready", 3, list)).toBeNull();
+  });
+
+  it("F-405: failed diagnostics leave the section out (undefined), whatever the revision", () => {
+    expect(diagnosticsAt(ready(3), "failed", 3, list)).toBeUndefined();
+    expect(diagnosticsAt(ready(3), "failed", 2, list)).toBeUndefined();
   });
 });

@@ -42,6 +42,8 @@ export interface Port {
   readonly argument: Range | null;
   /** The type of an inline argument (one that reads no graph value), for LA-32 checks; null otherwise. */
   readonly argumentType: FlowType | null;
+  /** A legacy `tuple` input: how many components it declares (LA-14); absent on every other port. */
+  readonly components?: number;
 }
 
 export interface Callee {

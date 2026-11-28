@@ -79,8 +79,10 @@ export type {
   EdgeDataflow,
 } from "./canvas";
 export { CANVAS_METRICS, canvasView, portY } from "./canvas";
+export { edgeMismatches } from "./canvas/mismatch";
 export * from "./config";
 export { nodeView } from "./details/node-view";
+export { workflowSuggestions } from "./details/suggestions";
 export { workflowSummary } from "./details/summary";
 export type {
   DeclarationDetails,
@@ -93,6 +95,7 @@ export type {
   PortDetail,
   Preview,
   SummaryCall,
+  SummaryCoverage,
   SummaryModule,
   SummaryPort,
   WorkflowSummary,
@@ -113,6 +116,11 @@ export {
   createEditState,
   type EditState,
 } from "./edit/apply";
+export {
+  type ConnectionStatus,
+  type ConnectionTarget,
+  connectionTargets,
+} from "./edit/connection-targets";
 export { applyPatches, PatchError } from "./edit/patches";
 export { planAdd } from "./files/add";
 export {
@@ -205,6 +213,8 @@ export type {
   ApplyOptions,
   ApplyOutcome,
   ConfigViewResult,
+  ConnectionTargetsRequest,
+  ConnectionTargetsResult,
   DeclarationFormResult,
   DiagnosticsResult,
   EngineApi,

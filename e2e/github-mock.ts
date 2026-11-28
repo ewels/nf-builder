@@ -1,11 +1,11 @@
 // A mocked GitHub for the F-401 end-to-end tests: both hosts the importer calls are answered from memory, so the tests need no
 // network. Every URL the importer asks for is logged, and one it shouldn't ask for is recorded as unexpected.
 import { createHash } from "node:crypto";
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import type { Page, Route } from "@playwright/test";
 import { REPO_ROOT } from "../scripts/check-common.ts";
-import { corpusDir } from "./zips.ts";
+import { corpusDir, pinnedSha } from "./zips.ts";
 
 const EXPOSED =
   "ETag, Link, Retry-After, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, X-RateLimit-Used, X-RateLimit-Resource";
@@ -117,6 +117,27 @@ export function fetchngsRepo(): MockRepo {
       }
     },
   };
+}
+
+/**
+ * A pinned corpus pipeline as a repository (F-405): the tree is made from the checkout's files, as the GitHub tree is
+ * made from the repository's, with no `.git` and no tree fixture. `ref` names the pinned commit.
+ */
+export function corpusRepo(id: string, repo: string, ref: string): MockRepo {
+  const dir = corpusDir(id);
+  const files: { path: string; bytes: Buffer }[] = [];
+  const walk = (rel: string) => {
+    for (const entry of readdirSync(join(dir, rel), { withFileTypes: true })) {
+      const path = rel === "" ? entry.name : `${rel}/${entry.name}`;
+      if (entry.name === ".git") continue;
+      if (entry.isDirectory()) walk(path);
+      else if (entry.isFile())
+        files.push({ path, bytes: readFileSync(join(dir, path)) });
+    }
+  };
+  walk("");
+  const made = repoFromFiles(repo, pinnedSha(id), files);
+  return { ...made, refs: { ...made.refs, [ref]: made.sha } };
 }
 
 const read = (...parts: string[]): Buffer =>

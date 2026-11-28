@@ -1,5 +1,12 @@
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import type { EditState } from "../../src/edit/apply";
+import {
+  connect as connectPatches,
+  planConnect,
+} from "../../src/edit/commands/connect";
+import { EditRefusal } from "../../src/edit/refusal";
+import { readTree } from "../model/read-tree";
 import {
   accepted,
   commit,
@@ -12,6 +19,8 @@ import {
   texts,
 } from "./helpers";
 
+const cases = new URL("../../../../tools/oracle/cases/", import.meta.url)
+  .pathname;
 const flag = "nextflow.enable.types = true\n\n";
 const B = `${flag}process B {\n    input:\n    x: String\n    y: String\n\n    output:\n    file('b')\n\n    script:\n    'b'\n}\n`;
 const C = `${flag}process C {\n    input:\n    x: String\n\n    output:\n    file('c')\n\n    script:\n    'c'\n}\n`;
@@ -309,3 +318,54 @@ describe("F-111 Connect", () => {
     expect(disconnect("B@1", "nope").code).toBe("not-found");
   });
 });
+
+describe("F-302 planConnect", () => {
+  it("F-302 UX-25 AR-21: planConnect refuses exactly what connect refuses, with the same message", async () => {
+    for (const start of ["f111-start-typed", "f111-start-legacy"]) {
+      const state = await stateFor(
+        Object.fromEntries(
+          readTree(join(cases, start)).map((f) => [f.path, f.text]),
+        ),
+      );
+      const { nodes } = projection(state);
+      let pairs = 0;
+      let refusals = 0;
+      for (const from of nodes)
+        for (const out of from.outputs)
+          for (const to of nodes)
+            for (const input of to.inputs) {
+              const command = {
+                kind: "connect" as const,
+                target,
+                from: { node: from.id, port: out.id },
+                to: { node: to.id, port: input.id },
+              };
+              const planned = attempt(() => planConnect(state, command));
+              const applied = attempt(() => connectPatches(state, command));
+              pairs++;
+              if (planned !== null) {
+                refusals++;
+                expect(applied, `${from.id} -> ${to.id}:${input.id}`).toBe(
+                  planned,
+                );
+              } else if (applied !== null) {
+                // only the reprint finds it: nothing in these trees
+                expect.fail(`${from.id} -> ${to.id}:${input.id}: ${applied}`);
+              }
+            }
+      expect(pairs, start).toBeGreaterThan(5);
+      expect(refusals, start).toBeGreaterThan(0);
+    }
+  });
+});
+
+/** The message of the refusal `run` throws, or null. */
+function attempt(run: () => unknown): string | null {
+  try {
+    run();
+    return null;
+  } catch (e) {
+    if (e instanceof EditRefusal) return `${e.code}: ${e.message}`;
+    throw e;
+  }
+}

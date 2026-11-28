@@ -4,6 +4,7 @@
 import {
   type ApplyOptions,
   type ApplyOutcome,
+  type ConnectionTarget,
   canvasView,
   type EditCommand,
   EMPTY_HISTORY,
@@ -16,6 +17,7 @@ import {
   type NodeDetails,
   type OpenRequest,
   type Point,
+  type PortRef,
   type Positions,
   type ProjectChange,
   type Projection,
@@ -25,6 +27,7 @@ import {
   type ReadOnlyReason,
   readOnlyReason,
   type WorkflowRef,
+  type WorkflowTarget,
 } from "@nf-builder/engine";
 import { useStore } from "zustand";
 import { createStore, type StoreApi } from "zustand/vanilla";
@@ -121,6 +124,8 @@ export interface WorkspaceState {
   } | null;
   /** The last request to centre a node of the active tab's canvas (F-309). */
   readonly focusNode: { readonly id: string; readonly seq: number } | null;
+  /** Why the last connect or disconnect was refused; the next change to the project clears it (F-302). */
+  readonly canvasNotice: string | null;
 }
 
 export interface WorkspaceActions {
@@ -202,6 +207,21 @@ export interface WorkspaceActions {
     request: PaletteAdd,
     session?: number,
   ): Promise<PaletteAddOutcome>;
+  /**
+   * Feeds the `from` output port into the `to` input port of the active workflow tab as one undo step (F-302, UX-25).
+   * A refusal sets `canvasNotice`. The view that follows keeps the viewport (ADR 0052).
+   */
+  connect(from: PortRef, to: PortRef, session?: number): Promise<ApplyOutcome>;
+  /** Removes the argument that feeds `port` in the active workflow tab (F-302, UX-70). Refusals as `connect`. */
+  disconnect(port: PortRef, session?: number): Promise<ApplyOutcome>;
+  /**
+   * The status of every input port of the active workflow for a dragged output port (F-302, UX-25). Null when the
+   * project, tab or revision moved on, or nothing can be answered (read-only, no workflow tab, a refusal).
+   */
+  connectionTargets(
+    from: PortRef,
+    session?: number,
+  ): Promise<readonly ConnectionTarget[] | null>;
 }
 
 /** A layout run on the canvas: every node's position, and what to save (`saved`, merged, or replacing the workflow's entries). */
@@ -384,6 +404,40 @@ export function createCanvasStore(
     let adds = 0;
     // palette adds in flight: every view they cause keeps the viewport, the intermediate one included (F-301)
     let addsPending = 0;
+
+    /** The active workflow tab, or undefined on a file tab or none. */
+    function workflowTab(): WorkflowTab | undefined {
+      const tab = get().tabs.find((t) => t.id === get().activeTab);
+      return tab?.kind === "workflow" ? tab : undefined;
+    }
+
+    /** One connect or disconnect: the views it causes keep the viewport; a refusal becomes the canvas notice. */
+    async function rewire(
+      verb: "connect" | "disconnect",
+      command: (target: WorkflowTarget) => EditCommand,
+      session: number | undefined,
+    ): Promise<ApplyOutcome> {
+      const tab = workflowTab();
+      if (tab === undefined)
+        return refusal("no-project", "No workflow is shown.");
+      addsPending++;
+      try {
+        const outcome = await send(
+          session,
+          (revision) =>
+            engine().apply(
+              command({ path: tab.path, workflow: tab.workflow }),
+              revision,
+            ),
+          afterApply,
+        );
+        if (!outcome.ok && outcome.code !== "read-only")
+          set({ canvasNotice: `Couldn't ${verb}: ${outcome.message}` });
+        return outcome;
+      } finally {
+        addsPending--;
+      }
+    }
 
     function clearSelection(): void {
       selection++;
@@ -725,6 +779,7 @@ export function createCanvasStore(
       historyNotice: null,
       reveal: null,
       focusNode: null,
+      canvasNotice: null,
 
       async open(request) {
         generation++;
@@ -755,6 +810,7 @@ export function createCanvasStore(
           historyNotice: null,
           reveal: null,
           focusNode: null,
+          canvasNotice: null,
         });
         if (tab !== null) await load(tab);
       },
@@ -777,6 +833,7 @@ export function createCanvasStore(
           historyNotice: null,
           reveal: null,
           focusNode: null,
+          canvasNotice: null,
         });
       },
 
@@ -820,6 +877,7 @@ export function createCanvasStore(
           activeTab,
           history: change.history,
           historyNotice: null,
+          canvasNotice: null,
           summary: {
             ...summary,
             revision: change.revision,
@@ -1143,6 +1201,45 @@ export function createCanvasStore(
             addsPending--;
           }
         });
+      },
+
+      connect: (from, to, session) =>
+        rewire(
+          "connect",
+          (target) => ({ kind: "connect", target, from, to }),
+          session,
+        ),
+
+      disconnect: (port, session) =>
+        rewire(
+          "disconnect",
+          (target) => ({ kind: "disconnect", target, port }),
+          session,
+        ),
+
+      async connectionTargets(from, session) {
+        const mine = session ?? get().session;
+        const tab = workflowTab();
+        if (mine !== get().session || tab === undefined || readOnly())
+          return null;
+        try {
+          const result = await engine().connectionTargets({
+            path: tab.path,
+            workflow: tab.workflow,
+            from,
+          });
+          if ("ok" in result) return null;
+          // a newer revision or project, or another tab, makes the answer stale
+          if (
+            mine !== get().session ||
+            workflowTab()?.id !== tab.id ||
+            result.revision !== get().summary?.revision
+          )
+            return null;
+          return result.targets;
+        } catch {
+          return null;
+        }
       },
     };
   });

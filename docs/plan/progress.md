@@ -794,3 +794,35 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - Notes appended to F-210, F-309, F-314 (the remaining Plugins & config palette items stay with F-314), F-505, F-602, F-607, F-701, F-702 and F-703.
   - The `config-form` and `config-details` baselines are approved from CI (ADR 0021).
 - Blockers: none.
+
+## 2026-11-28 · F-405 · Claude (autonomous)
+- Did:
+  - The workflow summary gains a "Modelled" section from `projectionCoverage` ("165 of 184 statements (89%)", rounded down; "All N statements (100%)"; "No statements") and a "Suggestions" section: the suggestions inside the open workflow's own range (`workflowSuggestions`), with "Show suggestions" opening the Suggestions tab at the first. The count shows only when the diagnostics revision matches the projection's ("Checking for suggestions…" otherwise); the section is left out when the diagnostics pull failed.
+  - `EngineApi.diagnostics()` returns `registry`, the project's registry folders (worker API only, not stored). The problems panel lists registry module files after the project's own files, under a "Registry modules (N suggestions)" heading, each with a `registry` tag; counts are unchanged.
+  - The summary's "Registry modules" list now uses the panel's rule, `registryModuleOf(callee.path, registry)` (ADR 0055), instead of `callee.module`, because rnaseq includes its nf-core modules by relative path and `callee.module` is null for them (a deviation from the plan's 4.2 and 4.4).
+  - Tests: `e2e/legacy-import.spec.ts` imports nf-core/rnaseq 3.28.0 through the mocked GitHub route with `repoFromFiles` (no typed badge on the legacy calls, status-bar suggestions equal to the engine's and the report's, registry groups last, RNASEQ 165 of 184 statements); `packages/engine/test/corpus/legacy-import.corpus.ts`; unit tests in `packages/engine` and `apps/web`.
+- State: passing once CI is green (PR #61).
+- Next: F-302, F-601, then F-303, F-307, F-505, F-406.
+- Decisions:
+  - [ADR 0063](../adr/0063-legacy-import-summary.md): the modelled share counts statements and rounds down; the per-workflow count covers the workflow's own suggestions only; registry module files are grouped after the project's own, not filtered (amends ADR 0054's file order); `DiagnosticsResult.registry` (amends the worker API of ADRs 0043 and 0054); the summary's registry modules found by folder (amends ADR 0049's summary contents).
+  - UX-31 and UX-03 updated.
+  - Vendored `subworkflows/nf-core/**` stay with the project's own files (ADR 0055 unchanged); note appended to F-504.
+  - `details-entry-summary` and `read-only-phone` baselines re-approved from CI (ADR 0021).
+## 2026-11-28 · F-302 · Claude (autonomous)
+- Did:
+  - Connect by drag (UX-25): drags start only from outputs; a drop applies `Connect` as one undo step and rewrites a fed input's argument. While dragging, the worker's dry run marks every input: refused targets dim and reject the drop, mismatched ones dim with a red ring and accept it (LA-29); a refused drop shows "Couldn't connect: <message>" in the canvas notices. The viewport is kept after a connect or disconnect.
+  - Engine: `planConnect` makes every check `Connect` makes short of the reprint, comment loss included, and `EngineApi.connectionTargets` runs it per input port with the pack's `connection` and `tupleArity` checks. The dry run predicts the argument count after the connect: `ok` while the count stays wrong, `mismatch` only when it becomes right, as lint checks types only then.
+  - Mismatch edges (UX-24, QA-12): `edgeMismatches` maps `type-mismatch` and `tuple-arity` diagnostics at the projection's revision to edges, drawn in the error colour, thicker, above the selection highlight, with a midpoint "!" glyph, the message in the tooltip and the aria label.
+  - Disconnect: canvas-local edge selection (click or Enter selects, Escape, a pane click or focus leaving clears); Delete or Backspace applies `Disconnect`. Deletable edges are `role="button"` with `aria-pressed`. The F-206 tests are unchanged. Read-only: no connection, no edge selection or Delete.
+  - LA-14: pack code `tuple-arity` (origin `ours`, error) and `Port.components` in lang-core.
+  - Tests: `e2e/connect.spec.ts` (all three steps, refused targets, edge keys, viewport, read-only, CSP, the `connect-mismatch` baseline), oracle cases `f302-connect-start`, `f302-connect-typed` and `f302-connect-mismatch` with engine goldens, `type-mismatch` record and `tuple-arity` lint fixtures, and unit tests in `packages/engine/test/`, `packages/lang-2610/test/lints/` and `apps/web/test/`.
+- State: passing once CI is green.
+- Next: F-303, F-307, F-505, F-406.
+- Decisions:
+  - [ADR 0064](../adr/0064-connect-ports.md): drag from outputs only; the `planConnect` dry run and `EngineApi.connectionTargets` (amends ADR 0043's API list); refused and mismatch target states; mismatch red with a glyph as the second cue; canvas-local edge selection and Delete; viewport kept after a connect or disconnect (amends ADR 0052); `tuple-arity` (amends ADR 0042's code set, now 31 codes) and `Port.components`. ADR 0063 is taken by F-405's open branch.
+  - The oracle confirmed the pinned lint reports `Path` into a `Sample` record input, so `type-mismatch` stays lint-origin. The pinned `nextflow lint` 26.10.7 doesn't check tuple arity (checked), so `tuple-arity` has no lint pattern.
+  - UX-24, UX-25 and LA-14 updated.
+  - Known: Disconnect after a Connect that introduced `x = P()` leaves `x` unused, which lint reports as an unused-variable warning; follow-up noted on F-310.
+  - Notes appended to F-308, F-310, F-504 and F-701.
+  - The `connect-mismatch` baseline is approved from CI (ADR 0021); no existing baseline changed.
+- Blockers: none.

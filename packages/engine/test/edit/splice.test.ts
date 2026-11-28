@@ -13,6 +13,7 @@ import {
 } from "../../src/edit/nodes";
 import { EditRefusal } from "../../src/edit/refusal";
 import {
+  assertCommentsKept,
   includeInsertion,
   itemSpan,
   reprintDeclaration,
@@ -80,6 +81,22 @@ describe("F-111 splice", () => {
     expect(applyEdit(file.text, edit)).toBe(
       "// about W\nworkflow {\n    println('x') // tail\n    Q()\n}\n\nprocess P {\n    script:\n    'p'\n}\n",
     );
+  });
+
+  it("F-302 UX-25: assertCommentsKept refuses an update that drops an attached comment, unless the node is removed", () => {
+    const file = script("workflow {\n    A() // tail\n    B()\n}\n");
+    const def = file.ast?.body[0];
+    if (def?.kind !== "Workflow" || !def.main) throw new Error("no workflow");
+    const [first, ...rest] = def.main.items;
+    const dropped = { ...def, main: { ...def.main, items: rest } };
+    expect(() => assertCommentsKept(file, def, dropped)).toThrow(EditRefusal);
+    expect(() => assertCommentsKept(file, def, dropped)).toThrow(
+      /drop the comment "\/\/ tail"/,
+    );
+    expect(() =>
+      assertCommentsKept(file, def, dropped, [first as Statement]),
+    ).not.toThrow();
+    expect(() => assertCommentsKept(file, def, def)).not.toThrow();
   });
 
   it("F-111 ADR-0033: a declaration in a partial file is reprinted with a layout masked to its span", () => {
