@@ -488,3 +488,26 @@ cases:
       - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/process-typed.mdx
     lint: { expect: ok, clean: true }
     run: { expect: ok }
+  # F-303: the Configure tab of the edit popup, before and after the step 2 edit, and the defaulted directive kinds.
+  - id: f303-configure-start
+    about: A typed entry workflow that calls a described local process with one input and one output; the start of the Configure tab end-to-end edit.
+    spec: [F-303, UX-41, UX-44, AR-21]
+    sources:
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/process-typed.mdx
+    lint: { expect: ok, clean: true }
+    run: { expect: ok }
+  - id: f303-configure-typed
+    about: The f303-configure-start tree after the popup edit that adds a nullable input and cpus 1 and renames the output; the call gains a null argument for the new input.
+    spec: [F-303, UX-41, UX-44, AR-21]
+    sources:
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/process-typed.mdx
+    lint: { expect: ok, clean: true }
+    run: { expect: ok }
+  - id: f303-directive-defaults
+    about: A typed process with each directive kind the popup defaults (cpus 1, memory 1.GB, time 1.h, debug true).
+    spec: [F-303, UX-41]
+    sources:
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/process-typed.mdx
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/reference/process.mdx
+    lint: { expect: ok, clean: true }
+    run: { expect: ok }
