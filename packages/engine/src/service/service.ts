@@ -34,6 +34,8 @@ import { freshDefinitionName } from "../edit/fresh-name";
 import { definitionPath } from "../edit/names";
 import { PatchError } from "../edit/patches";
 import { registryFolders } from "../files/registry";
+import { popupTarget } from "../form/popup-target";
+import { formChoices, processForm } from "../form/read-process";
 import { EMPTY_HISTORY, History, type HistoryLimits } from "../history/history";
 import { commandLabel } from "../history/labels";
 import {
@@ -66,6 +68,7 @@ import type {
   ApplyOptions,
   ApplyOutcome,
   ConfigViewResult,
+  DeclarationFormResult,
   DiagnosticsResult,
   EngineApi,
   EngineRefusal,
@@ -720,6 +723,46 @@ export function createEngineService(
             },
             node,
           ),
+        };
+      }),
+
+    declarationForm: (path, workflow, node) =>
+      guarded((open): DeclarationFormResult | EngineRefusal => {
+        const projection = projectorOf(open).project(path, workflow);
+        const found = projection?.nodes.find((n) => n.id === node);
+        if (!found) return refusal("not-found", `There is no node ${node}.`);
+        const target = popupTarget(found);
+        if (target.kind !== "typedProcess")
+          return refusal(
+            "invalid",
+            target.kind === "workflow"
+              ? "Workflows open in their own tab."
+              : target.reason,
+          );
+        const model = open.state.model.file(target.path);
+        const process = model?.declarations.get(target.name)?.declaration;
+        if (
+          model?.source.language !== "nextflow" ||
+          process?.kind !== "Process" ||
+          !process.typed
+        )
+          return refusal(
+            "not-found",
+            `${target.name} isn't found in ${target.path}.`,
+          );
+        // the records and enums in scope of the process's file are types an input can take
+        const local = [...(model?.scope ?? [])].flatMap(([name, binding]) => {
+          const d =
+            binding.kind === "declaration"
+              ? binding.declaration
+              : binding.entry.declaration;
+          return d?.kind === "Record" || d?.kind === "Enum" ? [name] : [];
+        });
+        return {
+          revision,
+          target: { path: target.path, name: target.name },
+          form: processForm(model.source, process, open.state.catalogue),
+          choices: formChoices(open.state.catalogue, open.configRules, local),
         };
       }),
 

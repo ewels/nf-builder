@@ -1,9 +1,12 @@
 // The engine's API as plain data (F-113, ADR 0003). Pure TypeScript: the Comlink bridge in apps/web wraps it. Every result
 // survives structuredClone, so it can cross the worker boundary unchanged.
 import type {
+  DeclarationForm,
   Diagnostic,
   EditCommand,
+  FieldProblem,
   FileText,
+  FormChoices,
   PaletteView,
   ParseProblem,
   ParseStatus,
@@ -88,6 +91,8 @@ export interface EngineRefusal {
   readonly message: string;
   readonly path: string | null;
   readonly problems: readonly ParseProblem[];
+  /** The form fields a refused `UpdateDeclaration` is about (F-303). */
+  readonly fields?: readonly FieldProblem[];
 }
 
 export interface Applied extends ProjectChange {
@@ -138,6 +143,15 @@ export interface ProjectionResult {
 export interface DiagnosticsResult {
   readonly revision: number;
   readonly diagnostics: readonly Diagnostic[];
+}
+
+/** The Configure form of a node's declaration, read at `revision` (F-303, UX-41). */
+export interface DeclarationFormResult {
+  readonly revision: number;
+  /** The declaration the form edits: its file and name. */
+  readonly target: { readonly path: string; readonly name: string };
+  readonly form: DeclarationForm;
+  readonly choices: FormChoices;
 }
 
 export interface NodeDetailsResult {
@@ -209,6 +223,12 @@ export interface EngineApi {
     workflow: string | null,
     node: string,
   ): Promise<NodeDetailsResult | EngineRefusal>;
+  /** The Configure form and choices for a call node of a typed process (F-303); `invalid` with the reason for any other node, `not-found` for an unknown one. */
+  declarationForm(
+    path: string,
+    workflow: string | null,
+    node: string,
+  ): Promise<DeclarationFormResult | EngineRefusal>;
   /** The config editor's view of a config file: cards, rows, selector counts and the diagnostics in them (F-601). `not-found` for a path that isn't a config file. */
   configView(path: string): Promise<ConfigViewResult | EngineRefusal>;
   /** The config catalogue as a clone-safe tree, for descriptions and Add scope (F-601). Needs no open project; rejects for an unknown version. */

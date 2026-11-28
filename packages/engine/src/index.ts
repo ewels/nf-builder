@@ -205,6 +205,7 @@ export type {
   ApplyOptions,
   ApplyOutcome,
   ConfigViewResult,
+  DeclarationFormResult,
   DiagnosticsResult,
   EngineApi,
   EngineRefusal,
