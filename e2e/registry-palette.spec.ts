@@ -26,10 +26,13 @@ const sourceLine = (scope: Page | FrameLocator): Locator =>
   registry(scope).locator(".registry-source");
 const refreshButton = (scope: Page | FrameLocator): Locator =>
   registry(scope).getByRole("button", { name: "Refresh registry data" });
+/** Module rows carry the full name in data-name; the visible label is the short name (F-503). */
 const moduleRows = (scope: Page | FrameLocator): Locator =>
-  registry(scope)
-    .getByRole("list", { name: "Modules" })
-    .locator(".registry-item-label");
+  registry(scope).locator("#registry-modules [data-name]");
+const moduleNames = (scope: Page | FrameLocator): Promise<string[]> =>
+  moduleRows(scope).evaluateAll((rows) =>
+    rows.map((r) => r.getAttribute("data-name") ?? ""),
+  );
 
 /** Console errors with the URL Chromium attributes them to: a failed fetch may not name it in its text. */
 function watchConsole(page: Page) {
@@ -108,11 +111,9 @@ test("F-502 step 1 IO-30 UX-14: with registry.nextflow.io blocked, the palette l
   await page.route(REGISTRY_ROUTE, (route) => route.abort());
   await page.goto("./");
   await expect(sourceLine(page)).toHaveText("Snapshot · updated 5 hours ago");
-  await expect(moduleRows(page)).toHaveText([
-    "nextflow-io/hello",
-    "nf-core/bam_applybqsr",
-    "nf-core/fastqc",
-  ]);
+  await expect
+    .poll(() => moduleNames(page))
+    .toEqual(["nf-core/bam_applybqsr", "nf-core/fastqc", "nextflow-io/hello"]);
   await expect(refreshButton(page)).toBeEnabled();
   expect(requests).toEqual([]);
   expect(await watch.violations()).toEqual([]);
@@ -146,11 +147,9 @@ test("F-502 step 2 UX-14: with live forced on and the registry routed with Acces
   await expect(sourceLine(page)).toHaveText("Snapshot · updated 5 hours ago");
   await page.evaluate(() => window.nfBuilderRegistry?.reload({ live: true }));
   await expect(sourceLine(page)).toHaveText("Live · updated just now");
-  await expect(moduleRows(page)).toHaveText([
-    "nextflow-io/hello",
-    "nf-core/bam_applybqsr",
-    "nf-core/newtool",
-  ]);
+  await expect
+    .poll(() => moduleNames(page))
+    .toEqual(["nf-core/bam_applybqsr", "nf-core/newtool", "nextflow-io/hello"]);
   await expect(registry(page)).not.toContainText(
     "The live registry couldn't be reached.",
   );

@@ -1,4 +1,8 @@
-import type { SnapshotModule, SnapshotPlugin } from "@nf-builder/lang-core";
+import type {
+  SnapshotModule,
+  SnapshotModulePorts,
+  SnapshotPlugin,
+} from "@nf-builder/lang-core";
 
 export type RegistrySource = "live" | "snapshot";
 
@@ -45,4 +49,12 @@ export interface RegistryClient {
   /** The source this client prefers; RegistryIndex.source says which one answered. */
   readonly source: RegistrySource;
   index(options?: RegistryReadOptions): Promise<RegistryIndex>;
+  /**
+   * The module's meta.yml ports from the snapshot's ports.json (never live: ADR 0050), read on first use. null:
+   * the name isn't in the file, such as a live-only module.
+   */
+  ports(
+    name: string,
+    options?: RegistryReadOptions,
+  ): Promise<SnapshotModulePorts | null>;
 }

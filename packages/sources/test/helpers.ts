@@ -9,6 +9,14 @@ export const goldenText = (): string => readFileSync(GOLDEN_URL, "utf8");
 export const golden = (): Record<string, unknown> =>
   JSON.parse(goldenText()) as Record<string, unknown>;
 
+const PORTS_URL = new URL(
+  "../../../tools/registry-snapshot/test/fixtures/expected/registry/ports.json",
+  import.meta.url,
+);
+export const portsText = (): string => readFileSync(PORTS_URL, "utf8");
+export const portsGolden = (): Record<string, unknown> =>
+  JSON.parse(portsText()) as Record<string, unknown>;
+
 export const SNAPSHOT_URL = "https://site.test/app/registry/";
 
 interface Call {
@@ -58,6 +66,7 @@ export function serve(
   return fakeFetch((url) => {
     const o = overrides(url);
     if (o) return o;
+    if (url === `${SNAPSHOT_URL}ports.json`) return jsonResponse(portsText());
     if (url.startsWith(SNAPSHOT_URL)) return jsonResponse(goldenText());
     if (url.includes("/modules/list") && url.includes("kind=Process"))
       return jsonResponse(fixture("modules-process-1.json"));
