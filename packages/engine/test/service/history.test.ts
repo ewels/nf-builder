@@ -347,6 +347,88 @@ describe("F-209 engine history", () => {
     expect(three.history.undoCount).toBe(2);
   });
 
+  it("F-301 AR-23 ADR-0051: createWorkflow and addCall under one group are one undo step that restores every file byte for byte", async () => {
+    const p = await open(small);
+    const base = p.snapshot();
+    await p.apply(
+      { kind: "createWorkflow", name: "SUB", caller: "main.nf" },
+      { group: "g", label: "Add workflow SUB" },
+    );
+    const two = await p.apply(
+      { kind: "addCall", target: entry, callee: "SUB" },
+      { group: "g" },
+    );
+    expect(two.history).toMatchObject({
+      undo: "Add workflow SUB",
+      undoCount: 1,
+    });
+    expect(
+      await p.service.readFile("subworkflows/local/sub/main.nf"),
+    ).toContain("workflow SUB {");
+    await p.undo();
+    expect(p.snapshot()).toEqual(base);
+  });
+
+  it("F-301 AR-23 ADR-0051: createProcess and addCall under one group are one undo step that restores every file byte for byte", async () => {
+    const p = await open(small);
+    const base = p.snapshot();
+    await p.apply(
+      { kind: "createProcess", name: "NEW_P", caller: "main.nf" },
+      { group: "g", label: "Add process NEW_P" },
+    );
+    const two = await p.apply(
+      { kind: "addCall", target: entry, callee: "NEW_P" },
+      { group: "g" },
+    );
+    expect(two.history).toMatchObject({
+      undo: "Add process NEW_P",
+      undoCount: 1,
+    });
+    expect(await p.service.readFile("modules/local/new_p/main.nf")).toContain(
+      "process NEW_P {",
+    );
+    await p.undo();
+    expect(p.snapshot()).toEqual(base);
+  });
+
+  it("F-301 AR-23: an undo with discard restores the files and leaves no redo step", async () => {
+    const p = await open(small);
+    const base = p.snapshot();
+    await p.apply(
+      { kind: "createProcess", name: "NEW_P", caller: "main.nf" },
+      { group: "g", label: "Add process NEW_P" },
+    );
+    const undone = p.take(await p.service.undo(p.revision, { discard: true }));
+    expect(undone.history).toMatchObject({ redo: null, redoCount: 0 });
+    expect(p.snapshot()).toEqual(base);
+    expect(refusal(await p.service.redo(p.revision)).code).toBe("no-history");
+  });
+
+  it("F-301: freshName refuses with no project or an unknown caller, and its result survives structuredClone", async () => {
+    const service = createEngineService();
+    const none = await service.freshName({
+      kind: "process",
+      caller: "main.nf",
+    });
+    expect(none).toMatchObject({ ok: false, code: "no-project" });
+    const p = await open(small);
+    const unknown = await p.service.freshName({
+      kind: "process",
+      caller: "nope.nf",
+    });
+    expect(unknown).toMatchObject({ ok: false, code: "not-found" });
+    const ok = await p.service.freshName({
+      kind: "workflow",
+      caller: "main.nf",
+    });
+    expect(ok).toEqual({
+      revision: p.revision,
+      name: "NEW_WORKFLOW",
+      path: "subworkflows/local/new_workflow/main.nf",
+    });
+    expect(structuredClone(ok)).toEqual(ok);
+  });
+
   it("F-209 ADR-0003: undo, redo and history results survive structuredClone", async () => {
     const p = await open(small);
     const a = await p.apply({ kind: "addCall", target: entry, callee: "B" });

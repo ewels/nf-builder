@@ -740,3 +740,20 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - `scope-change`: F-605's step 2 ("A .png in the project is listed but not opened") moved to the deferred M8 feature F-407 "Binary files in projects", since v0.1 projects hold text files only (ADR 0045).
   - `markdown-preview` baseline approved from CI (ADR 0021).
 - Blockers: none.
+
+## 2026-11-28 · F-301 · Claude (autonomous)
+- Did:
+  - Palette rows are native buttons: tabbable while their category is open, described to keyboard users by a hidden span, draggable when they can be added. Dropping Process or Workflow on the canvas, or pressing Enter or Space on it, creates `modules/local/new_process/main.nf` or `subworkflows/local/new_workflow/main.nf`, includes it and calls it in the open workflow, as one undo step. The new node is selected, the Files view reveals the file, focus stays on the palette item, and a polite live region in the palette announces the result (repeated messages are announced again).
+  - Engine: a `CreateWorkflow` command sharing `createDefinition` with `CreateProcess`; `Scaffold.workflow` in the 26.10 pack; `paletteAction`; `EngineApi.freshName` (`NEW_PROCESS`, `NEW_WORKFLOW`, then `_2`, …); `undo(revision, { discard: true })`, which leaves no redo step.
+  - Canvas store: `addFromPalette` runs the fresh name, the create and `AddCall` as one queued task under one group; a refused or throwing `AddCall` rolls the create back with `discard`, so nothing changes. The node's centre lands on the drop point or the viewport centre, set in the same update as the projection and saved with `setLayout`, so ELK never places it; an `addsPending` counter keeps the viewport for every view while an add is pending. Adds are refused in read-only (F-703), on a file tab and with no project.
+  - Drag data uses the custom MIME type `application/x-nf-builder-palette`; F-210's drop guard still acts on `Files` drags only.
+  - Tests: `e2e/palette-add.spec.ts`; unit tests in `packages/engine`, `packages/lang-2610` and `apps/web`; oracle case `f301-palette-adds` (lint clean, `run -stub`), matched byte for byte by the e2e test and the engine golden from `template-blank`.
+- State: passing once CI is green.
+- Next: F-601, F-404, then F-302, F-303, F-307.
+- Decisions:
+  - [ADR 0060](../adr/0060-palette-adds.md): `CreateWorkflow` and `Scaffold.workflow` (amend ADR 0039 and AR-21), with the scaffold `nextflow.enable.types = true\n\nworkflow NAME {\n}\n` taken from the blank template's precedent and proved by oracle case `f301-palette-adds`, since the typed-workflow docs don't show it verbatim; `EngineApi.freshName` and `undo`'s `discard` option (amend ADR 0043's API); the discarding rollback of a half add (amends ADR 0051's history rules); the viewport kept for every view while an add is pending (amends ADR 0052's viewport rule); default names `NEW_PROCESS` and `NEW_WORKFLOW`; placement by node centre; Process and Workflow only, other items focusable and `aria-disabled`; the custom MIME type; the live region instead of a second `role="status"`.
+  - UX-15 and AR-21 updated.
+  - Step 3's "exported result" read as the project's files, checked against the oracle case; F-404 repeats it on a zip.
+  - `scope-change`: F-314 "Add the remaining palette items" (factories, records, enums, functions, includes, params, output, Exec process, Agent, Include pipeline) added to M3, depending on F-301. The F-111 alias note moved to F-310 and F-504.
+  - No visual baseline changed.
+- Blockers: none.

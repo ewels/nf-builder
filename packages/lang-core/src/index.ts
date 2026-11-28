@@ -55,6 +55,7 @@ export {
   type Connect,
   type CreateFile,
   type CreateProcess,
+  type CreateWorkflow,
   type DeleteNode,
   type Disconnect,
   EDIT_COMMAND_KINDS,

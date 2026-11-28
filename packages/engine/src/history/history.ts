@@ -141,11 +141,11 @@ export class History {
     };
   }
 
-  /** Moves the top step to the redo stack after its undo was applied; returns its label. */
-  undone(): string {
+  /** Moves the top step to the redo stack after its undo was applied (or drops it with `discard`); returns its label. */
+  undone(discard = false): string {
     const step = this.#undo.pop();
     if (!step) throw new Error("Nothing to undo");
-    this.#redo.push(step);
+    if (!discard) this.#redo.push(step);
     this.#open = null;
     return step.label;
   }

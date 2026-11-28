@@ -35,6 +35,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-210 Files view | merged, PR #54 | Plan deleted in its PR. |
 | F-503 registry palette | merged, PR #56 | Plan deleted in its PR. |
 | F-605 Markdown and text files | merged, PR #57 | Plan deleted in its PR. |
+| F-301 add from palette | merged, PR #58 | Plan deleted in its PR. |
 
 ## Merge order
 
@@ -319,7 +320,7 @@ ADR numbers reserved for features in flight, so parallel branches don't clash: 0
 ### F-503 — plan deleted
 - Accept every recommendation in section 6, with one change: namespaces are ordered with `nf-core` first, then the rest in code-point order, as the mockup shows (2,296 of 2,330 modules in the deployed snapshot are nf-core's).
 
-### F-301 — [plan](plan-F-301.md)
+### F-301 — plan deleted
 - Accept every recommendation in section 6, with one change to point 16: F-703 (read-only below 1024 px) is being built now; if it has merged when F-301 starts, palette adds go through its read-only guard and are refused there, with a test.
 - The new feature for the other palette items (point 1) is added in F-301's PR with `scope-change`. ADR number: the next free one when F-301 starts (0055 to 0058 are reserved above).
 
@@ -331,3 +332,12 @@ ADR numbers reserved for features in flight, so parallel branches don't clash: 0
 
 ### F-404 — [plan](plan-F-404.md)
 - Accept every recommendation in section 6. For point 3, give module binaries under `resources/usr/bin/` the executable bit too, once the builder has confirmed that folder name in the Nextflow docs (module binaries); otherwise root `bin/` only. ADR number: the next free one when F-404 starts.
+
+### F-302 — [plan](plan-F-302.md)
+- Accept every recommendation in section 6. Start after F-301 merges. ADR number: the next free one when F-302 starts.
+
+### F-307 — [plan](plan-F-307.md)
+- Accept every recommendation in section 6: the new feature for removing and renaming takes and emits (point 1) is added in F-307's PR with `scope-change`. Start after F-301 merges. ADR number: the next free one when F-307 starts.
+
+### F-303 — [plan](plan-F-303.md)
+- Accept every recommendation in section 6, including point 5: renaming a process moves its module folder in the same undo group, superseding ADR 0039's "files don't move" line through F-303's ADR. Point 9: ask the researcher during the build whether the catalogue's missing `Boolean` and `Record` types are an upstream gap, and record it in `docs/research/upstream-bugs.md` if so. Start after F-301 merges; reuse F-601's value kinds if it has merged. ADR number: the next free one when F-303 starts.

@@ -193,6 +193,7 @@ export function createWorkspace(options: WorkspaceOptions): WorkspaceApi {
     report: () => engine.report(),
     readFile: (path) => engine.readFile(path),
     listFiles: () => engine.listFiles(),
+    freshName: (request) => engine.freshName(request),
     history: () => engine.history(),
 
     open: (request, onProgress) =>

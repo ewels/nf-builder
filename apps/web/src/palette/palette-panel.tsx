@@ -14,6 +14,7 @@ import { paletteMessage } from "./palette-message-rule";
 import { PaletteSearch } from "./palette-search";
 import { usePaletteStore } from "./palette-store";
 import { PaletteTree } from "./palette-tree";
+import { usePaletteAdd } from "./use-palette-add";
 import { usePaletteView } from "./use-palette-view";
 
 export function PalettePanel({
@@ -22,6 +23,7 @@ export function PalettePanel({
   readonly languageVersion: string | undefined;
 }): JSX.Element {
   const [query, setQuery] = useState("");
+  const { add, message: added } = usePaletteAdd();
   const open = usePaletteStore((s) => s.open);
   const toggleCategory = usePaletteStore((s) => s.toggleCategory);
   const state = usePaletteView(languageVersion);
@@ -52,6 +54,9 @@ export function PalettePanel({
   return (
     <div className="palette">
       <PaletteSearch value={query} onChange={setQuery} />
+      <div aria-live="polite" className="palette-add-status">
+        {added}
+      </div>
       {state.status === "error" ? (
         <PaletteMessage tone="error">
           Couldn't load the components for Nextflow {languageVersion}. Reload
@@ -72,6 +77,7 @@ export function PalettePanel({
           open={open}
           searching={searching}
           onToggle={toggleCategory}
+          onAdd={(item, at) => void add(item, at)}
         />
       )}
       <RegistrySection query={deferredQuery} matches={matches} />
