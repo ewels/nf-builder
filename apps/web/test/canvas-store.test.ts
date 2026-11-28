@@ -2062,3 +2062,141 @@ describe("F-301 addFromPalette", () => {
     expect(log).toEqual(["fresh:process:main.nf"]);
   });
 });
+
+describe("F-302 connect and disconnect", () => {
+  const wf = [ref("main.nf", null)];
+  const from = { node: "main.nf#/A@1", port: "out" };
+  const to = { node: "main.nf#/B@1", port: "in" };
+  const refusalOf = (message: string, code = "refused") => ({
+    ok: false,
+    revision: 1,
+    code,
+    message,
+    path: "main.nf",
+    problems: [],
+  });
+
+  function wiring(
+    options: { refuse?: string; targets?: () => Promise<unknown> } = {},
+  ) {
+    const applied: { command: unknown; revision: number }[] = [];
+    const asked: unknown[] = [];
+    let revision = 1;
+    const engine = {
+      open: async () => summaryOf(wf),
+      project: async (): Promise<ProjectionResult> => ({
+        revision,
+        projection: projectionOf(wf[0] as WorkflowRef),
+        positions: {},
+      }),
+      apply: async (command: unknown, rev: number) => {
+        applied.push({ command, revision: rev });
+        if (options.refuse !== undefined) return refusalOf(options.refuse);
+        revision = rev + 1;
+        return changeAt(revision, wf);
+      },
+      connectionTargets: async (req: unknown) => {
+        asked.push(req);
+        return options.targets === undefined
+          ? { revision, from, targets: [] }
+          : options.targets();
+      },
+      history: async () => EMPTY_HISTORY,
+    } as unknown as EngineApi;
+    return { engine, applied, asked };
+  }
+
+  it("F-302 UX-25: connect applies Connect for the active workflow tab with the session; disconnect applies Disconnect", async () => {
+    const { engine, applied } = wiring();
+    const store = createCanvasStore(() => engine);
+    await store.getState().open(request);
+    const session = store.getState().session;
+    expect((await store.getState().connect(from, to, session)).ok).toBe(true);
+    expect((await store.getState().disconnect(to, session)).ok).toBe(true);
+    expect(applied.map((a) => a.command)).toEqual([
+      {
+        kind: "connect",
+        target: { path: "main.nf", workflow: null },
+        from,
+        to,
+      },
+      {
+        kind: "disconnect",
+        target: { path: "main.nf", workflow: null },
+        port: to,
+      },
+    ]);
+    expect(applied.map((a) => a.revision)).toEqual([1, 2]);
+  });
+
+  it("F-302 UX-25: a refused connect sets canvasNotice with the engine message; the next change clears it", async () => {
+    const { engine } = wiring({ refuse: "A can't feed B." });
+    const store = createCanvasStore(() => engine);
+    await store.getState().open(request);
+    expect((await store.getState().connect(from, to)).ok).toBe(false);
+    expect(store.getState().canvasNotice).toBe(
+      "Couldn't connect: A can't feed B.",
+    );
+    await store.getState().disconnect(to);
+    expect(store.getState().canvasNotice).toBe(
+      "Couldn't disconnect: A can't feed B.",
+    );
+    await store.getState().changed(changeAt(5, wf) as never);
+    expect(store.getState().canvasNotice).toBeNull();
+  });
+
+  it("F-302: connectionTargets drops a result for an older session or revision", async () => {
+    const answer = (revision: number) => async () => ({
+      revision,
+      from,
+      targets: [{ node: "n", port: "p", status: "ok", message: null }],
+    });
+    const ok = wiring({ targets: answer(1) });
+    const store = createCanvasStore(() => ok.engine);
+    await store.getState().open(request);
+    expect(await store.getState().connectionTargets(from)).toHaveLength(1);
+    expect(ok.asked).toEqual([{ path: "main.nf", workflow: null, from }]);
+    expect(
+      await store
+        .getState()
+        .connectionTargets(from, store.getState().session + 1),
+    ).toBeNull();
+    const old = wiring({ targets: answer(7) });
+    const other = createCanvasStore(() => old.engine);
+    await other.getState().open(request);
+    expect(await other.getState().connectionTargets(from)).toBeNull();
+  });
+
+  it("F-302 ADR-0052: the view after a connect or disconnect has refit false", async () => {
+    const { engine } = wiring();
+    const store = createCanvasStore(() => engine);
+    await store.getState().open(request);
+    const refit = () => {
+      const c = store.getState().content;
+      if (c.status !== "ready") throw new Error("not ready");
+      return c.refit;
+    };
+    expect(refit()).toBe(true);
+    await store.getState().connect(from, to);
+    expect(refit()).toBe(false);
+    await store.getState().disconnect(to);
+    expect(refit()).toBe(false);
+    await store.getState().changed(changeAt(9, wf) as never);
+    expect(refit()).toBe(true);
+  });
+
+  it("F-302 ADR-0056: connect and disconnect are refused read-only without calling the engine", async () => {
+    const { engine, applied, asked } = wiring();
+    const store = createCanvasStore(
+      () => engine,
+      () => true,
+    );
+    await store.getState().open(request);
+    const a = await store.getState().connect(from, to);
+    const b = await store.getState().disconnect(to);
+    expect([a.ok, b.ok]).toEqual([false, false]);
+    expect(await store.getState().connectionTargets(from)).toBeNull();
+    expect(applied).toEqual([]);
+    expect(asked).toEqual([]);
+  });
+});

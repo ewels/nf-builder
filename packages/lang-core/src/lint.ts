@@ -92,4 +92,9 @@ export interface PackLints {
     port: Port,
     isRecord?: (name: string) => boolean,
   ): Compatibility;
+  /** LA-14: the component counts when `source` is a `Tuple<…>` of another size than the legacy `tuple` input `port` declares; null otherwise. */
+  tupleArity(
+    source: FlowType | null,
+    port: Port,
+  ): { expected: number; actual: number } | null;
 }

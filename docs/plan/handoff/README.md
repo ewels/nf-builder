@@ -39,6 +39,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-404 zip export | merged, PR #59 | Plan deleted in its PR. |
 | F-601 config editor | merged, PR #60 | Plan deleted in its PR. |
 | F-405 legacy import summary | merged, PR #61 | Plan deleted in its PR. |
+| F-302 connect ports | merged, PR #62 | Plan deleted in its PR. |
 
 ## Merge order
 
@@ -336,7 +337,7 @@ ADR numbers reserved for features in flight, so parallel branches don't clash: 0
 ### F-404 — plan deleted
 - Accept every recommendation in section 6. For point 3, give module binaries under `resources/usr/bin/` the executable bit too, once the builder has confirmed that folder name in the Nextflow docs (module binaries); otherwise root `bin/` only. ADR number: the next free one when F-404 starts.
 
-### F-302 — [plan](plan-F-302.md)
+### F-302 — plan deleted
 - Accept every recommendation in section 6. Start after F-301 merges. ADR number: the next free one when F-302 starts.
 
 ### F-307 — [plan](plan-F-307.md)
@@ -347,3 +348,18 @@ ADR numbers reserved for features in flight, so parallel branches don't clash: 0
 
 ### F-406 — [plan](plan-F-406.md)
 - Accept every recommendation in section 6. ADR number: the next free one when F-406 starts.
+
+## Session 3 state (2026-11-28, 06:00 UTC)
+
+- Merged this session: F-703 (#53), F-401 (#55), F-210 (#54), F-503 (#56), F-605 (#57), F-301 (#58), F-404 (#59), F-601 (#60), F-405 (#61).
+- In flight: F-302 (PR #62, CI), F-303 (`feat/F-303`, building: corpus prelude for `updateDeclaration`, output renames, module folder move; then tasks 6 to 9), F-505 (`feat/F-505`, tasks 1 to 4).
+- F-303 type suggestions: `Boolean`, `Record` and `Tuple` are valid standard types (docs.seqera.io/nextflow/reference/stdlib-types; pinned lint accepts them) but our catalogue generator (`tools/spec-extract`) drops types without a class-level `@Description` or without a class. F-303 adds the documented class-less types from a small hand-kept list citing that page; not an upstream bug.
+- ADR numbers used: 0055 to 0064. Next free: 0065.
+- Merge check: `check_suite.completed` fires per workflow, so verify every check run on the PR head (`gh api repos/ewels/nf-builder/commits/<sha>/check-runs`) before merging.
+- Next: F-307, F-406, then F-304, F-305, F-306, F-311 (after F-303), F-308 and F-310 (after F-302), F-504, F-602.
+
+### F-310 — [plan](plan-F-310.md)
+- Accept every recommendation in section 6; point 3 splits copying operator, factory and code nodes into a new feature in F-310's PR (`scope-change`). The workspace `undo` options bug it found is fixed separately (`fix/undo-discard`). Start after F-302 merges. ADR number: the next free one when F-310 starts.
+
+### F-504 — [plan](plan-F-504.md)
+- Accept every recommendation in section 6: F-302 joins F-504's `depends_on` in its PR (`scope-change`); `.module-info` not written until the researcher reproduces the checksum (one bounded try); bundles with binary files refused (pointing to F-407); registry subworkflows count as registry folders (amends ADRs 0055 and 0063); the Hello world connection step stays lint-only with the run failure recorded, and widening `tuple-arity` becomes a follow-up note. ADR number: the next free one when F-504 starts.

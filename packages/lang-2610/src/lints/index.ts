@@ -31,6 +31,7 @@ import {
   includeAlias,
   pipelineIncludeTypes,
 } from "./names.ts";
+import { tupleArity, tupleArityOf } from "./tuples.ts";
 import {
   missingType,
   publishTypeIgnored,
@@ -69,7 +70,9 @@ export const lints: PackLints = {
     unusedOutput,
     typeMismatch,
     multipleChannels,
+    tupleArity,
   ],
   advise,
   connection,
+  tupleArity: tupleArityOf,
 };

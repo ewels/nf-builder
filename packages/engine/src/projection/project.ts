@@ -211,6 +211,7 @@ function port(s: PortSpec, feed?: Feed): Port {
     argument: feed?.range ?? null,
     // an inline argument (one that reads no graph value) keeps its type for LA-32 checks
     argumentType: feed?.edges.length === 0 ? feed.type : null,
+    ...(s.components === undefined ? {} : { components: s.components }),
   };
 }
 

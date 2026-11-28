@@ -494,3 +494,32 @@ cases:
     sources:
       - https://docs.seqera.io/nextflow/plugins/using-plugins
     lint: { expect: ok, clean: true }
+
+  # F-302: connect and disconnect with type checking. The start tree, and the trees of the two connects (written by the
+  # edit goldens from the start tree).
+  - id: f302-connect-start
+    about: A typed project with a record, a process that takes one (DESCRIBE), a process with no input (TOUCH) and an entry workflow that calls DESCRIBE with no argument; the start of the connect sequence.
+    spec: [F-302, UX-25, LA-29, LA-32]
+    sources:
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/process-typed.mdx
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/workflow.mdx
+    lint:
+      expect: error
+      errors: ["Process `DESCRIBE` expects 1 argument(s) but received 0"]
+  - id: f302-connect-typed
+    about: The start tree with params.input connected to DESCRIBE's sample input; lints clean and stub-runs.
+    spec: [F-302, UX-25, LA-29]
+    sources:
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/process-typed.mdx
+    lint: { expect: ok, clean: true }
+    run:
+      expect: ok
+      args: ["-stub", "-profile", "test"]
+  - id: f302-connect-mismatch
+    about: The start tree with TOUCH's Path output connected to DESCRIBE's Sample input; lint reports the type error.
+    spec: [F-302, UX-25, LA-29, LA-32]
+    sources:
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/process-typed.mdx
+    lint:
+      expect: error
+      errors: ["not compatible with process input of type Sample"]

@@ -128,4 +128,34 @@ describe("F-205 flow elements", () => {
       "e3",
     ]);
   });
+
+  it("F-302 UX-24: a mismatched edge carries its message and class, which wins over the highlight; edges stay not selectable for React Flow", () => {
+    const marks = new Map([["e1", "Type mismatch: Path into Sample."]]);
+    const [edge] = toFlowEdges(view, "main.nf#/a", marks, {
+      deletable: true,
+      selectedEdge: "e1",
+    });
+    expect(edge?.data?.mismatch).toBe("Type mismatch: Path into Sample.");
+    expect(edge?.data?.highlighted).toBe(true);
+    expect(edge?.data?.selected).toBe(true);
+    expect(edge?.data?.tooltip).toBe(
+      "Value<Path> · params.fasta\nType mismatch: Path into Sample.",
+    );
+    expect(edge?.ariaLabel).toBe(
+      "Value<Path> · params.fasta\nType mismatch: Path into Sample.. Press Delete to disconnect.",
+    );
+    expect(edge?.selectable).toBe(false);
+    expect(edge?.ariaRole).toBe("button");
+    expect(edge?.domAttributes).toEqual({ "aria-pressed": true });
+    const [plain] = toFlowEdges(view, null);
+    expect(plain?.data?.mismatch).toBeNull();
+    expect(plain?.data?.selected).toBe(false);
+    expect(plain?.ariaLabel).toBe("Value<Path> · params.fasta");
+    expect(plain?.ariaRole).toBeUndefined();
+    const [other] = toFlowEdges(view, null, undefined, {
+      deletable: true,
+      selectedEdge: "nope",
+    });
+    expect(other?.domAttributes).toEqual({ "aria-pressed": false });
+  });
 });

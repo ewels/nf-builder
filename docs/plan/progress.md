@@ -808,4 +808,21 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - UX-31 and UX-03 updated.
   - Vendored `subworkflows/nf-core/**` stay with the project's own files (ADR 0055 unchanged); note appended to F-504.
   - `details-entry-summary` and `read-only-phone` baselines re-approved from CI (ADR 0021).
+## 2026-11-28 · F-302 · Claude (autonomous)
+- Did:
+  - Connect by drag (UX-25): drags start only from outputs; a drop applies `Connect` as one undo step and rewrites a fed input's argument. While dragging, the worker's dry run marks every input: refused targets dim and reject the drop, mismatched ones dim with a red ring and accept it (LA-29); a refused drop shows "Couldn't connect: <message>" in the canvas notices. The viewport is kept after a connect or disconnect.
+  - Engine: `planConnect` makes every check `Connect` makes short of the reprint, comment loss included, and `EngineApi.connectionTargets` runs it per input port with the pack's `connection` and `tupleArity` checks. The dry run predicts the argument count after the connect: `ok` while the count stays wrong, `mismatch` only when it becomes right, as lint checks types only then.
+  - Mismatch edges (UX-24, QA-12): `edgeMismatches` maps `type-mismatch` and `tuple-arity` diagnostics at the projection's revision to edges, drawn in the error colour, thicker, above the selection highlight, with a midpoint "!" glyph, the message in the tooltip and the aria label.
+  - Disconnect: canvas-local edge selection (click or Enter selects, Escape, a pane click or focus leaving clears); Delete or Backspace applies `Disconnect`. Deletable edges are `role="button"` with `aria-pressed`. The F-206 tests are unchanged. Read-only: no connection, no edge selection or Delete.
+  - LA-14: pack code `tuple-arity` (origin `ours`, error) and `Port.components` in lang-core.
+  - Tests: `e2e/connect.spec.ts` (all three steps, refused targets, edge keys, viewport, read-only, CSP, the `connect-mismatch` baseline), oracle cases `f302-connect-start`, `f302-connect-typed` and `f302-connect-mismatch` with engine goldens, `type-mismatch` record and `tuple-arity` lint fixtures, and unit tests in `packages/engine/test/`, `packages/lang-2610/test/lints/` and `apps/web/test/`.
+- State: passing once CI is green.
+- Next: F-303, F-307, F-505, F-406.
+- Decisions:
+  - [ADR 0064](../adr/0064-connect-ports.md): drag from outputs only; the `planConnect` dry run and `EngineApi.connectionTargets` (amends ADR 0043's API list); refused and mismatch target states; mismatch red with a glyph as the second cue; canvas-local edge selection and Delete; viewport kept after a connect or disconnect (amends ADR 0052); `tuple-arity` (amends ADR 0042's code set, now 31 codes) and `Port.components`. ADR 0063 is taken by F-405's open branch.
+  - The oracle confirmed the pinned lint reports `Path` into a `Sample` record input, so `type-mismatch` stays lint-origin. The pinned `nextflow lint` 26.10.7 doesn't check tuple arity (checked), so `tuple-arity` has no lint pattern.
+  - UX-24, UX-25 and LA-14 updated.
+  - Known: Disconnect after a Connect that introduced `x = P()` leaves `x` unused, which lint reports as an unused-variable warning; follow-up noted on F-310.
+  - Notes appended to F-308, F-310, F-504 and F-701.
+  - The `connect-mismatch` baseline is approved from CI (ADR 0021); no existing baseline changed.
 - Blockers: none.

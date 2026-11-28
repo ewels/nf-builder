@@ -67,3 +67,4 @@ Process: [0001](0001-record-decisions-as-adrs.md). Template: [template.md](templ
 | [0061](0061-config-editor.md) | Edit nextflow.config through forms with statement-level commands, a ported config printer, Nextflow's run-time option check and its selector matching | Accepted (agent) |
 | [0062](0062-zip-export.md) | Export a project as a zip under one folder, with the layout optional and bin/ executable | Accepted (agent) |
 | [0063](0063-legacy-import-summary.md) | Show the modelled share and suggestion count in the workflow summary, and group registry module files in the problems panel | Accepted (agent) |
+| [0064](0064-connect-ports.md) | Connect ports by drag with a worker dry run of targets, draw mismatches red from diagnostics, disconnect with Delete, and check tuple arity in the pack | Accepted (agent) |

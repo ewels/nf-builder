@@ -30,9 +30,11 @@ import {
   patchResult,
   patchSequence,
 } from "../edit/apply";
+import { connectionTargets } from "../edit/connection-targets";
 import { freshDefinitionName } from "../edit/fresh-name";
 import { definitionPath } from "../edit/names";
 import { PatchError } from "../edit/patches";
+import { EditRefusal } from "../edit/refusal";
 import { registryFolders } from "../files/registry";
 import type { RegistryFolder } from "../files/types";
 import { EMPTY_HISTORY, History, type HistoryLimits } from "../history/history";
@@ -73,6 +75,7 @@ import type {
   ApplyOptions,
   ApplyOutcome,
   ConfigViewResult,
+  ConnectionTargetsResult,
   DiagnosticsResult,
   EngineApi,
   EngineRefusal,
@@ -849,6 +852,26 @@ export function createEngineService(
           files: fileSummaries(open.state.model),
           registry: registryOf(open),
         };
+      }),
+
+    connectionTargets: (request) =>
+      guarded((open): ConnectionTargetsResult | EngineRefusal => {
+        try {
+          return {
+            revision,
+            from: request.from,
+            targets: connectionTargets(
+              open.state,
+              open.lints,
+              { path: request.path, workflow: request.workflow },
+              request.from,
+            ),
+          };
+        } catch (error) {
+          if (error instanceof EditRefusal)
+            return refusal(error.code, error.message);
+          throw error;
+        }
       }),
 
     freshName: (request) =>
