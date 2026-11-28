@@ -37,6 +37,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-605 Markdown and text files | merged, PR #57 | Plan deleted in its PR. |
 | F-301 add from palette | merged, PR #58 | Plan deleted in its PR. |
 | F-404 zip export | merged, PR #59 | Plan deleted in its PR. |
+| F-601 config editor | merged, PR #60 | Plan deleted in its PR. |
 
 ## Merge order
 
@@ -291,7 +292,7 @@ Next free ADR number: 0055 (0054 is F-309's).
   - tasks 1 to 3 now, tasks 4 to 7 after F-309 merges; no `depends_on` change;
   - the tablist label "Open workflows and files"; the 2.6 language set; `EngineApi.outline`; AR-30 extended to the preview; tab closing left to F-307; no preview size cap; the step 1 test tagged `@smoke`.
 
-### F-601 — [plan](plan-F-601.md)
+### F-601 — plan deleted
 - Accept every recommendation in section 6:
   - tasks 1 to 6 now, task 7 after F-309 merges (file tabs, `openFile`, `revealCode`); no `depends_on` change;
   - open configs through `openFile` and a "Configuration" link in the entry workflow's summary (UX-31 amended);

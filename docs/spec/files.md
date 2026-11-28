@@ -6,12 +6,12 @@ Each file type has an editor. Editors that offer a form also offer the raw text 
 
 | ID | Requirement |
 |---|---|
-| FI-01 | Parsed with the pack's config grammar. Each top-level scope is a collapsible card. Scopes and options come from the catalogue (`config.json`) and plugin specs. |
-| FI-02 | First-class forms for `manifest`, `params`, `process` (defaults, `resourceLimits`, `withLabel` and `withName` selectors), `profiles`, `plugins`, `docker`, `singularity`, `apptainer`, `conda`, `wave`, `executor`. Other scopes get a generic key/value form typed from the catalogue. |
-| FI-03 | "Add scope" lists every scope in the catalogue with its description. Unknown scopes and options in existing files are kept and flagged as warnings, never removed. |
-| FI-04 | Selecting an option shows its description, type and docs link in the right pane. |
-| FI-05 | `includeConfig` lines are kept, and the included files open from a link. |
-| FI-06 | Selectors show which processes they match (for example "used by 1 process"). |
+| FI-01 | Parsed with the pack's config grammar. Each top-level scope is a collapsible card. Scopes and options come from the catalogue (`config.json`) and, from F-505, plugin specs. A config file opens in its own tab with Form, Split and Code; the form is read-only while the file has parse problems (ADR 0061). |
+| FI-02 | First-class forms for `manifest`, `params`, `process` (defaults, `resourceLimits`, `withLabel` and `withName` selectors), `profiles`, `plugins`, `docker`, `singularity`, `apptainer`, `conda`, `wave`, `executor`. Other scopes get a generic key/value form typed from the catalogue. Memory and duration values are written as `8.GB` and `2.h`, strings single-quoted; a value the form can't model is shown as read-only code with "Edit in code" (ADR 0061). |
+| FI-03 | "Add scope" lists every scope in the catalogue with its description. Unknown scopes and options in existing files are kept, never removed, and flagged as warnings with Nextflow's run-time wording ("Unrecognized config option …"), which `nextflow lint` 26.10 doesn't report. Plugin scopes count as unknown until their plugin's spec is loaded, which is F-505's (ADR 0061). |
+| FI-04 | Selecting an option shows its description, type and docs link in the right pane. The description is rendered as safe Markdown (no HTML, `https` links only), and the docs link always points under `https://docs.seqera.io/nextflow/` (ADR 0061). |
+| FI-05 | `includeConfig` lines are kept, and the included files open from a link in their own config tab. A dynamic or URL source is shown as external, with no link (ADR 0061). |
+| FI-06 | Selectors show which processes they match (for example "used by 1 process"), counted over the processes the entry workflow invokes, matched as Nextflow does: regular expression on the whole name, `!` negates, `withName` against the declared, alias and fully qualified names, `withLabel` against any label (ADR 0061). |
 
 ## `nextflow_schema.json`
 
