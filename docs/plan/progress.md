@@ -664,3 +664,17 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - UX-03 and UX-20 updated.
   - Problems panel and status-bar baselines approved from CI (ADR 0021).
 - Blockers: none.
+
+## 2026-11-28 · F-401 · Claude (autonomous)
+- Did:
+  - GitHub import of public repositories: a second source, "GitHub repository", in F-403's "Import from" group on the Import route. Review lists the repository with two `api.github.com` requests and shows the summary in the shared `ImportSummaryView`; Import downloads from `raw.githubusercontent.com` (8 in flight, one retry), with progress and Cancel import; closing the dialog aborts an in-flight import.
+  - `@nf-builder/sources/github`: ref resolution, tree listing and raw downloads, run in the document. The client checks `content-length` before reading a body (skipped when `content-encoding` is set) and maps malformed tree entries to `GithubError("unexpected")`. F-403's import helpers are reused; only `binary.ts` and `plan.ts` were added in `sources/import`.
+  - `WorkspaceApi.importProject` stores the transferred bytes with the project's `source` in one transaction and re-checks the IO-12 limits. `EngineApi.report()` and the Import report dialog show files, parse failures, the legacy share and suggestions.
+  - Tests: `e2e/github-import.spec.ts` against a mocked GitHub, with the fetchngs tree fixture generated from git and its blob SHAs checked against the corpus cache. The unit tests' API responses are synthesised from the GitHub docs, since the sandbox couldn't reach the API. The opt-in live test (`F401_LIVE=1`) was not run.
+- State: passing once CI is green.
+- Next: F-210 merging, then F-503, F-605, F-601 and F-301.
+- Decisions:
+  - [ADR 0057](../adr/0057-github-import.md): fetching in the document with bytes transferred to the worker (an AR-30 reading); `ProjectMeta.source` as an optional field with no schema version bump, and the rule for when a bump is needed (amends ADR 0045); `EngineApi.report()` and `WorkspaceApi.importProject()` (amend ADRs 0043 and 0045); the `web-worker-no-github-client` dependency-cruiser rule and the `./github` subpath export; F-403's default ignore list shared by both routes instead of the plan's list; limits on the selected files; length checks, no SHA-1 in the app; no token field until F-402; Publish docs hidden for a GitHub import; the report's definitions; mocked e2e evidence with an opt-in live test.
+  - IO-10, IO-12, IO-13, UX-60, UX-61 and the architecture data flow updated.
+  - Known limitation: a raw 429 without CORS headers is opaque, so it shows as "Couldn't reach GitHub" rather than the rate-limit message.
+- Blockers: none.
