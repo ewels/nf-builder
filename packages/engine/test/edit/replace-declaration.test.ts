@@ -177,4 +177,76 @@ describe("F-304 ReplaceDeclaration", () => {
     const result = refused(state, replace(text));
     expect(result.message).toMatch(/pipe/);
   });
+
+  it("F-304 ADR-0039: a renamed input counts as removed and added, so its call argument becomes null", async () => {
+    const state = await start();
+    const result = accepted(
+      state,
+      replace(GREET.replace("name: String", "who: String")),
+    );
+    const main = result.files.find((f) => f.path === "main.nf")?.text;
+    expect(main).toContain("GREET(null)");
+  });
+
+  it("F-304 ADR-0039: the pipe refusal from the Code tab doesn't send the user back to the Code tab", async () => {
+    const state = await start(
+      MODULE_TEXT,
+      MAIN.replace("greet = GREET('world')", "greet = channel.of('a') | GREET"),
+    );
+    const text = GREET.replace(
+      "    name: String\n",
+      "    name: String\n    more: String\n",
+    );
+    const result = refused(state, replace(text));
+    expect(result.message).not.toMatch(/Code tab/);
+    expect(result.message).toMatch(/pipe/);
+  });
+
+  it("F-304 F-303: outputs renamed in place (two or more) are followed at call sites; a moved or added output leaves them", async () => {
+    const two = `process PAIR {
+    input:
+    x: String
+
+    output:
+    left: String = x
+    right: String = x
+
+    exec:
+    true
+}`;
+    const caller = `nextflow.enable.types = true
+
+include { PAIR } from './modules/local/greet/main.nf'
+
+workflow {
+    r = PAIR('a')
+    r.left.view()
+    r.right.view()
+}
+`;
+    const module = `nextflow.enable.types = true\n\n${two}\n`;
+    const state = await start(module, caller);
+    const renamed = accepted(
+      state,
+      replace(two.replace("left:", "first:"), "PAIR"),
+    );
+    const main = renamed.files.find((f) => f.path === "main.nf")?.text;
+    expect(main).toContain("r.first.view()");
+    expect(main).toContain("r.right.view()");
+    // an added output is not a rename: reads stay as they were
+    const added = accepted(
+      state,
+      replace(
+        two
+          .replace("left:", "first:")
+          .replace(
+            "    right: String = x\n",
+            "    right: String = x\n    third: String = x\n",
+          ),
+        "PAIR",
+      ),
+    );
+    const after = added.files.find((f) => f.path === "main.nf")?.text;
+    expect(after ?? caller).toContain("r.left.view()");
+  });
 });

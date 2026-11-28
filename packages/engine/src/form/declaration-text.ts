@@ -45,12 +45,18 @@ export type ParsedDeclaration =
 
 type Refused = Extract<ParsedDeclaration, { ok: false }>;
 
-const WRONG_KIND =
+export const WRONG_KIND =
   "The Code tab can't change what kind of declaration this is.";
 const ONE_ONLY =
   "The Code tab edits one declaration. Remove the other code, such as an include, a function or a second declaration.";
 
-const NO_PATH = "declaration.nf";
+/** The one-file project a declaration is parsed or edited in on its own (F-304). */
+export const DECLARATION_PATH = "declaration.nf";
+
+/** `text` after the flag `prefix`, as the one-declaration file is written. */
+export function withPrefix(prefix: string, text: string): string {
+  return prefix === "" ? text : `${prefix}\n\n${text}`;
+}
 
 function refusal(message: string): Refused {
   return {
@@ -78,9 +84,9 @@ export function parseDeclarationText(
   prefix: string,
   text: string,
 ): ParsedDeclaration {
-  const head = prefix === "" ? "" : `${prefix}\n\n`;
+  const head = withPrefix(prefix, "");
   const lines = head === "" ? 0 : head.split("\n").length - 1;
-  const file = createSourceFile(NO_PATH, head + text, parser);
+  const file = createSourceFile(DECLARATION_PATH, head + text, parser);
   if (file.language !== "nextflow") return refusal(ONE_ONLY);
   if (file.problems.length > 0) {
     const problems = file.problems.map((p) => {

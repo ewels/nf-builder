@@ -556,6 +556,7 @@ export function callSiteEdits(
   origins: readonly (number | null)[],
   inputCount: number,
   outputs: ReadonlyMap<string, string>,
+  fix = "change its inputs in the Code tab",
 ): { path: string; edit: TextEdit }[] {
   const inputsSame =
     origins.length === inputCount && origins.every((o, i) => o === i);
@@ -565,7 +566,7 @@ export function callSiteEdits(
   if (piped && !inputsSame)
     throw new EditRefusal(
       "invalid",
-      `${name} is called with a pipe in ${piped.path}; change its inputs in the Code tab. Nothing was changed.`,
+      `${name} is called with a pipe in ${piped.path}; ${fix}. Nothing was changed.`,
       piped.path,
     );
   const out: { path: string; edit: TextEdit }[] = [];

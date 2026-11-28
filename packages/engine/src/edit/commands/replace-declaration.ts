@@ -11,6 +11,7 @@ import {
   declarationSource,
   flagPrefix,
   parseDeclarationText,
+  WRONG_KIND,
 } from "../../form/declaration-text";
 import { processForm } from "../../form/read-process";
 import type { EditState } from "../apply";
@@ -31,6 +32,30 @@ function inputOrigins(
     );
     return at < 0 ? null : at;
   });
+}
+
+/**
+ * The outputs whose name changed, old to new, when the code keeps the same number (two or more) in the same places: a
+ * name at the same position is the same output renamed (as in F-303). Otherwise reads are left, since a moved, added
+ * or removed output can't be matched with certainty. A swap of names is left too.
+ */
+function outputRenames(
+  before: ReturnType<typeof processForm>,
+  after: ReturnType<typeof processForm>,
+): Map<string, string> {
+  const out = new Map<string, string>();
+  if (
+    before.outputs.length < 2 ||
+    before.outputs.length !== after.outputs.length
+  )
+    return out;
+  after.outputs.forEach((row, i) => {
+    const was = before.outputs[i]?.name ?? "";
+    if (was !== "" && row.name !== "" && was !== row.name)
+      out.set(was, row.name);
+  });
+  const olds = new Set(before.outputs.map((r) => r.name));
+  return [...out.values()].some((n) => olds.has(n)) ? new Map() : out;
 }
 
 export function replaceDeclaration(
@@ -80,7 +105,7 @@ export function replaceDeclaration(
   if (!parsed.process.typed)
     throw new EditRefusal(
       "invalid",
-      "The Code tab can't change what kind of declaration this is. Nothing was changed.",
+      `${WRONG_KIND} Nothing was changed.`,
       path,
     );
   if (parsed.process.name.name !== name)
@@ -106,7 +131,8 @@ export function replaceDeclaration(
       name,
       inputOrigins(before, after),
       declaration.inputs?.items.length ?? 0,
-      new Map(),
+      outputRenames(before, after),
+      "change that call to a plain call first",
     ),
   ]);
 }

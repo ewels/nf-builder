@@ -39,10 +39,13 @@ import { EditRefusal } from "../edit/refusal";
 import { registryFolders } from "../files/registry";
 import type { RegistryFolder } from "../files/types";
 import {
+  DECLARATION_PATH,
   declarationSource,
   flagPrefix,
   formatDeclarationText,
   parseDeclarationText,
+  WRONG_KIND,
+  withPrefix,
 } from "../form/declaration-text";
 import { popupTarget } from "../form/popup-target";
 import { formChoices, processForm } from "../form/read-process";
@@ -159,8 +162,6 @@ function fileSummaries(model: ProjectModel): FileSummary[] {
 }
 
 const ABSENT: LayoutStatus = { state: "absent", message: null };
-/** The one-file project `declarationText` applies a form in (F-304). */
-const SCRATCH = "declaration.nf";
 const OK: LayoutStatus = { state: "ok", message: null };
 
 const SIDECAR_REFUSAL =
@@ -872,11 +873,7 @@ export function createEngineService(
           request.text,
         );
         if (!parsed.ok) return unparsed(parsed.message, parsed.problems);
-        if (!parsed.process.typed)
-          return unparsed(
-            "The Code tab can't change what kind of declaration this is.",
-            [],
-          );
+        if (!parsed.process.typed) return unparsed(WRONG_KIND, []);
         return {
           revision,
           name: parsed.process.name.name,
@@ -919,13 +916,12 @@ export function createEngineService(
             text = request.base;
           }
           // the declaration alone, so no call site can refuse the form and nothing else is touched
-          const head = found.prefix === "" ? "" : `${found.prefix}\n\n`;
           const scratch = await createEditState(open.version, [
-            { path: SCRATCH, text: head + text },
+            { path: DECLARATION_PATH, text: withPrefix(found.prefix, text) },
           ]);
           const applied = applyCommand(scratch, {
             kind: "updateDeclaration",
-            path: SCRATCH,
+            path: DECLARATION_PATH,
             name,
             form: request.form,
           });
@@ -938,7 +934,7 @@ export function createEngineService(
           // an unchanged form writes nothing: the text stays as it was
           if (applied.files.length === 0) return { revision, text };
           commit(scratch, applied);
-          const file = scratch.model.file(SCRATCH);
+          const file = scratch.model.file(DECLARATION_PATH);
           const declaration = file?.declarations.get(name)?.declaration;
           if (
             file?.source.language !== "nextflow" ||
