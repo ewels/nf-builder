@@ -35,7 +35,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-210 Files view | merged, PR #54 | Plan deleted in its PR. |
 | F-503 registry palette | merged, PR #56 | Plan deleted in its PR. |
 | F-605 Markdown and text files | merged, PR #57 | Plan deleted in its PR. |
-| F-301 add from palette | merged, PR #TBD | Plan deleted in its PR. |
+| F-301 add from palette | merged, PR #58 | Plan deleted in its PR. |
 
 ## Merge order
 
