@@ -2,8 +2,9 @@ import type { JSX, ReactNode } from "react";
 import { CanvasHost } from "../canvas/canvas-host";
 import { useWorkspace } from "../canvas/canvas-store";
 import { CodePane } from "../code/code-pane";
+import { useReadOnly } from "../read-only/read-only-store";
 import { workflowTabId } from "../shell/tab-strip";
-import type { ViewMode } from "./view-mode";
+import { shownMode, type ViewMode } from "./view-mode";
 import "./views.css";
 
 /**
@@ -35,17 +36,19 @@ export function TabPanel(): JSX.Element {
   const summary = useWorkspace((s) => s.summary);
   const session = useWorkspace((s) => s.session);
   const tab = useWorkspace((s) => s.tabs.find((t) => t.id === s.activeTab));
+  const readOnly = useReadOnly();
   if (summary === null || tab === undefined) return <CanvasHost />;
+  const mode = shownMode(tab.mode, readOnly);
   return (
     <div
       className="tab-panel"
       id="canvas-panel"
       role="tabpanel"
       aria-labelledby={workflowTabId(tab.id)}
-      data-view-mode={tab.mode}
+      data-view-mode={mode}
     >
       <PanelLayout
-        mode={tab.mode}
+        mode={mode}
         canvas={<CanvasHost key="canvas" />}
         code={<CodePane key={`code:${session}:${tab.path}`} path={tab.path} />}
       />

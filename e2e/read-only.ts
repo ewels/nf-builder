@@ -24,15 +24,12 @@ export const resize = (
   size: { width: number; height: number },
 ): Promise<void> => page.setViewportSize(size);
 
-/** At 1440 px: creates a stored project from the f205-canvas fixture, waits until it is saved with its canvas drawn. */
-export async function openStoredCanvas(
+/** Stores a project from the f205-canvas fixture through the engine hook and reloads, so the app reopens it. */
+export async function storeCanvasProject(
   page: Page,
   name: string,
+  version: string,
 ): Promise<void> {
-  await page.setViewportSize(WIDE);
-  await page.goto("./");
-  await expect(switcher(page)).toBeEnabled();
-  const version = await page.getByLabel("Nextflow version").inputValue();
   const files = readProject(CANVAS_FIXTURE);
   await page.evaluate(
     async ({ files, version, name }) => {
@@ -55,6 +52,18 @@ export async function openStoredCanvas(
     { files, version, name },
   );
   await page.reload();
+}
+
+/** At 1440 px: creates a stored project from the f205-canvas fixture, waits until it is saved with its canvas drawn. */
+export async function openStoredCanvas(
+  page: Page,
+  name: string,
+): Promise<void> {
+  await page.setViewportSize(WIDE);
+  await page.goto("./");
+  await expect(switcher(page)).toBeEnabled();
+  const version = await page.getByLabel("Nextflow version").inputValue();
+  await storeCanvasProject(page, name, version);
   await canvasReady(page);
   await expect(saveState(page)).toHaveText("Saved");
 }
@@ -66,3 +75,85 @@ export const horizontalOverflow = (page: Page): Promise<number> =>
       document.documentElement.scrollWidth -
       document.documentElement.clientWidth,
   );
+
+/**
+ * A descriptor (`role: name`) of every visible control in the app shell, with React Flow's nodes and edges collapsed to
+ * `node` and `edge`. The read-only tests check them all against `READ_ONLY_ALLOWED`.
+ */
+export const visibleControls = (page: Page): Promise<string[]> =>
+  page.evaluate(() => {
+    const SELECTOR =
+      'button, a[href], input, select, textarea, [role="tab"], [role="radio"], [role="separator"], [tabindex]:not([tabindex="-1"])';
+    const shown = (el: Element) => {
+      const style = getComputedStyle(el);
+      return (
+        style.visibility !== "hidden" &&
+        style.display !== "none" &&
+        el.getClientRects().length > 0
+      );
+    };
+    const found = new Set<string>();
+    for (const el of document.querySelectorAll(
+      `.app-shell ${SELECTOR.replaceAll(", ", ", .app-shell ")}`,
+    )) {
+      if (!shown(el)) continue;
+      if (el.closest(".react-flow__node")) {
+        found.add("node");
+        continue;
+      }
+      if (el.closest(".react-flow__edge")) {
+        found.add("edge");
+        continue;
+      }
+      if (el.classList.contains("project-switcher-button")) {
+        found.add("switcher");
+        continue;
+      }
+      const name =
+        el.getAttribute("aria-label") ??
+        el.textContent?.trim() ??
+        el.getAttribute("title") ??
+        "";
+      found.add(
+        `${el.getAttribute("role") ?? el.tagName.toLowerCase()}: ${name}`,
+      );
+    }
+    return [...found];
+  });
+
+/**
+ * What read-only mode may show as a control. A feature that adds a visible control either hides it in read-only mode or
+ * adds it here in its own change, so a missing read-only treatment fails the test.
+ */
+export const READ_ONLY_ALLOWED: readonly RegExp[] = [
+  /^node$/,
+  /^edge$/,
+  /^switcher$/,
+  /^tab: /, // the workflow tabs
+  /^button: (Zoom in|Zoom out|Fit view|Port labels)$/,
+  /^a: React Flow attribution$/,
+  // the status bar's problem and suggestion counts open the panel, which only reads
+  /^button: .*\b(problems?|suggestions?)$/,
+];
+
+/** Sends `command` through the store's apply, as the UI does, and reports what came back instead of throwing. */
+export function applyOutcome(
+  page: Page,
+  command: unknown,
+): Promise<{ ok: boolean; code?: string; message?: string }> {
+  return page.evaluate(
+    (command) =>
+      (
+        window as unknown as {
+          nfBuilderWorkspace: {
+            apply(c: unknown): Promise<{
+              ok: boolean;
+              code?: string;
+              message?: string;
+            }>;
+          };
+        }
+      ).nfBuilderWorkspace.apply(command),
+    command,
+  );
+}

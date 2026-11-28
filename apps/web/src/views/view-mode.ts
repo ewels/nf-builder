@@ -11,6 +11,11 @@ export const VIEW_MODES: readonly {
   { mode: "code", label: "Code", key: "c" },
 ];
 
+/** The mode a tab shows: Graph only while the app is read-only, with the tab's own mode kept for when it widens (F-703, UX-04). */
+export function shownMode(mode: ViewMode, readOnly: boolean): ViewMode {
+  return readOnly ? "graph" : mode;
+}
+
 const EDITABLE =
   'input, textarea, select, [contenteditable]:not([contenteditable="false"]), .code-editor-host';
 

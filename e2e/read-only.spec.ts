@@ -1,18 +1,43 @@
 import { expect, test } from "@playwright/test";
 import { SMOKE_TAG } from "./browsers.ts";
-import { NODE, selectNode } from "./canvas.ts";
-import { watchForCspViolations } from "./csp.ts";
-import { switcher } from "./projects.ts";
 import {
+  canvasReady,
+  clickEmptyCanvas,
+  NODE,
+  node,
+  selectNode,
+} from "./canvas.ts";
+import { editor, radio, syncStatus } from "./code-view.ts";
+import { watchForCspViolations } from "./csp.ts";
+import {
+  applyThroughStore,
+  historyStatus,
+  openStoredFixture,
+  typeComment,
+} from "./history.ts";
+import {
+  dragNode,
+  nodePosition,
+  readSidecar,
+  SIDECAR,
+  waitSaved,
+} from "./layout.ts";
+import { readFile, switcher } from "./projects.ts";
+import {
+  applyOutcome,
   horizontalOverflow,
   NARROW,
   NOTE_TEXT,
   openStoredCanvas,
   PHONE,
+  READ_ONLY_ALLOWED,
   readOnlyNote,
   resize,
+  storeCanvasProject,
+  visibleControls,
   WIDE,
 } from "./read-only.ts";
+import { PREVIEW_URL } from "./urls.ts";
 
 const palette = (page: import("@playwright/test").Page) =>
   page.getByRole("complementary", { name: "Components and files" });
@@ -145,4 +170,186 @@ test("F-703 UX-04: entering read-only closes an open dialog and leaves only the 
   await expect(
     details(page).getByRole("button", { name: /^(Edit|Code)$/ }),
   ).toHaveCount(0);
+});
+
+test("F-703 step 1 UX-04: at 390 px wide a stored project shows its canvas and details, no editing controls, and the note", async ({
+  page,
+}) => {
+  const watch = await watchForCspViolations(page);
+  await openStoredCanvas(page, "Phone project");
+  await resize(page, PHONE);
+  await page.reload();
+  await canvasReady(page);
+  await expect(readOnlyNote(page)).toHaveText(NOTE_TEXT);
+  const canvas = page.locator('.workflow-canvas[data-canvas-state="ready"]');
+  const box = await canvas.boundingBox();
+  expect(box?.width).toBeGreaterThanOrEqual(300);
+  expect(box?.height).toBeGreaterThanOrEqual(300);
+  await expect(page.locator(".react-flow__node")).toHaveCount(12);
+  const side = await details(page).boundingBox();
+  expect(side?.y).toBeGreaterThanOrEqual(
+    (box?.y ?? 0) + (box?.height ?? 0) - 1,
+  );
+  await expect(details(page)).toContainText("Entry workflow");
+  await selectNode(page, NODE.greeted);
+  await expect(details(page)).toContainText("GREET");
+
+  const controls = await visibleControls(page);
+  const unexpected = controls.filter(
+    (c) => !READ_ONLY_ALLOWED.some((allowed) => allowed.test(c)),
+  );
+  expect(unexpected).toEqual([]);
+  for (const gone of [
+    "#column-left",
+    '[role="separator"]',
+    'select[aria-label="Nextflow version"]',
+    '[role="radiogroup"]',
+    ".react-flow__minimap",
+    ".react-flow__node.draggable",
+  ])
+    await expect(page.locator(gone)).toHaveCount(0);
+  for (const name of [
+    "Undo",
+    "Redo",
+    "Auto-layout all nodes",
+    "Auto-layout selected nodes",
+    "Edit",
+    "Code",
+  ])
+    await expect(page.getByRole("button", { name, exact: true })).toHaveCount(
+      0,
+    );
+  expect(await horizontalOverflow(page)).toBe(0);
+  expect(await watch.violations()).toEqual([]);
+  expect(watch.consoleErrors).toEqual([]);
+});
+
+test("F-703 UX-04 AR-23 AR-24: read-only, commands, undo, redo, drags and shortcuts change nothing", async ({
+  page,
+}) => {
+  await openStoredFixture(page, "Blocked");
+  await applyThroughStore(page, {
+    kind: "addCall",
+    target: { path: "main.nf", workflow: null },
+    callee: "ALIGN",
+  });
+  await expect.poll(async () => (await historyStatus(page)).undoCount).toBe(1);
+  await waitSaved(page);
+  await resize(page, PHONE);
+  await expect(readOnlyNote(page)).toHaveText(NOTE_TEXT);
+  const outcome = await applyOutcome(page, {
+    kind: "replaceFileText",
+    path: "main.nf",
+    text: "// nope\n",
+  });
+  expect(outcome.ok).toBe(false);
+  expect(outcome.code).toBe("read-only");
+
+  const main = await readFile(page, "main.nf");
+  const sidecar = await readFile(page, SIDECAR);
+  const history = await historyStatus(page);
+  await page.getByRole("button", { name: "Fit view" }).click();
+  const first = page.locator(".react-flow__node").first();
+  const id = (await first.getAttribute("data-id")) ?? "";
+  const before = await nodePosition(page, id);
+  await clickEmptyCanvas(page);
+  for (const key of [
+    "ControlOrMeta+z",
+    "ControlOrMeta+Shift+z",
+    "Control+y",
+    "g",
+    "s",
+    "c",
+    "Delete",
+  ])
+    await page.keyboard.press(key);
+  await first.focus();
+  await page.keyboard.press("Enter");
+  await page.keyboard.press("ArrowRight");
+  await dragNode(page, id, 40, 30);
+  await expect(page.locator(".tab-panel")).toHaveAttribute(
+    "data-view-mode",
+    "graph",
+  );
+  expect(await nodePosition(page, id)).toEqual(before);
+  expect(await readFile(page, "main.nf")).toBe(main);
+  expect(await readFile(page, SIDECAR)).toBe(sidecar);
+  expect(await historyStatus(page)).toEqual(history);
+});
+
+test("F-703 UX-04 F-207: viewing a project without a sidecar at 390 px lays it out without writing the sidecar", async ({
+  page,
+}) => {
+  await page.setViewportSize(PHONE);
+  await page.goto("./");
+  await expect(switcher(page)).toBeEnabled();
+  // stored through the raw engine hook, which no viewport guards: a project that never had a sidecar
+  await storeCanvasProject(page, "No sidecar", "26.10");
+  await canvasReady(page);
+  await expect(page.locator(".react-flow__node")).toHaveCount(12);
+  expect(await readSidecar(page)).toBeNull();
+  expect(await waitSaved(page)).toBeNull();
+});
+
+test("F-703 UX-04 ADR-0004 ADR-0048: narrowing during a code edit sends it first, and widening brings back the Split view and the editing controls", async ({
+  page,
+}) => {
+  await openStoredFixture(page, "Transition");
+  await radio(page, "Split").click();
+  await typeComment(page, "// typed just before narrowing");
+  await resize(page, PHONE);
+  await expect(readOnlyNote(page)).toHaveText(NOTE_TEXT);
+  expect(await readFile(page, "main.nf")).toContain(
+    "// typed just before narrowing",
+  );
+  await expect(editor(page)).toHaveCount(0);
+  await resize(page, WIDE);
+  await expect(readOnlyNote(page)).toHaveCount(0);
+  await expect(radio(page, "Split")).toBeChecked();
+  await expect(editor(page)).toContainText("typed just before narrowing");
+  await expect(
+    page.getByRole("complementary", { name: "Components and files" }),
+  ).toBeVisible();
+  await expect(syncStatus(page)).toHaveAttribute("data-sync", "idle");
+  const undo = page.getByRole("button", { name: "Undo", exact: true });
+  await expect(undo).toBeEnabled();
+  await expect(undo).toHaveAttribute("title", /Edit main\.nf/);
+});
+
+test("F-703 UX-04 ADR-0044: inside a 390 px cross-origin iframe the app is read-only", async ({
+  page,
+}) => {
+  const watch = await watchForCspViolations(page);
+  await page.setContent(
+    `<iframe id="app" src="${PREVIEW_URL}" width="390" height="800"></iframe>`,
+  );
+  const frame = page.frameLocator("#app");
+  await expect(frame.locator(".read-only-note p")).toHaveText(NOTE_TEXT);
+  await expect(
+    frame.getByRole("complementary", { name: "Components and files" }),
+  ).toHaveCount(0);
+  await expect(switcher(frame)).toBeEnabled();
+  expect(await watch.violations()).toEqual([]);
+});
+
+test.describe("touch", () => {
+  test.use({
+    viewport: PHONE,
+    isMobile: true,
+    hasTouch: true,
+    deviceScaleFactor: 3,
+  });
+
+  test("F-703 UX-04: on a touch phone a tap selects a node and shows its details", async ({
+    page,
+  }) => {
+    await page.goto("./");
+    await expect(switcher(page)).toBeEnabled();
+    await storeCanvasProject(page, "Touch project", "26.10");
+    await canvasReady(page);
+    await expect(readOnlyNote(page)).toHaveText(NOTE_TEXT);
+    expect(await page.evaluate(() => window.innerWidth)).toBe(390);
+    await node(page, NODE.greeted).locator(".canvas-node-title").first().tap();
+    await expect(details(page)).toContainText("GREET");
+  });
 });
