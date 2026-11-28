@@ -135,4 +135,31 @@ describe("problems panel", () => {
     expect(panel.match(/tabindex="0"/g)).toHaveLength(1);
     expect(panel.match(/tabindex="-1"/g)?.length).toBeGreaterThanOrEqual(2);
   });
+
+  it("F-405 LA-35: the Suggestions tab marks registry groups with a registry tag after a Registry modules heading", () => {
+    const own: Diagnostic = { ...hint, path: "z.nf" };
+    const registered: Diagnostic = {
+      ...hint,
+      path: "modules/nf-core/fastqc/main.nf",
+    };
+    const registry = [
+      { path: "modules/nf-core/fastqc", module: "nf-core/fastqc" },
+    ];
+    const html = render([registered, own, hint], {
+      view: "suggestions",
+      sections: problemSections([registered, own, hint], registry),
+    });
+    expect(html).toContain("Registry modules");
+    expect(html).toContain("1 suggestion)");
+    expect(html.indexOf("z.nf")).toBeLessThan(html.indexOf("Registry modules"));
+    expect(html.indexOf("Registry modules")).toBeLessThan(
+      html.indexOf("modules/nf-core/fastqc/main.nf"),
+    );
+    expect(html).toMatch(
+      /class="problems-tag"[^>]*title="Registry module nf-core\/fastqc"[^>]*>registry</,
+    );
+    expect(render([hint], { view: "suggestions" })).not.toContain(
+      "Registry modules",
+    );
+  });
 });

@@ -121,7 +121,7 @@ export function createProblemsStore(options: {
                 status: "ready",
                 revision: result.revision,
                 diagnostics: result.diagnostics,
-                sections: problemSections(result.diagnostics),
+                sections: problemSections(result.diagnostics, result.registry),
                 message: null,
               };
             }
