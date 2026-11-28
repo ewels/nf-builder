@@ -3,6 +3,10 @@
 // Not exported from the pack entry (plan F-110 3.2).
 import type {
   Comment,
+  ConfigApply,
+  ConfigAst,
+  ConfigPrinter,
+  ConfigStatement,
   Declaration,
   PrintOptions,
   PrintResult,
@@ -10,6 +14,7 @@ import type {
   ScriptPrinter,
 } from "@nf-builder/lang-core";
 import { attachedComments } from "./comments.ts";
+import { ConfigFormatter } from "./config-formatter.ts";
 import { Formatter } from "./formatter.ts";
 import { createLayout, FRESH_LAYOUT } from "./layout.ts";
 import { ScriptFormatter } from "./script-formatter.ts";
@@ -54,3 +59,38 @@ export const scriptPrinter = {
   printScript,
   printDeclaration,
 } satisfies ScriptPrinter;
+
+/** The whole config file, as `nextflow lint -format` prints it (F-601, ADR 0032). */
+export function printConfig(
+  ast: ConfigAst,
+  options: PrintOptions = {},
+): PrintResult {
+  const fmt = new Formatter(options.layout ?? FRESH_LAYOUT);
+  new ConfigFormatter(fmt).config(ast);
+  return {
+    text: fmt.toString(),
+    missingComments: missing(
+      [...new Set([...ast.comments, ...attachedComments(ast)])],
+      fmt,
+    ),
+  };
+}
+
+/** One config statement at `indent` levels: its leading comments, the statement, its trailing comment and a final "\n". */
+export function printConfigStatement(
+  node: ConfigStatement | ConfigApply,
+  options: PrintOptions & { readonly indent?: number } = {},
+): PrintResult {
+  const fmt = new Formatter(options.layout ?? FRESH_LAYOUT);
+  for (let i = 0; i < (options.indent ?? 0); i++) fmt.incIndent();
+  new ConfigFormatter(fmt).statement(node);
+  return {
+    text: fmt.toString(),
+    missingComments: missing(attachedComments(node), fmt),
+  };
+}
+
+export const configPrinter = {
+  printConfig,
+  printConfigStatement,
+} satisfies ConfigPrinter;

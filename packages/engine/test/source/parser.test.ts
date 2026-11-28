@@ -9,6 +9,7 @@ import { loadParser } from "../../src/source/parser";
 
 const stub: SourceParser = {
   printer: {} as SourceParser["printer"],
+  configPrinter: {} as SourceParser["configPrinter"],
   parseScript: () => ({ status: "verbatim", ast: null, problems: [] }),
   parseConfig: () => ({ status: "verbatim", ast: null, problems: [] }),
 };

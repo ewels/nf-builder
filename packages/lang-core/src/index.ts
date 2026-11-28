@@ -102,6 +102,7 @@ export type {
   PaletteViewItem,
 } from "./palette.ts";
 export {
+  type ConfigPrinter,
   PrintError,
   type PrintOptions,
   type PrintResult,

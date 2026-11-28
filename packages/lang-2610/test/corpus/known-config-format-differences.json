@@ -1,0 +1,44 @@
+[
+  {
+    "pipeline": "rnaseq",
+    "file": "conf/modules/align_bowtie2.config",
+    "upstreamBug": "25",
+    "cause": "lint -format drops the type of a closure parameter in a config file (`{ String token -> }` becomes `{ token -> }`); the printer keeps it, as `token: String` (upstream bug 25).",
+    "differingLines": {
+      "formatted": [
+        16
+      ],
+      "printed": [
+        16
+      ]
+    }
+  },
+  {
+    "pipeline": "rnaseq",
+    "file": "conf/modules/align_hisat2.config",
+    "upstreamBug": "25",
+    "cause": "lint -format drops the type of a closure parameter in a config file (`{ String token -> }` becomes `{ token -> }`); the printer keeps it, as `token: String` (upstream bug 25).",
+    "differingLines": {
+      "formatted": [
+        20
+      ],
+      "printed": [
+        20
+      ]
+    }
+  },
+  {
+    "pipeline": "rnaseq",
+    "file": "conf/modules/align_star.config",
+    "upstreamBug": "25",
+    "cause": "lint -format drops the type of a closure parameter in a config file (`{ String token -> }` becomes `{ token -> }`); the printer keeps it, as `token: String` (upstream bug 25).",
+    "differingLines": {
+      "formatted": [
+        81
+      ],
+      "printed": [
+        81
+      ]
+    }
+  }
+]

@@ -381,3 +381,19 @@ workflow {
 - **What happens:** `nextflow lint .` reports no errors. `nextflow run main.nf -stub` fails with "Process 'HELLO' was called twice -- include it with a different alias or call it in a different workflow".
 - **Expected:** lint reports the second call, as it reports other errors the runtime would raise.
 - **nf-builder:** AddCall refuses a second call of the same callee in one workflow (F-111, ADR 0039), and F-112 can report it in imported code.
+
+### 25. The config formatter drops the type of a closure parameter
+
+`nextflow.config`:
+
+```nextflow
+process {
+    ext.args = {
+        'a b'.split(' ').collect { String token -> token }
+    }
+}
+```
+
+- **What happens:** `nextflow lint -format .` (26.10.7) rewrites the closure to `{ token -> token }`. In a script the formatter keeps a closure parameter's type.
+- **Expected:** the type stays, or the formatter says why a config closure differs from a script one.
+- **nf-builder:** the config printer keeps the type (as `token: String`, the form it prints in scripts). Three rnaseq configs differ for this reason alone, listed in `packages/lang-2610/test/corpus/known-config-format-differences.json` (F-601, ADR 0032).
