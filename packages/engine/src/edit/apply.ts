@@ -18,6 +18,7 @@ import {
 import { installedPacks } from "../packs";
 import { loadParser } from "../source/parser";
 import { addCall } from "./commands/add-call";
+import { addInclude } from "./commands/add-include";
 import {
   addConfigBlock,
   addConfigPlugin,
@@ -96,6 +97,8 @@ const build = (state: EditState, command: EditCommand): TextPatch[] => {
       return removeConfigPlugin(state, command);
     case "createFile":
       return createFile(state, command);
+    case "addInclude":
+      return addInclude(state, command);
     default:
       throw new EditRefusal(
         "invalid",

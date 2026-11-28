@@ -165,10 +165,23 @@ export interface RemoveConfigPlugin {
   readonly id: string;
 }
 
-/** Create an empty file (UX-16); a new folder is its `.gitkeep`. */
+/** Create a file (UX-16): empty unless `text` is given (F-310, a pasted module); a new folder is its `.gitkeep`. */
 export interface CreateFile {
   readonly kind: "createFile";
   readonly path: string;
+  readonly text?: string;
+}
+
+/**
+ * Add `include { name as alias } from 'source'` to the script `caller` (F-310, AR-21). `source` is as written in the
+ * include, relative to `caller`; `alias` is null to include the name as it is.
+ */
+export interface AddInclude {
+  readonly kind: "addInclude";
+  readonly caller: string;
+  readonly name: string;
+  readonly alias: string | null;
+  readonly source: string;
 }
 
 export type EditCommand =
@@ -186,7 +199,8 @@ export type EditCommand =
   | AddConfigPlugin
   | RemoveConfigPlugin
   | CreateFile
-  | CreateWorkflow;
+  | CreateWorkflow
+  | AddInclude;
 
 export const EDIT_COMMAND_KINDS = [
   "createProcess",
@@ -204,6 +218,7 @@ export const EDIT_COMMAND_KINDS = [
   "removeConfigPlugin",
   "createFile",
   "createWorkflow",
+  "addInclude",
 ] as const satisfies readonly EditCommand["kind"][];
 
 /** Replace `text.slice(start, end)`: UTF-16 offsets into the file as it was before the patch. */

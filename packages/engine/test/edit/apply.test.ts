@@ -21,6 +21,13 @@ const commands: Record<EditCommand["kind"], EditCommand> = {
   addCall: { kind: "addCall", target, callee: "B" },
   connect: { kind: "connect", target, from: port, to: port },
   disconnect: { kind: "disconnect", target, port },
+  addInclude: {
+    kind: "addInclude",
+    caller: "main.nf",
+    name: "B",
+    alias: "B_2",
+    source: "./b.nf",
+  },
   deleteNode: { kind: "deleteNode", target, node: "n" },
   deleteNodes: { kind: "deleteNodes", target, nodes: ["n"] },
   renameDeclaration: {

@@ -12,6 +12,16 @@ const samples: Record<EditCommand["kind"], [EditCommand, string]> = {
   addCall: [{ kind: "addCall", target, callee: "ALIGN" }, "Add call to ALIGN"],
   connect: [{ kind: "connect", target, from: port, to: port }, "Connect"],
   disconnect: [{ kind: "disconnect", target, port }, "Disconnect"],
+  addInclude: [
+    {
+      kind: "addInclude",
+      caller: "main.nf",
+      name: "ALIGN",
+      alias: "ALIGN_2",
+      source: "./a.nf",
+    },
+    "Include ALIGN as ALIGN_2",
+  ],
   deleteNode: [{ kind: "deleteNode", target, node: "n" }, "Delete node"],
   deleteNodes: [
     { kind: "deleteNodes", target, nodes: ["a", "b"] },

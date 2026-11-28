@@ -20,6 +20,7 @@ import { expect } from "vitest";
 import { applyCommand, commit, type EditState } from "../../src/edit/apply";
 import { plugins } from "../../src/edit/config/locate";
 import { definitionStyles, problemKeys } from "../../src/edit/guards";
+import { freshName, relativeSource } from "../../src/edit/names";
 import { applyPatches } from "../../src/edit/patches";
 import { itemSpan } from "../../src/edit/splice";
 import { createProjector } from "../../src/projection/project";
@@ -304,6 +305,28 @@ export function buildCommand(state: EditState, c: Choice): EditCommand | null {
       const id = pick(CONFIG_PLUGINS, c.a + c.b);
       return id ? { kind, path, id } : null;
     }
+    case "addInclude": {
+      // a declaration of another script, as it is when the caller doesn't bind its name, else under a fresh alias
+      const caller = pick(scripts, c.a);
+      if (!caller) return null;
+      const decls = scripts
+        .filter((p) => p !== caller)
+        .flatMap((path) =>
+          [...(state.model.file(path)?.declarations.keys() ?? [])].map(
+            (name) => ({ path, name }),
+          ),
+        );
+      const d = pick(decls, c.b);
+      if (!d) return null;
+      const taken = new Set(state.model.file(caller)?.scope.keys() ?? []);
+      return {
+        kind,
+        caller,
+        name: d.name,
+        alias: taken.has(d.name) ? freshName(`${d.name}_2`, taken) : null,
+        source: relativeSource(caller, d.path),
+      };
+    }
     case "createFile": {
       const ext = [".nf", ".config", ".md", "/.gitkeep"][c.snippet % 4];
       return { kind, path: `${c.name.toLowerCase()}${ext}` };
@@ -456,7 +479,8 @@ function checkAccepted(
       break;
     }
     case "createProcess":
-    case "createWorkflow": {
+    case "createWorkflow":
+    case "addInclude": {
       const patch = patches.find((p) => p.path === command.caller);
       const before = state.model.file(command.caller)
         ?.source as ScriptSourceFile;
@@ -590,9 +614,13 @@ export function assertSequences(
   );
 }
 
-/** What has to happen first for a kind to have something to act on: a plugin is removed after one is added. */
+/**
+ * What has to happen first for a kind to have something to act on: a plugin is removed after one is added, and added
+ * after the one the fixed choices pick is removed (a config that already has it refuses the add).
+ */
 const PRELUDE: Partial<Record<string, string>> = {
   removeConfigPlugin: "addConfigPlugin",
+  addConfigPlugin: "removeConfigPlugin",
 };
 
 /**
