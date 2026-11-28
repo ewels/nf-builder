@@ -28,6 +28,7 @@ import type {
   LayoutChange,
   LayoutStatus,
   LayoutWrite,
+  MoveHint,
   Positions,
 } from "../layout";
 import type { ProjectFile } from "../model/project";
@@ -75,6 +76,8 @@ export interface ProjectChange {
   readonly workflows: readonly WorkflowRef[];
   /** The undo history after this change (F-209). */
   readonly history: HistoryStatus;
+  /** The files or folders this change moved, so open tabs can follow them (F-303); absent when none. */
+  readonly moves?: readonly MoveHint[];
 }
 
 export type EngineRefusalCode =

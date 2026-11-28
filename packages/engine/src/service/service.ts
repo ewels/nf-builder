@@ -334,6 +334,7 @@ export function createEngineService(
         sidecar.length > 0 ? [...remodelled, LAYOUT_PATH].sort() : remodelled,
       workflows: projectorOf(open).workflows(),
       history: open.history.status(),
+      ...(hints.moves?.length ? { moves: hints.moves } : {}),
     };
   };
 

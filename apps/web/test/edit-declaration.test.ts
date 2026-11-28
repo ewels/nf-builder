@@ -125,3 +125,20 @@ describe("F-303 editDeclaration module folder", () => {
     );
   });
 });
+
+describe("F-303 open tabs follow a moved file", () => {
+  it("F-303 LA-12: a file tab on the renamed process's module follows the move, and follows it back on undo", async () => {
+    const { store, edit } = await setup();
+    await store.getState().openFile("modules/local/greet/main.nf");
+    expect(store.getState().activeTab).toBe("file:modules/local/greet/main.nf");
+    const outcome = await edit("GREET", (f) => ({ ...f, name: "HELLO" }));
+    expect(outcome.ok).toBe(true);
+    const ids = () => store.getState().tabs.map((t) => t.id);
+    expect(ids()).toContain("file:modules/local/hello/main.nf");
+    expect(ids()).not.toContain("file:modules/local/greet/main.nf");
+    expect(store.getState().activeTab).not.toBeNull();
+    await store.getState().undo();
+    expect(ids()).toContain("file:modules/local/greet/main.nf");
+    expect(ids()).not.toContain("file:modules/local/hello/main.nf");
+  });
+});

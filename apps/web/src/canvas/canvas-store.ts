@@ -401,6 +401,19 @@ const IDLE: DetailsContent = { status: "idle" };
 const messageOf = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
 
+/** Where a file went when the change moved it or a folder above it (F-303). */
+function movedPath(
+  path: string,
+  moves: readonly { readonly from: string; readonly to: string }[],
+): string {
+  for (const m of moves) {
+    if (path === m.from) return m.to;
+    if (path.startsWith(`${m.from}/`))
+      return `${m.to}${path.slice(m.from.length)}`;
+  }
+  return path;
+}
+
 /** `modules/local/<lower name>`, the folder of a module of that name (LA-12). */
 const folderOf = (name: string): string => `modules/local/${name.toLowerCase()}`;
 
@@ -984,11 +997,26 @@ export function createCanvasStore(
         const renamed = renamedTabs(summary.workflows, change.workflows);
         // a stale tab that already holds a new id gives way to the renamed one
         const taken = new Set([...renamed.values()].map((w) => tabFor(w).id));
+        // a file tab follows its file when the change moved it (F-303)
+        const following = (t: WorkflowTab): WorkflowTab => {
+          if (!isFileLike(t)) return t;
+          const to = movedPath(t.path, change.moves ?? []);
+          if (to === t.path) return t;
+          return {
+            ...(t.kind === "config" ? configTabFor(to) : fileTabFor(to)),
+            mode: t.mode,
+          };
+        };
+        const followed = new Map(
+          get()
+            .tabs.map((t) => [t.id, following(t).id] as const)
+            .filter(([from, to]) => from !== to),
+        );
         // a file tab goes with its file (text null: deleted, e.g. by undoing CreateProcess)
         const deleted = new Set(
           change.files.filter((f) => f.text === null).map((f) => f.path),
         );
-        const before = get().tabs;
+        const before = get().tabs.map(following);
         const tabs = before
           .filter((t) => renamed.has(t.id) || !taken.has(t.id))
           .filter((t) => !(isFileLike(t) && deleted.has(t.path)))
@@ -996,7 +1024,7 @@ export function createCanvasStore(
             const to = renamed.get(t.id);
             return to === undefined ? t : { ...tabFor(to), mode: t.mode };
           });
-        const current = get().activeTab;
+        const current = followed.get(get().activeTab ?? "") ?? get().activeTab;
         const moved = current === null ? undefined : renamed.get(current);
         let activeTab = moved === undefined ? current : tabFor(moved).id;
         // the active file tab went: the previous tab takes over, else the first left
