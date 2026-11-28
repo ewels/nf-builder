@@ -871,4 +871,25 @@ describe("F-401 workspace import", () => {
     expect(await db.listProjects()).toEqual([]);
     db.close();
   });
+
+  it("F-401 IO-12: importProject refuses a file over 1 MB, more than 20,000 files or more than 200 MB in all, and stores nothing", async () => {
+    const s = setup();
+    await s.watching;
+    const base = { name: "X", languageVersion: version, source };
+    const shared = new ArrayBuffer(1_000_000);
+    const small = new ArrayBuffer(1);
+    const many = (n: number, bytes: ArrayBuffer) =>
+      Array.from({ length: n }, (_, i) => ({ path: `f${i}.txt`, bytes }));
+    for (const files of [
+      [{ path: "big.txt", bytes: new ArrayBuffer(1_000_001) }],
+      many(20_001, small),
+      many(201, shared),
+    ])
+      await expect(
+        s.workspace.importProject({ ...base, files }),
+      ).rejects.toThrow(/too (large|many|big)|limit/i);
+    const db = await s.reader();
+    expect(await db.listProjects()).toEqual([]);
+    db.close();
+  });
 });

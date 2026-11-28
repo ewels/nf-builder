@@ -222,9 +222,20 @@ export function createWorkspace(options: WorkspaceOptions): WorkspaceApi {
         )
           throw new Error("The import's source is not valid.");
         // loaded on first use, so the unzip code stays out of the worker's main chunk (import-stage.ts)
-        const { decodeText, entryPath } = await import(
+        const { decodeText, entryPath, IMPORT_LIMITS } = await import(
           "@nf-builder/sources/import"
         );
+        // IO-12 again here: the worker doesn't trust the main thread's plan
+        if (input.files.length > IMPORT_LIMITS.maxEntries)
+          throw new Error("The import has too many files (limit 20,000).");
+        let total = 0;
+        for (const f of input.files) {
+          if (f.bytes.byteLength > IMPORT_LIMITS.maxTextFileBytes)
+            throw new Error(`${f.path} is too large (limit 1 MB per file).`);
+          total += f.bytes.byteLength;
+        }
+        if (total > IMPORT_LIMITS.maxTotalBytes)
+          throw new Error("The import is too large (limit 200 MB in all).");
         const seen = new Set<string>();
         const files: ProjectFile[] = [];
         const skipped: ImportedProject["skipped"][number][] = [];
