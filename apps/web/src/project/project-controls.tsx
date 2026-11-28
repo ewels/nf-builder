@@ -2,6 +2,8 @@
 // header's Templates button opens the New project dialog too.
 import { installedPackVersions } from "@nf-builder/engine";
 import { type JSX, useEffect, useRef } from "react";
+import { ImportReportDialog } from "../import/import-report-dialog";
+import { useGithubImport } from "../import/use-github-import";
 import { focusTarget } from "./focus-target";
 import { NewProjectDialog } from "./new-project-dialog";
 import { DeleteProjectDialog, ProjectNameDialog } from "./project-dialogs";
@@ -17,6 +19,9 @@ export function ProjectControls(): JSX.Element {
   const opener = useProjects((s) => s.opener);
   const dialog = useProjects((s) => s.dialog);
   const create = useProjects((s) => s.create);
+  const importGithub = useProjects((s) => s.importGithub);
+  const importReport = useProjects((s) => s.importReport);
+  const closeImportReport = useProjects((s) => s.closeImportReport);
   const open = useProjects((s) => s.open);
   const rename = useProjects((s) => s.rename);
   const remove = useProjects((s) => s.remove);
@@ -51,6 +56,8 @@ export function ProjectControls(): JSX.Element {
           languageVersions={languageVersions}
           useTemplates={useTemplates}
           useZipImport={useZipImport}
+          useGithubImport={useGithubImport}
+          onImportGithub={importGithub}
           projects={status.projects}
           currentId={current?.id ?? null}
           initialRoute={dialog.route}
@@ -58,6 +65,9 @@ export function ProjectControls(): JSX.Element {
           onOpen={open}
           onClose={closeDialog}
         />
+      ) : null}
+      {importReport !== null && dialog === null ? (
+        <ImportReportDialog report={importReport} onClose={closeImportReport} />
       ) : null}
       {dialog?.kind === "rename" && current ? (
         <ProjectNameDialog

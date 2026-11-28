@@ -3,6 +3,8 @@ import { BLANK_TEMPLATE } from "@nf-builder/engine";
 import type { ImportSummary } from "@nf-builder/sources";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
+import { githubProjectName } from "../src/import/github-import";
+import type { GithubImportView } from "../src/import/use-github-import";
 import { takeChosenFile } from "../src/project/import-section";
 import {
   NewProjectDialog,
@@ -41,6 +43,19 @@ const zipView = (state: ZipImportState): ZipImportView => ({
   setIgnore: () => undefined,
   reset: () => undefined,
 });
+const githubView = (
+  over: Partial<GithubImportView> = {},
+): GithubImportView => ({
+  state: { status: "idle" },
+  repo: "",
+  ref: "",
+  setRepo: () => undefined,
+  setRef: () => undefined,
+  setIgnore: () => undefined,
+  review: async () => undefined,
+  reset: () => undefined,
+  ...over,
+});
 const EMPTY_ZIP: ZipImportState = { status: "empty" };
 const readyZip = (over: Partial<ImportSummary> = {}): ZipImportState => ({
   status: "ready",
@@ -74,6 +89,8 @@ const dialog = (
   renderToStaticMarkup(
     <NewProjectDialog
       useZipImport={() => zipView(zip)}
+      useGithubImport={() => githubView()}
+      onImportGithub={none}
       languageVersions={["26.10", "26.04"]}
       useTemplates={view({ status: "ready", list })}
       projects={[]}
@@ -301,7 +318,9 @@ describe("F-203 new project dialog", () => {
       /<input[^>]*type="file"[^>]*accept="\.zip,application\/zip,application\/x-zip-compressed"/,
     );
     expect(html).toContain("Zip file to import");
-    expect(html).not.toContain("GitHub repository");
+    // F-401 adds GitHub repository as the second source, not selected by default
+    expect(html).toContain("GitHub repository");
+    expect(html).not.toContain("<span>Repository</span>");
   });
 
   it("F-403 IO-12 UX-61 QA-10: a staged zip shows files and size, the removed folder, skipped groups and the labelled ignore list; a refusal is an alert", () => {
@@ -445,5 +464,58 @@ describe("F-203 new project dialog", () => {
     } finally {
       error.mockRestore();
     }
+  });
+});
+
+describe("F-401 new project dialog, GitHub source", () => {
+  it("F-401 UX-60 QA-10: the GitHub source has a labelled Repository and Branch, tag or commit field, no token field and no Publish docs checkbox", () => {
+    const html = dialog({ initialRoute: "import", initialSource: "github" });
+    expect(html).toContain("GitHub repository");
+    expect(html).toMatch(/<span>Repository<\/span>/);
+    expect(html).toMatch(/<span>Branch, tag or commit<\/span>/);
+    expect(html).toContain("Leave empty for the default branch");
+    expect(html).not.toMatch(/token/i);
+    expect(html).not.toContain("Publish docs to GitHub Pages");
+    expect(html).toContain(">Review</button>");
+    // the zip source and the other routes keep it
+    expect(dialog({ initialRoute: "import" })).toContain(
+      "Publish docs to GitHub Pages",
+    );
+  });
+
+  it("F-401 UX-60: the name follows the repository name until the user edits it", () => {
+    expect(githubProjectName("nf-core/fetchngs")).toBe("fetchngs");
+    expect(githubProjectName("https://github.com/nf-core/fetchngs.git")).toBe(
+      "fetchngs",
+    );
+    expect(githubProjectName("nonsense")).toBeNull();
+  });
+
+  it("F-401 UX-61: a reviewed repository shows the summary and an Import button with the file count", () => {
+    const summary = {
+      source: "nf-core/fetchngs",
+      stripped: null,
+      files: 155,
+      bytes: 2_287_680,
+      skipped: [],
+      ignore: "work/\n",
+      ignoreProblems: [],
+    };
+    const html = dialog({
+      initialRoute: "import",
+      initialSource: "github",
+      useGithubImport: () =>
+        githubView({
+          repo: "nf-core/fetchngs",
+          state: {
+            status: "ready",
+            review: {} as never,
+            ignore: "work/\n",
+            plan: { files: [], summary, breaches: [], hasNextflow: true },
+          },
+        }),
+    });
+    expect(html).toContain("155 files, 2.3 MB");
+    expect(html).toContain(">Import 155 files</button>");
   });
 });
