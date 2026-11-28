@@ -342,3 +342,6 @@ ADR numbers reserved for features in flight, so parallel branches don't clash: 0
 
 ### F-303 — [plan](plan-F-303.md)
 - Accept every recommendation in section 6, including point 5: renaming a process moves its module folder in the same undo group, superseding ADR 0039's "files don't move" line through F-303's ADR. Point 9: ask the researcher during the build whether the catalogue's missing `Boolean` and `Record` types are an upstream gap, and record it in `docs/research/upstream-bugs.md` if so. Start after F-301 merges; reuse F-601's value kinds if it has merged. ADR number: the next free one when F-303 starts.
+
+### F-406 — [plan](plan-F-406.md)
+- Accept every recommendation in section 6. ADR number: the next free one when F-406 starts.
