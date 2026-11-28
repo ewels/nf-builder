@@ -18,6 +18,13 @@ import {
 import { installedPacks } from "../packs";
 import { loadParser } from "../source/parser";
 import { addCall } from "./commands/add-call";
+import {
+  addConfigBlock,
+  addConfigPlugin,
+  removeConfigOption,
+  removeConfigPlugin,
+  setConfigOption,
+} from "./commands/config";
 import { connect, disconnect } from "./commands/connect";
 import { createProcess, createWorkflow } from "./commands/create-definition";
 import { createFile } from "./commands/create-file";
@@ -74,6 +81,16 @@ const build = (state: EditState, command: EditCommand): TextPatch[] => {
       return disconnect(state, command);
     case "deleteNode":
       return deleteNode(state, command);
+    case "setConfigOption":
+      return setConfigOption(state, command);
+    case "removeConfigOption":
+      return removeConfigOption(state, command);
+    case "addConfigBlock":
+      return addConfigBlock(state, command);
+    case "addConfigPlugin":
+      return addConfigPlugin(state, command);
+    case "removeConfigPlugin":
+      return removeConfigPlugin(state, command);
     case "createFile":
       return createFile(state, command);
     default:

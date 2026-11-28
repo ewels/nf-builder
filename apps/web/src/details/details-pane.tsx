@@ -13,6 +13,7 @@ import {
   type DetailsContent,
   useWorkspace,
 } from "../canvas/canvas-store";
+import { ConfigDetails } from "../config/config-details";
 import {
   type DiagnosticsStatus,
   problemsStore,
@@ -31,6 +32,8 @@ export function DetailsBody({
   onShowProblems,
   diagnostics,
   registry,
+  configPath,
+  onOpenConfig,
 }: {
   readonly content: CanvasContent;
   readonly selected: string | null;
@@ -40,6 +43,9 @@ export function DetailsBody({
   readonly diagnostics?: readonly Diagnostic[] | null;
   /** The project's registry module folders, for the summary's registry list (F-405). */
   readonly registry?: readonly RegistryFolder[];
+  /** The project's root `nextflow.config`, linked from the entry workflow's summary (F-601). */
+  readonly configPath?: string;
+  readonly onOpenConfig?: (path: string) => void;
 }): JSX.Element {
   if (content.status !== "ready")
     return <p className="muted">Nothing selected</p>;
@@ -56,6 +62,8 @@ export function DetailsBody({
               : workflowSuggestions(projection.workflow, diagnostics)
           }
           onShowSuggestions={onShowProblems}
+          configPath={configPath}
+          onOpenConfig={onOpenConfig}
         />
       </div>
     );
@@ -94,12 +102,23 @@ export function DetailsPane(): JSX.Element {
   const content = useWorkspace((s) => s.content);
   const selected = useWorkspace((s) => s.selected);
   const details = useWorkspace((s) => s.details);
+  const configPath = useWorkspace((s) => {
+    const tab = s.tabs.find((t) => t.id === s.activeTab);
+    return tab?.kind === "config" ? tab.path : null;
+  });
+  const rootConfig = useWorkspace((s) =>
+    s.summary?.files.some((f) => f.path === "nextflow.config")
+      ? "nextflow.config"
+      : undefined,
+  );
+  const openFile = useWorkspace((s) => s.openFile);
   const file = useWorkspace((s) => s.tabs.find((t) => t.id === s.activeTab));
   const status = useProblems((s) => s.status);
   const revision = useProblems((s) => s.revision);
   const list = useProblems((s) => s.diagnostics);
   const registry = useProblems((s) => s.registry);
   const diagnostics = diagnosticsAt(content, status, revision, list);
+  if (configPath !== null) return <ConfigDetails path={configPath} />;
   if (file?.kind === "file") return <FileDetails path={file.path} />;
   return (
     <DetailsBody
@@ -108,6 +127,8 @@ export function DetailsPane(): JSX.Element {
       details={details}
       diagnostics={diagnostics}
       registry={registry}
+      configPath={rootConfig}
+      onOpenConfig={(path) => void openFile(path)}
       onShowProblems={(first) =>
         problemsStore.getState().show(problemsView(first), problemKey(first))
       }

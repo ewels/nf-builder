@@ -11,7 +11,7 @@ files (IndexedDB) ──► engine worker: parse ─► AST ─► semantic mode
   text patches ◄── edit command ◄── UI (canvas, popup, forms, Code tab) ◄── React Flow / panes
 ```
 
-The main thread keeps only pack versions and palette search; parsing, modelling, projection, edits and diagnostics run in the engine worker behind Comlink (AR-04, ADR 0043). The worker also reads and writes the IndexedDB project store, so file text never sits on the main thread (ADR 0045), apart from open editors and Markdown previews, which hold their own file's text while mounted (ADRs 0048, 0059).
+The main thread keeps only pack versions and palette search; parsing, modelling, projection, edits and diagnostics run in the engine worker behind Comlink (AR-04, ADR 0043). The worker also reads and writes the IndexedDB project store, so file text never sits on the main thread (ADR 0045), apart from open editors and Markdown previews, which hold their own file's text while mounted (ADRs 0048, 0059). The config form gets a view of the file whose code excerpts are at most 160 characters (ADR 0061).
 
 - The UI never edits text or AST directly. It sends edit commands and renders projections.
 - The engine runs in a Web Worker behind a Comlink API. The UI keeps a read-only copy of the latest projection and diagnostics.
@@ -46,7 +46,7 @@ The main thread keeps only pack versions and palette search; parsing, modelling,
 | ID | Requirement |
 |---|---|
 | AR-20 | Edit commands are a discriminated union in `lang-core`. Each has a pure `apply(model) → TextPatch[]` in the engine, implemented with pack printer rules. |
-| AR-21 | Minimum set for v1: `CreateProcess`, `CreateWorkflow` (ADR 0060), `CreateRecord`, `CreateFunction`, `AddCall`, `AddChain`, `AddFactory`, `Connect`, `Disconnect`, `DeleteNode`, `RenameDeclaration`, `UpdateDeclaration` (from the popup), `SetDirective`, `AddInclude`, `InsertRegistryModule`, `AddTake`, `AddEmit`, `UpdateParams`, `UpdateOutputs`, `ReplaceFileText` (from code editors), `CreateFile` (new files and folders from the Files view, ADR 0055). |
+| AR-21 | Minimum set for v1: `CreateProcess`, `CreateWorkflow` (ADR 0060), `CreateRecord`, `CreateFunction`, `AddCall`, `AddChain`, `AddFactory`, `Connect`, `Disconnect`, `DeleteNode`, `RenameDeclaration`, `UpdateDeclaration` (from the popup), `SetDirective`, `AddInclude`, `InsertRegistryModule`, `AddTake`, `AddEmit`, `UpdateParams`, `UpdateOutputs`, `ReplaceFileText` (from code editors), `CreateFile` (new files and folders from the Files view, ADR 0055), and for config forms `SetConfigOption`, `RemoveConfigOption`, `AddConfigBlock`, `AddConfigPlugin` and `RemoveConfigPlugin`, each one statement-level text edit (ADR 0061). |
 | AR-22 | Applying a command leaves every declaration it doesn't target equivalent (see glossary), apart from added includes and new files. Whitespace next to the edit may change (property test, ADR 0011). |
 | AR-23 | Every command is one undo step; a user action that applies several commands (F-301, F-310) is one step. Undo restores exact bytes. History is kept in memory per open project; raw file writes clear it (ADR 0051). |
 | AR-24 | A command that would produce code that fails to parse is rejected before it touches any file. A problem the file already had doesn't count, so partial imports stay editable (ADR 0039). |

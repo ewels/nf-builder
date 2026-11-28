@@ -26,6 +26,46 @@ const samples: Record<EditCommand["kind"], [EditCommand, string]> = {
     { kind: "replaceFileText", path: "main.nf", text: "" },
     "Edit main.nf",
   ],
+  setConfigOption: [
+    {
+      kind: "setConfigOption",
+      path: "nextflow.config",
+      context: { profile: null, selector: null },
+      option: ["process", "memory"],
+      value: { kind: "memory", amount: 8, unit: "GB" },
+    },
+    "Set process.memory",
+  ],
+  removeConfigOption: [
+    {
+      kind: "removeConfigOption",
+      path: "nextflow.config",
+      context: { profile: null, selector: null },
+      option: ["docker", "enabled"],
+    },
+    "Remove docker.enabled",
+  ],
+  addConfigBlock: [
+    {
+      kind: "addConfigBlock",
+      path: "nextflow.config",
+      context: { profile: null, selector: null },
+      scope: ["docker"],
+    },
+    "Add docker",
+  ],
+  addConfigPlugin: [
+    { kind: "addConfigPlugin", path: "nextflow.config", id: "nf-schema@2.5.1" },
+    "Add plugin nf-schema@2.5.1",
+  ],
+  removeConfigPlugin: [
+    {
+      kind: "removeConfigPlugin",
+      path: "nextflow.config",
+      id: "nf-schema@2.5.1",
+    },
+    "Remove plugin nf-schema@2.5.1",
+  ],
   createFile: [
     { kind: "createFile", path: "notes/a.txt" },
     "Create notes/a.txt",
@@ -35,6 +75,57 @@ const samples: Record<EditCommand["kind"], [EditCommand, string]> = {
     "Create workflow ALIGN",
   ],
 };
+
+const context = (
+  profile: string | null,
+  kind: "withName" | "withLabel" | null = null,
+  pattern = "big_mem",
+) => ({ profile, selector: kind === null ? null : { kind, pattern } });
+
+describe("F-601 config labels", () => {
+  it("F-601 F-209: config commands have labels naming the option, context or plugin", () => {
+    const set = (c: ReturnType<typeof context>): EditCommand => ({
+      kind: "setConfigOption",
+      path: "nextflow.config",
+      context: c,
+      option: ["process", "memory"],
+      value: { kind: "memory", amount: 8, unit: "GB" },
+    });
+    expect(commandLabel(set(context(null, "withLabel")))).toBe(
+      "Set process.memory for withLabel: big_mem",
+    );
+    expect(commandLabel(set(context("test")))).toBe(
+      "Set process.memory in profile test",
+    );
+    expect(commandLabel(set(context("test", "withName", "A")))).toBe(
+      "Set process.memory for withName: A in profile test",
+    );
+    const block = (
+      c: ReturnType<typeof context>,
+      scope: string[],
+    ): EditCommand => ({
+      kind: "addConfigBlock",
+      path: "nextflow.config",
+      context: c,
+      scope,
+    });
+    expect(commandLabel(block(context(null, "withLabel"), []))).toBe(
+      "Add selector withLabel: big_mem",
+    );
+    expect(commandLabel(block(context("test"), []))).toBe("Add profile test");
+    expect(commandLabel(block(context("test"), ["docker"]))).toBe(
+      "Add docker in profile test",
+    );
+    expect(
+      commandLabel({
+        kind: "removeConfigOption",
+        path: "nextflow.config",
+        context: context("t"),
+        option: ["docker", "enabled"],
+      }),
+    ).toBe("Remove docker.enabled in profile t");
+  });
+});
 
 describe("F-209 labels", () => {
   it("F-209 AR-21: commandLabel gives a sentence-case label for every EDIT_COMMAND_KINDS entry", () => {

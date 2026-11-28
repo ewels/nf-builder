@@ -87,6 +87,14 @@
 
 - Config includes are only allowed at the top-level or in a profile -- move it to the top level or into a profile
 
+## config-unknown-option
+
+- Unrecognized config option 'docker.enable' -- check the name against the config reference, add the plugin that defines it, or remove it
+- Unrecognized config option 'mystery.level' -- check the name against the config reference, add the plugin that defines it, or remove it
+- Unrecognized config option 'process.cpuss' -- check the name against the config reference, add the plugin that defines it, or remove it
+- Unrecognized config option 'process.memmory' -- check the name against the config reference, add the plugin that defines it, or remove it
+- Unrecognized config option 'process.memry' -- check the name against the config reference, add the plugin that defines it, or remove it
+
 ## agent-output
 
 - Agent output `b` has unsupported field `meta` with type Map -- supported types are Boolean, Float, Integer, List<E>, Path, String, or a record type

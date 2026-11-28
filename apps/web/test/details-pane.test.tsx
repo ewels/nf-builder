@@ -363,6 +363,36 @@ describe("F-206 details pane", () => {
     );
   });
 
+  it("F-601 UX-31: the entry summary links nextflow.config when the project has one, and other workflows don't", () => {
+    const summary: WorkflowSummary = {
+      name: "main",
+      path: "main.nf",
+      entry: true,
+      typed: true,
+      takes: [],
+      emits: [],
+      params: [],
+      outputs: [],
+      calls: [],
+      modules: [],
+    };
+    const link = (over: Partial<WorkflowSummary>, configPath?: string) =>
+      renderToStaticMarkup(
+        <WorkflowSummaryView
+          summary={{ ...summary, ...over }}
+          configPath={configPath}
+          onOpenConfig={() => undefined}
+        />,
+      );
+    const out = link({}, "nextflow.config");
+    expect(out).toMatch(/<h4[^>]*>Configuration<\/h4>/);
+    expect(out).toContain("Open nextflow.config");
+    expect(link({})).not.toContain("Configuration");
+    expect(link({ entry: false }, "nextflow.config")).not.toContain(
+      "Configuration",
+    );
+  });
+
   it("F-206 UX-30 UX-31: a project with no selection shows the summary; a selection shows the node", () => {
     const projection = {
       workflow: {

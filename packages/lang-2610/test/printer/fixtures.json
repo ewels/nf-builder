@@ -728,6 +728,90 @@
           6
         ]
       }
+    },
+    {
+      "tree": "printer",
+      "path": "config/blocks.config",
+      "kind": "parsed",
+      "spec": [
+        "F-601",
+        "LA-45"
+      ],
+      "covers": [
+        "Config blocks"
+      ]
+    },
+    {
+      "tree": "printer",
+      "path": "config/selectors.config",
+      "kind": "parsed",
+      "spec": [
+        "F-601",
+        "LA-45"
+      ],
+      "covers": [
+        "Config selectors"
+      ]
+    },
+    {
+      "tree": "printer",
+      "path": "config/profiles.config",
+      "kind": "parsed",
+      "spec": [
+        "F-601",
+        "LA-45"
+      ],
+      "covers": [
+        "Config profiles"
+      ]
+    },
+    {
+      "tree": "printer",
+      "path": "config/plugins.config",
+      "kind": "parsed",
+      "spec": [
+        "F-601",
+        "LA-45"
+      ],
+      "covers": [
+        "Config plugins"
+      ]
+    },
+    {
+      "tree": "printer",
+      "path": "config/values.config",
+      "kind": "parsed",
+      "spec": [
+        "F-601",
+        "LA-45"
+      ],
+      "covers": [
+        "Config values"
+      ]
+    },
+    {
+      "tree": "printer",
+      "path": "config/comments.config",
+      "kind": "parsed",
+      "spec": [
+        "F-601",
+        "LA-45"
+      ],
+      "covers": [
+        "Config comments"
+      ]
+    },
+    {
+      "tree": "printer",
+      "path": "config/includes.config",
+      "kind": "parsed",
+      "spec": [
+        "F-601",
+        "LA-45"
+      ],
+      "covers": [
+        "Config includeConfig"
+      ]
     }
   ]
 }

@@ -1,3 +1,4 @@
+import type { ConfigApply, ConfigAst, ConfigStatement } from "./ast/config.ts";
 import type { Comment } from "./ast/range.ts";
 import type { Declaration, ScriptAst } from "./ast/script.ts";
 
@@ -27,6 +28,20 @@ export interface ScriptPrinter {
   printScript(ast: ScriptAst, options?: PrintOptions): PrintResult;
   /** One declaration: its leading comments (no blank lines before the first), the declaration, its trailing comment and a final "\n". */
   printDeclaration(node: Declaration, options?: PrintOptions): PrintResult;
+}
+
+/**
+ * The config printer of a pack (F-601, ADR 0032): a port of nf-lang's `ConfigFormattingVisitor` with default options. It
+ * shares `createLayout` with the script printer.
+ */
+export interface ConfigPrinter {
+  /** The whole file, as `nextflow lint -format` prints it. Throws `PrintError` for an `Unparsed` item or an error-only node. */
+  printConfig(ast: ConfigAst, options?: PrintOptions): PrintResult;
+  /** One statement: its leading comments, the statement, its trailing comment and a final "\n", at `indent` levels (default 0). */
+  printConfigStatement(
+    node: ConfigStatement | ConfigApply,
+    options?: PrintOptions & { readonly indent?: number },
+  ): PrintResult;
 }
 
 /** Thrown for the error-only node kinds and for a script that mixes top-level statements and declarations. */

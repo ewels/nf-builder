@@ -386,6 +386,100 @@ cases:
       - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/reference/channel.mdx
     lint: { expect: ok, clean: true }
     run: { expect: ok }
+
+  # F-601: the config editor's fixtures. The -after trees are what the edit commands produce, byte for byte (engine test config-commands).
+  - id: f601-config
+    about: A typed project with a manifest-only config and a process labelled big_mem; stub output shows no memory is set.
+    spec: [F-601, FI-02, FI-06]
+    sources:
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/config.mdx#L29-L95
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/reference/stdlib-types/memory-unit.mdx#L10
+    lint: { expect: ok, clean: true }
+    run:
+      expect: ok
+      output: ["NULL: HELLO ADA (NULL)"]
+  - id: f601-config-after
+    about: The f601-config tree after the process scope, process.memory and a withLabel selector were added; the config is a `lint -format` fixed point and the run shows both memories.
+    spec: [F-601, FI-02, FI-06, AR-23]
+    sources:
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/config.mdx#L185-L357
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/reference/stdlib-types/memory-unit.mdx#L10
+    lint: { expect: ok, clean: true }
+    run:
+      expect: ok
+      output: ["8 GB: HELLO ADA (2 GB)", "8 GB: HELLO GRACE (2 GB)"]
+  - id: f601-unknown
+    about: A config with a misspelt process option and an included file with an unknown scope; lint is silent, the run warns about both (the run-time ConfigValidator).
+    spec: [F-601, FI-03, FI-05]
+    sources:
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/modules/nextflow/src/main/groovy/nextflow/config/ConfigValidator.groovy#L107-L168
+    lint: { expect: ok, clean: true }
+    run:
+      expect: ok
+      output:
+        [
+          "Unrecognized config option 'process.memmory'",
+          "Unrecognized config option 'mystery.level'",
+        ]
+  - id: f601-unknown-after
+    about: The f601-unknown tree after process.cpus was set; the unknown option's line is unchanged and still warned about.
+    spec: [F-601, FI-03]
+    sources:
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/modules/nextflow/src/main/groovy/nextflow/config/ConfigValidator.groovy#L107-L168
+    lint: { expect: ok, clean: true }
+    run:
+      expect: ok
+      output:
+        [
+          "Unrecognized config option 'process.memmory'",
+          "Unrecognized config option 'mystery.level'",
+        ]
+  - id: f601-selectors
+    about: Eleven process selectors over a named workflow, a labelled process and one process included twice under aliases; the run shows which processes each matched, and warns about the two that match none.
+    spec: [F-601, FI-06]
+    sources:
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/config.mdx#L185-L286
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/modules/nextflow/src/main/groovy/nextflow/config/ConfigSelectorResolver.groovy#L89-L116
+    lint: { expect: ok, clean: true }
+    run:
+      expect: ok
+      output:
+        [
+          "GREET [notLabel:1, simple:1, dotstar:1, notTwice:1, fq:1]",
+          "SHOUT [either:1, label:1, notTwice:1]",
+          "TWICE [declared:1, notLabel:1, either:1, alias:1]",
+          "TWICE [declared:1, notLabel:1]",
+          "There's no process matching config selector: .*:SHOUT",
+          "There's no process matching config selector: NOPE",
+        ]
+  - id: f601-forms
+    about: A typed project with a config that has a manifest, a dotted docker option, a one-line selector, an empty wave block and a profile; the starting point of each placement rule of the config commands.
+    spec: [F-601, FI-02, FI-06]
+    sources:
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/config.mdx#L29-L95
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/config.mdx#L185-L357
+    lint: { expect: ok, clean: true }
+    run:
+      expect: ok
+      output: ["NULL: HELLO ADA (NULL)"]
+  - id: f601-forms-after
+    about: The f601-forms tree after the scripted sequence of config commands in the engine test (every placement rule and value kind); the run shows the selector memories.
+    spec: [F-601, FI-02, FI-06, AR-23]
+    sources:
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/config.mdx#L185-L357
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/reference/stdlib-types/memory-unit.mdx#L10
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/reference/stdlib-types/duration.mdx#L10-L34
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/reference/process/directives/resource-limits.mdx
+    lint: { expect: ok, clean: true }
+    run:
+      expect: ok
+      output: ["8 GB: HELLO ADA (4 GB)", "8 GB: HELLO GRACE (4 GB)"]
+  - id: f601-plugins
+    about: The f601-config tree after the plugin commands and the profile and docker block commands; lint only, as a run would download the plugin.
+    spec: [F-601, IO-33]
+    sources:
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/config.mdx#L29-L95
+    lint: { expect: ok, clean: true }
   - id: f301-palette-adds
     about: The blank template after the palette adds (a new process in modules/local and a new workflow in subworkflows/local, each included and called from the entry workflow); generated by the F-301 golden test.
     spec: [F-301, LA-12, AR-21, UX-15]

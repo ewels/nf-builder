@@ -381,3 +381,32 @@ workflow {
 - **What happens:** `nextflow lint .` reports no errors. `nextflow run main.nf -stub` fails with "Process 'HELLO' was called twice -- include it with a different alias or call it in a different workflow".
 - **Expected:** lint reports the second call, as it reports other errors the runtime would raise.
 - **nf-builder:** AddCall refuses a second call of the same callee in one workflow (F-111, ADR 0039), and F-112 can report it in imported code.
+
+### 25. The config formatter drops the type of a closure parameter
+
+`nextflow.config`:
+
+```nextflow
+process {
+    ext.args = {
+        'a b'.split(' ').collect { String token -> token }
+    }
+}
+```
+
+- **What happens:** `nextflow lint -format .` (26.10.7) rewrites the closure to `{ token -> token }`: the result parses, but the type is lost. In a script the formatter keeps a closure parameter's type.
+- **Expected:** the type stays, or the formatter says why a config closure differs from a script one.
+- **nf-builder:** the config printer keeps the type in the form a config accepts, `{ String token -> token }` (a config rejects the script form `token: String`). Three rnaseq configs differ for this reason alone, listed in `packages/lang-2610/test/corpus/known-config-format-differences.json` (F-601, ADR 0032).
+
+### 26. The config formatter drops the quotes of a quoted option name
+
+`nextflow.config`:
+
+```nextflow
+ext.'my-key' = 1
+```
+
+- **What happens:** `nextflow lint` accepts it, but `nextflow lint -format .` (26.10.7) rewrites it to `ext.my-key = 1`, which no longer parses ("Unexpected input: '-'"). The same happens inside `process { ext.'a-b' = 2 }`.
+- **Expected:** the quotes stay when the name isn't an identifier.
+- **What else:** `ext.'a.b' = 1` becomes `ext.a.b = 1`, which parses but is a different option (a nested `ext.a.b`).
+- **nf-builder:** the config printer keeps the quotes when a name isn't an identifier (F-601), a deliberate deviation from `lint -format` that no corpus config reaches.

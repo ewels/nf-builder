@@ -50,11 +50,16 @@ export function WorkflowSummaryView({
   summary,
   suggestions,
   onShowSuggestions,
+  configPath,
+  onOpenConfig,
 }: {
   readonly summary: WorkflowSummary;
   /** The workflow's own suggestions (F-405); null while they are being found, left out when not known. */
   readonly suggestions?: readonly Diagnostic[] | null;
   readonly onShowSuggestions?: (first: Diagnostic) => void;
+  /** The project's root `nextflow.config`, when it has one: the entry workflow's summary links it (F-601). */
+  readonly configPath?: string;
+  readonly onOpenConfig?: (path: string) => void;
 }): JSX.Element {
   const first = suggestions?.[0];
   return (
@@ -118,6 +123,18 @@ export function WorkflowSummaryView({
           </ul>
         )}
       </section>
+      {summary.entry && configPath !== undefined ? (
+        <section className="details-section">
+          <h4>Configuration</h4>
+          <button
+            type="button"
+            className="config-link"
+            onClick={() => onOpenConfig?.(configPath)}
+          >
+            Open {configPath}
+          </button>
+        </section>
+      ) : null}
       {summary.modules.length === 0 ? null : (
         <section className="details-section">
           <h4>Registry modules</h4>

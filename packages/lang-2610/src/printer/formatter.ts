@@ -67,6 +67,12 @@ export class Formatter {
   private currentRootExpr: Expression | null = null;
   private inWrappedMethodChain = false;
 
+  /**
+   * Config syntax: a closure parameter's type goes before its name (`String token`), the only form a config accepts.
+   * `nextflow lint -format` drops the type there (upstream bug 25); the printer keeps it.
+   */
+  legacyParameters = false;
+
   private readonly layout: SourceLayout;
   constructor(layout: SourceLayout = FRESH_LAYOUT) {
     this.layout = layout;
@@ -743,13 +749,24 @@ export class Formatter {
   /** L715 */
   parameters(params: readonly FormalParameter[]): void {
     for (const [i, param] of params.entries()) {
-      this.append(param.name.name);
-      if (hasLegacyType(param.legacyType)) {
-        this.append(": ");
-        this.legacyTypeAnnotation(param.legacyType);
-      } else if (hasType(param.type)) {
-        this.append(": ");
-        this.typeAnnotation(param.type);
+      if (this.legacyParameters) {
+        if (hasLegacyType(param.legacyType)) {
+          this.legacyTypeAnnotation(param.legacyType);
+          this.append(" ");
+        } else if (hasType(param.type)) {
+          this.typeAnnotation(param.type);
+          this.append(" ");
+        }
+        this.append(param.name.name);
+      } else {
+        this.append(param.name.name);
+        if (hasLegacyType(param.legacyType)) {
+          this.append(": ");
+          this.legacyTypeAnnotation(param.legacyType);
+        } else if (hasType(param.type)) {
+          this.append(": ");
+          this.typeAnnotation(param.type);
+        }
       }
       if (param.defaultValue) {
         this.append(" = ");
