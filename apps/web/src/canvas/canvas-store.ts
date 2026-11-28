@@ -14,7 +14,6 @@ import {
   type HistoryStatus,
   type NodeDetails,
   type OpenRequest,
-  type PaletteAction,
   type Point,
   type Positions,
   type ProjectChange,
@@ -404,24 +403,26 @@ export function createCanvasStore(
         content = { status: "unavailable", message: messageOf(error) };
       }
       if (mine !== generation) return;
-      // the node an add from the palette shows gets its place in the same update as the projection, so it is never
-      // drawn unplaced and the layout never moves it (ADR 0052)
-      const placed =
-        content.status === "ready" ? placement(tab, content) : null;
-      set({
-        content:
-          placed === null || content.status !== "ready"
-            ? content
-            : {
-                ...content,
-                positions: { ...content.positions, [placed.key]: placed.at },
-                refit: false,
-              },
-      });
-      if (placed !== null && content.status === "ready")
-        await save(tab, content.revision, { [placed.key]: placed.at }, false);
-      // no canvas, so no node to select (the header and the body agree)
-      if (content.status !== "ready") clearSelection();
+      if (content.status === "ready") {
+        // the node an add from the palette shows gets its place in the same update as the projection, so it is never
+        // drawn unplaced and the layout never moves it (ADR 0052); its view never refits, as the add is pending
+        const placed = placement(tab, content);
+        set({
+          content:
+            placed === null
+              ? content
+              : {
+                  ...content,
+                  positions: { ...content.positions, [placed.key]: placed.at },
+                },
+        });
+        if (placed !== null)
+          await save(tab, content.revision, { [placed.key]: placed.at }, false);
+      } else {
+        set({ content });
+        // no canvas, so no node to select (the header and the body agree)
+        clearSelection();
+      }
     }
 
     /** The pending add's node and top-left corner when this projection holds it, which uses the placement up. */
@@ -984,7 +985,7 @@ export function createCanvasStore(
         });
         const { summary, tabs } = get();
         const tab = tabs.find((t) => t.id === request.tab);
-        const action: PaletteAction | null = paletteAction({
+        const action = paletteAction({
           key: request.item,
         });
         if (mine !== get().session || summary === null)

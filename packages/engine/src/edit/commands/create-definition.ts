@@ -4,12 +4,7 @@ import type {
   TextPatch,
 } from "@nf-builder/lang-core";
 import type { EditState } from "../apply";
-import {
-  isIdentifier,
-  moduleDirectory,
-  relativeSource,
-  subworkflowDirectory,
-} from "../names";
+import { definitionPath, isIdentifier, relativeSource } from "../names";
 import { includeOf } from "../nodes";
 import { EditRefusal } from "../refusal";
 import { includeInsertion } from "../splice";
@@ -70,8 +65,7 @@ function createDefinition(
       `${caller} has statements outside a workflow block, and Nextflow doesn't allow an include next to them. Move them into a workflow first.`,
       caller,
     );
-  const directory = kind === "process" ? moduleDirectory : subworkflowDirectory;
-  const path = `${directory(name)}/main.nf`;
+  const path = definitionPath(kind, name);
   if (state.model.paths().includes(path))
     throw new EditRefusal(
       "invalid",

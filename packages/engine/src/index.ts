@@ -99,7 +99,6 @@ export {
   createEditState,
   type EditState,
 } from "./edit/apply";
-export type { FreshNameRequest } from "./edit/fresh-name";
 export { applyPatches, PatchError } from "./edit/patches";
 export { planAdd } from "./files/add";
 export {

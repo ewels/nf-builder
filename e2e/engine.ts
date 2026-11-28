@@ -69,16 +69,6 @@ export interface EngineHook {
     registry?: { path: string; module: string }[];
     code?: string;
   }>;
-  /** A fresh default name for a new process or workflow (F-301). */
-  freshName(request: {
-    kind: "process" | "workflow";
-    caller: string;
-  }): Promise<{
-    revision?: number;
-    name?: string;
-    path?: string;
-    code?: string;
-  }>;
   diagnostics(): Promise<{
     revision?: number;
     diagnostics?: {

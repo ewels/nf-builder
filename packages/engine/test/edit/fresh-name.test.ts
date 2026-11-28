@@ -1,9 +1,6 @@
 import { describe, expect, it } from "vitest";
-import {
-  definitionPath,
-  freshDefinitionName,
-  NEW_NAME_BASE,
-} from "../../src/edit/fresh-name";
+import { freshDefinitionName, NEW_NAME_BASE } from "../../src/edit/fresh-name";
+import { definitionPath } from "../../src/edit/names";
 import { accepted, stateFor } from "./helpers";
 
 const main = "workflow {\n}\n";

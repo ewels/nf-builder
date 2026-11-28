@@ -56,7 +56,6 @@ describe("F-301 palette item row", () => {
     const unregister = registerViewport({
       tab: "main.nf#",
       centre: () => ({ x: 120, y: 80 }),
-      toFlow: (p) => p,
     });
     const button = find(
       PaletteItemRow({

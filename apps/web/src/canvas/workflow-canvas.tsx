@@ -281,7 +281,6 @@ function CanvasInner({
     () =>
       registerViewport({
         tab,
-        toFlow: (client) => screenToFlowPosition(client),
         centre() {
           const box = host.current?.getBoundingClientRect();
           return screenToFlowPosition({

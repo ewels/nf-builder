@@ -23,7 +23,8 @@ import {
   patchResult,
   patchSequence,
 } from "../edit/apply";
-import { definitionPath, freshDefinitionName } from "../edit/fresh-name";
+import { freshDefinitionName } from "../edit/fresh-name";
+import { definitionPath } from "../edit/names";
 import { PatchError } from "../edit/patches";
 import { registryFolders } from "../files/registry";
 import { EMPTY_HISTORY, History, type HistoryLimits } from "../history/history";

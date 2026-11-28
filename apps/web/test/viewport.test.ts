@@ -4,7 +4,6 @@ import { activeViewport, registerViewport } from "../src/canvas/viewport";
 const viewport = (tab: string) => ({
   tab,
   centre: () => ({ x: 1, y: 2 }),
-  toFlow: (client: { x: number; y: number }) => client,
 });
 
 describe("F-301 viewport bridge", () => {

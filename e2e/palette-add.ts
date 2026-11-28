@@ -6,18 +6,18 @@ import { REPO_ROOT } from "../scripts/check-common.ts";
 import { readProject } from "./engine.ts";
 import { storedFiles } from "./history.ts";
 
-export interface Point {
+interface Point {
   x: number;
   y: number;
 }
 
 /** The oracle case the blank template plus a palette process and workflow must equal (CI lints and stub-runs it). */
-export const PALETTE_ADDS_CASE = join(
+const PALETTE_ADDS_CASE = join(
   REPO_ROOT,
   "tools/oracle/cases/f301-palette-adds",
 );
 
-export const palettePanel = (page: Page): Locator =>
+const palettePanel = (page: Page): Locator =>
   page.getByRole("tabpanel", { name: "Components" });
 
 /** The live region that says what an add did. */
