@@ -26,6 +26,7 @@ import {
   setConfigOption,
 } from "./commands/config";
 import { connect, disconnect } from "./commands/connect";
+import { createFile } from "./commands/create-file";
 import { createProcess } from "./commands/create-process";
 import { deleteNode } from "./commands/delete-node";
 import { renameDeclaration } from "./commands/rename";
@@ -88,6 +89,8 @@ const build = (state: EditState, command: EditCommand): TextPatch[] => {
       return addConfigPlugin(state, command);
     case "removeConfigPlugin":
       return removeConfigPlugin(state, command);
+    case "createFile":
+      return createFile(state, command);
     default:
       throw new EditRefusal(
         "invalid",

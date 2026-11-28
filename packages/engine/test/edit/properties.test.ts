@@ -3,12 +3,7 @@ import { EDIT_COMMAND_KINDS } from "@nf-builder/lang-core";
 import { describe, expect, it } from "vitest";
 import { createEditState } from "../../src/edit/apply";
 import { readTree } from "../model/read-tree";
-import {
-  assertSequences,
-  runFixedExamples,
-  Stats,
-  sequenceArb,
-} from "./harness";
+import { assertSequences, Stats, sequenceArb } from "./harness";
 import { version } from "./helpers";
 
 const root = new URL("../../../../", import.meta.url).pathname;
@@ -70,7 +65,6 @@ describe("F-111 properties", () => {
           text: "docker {\n    enabled = true\n}\n\nplugins {\n    id 'nf-schema@2.5.1'\n}\n",
         });
       const state = await createEditState(version, files);
-      if (tree.start) runFixedExamples(state, startStats);
       assertSequences(
         state,
         sequenceArb,

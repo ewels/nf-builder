@@ -40,5 +40,7 @@ export function commandLabel(command: EditCommand): string {
       return `Add plugin ${command.id}`;
     case "removeConfigPlugin":
       return `Remove plugin ${command.id}`;
+    case "createFile":
+      return `Create ${command.path}`;
   }
 }

@@ -66,6 +66,10 @@ const samples: Record<EditCommand["kind"], [EditCommand, string]> = {
     },
     "Remove plugin nf-schema@2.5.1",
   ],
+  createFile: [
+    { kind: "createFile", path: "notes/a.txt" },
+    "Create notes/a.txt",
+  ],
 };
 
 const context = (

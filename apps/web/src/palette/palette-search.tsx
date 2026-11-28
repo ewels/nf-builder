@@ -12,7 +12,7 @@ export function PaletteSearch({
       <input
         type="search"
         aria-label="Search components"
-        placeholder="Search components"
+        placeholder="Search components and modules"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={(e) => {

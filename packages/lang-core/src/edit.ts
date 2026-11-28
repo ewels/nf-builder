@@ -147,6 +147,12 @@ export interface RemoveConfigPlugin {
   readonly id: string;
 }
 
+/** Create an empty file (UX-16); a new folder is its `.gitkeep`. */
+export interface CreateFile {
+  readonly kind: "createFile";
+  readonly path: string;
+}
+
 export type EditCommand =
   | CreateProcess
   | AddCall
@@ -159,7 +165,8 @@ export type EditCommand =
   | RemoveConfigOption
   | AddConfigBlock
   | AddConfigPlugin
-  | RemoveConfigPlugin;
+  | RemoveConfigPlugin
+  | CreateFile;
 
 export const EDIT_COMMAND_KINDS = [
   "createProcess",
@@ -174,6 +181,7 @@ export const EDIT_COMMAND_KINDS = [
   "addConfigBlock",
   "addConfigPlugin",
   "removeConfigPlugin",
+  "createFile",
 ] as const satisfies readonly EditCommand["kind"][];
 
 /** Replace `text.slice(start, end)`: UTF-16 offsets into the file as it was before the patch. */

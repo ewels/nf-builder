@@ -705,3 +705,32 @@ html.is-resizing body * {
   font-family: var(--font-mono);
   font-size: 0.8125rem;
 }
+
+/* the tablist holds only tabs; each closable tab carries a pointer-only close control (Delete closes from the keyboard) */
+.workflow-tablist {
+  display: flex;
+  gap: 2px;
+}
+
+.workflow-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.workflow-tab-close {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  color: #3d4659;
+  background: transparent;
+  border: 0;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.workflow-tab-close:hover {
+  background: var(--color-border);
+}

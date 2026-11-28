@@ -1,6 +1,7 @@
 import type { PaletteCategoryId, PaletteView } from "@nf-builder/engine";
 import type { JSX } from "react";
 import { PaletteCategorySection } from "./palette-category-section";
+import { PaletteHeading } from "./palette-heading";
 
 export function PaletteTree({
   view,
@@ -16,9 +17,7 @@ export function PaletteTree({
 }): JSX.Element {
   return (
     <section aria-labelledby="palette-heading" className="palette-tree">
-      <h2 id="palette-heading" className="palette-heading">
-        Nextflow language · {view.version}
-      </h2>
+      <PaletteHeading version={view.version} />
       {view.categories.map((category) => (
         <PaletteCategorySection
           key={category.id}

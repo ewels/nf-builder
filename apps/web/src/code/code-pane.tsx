@@ -1,3 +1,4 @@
+import type { ReadOnlyReason } from "@nf-builder/engine";
 import type { JSX } from "react";
 import { lazy, Suspense, useState } from "react";
 import { CanvasErrorBoundary } from "../canvas/canvas-error-boundary";
@@ -21,13 +22,27 @@ function syncText(state: PaneSyncState): string {
   }
 }
 
+const READ_ONLY_TEXT: Record<ReadOnlyReason, string> = {
+  managed: "Read-only: nf-builder keeps .nf-builder/ up to date itself.",
+};
+
 /** The code of a workflow's file (UX-27): its path, the editor and a status line. */
-export function CodePane({ path }: { readonly path: string }): JSX.Element {
+export function CodePane({
+  path,
+  readOnly = null,
+}: {
+  readonly path: string;
+  /** Why the file can't be edited (F-210, IO-02), or null. */
+  readonly readOnly?: ReadOnlyReason | null;
+}): JSX.Element {
   const [state, setState] = useState<PaneSyncState>({ status: "idle" });
   return (
     <section className="code-pane" aria-label={`Code of ${path}`}>
       <header className="code-pane-header">
         <span className="code-pane-path">{path}</span>
+        {readOnly === null ? null : (
+          <span className="code-pane-readonly">{READ_ONLY_TEXT[readOnly]}</span>
+        )}
         <span
           className="code-pane-status"
           role="status"
@@ -39,7 +54,11 @@ export function CodePane({ path }: { readonly path: string }): JSX.Element {
       <div className="code-pane-body">
         <CanvasErrorBoundary message="The code editor couldn't load. Reload the page.">
           <Suspense fallback={<p className="muted">Loading editor…</p>}>
-            <CodeEditor path={path} onSync={setState} />
+            <CodeEditor
+              path={path}
+              readOnly={readOnly !== null}
+              onSync={setState}
+            />
           </Suspense>
         </CanvasErrorBoundary>
       </div>

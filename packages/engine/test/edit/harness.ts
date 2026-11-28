@@ -43,7 +43,7 @@ export const choiceArb: fc.Arbitrary<Choice> = fc.record({
   snippet: fc.nat(3),
 });
 
-export const sequenceArb = fc.array(choiceArb, { minLength: 1, maxLength: 4 });
+export const sequenceArb = fc.array(choiceArb, { minLength: 1, maxLength: 5 });
 
 /** What happened over a run: accepted commands per kind, refusals per kind and code, and skipped choices. */
 export class Stats {
@@ -293,6 +293,10 @@ export function buildCommand(state: EditState, c: Choice): EditCommand | null {
       const id = pick(CONFIG_PLUGINS, c.a + c.b);
       return id ? { kind, path, id } : null;
     }
+    case "createFile": {
+      const ext = [".nf", ".config", ".md", "/.gitkeep"][c.snippet % 4];
+      return { kind, path: `${c.name.toLowerCase()}${ext}` };
+    }
     default:
       return null;
   }
@@ -381,7 +385,7 @@ function checkAccepted(
     const after = createSourceFile(f.path, f.text, state.parser);
     parsed.set(f.path, after);
     // (a2) a modelled file stays modelled, and a new file is modelled
-    if (!before || before.status === "modelled")
+    if ((!before && after.status !== "plain") || before?.status === "modelled")
       expect(after.status, `${label}: ${f.path} is still modelled`).toBe(
         "modelled",
       );
@@ -472,6 +476,11 @@ function checkAccepted(
         patches.length === 0 ? [] : [command.path],
       );
       break;
+    case "createFile":
+      expect(patches).toEqual([
+        { kind: "create", path: command.path, text: "" },
+      ]);
+      break;
   }
 }
 
@@ -544,6 +553,8 @@ export function assertSequences(
   numRuns: number,
 ) {
   const base = snapshot(state);
+  // every kind is tried first, however the random kinds fall (small run counts can miss one)
+  runFixedExamples(state, stats);
   fc.assert(
     fc.property(arb, (choices) => {
       try {
@@ -562,11 +573,11 @@ const PRELUDE: Partial<Record<string, string>> = {
 };
 
 /**
- * One accepted command of every kind, by searching small choices for the first the state accepts, each run through
+ * The one mechanism for fixed examples, run first by `assertSequences`. One accepted command of every kind, by searching small choices for the first the state accepts, each run through
  * `runSequence` for its invariants. Random sequences alone leave a kind unexercised on some trees; this keeps the
  * "every kind is accepted" checks honest as kinds are added (F-601). A kind with no accepted choice stays at zero.
  */
-export function runFixedExamples(state: EditState, stats: Stats) {
+function runFixedExamples(state: EditState, stats: Stats) {
   const base = snapshot(state);
   EDIT_COMMAND_KINDS.forEach((kind, index) => {
     const before = EDIT_COMMAND_KINDS.indexOf(

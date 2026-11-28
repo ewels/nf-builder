@@ -31,6 +31,10 @@ function message(code: ImportRefusalCode, detail: RefusalDetail): string {
         : `This zip couldn't be unpacked at ${detail.path ?? "an entry"} (${detail.cause}). It may be damaged or password-protected.`;
     case "too-slow":
       return `This zip took more than ${limits.unpackMs / 1000} seconds to unpack and was stopped. It may be damaged.`;
+    case "too-many-files":
+      return `That's more than ${formatCount(limits.maxEntries)} files. Uploads take up to ${formatCount(limits.maxEntries)} at a time.`;
+    case "files-too-large":
+      return `These files add up to more than ${formatBytes(limits.maxTotalBytes)}. Uploads take up to ${formatBytes(limits.maxTotalBytes)} at a time.`;
     case "gone":
       return "That import is no longer available. Choose the zip file again.";
   }

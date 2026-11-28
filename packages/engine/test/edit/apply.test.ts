@@ -58,6 +58,7 @@ const commands: Record<EditCommand["kind"], EditCommand> = {
     path: "nextflow.config",
     id: "nf-schema@2.5.1",
   },
+  createFile: { kind: "createFile", path: "notes.txt" },
 };
 
 describe("F-111 applyCommand", () => {

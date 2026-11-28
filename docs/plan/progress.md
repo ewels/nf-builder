@@ -692,3 +692,36 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - IO-10, IO-12, IO-13, UX-60, UX-61 and the architecture data flow updated.
   - Known limitation: a raw 429 without CORS headers is opaque, so it shows as "Couldn't reach GitHub" rather than the rate-limit message.
 - Blockers: none.
+
+## 2026-11-28 · F-210 · Claude (autonomous)
+- Did:
+  - The Files view in the left column's Files tab: the project tree as a WAI-ARIA tree (files before folders, type-ahead, Enter to open), with New file, New folder and Upload, a drop hint, `registry` tags on registry module folders and parse badges.
+  - `EngineApi.listFiles`, pulled while the panel is visible and stopped when it is hidden, including in read-only where the left column isn't rendered; tree rows built on the main thread by a pure engine function. A path that is both a file and a folder shows the folder only.
+  - A `CreateFile` command for new files and folders, one undo step each; an empty folder is `<folder>/.gitkeep`. `projectPathProblem` moved from F-403's import code into lang-core and shared by new names, zips and uploads.
+  - Adding files through the workspace's `stageFiles`, `previewAdd` and `addFiles`: the Add files dialog is always shown, names the target folder, lists replacements and skipped clashes with reasons, and says adding can't be undone and clears the undo history. A pending code edit is flushed first. Loose files take IO-12's limits with binary files skipped; a dropped zip uses F-403's staging with a "Keep the folder" checkbox; dropped folders are refused.
+  - Opening files: a script with a workflow opens its canvas tab, anything else a code-only file tab through F-309's `openFile`, and `.nf-builder/**` opens read-only. The tablist ("Open workflows and files") holds only tabs; a closable file tab closes with Delete (`aria-keyshortcuts`) and has an `aria-hidden` pointer-only ×.
+  - Read-only guards: adds are refused even when already in flight, `createFile` and `createFolder` are refused through F-703's apply refusal, and the document drop guard stays mounted.
+  - Tests: `e2e/files.spec.ts` and unit tests in `packages/engine`, `packages/sources`, `packages/lang-core` and `apps/web`. The property and corpus edit harness now runs 6 fixed examples per command kind before its random runs (no assertion weakened). The Firefox and WebKit `@smoke` run adds the zip through the Upload input, because Playwright's synthetic `DataTransfer` with files crashes Firefox; the drop path is tested on Chromium.
+- State: passing once CI is green with the approved baseline.
+- Next: F-605, F-601, F-301.
+- Decisions:
+  - [ADR 0055](../adr/0055-files-view.md): `listFiles` and the workspace's add methods (amend ADR 0043's API list); `CreateFile` (extends ADR 0039 and AR-21); `.gitkeep` for empty folders with no stored-format change; adds as raw writes that clear the history (ADR 0051); IO-12 limits for loose files with no ignore list; F-403's staging plus "Keep the folder" for zips; clash handling; the registry rule from the pack's include check with `local` excluded; badges from parse status, with "Not fully parsed" for verbatim or partial files without problems; file tabs and the tablist rename; the tree keyboard model; read-only refusals.
+  - UX-16, UX-20, AR-21, IO-12 and the architecture data flow updated.
+  - `scope-change`: F-313 "Files view: rename, move and delete files and folders" added to M3, depending on F-210.
+  - `files-view-registry-error` baseline approved from CI (ADR 0021).
+- Blockers: none.
+
+## 2026-11-28 · F-503 · Claude (autonomous)
+- Did:
+  - Registry modules grouped by namespace in the palette, `nf-core` first and the rest in code-point order, each group a collapsible heading with its count; rows show the short name with the full name in `data-name`, the process or workflow glyph with hidden text, and a `typed` tag on typed modules that have a version. Plugins list their ids with `summary` as the title.
+  - Lazy loading as windows of 100 rows with a real "Show N more (of T)" button that an `IntersectionObserver` presses as the palette scrolls; growth runs in a transition, and a group's window resets when the group closes.
+  - The palette's one search box filters registry modules (name, description, keywords) and plugins (id, summary) through a deferred query; the lists stay visible while searching. The single "No components match" status appears only when nothing matches anywhere; the placeholder reads "Search components and modules".
+  - `ports(name)` on the registry client: snapshot-only, `ports.json` read on demand, failed reads retried, concurrent re-reads of a stale file shared.
+- State: passing once CI is green with the approved baseline.
+- Next: F-605, F-601 and F-301.
+- Decisions:
+  - [ADR 0058](../adr/0058-registry-palette.md): namespace groups and order, short labels, 100-row scroll-loaded windows with no new dependency, shared search, the message rule, session-only group state, and snapshot-only `ports()` (amends ADR 0050: interim lists replaced, `ports` added).
+  - UX-14 updated.
+  - F-502's e2e locator reads `data-name` and expects nf-core first; the names and counts it asserts are unchanged. F-502's interim-list unit test replaced, as F-502's note asked.
+  - App-shell `@visual` baseline re-approved from CI (ADR 0021).
+- Blockers: none.
