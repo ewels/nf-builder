@@ -1,4 +1,6 @@
 const MAX_SLUG = 100;
+/** Names the importer skips (`__MACOSX`) and Windows device names (with or without an extension), any case. */
+const RESERVED = /^(__MACOSX|(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(\..*)?)$/i;
 
 /** The project name made safe as a file and folder name: unsafe characters become `-` (F-404, UX-62). */
 export function exportSlug(projectName: string): string {
@@ -9,7 +11,8 @@ export function exportSlug(projectName: string): string {
     .replace(/^[.\s-]+|[.\s-]+$/g, "")
     .slice(0, MAX_SLUG)
     .replace(/[.\s-]+$/, "");
-  return slug === "" ? "project" : slug;
+  if (slug === "") return "project";
+  return RESERVED.test(slug) ? `${slug}-project` : slug;
 }
 
 export const exportFileName = (projectName: string): string =>
