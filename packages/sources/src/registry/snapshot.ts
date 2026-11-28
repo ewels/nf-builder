@@ -1,8 +1,10 @@
 import type {
   RegistrySnapshotIndex,
   RegistrySnapshotPorts,
+  SnapshotPluginFile,
 } from "@nf-builder/lang-core";
 import { RegistryError, readJson, request } from "./errors.ts";
+import { parsePluginFile } from "./plugin.ts";
 import { parseSnapshotPorts } from "./ports.ts";
 import type {
   RegistryClient,
@@ -168,9 +170,58 @@ export function createSnapshotClient(
     return again;
   }
 
+  const heldPlugins = new Map<string, Promise<SnapshotPluginFile>>();
+
+  async function readPlugin(
+    id: string,
+    version: string,
+    refresh: boolean,
+  ): Promise<SnapshotPluginFile> {
+    const pluginUrl = new URL(
+      `plugins/${encodeURIComponent(id)}/${encodeURIComponent(version)}.json`,
+      options.snapshotUrl,
+    ).href;
+    const response = await request(
+      doFetch,
+      pluginUrl,
+      { credentials: "omit", cache: refresh ? "no-cache" : "default" },
+      "Registry plugin spec",
+    );
+    if (response.status === 404 || response.status === 410) {
+      throw new RegistryError(
+        "unavailable",
+        pluginUrl,
+        `This registry snapshot has no spec for ${id} ${version}.`,
+        response.status,
+      );
+    }
+    return parsePluginFile(
+      await readJson(response, pluginUrl, "Registry plugin spec"),
+      pluginUrl,
+      id,
+      version,
+    );
+  }
+
   return {
     source: "snapshot",
     snapshot,
+    plugin(id, version, opts) {
+      const key = `${id}@${version}`;
+      const held = heldPlugins.get(key);
+      if (held && !opts?.refresh) return held;
+      const next = readPlugin(id, version, opts?.refresh === true);
+      if (!opts?.refresh) heldPlugins.set(key, next);
+      next.then(
+        () => {
+          if (opts?.refresh) heldPlugins.set(key, next);
+        },
+        () => {
+          if (heldPlugins.get(key) === next) heldPlugins.delete(key);
+        },
+      );
+      return next;
+    },
     async ports(name, opts) {
       return (await loadPorts(opts)).modules[name] ?? null;
     },
