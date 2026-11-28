@@ -313,3 +313,7 @@ ADR numbers reserved for features in flight, so parallel branches don't clash: 0
 
 ### F-503 — [plan](plan-F-503.md)
 - Accept every recommendation in section 6, with one change: namespaces are ordered with `nf-core` first, then the rest in code-point order, as the mockup shows (2,296 of 2,330 modules in the deployed snapshot are nf-core's).
+
+### F-301 — [plan](plan-F-301.md)
+- Accept every recommendation in section 6, with one change to point 16: F-703 (read-only below 1024 px) is being built now; if it has merged when F-301 starts, palette adds go through its read-only guard and are refused there, with a test.
+- The new feature for the other palette items (point 1) is added in F-301's PR with `scope-change`. ADR number: the next free one when F-301 starts (0055 to 0058 are reserved above).
