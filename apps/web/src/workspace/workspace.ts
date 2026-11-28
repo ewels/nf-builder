@@ -199,6 +199,8 @@ export function createWorkspace(options: WorkspaceOptions): WorkspaceApi {
     listFiles: () => engine.listFiles(),
     connectionTargets: (request) => engine.connectionTargets(request),
     freshName: (request) => engine.freshName(request),
+    calleeWorkflow: (request) => engine.calleeWorkflow(request),
+    callPath: (ref) => engine.callPath(ref),
     history: () => engine.history(),
 
     open: (request, onProgress) =>

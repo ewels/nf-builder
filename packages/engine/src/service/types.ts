@@ -122,6 +122,20 @@ export interface ConnectionTargetsResult {
   readonly targets: readonly ConnectionTarget[];
 }
 
+/** The call node to open: a node of the projection of `path`/`workflow` (F-307, UX-50). */
+export interface CalleeRequest {
+  readonly path: string;
+  readonly workflow: string | null;
+  readonly node: string;
+}
+
+/** The workflows from the project's default workflow down to, but not including, the one asked about (F-307, UX-50). */
+export interface CallPathResult {
+  readonly revision: number;
+  /** Empty for the default workflow itself and for one it can't reach. */
+  readonly trail: readonly WorkflowRef[];
+}
+
 export type ApplyOutcome = Applied | EngineRefusal;
 
 /** How `apply` records a command in the undo history (F-209). */
@@ -268,6 +282,13 @@ export interface EngineApi {
   ): Promise<ConnectionTargetsResult | EngineRefusal>;
   /** A name for a new process or workflow added from the palette, free in `caller`'s scope and directory (F-301). */
   freshName(request: FreshNameRequest): Promise<FreshName | EngineRefusal>;
+  /** The definition a call node opens (aliases resolved), or a `not-found` refusal saying why it has no canvas (F-307, UX-50; amends ADR 0043's API list). */
+  calleeWorkflow(request: CalleeRequest): Promise<WorkflowRef | EngineRefusal>;
+  /** The shortest call path from the project's default workflow to `ref`, for the breadcrumb (F-307, UX-50). */
+  callPath(ref: {
+    readonly path: string;
+    readonly workflow: string | null;
+  }): Promise<CallPathResult | EngineRefusal>;
   /** The current text of a file, or null with no project or no such file. */
   readFile(path: string): Promise<string | null>;
   /** Drops the open project; later calls answer `no-project` until the next `open`. The revision counter keeps counting. */

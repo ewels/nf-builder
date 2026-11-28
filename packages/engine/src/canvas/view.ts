@@ -158,6 +158,10 @@ export function canvasView(
         title: l.title,
         subtitle: l.subtitle,
         badge,
+        opens:
+          node.kind === "call" &&
+          node.callee.status === "modelled" &&
+          (node.callee.kind === "workflow" || node.callee.kind === "pipeline"),
         inputs: node.inputs.map(portView),
         outputs: node.outputs.map(portView),
         ariaLabel: parts.join(", "),

@@ -34,6 +34,7 @@ const view: CanvasNodeView = {
   title: "B",
   subtitle: "process",
   badge: null,
+  opens: false,
   inputs: [
     { id: "x", label: "x", type: "Path" },
     { id: "y", label: "y", type: "Path" },

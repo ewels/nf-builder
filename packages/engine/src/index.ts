@@ -223,6 +223,8 @@ export type {
   Applied,
   ApplyOptions,
   ApplyOutcome,
+  CalleeRequest,
+  CallPathResult,
   ConfigViewResult,
   ConnectionTargetsRequest,
   ConnectionTargetsResult,
