@@ -237,6 +237,43 @@ test.describe("F-401", () => {
     expect((await stored(page)).projects).toHaveLength(0);
   });
 
+  for (const [how, cancel] of [
+    ["Escape", (page: Page) => page.keyboard.press("Escape")],
+    [
+      "the Cancel import button",
+      (page: Page) =>
+        page.getByRole("button", { name: "Cancel import" }).click(),
+    ],
+  ] as const) {
+    test(`F-401 IO-14 UX-61: ${how} during the download aborts the import and creates no project`, async ({
+      page,
+    }) => {
+      let release: () => void = () => undefined;
+      const gate = new Promise<void>((resolve) => {
+        release = resolve;
+      });
+      const log = await mockGithub(page, [reportRepo()], {
+        raw: async () => {
+          await gate;
+          return undefined;
+        },
+      });
+      await openApp(page);
+      const dialog = await importFromGithub(page, "ewels/report-demo", "");
+      await expect.poll(() => log.raw.length).toBeGreaterThan(0);
+      await cancel(page);
+      if (how === "Escape") await dialog.waitFor({ state: "hidden" });
+      else
+        await expect(dialog.getByRole("alert")).toContainText(
+          "Nothing was imported",
+        );
+      release();
+      await page.waitForTimeout(1000);
+      await expect(reportDialog(page)).toHaveCount(0);
+      expect((await stored(page)).projects).toHaveLength(0);
+    });
+  }
+
   test("F-401 QA-30: an import logs no CSP violation and no console error", async ({
     page,
   }) => {

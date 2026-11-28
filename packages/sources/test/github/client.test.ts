@@ -104,6 +104,17 @@ describe("GitHub client", () => {
     );
   });
 
+  it("F-401 IO-14: a null or malformed tree entry is an unexpected error, not a TypeError", async () => {
+    for (const bad of [null, 7, "x"]) {
+      const client = createGithubClient({
+        fetch: fake(() => tree({ tree: [bad] })).fetch,
+      });
+      expect((await kindOf(client.listTree(repo, SHA))).kind).toBe(
+        "unexpected",
+      );
+    }
+  });
+
   it("F-401 IO-14: 404, 422, 409, 403 or 429 with remaining 0 (resetAt from x-ratelimit-reset), 403 without it (retry-after), a TypeError and a non-SHA body map to their kinds", async () => {
     const status = (s: number, headers: Record<string, string> = {}) =>
       createGithubClient({
@@ -222,6 +233,25 @@ describe("GitHub client", () => {
         ]),
       );
       expect([e.kind, e.path]).toEqual(["incomplete", "a.txt"]);
+    });
+
+    it("F-401 IO-14: a content-length that differs from the tree size is incomplete before the body is read", async () => {
+      const res = new Response(new Uint8Array([1, 2, 3]), {
+        headers: { "content-length": "999" },
+      });
+      let read = false;
+      res.arrayBuffer = () => {
+        read = true;
+        return Promise.resolve(new ArrayBuffer(3));
+      };
+      const f = fake(() => res);
+      const e = await kindOf(
+        createGithubClient({ fetch: f.fetch }).download(repo, SHA, [
+          { path: "a.txt", size: 3 },
+        ]),
+      );
+      expect([e.kind, e.path]).toEqual(["incomplete", "a.txt"]);
+      expect(read).toBe(false);
     });
 
     it("F-401 IO-14: an abort stops everything", async () => {

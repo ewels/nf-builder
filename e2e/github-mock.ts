@@ -45,7 +45,8 @@ export interface Reply {
 export interface Overrides {
   /** Replaces an API answer: return undefined to answer as usual. */
   api?(pathAndQuery: string): Reply | undefined;
-  raw?(path: string): Reply | undefined;
+  /** May wait (return a promise) to hold a download open. */
+  raw?(path: string): Reply | undefined | Promise<Reply | undefined>;
 }
 
 /** The git blob SHA-1 of some bytes. */
@@ -199,12 +200,12 @@ export async function mockGithub(
     }
     return fulfil(route, json(200, repo.tree), API_HEADERS);
   });
-  await page.route("https://raw.githubusercontent.com/**", (route) => {
+  await page.route("https://raw.githubusercontent.com/**", async (route) => {
     const url = new URL(route.request().url());
     const [owner, name, sha, ...rest] = url.pathname.split("/").slice(1);
     const path = rest.map(decodeURIComponent).join("/");
     log.raw.push(path);
-    const over = overrides.raw?.(path);
+    const over = await overrides.raw?.(path);
     if (over) return fulfil(route, over, RAW_HEADERS);
     const repo = repos.find((r) => r.repo === `${owner}/${name}`);
     const bytes = repo && sha === repo.sha ? repo.raw(path) : null;

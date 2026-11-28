@@ -176,6 +176,8 @@ export function NewProjectDialog(props: NewProjectDialogProps): JSX.Element {
     total: number;
   } | null>(null);
   const abort = useRef<AbortController | null>(null);
+  // closing the dialog (Escape, Cancel, a route change) aborts a download still running (plan 2.2)
+  useEffect(() => () => abort.current?.abort(), []);
   // the repository's name becomes the project name while the field still holds the default or the last name taken from a repository
   const [autoRepoName, setAutoRepoName] = useState(DEFAULT_PROJECT_NAME);
   const repoName = githubProjectName(github.repo);
