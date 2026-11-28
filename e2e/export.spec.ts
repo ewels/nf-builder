@@ -2,7 +2,14 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { expect, test } from "@playwright/test";
 import { canvasReady, node } from "./canvas.ts";
-import { F208_AFTER, F208_BEFORE } from "./code-view.ts";
+import {
+  appendToLine,
+  F208_AFTER,
+  F208_BEFORE,
+  GREETED_LINE,
+  lineNumberOf,
+  radio,
+} from "./code-view.ts";
 import { watchForCspViolations } from "./csp.ts";
 import { readProject } from "./engine.ts";
 import { exportZip, stripFolder } from "./export.ts";
@@ -114,6 +121,34 @@ test("F-404 step 2 IO-21: f208-code-edit imported, the Code edit applied, the ex
       .map((path) => ({ path, text: decode(files[path]) })),
   ).toEqual(after);
   // the CI oracle job lints both cases (f208-code-edit, f208-code-edit-after), IO-21
+});
+
+test("F-404 IO-20 AR-24: text typed in the Code view and exported at once is in the zip", async ({
+  page,
+}, testInfo) => {
+  const zip = testInfo.outputPath("typed.zip");
+  writeZip(
+    Object.fromEntries(
+      readProject(F208_BEFORE).map((f) => [`typed/${f.path}`, f.text]),
+    ),
+    zip,
+  );
+  await importZip(page, zip, "typed");
+  await canvasReady(page);
+  await radio(page, "Code").click();
+  await expect(page.locator(".monaco-editor")).toBeVisible();
+  await appendToLine(
+    page,
+    lineNumberOf(F208_BEFORE, GREETED_LINE),
+    " // typed just now",
+  );
+  const out = await exportZip(page, { layout: false });
+  const main = Object.entries(out.files).find(([name]) =>
+    name.endsWith("/main.nf"),
+  );
+  expect(decode(main?.[1])).toContain(
+    "greeted = GREET(names) // typed just now",
+  );
 });
 
 test("F-404 step 3 IO-02 ADR-0008: export with the layout, import the zip in a fresh browser context: the sidecar bytes and every node position are identical", async ({
