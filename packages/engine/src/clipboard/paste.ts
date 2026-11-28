@@ -1,12 +1,9 @@
 // Planning a paste (F-310, UX-26): which files a target project lacks, which includes a call needs, and which callees
 // have to come in under an alias. Pure; the service runs the plan as one group of commands.
 import type {
-  AddCall,
   AddInclude,
-  Connect,
   CreateFile,
   EditCommand,
-  PortRef,
   Projection,
   WorkflowTarget,
 } from "@nf-builder/lang-core";
@@ -219,30 +216,6 @@ export function setupCommands(
     }),
   );
   return [...files, ...includes];
-}
-
-/** One bare call per planned node, in order. */
-export const callCommands = (
-  plan: PastePlan,
-  target: WorkflowTarget,
-): AddCall[] =>
-  plan.nodes.map((n) => ({ kind: "addCall", target, callee: n.bound }));
-
-export const connectCommand = (
-  target: WorkflowTarget,
-  from: PortRef,
-  to: PortRef,
-): Connect => ({ kind: "connect", target, from, to });
-
-/** How many call nodes of each name the projection has: taken before the paste, to tell the pasted ones apart. */
-export function callCounts(
-  projection: Projection,
-): ReadonlyMap<string, number> {
-  const counts = new Map<string, number>();
-  for (const n of projection.nodes)
-    if (n.kind === "call")
-      counts.set(n.callee.name, (counts.get(n.callee.name) ?? 0) + 1);
-  return counts;
 }
 
 /**

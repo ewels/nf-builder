@@ -20,10 +20,7 @@ import {
   summarise,
 } from "../clipboard/fragment";
 import {
-  callCommands,
-  callCounts,
   checkVersion,
-  connectCommand,
   type PastePlan,
   pastedIds,
   planPaste,
@@ -113,6 +110,8 @@ export interface EngineServiceOptions {
 }
 
 interface Open {
+  /** Which open this is: the clipboard remembers it to tell the project it came from (F-310). */
+  readonly id: number;
   readonly version: string;
   readonly state: EditState;
   readonly lints: PackLints;
@@ -201,7 +200,8 @@ export function createEngineService(
   let revision = 0;
   let tail: Promise<unknown> = Promise.resolve();
   /** What the last copy took, and the project it came from: it outlives `close` (F-310, AR-30). */
-  let clipboard: { fragment: NodeFragment; origin: Open } | null = null;
+  let clipboard: { fragment: NodeFragment; origin: number } | null = null;
+  let opens = 0;
   let pastes = 0;
 
   /** Runs `fn` after every earlier call has settled. */
@@ -554,7 +554,7 @@ export function createEngineService(
           open.state,
           clipboard.fragment,
           target,
-          clipboard.origin === open,
+          clipboard.origin === open.id,
         ),
       };
     } catch (error) {
@@ -602,9 +602,13 @@ export function createEngineService(
         `Couldn't paste: ${why.message.replace(/ ?Nothing was changed\.$/, "")} Nothing was changed.`,
       );
     };
-    const before = callCounts(
-      projectionOf(open, target.path, target.workflow) as Projection,
-    );
+    // how many calls of each name there are before the paste, to tell the pasted ones apart
+    const before = new Map<string, number>();
+    for (const n of (
+      projectionOf(open, target.path, target.workflow) as Projection
+    ).nodes)
+      if (n.kind === "call")
+        before.set(n.callee.name, (before.get(n.callee.name) ?? 0) + 1);
     const idsNow = () =>
       pastedIds(
         projectionOf(open, target.path, target.workflow) as Projection,
@@ -614,7 +618,9 @@ export function createEngineService(
     try {
       for (const command of [
         ...setupCommands(plan, target),
-        ...callCommands(plan, target),
+        ...plan.nodes.map(
+          (n): EditCommand => ({ kind: "addCall", target, callee: n.bound }),
+        ),
       ]) {
         const failed = step(command);
         if (failed) return rollback(failed);
@@ -626,13 +632,12 @@ export function createEngineService(
         const to = ids.get(edge.to.node);
         if (from === undefined || to === undefined)
           return rollback(refusal("internal", "A pasted node wasn't found."));
-        const failed = step(
-          connectCommand(
-            target,
-            { node: from, port: edge.from.port },
-            { node: to, port: edge.to.port },
-          ),
-        );
+        const failed = step({
+          kind: "connect",
+          target,
+          from: { node: from, port: edge.from.port },
+          to: { node: to, port: edge.to.port },
+        });
         if (failed) return rollback(failed);
       }
       const ids = idsNow();
@@ -713,7 +718,9 @@ export function createEngineService(
         if (!catalogue || !pack)
           throw new Error(`No pack for ${request.version}`);
         const configRules = await pack.loadConfigRules();
+        opens += 1;
         const open: Open = {
+          id: opens,
           version: request.version,
           state,
           lints,
@@ -1008,7 +1015,7 @@ export function createEngineService(
       guarded((open): Copied | EngineRefusal => {
         try {
           const fragment = buildFragment(open.state, request, open.version);
-          clipboard = { fragment, origin: open };
+          clipboard = { fragment, origin: open.id };
           return { revision, summary: summarise(fragment) };
         } catch (error) {
           return refused(error);
