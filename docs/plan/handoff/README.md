@@ -321,3 +321,12 @@ ADR numbers reserved for features in flight, so parallel branches don't clash: 0
 ### F-301 — [plan](plan-F-301.md)
 - Accept every recommendation in section 6, with one change to point 16: F-703 (read-only below 1024 px) is being built now; if it has merged when F-301 starts, palette adds go through its read-only guard and are refused there, with a test.
 - The new feature for the other palette items (point 1) is added in F-301's PR with `scope-change`. ADR number: the next free one when F-301 starts (0055 to 0058 are reserved above).
+
+### F-405 — [plan](plan-F-405.md)
+- Accept every recommendation in section 6. ADR number: the next free one when F-405 starts.
+
+### F-505 — [plan](plan-F-505.md)
+- Accept every recommendation in section 6: add F-601 and F-301 to F-505's `depends_on` in its PR (`scope-change`); tasks 1 to 3 may start before they merge, tasks 4 to 7 after.
+
+### F-404 — [plan](plan-F-404.md)
+- Accept every recommendation in section 6. For point 3, give module binaries under `resources/usr/bin/` the executable bit too, once the builder has confirmed that folder name in the Nextflow docs (module binaries); otherwise root `bin/` only. ADR number: the next free one when F-404 starts.
