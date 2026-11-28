@@ -33,6 +33,7 @@ import {
   saveState,
   switcher,
 } from "./projects.ts";
+import { PHONE } from "./read-only.ts";
 import { writeZip } from "./zips.ts";
 
 const csv = (name: string, text = "a,b\n1,2\n"): DropFile => ({
@@ -411,6 +412,12 @@ test("F-210 UX-16 IO-12 QA-32: a dropped zip with more than 20,000 entries is re
 }, testInfo) => {
   test.skip(testInfo.project.name !== "chromium", "one browser is enough");
   await blankProject(page, "files-many");
+  // opening a project writes the layout sidecar after the first listing, and its write refreshes the list (F-207);
+  // wait for both before taking the list to compare with, or a late `.nf-builder` row looks like a write by the drop
+  await expect(treeRow(page, ".nf-builder")).toBeVisible();
+  await expect
+    .poll(() => readFile(page, ".nf-builder/layout.json"))
+    .not.toBeNull();
   const before = await visiblePaths(page);
   const entries: Record<string, string> = {};
   for (let i = 0; i <= 20_000; i += 1) entries[`many/f${i}.txt`] = "";
@@ -453,6 +460,21 @@ test("F-210 UX-16: dropping a folder is refused with a message, and a file dropp
   expect(
     ((await engineFileList(page)).files ?? []).map((f) => f.path).sort(),
   ).toEqual(listed);
+});
+
+test("F-210 F-703 UX-04: a file dropped on the page at 390 px, where the Files view is gone, is still cancelled and doesn't navigate away", async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name !== "chromium", "one browser is enough");
+  await page.setViewportSize(PHONE);
+  await page.goto("./");
+  await expect(switcher(page)).toBeEnabled();
+  await expect(page.locator("#column-left")).toHaveCount(0);
+  const url = page.url();
+  expect(
+    await dropCancelled(page, page.locator("main"), [csv("stray.csv")]),
+  ).toBe(true);
+  expect(page.url()).toBe(url);
 });
 
 test(
