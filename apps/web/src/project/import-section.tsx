@@ -1,6 +1,11 @@
 // The Import route of the New project dialog (F-403, IO-12, UX-61): a source (Zip file for now), the file input and the
 // summary of what would be imported before anything is. Presentational; the state is in `zip-import.ts` (AR-31).
-import { formatBytes, formatCount, type SkipReason } from "@nf-builder/sources";
+import {
+  formatBytes,
+  formatCount,
+  type ImportSummary,
+  type SkipReason,
+} from "@nf-builder/sources";
 import { type JSX, useId } from "react";
 import type { ZipImportView } from "./zip-import";
 
@@ -13,8 +18,44 @@ const SKIP_LABELS: Record<SkipReason, string> = {
   unsupported: "Unsupported compression",
 };
 
-const plural = (n: number, one: string, many: string): string =>
+export const plural = (n: number, one: string, many: string): string =>
   n === 1 ? `1 ${one}` : `${formatCount(n)} ${many}`;
+
+/** The skipped files of an import, grouped by reason (F-403); also shown by the Add files dialog (F-210). */
+export function SkippedFiles({
+  summary,
+}: {
+  readonly summary: ImportSummary;
+}): JSX.Element | null {
+  return summary.skipped.length > 0 ? (
+    <details>
+      <summary>
+        Skipped files (
+        {formatCount(summary.skipped.reduce((n, g) => n + g.count, 0))})
+      </summary>
+      {summary.skipped.map((group) => (
+        <div key={group.reason}>
+          <h4>
+            {SKIP_LABELS[group.reason]}: {plural(group.count, "file", "files")},{" "}
+            {formatBytes(group.bytes)}
+          </h4>
+          <ul className="import-paths">
+            {group.paths.map((path, index) => (
+              // the same path can be listed twice (duplicate entries)
+              // biome-ignore lint/suspicious/noArrayIndexKey: the list is static between renders
+              <li key={`${index}:${path}`}>{path}</li>
+            ))}
+            {group.count > group.paths.length ? (
+              <li className="muted">
+                and {formatCount(group.count - group.paths.length)} more
+              </li>
+            ) : null}
+          </ul>
+        </div>
+      ))}
+    </details>
+  ) : null;
+}
 
 /** Passes the chosen file on and empties the input, so choosing the same file again still fires `change`. */
 export function takeChosenFile(
@@ -79,38 +120,7 @@ export function ImportSection(props: {
               Removed the top-level folder {state.summary.stripped}/.
             </p>
           ) : null}
-          {state.summary.skipped.length > 0 ? (
-            <details>
-              <summary>
-                Skipped files (
-                {formatCount(
-                  state.summary.skipped.reduce((n, g) => n + g.count, 0),
-                )}
-                )
-              </summary>
-              {state.summary.skipped.map((group) => (
-                <div key={group.reason}>
-                  <h4>
-                    {SKIP_LABELS[group.reason]}:{" "}
-                    {plural(group.count, "file", "files")},{" "}
-                    {formatBytes(group.bytes)}
-                  </h4>
-                  <ul className="import-paths">
-                    {group.paths.map((path, index) => (
-                      // the same path can be listed twice (duplicate entries)
-                      // biome-ignore lint/suspicious/noArrayIndexKey: the list is static between renders
-                      <li key={`${index}:${path}`}>{path}</li>
-                    ))}
-                    {group.count > group.paths.length ? (
-                      <li className="muted">
-                        and {formatCount(group.count - group.paths.length)} more
-                      </li>
-                    ) : null}
-                  </ul>
-                </div>
-              ))}
-            </details>
-          ) : null}
+          <SkippedFiles summary={state.summary} />
           <label className="dialog-field" htmlFor={`${ids}-ignore`}>
             Ignore list
           </label>

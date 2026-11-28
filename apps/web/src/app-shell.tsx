@@ -3,6 +3,7 @@ import type { JSX } from "react";
 import { type CanvasContent, useWorkspace } from "./canvas/canvas-store";
 import { DetailsHeader } from "./details/details-header";
 import { DetailsPane } from "./details/details-pane";
+import { useFileDropGuard } from "./files/drop";
 import { useHistoryKeys } from "./history/use-history-keys";
 import { COLLAPSED_WIDTH, useLayout } from "./layout/layout-store";
 import { ProblemsPanel, problemsTabId } from "./problems/problems-panel";
@@ -60,6 +61,7 @@ function useProblemsStatus(hasProject: boolean): StatusProblems | null {
 
 export function AppShell(): JSX.Element {
   useViewModeKeys();
+  useFileDropGuard();
   useHistoryKeys();
   const left = useLayout((s) => s.left);
   const right = useLayout((s) => s.right);

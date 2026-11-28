@@ -52,6 +52,14 @@ interface Pending {
 function setup() {
   const pending: Pending[] = [];
   const calls: string[] = [];
+  let outcome: () => unknown = () => ({
+    ok: false,
+    revision: null,
+    code: "invalid",
+    message: "No.",
+    path: null,
+    problems: [],
+  });
   const engine = {
     open: async () => summary(),
     project: async () => ({
@@ -63,9 +71,11 @@ function setup() {
       new Promise<ProjectFiles | EngineRefusal>((resolve) => {
         pending.push({ resolve });
       }),
-    apply: async (command: unknown) => {
-      calls.push(JSON.stringify(command));
-      return { ok: false, code: "invalid", message: "No." };
+    apply: async (command: unknown, _revision: number, options: unknown) => {
+      calls.push(
+        `${JSON.stringify(command)} ${JSON.stringify(options ?? null)}`,
+      );
+      return outcome();
     },
   } as never;
   const canvas = createCanvasStore(() => engine);
@@ -88,7 +98,10 @@ function setup() {
   const change = () => {
     for (const fn of listeners) fn();
   };
-  return { files, canvas, pending, calls, reply, show, change };
+  const setOutcome = (fn: () => unknown) => {
+    outcome = fn;
+  };
+  return { files, canvas, pending, calls, reply, show, change, setOutcome };
 }
 const tick = () => new Promise((r) => setTimeout(r, 0));
 
@@ -220,5 +233,45 @@ describe("F-210 files store", () => {
     expect(text(files)).toBe(false);
     expect(text(registry)).toBe(false);
     expect(Object.keys(t.files.getState())).not.toContain("text");
+  });
+
+  it('F-210 AR-23 UX-16: createFile and createFolder send createFile through canvas apply with the session, label a folder "Create folder <path>", and return a refusal message', async () => {
+    const t = setup();
+    t.files.getState().setVisible(true);
+    await t.show();
+    await tick();
+    await t.reply();
+    // a refusal comes back as its message and changes nothing
+    expect(await t.files.getState().createFile("notes.txt")).toBe("No.");
+    expect(t.files.getState().selected).toBeNull();
+    t.setOutcome(() => ({
+      ok: true,
+      revision: 2,
+      workflows: [entry],
+      files: [{ path: "x", text: "" }],
+      history: EMPTY_HISTORY,
+    }));
+    t.files.getState().select("modules");
+    expect(await t.files.getState().createFile("notes.txt")).toBeNull();
+    expect(t.calls[1]).toBe(
+      '{"kind":"createFile","path":"modules/notes.txt"} null',
+    );
+    const s = t.files.getState();
+    expect(s.selected).toBe("modules/notes.txt");
+    expect(s.expanded.has("modules")).toBe(true);
+    expect(s.notice).toEqual({
+      tone: "status",
+      text: "Created modules/notes.txt.",
+    });
+    // the new file opens in a code tab
+    expect(t.canvas.getState().activeTab).toBe("file:modules/notes.txt");
+    expect(await t.files.getState().createFolder("assets/raw/")).toBeNull();
+    expect(t.calls[2]).toBe(
+      '{"kind":"createFile","path":"modules/assets/raw/.gitkeep"} {"label":"Create folder modules/assets/raw"}',
+    );
+    expect(t.files.getState().selected).toBe("modules/assets/raw");
+    expect(t.files.getState().notice?.text).toBe(
+      "Created folder modules/assets/raw.",
+    );
   });
 });

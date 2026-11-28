@@ -4,6 +4,7 @@ import {
   type EngineApi,
   type FileSummary,
   folderSet,
+  joinFolder,
   openTarget,
   type RegistryFolder,
 } from "@nf-builder/engine";
@@ -55,6 +56,10 @@ export interface FilesActions {
   open(path: string): Promise<void>;
   /** The folder new files go to: the selected folder, else the selected file's folder, else the top. */
   targetFolder(): string;
+  /** Creates an empty file in the target folder, reveals and opens it; the refusal's message, or null. */
+  createFile(name: string): Promise<string | null>;
+  /** Creates a folder as its `.gitkeep` (UX-16), reveals it; the refusal's message, or null. */
+  createFolder(name: string): Promise<string | null>;
   notify(notice: FilesNotice | null): void;
 }
 
@@ -217,6 +222,34 @@ export function createFilesStore(deps: {
         const { selected, files } = get();
         if (selected === null) return "";
         return folderSet(files).has(selected) ? selected : folderOf(selected);
+      },
+      async createFile(name) {
+        const path = joinFolder(get().targetFolder(), name);
+        const outcome = await canvas
+          .getState()
+          .apply({ kind: "createFile", path }, canvas.getState().session);
+        if (!outcome.ok) return outcome.message;
+        get().reveal(path);
+        set({ notice: { tone: "status", text: `Created ${path}.` } });
+        await get().open(path);
+        return null;
+      },
+      async createFolder(name) {
+        const folder = joinFolder(
+          get().targetFolder(),
+          name.replace(/\/+$/, ""),
+        );
+        const outcome = await canvas
+          .getState()
+          .apply(
+            { kind: "createFile", path: `${folder}/.gitkeep` },
+            canvas.getState().session,
+            { label: `Create folder ${folder}` },
+          );
+        if (!outcome.ok) return outcome.message;
+        get().reveal(folder);
+        set({ notice: { tone: "status", text: `Created folder ${folder}.` } });
+        return null;
       },
       notify: (notice) => set({ notice }),
     };

@@ -14,6 +14,7 @@ const html = (
     <FilesPanelView
       status={status}
       message="boom"
+      projectName="Demo"
       rows={rows}
       selected={selected}
       onSelect={noop}
@@ -48,6 +49,15 @@ describe("F-210 files panel", () => {
       "The files couldn&#x27;t be listed (boom).",
     );
     expect(html(rows)).not.toContain("No project open");
+    const full = html(rows);
+    expect(full).toContain(">Demo<");
+    expect(full).toContain('aria-label="New file"');
+    expect(full).toContain('aria-label="New folder"');
+    expect(full).toContain('aria-label="Upload files"');
+    expect(full).toContain(
+      "Drop files or a .zip here to add them to the project.",
+    );
+    expect(full).toMatch(/role="status"/);
   });
 
   it('F-210 UX-16 QA-10: role tree labelled "Project files"; treeitems with aria-level, aria-setsize, aria-posinset and aria-selected, aria-expanded on folders only; exactly one row with tabindex 0', () => {

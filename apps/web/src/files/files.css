@@ -59,3 +59,44 @@
   flex: none;
   color: var(--color-error);
 }
+
+.files-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-bottom: var(--space-2);
+}
+
+.files-title {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.files-status:empty {
+  display: none;
+}
+
+.files-alert {
+  margin: 0 0 var(--space-2);
+  color: var(--color-error);
+}
+
+.files-hint {
+  margin-top: var(--space-3);
+  padding: var(--space-3);
+  font-size: 12px;
+  border: 1px dashed var(--color-border);
+  border-radius: 6px;
+}
+
+.files-drop[data-dragging] .files-hint,
+.file-row.is-drop-target {
+  background: var(--tone-blue-bg);
+  outline: 2px dashed var(--color-accent);
+  outline-offset: -2px;
+}

@@ -12,12 +12,15 @@ const parseErrors = (n: number): string =>
 export function FileTree({
   rows,
   selected,
+  dropTarget = null,
   onSelect,
   onActivate,
   onKeyDown,
 }: {
   readonly rows: readonly FileTreeRow[];
   readonly selected: string | null;
+  /** The folder a file drag is over, for a highlight. */
+  readonly dropTarget?: string | null;
   readonly onSelect: (path: string) => void;
   readonly onActivate: (row: FileTreeRow) => void;
   readonly onKeyDown?: (
@@ -47,7 +50,7 @@ export function FileTree({
         <li
           key={row.path}
           role="treeitem"
-          className={`file-row${row.kind === "folder" ? " is-folder" : ""}`}
+          className={`file-row${row.kind === "folder" ? " is-folder" : ""}${row.path === dropTarget ? " is-drop-target" : ""}`}
           data-path={row.path}
           aria-level={row.level}
           aria-setsize={row.setSize}
