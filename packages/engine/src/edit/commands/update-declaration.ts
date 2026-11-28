@@ -436,7 +436,7 @@ export function updateDeclaration(
       state,
       path,
       name,
-      wanted,
+      inputOrigins(wanted),
       process.inputs?.items.length ?? 0,
       outputRenames(original, wanted),
     ),
@@ -535,7 +535,7 @@ function renameReads(
 }
 
 /** One `edit` patch per path, its edits in order. */
-function mergePatches(
+export function mergePatches(
   edits: readonly { path: string; edit: TextEdit }[],
 ): TextPatch[] {
   const byPath = new Map<string, TextEdit[]>();
@@ -549,15 +549,15 @@ function mergePatches(
 }
 
 /** The edits that make every call of the process pass what its changed inputs take (ADR 0039). */
-function callSiteEdits(
+export function callSiteEdits(
   state: EditState,
   path: string,
   name: string,
-  form: TypedProcessForm,
+  origins: readonly (number | null)[],
   inputCount: number,
   outputs: ReadonlyMap<string, string>,
+  fix = "change its inputs in the Code tab",
 ): { path: string; edit: TextEdit }[] {
-  const origins = inputOrigins(form);
   const inputsSame =
     origins.length === inputCount && origins.every((o, i) => o === i);
   if (inputsSame && outputs.size === 0) return [];
@@ -566,7 +566,7 @@ function callSiteEdits(
   if (piped && !inputsSame)
     throw new EditRefusal(
       "invalid",
-      `${name} is called with a pipe in ${piped.path}; change its inputs in the Code tab. Nothing was changed.`,
+      `${name} is called with a pipe in ${piped.path}; ${fix}. Nothing was changed.`,
       piped.path,
     );
   const out: { path: string; edit: TextEdit }[] = [];

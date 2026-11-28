@@ -8,6 +8,7 @@ import type {
   EditCommand,
   FileText,
   PackLints,
+  ParseProblem,
   Projection,
   QuickFix,
   TextPatch,
@@ -50,6 +51,15 @@ import { PatchError } from "../edit/patches";
 import { EditRefusal } from "../edit/refusal";
 import { registryFolders } from "../files/registry";
 import type { RegistryFolder } from "../files/types";
+import {
+  DECLARATION_PATH,
+  declarationSource,
+  flagPrefix,
+  formatDeclarationText,
+  parseDeclarationText,
+  WRONG_KIND,
+  withPrefix,
+} from "../form/declaration-text";
 import { popupTarget } from "../form/popup-target";
 import { formChoices, processForm } from "../form/read-process";
 import { EMPTY_HISTORY, History, type HistoryLimits } from "../history/history";
@@ -96,6 +106,8 @@ import type {
   ConfigViewResult,
   ConnectionTargetsResult,
   Copied,
+  DeclarationCode,
+  DeclarationCodeResult,
   DeclarationFormResult,
   DiagnosticsResult,
   EngineApi,
@@ -251,6 +263,58 @@ export function createEngineService(
     }
     return open.projector;
   };
+
+  /** What a form row can pick: the pack's directives and types, and the records and enums in scope of the process's file. */
+  const choicesOf = (
+    open: Open,
+    model: NonNullable<ReturnType<ProjectModel["file"]>>,
+  ) => {
+    const local = [...model.scope].flatMap(([name, binding]) => {
+      const d =
+        binding.kind === "declaration"
+          ? binding.declaration
+          : binding.entry.declaration;
+      return d?.kind === "Record" || d?.kind === "Enum" ? [name] : [];
+    });
+    return formChoices(
+      open.state.catalogue,
+      open.configRules,
+      local,
+      installedPacks.find((p) => p.version === open.version)?.standardTypes,
+    );
+  };
+
+  /** The typed process a Code tab text is for, with the flags it parses under; a refusal when there is none. */
+  const codeTarget = (
+    open: Open,
+    request: { readonly path: string; readonly name: string },
+  ) => {
+    const model = open.state.model.file(request.path);
+    const process = model?.declarations.get(request.name)?.declaration;
+    if (
+      !model ||
+      model.source.language !== "nextflow" ||
+      process?.kind !== "Process" ||
+      !process.typed
+    )
+      return refusal(
+        "not-found",
+        `${request.name} isn't a typed process in ${request.path}.`,
+      );
+    return {
+      model,
+      source: declarationSource(model.source, process),
+      prefix: flagPrefix(model.source, process),
+    };
+  };
+
+  const unparsed = (
+    message: string,
+    problems: readonly ParseProblem[],
+  ): EngineRefusal => ({
+    ...refusal("does-not-parse", message),
+    problems,
+  });
 
   const registryOf = (open: Open): readonly RegistryFolder[] => {
     const pack = installedPacks.find((p) => p.version === open.version);
@@ -975,26 +1039,106 @@ export function createEngineService(
             "not-found",
             `${target.name} isn't found in ${target.path}.`,
           );
-        // the records and enums in scope of the process's file are types an input can take
-        const local = [...(model?.scope ?? [])].flatMap(([name, binding]) => {
-          const d =
-            binding.kind === "declaration"
-              ? binding.declaration
-              : binding.entry.declaration;
-          return d?.kind === "Record" || d?.kind === "Enum" ? [name] : [];
-        });
+        const source = declarationSource(model.source, process);
         return {
           revision,
           target: { path: target.path, name: target.name },
           form: processForm(model.source, process, open.state.catalogue),
-          choices: formChoices(
-            open.state.catalogue,
-            open.configRules,
-            local,
-            installedPacks.find((p) => p.version === open.version)
-              ?.standardTypes,
-          ),
+          choices: choicesOf(open, model),
+          text: source.text,
+          span: { start: source.start, end: source.end },
         };
+      }),
+
+    parseDeclaration: (request) =>
+      guarded((open): DeclarationCodeResult | EngineRefusal => {
+        const found = codeTarget(open, request);
+        if ("ok" in found) return found;
+        const parsed = parseDeclarationText(
+          open.state.parser,
+          found.prefix,
+          request.text,
+        );
+        if (!parsed.ok) return unparsed(parsed.message, parsed.problems);
+        if (!parsed.process.typed) return unparsed(WRONG_KIND, []);
+        return {
+          revision,
+          name: parsed.process.name.name,
+          form: processForm(parsed.file, parsed.process, open.state.catalogue),
+          choices: choicesOf(open, found.model),
+        };
+      }),
+
+    formatDeclaration: (request) =>
+      guarded((open) => {
+        const found = codeTarget(open, request);
+        if ("ok" in found) return found;
+        const formatted = formatDeclarationText(
+          open.state.parser,
+          found.prefix,
+          request.text,
+        );
+        return formatted.ok
+          ? { revision, text: formatted.text }
+          : unparsed(formatted.message, formatted.problems);
+      }),
+
+    declarationText: (request) =>
+      serial(async () => {
+        const open = current;
+        if (!open) return refusal("no-project", "No project is open.");
+        try {
+          const found = codeTarget(open, request);
+          if ("ok" in found) return found;
+          let name = request.name;
+          let text = found.source.text;
+          if (request.base !== null) {
+            const parsed = parseDeclarationText(
+              open.state.parser,
+              found.prefix,
+              request.base,
+            );
+            if (!parsed.ok) return unparsed(parsed.message, parsed.problems);
+            name = parsed.process.name.name;
+            text = request.base;
+          }
+          // the declaration alone, so no call site can refuse the form and nothing else is touched
+          const scratch = await createEditState(open.version, [
+            { path: DECLARATION_PATH, text: withPrefix(found.prefix, text) },
+          ]);
+          const applied = applyCommand(scratch, {
+            kind: "updateDeclaration",
+            path: DECLARATION_PATH,
+            name,
+            form: request.form,
+          });
+          if (!applied.ok)
+            return {
+              ...refusal(applied.code, applied.message),
+              problems: applied.problems,
+              ...(applied.fields ? { fields: applied.fields } : {}),
+            };
+          // an unchanged form writes nothing: the text stays as it was
+          if (applied.files.length === 0) return { revision, text };
+          commit(scratch, applied);
+          const file = scratch.model.file(DECLARATION_PATH);
+          const declaration = file?.declarations.get(name)?.declaration;
+          if (
+            file?.source.language !== "nextflow" ||
+            declaration?.kind !== "Process"
+          )
+            return refusal("internal", "The form's code wasn't found.");
+          return {
+            revision,
+            text: declarationSource(file.source, declaration).text,
+          };
+        } catch (error) {
+          const reason = error instanceof Error ? error.message : String(error);
+          return refusal(
+            "internal",
+            `The engine failed unexpectedly (${reason}). Nothing was changed.`,
+          );
+        }
       }),
 
     configView: (path) =>

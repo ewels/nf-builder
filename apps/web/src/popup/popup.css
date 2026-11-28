@@ -222,3 +222,55 @@
 .popup-message:empty {
   display: none;
 }
+
+.popup-tabs [role="tab"]:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: -2px;
+}
+
+.code-tab-toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.code-tab-toolbar [aria-pressed="true"] {
+  background: var(--tone-blue-bg);
+}
+
+.code-tab-state {
+  color: var(--color-muted);
+}
+
+.code-tab-body {
+  position: relative;
+  height: min(50vh, 26rem);
+  border: 1px solid var(--color-border);
+}
+
+.code-tab-problem {
+  min-height: 1.2em;
+  margin: var(--space-2) 0 0;
+  color: var(--color-error);
+}
+
+.code-tab-problem:empty {
+  display: none;
+}
+
+.popup-discard {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.popup-discard p {
+  margin: 0;
+  font-weight: 600;
+}
+
+.popup-declaration-lines {
+  background: var(--tone-blue-bg);
+}

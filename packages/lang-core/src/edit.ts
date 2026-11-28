@@ -107,6 +107,18 @@ export interface UpdateDeclaration {
   readonly form: DeclarationForm;
 }
 
+/**
+ * Replace one declaration's text, doc comment included, with text the user wrote in the popup's Code tab (F-304, UX-43,
+ * UX-44). The text is applied as written, not reprinted; it must parse alone as one declaration of the same name and kind.
+ */
+export interface ReplaceDeclaration {
+  readonly kind: "replaceDeclaration";
+  readonly path: string;
+  /** The declaration as it is now named. */
+  readonly name: string;
+  readonly text: string;
+}
+
 /** Replace a file's whole text (the Code tab). */
 export interface ReplaceFileText {
   readonly kind: "replaceFileText";
@@ -247,6 +259,7 @@ export type EditCommand =
   | CreateWorkflow
   | AddInclude
   | UpdateDeclaration
+  | ReplaceDeclaration
   | MoveFile
   | AddTake
   | AddEmit;
@@ -269,6 +282,7 @@ export const EDIT_COMMAND_KINDS = [
   "createWorkflow",
   "addInclude",
   "updateDeclaration",
+  "replaceDeclaration",
   "moveFile",
   "addTake",
   "addEmit",

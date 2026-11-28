@@ -916,4 +916,30 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - `features.json` (scope-change): new F-316 (M3, depends on F-307) for removing and renaming takes and emits and the workflow Configure popup, from settled point 1.
   - Updated UX-04, UX-20, UX-21, UX-31, UX-40, UX-50, UX-51, UX-70 and AR-21.
   - Notes appended to F-303, F-312 and F-701.
+## 2026-11-28 · F-304 · Claude (autonomous)
+- Did:
+  - The edit popup's Code tab is enabled (UX-43): its own Monaco model holding only the declaration, from its doc comment to its trailing comment, loaded as a lazy chunk so Configure-only use loads no Monaco. The details header's Code button opens the popup on the Code tab.
+  - The worker parses the text on its own under the file's feature flags (`nextflow.enable.types` mirrored), so legacy declarations parse as legacy; a change of kind or style, or extra code, is refused. Parse problems show live as markers; lints of unapplied text are deferred.
+  - One draft across both tabs (UX-44): Configure is the truth until the Code tab is edited, then the code text is. Switching to Configure parses the code into the form (disabled while it doesn't parse); later form edits are redrawn over the code in the worker.
+  - Apply with a Code edit is one undo group "Edit process <name>": a rename to the text's name if it differs, a new `ReplaceDeclaration` (verbatim splice), a rename to the form's name if Configure changed it, and F-303's module folder move. Calls are remapped by input name (a renamed input becomes `null`), piped calls refuse an input change ("change that call to a plain call first"), and output renames are followed at call sites with two or more outputs when their count and positions match.
+  - Format prints the declaration with `printDeclaration` as one editor edit; Show whole file is read-only with the declaration highlighted. Monaco's find widget and context menu work inside the modal; Tab inserts a tab and Ctrl+M leaves, as in the Code view.
+  - Escape with an edited code draft asks "Discard your changes to the code?" with focus on Keep editing; unedited drafts close at once; Cancel discards. `registerFlush` only syncs the editor into the draft.
+  - `EngineApi` gains `parseDeclaration`, `formatDeclaration` and `declarationText`; `declarationForm` also returns `text` and `span`.
+  - Tests: `e2e/popup-code.spec.ts` (all three steps, Show whole file, find widget and context menu, the discard prompt, the details Code button, read-only, CSP), oracle cases `f304-format-start` and `f304-code-edited`, the printer fixture `f304-format`, and engine and web unit tests. F-206's and F-303's e2e tests now expect Code enabled, as ADRs 0049 and 0066 anticipated.
+  - Merged `main` (F-310): kept both sides in the canvas store (F-304's `editProcess` and `moveParts` with F-310's `Sent` type) and the engine and service exports. The added command kinds shifted F-207's seeded carry property so that 25 runs drew no accepted rename on the legacy start; the default run count is now 100 (under 2 s). No assertion changed.
+- State: passing once CI is green.
+- Next: paused at the maintainer's request for MVP testing; then F-305, F-306, F-311.
+- Decisions:
+  - [ADR 0069](../adr/0069-popup-code-tab.md) (amends ADRs 0039, 0043 and 0066; ADR 0068 is F-307's):
+    - Show whole file is read-only, with the declaration highlighted.
+    - After a Code edit, calls are remapped by input name; an input renamed in Code counts as removed plus added.
+    - A change of kind or style in Code is refused; a name change is a rename, a replace and the folder move in one group.
+    - Code text is applied as written; LA-45 is read as applying to form edits, and Format is the user's choice.
+    - Draft diagnostics are live parse problems only; lints of unapplied text are deferred.
+    - `registerFlush` only syncs the editor into the draft.
+    - Escape with an edited code draft asks before discarding.
+  - `features.json` (scope-change): new F-317 (M3, depends on F-304) for UX-43's hover help in the Code tab.
+  - Updated UX-32, UX-43, UX-44, AR-21 and LA-45.
+  - Notes appended to F-305, F-306, F-307 and F-701.
+  - No visual baseline changed.
 - Blockers: none.

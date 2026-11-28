@@ -33,6 +33,7 @@ import { deleteNode } from "./commands/delete-node";
 import { deleteNodes } from "./commands/delete-nodes";
 import { moveFile } from "./commands/move-file";
 import { renameDeclaration } from "./commands/rename";
+import { replaceDeclaration } from "./commands/replace-declaration";
 import { replaceFileText } from "./commands/replace-file-text";
 import { addEmit, addTake } from "./commands/take-emit";
 import { updateDeclaration } from "./commands/update-declaration";
@@ -108,6 +109,8 @@ const build = (state: EditState, command: EditCommand): TextPatch[] => {
       return addInclude(state, command);
     case "updateDeclaration":
       return updateDeclaration(state, command);
+    case "replaceDeclaration":
+      return replaceDeclaration(state, command);
     case "moveFile":
       return moveFile(state, command);
     default:

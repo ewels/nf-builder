@@ -161,6 +161,49 @@ describe("F-202 workspace", () => {
     expect(s.saves).toHaveLength(savedBefore);
   });
 
+  it("F-304 UX-43 UX-44: the workspace passes parseDeclaration, formatDeclaration and declarationText straight through and saves nothing", async () => {
+    const s = setup();
+    await s.watching;
+    const meta = await s.workspace.createProject({
+      name: "P",
+      languageVersion: version,
+      files: [
+        {
+          path: "main.nf",
+          text: "nextflow.enable.types = true\n\nprocess P {\n    input:\n    x: String\n\n    script:\n    'p'\n}\n\nworkflow {\n    P('a')\n}\n",
+        },
+      ],
+    });
+    await s.workspace.openProject(meta.id);
+    const projection = await s.workspace.project("main.nf", null);
+    const node =
+      "projection" in projection ? projection.projection?.nodes[0] : undefined;
+    const savedBefore = s.saves.length;
+    const form = await s.workspace.declarationForm(
+      "main.nf",
+      null,
+      node?.id ?? "",
+    );
+    if (!("form" in form)) throw new Error("no form");
+    const request = { path: "main.nf", name: "P", text: form.text };
+    expect(await s.workspace.parseDeclaration(request)).toMatchObject({
+      name: "P",
+    });
+    expect(await s.workspace.formatDeclaration(request)).toMatchObject({
+      text: form.text,
+    });
+    expect(
+      await s.workspace.declarationText({
+        path: "main.nf",
+        name: "P",
+        base: null,
+        form: form.form,
+      }),
+    ).toMatchObject({ text: form.text });
+    expect(await s.workspace.flush()).toMatchObject({ status: "saved" });
+    expect(s.saves).toHaveLength(savedBefore);
+  });
+
   it("F-203 UX-20: every status has a higher seq than the one before, and openProject returns the seq of the status that made the project current", async () => {
     const s = setup();
     await s.watching;

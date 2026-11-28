@@ -26,6 +26,7 @@ import { freshName, relativeSource } from "../../src/edit/names";
 import { applyPatches } from "../../src/edit/patches";
 import { itemSpan } from "../../src/edit/splice";
 import { folderOf, isManagedPath } from "../../src/files/paths";
+import { declarationSource } from "../../src/form/declaration-text";
 import { processForm } from "../../src/form/read-process";
 import { createProjector } from "../../src/projection/project";
 import { diffNodes } from "../../src/source/equivalent";
@@ -443,6 +444,30 @@ export function buildCommand(state: EditState, c: Choice): EditCommand | null {
       if (JSON.stringify(changed) === JSON.stringify(form)) return null;
       return { kind, path: p.path, name: p.name, form: changed };
     }
+    case "replaceDeclaration": {
+      // F-304: a typed process's own text with one random change that keeps it a typed process
+      const procs = scripts.flatMap((path) =>
+        [...(state.model.file(path)?.declarations.entries() ?? [])].flatMap(
+          ([name, { declaration }]) =>
+            declaration.kind === "Process" && declaration.typed
+              ? [{ path, name, declaration }]
+              : [],
+        ),
+      );
+      const p = pick(procs, c.a);
+      if (!p) return null;
+      const { text } = declarationSource(
+        state.model.file(p.path)?.source as ScriptSourceFile,
+        p.declaration,
+      );
+      const changed = [
+        `// note ${c.name}\n${text}`,
+        text.replace(/process (\w+) \{/, "process $1 {\n    cpus 2\n"),
+        `// ${c.name}\n// again\n${text}`,
+        `${text}\n// after ${c.name}`,
+      ][c.b % 4] as string;
+      return { kind, path: p.path, name: p.name, text: changed };
+    }
     default:
       return null;
   }
@@ -660,6 +685,7 @@ function checkAccepted(
         expect(p.path.startsWith(command.newPath)).toBe(true);
       break;
     }
+    case "replaceDeclaration":
     case "updateDeclaration": {
       // F-303: the process's own file is patched, and each edit (it, and the call sites') is one top-level item
       expect(patches.map((p) => p.path)).toContain(command.path);
@@ -785,6 +811,7 @@ const PRELUDE: Partial<Record<string, readonly string[]>> = {
   addConfigPlugin: ["removeConfigPlugin"],
   // a pin with no typed process gets a real typed scaffold first (F-301), then edits it
   updateDeclaration: ["createProcess"],
+  replaceDeclaration: ["createProcess"],
   addEmit: ["createWorkflow"],
   addTake: ["createWorkflow", "addEmit"],
 };
