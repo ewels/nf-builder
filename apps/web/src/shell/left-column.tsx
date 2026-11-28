@@ -61,6 +61,12 @@ function LeftColumnTabs({
   );
 }
 
+/** Tells the Files store whether its panel can be seen; the returned cleanup says no, so an unmounted column (read-only, F-703) stops the pulls. */
+export function syncFilesVisible(visible: boolean): () => void {
+  filesStore.getState().setVisible(visible);
+  return () => filesStore.getState().setVisible(false);
+}
+
 export function LeftColumn({
   languageVersion,
 }: {
@@ -70,9 +76,10 @@ export function LeftColumn({
   const collapsed = useLayout((s) => s.left.collapsed);
   const noProject = useWorkspace((s) => s.summary === null);
   // the Files panel pulls its list only while it can be seen
-  useEffect(() => {
-    filesStore.getState().setVisible(view === "files" && !collapsed);
-  }, [view, collapsed]);
+  useEffect(
+    () => syncFilesVisible(view === "files" && !collapsed),
+    [view, collapsed],
+  );
   return (
     <SideColumn
       side="left"
