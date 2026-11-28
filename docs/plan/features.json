@@ -1290,7 +1290,7 @@
     {
       "id": "F-605",
       "milestone": "M6",
-      "description": "Markdown preview and editor (sanitised); Monaco for other text files; binaries listed but not opened.",
+      "description": "Markdown preview and editor (sanitised); Monaco for other text files (binary files moved to F-407, ADR 0059).",
       "spec": [
         "FI-30",
         "FI-31",
