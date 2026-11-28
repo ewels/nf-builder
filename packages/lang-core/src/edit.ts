@@ -211,6 +211,7 @@ export type EditCommand =
   | CreateFile
   | CreateWorkflow
   | UpdateDeclaration
+  | ReplaceDeclaration
   | MoveFile;
 
 export const EDIT_COMMAND_KINDS = [
@@ -229,6 +230,7 @@ export const EDIT_COMMAND_KINDS = [
   "createFile",
   "createWorkflow",
   "updateDeclaration",
+  "replaceDeclaration",
   "moveFile",
 ] as const satisfies readonly EditCommand["kind"][];
 

@@ -79,6 +79,12 @@ const commands: Record<EditCommand["kind"], EditCommand> = {
       kept: [],
     },
   },
+  replaceDeclaration: {
+    kind: "replaceDeclaration",
+    path: "b.nf",
+    name: "B",
+    text: "process B {\n}",
+  },
   moveFile: { kind: "moveFile", path: "b.nf", newPath: "moved/b.nf" },
 };
 

@@ -7,6 +7,7 @@ import type {
 } from "@nf-builder/lang-core";
 import { describe, expect, it } from "vitest";
 import type { EditState } from "../../src/edit/apply";
+import { declarationSource } from "../../src/form/declaration-text";
 import { processForm } from "../../src/form/read-process";
 import { diagnoseFiles } from "../diagnostics/open";
 import { readTree } from "../model/read-tree";
@@ -55,6 +56,18 @@ const update =
         ),
       ),
     };
+  };
+
+/** The `replaceDeclaration` of `name` in `path` whose text is its current text with `change` applied (F-304). */
+const replaceText =
+  (path: string, name: string, change: (text: string) => string) =>
+  (s: EditState): EditCommand => {
+    const file = s.model.file(path);
+    const { text } = declarationSource(
+      file?.source as ScriptSourceFile,
+      file?.declarations.get(name)?.declaration as never,
+    );
+    return { kind: "replaceDeclaration", path, name, text: change(text) };
   };
 
 const PAIR_MODULE = "modules/local/split/main.nf";
@@ -285,6 +298,41 @@ const goldens = {
         name: "GREET",
         newName: "SAY",
       }),
+      (): EditCommand => ({
+        kind: "moveFile",
+        path: "modules/local/greet",
+        newPath: "modules/local/say",
+      }),
+    ],
+  },
+  // F-304 step 1: the Code tab edit, applied as written
+  "f303-configure-start -> f304-code-edited": {
+    start: "f303-configure-start",
+    expected: "f304-code-edited",
+    steps: [
+      replaceText("modules/local/greet/main.nf", "GREET", (text) =>
+        text
+          .replace("Writes a greeting.", "Writes a friendly greeting.")
+          .replace("    input:", "    cpus 2\n\n    input:")
+          .replace(
+            "    script:",
+            "    // keep the greeting short\n    script:",
+          ),
+      ),
+    ],
+  },
+  // F-304 UX-44: the popup's rename, the code replaced under the new name, and the move of its folder
+  "f303-configure-start -> f303-rename-moved (Code tab)": {
+    start: "f303-configure-start",
+    expected: "f303-rename-moved",
+    steps: [
+      (): EditCommand => ({
+        kind: "renameDeclaration",
+        path: "modules/local/greet/main.nf",
+        name: "GREET",
+        newName: "SAY",
+      }),
+      replaceText("modules/local/greet/main.nf", "SAY", (text) => text),
       (): EditCommand => ({
         kind: "moveFile",
         path: "modules/local/greet",

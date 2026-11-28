@@ -31,6 +31,7 @@ import { createFile } from "./commands/create-file";
 import { deleteNode } from "./commands/delete-node";
 import { moveFile } from "./commands/move-file";
 import { renameDeclaration } from "./commands/rename";
+import { replaceDeclaration } from "./commands/replace-declaration";
 import { replaceFileText } from "./commands/replace-file-text";
 import { updateDeclaration } from "./commands/update-declaration";
 import { checkResult } from "./guards";
@@ -97,6 +98,8 @@ const build = (state: EditState, command: EditCommand): TextPatch[] => {
       return createFile(state, command);
     case "updateDeclaration":
       return updateDeclaration(state, command);
+    case "replaceDeclaration":
+      return replaceDeclaration(state, command);
     case "moveFile":
       return moveFile(state, command);
     default:

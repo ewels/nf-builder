@@ -97,6 +97,16 @@ const samples: Record<EditCommand["kind"], [EditCommand, string]> = {
     },
     "Edit process ALIGN",
   ],
+  // F-304 AR-23: replaceDeclaration is labelled "Edit process <name>"
+  replaceDeclaration: [
+    {
+      kind: "replaceDeclaration",
+      path: "modules/local/align/main.nf",
+      name: "ALIGN",
+      text: "process ALIGN {\n}",
+    },
+    "Edit process ALIGN",
+  ],
   // F-303 AR-23: moveFile is labelled with both paths
   moveFile: [
     {
