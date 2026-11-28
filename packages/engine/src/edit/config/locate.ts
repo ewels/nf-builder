@@ -11,6 +11,7 @@ import type {
   ConfigSelectorRef,
   ConfigStatement,
 } from "@nf-builder/lang-core";
+import { isSelectorKey } from "../../config/selectors";
 import { configBlock, configSelector } from "./nodes";
 
 /** A node that holds statements. */
@@ -25,10 +26,8 @@ export interface Occurrence<S> {
 export const topStatements = (ast: ConfigAst): readonly ConfigStatement[] =>
   ast.statements.filter((s): s is ConfigStatement => s.kind !== "Unparsed");
 
-export const isSelectorKey = (name: string): boolean =>
-  name.startsWith("withName:") || name.startsWith("withLabel:");
-
-const lastOf = <T>(list: readonly T[]): T | undefined => list[list.length - 1];
+export const lastOf = <T>(list: readonly T[]): T | undefined =>
+  list[list.length - 1];
 
 const blocks = (
   statements: readonly ConfigStatement[],
@@ -36,6 +35,24 @@ const blocks = (
 ): ConfigBlock[] =>
   statements.filter(
     (s): s is ConfigBlock => s.kind === "ConfigBlock" && s.name.name === name,
+  );
+
+/** The blocks named `name` inside the `profiles` blocks of `statements`, with their `profiles` parents. */
+const profileBlocks = (statements: readonly ConfigStatement[], name: string) =>
+  blocks(statements, "profiles").flatMap((parent) =>
+    blocks(parent.statements, name).map((block) => ({ block, parent })),
+  );
+
+/** The selector blocks that match `ref` inside the `process` blocks of `statements`, with their `process` parents. */
+const selectorBlocks = (
+  statements: readonly ConfigStatement[],
+  ref: ConfigSelectorRef,
+) =>
+  blocks(statements, "process").flatMap((parent) =>
+    parent.statements
+      .filter((s): s is ConfigSelector => s.kind === "ConfigSelector")
+      .filter((s) => matches(s, ref))
+      .map((block) => ({ block, parent })),
   );
 
 const matches = (s: ConfigSelector, ref: ConfigSelectorRef): boolean =>
@@ -54,21 +71,12 @@ function layers(ast: ConfigAst, context: ConfigContext): Layers {
   let profile: Layers["profile"] = null;
   let here: readonly ConfigStatement[] = top;
   if (context.profile !== null) {
-    const name = context.profile;
-    profile = blocks(top, "profiles").flatMap((parent) =>
-      blocks(parent.statements, name).map((block) => ({ block, parent })),
-    );
+    profile = profileBlocks(top, context.profile);
     here = profile.flatMap((p) => p.block.statements);
   }
   let selector: Layers["selector"] = null;
   if (context.selector !== null) {
-    const ref = context.selector;
-    selector = blocks(here, "process").flatMap((parent) =>
-      parent.statements
-        .filter((s): s is ConfigSelector => s.kind === "ConfigSelector")
-        .filter((s) => matches(s, ref))
-        .map((block) => ({ block, parent })),
-    );
+    selector = selectorBlocks(here, context.selector);
   }
   return { profile, selector };
 }
@@ -171,13 +179,8 @@ export function placement(ast: ConfigAst, context: ConfigContext): Placement {
   let chain: readonly Container[] = [];
   if (context.profile !== null) {
     const name = context.profile;
-    const parents = blocks(top, "profiles");
-    const parent = lastOf(parents);
-    const found = lastOf(
-      parents.flatMap((p) =>
-        blocks(p.statements, name).map((block) => ({ block, parent: p })),
-      ),
-    );
+    const parent = lastOf(blocks(top, "profiles"));
+    const found = lastOf(profileBlocks(top, name));
     if (!found) {
       const profile = (leaf: readonly ConfigStatement[]) => {
         const inner = ref
@@ -197,14 +200,7 @@ export function placement(ast: ConfigAst, context: ConfigContext): Placement {
   if (ref === null) return keep(statements, owner, chain);
 
   const processBlock = lastOf(blocks(statements, "process"));
-  const selected = lastOf(
-    blocks(statements, "process").flatMap((p) =>
-      p.statements
-        .filter((s): s is ConfigSelector => s.kind === "ConfigSelector")
-        .filter((s) => matches(s, ref))
-        .map((block) => ({ block, parent: p })),
-    ),
-  );
+  const selected = lastOf(selectorBlocks(statements, ref));
   if (!selected) {
     if (processBlock)
       return missing(processBlock, [...chain, processBlock], (leaf) =>

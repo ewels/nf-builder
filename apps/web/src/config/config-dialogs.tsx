@@ -3,6 +3,7 @@ import {
   type ConfigContext,
   type ConfigSchema,
   type ConfigValue,
+  PLUGIN_ID,
   parseValueText,
 } from "@nf-builder/engine";
 import type { JSX } from "react";
@@ -15,8 +16,6 @@ import type { PendingRow } from "./config-store";
 import { pendingKey } from "./config-store";
 import type { DialogRequest } from "./option-row";
 import { PromptDialog } from "./prompt-dialog";
-
-const PLUGIN_ID = /^[A-Za-z0-9._-]+(@[A-Za-z0-9._+-]+)?$/;
 
 /** What the dialogs ask of the store; each returns the refusal's message, or null when applied. */
 export interface DialogActions {
@@ -87,7 +86,6 @@ export function ConfigDialogs({
       return (
         <PromptDialog
           title="Add selector"
-          submit="Add"
           fields={[
             {
               name: "kind",
@@ -126,7 +124,6 @@ export function ConfigDialogs({
       return (
         <PromptDialog
           title="Add profile"
-          submit="Add"
           fields={[{ name: "name", label: "Name" }]}
           check={(v) => ((v.name ?? "").trim() === "" ? "Enter a name." : null)}
           onSubmit={(v) =>
@@ -142,7 +139,6 @@ export function ConfigDialogs({
       return (
         <PromptDialog
           title="Add plugin"
-          submit="Add"
           fields={[
             {
               name: "id",
@@ -164,7 +160,6 @@ export function ConfigDialogs({
       return (
         <PromptDialog
           title={scope === "env" ? "Add environment variable" : "Add parameter"}
-          submit="Add"
           fields={[
             { name: "name", label: "Name" },
             {

@@ -13,6 +13,7 @@ import type { JSX, ReactNode } from "react";
 import type { PendingRow } from "./config-store";
 import {
   type ConfigHandlers,
+  canEdit,
   OptionRowView,
   PendingRowView,
   UnsetRowView,
@@ -28,9 +29,6 @@ const isCollapsed = (
   key: string,
   byDefault: boolean,
 ): boolean => handlers.toggled.includes(key) !== byDefault;
-
-const canEdit = (handlers: ConfigHandlers): boolean =>
-  handlers.edit?.editable === true;
 
 function Card({
   cardKey,

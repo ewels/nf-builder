@@ -1,6 +1,7 @@
 // Where the Nextflow docs describe a config scope or option (F-601, FI-04). The page lists come from the v26.10.7 docs tree
 // (`docs/reference/config/*.mdx`, `docs/reference/process/directives/*.mdx`) and were checked against docs.seqera.io.
 import type { ConfigCatalogue, ConfigNode } from "@nf-builder/lang-core";
+import { child } from "./validator.ts";
 
 const BASE = "https://docs.seqera.io/nextflow/";
 
@@ -89,27 +90,6 @@ export const DIRECTIVE_PAGES: readonly string[] = [
 const kebab = (name: string): string =>
   name.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`);
 
-/** The catalogue node a path names, or null. */
-function find(
-  catalogue: ConfigCatalogue,
-  names: readonly string[],
-): ConfigNode | null {
-  let nodes: readonly ConfigNode[] = catalogue.scopes;
-  let found: ConfigNode | null = null;
-  for (const name of names) {
-    found =
-      nodes.find((n) => n.kind !== "placeholder" && n.name === name) ??
-      nodes.find((n) => n.kind === "placeholder") ??
-      null;
-    if (found === null) return null;
-    nodes =
-      found.kind === "scope" || found.kind === "placeholder"
-        ? found.children
-        : [];
-  }
-  return found;
-}
-
 /** The "Read more" link of a node's description, when it points into the Nextflow docs. */
 const readMore = (node: ConfigNode): string | null => {
   const link = [
@@ -126,7 +106,7 @@ export function configDocsUrl(
   catalogue: ConfigCatalogue,
   names: readonly string[],
 ): string | null {
-  const node = find(catalogue, names);
+  const node = child(catalogue, names);
   if (node === null) return null;
   const [scope] = names;
   if (scope === "params") return `${BASE}config#parameters`;

@@ -36,7 +36,7 @@ export function commandLabel(command: EditCommand): string {
       if (command.scope.length > 0)
         return `Add ${command.scope.join(".")}${where(command.context)}`;
       return command.context.selector
-        ? `Add selector ${command.context.selector.kind}: ${command.context.selector.pattern}${command.context.profile === null ? "" : ` in profile ${command.context.profile}`}`
+        ? `Add selector ${command.context.selector.kind}: ${command.context.selector.pattern}${where({ ...command.context, selector: null })}`
         : `Add profile ${command.context.profile}`;
     case "addConfigPlugin":
       return `Add plugin ${command.id}`;

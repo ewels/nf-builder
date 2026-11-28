@@ -13,17 +13,18 @@ import type {
   TextEdit,
   TextPatch,
 } from "@nf-builder/lang-core";
+import { PLUGIN_ID } from "../../config/plugins";
 import { valueExpression } from "../../config/values";
 import type { EditState } from "../apply";
 import {
   type Container,
   descend,
   lastDotted,
+  lastOf,
   lastPluginsBlock,
   occurrences,
   placement,
   plugins,
-  topStatements,
 } from "../config/locate";
 import {
   bareSafe,
@@ -39,8 +40,6 @@ import {
   replaceValue,
 } from "../config/splice";
 import { EditRefusal } from "../refusal";
-
-const PLUGIN_ID = /^[A-Za-z0-9._-]+(@[A-Za-z0-9._+-]+)?$/;
 
 /** A config file that parsed, or the refusal that says why not. */
 function configFile(
@@ -110,9 +109,17 @@ function checkOption(
     );
 }
 
-/** The last item at the top level, for appending. */
-const lastItem = (ast: ConfigAst) =>
-  ast.statements[ast.statements.length - 1] ?? null;
+/** Insert after the last statement of `into` (a new top-level block, after the last item, with a blank line before it). */
+const append = (
+  into: Container | null,
+  chain: readonly Container[],
+  blank = into === null,
+): Insertion => ({
+  into,
+  chain,
+  after: into === null ? null : (lastOf<AstNode>(into.statements) ?? null),
+  blank,
+});
 
 export function setConfigOption(
   state: EditState,
@@ -142,23 +149,15 @@ export function setConfigOption(
     ]);
   }
 
+  const insert = (node: ConfigStatement, at: Insertion) =>
+    patch(path, [insertStatement(file, printer, node, at)]);
+
   const place = placement(ast, context);
   const skip = context.selector === null ? 0 : 1;
   if (!place.ready) {
     // the profile or selector is missing: create it holding the statement
     const leaf = configAssign(option.slice(skip), value);
-    return patch(path, [
-      insertStatement(file, printer, place.wrap([leaf]), {
-        into: place.into,
-        chain: place.intoChain,
-        after: null,
-        blank: place.into === null,
-        last: lastItem(ast),
-        ...(place.into === null
-          ? {}
-          : { after: lastOf(place.into.statements) }),
-      }),
-    ]);
+    return insert(place.wrap([leaf]), append(place.into, place.intoChain));
   }
 
   const local = option.slice(skip);
@@ -166,43 +165,21 @@ export function setConfigOption(
   const name = local[local.length - 1] as string;
   const chain = descend(place.statements, scope);
   const owner = place.owner;
-  const intoOwner = (
-    node: ConfigStatement,
-    c: Container | null,
-    cchain: readonly Container[],
-    after?: ConfigStatement | null,
-  ): Insertion => ({
-    into: c,
-    chain: cchain,
-    after: after === undefined ? (c ? lastOf(c.statements) : null) : after,
-    last: lastItem(ast),
-    blank: c === null && node.kind !== "ConfigAssign" ? true : undefined,
-  });
-  const insert = (node: ConfigStatement, at: Insertion) =>
-    patch(path, [insertStatement(file, printer, node, at)]);
 
   if (scope.length === 0) {
     const node = configAssign([name], value);
-    if (owner !== null)
-      return insert(node, intoOwner(node, owner, place.chain));
-    const last = lastItem(ast);
-    return insert(node, {
-      into: null,
-      chain: [],
-      after: null,
-      last,
-      blank: !(last?.kind === "ConfigAssign"),
-    });
-  }
-  if (chain.length === scope.length) {
-    const inner = chain[chain.length - 1] as Container;
-    const node = configAssign([name], value);
-    return insert(node, intoOwner(node, inner, [...place.chain, ...chain]));
+    if (owner !== null) return insert(node, append(owner, place.chain));
+    // a top-level assignment goes after the last one without a blank line
+    return insert(
+      node,
+      append(null, [], lastOf(ast.statements)?.kind !== "ConfigAssign"),
+    );
   }
   if (chain.length > 0) {
+    // some of the scope's blocks exist: the statement goes into the innermost, under the names that are left
     const inner = chain[chain.length - 1] as Container;
     const node = configAssign([...scope.slice(chain.length), name], value);
-    return insert(node, intoOwner(node, inner, [...place.chain, ...chain]));
+    return insert(node, append(inner, [...place.chain, ...chain]));
   }
   // nothing of the scope's blocks exists in the context
   if (context.selector === null) {
@@ -213,28 +190,17 @@ export function setConfigOption(
         into: owner,
         chain: place.chain,
         after: sibling,
-        last: lastItem(ast),
       });
     if (owner === null) {
       const node = configBlock(scope[0] as string, [
         configAssign([...scope.slice(1), name], value),
       ]);
-      return insert(node, {
-        into: null,
-        chain: [],
-        after: null,
-        last: lastItem(ast),
-        blank: true,
-      });
+      return insert(node, append(null, []));
     }
-    return insert(full, intoOwner(full, owner, place.chain));
+    return insert(full, append(owner, place.chain));
   }
-  const node = configAssign(local, value);
-  return insert(node, intoOwner(node, owner, place.chain));
+  return insert(configAssign(local, value), append(owner, place.chain));
 }
-
-const lastOf = (list: readonly AstNode[]): AstNode | null =>
-  list[list.length - 1] ?? null;
 
 export function removeConfigOption(
   state: EditState,
@@ -270,15 +236,13 @@ export function addConfigBlock(
     return first === undefined ? [] : [configBlock(first, nest(rest))];
   };
   if (!place.ready) {
-    const node = place.wrap(nest(scope));
     return patch(path, [
-      insertStatement(file, printer, node, {
-        into: place.into,
-        chain: place.intoChain,
-        after: place.into ? lastOf(place.into.statements) : null,
-        last: lastItem(ast),
-        blank: place.into === null,
-      }),
+      insertStatement(
+        file,
+        printer,
+        place.wrap(nest(scope)),
+        append(place.into, place.intoChain),
+      ),
     ]);
   }
   const chain = descend(place.statements, scope);
@@ -289,13 +253,7 @@ export function addConfigBlock(
     chain.length > 0 ? [...place.chain, ...chain] : [...place.chain];
   const [node] = nest(scope.slice(chain.length)) as [ConfigStatement];
   return patch(path, [
-    insertStatement(file, printer, node, {
-      into,
-      chain: intoChain,
-      after: into ? lastOf(into.statements) : null,
-      last: lastItem(ast),
-      blank: into === null,
-    }),
+    insertStatement(file, printer, node, append(into, intoChain)),
   ]);
 }
 
@@ -334,21 +292,11 @@ export function addConfigPlugin(
         file,
         printer,
         configApplyBlock("plugins", [configApply(id)]),
-        {
-          into: null,
-          chain: [],
-          after: null,
-          last: lastItem(file.ast),
-          blank: true,
-        },
+        append(null, []),
       ),
     ]);
   return patch(path, [
-    insertStatement(file, printer, configApply(id), {
-      into: block,
-      chain: [block],
-      after: lastOf(block.statements),
-    }),
+    insertStatement(file, printer, configApply(id), append(block, [block])),
   ]);
 }
 
@@ -372,5 +320,3 @@ export function removeConfigPlugin(
     );
   return patch(path, removeStatements(file, state.parser, found));
 }
-
-export { topStatements };

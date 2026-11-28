@@ -1,6 +1,5 @@
 // One option of a config card (F-601, FI-02, FI-03): its label, its value field and its flags.
 import {
-  type ApplyOutcome,
   type ConfigContext,
   type ConfigSchema,
   type ConfigSchemaNode,
@@ -10,6 +9,7 @@ import {
   valueText,
 } from "@nf-builder/engine";
 import { type JSX, useId, useState } from "react";
+import { findSchemaNode } from "./config-details";
 import type { PendingRow } from "./config-store";
 import { ValueField } from "./value-field";
 
@@ -65,33 +65,16 @@ export interface ConfigHandlers {
   readonly edit?: EditActions;
 }
 
-export type { ApplyOutcome };
-
 /** The text a row shows for its value: the decoded value as written, else the code, else nothing. */
-export const rowText = (row: OptionRow): string =>
+const rowText = (row: OptionRow): string =>
   row.value !== null ? valueText(row.value) : (row.code ?? "");
 
 /** The selection key of a pinned field that isn't set: its full option path. */
-export const unsetKey = (names: readonly string[]): string =>
+const unsetKey = (names: readonly string[]): string =>
   `unset:${names.join(".")}`;
 
-const canEdit = (handlers: ConfigHandlers): boolean =>
+export const canEdit = (handlers: ConfigHandlers): boolean =>
   handlers.edit?.editable === true;
-
-/** The value kind of an option the file doesn't set, from the schema. */
-export function kindOf(
-  schema: ConfigSchema | null,
-  names: readonly string[],
-): ConfigValueKind {
-  let level = schema?.scopes ?? [];
-  let found: ConfigSchemaNode | undefined;
-  for (const name of names) {
-    found = level.find((n) => n.name === name);
-    if (found === undefined) return "string";
-    level = found.children;
-  }
-  return found?.valueKind ?? "string";
-}
 
 function RowShell({
   selectKey,
@@ -269,7 +252,10 @@ export function UnsetRowView({
       note={null}
     >
       <ValueField
-        kind={kindOf(edit?.schema ?? null, names)}
+        kind={
+          findSchemaNode(edit?.schema?.scopes ?? [], names)?.valueKind ??
+          "string"
+        }
         value={null}
         id={id}
         disabled={!canEdit(handlers)}

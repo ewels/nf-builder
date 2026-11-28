@@ -19,7 +19,7 @@ import type {
   Range,
 } from "@nf-builder/lang-core";
 import type { ConfigIncludeModel } from "../model/file-model";
-import { matchSelector } from "./selectors";
+import { isSelectorKey, matchSelector } from "./selectors";
 import {
   type CodeRow,
   type ConfigRow,
@@ -55,9 +55,6 @@ const span = (a: Range, b: Range): Range => ({
   endLine: a.end >= b.end ? a.endLine : b.endLine,
   endColumn: a.end >= b.end ? a.endColumn : b.endColumn,
 });
-
-const isSelectorKey = (name: string): boolean =>
-  name.startsWith("withName:") || name.startsWith("withLabel:");
 
 /** Rows of one card or selector, one per option path in order of first appearance; the last statement wins. */
 class Rows {
@@ -255,6 +252,13 @@ export function configView(input: ConfigViewInput): ConfigView {
     };
     const rowKey = (kind: string, range: Range) =>
       `${kind}:${ctxKey}:${range.start}`;
+    /** The row for a statement shown as code. */
+    const leafRow = (
+      node: { readonly range: Range },
+      reason: CodeRow["reason"],
+      problems?: readonly string[],
+    ): CodeRow =>
+      codeRow(rowKey("code", node.range), node.range, reason, problems);
 
     /** Statements of a block (or a selector), as rows of `rows`; `prefix` is the option path so far. */
     const collect = (
@@ -314,13 +318,11 @@ export function configView(input: ConfigViewInput): ConfigView {
         } else if (s.kind === "ConfigInclude") {
           rows.rows.push(includeRow(rowKey("include", s.range), s));
         } else if (s.kind === "ConfigIncomplete") {
-          rows.rows.push(
-            codeRow(rowKey("code", s.range), s.range, "incomplete"),
-          );
+          rows.rows.push(leafRow(s, "incomplete"));
         } else if (s.kind === "ConfigInvalid") {
-          rows.rows.push(codeRow(rowKey("code", s.range), s.range, "invalid"));
+          rows.rows.push(leafRow(s, "invalid"));
         } else {
-          rows.rows.push(codeRow(rowKey("code", s.range), s.range, "value"));
+          rows.rows.push(leafRow(s, "value"));
         }
         builder.range = span(builder.range, s.range);
       }
@@ -329,9 +331,7 @@ export function configView(input: ConfigViewInput): ConfigView {
     const addProfiles = (builder: ScopeBuilder, block: ConfigBlock): void => {
       for (const inner of block.statements) {
         if (inner.kind !== "ConfigBlock") {
-          builder.rows.rows.push(
-            codeRow(rowKey("code", inner.range), inner.range, "value"),
-          );
+          builder.rows.rows.push(leafRow(inner, "value"));
           continue;
         }
         const name = inner.name.name;
@@ -363,10 +363,7 @@ export function configView(input: ConfigViewInput): ConfigView {
             version: at < 0 ? null : arg.value.slice(at + 1),
             range: apply.range,
           });
-        } else
-          builder.rows.rows.push(
-            codeRow(rowKey("code", apply.range), apply.range, "value"),
-          );
+        } else builder.rows.rows.push(leafRow(apply, "value"));
       }
     };
 
@@ -374,9 +371,8 @@ export function configView(input: ConfigViewInput): ConfigView {
       if (s.kind === "Unparsed") {
         slots.push({
           kind: "row",
-          item: codeRow(
-            rowKey("code", s.range),
-            s.range,
+          item: leafRow(
+            s,
             "unparsed",
             s.problems.map((p) => p.message),
           ),
@@ -389,23 +385,22 @@ export function configView(input: ConfigViewInput): ConfigView {
       } else if (s.kind === "ConfigIncomplete" || s.kind === "ConfigInvalid") {
         slots.push({
           kind: "row",
-          item: codeRow(
-            rowKey("code", s.range),
-            s.range,
+          item: leafRow(
+            s,
             s.kind === "ConfigIncomplete" ? "incomplete" : "invalid",
           ),
         });
       } else if (s.kind === "ConfigSelector") {
         slots.push({
           kind: "row",
-          item: codeRow(rowKey("code", s.range), s.range, "value"),
+          item: leafRow(s, "value"),
         });
       } else if (s.kind === "ConfigAssign") {
         const keys = s.path.map((n) => n.name);
         if (keys.length > 1 && keys[0] === "profiles") {
           slots.push({
             kind: "row",
-            item: codeRow(rowKey("code", s.range), s.range, "value"),
+            item: leafRow(s, "value"),
           });
           continue;
         }
@@ -417,10 +412,7 @@ export function configView(input: ConfigViewInput): ConfigView {
       } else if (s.kind === "ConfigApplyBlock") {
         const builder = slotOf(s.name.name, s.range);
         if (s.name.name === "plugins") addPlugins(builder, s);
-        else
-          builder.rows.rows.push(
-            codeRow(rowKey("code", s.range), s.range, "value"),
-          );
+        else builder.rows.rows.push(leafRow(s, "value"));
       } else {
         const name = s.name.name;
         const builder = slotOf(name, s.range);

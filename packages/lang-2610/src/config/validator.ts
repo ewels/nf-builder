@@ -37,7 +37,7 @@ export const CORE_PLUGIN_SCOPES: readonly string[] = [
 ];
 
 /** The catalogue node a path names (nf-lang's `SpecNode.getChild`); a placeholder matches any name. */
-function child(
+export function child(
   catalogue: ConfigCatalogue,
   names: readonly string[],
 ): ConfigNode | null {
@@ -143,13 +143,14 @@ export function* optionPaths(ast: ConfigAst): Iterable<OptionPath> {
     scopes: readonly string[],
   ): Iterable<OptionPath> {
     for (const statement of statements) {
-      if (statement.kind === "ConfigBlock") {
-        const key = statement.name.name;
-        const names = enter(scopes, key);
-        if (isSelector(names, key)) names.pop();
-        yield* visit(statement.statements, names);
-      } else if (statement.kind === "ConfigSelector") {
-        const key = `${statement.selector.name}:${statement.target.name}`;
+      if (
+        statement.kind === "ConfigBlock" ||
+        statement.kind === "ConfigSelector"
+      ) {
+        const key =
+          statement.kind === "ConfigBlock"
+            ? statement.name.name
+            : `${statement.selector.name}:${statement.target.name}`;
         const names = enter(scopes, key);
         if (isSelector(names, key)) names.pop();
         yield* visit(statement.statements, names);

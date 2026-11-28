@@ -1,3 +1,4 @@
+export { PLUGIN_ID } from "./plugins";
 export { configSchema } from "./schema";
 export { matchSelector } from "./selectors";
 export type * from "./types";

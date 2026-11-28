@@ -18,7 +18,6 @@ export interface PromptField {
     readonly label: string;
   }[];
   readonly help?: string;
-  readonly initial?: string;
 }
 
 function FieldInput({
@@ -76,14 +75,12 @@ function FieldInput({
 
 export function PromptDialog({
   title,
-  submit,
   fields,
   check,
   onSubmit,
   onClose,
 }: {
   readonly title: string;
-  readonly submit: string;
   readonly fields: readonly PromptField[];
   /** The problem with these values, or null. */
   readonly check?: (values: Readonly<Record<string, string>>) => string | null;
@@ -97,7 +94,7 @@ export function PromptDialog({
   const titleId = useId();
   const [values, setValues] = useState<Record<string, string>>(
     Object.fromEntries(
-      fields.map((f) => [f.name, f.initial ?? f.options?.[0]?.value ?? ""]),
+      fields.map((f) => [f.name, f.options?.[0]?.value ?? ""]),
     ),
   );
   const problem = modal.error;
@@ -145,7 +142,7 @@ export function PromptDialog({
             Cancel
           </button>
           <button type="submit" className="primary" disabled={modal.busy}>
-            {submit}
+            Add
           </button>
         </div>
       </form>

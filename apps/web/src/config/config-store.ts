@@ -241,14 +241,8 @@ export function createConfigStore(options: {
           option,
           value,
         });
-        if (outcome?.ok) {
-          const key = pendingKey(context, option);
-          update(path, {
-            pending: (get().tabs[path]?.pending ?? []).filter(
-              (p) => p.key !== key,
-            ),
-          });
-        }
+        if (outcome?.ok)
+          get().discardPending(path, pendingKey(context, option));
         return outcome;
       },
 

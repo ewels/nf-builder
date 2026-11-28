@@ -3,6 +3,10 @@
 import type { ConfigSelectorRef } from "@nf-builder/lang-core";
 import type { ProcessUses, SelectorMatch } from "./types";
 
+/** A key of a config block or dotted path that names a selector (`withName:FOO`). */
+export const isSelectorKey = (name: string): boolean =>
+  name.startsWith("withName:") || name.startsWith("withLabel:");
+
 const DETAIL_LIMIT = 50;
 
 /** The pattern without a leading `!` (after trimming), and whether it was negated. */

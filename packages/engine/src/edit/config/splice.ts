@@ -3,11 +3,9 @@
 // reprinted with the config printer instead, which keeps every comment attached to it or refuses.
 import type {
   AstNode,
+  Comment,
   ConfigApply,
-  ConfigApplyBlock,
   ConfigAssign,
-  ConfigBlock,
-  ConfigSelector,
   ConfigSourceFile,
   ConfigStatement,
   Expression,
@@ -24,7 +22,7 @@ const eolOf = (file: ConfigSourceFile): string =>
   usesCrlf(file.text) ? "\r\n" : "\n";
 
 /** The file's indent unit: a tab, or two spaces, when the first indented line uses them; four spaces otherwise. */
-export function indentUnit(text: string): string {
+function indentUnit(text: string): string {
   const first = /^([ \t]+)\S/m.exec(text)?.[1];
   if (first === undefined) return "    ";
   if (first.startsWith("\t")) return "\t";
@@ -73,6 +71,14 @@ function withUnit(text: string, unit: string): string {
 const withEndings = (file: ConfigSourceFile, text: string): string =>
   usesCrlf(file.text) ? text.replace(/\r?\n/g, "\r\n") : text;
 
+/** The refusal for a comment the printer would lose. */
+const droppedComment = (file: ConfigSourceFile, comment: Comment | undefined) =>
+  new EditRefusal(
+    "internal",
+    `The printer would drop the comment ${JSON.stringify(comment?.text)} in ${file.path}. Nothing was changed.`,
+    file.path,
+  );
+
 /** The printed form of `node` with a final line break, each line indented by `indent`. */
 function render(
   file: ConfigSourceFile,
@@ -85,11 +91,7 @@ function render(
     layout: parser.printer.createLayout(""),
   });
   if (printed.missingComments.length > 0)
-    throw new EditRefusal(
-      "internal",
-      `The printer would drop the comment ${JSON.stringify(printed.missingComments[0]?.text)} in ${file.path}. Nothing was changed.`,
-      file.path,
-    );
+    throw droppedComment(file, printed.missingComments[0]);
   const body = withUnit(printed.text, unit)
     .split("\n")
     .map((line) => (line === "" ? line : indent + line))
@@ -98,7 +100,7 @@ function render(
 }
 
 /** Prints one value expression as the text that follows `name = `. */
-export function printValue(
+function printValue(
   parser: SourceParser,
   value: Expression,
   depth: number,
@@ -114,13 +116,6 @@ export function printValue(
     .replace(/^[ ]*x = /, "")
     .replace(/\n$/, "")
     .replace(/\r$/, "");
-}
-
-/** The statements of a container, as a replaceable list. */
-function statementsOf(
-  c: Container,
-): readonly (ConfigStatement | ConfigApply)[] {
-  return c.statements;
 }
 
 function withStatements(
@@ -158,7 +153,7 @@ function rebuild(
     const parent = chain[i - 1] as Container;
     current = withStatements(
       parent,
-      statementsOf(parent).map((s) => (s === chain[i] ? current : s)),
+      parent.statements.map((s) => (s === chain[i] ? current : s)),
     );
   }
   return current;
@@ -176,12 +171,7 @@ function reprint(
   const span = spanOf(original);
   const kept = new Set(attachedComments(updated));
   const lost = attachedComments(original).filter((c) => !kept.has(c));
-  if (lost.length > 0)
-    throw new EditRefusal(
-      "internal",
-      `This edit would drop the comment ${JSON.stringify(lost[0]?.text)} in ${file.path}. Nothing was changed.`,
-      file.path,
-    );
+  if (lost.length > 0) throw droppedComment(file, lost[0]);
   const printed = parser.configPrinter.printConfigStatement(updated, {
     layout: parser.printer.createLayout(
       maskOutside(file.text, span.start, span.end),
@@ -189,11 +179,7 @@ function reprint(
     indent: index,
   });
   if (printed.missingComments.length > 0)
-    throw new EditRefusal(
-      "internal",
-      `The printer would drop the comment ${JSON.stringify(printed.missingComments[0]?.text)} in ${file.path}. Nothing was changed.`,
-      file.path,
-    );
+    throw droppedComment(file, printed.missingComments[0]);
   const text = withUnit(printed.text, indentUnit(file.text)).replace(/\n$/, "");
   return {
     start: lineStart(file.text, span.start),
@@ -207,12 +193,10 @@ export interface Insertion {
   readonly into: Container | null;
   /** The containers from the top level down to `into`. */
   readonly chain: readonly Container[];
-  /** Insert after this statement; null for an empty container. At the top level the last item when omitted. */
+  /** Insert after this statement; null for an empty container (at the top level, the file's last item). */
   readonly after: AstNode | null;
   /** A blank line before it (new top-level blocks). */
   readonly blank?: boolean;
-  /** The last top-level item, for an insertion at the top level without `after`. */
-  readonly last?: AstNode | null;
 }
 
 /** The edit that inserts `node` as a new statement. */
@@ -227,7 +211,8 @@ export function insertStatement(
   const unit = indentUnit(text);
 
   if (at.into === null) {
-    const after = at.after ?? at.last ?? null;
+    const after =
+      at.after ?? file.ast?.statements[file.ast.statements.length - 1] ?? null;
     const body = render(file, parser, node, "", unit);
     const blank = at.blank === true ? eol : "";
     if (after === null) {
@@ -265,7 +250,7 @@ export function insertStatement(
   if (shared) {
     const index = at.chain.length - 1;
     const target = reprintTarget(file, at.chain);
-    const list = statementsOf(into);
+    const list: readonly (ConfigStatement | ConfigApply)[] = into.statements;
     const position =
       after === null ? list.length : list.indexOf(after as ConfigStatement) + 1;
     const updated = withStatements(into, [
@@ -333,7 +318,7 @@ export function replaceValue(
 function prune(container: Container, gone: ReadonlySet<AstNode>): Container {
   return withStatements(
     container,
-    statementsOf(container)
+    container.statements
       .filter((s) => !gone.has(s))
       .map((s) =>
         s.kind === "ConfigBlock" ||
@@ -407,5 +392,3 @@ export function removeStatements(
   }
   return kept;
 }
-
-export type { ConfigApplyBlock, ConfigBlock, ConfigSelector };
