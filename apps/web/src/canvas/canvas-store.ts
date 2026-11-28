@@ -221,6 +221,15 @@ export interface WorkspaceActions {
     session?: number,
   ): Promise<EditOutcome>;
   /**
+   * Applies the popup's Code tab text for a typed process (F-304, UX-44) as one undo step: `RenameDeclaration` when the
+   * text names it differently, then `ReplaceDeclaration`, then the move of the module folder. Refused as stale and
+   * discarded on a refused part as `editDeclaration` is.
+   */
+  editDeclarationText(
+    request: DeclarationTextEdit,
+    session?: number,
+  ): Promise<EditOutcome>;
+  /**
    * Adds a registry plugin to the project's `plugins` block as one undo step: `CreateFile` of `nextflow.config` first
    * when it is missing, then `AddConfigPlugin`. A refused second part is undone, so a refusal changes nothing (F-505,
    * IO-33, AR-23). Runs as one task of the queue of applies, undos and redos.
@@ -278,6 +287,16 @@ export interface DeclarationEdit {
   readonly revision: number;
   readonly form: TypedProcessForm;
   /** The node the popup was opened from; selected again afterwards. */
+  readonly node: string;
+}
+
+/** The popup's Code tab edit of a typed process (F-304): the declaration's text, applied as written. */
+export interface DeclarationTextEdit {
+  readonly target: { readonly path: string; readonly name: string };
+  readonly revision: number;
+  readonly text: string;
+  /** The name the text gives the declaration. */
+  readonly name: string;
   readonly node: string;
 }
 
@@ -817,6 +836,98 @@ export function createCanvasStore(
      * part undoes the parts before it (`discard`, so the step isn't left to redo) and its refusal is returned; else the
      * last part's outcome. Runs inside a task of the queue.
      */
+    /**
+     * One popup edit of a process as a group (F-303, F-304): refused when the session or revision is stale or the page is
+     * read-only, the commands built by `build` applied as one undo step labelled `Edit process <name>`, the node selected
+     * again under its new name.
+     */
+    function editProcess(
+      session: number | undefined,
+      request: {
+        readonly target: { readonly path: string; readonly name: string };
+        readonly revision: number;
+        readonly node: string;
+      },
+      name: string,
+      build: () => Promise<EditCommand[]>,
+    ): Promise<EditOutcome> {
+      const mine = session ?? get().session;
+      const { target } = request;
+      const fail = (
+        message: string,
+        fields: readonly FieldProblem[] = [],
+      ): EditOutcome => ({ ok: false, message, fields });
+      if (mine !== get().session || get().summary === null)
+        return Promise.resolve(fail(NO_PROJECT_EDIT));
+      if (readOnly()) return Promise.resolve(fail(READ_ONLY_REFUSAL));
+      return enqueue(async () => {
+        if (get().summary?.revision !== request.revision)
+          return fail(
+            `${target.name} changed since the popup opened. Close it and open it again.`,
+          );
+        const commands = await build();
+        const outcome = await applyGroup(
+          mine,
+          `popup-${mine}-${++edits}`,
+          commands,
+          `Edit process ${name}`,
+        );
+        if (!outcome.ok)
+          return fail(
+            // a refusal that says so already isn't followed by it again
+            /Nothing was changed\.$/.test(outcome.message)
+              ? `Couldn't apply: ${outcome.message}`
+              : `Couldn't apply: ${outcome.message} Nothing was changed.`,
+            outcome.fields ?? [],
+          );
+        const node = nodeAfterRename(
+          request.node,
+          target.name,
+          name,
+          get().content,
+        );
+        await get().select(node);
+        return { ok: true, node };
+      });
+    }
+
+    /** The rename of a process, and the move of its module folder when it is the only thing in it and the new folder is free. */
+    async function renameParts(
+      target: { readonly path: string; readonly name: string },
+      newName: string,
+    ): Promise<{ rename: EditCommand; move: EditCommand | null }> {
+      const rename: EditCommand = {
+        kind: "renameDeclaration",
+        path: target.path,
+        name: target.name,
+        newName,
+      };
+      const folder = moduleFolder(target.path, target.name);
+      const newFolder = folderOf(newName);
+      // a case-only rename keeps the folder, and a folder that is taken stays where it is
+      if (folder === null || newFolder === folder)
+        return { rename, move: null };
+      const [outline, taken] = await Promise.all([
+        engine()
+          .outline(target.path)
+          .catch(() => null),
+        engine()
+          .readFile(`${newFolder}/main.nf`)
+          .catch(() => null),
+      ]);
+      if (
+        taken === null &&
+        outline !== null &&
+        !("ok" in outline) &&
+        declaresOnly(outline.items, target.name)
+      )
+        return {
+          rename,
+          move: { kind: "moveFile", path: folder, newPath: newFolder },
+        };
+      return { rename, move: null };
+    }
+
     async function applyGroup(
       session: number | undefined,
       group: string,
@@ -1383,21 +1494,8 @@ export function createCanvasStore(
       },
 
       editDeclaration(request, session) {
-        const mine = session ?? get().session;
         const { target, form } = request;
-        const fail = (
-          message: string,
-          fields: readonly FieldProblem[] = [],
-        ): EditOutcome => ({ ok: false, message, fields });
-        if (mine !== get().session || get().summary === null)
-          return Promise.resolve(fail(NO_PROJECT_EDIT));
-        if (readOnly()) return Promise.resolve(fail(READ_ONLY_REFUSAL));
-        return enqueue(async () => {
-          if (get().summary?.revision !== request.revision)
-            return fail(
-              `${target.name} changed since the popup opened. Close it and open it again.`,
-            );
-          const renamed = form.name !== target.name;
+        return editProcess(session, request, form.name, async () => {
           const commands: EditCommand[] = [
             {
               kind: "updateDeclaration",
@@ -1406,61 +1504,31 @@ export function createCanvasStore(
               form,
             },
           ];
-          if (renamed) {
-            commands.push({
-              kind: "renameDeclaration",
-              path: target.path,
-              name: target.name,
-              newName: form.name,
-            });
-            const folder = moduleFolder(target.path, target.name);
-            const newFolder = folderOf(form.name);
-            // a case-only rename keeps the folder, and a folder that is taken stays where it is
-            if (folder !== null && newFolder !== folder) {
-              const [outline, taken] = await Promise.all([
-                engine()
-                  .outline(target.path)
-                  .catch(() => null),
-                engine()
-                  .readFile(`${newFolder}/main.nf`)
-                  .catch(() => null),
-              ]);
-              if (
-                taken === null &&
-                outline !== null &&
-                !("ok" in outline) &&
-                declaresOnly(outline.items, target.name)
-              )
-                commands.push({
-                  kind: "moveFile",
-                  path: folder,
-                  newPath: newFolder,
-                });
-            }
+          if (form.name !== target.name) {
+            const { rename, move } = await renameParts(target, form.name);
+            commands.push(rename);
+            if (move) commands.push(move);
           }
-          const label = `Edit process ${form.name}`;
-          const outcome = await applyGroup(
-            mine,
-            `popup-${mine}-${++edits}`,
-            commands,
-            label,
-          );
-          if (!outcome.ok)
-            return fail(
-              // a refusal that says so already isn't followed by it again
-              /Nothing was changed\.$/.test(outcome.message)
-                ? `Couldn't apply: ${outcome.message}`
-                : `Couldn't apply: ${outcome.message} Nothing was changed.`,
-              outcome.fields ?? [],
-            );
-          const node = nodeAfterRename(
-            request.node,
-            target.name,
-            form.name,
-            get().content,
-          );
-          await get().select(node);
-          return { ok: true, node };
+          return commands;
+        });
+      },
+
+      editDeclarationText(request, session) {
+        const { target, name, text } = request;
+        return editProcess(session, request, name, async () => {
+          const commands: EditCommand[] = [];
+          const parts =
+            name === target.name ? null : await renameParts(target, name);
+          // the rename runs first, so the replace finds the declaration under its new name
+          if (parts) commands.push(parts.rename);
+          commands.push({
+            kind: "replaceDeclaration",
+            path: target.path,
+            name,
+            text,
+          });
+          if (parts?.move) commands.push(parts.move);
+          return commands;
         });
       },
 
