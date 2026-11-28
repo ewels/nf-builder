@@ -231,6 +231,7 @@ export type {
   NodeDetailsResult,
   OpenRequest,
   OutlineResult,
+  PluginsResult,
   ProjectChange,
   ProjectFiles,
   ProjectionResult,

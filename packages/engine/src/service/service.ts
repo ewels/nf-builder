@@ -60,6 +60,8 @@ import type { ConfigIncludeModel } from "../model/file-model";
 import type { ModelEvent, ProjectModel } from "../model/project";
 import { installedPacks } from "../packs";
 import { loadPalette } from "../palette";
+import { type PluginScopes, pluginsKey } from "../plugins/config-scopes";
+import { declaredPlugins } from "../plugins/declared";
 import { createProjector, type Projector } from "../projection/project";
 import { type ProjectReport, projectReport } from "../report/report";
 import { templateList } from "../templates";
@@ -76,6 +78,7 @@ import type {
   LoadProgress,
   NodeDetailsResult,
   OutlineResult,
+  PluginsResult,
   ProjectChange,
   ProjectionResult,
   ProjectSummary,
@@ -481,6 +484,8 @@ export function createEngineService(
   };
 
   const schemas = new Map<string, ConfigSchema>();
+  /** The declared plugins' config scopes the page last sent; none until it does, and none after open or close (F-505). */
+  let pluginScopes: readonly PluginScopes[] = [];
 
   return {
     palette: (version) => serial(() => loadPalette(version)),
@@ -528,6 +533,7 @@ export function createEngineService(
           ...readLayout(state.model.file(LAYOUT_PATH)?.source.text),
         };
         current = open;
+        pluginScopes = [];
         revision += 1;
         return {
           revision,
@@ -774,6 +780,24 @@ export function createEngineService(
         return schema;
       }),
 
+    plugins: () =>
+      guarded((open): PluginsResult => {
+        const file = open.state.model.file("nextflow.config")?.source;
+        return {
+          revision,
+          plugins:
+            file?.language === "config"
+              ? declaredPlugins(file as ConfigSourceFile)
+              : [],
+        };
+      }),
+
+    setPluginScopes: (scopes) =>
+      serial(() => {
+        pluginScopes = scopes;
+        return { pluginsKey: pluginsKey(scopes) };
+      }),
+
     outline: (path) =>
       guarded((open): OutlineResult | EngineRefusal => {
         const file = open.state.model.file(path);
@@ -809,6 +833,7 @@ export function createEngineService(
     close: () =>
       serial(() => {
         current = null;
+        pluginScopes = [];
       }),
   };
 }

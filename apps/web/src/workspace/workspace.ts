@@ -193,6 +193,8 @@ export function createWorkspace(options: WorkspaceOptions): WorkspaceApi {
     report: () => engine.report(),
     configView: (path) => engine.configView(path),
     configSchema: (version) => engine.configSchema(version),
+    plugins: () => engine.plugins(),
+    setPluginScopes: (scopes) => engine.setPluginScopes(scopes),
     readFile: (path) => engine.readFile(path),
     listFiles: () => engine.listFiles(),
     freshName: (request) => engine.freshName(request),
