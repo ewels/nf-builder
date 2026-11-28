@@ -28,6 +28,7 @@ import {
   pressUndo,
   storedFiles,
 } from "./history.ts";
+import { dragNode, waitSaved } from "./layout.ts";
 import { createProjectInUi, readFile, switcher } from "./projects.ts";
 import { PREVIEW_URL } from "./urls.ts";
 
@@ -133,13 +134,22 @@ test("F-310 step 2 UX-26 AR-23: delete a multi-selection: one undo step restores
 }, testInfo) => {
   test.skip(testInfo.project.name !== "chromium", "one browser is enough");
   await openStoredFixture(page, "Delete", F310_DELETE_START);
-  const before = await storedFiles(page);
-  expect(before[SIDECAR]).toBeTruthy();
   const boxOf = async (id: string) => {
     const box = await node(page, id).boundingBox();
     if (box === null) throw new Error(`${id} is not on screen`);
     return box;
   };
+  // put STAMP in SIZE's row, to its right, so a rectangle round the pair never reaches MAKE (which feeds SIZE from the left)
+  const [size0, stamp0] = [await boxOf(SIZE), await boxOf(STAMP)];
+  await dragNode(
+    page,
+    STAMP,
+    size0.x + size0.width + 60 - stamp0.x,
+    size0.y - stamp0.y,
+  );
+  await waitSaved(page);
+  const before = await storedFiles(page);
+  expect(before[SIDECAR]).toBeTruthy();
   const [size, stamp, make] = [
     await boxOf(SIZE),
     await boxOf(STAMP),
@@ -150,18 +160,8 @@ test("F-310 step 2 UX-26 AR-23: delete a multi-selection: one undo step restores
   const top = Math.min(size.y, stamp.y) - 6;
   const right = Math.max(size.x + size.width, stamp.x + stamp.width) + 6;
   const bottom = Math.max(size.y + size.height, stamp.y + stamp.height) + 6;
-  const hitsMake =
-    make.x < right &&
-    make.x + make.width > left &&
-    make.y < bottom &&
-    make.y + make.height > top;
-  if (hitsMake) {
-    // the layout put MAKE inside the rectangle: select the pair by clicks instead
-    await selectNode(page, SIZE);
-    await shiftClick(page, STAMP);
-  } else {
-    await marquee(page, { x: left, y: top }, { x: right, y: bottom });
-  }
+  expect(make.x + make.width).toBeLessThan(left);
+  await marquee(page, { x: left, y: top }, { x: right, y: bottom });
   expect(await selectedNodes(page)).toEqual([SIZE, STAMP].sort());
   await expect(page.locator(".details-name")).toHaveText("2 nodes selected");
   await page.keyboard.press("Delete");
@@ -209,6 +209,33 @@ test("F-310 ADR-0056 UX-04: read-only: Delete and paste keys change nothing, cop
   expect(await readFile(page, "main.nf")).toBe(start);
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await undoCountIs(page, 0);
+});
+
+test("F-310 ADR-0056 UX-04: copying while read-only still fills the clipboard, and pasting after widening works", async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name !== "chromium", "one browser is enough");
+  await openStoredFixture(page, "Copy read only", F310_DELETE_START);
+  const wide = page.viewportSize();
+  if (wide === null) throw new Error("no viewport");
+  await selectNode(page, SIZE);
+  await shiftClick(page, STAMP);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(page.getByRole("button", { name: "Delete" })).toHaveCount(0);
+  await pressCopy(page);
+  await expect(page.locator("[data-clipboard-notice]")).toHaveText(
+    "Copied 2 nodes.",
+  );
+  await page.setViewportSize(wide);
+  await expect(
+    page.getByRole("button", { name: "Delete", exact: true }),
+  ).toHaveCount(1);
+  await pressPaste(page);
+  const dialog = page.getByRole("dialog", { name: "Paste with new names?" });
+  await dialog.getByRole("button", { name: "Paste", exact: true }).click();
+  await expect(dialog).toBeHidden();
+  await expect.poll(() => readFile(page, "main.nf")).toContain("SIZE_2(");
+  await undoCountIs(page, 1);
 });
 
 test("F-310 ADR-0044 UX-26: copy and paste work in a cross-origin iframe without clipboard permissions", async ({
