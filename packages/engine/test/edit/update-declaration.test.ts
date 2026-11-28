@@ -320,4 +320,23 @@ describe("F-303 input renames", () => {
     expect(edited.files[0]?.text).toContain("env 'x', name");
     expect(edited.files[0]?.text).toContain("echo ${who} > ${who}.txt");
   });
+
+  it("F-303 UX-41: a closure parameter or local that shadows the renamed input is left alone", async () => {
+    const source =
+      'nextflow.enable.types = true\n\nprocess P {\n    input:\n    name: String\n    names: Bag<String>\n\n    output:\n    text: String = names.collect { name -> name.toUpperCase() }.join(name)\n\n    script:\n    """\n    echo hi\n    """\n}\n';
+    const state = await stateFor({ "p.nf": source });
+    const form = formOf(state, "p.nf", "P");
+    const r = accepted(
+      state,
+      update("p.nf", "P", {
+        ...form,
+        inputs: form.inputs.map((i) =>
+          i.kind === "named" && i.name === "name" ? { ...i, name: "who" } : i,
+        ),
+      }),
+    );
+    expect(r.files[0]?.text).toContain(
+      "names.collect { name -> name.toUpperCase() }.join(who)",
+    );
+  });
 });

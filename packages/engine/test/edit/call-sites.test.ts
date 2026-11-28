@@ -137,6 +137,33 @@ describe("F-303 call sites", () => {
     expect(state.model.diagnostics()).toEqual([]);
   });
 
+  it("F-303 point 4 LA-33: renaming an output renames the legacy reads P.out.<name> and P(...).out.<name> at call sites", async () => {
+    const legacy =
+      "include { P } from './p.nf'\n\nworkflow {\n    P('a')\n    P.out.first.view()\n    P.out.second.view()\n    P('b').out.second.view()\n}\n";
+    const state = await stateFor({ "p.nf": TWO, "main.nf": legacy });
+    const model = state.model.file("p.nf");
+    const form = processForm(
+      model?.source as ScriptSourceFile,
+      model?.declarations.get("P")?.declaration as TypedProcess,
+      state.catalogue,
+    );
+    const r = accepted(state, {
+      kind: "updateDeclaration",
+      path: "p.nf",
+      name: "P",
+      form: {
+        ...form,
+        outputs: form.outputs.map((o, i) =>
+          i === 0 ? { ...o, name: "one" } : i === 1 ? { ...o, name: "two" } : o,
+        ),
+      },
+    });
+    const text = out(r)["main.nf"];
+    expect(text).toContain("P.out.one.view()");
+    expect(text).toContain("P.out.two.view()");
+    expect(text).toContain("P('b').out.two.view()");
+  });
+
   it("F-303 point 4: a single output is read without its name, so renaming it leaves calls alone", async () => {
     const one = TWO.replace("    second: String = 'y'\n", "");
     const state = await stateFor({

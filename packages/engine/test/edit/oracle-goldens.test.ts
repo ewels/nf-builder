@@ -306,6 +306,30 @@ const goldens = {
       })),
     ],
   },
+  // F-303 point 4: the legacy reads NAME.out.<name> follow the renames too
+  "f303 legacy reads start -> f303-outputs-legacy-reads": {
+    start: {
+      ...OUTPUTS_START,
+      "main.nf": `include { SPLIT } from './modules/local/split/main.nf'
+
+workflow {
+    SPLIT('hello')
+    SPLIT.out.first.view()
+    SPLIT.out.second.view()
+}
+`,
+    },
+    expected: "f303-outputs-legacy-reads",
+    steps: [
+      update(PAIR_MODULE, "SPLIT", (form) => ({
+        ...form,
+        outputs: form.outputs.map((o, i) => ({
+          ...o,
+          name: i === 0 ? "head" : "tail",
+        })),
+      })),
+    ],
+  },
   // every section edited once; a kept record(...) input and a kept storeDir; two callers; the stub removed, then added
   "f303 all-sections start -> f303-configure-all": {
     start: ALL_START,

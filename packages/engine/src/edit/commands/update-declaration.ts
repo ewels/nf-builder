@@ -5,6 +5,7 @@ import {
   type AstNode,
   type Comment,
   childFields,
+  childNodes,
   type Declaration,
   type FieldProblem,
   type FormField,
@@ -492,14 +493,16 @@ function outputRenames(
 }
 
 /**
- * `item` with every read of a renamed output changed: `r.old` where `r = CALL(...)`, and `CALL(...).old`. `item` is the
- * original top-level item; `current` the copy being edited, whose nodes are shared with it.
+ * `item` with every read of a renamed output changed: `r.old` where `r = CALL(...)`, `CALL(...).old`, and the legacy
+ * `NAME.out.old` and `CALL(...).out.old`. `item` is the original top-level item; `current` the copy being edited, whose
+ * nodes are shared with it; `locals` the names the file calls the process by.
  */
 function renameReads(
   current: AstNode,
   calls: readonly MethodCall[],
   renames: ReadonlyMap<string, string>,
   item: AstNode,
+  locals: ReadonlySet<string>,
 ): AstNode {
   const called = new Set<AstNode>(calls);
   // variables the item assigns a call's result to
@@ -527,11 +530,21 @@ function renameReads(
       object: AstNode & { name?: string };
       property: { kind: string; name?: string };
     };
+    if (property.kind !== "Identifier" || !renames.has(property.name as string))
+      return undefined;
+    // `X.out.old`: the legacy read through the process name
+    const legacy =
+      object.kind === "Property" &&
+      (object as unknown as { property: { name?: string } }).property.name ===
+        "out"
+        ? (object as unknown as { object: AstNode & { name?: string } }).object
+        : null;
     if (
-      property.kind === "Identifier" &&
-      renames.has(property.name as string) &&
-      (called.has(object) ||
-        (object.kind === "Variable" && holders.has(object.name as string)))
+      called.has(object) ||
+      (object.kind === "Variable" && holders.has(object.name as string)) ||
+      (legacy !== null &&
+        (called.has(legacy) ||
+          (legacy.kind === "Variable" && locals.has(legacy.name as string))))
     )
       reads.push(property as unknown as AstNode);
     return undefined;
@@ -603,7 +616,12 @@ function callSiteEdits(
         updated = replaceNode(updated, call, { ...call, args } as MethodCall);
       }
     }
-    if (outputs.size > 0) updated = renameReads(updated, calls, outputs, item);
+    if (outputs.size > 0) {
+      const names = new Set(
+        sites.filter((s) => s.path === path).map((s) => s.localName),
+      );
+      updated = renameReads(updated, calls, outputs, item, names);
+    }
     out.push({
       path,
       edit: reprintDeclaration(
@@ -635,21 +653,66 @@ function partOf(field: FormField): string | null {
   }
 }
 
-/** `node` with each `Variable` named in `renames` renamed; the node itself when it reads none. */
+/** The names a `Block` or `Section` of statements declares itself, not counting those inside closures. */
+function declaredIn(statements: readonly AstNode[]): string[] {
+  const names: string[] = [];
+  for (const statement of statements)
+    walk(statement, (n) => {
+      if (n.kind === "Closure") return false;
+      if (n.kind === "VariableDeclaration")
+        for (const t of (n as unknown as { targets: { name: { name: string } }[] })
+          .targets)
+          names.push(t.name.name);
+      return undefined;
+    });
+  return names;
+}
+
+/** The names a node introduces for what is inside it: a closure's parameters and locals, a block's or section's locals. */
+function introduced(node: AstNode): string[] {
+  const n = node as unknown as {
+    params?: readonly { name: { name: string } }[] | null;
+    body?: unknown;
+    statements?: readonly AstNode[];
+    items?: readonly AstNode[];
+  };
+  switch (node.kind) {
+    case "Closure":
+      return [
+        ...(n.params ?? []).map((p) => p.name.name),
+        ...declaredIn(n.body as readonly AstNode[]),
+      ];
+    case "Block":
+      return declaredIn(n.statements ?? []);
+    case "Section":
+      return declaredIn(n.items ?? []);
+    default:
+      return [];
+  }
+}
+
+/** `node` with each `Variable` named in `renames` renamed, except where a closure parameter or a local shadows it; the node itself when it reads none. */
 function renameUses<T extends AstNode>(
   node: T,
   renames: ReadonlyMap<string, string>,
 ): T {
-  let result: AstNode = node;
   const found: AstNode[] = [];
-  walk(node, (n) => {
+  const visit = (n: AstNode, active: ReadonlyMap<string, string>): void => {
+    let scope = active;
+    const hidden = introduced(n).filter((name) => active.has(name));
+    if (hidden.length > 0) {
+      scope = new Map(active);
+      for (const name of hidden) (scope as Map<string, string>).delete(name);
+    }
     if (
       n.kind === "Variable" &&
-      renames.has((n as unknown as { name: string }).name)
+      scope.has((n as unknown as { name: string }).name)
     )
       found.push(n);
-    return undefined;
-  });
+    for (const child of childNodes(n)) visit(child, scope);
+  };
+  visit(node, renames);
+  let result: AstNode = node;
   for (const v of found) {
     const next = variable(
       renames.get((v as unknown as { name: string }).name) as string,
