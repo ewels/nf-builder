@@ -58,6 +58,14 @@ export interface SummaryModule {
   readonly calls: readonly string[];
 }
 
+/** The share of a workflow's main statements that are modelled (F-405, ADR 0004). */
+export interface SummaryCoverage {
+  readonly statements: number;
+  readonly modelled: number;
+  /** Rounded down, so 100 means every statement is modelled; null when there are no statements. */
+  readonly percent: number | null;
+}
+
 export interface WorkflowSummary {
   /** The workflow's name, or "Entry workflow". */
   readonly name: string;
@@ -73,6 +81,7 @@ export interface WorkflowSummary {
   readonly outputs: readonly SummaryPort[];
   readonly calls: readonly SummaryCall[];
   readonly modules: readonly SummaryModule[];
+  readonly coverage: SummaryCoverage;
 }
 
 export interface DetailRow {

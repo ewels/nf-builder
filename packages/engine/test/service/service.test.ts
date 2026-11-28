@@ -174,6 +174,26 @@ describe("F-113 engine service", () => {
     expect(applied.workflows.map((w) => w.name)).toEqual([null]);
   });
 
+  it("F-405 LA-35: diagnostics() returns the registry folders of the open project", async () => {
+    const service = createEngineService();
+    await service.open({
+      version,
+      files: [
+        { path: "main.nf", text: "workflow {\n}\n" },
+        {
+          path: "modules/nf-core/a/main.nf",
+          text: "process A {\n    script:\n    'a'\n}\n",
+        },
+        { path: "modules/nf-core/a/meta.yml", text: "name: a\n" },
+      ],
+    });
+    const r = await service.diagnostics();
+    if (!("diagnostics" in r)) throw new Error(`refused: ${r.code}`);
+    expect(r.registry).toEqual([
+      { path: "modules/nf-core/a", module: "nf-core/a" },
+    ]);
+  });
+
   it("F-112 F-113 AR-05: diagnostics() returns the pack lint codes and is recomputed after a change", async () => {
     const service = createEngineService();
     const legacy = (receiver: string) =>

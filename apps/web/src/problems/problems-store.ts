@@ -11,6 +11,7 @@ import {
   problemKey,
   problemSections,
   problemTarget,
+  type RegistryFolder,
 } from "@nf-builder/engine";
 import { useStore } from "zustand";
 import { createStore, type StoreApi } from "zustand/vanilla";
@@ -36,6 +37,8 @@ export interface ProblemsState {
   readonly revision: number | null;
   readonly diagnostics: readonly Diagnostic[];
   readonly sections: ProblemSections;
+  /** The registry module folders, for the workflow summary's registry list (F-405). */
+  readonly registry: readonly RegistryFolder[];
   readonly message: string | null;
   /** The panel is open (session only: no stored format). */
   readonly open: boolean;
@@ -68,6 +71,7 @@ const INITIAL: ProblemsState = {
   revision: null,
   diagnostics: [],
   sections: NONE,
+  registry: [],
   message: null,
   open: false,
   view: "problems",
@@ -121,7 +125,8 @@ export function createProblemsStore(options: {
                 status: "ready",
                 revision: result.revision,
                 diagnostics: result.diagnostics,
-                sections: problemSections(result.diagnostics),
+                sections: problemSections(result.diagnostics, result.registry),
+                registry: result.registry,
                 message: null,
               };
             }

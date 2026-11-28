@@ -80,6 +80,7 @@ export type {
 export { CANVAS_METRICS, canvasView, portY } from "./canvas";
 export * from "./config";
 export { nodeView } from "./details/node-view";
+export { workflowSuggestions } from "./details/suggestions";
 export { workflowSummary } from "./details/summary";
 export type {
   DeclarationDetails,
@@ -92,6 +93,7 @@ export type {
   PortDetail,
   Preview,
   SummaryCall,
+  SummaryCoverage,
   SummaryModule,
   SummaryPort,
   WorkflowSummary,

@@ -38,6 +38,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-301 add from palette | merged, PR #58 | Plan deleted in its PR. |
 | F-404 zip export | merged, PR #59 | Plan deleted in its PR. |
 | F-601 config editor | merged, PR #60 | Plan deleted in its PR. |
+| F-405 legacy import summary | merged, PR #61 | Plan deleted in its PR. |
 
 ## Merge order
 
@@ -326,7 +327,7 @@ ADR numbers reserved for features in flight, so parallel branches don't clash: 0
 - Accept every recommendation in section 6, with one change to point 16: F-703 (read-only below 1024 px) is being built now; if it has merged when F-301 starts, palette adds go through its read-only guard and are refused there, with a test.
 - The new feature for the other palette items (point 1) is added in F-301's PR with `scope-change`. ADR number: the next free one when F-301 starts (0055 to 0058 are reserved above).
 
-### F-405 — [plan](plan-F-405.md)
+### F-405 — plan deleted
 - Accept every recommendation in section 6. ADR number: the next free one when F-405 starts.
 
 ### F-505 — [plan](plan-F-505.md)

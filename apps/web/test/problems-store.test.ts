@@ -79,6 +79,7 @@ function fake(
     applyFix?: () => Promise<ApplyOutcome>;
     workflows?: WorkflowRef[];
     nodes?: unknown[];
+    registry?: { path: string; module: string }[];
   } = {},
 ) {
   const calls: string[] = [];
@@ -106,7 +107,11 @@ function fake(
       calls.push("diagnostics");
       const at = revision();
       const list = await (options.diagnose?.(call) ?? [warning, suggestion]);
-      return { revision: at, diagnostics: list };
+      return {
+        revision: at,
+        diagnostics: list,
+        registry: options.registry ?? [],
+      };
     },
     applyFix: async (...args: unknown[]) => {
       calls.push(`applyFix@${args[1]}`);
@@ -161,6 +166,26 @@ describe("problems store", () => {
       problems: 1,
     });
     expect(state.diagnostics).toEqual([warning, suggestion]);
+  });
+
+  it("F-405 LA-35: the registry folders of the pull group the sections, registry files last", async () => {
+    const own: Diagnostic = { ...suggestion, path: "z.nf" };
+    const registered: Diagnostic = {
+      ...suggestion,
+      path: "modules/nf-core/a/main.nf",
+    };
+    const { workspace, problems, settle } = setup({
+      diagnose: () => [registered, own],
+      registry: [{ path: "modules/nf-core/a", module: "nf-core/a" }],
+    });
+    await workspace.getState().show(summaryAt(1));
+    await settle();
+    expect(
+      problems.getState().sections.suggestions.map((g) => [g.path, g.module]),
+    ).toEqual([
+      ["z.nf", null],
+      ["modules/nf-core/a/main.nf", "nf-core/a"],
+    ]);
   });
 
   it("F-309: each new revision pulls again; one pull is in flight, the latest revision wins and an older result is dropped", async () => {

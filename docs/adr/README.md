@@ -66,3 +66,4 @@ Process: [0001](0001-record-decisions-as-adrs.md). Template: [template.md](templ
 | [0060](0060-palette-adds.md) | Add palette items as grouped commands with fresh names, positions set before the first draw, and the viewport kept | Accepted (agent) |
 | [0061](0061-config-editor.md) | Edit nextflow.config through forms with statement-level commands, a ported config printer, Nextflow's run-time option check and its selector matching | Accepted (agent) |
 | [0062](0062-zip-export.md) | Export a project as a zip under one folder, with the layout optional and bin/ executable | Accepted (agent) |
+| [0063](0063-legacy-import-summary.md) | Show the modelled share and suggestion count in the workflow summary, and group registry module files in the problems panel | Accepted (agent) |
