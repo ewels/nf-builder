@@ -1,13 +1,13 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { MARKDOWN_MODES, WORKFLOW_MODES } from "../src/views/view-mode";
+import { MARKDOWN_MODES, VIEW_MODES } from "../src/views/view-mode";
 import { ViewModeToggle } from "../src/views/view-mode-toggle";
 
 describe("F-208 view mode toggle", () => {
   it('F-208 step 1 UX-27 QA-11: the toggle is a radio group "View mode" with Graph, Split and Code, the current mode checked, and G, S, C shortcuts', () => {
     const html = renderToStaticMarkup(
       <ViewModeToggle
-        modes={WORKFLOW_MODES}
+        modes={VIEW_MODES}
         mode="split"
         onChange={() => undefined}
       />,

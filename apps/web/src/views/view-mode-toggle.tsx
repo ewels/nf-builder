@@ -1,7 +1,7 @@
 import type { JSX, KeyboardEvent } from "react";
 import type { ModeOption, ViewMode } from "./view-mode";
 
-/** The switch between the modes of a tab: Graph, Split and Code, or Preview, Split and Code, of a tab (UX-27): a radio group with roving focus and arrow keys. */
+/** The mode switch of a tab (UX-27): Graph or Preview, Split and Code; a radio group with roving focus and arrow keys. */
 export function ViewModeToggle({
   modes,
   mode,

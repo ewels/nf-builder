@@ -16,27 +16,29 @@ export const MARKDOWN_PREVIEW_MARKER = "f605-markdown-preview-chunk";
 export interface RenderOptions {
   /** The path of the Markdown file, which relative links resolve against. */
   readonly path: string;
-  readonly window?: Window;
 }
 
-type Purifier = ReturnType<typeof createDOMPurify>;
-
-const BASE_TAG = /<base\b[^>]*>/gi;
-const OPEN_TAG = /<[a-z][^>]*>/gi;
-const HANDLER_WITH_VALUE = /[\s/]on[a-z]+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi;
-const HANDLER_WITHOUT_VALUE = /[\s/]on[a-z]+(?=[\s/>]|$)/gi;
+// an open tag: its name, then attributes (a separator, a name, an optional quoted or bare value), then its end
+const OPEN_TAG =
+  /<([a-z][^\s/>]*)((?:[\s/]+[^\s/>=]+(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]*))?)*)\s*\/?>/gi;
+const ATTRIBUTE = /([\s/]+)([^\s/>=]+)(\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]*))?/g;
 
 /**
- * Drops event-handler attributes and base tags from raw HTML in the Markdown. This only keeps the CSP report log quiet:
- * Chromium reports them even when the markup is parsed in an inert document. DOMPurify stays the sanitiser, so a miss
- * here is a blocked and reported attempt, never an executed one.
+ * Drops event-handler attributes (by name, with their values) and base tags from raw HTML in the Markdown. This only
+ * keeps the CSP report log quiet: Chromium reports them even when the markup is parsed in an inert document. DOMPurify
+ * stays the sanitiser, so a miss here is a blocked and reported attempt, never an executed one. Quoted values and text
+ * outside tags are never touched.
  */
 export function stripNoisyHtml(html: string): string {
-  return html
-    .replace(BASE_TAG, "")
-    .replace(OPEN_TAG, (tag) =>
-      tag.replace(HANDLER_WITH_VALUE, "").replace(HANDLER_WITHOUT_VALUE, ""),
+  return html.replace(OPEN_TAG, (tag, name: string, attributes: string) => {
+    if (name.toLowerCase() === "base") return "";
+    const kept = attributes.replace(
+      ATTRIBUTE,
+      (attribute, _separator: string, attributeName: string) =>
+        /^on/i.test(attributeName) ? "" : attribute,
     );
+    return kept === attributes ? tag : tag.replace(attributes, () => kept);
+  });
 }
 
 const marked = new Marked({
@@ -46,30 +48,18 @@ const marked = new Marked({
     html: ({ text }) => stripNoisyHtml(text),
   },
 });
-const purifiers = new WeakMap<Window, Purifier>();
-
-function purifierFor(window: Window): Purifier {
-  let found = purifiers.get(window);
-  if (found === undefined) {
-    found = createDOMPurify(
-      window as unknown as Parameters<typeof createDOMPurify>[0],
-    );
-    purifiers.set(window, found);
-  }
-  return found;
-}
+let purifier: ReturnType<typeof createDOMPurify> | undefined;
 
 /** Renders `text` into a fragment holding only what the policy allows. */
 export function renderMarkdown(
   text: string,
   options: RenderOptions,
 ): DocumentFragment {
-  const win = options.window ?? window;
   const html = marked.parse(text, { async: false });
   // Parse into an inert document, not with DOMParser: Chromium reports CSP violations for the untrusted markup when
   // DOMParser parses it, and an inert document runs nothing and has no policy. DOMPurify then cleans the node in place.
   // The document of a template's content has no browsing context, so an img parsed here fetches nothing either.
-  const holder = win.document.implementation
+  const holder = window.document.implementation
     .createHTMLDocument("")
     .createElement("template").content;
   const inert = holder.ownerDocument;
@@ -77,7 +67,8 @@ export function renderMarkdown(
   range.selectNodeContents(holder);
   const root = inert.createElement("div");
   root.append(range.createContextualFragment(html));
-  purifierFor(win).sanitize(root, {
+  purifier ??= createDOMPurify(window);
+  purifier.sanitize(root, {
     ALLOWED_TAGS: [...MARKDOWN_TAGS],
     ALLOWED_ATTR: [...MARKDOWN_ATTRIBUTES],
     ALLOW_DATA_ATTR: false,
@@ -90,9 +81,9 @@ export function renderMarkdown(
   rewriteLinks(root, options.path);
   rewriteImages(root);
   rewriteInputs(root);
-  const fragment = win.document.createDocumentFragment();
+  const fragment = window.document.createDocumentFragment();
   for (const child of root.childNodes) {
-    fragment.append(win.document.importNode(child, true));
+    fragment.append(window.document.importNode(child, true));
   }
   return fragment;
 }

@@ -1,11 +1,13 @@
 import type { OutlineItem } from "@nf-builder/engine";
+import { languageOf } from "@nf-builder/engine";
 import type { JSX } from "react";
 import { useEffect, useState } from "react";
 import { canvasStore, useWorkspace } from "../canvas/canvas-store";
 import { getEngine } from "../engine/engine-client";
 import { editorLanguageOf, LANGUAGE_NAMES } from "../files/file-kinds";
+import { useReadOnly } from "../read-only/read-only-store";
 
-export type OutlineState =
+type OutlineState =
   | { readonly status: "loading" }
   | { readonly status: "ready"; readonly items: readonly OutlineItem[] }
   | { readonly status: "unavailable"; readonly message: string };
@@ -28,6 +30,18 @@ const KIND_WORDS: Record<OutlineItem["kind"], string> = {
   statement: "statement",
 };
 
+const row = (item: OutlineItem): JSX.Element => (
+  <>
+    <span className="details-type">{KIND_WORDS[item.kind]}</span>{" "}
+    <span className="details-port-name">{item.name}</span>{" "}
+    <span className="details-note">line {item.line}</span>
+  </>
+);
+
+/** Whether a file is a Nextflow script, by the AR-01 rule (case-sensitive `.nf`). */
+export const isScriptPath = (path: string): boolean =>
+  languageOf(path) === "nextflow";
+
 /**
  * The details of a file tab (FI-31, FI-32): its path and language, and for a script the declarations it holds, each a
  * button that shows the declaration in the code.
@@ -37,11 +51,14 @@ export function FileDetailsView({
   language,
   outline,
   onReveal,
+  readOnly = false,
 }: {
   readonly path: string;
   readonly language: string;
   readonly outline: OutlineState | null;
   readonly onReveal?: (item: OutlineItem) => void;
+  /** Nothing reveals code while read-only (ADR 0056), so the rows are plain text. */
+  readonly readOnly?: boolean;
 }): JSX.Element {
   return (
     <div
@@ -63,17 +80,17 @@ export function FileDetailsView({
             <ul className="details-list">
               {outline.items.map((item) => (
                 <li key={`${item.range.start}:${item.kind}:${item.name}`}>
-                  <button
-                    type="button"
-                    className="details-outline-row"
-                    onClick={() => onReveal?.(item)}
-                  >
-                    <span className="details-type">
-                      {KIND_WORDS[item.kind]}
-                    </span>{" "}
-                    <span className="details-port-name">{item.name}</span>{" "}
-                    <span className="details-note">line {item.line}</span>
-                  </button>
+                  {readOnly ? (
+                    <div className="details-outline-row">{row(item)}</div>
+                  ) : (
+                    <button
+                      type="button"
+                      className="details-outline-row"
+                      onClick={() => onReveal?.(item)}
+                    >
+                      {row(item)}
+                    </button>
+                  )}
                 </li>
               ))}
             </ul>
@@ -89,7 +106,8 @@ export function FileDetails({ path }: { readonly path: string }): JSX.Element {
   const lastChange = useWorkspace((s) => s.lastChange);
   const session = useWorkspace((s) => s.session);
   const revision = lastChange?.paths.includes(path) ? lastChange.revision : 0;
-  const isScript = path.toLowerCase().endsWith(".nf");
+  const isScript = isScriptPath(path);
+  const readOnly = useReadOnly();
   const [outline, setOutline] = useState<OutlineState | null>(null);
   // biome-ignore lint/correctness/useExhaustiveDependencies: `revision` and `session` read the outline again
   useEffect(() => {
@@ -127,6 +145,7 @@ export function FileDetails({ path }: { readonly path: string }): JSX.Element {
       path={path}
       language={LANGUAGE_NAMES[editorLanguageOf(path)]}
       outline={outline}
+      readOnly={readOnly}
       onReveal={(item) => canvasStore.getState().revealCode(path, item.range)}
     />
   );

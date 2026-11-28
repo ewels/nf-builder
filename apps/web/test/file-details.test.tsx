@@ -1,6 +1,6 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { FileDetailsView } from "../src/details/file-details";
+import { FileDetailsView, isScriptPath } from "../src/details/file-details";
 
 const item = (kind: never, name: string, line: number) => ({
   kind,
@@ -38,6 +38,30 @@ describe("F-605 file details", () => {
       "record Sample line 8",
       "function greet line 13",
     ]);
+  });
+
+  it("F-605 FI-31 ADR-0056: read-only outline rows are plain text, not buttons", () => {
+    const html = renderToStaticMarkup(
+      <FileDetailsView
+        path="lib/samples.nf"
+        language="Nextflow"
+        readOnly
+        outline={{
+          status: "ready",
+          items: [item("enum" as never, "Kind", 3)],
+        }}
+      />,
+    );
+    expect(html).not.toContain("<button");
+    expect(html).toContain("enum");
+    expect(html).toContain("Kind");
+    expect(html).toContain("line 3");
+  });
+
+  it("F-605 FI-31 AR-01: only a lower-case .nf is a script", () => {
+    expect(isScriptPath("main.nf")).toBe(true);
+    expect(isScriptPath("main.NF")).toBe(false);
+    expect(isScriptPath("nextflow.config")).toBe(false);
   });
 
   it("F-605 FI-32: another file shows its path and language name", () => {

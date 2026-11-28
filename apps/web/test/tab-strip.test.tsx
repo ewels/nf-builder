@@ -1,6 +1,7 @@
 import type { ReactElement, ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
+import { fileTabFor } from "../src/canvas/canvas-store";
 import { TabStripView } from "../src/shell/tab-strip";
 
 const controls = <span role="status" />;
@@ -73,5 +74,31 @@ describe("F-703 read-only tab strip", () => {
     expect(narrow).not.toContain("history-controls");
     expect(narrow).not.toContain("view-mode");
     expect(narrow).not.toContain("radio");
+  });
+});
+
+describe("F-605 tab strip", () => {
+  it('F-605 UX-27 UX-20: a Markdown tab shows the Preview, Split and Code toggle, a plain file tab shows none, file tabs carry their path as a title, and the tablist is "Open workflows and files"', () => {
+    const html = (path: string) =>
+      renderToStaticMarkup(
+        TabStripView({
+          tabs: [fileTabFor(path)],
+          activeTab: fileTabFor(path).id,
+          controls: null,
+          onSelect: noop,
+          onMode: noop,
+          onClose: noop,
+        }),
+      );
+    const markdown = html("docs/README.md");
+    expect(markdown).toContain('aria-label="Open workflows and files"');
+    expect(markdown).toContain('title="docs/README.md"');
+    for (const label of ["Preview", "Split", "Code"]) {
+      expect(markdown).toContain(label);
+    }
+    expect(markdown).not.toContain("Graph");
+    const plain = html("conf/params.yml");
+    expect(plain).toContain('title="conf/params.yml"');
+    expect(plain).not.toContain("view-mode");
   });
 });

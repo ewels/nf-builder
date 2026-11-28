@@ -74,14 +74,14 @@ export function editorLanguageOf(path: string): EditorLanguage {
   return "plaintext";
 }
 
-export type FileEditor = "markdown" | "code";
+type FileEditor = "markdown" | "code";
 
 /** Markdown exactly when the engine's AR-01 rule says so, so `README.MD` opens as code. */
 export function fileEditorOf(path: string): FileEditor {
   return languageOf(path) === "markdown" ? "markdown" : "code";
 }
 
-export type OpenTarget =
+type OpenTarget =
   | { readonly kind: "workflow"; readonly ref: WorkflowRef }
   | { readonly kind: "file" };
 

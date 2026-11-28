@@ -1,18 +1,16 @@
 // What a Markdown preview may contain (F-605, FI-30, QA-31, ADR 0048): pure rules with no DOM and no dependencies.
 
 /** Elements that survive sanitising: none runs code, loads anything, submits or restyles. */
-export const MARKDOWN_TAGS: readonly string[] = [
-  ..."a abbr b blockquote br caption cite code col colgroup dd del details dfn div dl dt em h1 h2 h3 h4 h5 h6 hr i img input ins kbd li mark ol p picture pre q rp rt ruby s samp small span strike strong sub summary sup table tbody td tfoot th thead tr tt u ul var".split(
+export const MARKDOWN_TAGS: readonly string[] =
+  "a abbr b blockquote br caption cite code col colgroup dd del details dfn div dl dt em h1 h2 h3 h4 h5 h6 hr i img input ins kbd li mark ol p picture pre q rp rt ruby s samp small span strike strong sub summary sup table tbody td tfoot th thead tr tt u ul var".split(
     " ",
-  ),
-];
+  );
 
 /** Attributes that survive: no style, class, event handler or attribute that makes the browser fetch. */
-export const MARKDOWN_ATTRIBUTES: readonly string[] = [
-  ..."href title alt src align colspan rowspan scope open checked disabled type start reversed id name lang dir width height".split(
+export const MARKDOWN_ATTRIBUTES: readonly string[] =
+  "href title alt src align colspan rowspan scope open checked disabled type start reversed id name lang dir width height".split(
     " ",
-  ),
-];
+  );
 
 export type LinkTarget =
   | {
@@ -43,10 +41,11 @@ export function classifyLink(href: string, from: string): LinkTarget {
   if (scheme === "mailto") {
     return { kind: "external", url: trimmed, newTab: false };
   }
+  // a backslash may be read as a slash (`/\host`), so it never makes a project link
   if (
     scheme !== undefined ||
     squeezed.startsWith("//") ||
-    squeezed.startsWith("\\\\")
+    squeezed.includes("\\")
   ) {
     return { kind: "inert", reason: "scheme" };
   }

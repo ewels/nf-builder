@@ -28,8 +28,7 @@ export default function MarkdownPreview({
   const reads = useRef(0);
   const session = useRef(canvasStore.getState().session);
   const lastChange = useWorkspace((s) => s.lastChange);
-  const changed = lastChange?.paths.includes(path) === true;
-  const revision = changed ? lastChange?.revision : 0;
+  const revision = lastChange?.paths.includes(path) ? lastChange.revision : 0;
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: `revision` re-reads the file after an edit to it
   useEffect(() => {
@@ -53,7 +52,12 @@ export default function MarkdownPreview({
         container.current.replaceChildren(renderMarkdown(text, { path }));
         setState("ready");
       } catch (error) {
-        if (read !== reads.current || container.current === null) return;
+        if (
+          read !== reads.current ||
+          mine !== canvasStore.getState().session ||
+          container.current === null
+        )
+          return;
         container.current.replaceChildren();
         setMessage(
           `The preview couldn't be shown: ${error instanceof Error ? error.message : String(error)}`,
@@ -75,14 +79,9 @@ export default function MarkdownPreview({
         ),
       );
   };
-  const onClick = (event: MouseEvent<HTMLElement>) => {
-    const target = projectLinkOf(event.target);
-    if (target === null) return;
-    event.preventDefault();
-    open(target);
-  };
-  const onKeyDown = (event: KeyboardEvent<HTMLElement>) => {
-    if (event.key !== "Enter") return;
+  const follow = (
+    event: MouseEvent<HTMLElement> | KeyboardEvent<HTMLElement>,
+  ) => {
     const target = projectLinkOf(event.target);
     if (target === null) return;
     event.preventDefault();
@@ -106,8 +105,10 @@ export default function MarkdownPreview({
         data-preview-state={state}
         data-marker={MARKDOWN_PREVIEW_MARKER}
         hidden={state === "unavailable"}
-        onClick={onClick}
-        onKeyDown={onKeyDown}
+        onClick={follow}
+        onKeyDown={(event) => {
+          if (event.key === "Enter") follow(event);
+        }}
       />
     </>
   );

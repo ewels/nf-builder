@@ -231,6 +231,18 @@ describe("F-605 renderMarkdown", () => {
     );
   });
 
+  it("F-605 QA-30: the pre-filter leaves attribute values and text alone, even when they look like handlers", () => {
+    const svg =
+      '<img src="data:image/svg+xml,<svg onload=alert(1)>" alt="a onclick=b">';
+    expect(stripNoisyHtml(svg)).toBe(svg);
+    expect(stripNoisyHtml('<a title="x onerror=y" onclick=z>t</a>')).toBe(
+      '<a title="x onerror=y">t</a>',
+    );
+    expect(stripNoisyHtml("<p>a <b onclick=1>b</b></p> onload=x")).toBe(
+      "<p>a <b>b</b></p> onload=x",
+    );
+  });
+
   it("F-605 QA-30: a README with handlers and a base tag renders as before apart from them", () => {
     const text =
       '<p onclick="a()">hi <b>there</b></p>\n\n<base href="https://e.example/">\n\n<img onerror=x alt="pic" src="data:image/png;base64,AAAA">';

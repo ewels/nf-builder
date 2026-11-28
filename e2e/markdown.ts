@@ -25,7 +25,7 @@ Visible paragraph text.
 <meta http-equiv="refresh" content="0;url=https://example.com/z">
 <base href="https://example.com/">
 <link rel="stylesheet" href="https://example.com/s.css">
-<details ontoggle="window.__f605 = 8"><summary>More</summary>Inside</details>
+<details open ontoggle="window.__f605 = 8"><summary>More</summary>Inside</details>
 <picture><source srcset="https://example.com/a.png"><img src="https://example.com/b.png" alt="Remote picture"></picture>
 
 [js](javascript:window.__f605=9) [mixed](JaVaScRiPt:window.__f605=10) [vb](vbscript:x) [data](data:text/html,x)

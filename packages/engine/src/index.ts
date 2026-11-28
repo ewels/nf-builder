@@ -67,7 +67,6 @@ export type {
 } from "./canvas";
 export { CANVAS_METRICS, canvasView, portY } from "./canvas";
 export { nodeView } from "./details/node-view";
-export { fileOutline } from "./details/outline";
 export { workflowSummary } from "./details/summary";
 export type {
   DeclarationDetails,
@@ -76,7 +75,6 @@ export type {
   NodeView,
   OperatorDetail,
   OutlineItem,
-  OutlineKind,
   PortConnection,
   PortDetail,
   Preview,

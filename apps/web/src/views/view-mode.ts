@@ -9,7 +9,7 @@ export interface ModeOption {
   readonly key: "g" | "s" | "c";
 }
 
-export const WORKFLOW_MODES: readonly ModeOption[] = [
+export const VIEW_MODES: readonly ModeOption[] = [
   { mode: "graph", label: "Graph", key: "g" },
   { mode: "split", label: "Split", key: "s" },
   { mode: "code", label: "Code", key: "c" },
@@ -21,14 +21,12 @@ export const MARKDOWN_MODES: readonly ModeOption[] = [
   { mode: "code", label: "Code", key: "c" },
 ];
 
-export const VIEW_MODES = WORKFLOW_MODES;
-
 /** The modes a tab offers (UX-27): Graph, Split, Code for a workflow; Preview, Split, Code for Markdown; none for other files, which show code only. */
 export function modesFor(
   kind: "workflow" | "file",
   path: string,
 ): readonly ModeOption[] {
-  if (kind === "workflow") return WORKFLOW_MODES;
+  if (kind === "workflow") return VIEW_MODES;
   return fileEditorOf(path) === "markdown" ? MARKDOWN_MODES : [];
 }
 
@@ -82,7 +80,7 @@ export function ignoredByShortcuts(e: ViewModeKey): boolean {
 /** The mode a key press switches to (UX-70), or null when the press is not a plain G, S or C outside text entry. The keys are positional: G, S and C pick the first, second and third of `modes`. */
 export function viewModeForKey(
   e: ViewModeKey,
-  modes: readonly ModeOption[] = WORKFLOW_MODES,
+  modes: readonly ModeOption[] = VIEW_MODES,
 ): ViewMode | null {
   if (e.ctrlKey || e.metaKey || e.altKey || ignoredByShortcuts(e)) return null;
   const key = e.key.toLowerCase();

@@ -60,6 +60,17 @@ describe("F-605 Markdown policy", () => {
     });
   });
 
+  it("F-605 FI-30 QA-31: a backslash in a link makes it inert, never a project link", () => {
+    for (const href of [
+      "docs\\usage.md",
+      "/\\host/x",
+      "\\\\host\\x",
+      "a/..\\b.md",
+    ]) {
+      expect(classifyLink(href, "README.md").kind).toBe("inert");
+    }
+  });
+
   it("F-605 FI-30: resolveProjectPath resolves against the Markdown file's folder, treats a leading slash as the project root, decodes percent escapes and refuses paths that leave the project", () => {
     expect(resolveProjectPath("docs/a.md", "b.md")).toBe("docs/b.md");
     expect(resolveProjectPath("docs/a.md", "../c/d.md")).toBe("c/d.md");
