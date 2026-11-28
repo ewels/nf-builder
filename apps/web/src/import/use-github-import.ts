@@ -71,24 +71,12 @@ export function useGithubImport(): GithubImportView {
           : current,
       );
     },
-    reset() {
-      edited();
-    },
+    reset: edited,
     async review() {
       const key = `${repo.trim()}\n${ref.trim()}`;
       const mine = ++run.current;
       const parsed = parseRepoInput(repo, ref);
       const name = "error" in parsed ? repo.trim() : repoSlug(parsed.repo);
-      const fail = (error: unknown) => {
-        if (mine === run.current)
-          setState({
-            status: "failed",
-            message: importErrorMessage(error, {
-              repo: name,
-              ref: "error" in parsed ? null : parsed.ref,
-            }),
-          });
-      };
       try {
         let r = listed.current?.key === key ? listed.current.review : null;
         if (r === null) {
@@ -109,7 +97,14 @@ export function useGithubImport(): GithubImportView {
           plan: replan(r, ignore.current),
         });
       } catch (error) {
-        fail(error);
+        if (mine === run.current)
+          setState({
+            status: "failed",
+            message: importErrorMessage(error, {
+              repo: name,
+              ref: "error" in parsed ? null : parsed.ref,
+            }),
+          });
       }
     },
   };

@@ -1,8 +1,7 @@
 // The Import route of the New project dialog (F-403, F-401; IO-10, IO-12, UX-61): a source (Zip file or GitHub repository), its
 // inputs and the summary of what would be imported before anything is. Presentational; the state is in `zip-import.ts` and
 // `use-github-import.ts` (AR-31).
-import type { JSX } from "react";
-import { useId } from "react";
+import { type JSX, useId } from "react";
 import { ImportSummaryView } from "../import/import-summary";
 import type { GithubImportView } from "../import/use-github-import";
 import type { ZipImportView } from "./zip-import";

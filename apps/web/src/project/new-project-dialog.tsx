@@ -3,6 +3,7 @@
 // (QA-10, QA-11) and inside a cross-origin frame (ADR 0044). An error shows inline and the dialog stays open.
 import { BLANK_TEMPLATE, type TemplateList } from "@nf-builder/engine";
 import { importProblem } from "@nf-builder/sources";
+import { repoSlug } from "@nf-builder/sources/github";
 import {
   type FormEvent,
   type JSX,
@@ -202,19 +203,14 @@ export function NewProjectDialog(props: NewProjectDialogProps): JSX.Element {
 
   const submitGithub = async () => {
     const { state } = github;
-    if (state.status !== "ready") {
-      const normalised = normaliseProjectName(name);
-      if (normalised === null) {
-        modal.setError(`Enter a name of 1 to ${PROJECT_NAME_MAX} characters.`);
-        return;
-      }
-      modal.setError(null);
-      await github.review();
-      return;
-    }
     const normalised = normaliseProjectName(name);
     if (normalised === null) {
       modal.setError(`Enter a name of 1 to ${PROJECT_NAME_MAX} characters.`);
+      return;
+    }
+    if (state.status !== "ready") {
+      modal.setError(null);
+      await github.review();
       return;
     }
     const problem = githubImportProblem(state.plan);
@@ -244,7 +240,7 @@ export function NewProjectDialog(props: NewProjectDialogProps): JSX.Element {
         const { repo, ref } = state.review.input;
         throw new Error(
           importErrorMessage(failure, {
-            repo: `${repo.owner}/${repo.name}`,
+            repo: repoSlug(repo),
             ref,
           }),
         );

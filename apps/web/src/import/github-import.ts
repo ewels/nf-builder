@@ -14,6 +14,7 @@ import {
   parseRepoInput,
   type RepoInput,
   type RepoListing,
+  repoSlug,
   treeCandidates,
 } from "@nf-builder/sources/github";
 import {
@@ -47,11 +48,7 @@ export async function review(
 
 /** What to download for an ignore list, decided from the listing alone: no request. */
 export function replan(r: Review, ignoreText: string): ImportPlan {
-  return planImport(
-    r.candidates,
-    ignoreText,
-    `${r.input.repo.owner}/${r.input.repo.name}`,
-  );
+  return planImport(r.candidates, ignoreText, repoSlug(r.input.repo));
 }
 
 export function download(

@@ -2,7 +2,7 @@
 
 export type { ZipRead } from "../zip/read-zip.ts";
 export { checkArchiveSize, readZip } from "../zip/read-zip.ts";
-export { BINARY_EXTENSIONS, binaryByName } from "./binary.ts";
+export { binaryByName } from "./binary.ts";
 export { DEFAULT_IGNORE, parseIgnore } from "./ignore.ts";
 export { formatBytes, formatCount, IMPORT_LIMITS } from "./limits.ts";
 export { refuse } from "./messages.ts";
