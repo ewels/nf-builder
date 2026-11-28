@@ -141,4 +141,6 @@ export type CommandResult =
 export interface Scaffold {
   /** A new typed process in its own script (LA-12). `name` is a valid identifier. */
   process(name: string): string;
+  /** A new named workflow in its own script (LA-12). `name` is a valid identifier. */
+  workflow(name: string): string;
 }
