@@ -13,6 +13,7 @@ import {
 } from "../canvas/canvas-store";
 import { problemsStore } from "../problems/problems-store";
 import "./details.css";
+import { FileDetails } from "./file-details";
 import { NodeDetailsView } from "./node-details";
 import { WorkflowSummaryView } from "./workflow-summary";
 
@@ -57,6 +58,8 @@ export function DetailsPane(): JSX.Element {
   const content = useWorkspace((s) => s.content);
   const selected = useWorkspace((s) => s.selected);
   const details = useWorkspace((s) => s.details);
+  const file = useWorkspace((s) => s.tabs.find((t) => t.id === s.activeTab));
+  if (file?.kind === "file") return <FileDetails path={file.path} />;
   return (
     <DetailsBody
       content={content}

@@ -34,6 +34,7 @@ export function connectEngine(
     diagnostics: () => race(remote.diagnostics()),
     details: (path, workflow, node) =>
       race(remote.details(path, workflow, node)),
+    outline: (path) => race(remote.outline(path)),
     report: () => race(remote.report()),
     setLayout: (write) => race(remote.setLayout(write)),
     readFile: (path) => race(remote.readFile(path)),

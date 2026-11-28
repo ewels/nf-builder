@@ -107,3 +107,30 @@ export interface NodeDetails {
   readonly declaration: DeclarationDetails;
   readonly diagnostics: readonly Diagnostic[];
 }
+
+export type OutlineKind =
+  | "featureFlag"
+  | "include"
+  | "import"
+  | "params"
+  | "legacyParam"
+  | "record"
+  | "enum"
+  | "process"
+  | "agent"
+  | "workflow"
+  | "output"
+  | "function"
+  | "unparsed"
+  | "statement";
+
+/** One top-level declaration of a file (F-605, FI-31): names and a range, never text. `detail` is at most 80 characters. */
+export interface OutlineItem {
+  readonly kind: OutlineKind;
+  readonly name: string;
+  readonly detail: string;
+  /** 1-based. */
+  readonly line: number;
+  /** UTF-16 offsets into the file's text. */
+  readonly range: { readonly start: number; readonly end: number };
+}

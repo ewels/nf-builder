@@ -55,6 +55,6 @@ Each file type has an editor. Editors that offer a form also offer the raw text 
 
 | ID | Requirement |
 |---|---|
-| FI-30 | `README.md` and other Markdown: preview and code, with the preview sanitised. |
-| FI-31 | `.nf` files with no workflow (function libraries, record definitions) open in Monaco, with an outline of their declarations in the details pane. |
-| FI-32 | Everything else that is text opens in Monaco with language detected from the extension. Binary files are listed but not opened. |
+| FI-30 | `README.md` and other Markdown (`.md`, `.markdown`) open in Preview, with Split and Code. The preview renders GitHub-flavoured Markdown, raw HTML included, and is sanitised: no scripts, styles, frames, forms or event handlers; external links open in a new tab with `noopener`; links to project files open them; only `data:` images are shown and others appear as their alt text, so the preview makes no requests (ADR 0059). |
+| FI-31 | `.nf` files with no workflow (function libraries, record definitions) open in Monaco, with an outline of their declarations in the details pane. Each declaration is listed with its kind, name and line; selecting one shows it in the code (ADR 0059). |
+| FI-32 | Everything else that is text opens in Monaco, highlighted by extension; unknown extensions, HTML and SVG open as plain text and are never rendered (ADR 0059). In v0.1, projects hold text files only (ADR 0045): imports and uploads list binary files as skipped and never open them. Once projects hold binary files (F-407), the Files view lists them and they don't open. |

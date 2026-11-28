@@ -1,18 +1,20 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
+import { fileTabFor } from "../src/canvas/canvas-store";
 import { TabStripView } from "../src/shell/tab-strip";
 import {
   PanelLayout,
   READ_ONLY_FILE_NOTE,
   ReadOnlyFileNote,
+  shownFileMode,
 } from "../src/views/tab-panel";
 import { shownMode } from "../src/views/view-mode";
 
-const html = (mode: "graph" | "split" | "code") =>
+const html = (mode: "graph" | "preview" | "split" | "code") =>
   renderToStaticMarkup(
     <PanelLayout
       mode={mode}
-      canvas={<div className="canvas-area" />}
+      visual={<div className="canvas-area" />}
       code={<section className="code-pane" />}
     />,
   );
@@ -29,6 +31,45 @@ describe("F-208 tab panel", () => {
       split.indexOf("code-pane"),
     );
     expect(split).toContain("view-divider");
+  });
+
+  it("F-605 UX-27 FI-30: a Markdown tab shows the preview in Preview, both with the preview first in Split, and the code in Code; another file tab shows only the code", () => {
+    expect(html("preview")).toContain("canvas-area");
+    expect(html("preview")).not.toContain("code-pane");
+    const split = html("split");
+    expect(split.indexOf("canvas-area")).toBeLessThan(
+      split.indexOf("code-pane"),
+    );
+    expect(html("code")).not.toContain("canvas-area");
+    // the toggle: a Markdown tab has one, a YAML tab has none
+    const strip = (path: string) =>
+      renderToStaticMarkup(
+        <TabStripView
+          tabs={[fileTabFor(path)]}
+          activeTab={`file:${path}`}
+          controls={null}
+          onSelect={() => undefined}
+          onMode={() => undefined}
+          onClose={() => undefined}
+        />,
+      );
+    const md = strip("README.md");
+    expect(md).toContain('id="view-mode-preview"');
+    expect(md).toContain("Preview (G)");
+    expect(strip("conf/params.yml")).not.toContain("view-mode");
+  });
+
+  it("F-605 F-703 UX-04: read-only, a Markdown tab shows the sanitised preview only (no Split or Code), and another file tab keeps the note", () => {
+    expect(shownFileMode(fileTabFor("README.md"), true)).toBe("preview");
+    expect(shownFileMode(fileTabFor("README.md"), false)).toBe("preview");
+    expect(
+      shownFileMode({ ...fileTabFor("README.md"), mode: "code" }, true),
+    ).toBe("preview");
+    expect(
+      shownFileMode({ ...fileTabFor("README.md"), mode: "split" }, false),
+    ).toBe("split");
+    expect(shownFileMode(fileTabFor("conf/params.yml"), true)).toBeNull();
+    expect(shownFileMode(fileTabFor("conf/params.yml"), false)).toBe("code");
   });
 
   it("F-309 UX-20: a file tab shows only the code pane, and the tab strip shows no view-mode toggle for it", () => {
@@ -64,11 +105,14 @@ describe("F-208 tab panel", () => {
   });
 
   it("F-703 UX-04 UX-27: read-only, the panel lays out the shown mode: only the graph, and the code pane is not built", () => {
-    const layout = (mode: "graph" | "split" | "code", readOnly: boolean) =>
+    const layout = (
+      mode: "graph" | "preview" | "split" | "code",
+      readOnly: boolean,
+    ) =>
       renderToStaticMarkup(
         <PanelLayout
           mode={shownMode(mode, readOnly)}
-          canvas={<div className="canvas-area" />}
+          visual={<div className="canvas-area" />}
           code={<section className="code-pane" />}
         />,
       );

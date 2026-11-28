@@ -798,7 +798,7 @@
         "Format produces the same text as the oracle formatter for that declaration"
       ],
       "passes": false,
-      "notes": "From F-206: enable the details header's Code button.From F-208: reuse `apps/web/src/code/monaco.ts`, `nextflow-language.ts` and `markers.ts`. Refusal markers use the owner `nf-builder-refusal`; use another owner for the file's own diagnostics. From F-209: the popup's Monaco keeps its own undo and must register its flush with the canvas store (`registerFlush`), as the Code view does. From F-703: don't open the popup on double-click or Enter in read-only."
+      "notes": "From F-206: enable the details header's Code button.From F-208: reuse `apps/web/src/code/monaco.ts`, `nextflow-language.ts` and `markers.ts`. Refusal markers use the owner `nf-builder-refusal`; use another owner for the file's own diagnostics. From F-209: the popup's Monaco keeps its own undo and must register its flush with the canvas store (`registerFlush`), as the Code view does. From F-703: don't open the popup on double-click or Enter in read-only. From F-605: `nextflow-language.ts` is gone; register languages with `registerLanguage(id)` in `apps/web/src/code/languages.ts`, and `.code-editor-host` carries `data-language` for tests."
     },
     {
       "id": "F-305",
@@ -857,7 +857,7 @@
         "Breadcrumb back returns to main.nf"
       ],
       "passes": false,
-      "notes": "From F-111: takes, emits, params and outputs have no edit commands yet. From F-205: closing tabs, the breadcrumb and double-click to open a workflow go through canvasStore.openWorkflow. From F-703: opening a workflow tab is allowed in read-only; add the breadcrumb to `READ_ONLY_ALLOWED`; take and emit editing stays hidden. From F-210: `closeTab` exists for file tabs (Delete, `aria-keyshortcuts`, an `aria-hidden` pointer-only ×); extend it to workflow tabs."
+      "notes": "From F-111: takes, emits, params and outputs have no edit commands yet. From F-205: closing tabs, the breadcrumb and double-click to open a workflow go through canvasStore.openWorkflow. From F-703: opening a workflow tab is allowed in read-only; add the breadcrumb to `READ_ONLY_ALLOWED`; take and emit editing stays hidden. From F-210: `closeTab` exists for file tabs (Delete, `aria-keyshortcuts`, an `aria-hidden` pointer-only ×); extend it to workflow tabs. From F-605: Markdown file tabs keep their own mode (Preview, Split or Code) per tab; closing them reuses F-210's `closeTab`."
     },
     {
       "id": "F-308",
@@ -1233,7 +1233,7 @@
         "An unknown option in an imported config is kept and flagged"
       ],
       "passes": false,
-      "notes": "From F-103: the config AST is syntactic. Profiles, params and env are ConfigBlocks; selectors are ConfigSelector with the kind as written; plugins is ConfigApplyBlock; mapping to catalogue/config.json is F-601's. From F-105: FI-05 links come from FileModel.includes (config includes with file targets); external sources (expressions, URLs) have no link. From F-203: templates set no `manifest.name`; the config forms are where a user sets it. From F-309: config files open in a code-only tab through `openFile` until the forms land; `revealCode` reveals a range in the Code view. From F-703: editors aren't shown in read-only; F-605 decides on previews."
+      "notes": "From F-103: the config AST is syntactic. Profiles, params and env are ConfigBlocks; selectors are ConfigSelector with the kind as written; plugins is ConfigApplyBlock; mapping to catalogue/config.json is F-601's. From F-105: FI-05 links come from FileModel.includes (config includes with file targets); external sources (expressions, URLs) have no link. From F-203: templates set no `manifest.name`; the config forms are where a user sets it. From F-309: config files open in a code-only tab through `openFile` until the forms land; `revealCode` reveals a range in the Code view. From F-703: editors aren't shown in read-only; F-605 decides on previews. From F-605: `modesFor(kind, path)` in `apps/web/src/views/view-mode.ts` gives each tab its modes; add `[form, split, code]` for configs, with G, S and C picking the first, second and third mode (UX-27, ADR 0059). `.config` files highlight as Nextflow through `editorLanguageOf`."
     },
     {
       "id": "F-602",
@@ -1252,7 +1252,7 @@
         "Change a type in the schema: a diagnostic with quick fix appears on the params block"
       ],
       "passes": false,
-      "notes": "From F-703: editors aren't shown in read-only; F-605 decides on previews."
+      "notes": "From F-703: editors aren't shown in read-only; F-605 decides on previews. From F-605: JSON files open in Monaco as JSON and are never refused for their content; validating `nextflow_schema.json` is F-602's (ADR 0059)."
     },
     {
       "id": "F-603",
@@ -1285,12 +1285,12 @@
         "Change a local process's inputs, run Update from process: diff shows the matching meta.yml change"
       ],
       "passes": false,
-      "notes": "From F-703: editors aren't shown in read-only; F-605 decides on previews."
+      "notes": "From F-703: editors aren't shown in read-only; F-605 decides on previews. From F-605: YAML files open in Monaco as YAML and are never refused for their content; validating `meta.yml` is F-604's (ADR 0059)."
     },
     {
       "id": "F-605",
       "milestone": "M6",
-      "description": "Markdown preview and editor (sanitised); Monaco for other text files; binaries listed but not opened.",
+      "description": "Markdown preview and editor (sanitised); Monaco for other text files (binary files moved to F-407, ADR 0059).",
       "spec": [
         "FI-30",
         "FI-31",
@@ -1301,11 +1301,10 @@
         "F-208"
       ],
       "steps": [
-        "A README containing a script tag previews without executing it",
-        "A .png in the project is listed but not opened"
+        "A README containing a script tag previews without executing it"
       ],
-      "passes": false,
-      "notes": "From F-208: the markdown sanitiser must strip `<style>` elements and `style` attributes, because the policy allows inline styles for Monaco (ADR 0048); reuse the Monaco modules in `apps/web/src/code/`. From F-403: the deferred F-407 \"Binary files in projects\" exists; move F-605 step 2 there as planned. From F-309: route Markdown and other text files through `openFile`; file tabs are `kind: \"file\"` and show Code only, so add a preview mode for Markdown. From F-703: editors aren't shown in read-only; F-605 decides on previews. From F-210: file tabs use the Nextflow language for every file; detect by extension (FI-32). Binary files never reach the tree until schema v2 (F-407)."
+      "passes": true,
+      "notes": "From F-208: the markdown sanitiser must strip `<style>` elements and `style` attributes, because the policy allows inline styles for Monaco (ADR 0048); reuse the Monaco modules in `apps/web/src/code/`. From F-403: the deferred F-407 \"Binary files in projects\" exists; move F-605 step 2 there as planned. From F-309: route Markdown and other text files through `openFile`; file tabs are `kind: \"file\"` and show Code only, so add a preview mode for Markdown. From F-703: editors aren't shown in read-only; F-605 decides on previews. From F-210: file tabs use the Nextflow language for every file; detect by extension (FI-32). Binary files never reach the tree until schema v2 (F-407). Verified 2026-11-28 (ADR 0059): step 1 by `e2e/markdown.spec.ts` \"F-605 step 1\" (a hostile README with scripts, event handlers, frames, objects, forms, SVG, MathML, styles, a `<base>` tag and remote images previews with nothing executed, no foreign request and no CSP violation; tagged `@smoke`, so Firefox and WebKit run it too) and `apps/web/test/{render-markdown,markdown-policy}.test.ts` under jsdom. Step 2 moved to F-407 \"Binary files in projects\" (deferred M8, ADR 0030) with the `scope-change` label: v0.1 projects hold text files only (ADR 0045), so a binary file is never stored and has nothing to open. Also: the preview loads without Monaco and marked and DOMPurify stay out of the initial JavaScript (AR-32, QA-01); a Split edit updates the preview and one undo restores the file; project links open files and a missing one says so; Preview, Split and Code with G, S and C; other files open in Monaco with their extension's language and HTML shows as source (FI-32); a `.nf` file with no workflow opens in Code with a \"Declarations\" outline from `EngineApi.outline` whose rows reveal the code (FI-31, `packages/engine/test/{details,service}/outline.test.ts`, oracle case `f605-library`); read-only, a Markdown tab shows the preview only and other files show the note; the `markdown-preview` baseline approved from CI (ADR 0021). README opened from the Files view now opens in Preview (F-210's end-to-end test updated). F-309 was a dependency in practice (file tabs, `revealCode`)."
     },
     {
       "id": "F-606",
@@ -1356,7 +1355,7 @@
         "Docs oracle: `nf-metro validate` passes on every template's generated map"
       ],
       "passes": false,
-      "notes": "From F-010 (S5): nf-metro renders in the browser with no patches (ADR 0013 spike result): self-host Pyodide and five wheels (nf-metro, lark, drawsvg, networkx by URL, Pillow), lazy-load the worker with a boot timeout, add 'wasm-unsafe-eval' to netlify.toml, set Pyodide's package base URL (its default CDN string would trip IO-41), add licences.md entries, and delete spikes/s5-nf-metro/. From F-011: on Pages workers aren't under the meta CSP, so no `'wasm-unsafe-eval'` is needed for Pyodide in a worker; add it to `scripts/security-policy.ts` only if the document compiles WebAssembly. Take `indexURL` from `BASE_URL`. Whether github.io serves `.wasm` as `application/wasm` is unconfirmed. From F-203: the metro map checkbox in the New project dialog is F-607's; the metro title comes from `manifest.name`, which templates don't set. From F-206: the FI-55 metro map can sit in the entry workflow's summary. From F-703: editors aren't shown in read-only; F-605 decides on previews."
+      "notes": "From F-010 (S5): nf-metro renders in the browser with no patches (ADR 0013 spike result): self-host Pyodide and five wheels (nf-metro, lark, drawsvg, networkx by URL, Pillow), lazy-load the worker with a boot timeout, add 'wasm-unsafe-eval' to netlify.toml, set Pyodide's package base URL (its default CDN string would trip IO-41), add licences.md entries, and delete spikes/s5-nf-metro/. From F-011: on Pages workers aren't under the meta CSP, so no `'wasm-unsafe-eval'` is needed for Pyodide in a worker; add it to `scripts/security-policy.ts` only if the document compiles WebAssembly. Take `indexURL` from `BASE_URL`. Whether github.io serves `.wasm` as `application/wasm` is unconfirmed. From F-203: the metro map checkbox in the New project dialog is F-607's; the metro title comes from `manifest.name`, which templates don't set. From F-206: the FI-55 metro map can sit in the entry workflow's summary. From F-703: editors aren't shown in read-only; F-605 decides on previews. From F-605: the Markdown preview shows only `data:` images; project and remote images are placeholders (`[alt]`). Show project SVGs such as `docs/images/metro_map.svg` in the README preview through a `blob:` URL made from the project text (`img-src` allows `blob:`; an SVG in `<img>` runs no script), revoked on unmount (ADR 0059)."
     },
     {
       "id": "F-701",
@@ -1416,7 +1415,7 @@
         "At 390 px wide: canvas and details visible, no editing controls, note shown"
       ],
       "passes": true,
-      "notes": "From F-202: tabs don't coordinate writes (last write wins per file); consider Web Locks if needed. From F-206: hide the details header's Edit and Code buttons in read-only mode. From F-208: set Monaco `readOnly` below 1024 px. From F-309: hide the problems panel's fix buttons in read-only mode, and check `applyFix` is refused through the canvas store's `send` queue. Verified 2026-11-28: step 1 by `e2e/read-only.spec.ts` (390 px stored project, allow-list, blocked commands, sidecar, transition, 1024 boundary, 640 stacking, 320 reflow, iframe, touch, `@smoke` on three browsers) and the `read-only-phone` and `read-only-narrow` baselines (ADR 0056). Monaco isn't mounted below 1024 px (F-208's note); a code-only file tab shows \"This file opens in the code view on screens 1024 px or wider.\" instead. The problems panel's fix buttons are hidden and `goTo` doesn't change a tab's view mode or reveal code while read-only (F-309's note). F-202's multi-tab note: not UX-04; ADR 0045's last-write-wins stands for v0.1."
+      "notes": "From F-202: tabs don't coordinate writes (last write wins per file); consider Web Locks if needed. From F-206: hide the details header's Edit and Code buttons in read-only mode. From F-208: set Monaco `readOnly` below 1024 px. From F-309: hide the problems panel's fix buttons in read-only mode, and check `applyFix` is refused through the canvas store's `send` queue. Verified 2026-11-28: step 1 by `e2e/read-only.spec.ts` (390 px stored project, allow-list, blocked commands, sidecar, transition, 1024 boundary, 640 stacking, 320 reflow, iframe, touch, `@smoke` on three browsers) and the `read-only-phone` and `read-only-narrow` baselines (ADR 0056). Monaco isn't mounted below 1024 px (F-208's note); a code-only file tab shows \"This file opens in the code view on screens 1024 px or wider.\" instead. The problems panel's fix buttons are hidden and `goTo` doesn't change a tab's view mode or reveal code while read-only (F-309's note). F-202's multi-tab note: not UX-04; ADR 0045's last-write-wins stands for v0.1. From F-605 (ADR 0059, amends ADR 0056): read-only, a Markdown tab shows its sanitised preview only, with no toggle; other file tabs keep the note, and the details outline rows are plain text."
     },
     {
       "id": "F-704",
@@ -1435,7 +1434,7 @@
         "Tag v0.1.0; https://ewels.github.io/nf-builder/ (or the custom domain that replaces it, ADR 0040) serves the release build; README explains what the app does and where projects are stored"
       ],
       "passes": false,
-      "notes": "Hosting moved to GitHub Pages (ADR 0040); the URL is a placeholder until a custom domain is decided (#35). From F-208: the notices page carries the texts for Monaco (its ThirdPartyNotices), DOMPurify (Apache-2.0), marked, the codicons (CC-BY-4.0) and the Shiki Nextflow grammars, because minification strips their licence comments. From F-703: the README says small screens get a read-only view."
+      "notes": "Hosting moved to GitHub Pages (ADR 0040); the URL is a placeholder until a custom domain is decided (#35). From F-208: the notices page carries the texts for Monaco (its ThirdPartyNotices), DOMPurify (Apache-2.0), marked, the codicons (CC-BY-4.0) and the Shiki Nextflow grammars, because minification strips their licence comments. From F-703: the README says small screens get a read-only view. From F-605: the notices page carries marked 18.2.1 (MIT), DOMPurify 3.4.18 (Apache-2.0) and the 13 extra Shiki grammars loaded for other text files (`apps/web/src/code/extra-grammars.ts`)."
     },
     {
       "id": "F-705",
@@ -1471,10 +1470,11 @@
       "steps": [
         "Import a zip containing a .png: the file is stored and listed in the Files view, and opening it shows a notice instead of an editor",
         "Export the project: the .png is in the zip byte for byte",
-        "An older build opening the database is told to reload; a schema v1 database migrates to v2 without losing projects"
+        "An older build opening the database is told to reload; a schema v1 database migrates to v2 without losing projects",
+        "A .png in the project is listed in the Files view but not opened"
       ],
       "passes": false,
-      "notes": "Split from F-403 on 2026-11-23 (ADR 0053): v0.1 projects hold text files only and imports skip binary files; deferred past v0.1 (ADR 0030)."
+      "notes": "Split from F-403 on 2026-11-23 (ADR 0053): v0.1 projects hold text files only and imports skip binary files; deferred past v0.1 (ADR 0030). From F-605 (2026-11-28, ADR 0059, `scope-change`): step 4 is F-605's step 2, moved here because v0.1 projects hold text files only. Route a binary path in `openPath` to the notice, not to `readFile` and a file tab."
     }
   ]
 }

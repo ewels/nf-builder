@@ -28,8 +28,9 @@ import {
 import { useStore } from "zustand";
 import { createStore, type StoreApi } from "zustand/vanilla";
 import { getEngine, onEngineChange } from "../engine/engine-client";
+import { fileEditorOf, openTargetOf } from "../files/file-kinds";
 import { isReadOnly, READ_ONLY_REFUSAL } from "../read-only/read-only-store";
-import type { ViewMode } from "../views/view-mode";
+import { modesFor, type ViewMode } from "../views/view-mode";
 
 export interface WorkflowTab {
   /** `<path>#<workflow>`, the empty name for the entry workflow (the projection key prefix, ADR 0036); `file:<path>` for a file tab. */
@@ -136,6 +137,11 @@ export interface WorkspaceActions {
    * that workflow's canvas tab instead. F-210, F-605 and F-601 open files through this.
    */
   openFile(path: string): Promise<void>;
+  /**
+   * Opens a project file by its path (F-605, UX-52): a file with workflows in its default workflow's tab, any other
+   * text file in a file tab, and a path that isn't in the project nowhere. Preview links and the Files view use it.
+   */
+  openPath(path: string): Promise<"workflow" | "file" | "missing">;
   /** Closes a file tab (F-210); the previous tab takes over, else the next, else none. Workflow tabs stay open (F-307). */
   closeTab(id: string): Promise<void>;
   /** Asks the file's code editor to select and scroll to a range; the editor shows it when it is mounted (F-309). */
@@ -254,7 +260,7 @@ export function fileTabFor(path: string): WorkflowTab {
     workflow: null,
     label: fileLabel(path),
     title: path,
-    mode: "code",
+    mode: fileEditorOf(path) === "markdown" ? "preview" : "code",
     readOnly: readOnlyReason(path),
   };
 }
@@ -837,6 +843,26 @@ export function createCanvasStore(
         await openTab(workflow === null ? fileTabFor(path) : tabFor(workflow));
       },
 
+      async openPath(path) {
+        const { summary, session } = get();
+        if (summary === null) return "missing";
+        const target = openTargetOf(path, summary.workflows);
+        if (target.kind === "workflow") {
+          await openTab(tabFor(target.ref));
+          return "workflow";
+        }
+        let text: string | null;
+        try {
+          text = await engine().readFile(path);
+        } catch {
+          text = null;
+        }
+        // the project may have been replaced while the file was read
+        if (text === null || get().session !== session) return "missing";
+        await openTab(fileTabFor(path));
+        return "file";
+      },
+
       async closeTab(id) {
         const { tabs, activeTab } = get();
         const at = tabs.findIndex((t) => t.id === id);
@@ -873,7 +899,10 @@ export function createCanvasStore(
       setMode(tabId, mode) {
         set({
           tabs: get().tabs.map((t) =>
-            t.id === tabId && t.kind === "workflow" ? { ...t, mode } : t,
+            t.id === tabId &&
+            modesFor(t.kind, t.path).some((m) => m.mode === mode)
+              ? { ...t, mode }
+              : t,
           ),
         });
       },

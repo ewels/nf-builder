@@ -62,12 +62,15 @@ function fake(
     nodes?: string[] | (() => string[]);
     /** What `setLayout` answers with (default: the sidecar was written, status ok). */
     setLayout?: (write: LayoutWrite) => Promise<unknown>;
+    /** The files `readFile` answers with; any other path is null. */
+    files?: Record<string, string>;
   } = {},
 ) {
   const calls: string[] = [];
   const writes: LayoutWrite[] = [];
   const engine = {
     open: async () => summaryOf(workflows),
+    readFile: async (path: string) => options.files?.[path] ?? null,
     project: async (
       path: string,
       workflow: string | null,
@@ -1588,6 +1591,65 @@ describe("F-703 read-only canvas store", () => {
     const outcome = await store.getState().apply(command);
     expect(outcome.ok).toBe(true);
     expect(log).toEqual(["apply@1"]);
+  });
+
+  it("F-605 FI-30 UX-20: a Markdown file tab opens in Preview and another file tab in Code; neither loads a projection", async () => {
+    const wf = [ref("main.nf", null)];
+    const { engine, calls } = fake(wf);
+    const store = createCanvasStore(() => engine);
+    await store.getState().open(request);
+    const before = calls.length;
+    await store.getState().openFile("README.md");
+    await store.getState().openFile("conf/params.yml");
+    await store.getState().openFile("README.MD");
+    const modes = Object.fromEntries(
+      store.getState().tabs.map((t) => [t.path, t.mode]),
+    );
+    expect(modes).toEqual({
+      "main.nf": "graph",
+      "README.md": "preview",
+      "conf/params.yml": "code",
+      "README.MD": "code",
+    });
+    expect(calls).toHaveLength(before);
+    // the mode of a Markdown tab is kept for the session; a plain file tab has no mode to set
+    store.getState().setMode("file:README.md", "split");
+    store.getState().setMode("file:conf/params.yml", "split");
+    const tabs = store.getState().tabs;
+    expect(tabs.find((t) => t.path === "README.md")?.mode).toBe("split");
+    expect(tabs.find((t) => t.path === "conf/params.yml")?.mode).toBe("code");
+  });
+
+  it("F-605 UX-52: openPath opens a workflow file's default workflow tab, opens other files in a file tab, and reports a missing path without adding a tab", async () => {
+    const wf = [ref("main.nf", null), ref("lib.nf", "LIB")];
+    const store = createCanvasStore(
+      () =>
+        fake(wf, { files: { "README.md": "# Hi", "lib/x.nf": "def f() {}" } })
+          .engine,
+    );
+    await store.getState().open(request);
+    expect(await store.getState().openPath("lib.nf")).toBe("workflow");
+    expect(store.getState().activeTab).toBe("lib.nf#LIB");
+    expect(await store.getState().openPath("README.md")).toBe("file");
+    expect(store.getState().activeTab).toBe("file:README.md");
+    expect(
+      store.getState().tabs.find((t) => t.path === "README.md")?.mode,
+    ).toBe("preview");
+    expect(await store.getState().openPath("lib/x.nf")).toBe("file");
+    const count = store.getState().tabs.length;
+    expect(await store.getState().openPath("docs/usage.md")).toBe("missing");
+    expect(store.getState().tabs).toHaveLength(count);
+    expect(store.getState().activeTab).toBe("file:lib/x.nf");
+  });
+
+  it("F-605 AR-30: file tabs hold paths and modes, never text", async () => {
+    const wf = [ref("main.nf", null)];
+    const store = createCanvasStore(
+      () => fake(wf, { files: { "README.md": "SECRET-TEXT" } }).engine,
+    );
+    await store.getState().open(request);
+    await store.getState().openPath("README.md");
+    expect(JSON.stringify(store.getState().tabs)).not.toContain("SECRET-TEXT");
   });
 });
 
