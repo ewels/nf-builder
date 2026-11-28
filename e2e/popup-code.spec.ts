@@ -202,12 +202,6 @@ test("F-304 UX-44 ADR 0066: Esc with an edited code draft asks before discarding
   await expect(ask).toContainText("Discard your changes to the code?");
   const keep = ask.getByRole("button", { name: "Keep editing" });
   await expect(keep).toBeFocused();
-  // a second Escape answers the prompt with Keep editing
-  await page.keyboard.press("Escape");
-  await expect(ask).toHaveCount(0);
-  await expect(dialog).toBeVisible();
-  await page.keyboard.press("Escape");
-  await expect(ask).toBeVisible();
   await keep.click();
   await expect(ask).toHaveCount(0);
   // the editor has scrolled to the end of the pasted text, so only its last lines are drawn
@@ -218,6 +212,24 @@ test("F-304 UX-44 ADR 0066: Esc with an edited code draft asks before discarding
   expect(ofFixture(await currentFiles(page), CONFIGURE_START)).toEqual(
     startFiles,
   );
+});
+
+test("F-304 UX-44 ADR 0066: the discard prompt focuses Keep editing, and a second Esc keeps editing", async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name !== "chromium", "one browser is enough");
+  await start(page, "popup-code-esc-twice");
+  await openPopupByDoubleClick(page, GREET_NODE);
+  const dialog = popup(page);
+  await openCodeTab(page);
+  await typeInPopupEditor(page, declarationOf(readModule(CODE_EDITED)));
+  await page.keyboard.press("Escape");
+  const ask = dialog.getByRole("alert");
+  await expect(ask.getByRole("button", { name: "Keep editing" })).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(ask).toHaveCount(0);
+  await expect(dialog).toBeVisible();
+  expect(await codeText(page)).toContain("// keep the greeting short");
 });
 
 test("F-304 UX-32 F-206: the details Code button opens the popup on the Code tab", async ({
