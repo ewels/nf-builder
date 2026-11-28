@@ -16,6 +16,7 @@ export function connectEngine(
   const race = <P extends Promise<unknown>>(call: P): P =>
     (failed ? Promise.race([call, failed]) : call) as P;
   return {
+    exportProject: (options) => race(remote.exportProject(options)),
     palette: (version) => race(remote.palette(version)),
     templates: (version) => race(remote.templates(version)),
     open: (request, onProgress) =>

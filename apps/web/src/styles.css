@@ -632,6 +632,19 @@ html.is-resizing body * {
   color: #b42318;
 }
 
+.dialog-warning {
+  margin: var(--space-2) 0 0;
+  color: #93370d;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.dialog-warning-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
 .dialog-buttons {
   display: flex;
   justify-content: flex-end;

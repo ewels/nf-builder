@@ -171,7 +171,23 @@ export interface OpenedProject {
   readonly seq: number;
 }
 
+/** What to export (F-404): whether the layout sidecar goes in the zip (UX-62, ADR 0008). */
+export interface ExportOptions {
+  readonly layout: boolean;
+}
+
+/** The zip of the project at one revision (F-404). `files` counts the entries. */
+export interface ExportResult {
+  readonly ok: true;
+  readonly fileName: string;
+  readonly bytes: Uint8Array;
+  readonly files: number;
+  readonly revision: number;
+}
+
 export interface WorkspaceApi extends EngineApi {
+  /** A zip of every project file at the current revision, ordered after earlier changes (F-404, IO-20). */
+  exportProject(options: ExportOptions): Promise<ExportResult | EngineRefusal>;
   watch(listener: (status: WorkspaceStatus) => void): Promise<WorkspaceStatus>;
   /** Reads a zip in the worker and stages it; the page gets the summary only (F-403). `name` is the file's name, which a cloned `Blob` loses. */
   stageZip(file: Blob, name: string): Promise<ImportStageResult>;

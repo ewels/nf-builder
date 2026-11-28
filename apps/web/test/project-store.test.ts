@@ -42,6 +42,7 @@ function fixture(
   initial: WorkspaceStatus,
   storage?: () => StorageManager | undefined,
   readOnly?: () => boolean,
+  extra: Partial<ProjectStoreDeps> = {},
 ) {
   const calls: string[] = [];
   const shown: unknown[] = [];
@@ -101,6 +102,7 @@ function fixture(
     },
     storage: storage ?? (() => undefined),
     ...(readOnly === undefined ? {} : { readOnly }),
+    ...extra,
     languageVersion: "26.10",
     canvas: {
       show: async (summary) => {
@@ -503,5 +505,57 @@ describe("F-703 read-only project store", () => {
     expect(f.workspace.deleteProject).not.toHaveBeenCalled();
     await f.store.getState().open("p");
     expect(f.workspace.openProject).toHaveBeenCalledWith("p");
+  });
+});
+
+describe("F-404 project store export", () => {
+  const zip = {
+    ok: true,
+    fileName: "P.zip",
+    bytes: new Uint8Array([1]),
+    files: 1,
+    revision: 3,
+  };
+  it("F-404 UX-62: exportProject flushes code edits before asking the workspace, then downloads the file name and bytes it returns", async () => {
+    const order: string[] = [];
+    const f = fixture(ready(), undefined, undefined, {
+      flushEdits: async () => {
+        order.push("flush");
+      },
+      download: (bytes, name) => order.push(`download:${name}:${bytes.length}`),
+    });
+    (f.workspace as unknown as Record<string, unknown>).exportProject = vi.fn(
+      async (o: { layout: boolean }) => {
+        order.push(`export:${o.layout}`);
+        return zip;
+      },
+    );
+    await f.store.getState().exportProject(false);
+    expect(order).toEqual(["flush", "export:false", "download:P.zip:1"]);
+  });
+
+  it("F-404: a refused export throws its message and downloads nothing", async () => {
+    const download = vi.fn();
+    const f = fixture(ready(), undefined, undefined, {
+      flushEdits: async () => undefined,
+      download,
+    });
+    (f.workspace as unknown as Record<string, unknown>).exportProject = vi.fn(
+      async () => ({
+        ok: false,
+        code: "invalid",
+        message: "Nothing to export.",
+      }),
+    );
+    await expect(f.store.getState().exportProject(true)).rejects.toThrow(
+      "Nothing to export.",
+    );
+    expect(download).not.toHaveBeenCalled();
+  });
+
+  it("F-404 UX-62: the Export dialog kind is held in the store with the opener's focus target", () => {
+    const f = fixture(ready());
+    f.store.getState().showDialog({ kind: "export" });
+    expect(f.store.getState().dialog).toEqual({ kind: "export" });
   });
 });
