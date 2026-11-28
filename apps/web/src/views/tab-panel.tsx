@@ -2,8 +2,9 @@ import type { JSX, ReactNode } from "react";
 import { CanvasHost } from "../canvas/canvas-host";
 import { useWorkspace } from "../canvas/canvas-store";
 import { CodePane } from "../code/code-pane";
+import { useReadOnly } from "../read-only/read-only-store";
 import { workflowTabId } from "../shell/tab-strip";
-import type { ViewMode } from "./view-mode";
+import { shownMode, type ViewMode } from "./view-mode";
 import "./views.css";
 
 /**
@@ -30,25 +31,41 @@ export function PanelLayout({
   );
 }
 
+export const READ_ONLY_FILE_NOTE =
+  "This file opens in the code view on screens 1024 px or wider.";
+
+/** What a code-only file tab shows while read-only: the code view stays unmounted below 1024 px (F-703, UX-04). */
+export function ReadOnlyFileNote(): JSX.Element {
+  return <p className="read-only-file-note">{READ_ONLY_FILE_NOTE}</p>;
+}
+
 /** The tab panel: the active tab's graph, code or both, by its view mode. */
 export function TabPanel(): JSX.Element {
   const summary = useWorkspace((s) => s.summary);
   const session = useWorkspace((s) => s.session);
   const tab = useWorkspace((s) => s.tabs.find((t) => t.id === s.activeTab));
+  const readOnly = useReadOnly();
   if (summary === null || tab === undefined) return <CanvasHost />;
+  const mode = shownMode(tab.mode, readOnly);
   return (
     <div
       className="tab-panel"
       id="canvas-panel"
       role="tabpanel"
       aria-labelledby={workflowTabId(tab.id)}
-      data-view-mode={tab.mode}
+      data-view-mode={mode}
     >
-      <PanelLayout
-        mode={tab.mode}
-        canvas={<CanvasHost key="canvas" />}
-        code={<CodePane key={`code:${session}:${tab.path}`} path={tab.path} />}
-      />
+      {readOnly && tab.kind === "file" ? (
+        <ReadOnlyFileNote />
+      ) : (
+        <PanelLayout
+          mode={mode}
+          canvas={<CanvasHost key="canvas" />}
+          code={
+            <CodePane key={`code:${session}:${tab.path}`} path={tab.path} />
+          }
+        />
+      )}
     </div>
   );
 }

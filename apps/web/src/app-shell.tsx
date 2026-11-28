@@ -10,6 +10,8 @@ import { useProblems } from "./problems/problems-store";
 import { ProjectControls } from "./project/project-controls";
 import { saveLabel } from "./project/project-status";
 import { useProjects } from "./project/project-store";
+import { ReadOnlyNote } from "./read-only/read-only-note";
+import { useReadOnly } from "./read-only/read-only-store";
 import { AppHeader } from "./shell/app-header";
 import { ColumnSeparator } from "./shell/column-separator";
 import { LeftColumn } from "./shell/left-column";
@@ -61,6 +63,7 @@ function useProblemsStatus(hasProject: boolean): StatusProblems | null {
 export function AppShell(): JSX.Element {
   useViewModeKeys();
   useHistoryKeys();
+  const readOnly = useReadOnly();
   const left = useLayout((s) => s.left);
   const right = useLayout((s) => s.right);
   const leftWidth = left.collapsed ? COLLAPSED_WIDTH : left.width;
@@ -77,8 +80,9 @@ export function AppShell(): JSX.Element {
   const showDialog = useProjects((s) => s.showDialog);
   const rightWidth = right.collapsed ? COLLAPSED_WIDTH : right.width;
   return (
-    <div className="app-shell">
+    <div className={readOnly ? "app-shell is-read-only" : "app-shell"}>
       <AppHeader
+        readOnly={readOnly}
         languageVersions={languageVersions}
         projectControls={<ProjectControls />}
         saveLabel={saveLabel(projects.current !== null, projects.save)}
@@ -89,14 +93,19 @@ export function AppShell(): JSX.Element {
         storageNote={persisted === false}
         onTemplates={() => showDialog({ kind: "new", route: "template" })}
       />
+      <ReadOnlyNote />
       <div
-        className="app-columns"
-        style={{
-          gridTemplateColumns: `${leftWidth}px minmax(0, 1fr) ${rightWidth}px`,
-        }}
+        className={readOnly ? "app-columns is-read-only" : "app-columns"}
+        style={
+          readOnly
+            ? undefined
+            : {
+                gridTemplateColumns: `${leftWidth}px minmax(0, 1fr) ${rightWidth}px`,
+              }
+        }
       >
-        <LeftColumn languageVersion={languageVersions[0]} />
-        {left.collapsed ? null : (
+        {readOnly ? null : <LeftColumn languageVersion={languageVersions[0]} />}
+        {readOnly || left.collapsed ? null : (
           <ColumnSeparator side="left" label="Resize components and files" />
         )}
         <main className="column column-centre" aria-label="Canvas and editor">
@@ -104,10 +113,15 @@ export function AppShell(): JSX.Element {
           <TabPanel />
           <ProblemsPanel />
         </main>
-        {right.collapsed ? null : (
+        {readOnly || right.collapsed ? null : (
           <ColumnSeparator side="right" label="Resize details" />
         )}
-        <SideColumn side="right" label="Details" header={<DetailsHeader />}>
+        <SideColumn
+          side="right"
+          label="Details"
+          header={<DetailsHeader />}
+          collapsible={!readOnly}
+        >
           <DetailsPane />
         </SideColumn>
       </div>

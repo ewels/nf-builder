@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 import { AppShell, canvasCounts } from "../src/app-shell";
 import { COLUMN_LIMITS } from "../src/layout/layout-store";
 import { AppHeader } from "../src/shell/app-header";
+import { SideColumn } from "../src/shell/side-column";
 
 describe("@nf-builder/web", () => {
   it("ADR-0003: the entry module loads", () => {
@@ -194,5 +195,48 @@ describe("@nf-builder/web", () => {
     expect(column).toContain('<h2 class="column-title">Details</h2>');
     expect(column).toContain('<p class="muted">Nothing selected</p>');
     expect(column).not.toContain("Edit");
+  });
+});
+
+describe("F-703 shell", () => {
+  it("F-703 UX-04 UX-01: the read-only header shows the app name, project switcher and save state, with no Templates, Import, Export or version selector", () => {
+    const html = renderToStaticMarkup(
+      AppHeader({
+        languageVersions: ["26.10"],
+        projectControls: <span>switcher</span>,
+        saveLabel: "Saved",
+        saveFailed: null,
+        storageWarning: null,
+        storageNote: false,
+        onTemplates: () => undefined,
+        readOnly: true,
+      }),
+    );
+    expect(html).toContain("nf-builder");
+    expect(html).toContain("switcher");
+    expect(html).toContain("Saved");
+    for (const gone of ["Templates", "Import", "Export", "Nextflow version"])
+      expect(html).not.toContain(gone);
+    expect(html).not.toContain("header-actions");
+  });
+
+  it("F-703 UX-04 UX-02: a non-collapsible side column has no toggle and shows its body even when the stored layout is collapsed", () => {
+    const html = renderToStaticMarkup(
+      <SideColumn side="right" label="Details" header="H" collapsible={false}>
+        body
+      </SideColumn>,
+    );
+    expect(html).not.toContain("<button");
+    expect(html).not.toContain("hidden");
+    expect(html).toContain("body");
+    expect(html).toContain("H");
+  });
+
+  it("F-201 F-703: editable, the shell's markup is unchanged apart from an empty status container after the header", () => {
+    const html = renderToStaticMarkup(<AppShell />);
+    expect(html).toContain(
+      '</header><div class="read-only-note" role="status"></div><div class="app-columns"',
+    );
+    expect(html).toContain('<div class="app-shell">');
   });
 });

@@ -121,7 +121,9 @@ function fake(
   return { engine, calls };
 }
 
-function setup(options: Parameters<typeof fake>[0] = {}) {
+function setup(
+  options: Parameters<typeof fake>[0] & { readOnly?: () => boolean } = {},
+) {
   const { engine, calls } = fake(options);
   const workspace = createCanvasStore(() => engine);
   const queue: (() => void)[] = [];
@@ -129,6 +131,7 @@ function setup(options: Parameters<typeof fake>[0] = {}) {
     engine: () => engine,
     workspace,
     schedule: (fn) => queue.push(fn),
+    ...(options.readOnly === undefined ? {} : { readOnly: options.readOnly }),
   });
   /** Runs what was scheduled, then lets the pulls settle. */
   const settle = async () => {
@@ -338,7 +341,7 @@ describe("problems store", () => {
     kind: "params",
     range: wide.range,
   };
-  const shown = async (options: Parameters<typeof fake>[0]) => {
+  const shown = async (options: Parameters<typeof setup>[0]) => {
     const made = setup({ workflows: [wide, lib], ...options });
     await made.workspace.getState().open({ version: "26.10", files: [] });
     await made.settle();
@@ -392,5 +395,25 @@ describe("problems store", () => {
     };
     await problems.getState().goTo(elsewhere);
     expect(workspace.getState().activeTab).toBe("lib.nf#LIB");
+  });
+
+  it("F-703 UX-04 UX-27: goTo while read-only still selects and centres a node but never changes a tab's stored mode, and for code only selects the row", async () => {
+    let readOnly = true;
+    const { workspace, problems } = await shown({
+      nodes: [whole, numbers],
+      readOnly: () => readOnly,
+    });
+    await problems.getState().goTo(warning);
+    let s = workspace.getState();
+    expect(s.selected).toBe(numbers.id);
+    expect(s.focusNode).toMatchObject({ id: numbers.id });
+    await problems.getState().goTo(suggestion);
+    s = workspace.getState();
+    expect(s.tabs.find((t) => t.id === s.activeTab)?.mode).toBe("graph");
+    expect(s.reveal).toBeNull();
+    readOnly = false;
+    await problems.getState().goTo(suggestion);
+    s = workspace.getState();
+    expect(s.tabs.find((t) => t.id === s.activeTab)?.mode).toBe("split");
   });
 });

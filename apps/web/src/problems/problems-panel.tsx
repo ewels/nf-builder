@@ -13,6 +13,7 @@ import {
   useState,
 } from "react";
 import { focusTarget } from "../project/focus-target";
+import { useReadOnly } from "../read-only/read-only-store";
 import { PROBLEMS_PANEL_ID, statusLinkId } from "../shell/status-bar";
 import { focusAfterFix, nextRowFocus, type RowFocus } from "./problem-keys";
 import { ProblemRow } from "./problem-row";
@@ -50,6 +51,8 @@ interface PanelProps {
   onClose(): void;
   onGo(d: Diagnostic): void;
   onFix(d: Diagnostic): void;
+  /** Below 1024 px (F-703, UX-04): rows have no quick-fix button. */
+  readonly readOnly?: boolean;
 }
 
 /** The problems panel's layout (F-309, UX-03): two tabs, rows grouped by file, a quick-fix button on fixable rows. */
@@ -64,6 +67,7 @@ export function ProblemsPanelView({
   onClose,
   onGo,
   onFix,
+  readOnly = false,
 }: PanelProps): JSX.Element {
   const groups = sections[view];
   const rows = groups.flatMap((g) => g.diagnostics);
@@ -126,7 +130,7 @@ export function ProblemsPanelView({
     const next = nextRowFocus(
       rows.map((d, i) => ({
         key: keys[i] ?? "",
-        fixable: d.fix !== undefined,
+        fixable: d.fix !== undefined && !readOnly,
       })),
       key === undefined ? null : { key, part },
       event.key,
@@ -240,6 +244,7 @@ export function ProblemsPanelView({
                       tabIndexGo={here && stop?.part === "go" ? 0 : -1}
                       tabIndexFix={here && stop?.part === "fix" ? 0 : -1}
                       applying={applying === key}
+                      readOnly={readOnly}
                       onGo={() => {
                         fixed.current = null;
                         onGo(d);
@@ -278,6 +283,7 @@ export function ProblemsPanel(): JSX.Element | null {
   }, [open]);
   const goTo = useProblems((s) => s.goTo);
   const applyFix = useProblems((s) => s.applyFix);
+  const readOnly = useReadOnly();
   if (!open) return null;
   return (
     <ProblemsPanelView
@@ -298,6 +304,7 @@ export function ProblemsPanel(): JSX.Element | null {
       }}
       onGo={(d) => void goTo(d)}
       onFix={(d) => void applyFix(d)}
+      readOnly={readOnly}
     />
   );
 }

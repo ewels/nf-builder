@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   isEditableTarget,
+  shownMode,
   VIEW_MODES,
   type ViewModeKey,
   viewModeForKey,
@@ -62,5 +63,14 @@ describe("F-208 view modes", () => {
 
   it("F-208 UX-70: a target inside a dialog gives no mode", () => {
     expect(viewModeForKey(press({ target: target("dialog") }))).toBeNull();
+  });
+});
+
+describe("F-703 shown mode", () => {
+  it("F-703 UX-04 UX-27: read-only, a tab in Split or Code mode shows only its graph and keeps its mode", () => {
+    for (const mode of ["graph", "split", "code"] as const) {
+      expect(shownMode(mode, true)).toBe("graph");
+      expect(shownMode(mode, false)).toBe(mode);
+    }
   });
 });
