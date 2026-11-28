@@ -469,4 +469,31 @@ describe("F-310 carry", () => {
     });
     expect(undone.doc).toEqual(start);
   });
+
+  it("F-310 ADR-0064 F-207: Disconnect turning the producer's assignment into a bare call keeps its position, and undo restores every key", async () => {
+    const state = await fixtureState("f111-start-typed", {
+      "main.nf":
+        "include { B } from './b.nf'\ninclude { C } from './c.nf'\n\nworkflow {\n    c = C()\n    B(c)\n}\n",
+      "b.nf": "process B {\n    input:\n    val x\n\n    script:\n    'b'\n}\n",
+      "c.nf": "process C {\n    script:\n    'c'\n}\n",
+    });
+    const removed = new RemovedPositions();
+    const start = seedLayout(snapshot(state));
+    expect(start.nodes["main.nf#/c"]).toBeDefined();
+    const cut = step(
+      state,
+      start,
+      {
+        kind: "disconnect",
+        target: entry,
+        port: port(state, "B@1", "x"),
+      },
+      removed,
+    );
+    // `c = C()` is now the bare `C()`, so its key changes from `c` to `C@1`
+    expect(cut.doc.nodes["main.nf#/C@1"]).toEqual(start.nodes["main.nf#/c"]);
+    expect(cut.doc.nodes["main.nf#/B@1"]).toEqual(start.nodes["main.nf#/B@1"]);
+    const undone = stepPatches(state, cut.doc, cut.inverse, removed);
+    expect(undone.doc).toEqual(start);
+  });
 });

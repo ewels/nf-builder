@@ -89,4 +89,34 @@ describe("F-310 unread assignment cleanup", () => {
     });
     expect(main(r)).toContain("// the source\n    C()");
   });
+
+  it("F-310 ADR-0064: a read inside a closure keeps the assignment", async () => {
+    const state = await open([
+      "c = C()",
+      "B(c)",
+      "channel.of(1).map { v -> c }",
+    ]);
+    const r = accepted(state, {
+      kind: "deleteNodes",
+      target,
+      nodes: [node(state, "B@1").id],
+    });
+    expect(main(r)).toContain("c = C()");
+  });
+
+  it("F-310 ADR-0064: a reassigned name that is still read keeps both assignments", async () => {
+    const state = await open([
+      "c = C()",
+      "B(c)",
+      "c = channel.of(2)",
+      "channel.of(3).map { v -> c }",
+    ]);
+    const r = accepted(state, {
+      kind: "deleteNodes",
+      target,
+      nodes: [node(state, "B@1").id],
+    });
+    expect(main(r)).toContain("c = C()");
+    expect(main(r)).toContain("c = channel.of(2)");
+  });
 });

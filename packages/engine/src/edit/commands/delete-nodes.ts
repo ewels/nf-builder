@@ -47,11 +47,8 @@ export function deleteNodes(
       );
   const ids = new Set(nodes.map((n) => n.id));
   // top-level statements that go; a nested node inside one of them goes with it
-  const gone = new Set<number>();
-  for (const node of nodes) {
-    const s = topLevelIndex(def, node);
-    if (s >= 0) gone.add(s);
-  }
+  const topIndex = new Map(nodes.map((n) => [n.id, topLevelIndex(def, n)]));
+  const gone = new Set([...topIndex.values()].filter((s) => s >= 0));
   const removed: AstNode[] = [];
   const cleared = new Set<string>();
   let updated = def;
@@ -65,7 +62,7 @@ export function deleteNodes(
     return true;
   };
   for (const node of nodes) {
-    if (topLevelIndex(def, node) >= 0) {
+    if ((topIndex.get(node.id) as number) >= 0) {
       for (const edge of projection.edges) {
         if (edge.from.node !== node.id || !edge.direct || ids.has(edge.to.node))
           continue;
