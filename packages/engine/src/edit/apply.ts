@@ -31,6 +31,7 @@ import { createFile } from "./commands/create-file";
 import { deleteNode } from "./commands/delete-node";
 import { renameDeclaration } from "./commands/rename";
 import { replaceFileText } from "./commands/replace-file-text";
+import { updateDeclaration } from "./commands/update-declaration";
 import { checkResult } from "./guards";
 import { applyPatches } from "./patches";
 import { EditRefusal } from "./refusal";
@@ -93,6 +94,8 @@ const build = (state: EditState, command: EditCommand): TextPatch[] => {
       return removeConfigPlugin(state, command);
     case "createFile":
       return createFile(state, command);
+    case "updateDeclaration":
+      return updateDeclaration(state, command);
     default:
       throw new EditRefusal(
         "invalid",
@@ -118,6 +121,7 @@ export function applyCommand(
         message: error.message,
         path: error.path,
         problems: error.problems,
+        ...(error.fields ? { fields: error.fields } : {}),
       };
     return {
       ok: false,

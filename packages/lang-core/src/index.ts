@@ -103,6 +103,7 @@ export {
   type SetConfigOption,
   type TextEdit,
   type TextPatch,
+  type UpdateDeclaration,
   type WorkflowTarget,
 } from "./edit.ts";
 export type {

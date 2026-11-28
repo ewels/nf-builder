@@ -63,6 +63,7 @@ export type {
   TextEdit,
   TextPatch,
   TypeExpr,
+  UpdateDeclaration,
   WorkflowRef,
   WorkflowTarget,
 } from "@nf-builder/lang-core";

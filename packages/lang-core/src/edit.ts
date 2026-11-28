@@ -1,6 +1,7 @@
 // Edit commands (AR-20, AR-21, F-111): plain, clone-safe data. The engine applies them to a project model and returns
 // text patches plus their inverse (AR-23). Nothing here depends on a language pack version.
 import type { ParseProblem } from "./ast/parse-result.ts";
+import type { DeclarationForm, FieldProblem } from "./declaration-form.ts";
 import type { PortRef } from "./projection.ts";
 
 /** A workflow to edit: `workflow` is its name, or null for the unnamed entry workflow. */
@@ -59,6 +60,18 @@ export interface RenameDeclaration {
   readonly path: string;
   readonly name: string;
   readonly newName: string;
+}
+
+/**
+ * Replace a declaration's parts with the Configure form's rows (F-303, UX-44). Rows whose fields are unchanged keep their
+ * text and comments; the form's `name` is not applied (a rename is `RenameDeclaration`, in the same group).
+ */
+export interface UpdateDeclaration {
+  readonly kind: "updateDeclaration";
+  readonly path: string;
+  /** The declaration as it is now named. */
+  readonly name: string;
+  readonly form: DeclarationForm;
 }
 
 /** Replace a file's whole text (the Code tab). */
@@ -174,7 +187,8 @@ export type EditCommand =
   | AddConfigPlugin
   | RemoveConfigPlugin
   | CreateFile
-  | CreateWorkflow;
+  | CreateWorkflow
+  | UpdateDeclaration;
 
 export const EDIT_COMMAND_KINDS = [
   "createProcess",
@@ -191,6 +205,7 @@ export const EDIT_COMMAND_KINDS = [
   "removeConfigPlugin",
   "createFile",
   "createWorkflow",
+  "updateDeclaration",
 ] as const satisfies readonly EditCommand["kind"][];
 
 /** Replace `text.slice(start, end)`: UTF-16 offsets into the file as it was before the patch. */
@@ -240,6 +255,8 @@ export type CommandResult =
       readonly path: string | null;
       /** The new parse problems, for `does-not-parse` and `mixed-definitions`. */
       readonly problems: readonly ParseProblem[];
+      /** The form fields a refused `UpdateDeclaration` is about, for the popup to mark. */
+      readonly fields?: readonly FieldProblem[];
     };
 
 /** Version-specific text a pack provides for new files (LA-02). */
