@@ -69,3 +69,4 @@ Process: [0001](0001-record-decisions-as-adrs.md). Template: [template.md](templ
 | [0063](0063-legacy-import-summary.md) | Show the modelled share and suggestion count in the workflow summary, and group registry module files in the problems panel | Accepted (agent) |
 | [0064](0064-connect-ports.md) | Connect ports by drag with a worker dry run of targets, draw mismatches red from diagnostics, disconnect with Delete, and check tuple arity in the pack | Accepted (agent) |
 | [0065](0065-registry-plugins.md) | Add plugins from the palette with F-601's command, read plugin specs from the snapshot in the document, and merge their scopes in the worker | Accepted (agent) |
+| [0066](0066-edit-popup.md) | Edit typed processes in a popup form read in the worker, applied by UpdateDeclaration, with renames moving the module folder | Accepted (agent) |

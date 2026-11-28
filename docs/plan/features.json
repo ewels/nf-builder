@@ -778,8 +778,8 @@
         "Deprecated directives are not offered",
         "There is no control for changing kind"
       ],
-      "passes": false,
-      "notes": "From F-206: enable the details header's Edit button. React Flow's Enter selects a focused node; settle it against Enter opening the popup. From F-209: the popup's Apply is one command or one group, so one undo step. From F-207: repeat F-207 step 3 (a rename keeps the position) through the popup once it exists. From F-703: don't open the popup on double-click or Enter in read-only. From F-301: definitions added from the palette are named `NEW_PROCESS` or `NEW_WORKFLOW` (then `_2`, …) by `EngineApi.freshName`, with no doc comment and, for a workflow, an empty body; Configure is where they are renamed (ADR 0060)."
+      "passes": true,
+      "notes": "From F-206: enable the details header's Edit button. React Flow's Enter selects a focused node; settle it against Enter opening the popup. From F-209: the popup's Apply is one command or one group, so one undo step. From F-207: repeat F-207 step 3 (a rename keeps the position) through the popup once it exists. From F-703: don't open the popup on double-click or Enter in read-only. From F-301: definitions added from the palette are named `NEW_PROCESS` or `NEW_WORKFLOW` (then `_2`, …) by `EngineApi.freshName`, with no doc comment and, for a workflow, an empty body; Configure is where they are renamed (ADR 0060). Verified 2026-11-28 (PR #65, ADR 0066): step 1 by \"F-303 step 1\" in `e2e/popup.spec.ts` (double-click GREET: the dialog \"Edit process GREET\" opens with Configure selected and Code `aria-disabled`; Escape closes it and returns focus to the node) and `packages/engine/test/form/popup-target.test.ts`. Step 2 by \"F-303 step 2\" (from oracle case `f303-configure-start`, add the nullable input `punctuation`, rename the output to `message`, add `cpus` from the list with its default `1`, Apply: one undo step labelled \"Edit process GREET\", the stored files equal `f303-configure-typed` byte for byte, the node's ports are `name`, `punctuation` and `message`, and one Ctrl+Z restores the start bytes), `packages/engine/test/edit/update-declaration.test.ts`, `call-sites.test.ts` and `oracle-goldens.test.ts` (the scripted edits produce `f303-configure-typed`, `f303-configure-all`, `f303-rename-moved`, `f303-outputs-renamed` and `f303-outputs-legacy-reads` byte for byte); CI's `oracle` job lints and stub-runs every `f303-*` case, including `f303-directive-defaults` (`cpus 1`, `memory 1.GB`, `time 1.h`, `debug true`). Step 3 by \"F-303 step 3\" (searching storeDir shows \"No directives match.\" and the list equals the catalogue's non-deprecated directives) and `packages/engine/test/form/read-process.test.ts`. Step 4 by \"F-303 step 4\" (no combobox, listbox or radio group but the directive picker, and no kind label) and `apps/web/test/configure-form.test.tsx`. Also covered in `e2e/popup.spec.ts`: Enter on the selected node and the Edit button open the popup, and Enter on an unselected node only selects it (F-206); a rename keeps the node's position and selection and moves its module folder (F-207 step 3); Cancel changes nothing; a refused value keeps the popup open and marks the field; in read-only, double-click and Enter don't open it and narrowing closes it (F-703); no CSP violation or console error. Unit tests: `packages/engine/test/edit/move-file.test.ts`, `packages/engine/test/form/form-diff.test.ts`, `packages/engine/test/service/declaration-form.test.ts`, `packages/engine/test/history/labels.test.ts`, `apps/web/test/popup-store.test.ts`, `edit-declaration.test.ts`, `directive-picker.test.tsx`, `node-keys.test.ts` and `details-pane.test.tsx`; the edit harness runs `createProcess` before `updateDeclaration`, so the property and corpus tests exercise it. F-206's e2e test now expects Edit enabled and Code disabled, as ADR 0049 anticipated; the `details-process-trim` baseline is re-approved from CI if it moves."
     },
     {
       "id": "F-304",
@@ -798,7 +798,7 @@
         "Format produces the same text as the oracle formatter for that declaration"
       ],
       "passes": false,
-      "notes": "From F-206: enable the details header's Code button.From F-208: reuse `apps/web/src/code/monaco.ts`, `nextflow-language.ts` and `markers.ts`. Refusal markers use the owner `nf-builder-refusal`; use another owner for the file's own diagnostics. From F-209: the popup's Monaco keeps its own undo and must register its flush with the canvas store (`registerFlush`), as the Code view does. From F-703: don't open the popup on double-click or Enter in read-only. From F-605: `nextflow-language.ts` is gone; register languages with `registerLanguage(id)` in `apps/web/src/code/languages.ts`, and `.code-editor-host` carries `data-language` for tests."
+      "notes": "From F-206: enable the details header's Code button.From F-208: reuse `apps/web/src/code/monaco.ts`, `nextflow-language.ts` and `markers.ts`. Refusal markers use the owner `nf-builder-refusal`; use another owner for the file's own diagnostics. From F-209: the popup's Monaco keeps its own undo and must register its flush with the canvas store (`registerFlush`), as the Code view does. From F-703: don't open the popup on double-click or Enter in read-only. From F-605: `nextflow-language.ts` is gone; register languages with `registerLanguage(id)` in `apps/web/src/code/languages.ts`, and `.code-editor-host` carries `data-language` for tests. From F-303 (ADR 0066): the popup is `apps/web/src/popup/edit-popup.tsx` with its draft in `popupStore` (AR-30); make the Code tab edit the same draft, drop its `aria-disabled`, and enable the details header's Code button. Apply goes through `canvasStore.editDeclaration`, which applies `UpdateDeclaration` (plus `RenameDeclaration` and `MoveFile` on a rename) as one group through `applyGroup`; a Code edit could apply `ReplaceFileText` for the declaration's range through the same path. Register the popup's Monaco flush with `registerFlush`. Forms read before the latest revision are refused as stale."
     },
     {
       "id": "F-305",
@@ -818,7 +818,7 @@
         "Operator closures are editable in a small Monaco field"
       ],
       "passes": false,
-      "notes": "From F-111: takes, emits, params and outputs have no edit commands yet. From F-703: don't open the popup on double-click or Enter in read-only."
+      "notes": "From F-111: takes, emits, params and outputs have no edit commands yet. From F-703: don't open the popup on double-click or Enter in read-only. From F-303 (ADR 0066): extend the `DeclarationForm` union (`packages/lang-core/src/declaration-form.ts`), `popupTarget` (`packages/engine/src/form/popup-target.ts`, which now gives the reason shown on the disabled Edit button), `EngineApi.declarationForm` and `UpdateDeclaration`'s apply. Reuse the row `origin` scheme so untouched rows keep their text and comments, the `fields` refusal for row problems, and the call-site rules (reorder, drop, append `null`, refuse pipe-fed calls)."
     },
     {
       "id": "F-306",
@@ -838,7 +838,7 @@
         "No silent migration happens on any edit"
       ],
       "passes": false,
-      "notes": "From F-703: don't open the popup on double-click or Enter in read-only."
+      "notes": "From F-703: don't open the popup on double-click or Enter in read-only. From F-303 (ADR 0066): extend the `DeclarationForm` union (`packages/lang-core/src/declaration-form.ts`), `popupTarget` (`packages/engine/src/form/popup-target.ts`, which now gives the reason shown on the disabled Edit button), `EngineApi.declarationForm` and `UpdateDeclaration`'s apply. Reuse the row `origin` scheme so untouched rows keep their text and comments, the `fields` refusal for row problems, and the call-site rules (reorder, drop, append `null`, refuse pipe-fed calls)."
     },
     {
       "id": "F-307",
@@ -857,7 +857,7 @@
         "Breadcrumb back returns to main.nf"
       ],
       "passes": false,
-      "notes": "From F-111: takes, emits, params and outputs have no edit commands yet. From F-205: closing tabs, the breadcrumb and double-click to open a workflow go through canvasStore.openWorkflow. From F-703: opening a workflow tab is allowed in read-only; add the breadcrumb to `READ_ONLY_ALLOWED`; take and emit editing stays hidden. From F-210: `closeTab` exists for file tabs (Delete, `aria-keyshortcuts`, an `aria-hidden` pointer-only ×); extend it to workflow tabs. From F-605: Markdown file tabs keep their own mode (Preview, Split or Code) per tab; closing them reuses F-210's `closeTab`."
+      "notes": "From F-111: takes, emits, params and outputs have no edit commands yet. From F-205: closing tabs, the breadcrumb and double-click to open a workflow go through canvasStore.openWorkflow. From F-703: opening a workflow tab is allowed in read-only; add the breadcrumb to `READ_ONLY_ALLOWED`; take and emit editing stays hidden. From F-210: `closeTab` exists for file tabs (Delete, `aria-keyshortcuts`, an `aria-hidden` pointer-only ×); extend it to workflow tabs. From F-605: Markdown file tabs keep their own mode (Preview, Split or Code) per tab; closing them reuses F-210's `closeTab`. From F-303 (ADR 0066): `popupTarget` returns `{kind: \"workflow\"}` for a workflow call node and the popup does nothing for it; wire double-click and Enter on the selected node to `canvasStore.openWorkflow` there."
     },
     {
       "id": "F-308",
@@ -942,7 +942,7 @@
         "Docs oracle: nf-docs JSON for the result contains every description"
       ],
       "passes": false,
-      "notes": "From F-203: templates produce no LA-54 suggestion; the `lang-2610` template test checks doc comments until the engine does.From F-206: the details description is the doc comment's text before its first tag (`docSummary`); replace it with the comment parser and add per-port descriptions. From F-703: don't open the popup on double-click or Enter in read-only."
+      "notes": "From F-203: templates produce no LA-54 suggestion; the `lang-2610` template test checks doc comments until the engine does.From F-206: the details description is the doc comment's text before its first tag (`docSummary`); replace it with the comment parser and add per-port descriptions. From F-703: don't open the popup on double-click or Enter in read-only. From F-303 (ADR 0066): the Configure form edits the doc comment's text before its first tag (`description`) and keeps the tags verbatim (`docTags`); new comments are written `/**\\n * text\\n */`. Input renames in the popup leave `@param` tags stale until this feature keeps them in step; add per-port description fields to `configure-form.tsx`."
     },
     {
       "id": "F-312",
