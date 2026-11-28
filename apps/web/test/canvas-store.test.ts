@@ -2354,3 +2354,182 @@ describe("F-505 addPlugin", () => {
     expect(undos).toEqual([]);
   });
 });
+
+describe("F-307 workflow tabs", () => {
+  const main = ref("main.nf", null);
+  const align = ref("lib.nf", "ALIGN");
+  const sort = ref("sort.nf", "SORT");
+  const orphan = ref("orphan.nf", "ORPHAN");
+  const all = [main, align, sort, orphan];
+  const crumb = (w: WorkflowRef) => ({
+    path: w.path,
+    workflow: w.name,
+    label: w.name ?? w.path,
+  });
+
+  /** A fake engine whose `calleeWorkflow` maps a node id to a workflow and whose `callPath` answers from `trails`. */
+  const navigating = (
+    workflows: WorkflowRef[],
+    callees: Record<string, WorkflowRef | string>,
+    trails: Record<string, WorkflowRef[]> = {},
+  ) =>
+    ({
+      ...fake(workflows).engine,
+      calleeWorkflow: async (request: { node: string }) => {
+        const found = callees[request.node];
+        if (found === undefined || typeof found === "string")
+          return {
+            ok: false,
+            revision: 1,
+            code: "not-found",
+            message: found ?? "No such node.",
+            path: null,
+            problems: [],
+          };
+        return found;
+      },
+      callPath: async (r: { path: string; workflow: string | null }) => ({
+        revision: 1,
+        trail: trails[`${r.path}#${r.workflow ?? ""}`] ?? [],
+      }),
+    }) as unknown as EngineApi;
+  const trailOf = (store: ReturnType<typeof createCanvasStore>, id: string) =>
+    store.getState().tabs.find((t) => t.id === id)?.trail;
+
+  it("F-307 UX-50: openCallee opens the definition's tab once with the caller's trail, and focuses it the second time", async () => {
+    const store = createCanvasStore(() =>
+      navigating(all, { a: align, s: sort }),
+    );
+    await store.getState().open(request);
+    expect(trailOf(store, "main.nf#")).toEqual([]);
+    expect(await store.getState().openCallee("a")).toEqual({
+      ok: true,
+      tab: "lib.nf#ALIGN",
+    });
+    expect(store.getState().activeTab).toBe("lib.nf#ALIGN");
+    expect(trailOf(store, "lib.nf#ALIGN")).toEqual([crumb(main)]);
+    await store.getState().openCallee("s");
+    expect(trailOf(store, "sort.nf#SORT")).toEqual([crumb(main), crumb(align)]);
+    await store.getState().selectTab("main.nf#");
+    await store.getState().openCallee("a");
+    expect(store.getState().tabs.map((t) => t.id)).toEqual([
+      "main.nf#",
+      "lib.nf#ALIGN",
+      "sort.nf#SORT",
+    ]);
+    expect(store.getState().activeTab).toBe("lib.nf#ALIGN");
+  });
+
+  it("F-307 UX-50: openWorkflow and openPath set the trail from callPath; an unreachable workflow gets an empty trail", async () => {
+    const store = createCanvasStore(() =>
+      navigating(
+        all,
+        {},
+        {
+          "lib.nf#ALIGN": [main],
+          "sort.nf#SORT": [main, align],
+        },
+      ),
+    );
+    await store.getState().open(request);
+    await store.getState().openWorkflow("sort.nf", "SORT");
+    expect(trailOf(store, "sort.nf#SORT")).toEqual([crumb(main), crumb(align)]);
+    await store.getState().openPath("lib.nf");
+    expect(trailOf(store, "lib.nf#ALIGN")).toEqual([crumb(main)]);
+    await store.getState().openWorkflow("orphan.nf", "ORPHAN");
+    expect(trailOf(store, "orphan.nf#ORPHAN")).toEqual([]);
+    // an open tab keeps its own trail when it is opened again
+    await store.getState().openWorkflow("sort.nf", "SORT");
+    expect(trailOf(store, "sort.nf#SORT")).toEqual([crumb(main), crumb(align)]);
+    // an engine without the call (or one that throws) means no trail, not a failure
+    const plain = createCanvasStore(() => fake(all).engine);
+    await plain.getState().open(request);
+    await plain.getState().openWorkflow("lib.nf", "ALIGN");
+    expect(trailOf(plain, "lib.nf#ALIGN")).toEqual([]);
+  });
+
+  it("F-307 UX-50: a refused openCallee sets navigationNotice and opens nothing; the next load clears it", async () => {
+    const store = createCanvasStore(() =>
+      navigating(all, { p: "P is a process." }),
+    );
+    await store.getState().open(request);
+    expect(await store.getState().openCallee("p")).toEqual({
+      ok: false,
+      message: "P is a process.",
+    });
+    expect(store.getState().navigationNotice).toBe("P is a process.");
+    expect(store.getState().tabs.map((t) => t.id)).toEqual(["main.nf#"]);
+    await store.getState().selectTab("main.nf#");
+    expect(store.getState().navigationNotice).toBeNull();
+  });
+
+  it("F-307 F-209: a rename keeps the tab's trail and renames crumbs; a deleted ancestor's crumb is dropped", async () => {
+    const old = ref("lib.nf", "OLD");
+    const renamed = ref("lib.nf", "NEW");
+    const gone = ref("gone.nf", "GONE");
+    const child = ref("child.nf", "CHILD");
+    const store = createCanvasStore(() =>
+      navigating([main, old, gone, child], { o: old, g: gone, c: child }),
+    );
+    await store.getState().open(request);
+    await store.getState().openCallee("o");
+    await store.getState().openCallee("c");
+    await store.getState().selectTab("main.nf#");
+    await store.getState().openCallee("g");
+    await store.getState().openCallee("c");
+    await store.getState().changed({
+      revision: 2,
+      files: [],
+      remodelled: [],
+      history: EMPTY_HISTORY,
+      workflows: [main, renamed, child],
+    });
+    expect(store.getState().tabs.map((t) => t.id)).toEqual([
+      "main.nf#",
+      "lib.nf#NEW",
+      "child.nf#CHILD",
+      "gone.nf#GONE",
+    ]);
+    expect(trailOf(store, "lib.nf#NEW")).toEqual([crumb(main)]);
+    // CHILD was last opened from GONE, which no longer exists
+    expect(trailOf(store, "child.nf#CHILD")).toEqual([crumb(main)]);
+  });
+
+  it("F-307 F-210 ADR-0055: closeTab closes a named workflow tab (previous, else next) and refuses the default workflow's tab", async () => {
+    const store = createCanvasStore(() =>
+      navigating(all, { a: align, s: sort }),
+    );
+    await store.getState().open(request);
+    await store.getState().openCallee("a");
+    await store.getState().openCallee("s");
+    await store.getState().closeTab("main.nf#");
+    expect(store.getState().tabs).toHaveLength(3);
+    await store.getState().closeTab("sort.nf#SORT");
+    expect(store.getState().tabs.map((t) => t.id)).toEqual([
+      "main.nf#",
+      "lib.nf#ALIGN",
+    ]);
+    expect(store.getState().activeTab).toBe("lib.nf#ALIGN");
+    await store.getState().selectTab("main.nf#");
+    await store.getState().closeTab("lib.nf#ALIGN");
+    expect(store.getState().tabs.map((t) => t.id)).toEqual(["main.nf#"]);
+    expect(store.getState().activeTab).toBe("main.nf#");
+  });
+
+  it("F-307 UX-04 ADR-0056: openCallee works read-only; apply of addTake is refused read-only", async () => {
+    const store = createCanvasStore(
+      () => navigating(all, { a: align }),
+      () => true,
+    );
+    await store.getState().open(request);
+    expect(await store.getState().openCallee("a")).toMatchObject({ ok: true });
+    expect(store.getState().activeTab).toBe("lib.nf#ALIGN");
+    const outcome = await store.getState().apply({
+      kind: "addTake",
+      target: { path: "lib.nf", workflow: "ALIGN" },
+      name: "x",
+      type: null,
+    });
+    expect(outcome).toMatchObject({ ok: false, code: "read-only" });
+  });
+});
