@@ -168,4 +168,20 @@ describe("F-304 declaration text", () => {
     const twice = formatDeclarationText(parser, prefix, once.text);
     expect(twice.ok && twice.text).toBe(once.text);
   });
+
+  it("F-304 UX-44: a legacy process in a file without the types flag parses as legacy, with no flag put in front", async () => {
+    const legacy =
+      "process OLD {\n    input:\n    val x\n\n    script:\n    'true'\n}";
+    const state = await createEditState(version, [
+      { path: "main.nf", text: `${legacy}\n` },
+    ]);
+    const file = state.model.file("main.nf")?.source as ScriptSourceFile;
+    const declaration = state.model.file("main.nf")?.declarations.get("OLD")
+      ?.declaration as never;
+    const prefix = flagPrefix(file, declaration);
+    expect(prefix).toBe("");
+    const parsed = parseDeclarationText(state.parser, prefix, legacy);
+    expect(parsed.ok).toBe(true);
+    if (parsed.ok) expect(parsed.process.typed).toBe(false);
+  });
 });

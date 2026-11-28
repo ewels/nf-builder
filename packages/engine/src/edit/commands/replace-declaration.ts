@@ -77,6 +77,12 @@ export function replaceDeclaration(
       problems,
     );
   }
+  if (!parsed.process.typed)
+    throw new EditRefusal(
+      "invalid",
+      "The Code tab can't change what kind of declaration this is. Nothing was changed.",
+      path,
+    );
   if (parsed.process.name.name !== name)
     throw new EditRefusal(
       "invalid",

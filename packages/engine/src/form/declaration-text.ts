@@ -2,6 +2,7 @@
 // the file's feature flags, so they are put in front of the text and the problem lines shifted back.
 import type {
   Declaration,
+  LegacyProcess,
   ParseProblem,
   ScriptSourceFile,
   SourceParser,
@@ -33,7 +34,7 @@ export function flagPrefix(file: ScriptSourceFile, d: Declaration): string {
 export type ParsedDeclaration =
   | {
       readonly ok: true;
-      readonly process: TypedProcess;
+      readonly process: TypedProcess | LegacyProcess;
       readonly file: ScriptSourceFile;
     }
   | {
@@ -69,7 +70,7 @@ function refusal(message: string): Refused {
 }
 
 /**
- * Parses `text` after `prefix` and requires exactly one typed process. Problems come back with lines and columns relative to
+ * Parses `text` after `prefix` and requires exactly one process, of the style the file's flags give it (a legacy process parses as legacy when the file has no types flag). Problems come back with lines and columns relative to
  * `text`; one that falls in the prefix goes to the first line.
  */
 export function parseDeclarationText(
@@ -105,7 +106,7 @@ export function parseDeclarationText(
   const only = items[0];
   if (items.length !== 1 || !only) return refusal(ONE_ONLY);
   if (only.kind === "Unparsed") return refusal("The code doesn't parse.");
-  if (only.kind !== "Process" || !only.typed) return refusal(WRONG_KIND);
+  if (only.kind !== "Process") return refusal(WRONG_KIND);
   return { ok: true, process: only, file };
 }
 

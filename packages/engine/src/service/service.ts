@@ -872,6 +872,11 @@ export function createEngineService(
           request.text,
         );
         if (!parsed.ok) return unparsed(parsed.message, parsed.problems);
+        if (!parsed.process.typed)
+          return unparsed(
+            "The Code tab can't change what kind of declaration this is.",
+            [],
+          );
         return {
           revision,
           name: parsed.process.name.name,
