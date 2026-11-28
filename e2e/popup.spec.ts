@@ -58,7 +58,12 @@ test("F-303 step 1 UX-40: double-clicking a process opens the popup on Configure
     "aria-selected",
     "true",
   );
+  // F-304 enables the Code tab (F-303 had it aria-disabled until then)
   await expect(dialog.getByRole("tab", { name: "Code" })).toHaveAttribute(
+    "aria-selected",
+    "false",
+  );
+  await expect(dialog.getByRole("tab", { name: "Code" })).not.toHaveAttribute(
     "aria-disabled",
     "true",
   );
