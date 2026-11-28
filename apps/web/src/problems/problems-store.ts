@@ -174,10 +174,8 @@ export function createProblemsStore(options: {
       follow(workspace.getState());
     });
 
-    let scopesKey = options.pluginsKey?.getState().pluginsKey ?? "";
-    options.pluginsKey?.subscribe(({ pluginsKey }) => {
-      if (pluginsKey === scopesKey) return;
-      scopesKey = pluginsKey;
+    options.pluginsKey?.subscribe(({ pluginsKey }, prev) => {
+      if (pluginsKey === prev.pluginsKey) return;
       if (workspace.getState().summary === null) return;
       if (get().status === "ready") set({ status: "refreshing" });
       schedule(() => void pull());

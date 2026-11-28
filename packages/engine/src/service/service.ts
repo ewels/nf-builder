@@ -801,7 +801,7 @@ export function createEngineService(
           pack.loadCatalogue(),
           pack.loadConfigRules(),
         ]);
-        const schema = configSchema(version, catalogue.config, rules, "");
+        const schema = configSchema(version, catalogue.config, rules);
         schemas.set(version, schema);
         return schema;
       }),

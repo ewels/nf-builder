@@ -62,9 +62,5 @@ export interface RegistryClient {
    * A plugin's spec (plugins/<id>/<version>.json) from the snapshot, never live (ADR 0050), read once per id and
    * version. Rejects "unavailable" when the snapshot has no file for that release.
    */
-  plugin(
-    id: string,
-    version: string,
-    options?: RegistryReadOptions,
-  ): Promise<SnapshotPluginFile>;
+  plugin(id: string, version: string): Promise<SnapshotPluginFile>;
 }

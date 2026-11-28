@@ -175,7 +175,6 @@ export function createSnapshotClient(
   async function readPlugin(
     id: string,
     version: string,
-    refresh: boolean,
   ): Promise<SnapshotPluginFile> {
     const pluginUrl = new URL(
       `plugins/${encodeURIComponent(id)}/${encodeURIComponent(version)}.json`,
@@ -184,7 +183,7 @@ export function createSnapshotClient(
     const response = await request(
       doFetch,
       pluginUrl,
-      { credentials: "omit", cache: refresh ? "no-cache" : "default" },
+      { credentials: "omit", cache: "default" },
       "Registry plugin spec",
     );
     if (response.status === 404 || response.status === 410) {
@@ -206,21 +205,18 @@ export function createSnapshotClient(
   return {
     source: "snapshot",
     snapshot,
-    plugin(id, version, opts) {
+    plugin(id, version) {
       const key = `${id}@${version}`;
-      const held = heldPlugins.get(key);
-      if (held && !opts?.refresh) return held;
-      const next = readPlugin(id, version, opts?.refresh === true);
-      if (!opts?.refresh) heldPlugins.set(key, next);
-      next.then(
-        () => {
-          if (opts?.refresh) heldPlugins.set(key, next);
-        },
-        () => {
+      let held = heldPlugins.get(key);
+      if (!held) {
+        const next = readPlugin(id, version);
+        held = next;
+        heldPlugins.set(key, next);
+        next.catch(() => {
           if (heldPlugins.get(key) === next) heldPlugins.delete(key);
-        },
-      );
-      return next;
+        });
+      }
+      return held;
     },
     async ports(name, opts) {
       return (await loadPorts(opts)).modules[name] ?? null;

@@ -230,10 +230,8 @@ export function createConfigStore(options: {
       follow(workspace.getState());
     });
     // the plugins' scopes changed what the rules and the schema know: the same revision is viewed again
-    let scopesKey = options.pluginsKey?.getState().pluginsKey ?? "";
-    options.pluginsKey?.subscribe(({ pluginsKey }) => {
-      if (pluginsKey === scopesKey) return;
-      scopesKey = pluginsKey;
+    options.pluginsKey?.subscribe(({ pluginsKey }, prev) => {
+      if (pluginsKey === prev.pluginsKey) return;
       const tabs = get().tabs;
       set({
         schema: null,

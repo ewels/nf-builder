@@ -44,7 +44,12 @@ export function pluginPaletteGroup(
 ): PluginPaletteGroup {
   const items = new Map<
     string,
-    { item: Omit<PluginPaletteItem, "summary">; signatures: string[] }
+    {
+      kind: PluginItemKind;
+      name: string;
+      description: string;
+      signatures: string[];
+    }
   >();
   for (const d of spec.definitions) {
     if (d.type === "ConfigScope") continue;
@@ -52,35 +57,23 @@ export function pluginPaletteGroup(
     const key = `plugin:${spec.id}:${kind}:${d.spec.name}`;
     let entry = items.get(key);
     if (!entry) {
-      entry = {
-        item: {
-          key,
-          kind,
-          name: d.spec.name,
-          description: d.spec.description ?? "",
-          signatures: [],
-        },
-        signatures: [],
-      };
+      entry = { kind, name: d.spec.name, description: "", signatures: [] };
       items.set(key, entry);
     }
-    if (!entry.item.description && d.spec.description)
-      entry = {
-        ...entry,
-        item: { ...entry.item, description: d.spec.description },
-      };
+    // the first overload with a description names the item
+    if (!entry.description && d.spec.description)
+      entry.description = d.spec.description;
     entry.signatures.push(signature(d.spec));
-    items.set(key, entry);
   }
   return {
     id: spec.id,
     version,
     approximate,
-    items: [...items.values()].map(({ item, signatures }) => ({
-      ...item,
-      signatures,
+    items: [...items].map(([key, e]) => ({
+      key,
+      ...e,
       summary:
-        item.description.split(/\n\s*\n/)[0]?.trim() || (signatures[0] ?? ""),
+        e.description.split(/\n\s*\n/)[0]?.trim() || (e.signatures[0] ?? ""),
     })),
   };
 }

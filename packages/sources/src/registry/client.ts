@@ -27,7 +27,7 @@ export function createRegistryClient(
   return {
     source: live ? "live" : "snapshot",
     ports: (name, opts) => snapshot.ports(name, opts),
-    plugin: (id, version, opts) => snapshot.plugin(id, version, opts),
+    plugin: (id, version) => snapshot.plugin(id, version),
     async index(opts) {
       // Rejects with the snapshot's error when it fails: no live-only index.
       const base = await snapshot.snapshot(opts);

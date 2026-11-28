@@ -124,7 +124,11 @@ export function createPluginStore(options: {
               const listing = new Map(index.plugins.map((p) => [p.id, p]));
               const outcomes = await Promise.all(
                 [...new Map(result.plugins.map((p) => [p.id, p])).values()].map(
-                  async (declared) => {
+                  async (
+                    declared,
+                  ): Promise<
+                    LoadedPlugin | { id: string; message: string } | null
+                  > => {
                     const listed = listing.get(declared.id);
                     if (!listed || listed.definitions === 0) return null;
                     try {
