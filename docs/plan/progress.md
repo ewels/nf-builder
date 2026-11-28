@@ -773,3 +773,18 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - Notes appended to F-406 (reuse the writer and name rule; the Import button) and F-407 (export binary files once stored).
   - `@visual` baselines that show the enabled Export button are re-approved from CI (ADR 0021) and listed in the PR.
 - Blockers: none.
+
+## 2026-11-28 · F-405 · Claude (autonomous)
+- Did:
+  - The workflow summary gains a "Modelled" section from `projectionCoverage` ("165 of 184 statements (89%)", rounded down; "All N statements (100%)"; "No statements") and a "Suggestions" section: the suggestions inside the open workflow's own range (`workflowSuggestions`), with "Show suggestions" opening the Suggestions tab at the first. The count shows only when the diagnostics revision matches the projection's ("Checking for suggestions…" otherwise); the section is left out when the diagnostics pull failed.
+  - `EngineApi.diagnostics()` returns `registry`, the project's registry folders (worker API only, not stored). The problems panel lists registry module files after the project's own files, under a "Registry modules (N suggestions)" heading, each with a `registry` tag; counts are unchanged.
+  - The summary's "Registry modules" list now uses the panel's rule, `registryModuleOf(callee.path, registry)` (ADR 0055), instead of `callee.module`, because rnaseq includes its nf-core modules by relative path and `callee.module` is null for them (a deviation from the plan's 4.2 and 4.4).
+  - Tests: `e2e/legacy-import.spec.ts` imports nf-core/rnaseq 3.28.0 through the mocked GitHub route with `repoFromFiles` (no typed badge on the legacy calls, status-bar suggestions equal to the engine's and the report's, registry groups last, RNASEQ 165 of 184 statements); `packages/engine/test/corpus/legacy-import.corpus.ts`; unit tests in `packages/engine` and `apps/web`.
+- State: passing once CI is green (PR #61).
+- Next: F-302, F-601, then F-303, F-307, F-505, F-406.
+- Decisions:
+  - [ADR 0063](../adr/0063-legacy-import-summary.md): the modelled share counts statements and rounds down; the per-workflow count covers the workflow's own suggestions only; registry module files are grouped after the project's own, not filtered (amends ADR 0054's file order); `DiagnosticsResult.registry` (amends the worker API of ADRs 0043 and 0054); the summary's registry modules found by folder (amends ADR 0049's summary contents).
+  - UX-31 and UX-03 updated.
+  - Vendored `subworkflows/nf-core/**` stay with the project's own files (ADR 0055 unchanged); note appended to F-504.
+  - `details-entry-summary` and `read-only-phone` baselines re-approved from CI (ADR 0021).
+- Blockers: none.
