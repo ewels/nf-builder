@@ -241,6 +241,35 @@ describe("F-310 engine clipboard", () => {
     ]);
   });
 
+  it("F-310 ADR-0052: undo of a paste with `at` restores the sidecar byte for byte, or removes it", async () => {
+    for (const existed of [false, true]) {
+      const service = createEngineService();
+      await copied(service);
+      const target = await open(service, blankFiles());
+      if (existed) {
+        const text = `${JSON.stringify({ version: 1, nodes: {} }, null, 2)}\n`;
+        ok(
+          await service.writeFiles([{ path: ".nf-builder/layout.json", text }]),
+        );
+        target.texts.set(".nf-builder/layout.json", text);
+      }
+      const before = target.snapshot();
+      const current = await service.project("main.nf", null);
+      const rev = (current as { revision: number }).revision;
+      const pasted = target.take(
+        ok(
+          await service.paste(
+            { target: entry, aliases: [], at: { x: 1000, y: 500 } },
+            rev,
+          ),
+        ) as Changed,
+      );
+      expect(target.snapshot()[".nf-builder/layout.json"]).toBeTruthy();
+      target.take(ok(await service.undo(pasted.revision)) as Changed);
+      expect(target.snapshot()).toEqual(before);
+    }
+  });
+
   it("F-310 ADR-0052: undo of a multi-node delete restores the sidecar byte for byte", async () => {
     const service = createEngineService();
     const p = await open(service, caseFiles("f310-delete-start"));

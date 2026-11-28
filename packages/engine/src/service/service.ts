@@ -496,6 +496,11 @@ export function createEngineService(
       files.map((f) => f.path),
     );
     startedChanging();
+    if (files.some((f) => f.path === LAYOUT_PATH)) {
+      // the step carried the sidecar's bytes itself: read the layout from them again
+      const text = files.find((f) => f.path === LAYOUT_PATH)?.text;
+      Object.assign(open, readLayout(text ?? undefined));
+    }
     const label =
       direction === "undo"
         ? open.history.undone(discard)
@@ -602,6 +607,7 @@ export function createEngineService(
         `Couldn't paste: ${why.message.replace(/ ?Nothing was changed\.$/, "")} Nothing was changed.`,
       );
     };
+    const priorSidecar = open.state.model.file(LAYOUT_PATH)?.source.text;
     const before = callCounts(
       projectionOf(open, target.path, target.workflow) as Projection,
     );
@@ -660,6 +666,35 @@ export function createEngineService(
         for (const f of sidecar) {
           files.set(f.path, f);
           remodelled.add(f.path);
+          // the sidecar joins the step, so undo restores its bytes (or removes it) and redo writes it again (ADR 0052)
+          const text = f.text as string;
+          open.history.record(
+            priorSidecar === undefined
+              ? {
+                  patches: [{ kind: "create", path: LAYOUT_PATH, text }],
+                  inverse: [{ kind: "delete", path: LAYOUT_PATH }],
+                }
+              : {
+                  patches: [
+                    {
+                      kind: "edit",
+                      path: LAYOUT_PATH,
+                      edits: [{ start: 0, end: priorSidecar.length, text }],
+                    },
+                  ],
+                  inverse: [
+                    {
+                      kind: "edit",
+                      path: LAYOUT_PATH,
+                      edits: [
+                        { start: 0, end: text.length, text: priorSidecar },
+                      ],
+                    },
+                  ],
+                },
+            options.label,
+            options.group,
+          );
         }
       }
       return {
