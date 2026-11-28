@@ -70,6 +70,7 @@ export type {
 } from "./canvas";
 export { CANVAS_METRICS, canvasView, portY } from "./canvas";
 export { nodeView } from "./details/node-view";
+export { workflowSuggestions } from "./details/suggestions";
 export { workflowSummary } from "./details/summary";
 export type {
   DeclarationDetails,
