@@ -33,6 +33,12 @@ async function open(id: string) {
 
 const rnaseq = await open("rnaseq");
 
+function registryOf({ model }: { model: typeof rnaseq.model }) {
+  const pack = installedPacks[0];
+  if (pack === undefined) throw new Error("no pack installed");
+  return registryFolders(model.paths(), pack.includes, model.tree);
+}
+
 describe("F-405 imported legacy pipelines", () => {
   it("F-405 UX-23 ADR-0007: no node of any rnaseq workflow carries the typed badge, and at least ten calls of modules/nf-core processes are modelled and legacy", () => {
     expect(rnaseq.projections.length).toBeGreaterThan(20);
@@ -62,10 +68,8 @@ describe("F-405 imported legacy pipelines", () => {
   });
 
   it("F-405 LA-35: rnaseq has one legacy-process suggestion per process and one legacy-workflow per workflow, and 75 of the legacy-process ones are in registry module files", () => {
-    const pack = installedPacks[0];
-    if (pack === undefined) throw new Error("no pack installed");
-    const { model, diagnoser } = rnaseq;
-    const registry = registryFolders(model.paths(), pack.includes, model.tree);
+    const { diagnoser } = rnaseq;
+    const registry = registryOf(rnaseq);
     const all = diagnoser.all();
     const processes = all.filter((d) => d.code === "legacy-process");
     const workflows = all.filter((d) => d.code === "legacy-workflow");
@@ -77,9 +81,11 @@ describe("F-405 imported legacy pipelines", () => {
   });
 
   it("F-405 ADR-0004: every rnaseq workflow summary's coverage equals the snapshot header", () => {
+    let compared = 0;
     for (const p of rnaseq.projections) {
       const file = `${SNAPSHOTS}/rnaseq/${name(p.workflow.path, p.workflow.name)}`;
       if (!existsSync(file)) continue;
+      compared++;
       const m = /^statements (\d+), modelled (\d+)$/m.exec(
         readFileSync(file, "utf8"),
       );
@@ -88,5 +94,26 @@ describe("F-405 imported legacy pipelines", () => {
         [Number(m?.[1]), Number(m?.[2])],
       );
     }
+    expect(compared).toBeGreaterThan(0);
+  });
+
+  it("F-405 ADR-0055: rnaseq's workflow summaries list the nf-core modules their calls include by relative path", () => {
+    const registry = registryOf(rnaseq);
+    let listed = 0;
+    for (const p of rnaseq.projections) {
+      const expected = new Set(
+        p.nodes.flatMap((n) => {
+          const m =
+            n.kind === "call"
+              ? /^modules\/(nf-core\/.+)\/[^/]+$/.exec(n.callee.path ?? "")
+              : null;
+          return m?.[1] ? [m[1]] : [];
+        }),
+      );
+      const modules = workflowSummary(p, registry).modules.map((m) => m.module);
+      expect(new Set(modules), p.workflow.path).toEqual(expected);
+      listed += modules.length;
+    }
+    expect(listed).toBeGreaterThan(20);
   });
 });

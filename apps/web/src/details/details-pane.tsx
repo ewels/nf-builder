@@ -3,6 +3,7 @@ import {
   nodeView,
   problemKey,
   problemsView,
+  type RegistryFolder,
   workflowSuggestions,
   workflowSummary,
 } from "@nf-builder/engine";
@@ -12,7 +13,11 @@ import {
   type DetailsContent,
   useWorkspace,
 } from "../canvas/canvas-store";
-import { problemsStore, useProblems } from "../problems/problems-store";
+import {
+  type DiagnosticsStatus,
+  problemsStore,
+  useProblems,
+} from "../problems/problems-store";
 import "./details.css";
 import { FileDetails } from "./file-details";
 import { NodeDetailsView } from "./node-details";
@@ -25,6 +30,7 @@ export function DetailsBody({
   details,
   onShowProblems,
   diagnostics,
+  registry,
 }: {
   readonly content: CanvasContent;
   readonly selected: string | null;
@@ -32,6 +38,8 @@ export function DetailsBody({
   readonly onShowProblems?: (first: Diagnostic) => void;
   /** The project's diagnostics at this revision; null while they are being pulled, left out when they failed (F-405). */
   readonly diagnostics?: readonly Diagnostic[] | null;
+  /** The project's registry module folders, for the summary's registry list (F-405). */
+  readonly registry?: readonly RegistryFolder[];
 }): JSX.Element {
   if (content.status !== "ready")
     return <p className="muted">Nothing selected</p>;
@@ -41,7 +49,7 @@ export function DetailsBody({
     return (
       <div className="details-pane" data-details-state="summary">
         <WorkflowSummaryView
-          summary={workflowSummary(projection)}
+          summary={workflowSummary(projection, registry)}
           suggestions={
             diagnostics === undefined || diagnostics === null
               ? diagnostics
@@ -66,6 +74,22 @@ export function DetailsBody({
   );
 }
 
+/**
+ * What the summary shows of the diagnostics (F-405): undefined (the section is left out) when they failed, null (still
+ * being pulled) unless they were made at the projection's revision, else the list.
+ */
+export function diagnosticsAt(
+  content: CanvasContent,
+  status: DiagnosticsStatus,
+  revision: number | null,
+  list: readonly Diagnostic[],
+): readonly Diagnostic[] | null | undefined {
+  if (status === "failed") return undefined;
+  return content.status === "ready" && revision === content.revision
+    ? list
+    : null;
+}
+
 export function DetailsPane(): JSX.Element {
   const content = useWorkspace((s) => s.content);
   const selected = useWorkspace((s) => s.selected);
@@ -74,12 +98,8 @@ export function DetailsPane(): JSX.Element {
   const status = useProblems((s) => s.status);
   const revision = useProblems((s) => s.revision);
   const list = useProblems((s) => s.diagnostics);
-  // the count is shown only for the diagnostics made at the projection's revision (F-405)
-  const current =
-    content.status === "ready" &&
-    status !== "failed" &&
-    revision === content.revision;
-  const diagnostics = status === "failed" ? undefined : current ? list : null;
+  const registry = useProblems((s) => s.registry);
+  const diagnostics = diagnosticsAt(content, status, revision, list);
   if (file?.kind === "file") return <FileDetails path={file.path} />;
   return (
     <DetailsBody
@@ -87,6 +107,7 @@ export function DetailsPane(): JSX.Element {
       selected={selected}
       details={details}
       diagnostics={diagnostics}
+      registry={registry}
       onShowProblems={(first) =>
         problemsStore.getState().show(problemsView(first), problemKey(first))
       }

@@ -28,6 +28,7 @@ import { freshDefinitionName } from "../edit/fresh-name";
 import { definitionPath } from "../edit/names";
 import { PatchError } from "../edit/patches";
 import { registryFolders } from "../files/registry";
+import type { RegistryFolder } from "../files/types";
 import { EMPTY_HISTORY, History, type HistoryLimits } from "../history/history";
 import { commandLabel } from "../history/labels";
 import {
@@ -192,6 +193,17 @@ export function createEngineService(
       });
     }
     return open.projector;
+  };
+
+  const registryOf = (open: Open): readonly RegistryFolder[] => {
+    const pack = installedPacks.find((p) => p.version === open.version);
+    return pack
+      ? registryFolders(
+          open.state.model.paths(),
+          pack.includes,
+          open.state.model.tree,
+        )
+      : [];
   };
 
   const diagnoserOf = (open: Open): Diagnoser => {
@@ -669,14 +681,10 @@ export function createEngineService(
 
     diagnostics: () =>
       guarded((open): DiagnosticsResult => {
-        const pack = installedPacks.find((p) => p.version === open.version);
-        const model = open.state.model;
         return {
           revision,
           diagnostics: diagnoserOf(open).all(),
-          registry: pack
-            ? registryFolders(model.paths(), pack.includes, model.tree)
-            : [],
+          registry: registryOf(open),
         };
       }),
 
@@ -721,14 +729,10 @@ export function createEngineService(
 
     listFiles: () =>
       guarded((open) => {
-        const pack = installedPacks.find((p) => p.version === open.version);
-        const model = open.state.model;
         return {
           revision,
-          files: fileSummaries(model),
-          registry: pack
-            ? registryFolders(model.paths(), pack.includes, model.tree)
-            : [],
+          files: fileSummaries(open.state.model),
+          registry: registryOf(open),
         };
       }),
 

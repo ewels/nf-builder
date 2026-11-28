@@ -162,9 +162,8 @@ export {
   problemSections,
   problemsView,
   problemTarget,
-  registryModuleOf,
 } from "./problems";
-export { modelledShare, projectionCoverage } from "./projection/coverage";
+export { projectionCoverage } from "./projection/coverage";
 export type {
   FreeRead,
   StatementVariables,
