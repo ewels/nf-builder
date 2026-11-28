@@ -3,6 +3,7 @@ import {
   nodeView,
   problemKey,
   problemsView,
+  workflowSuggestions,
   workflowSummary,
 } from "@nf-builder/engine";
 import type { JSX } from "react";
@@ -11,7 +12,7 @@ import {
   type DetailsContent,
   useWorkspace,
 } from "../canvas/canvas-store";
-import { problemsStore } from "../problems/problems-store";
+import { problemsStore, useProblems } from "../problems/problems-store";
 import "./details.css";
 import { FileDetails } from "./file-details";
 import { NodeDetailsView } from "./node-details";
@@ -23,11 +24,14 @@ export function DetailsBody({
   selected,
   details,
   onShowProblems,
+  diagnostics,
 }: {
   readonly content: CanvasContent;
   readonly selected: string | null;
   readonly details: DetailsContent;
   readonly onShowProblems?: (first: Diagnostic) => void;
+  /** The project's diagnostics at this revision; null while they are being pulled, left out when they failed (F-405). */
+  readonly diagnostics?: readonly Diagnostic[] | null;
 }): JSX.Element {
   if (content.status !== "ready")
     return <p className="muted">Nothing selected</p>;
@@ -36,7 +40,15 @@ export function DetailsBody({
   if (view === null)
     return (
       <div className="details-pane" data-details-state="summary">
-        <WorkflowSummaryView summary={workflowSummary(projection)} />
+        <WorkflowSummaryView
+          summary={workflowSummary(projection)}
+          suggestions={
+            diagnostics === undefined || diagnostics === null
+              ? diagnostics
+              : workflowSuggestions(projection.workflow, diagnostics)
+          }
+          onShowSuggestions={onShowProblems}
+        />
       </div>
     );
   const state =
@@ -59,12 +71,22 @@ export function DetailsPane(): JSX.Element {
   const selected = useWorkspace((s) => s.selected);
   const details = useWorkspace((s) => s.details);
   const file = useWorkspace((s) => s.tabs.find((t) => t.id === s.activeTab));
+  const status = useProblems((s) => s.status);
+  const revision = useProblems((s) => s.revision);
+  const list = useProblems((s) => s.diagnostics);
+  // the count is shown only for the diagnostics made at the projection's revision (F-405)
+  const current =
+    content.status === "ready" &&
+    status !== "failed" &&
+    revision === content.revision;
+  const diagnostics = status === "failed" ? undefined : current ? list : null;
   if (file?.kind === "file") return <FileDetails path={file.path} />;
   return (
     <DetailsBody
       content={content}
       selected={selected}
       details={details}
+      diagnostics={diagnostics}
       onShowProblems={(first) =>
         problemsStore.getState().show(problemsView(first), problemKey(first))
       }
