@@ -2200,3 +2200,140 @@ describe("F-302 connect and disconnect", () => {
     expect(asked).toEqual([]);
   });
 });
+
+describe("F-505 addPlugin", () => {
+  const wf = [ref("main.nf", null)];
+
+  /** A fake engine that records applies and undos; `config` says whether nextflow.config exists. */
+  function plugging(
+    options: { config: boolean; refuse?: "second" | "first" } = {
+      config: true,
+    },
+  ) {
+    const log: { kind: string; rev: number; options: unknown }[] = [];
+    const undos: unknown[] = [];
+    let revision = 1;
+    const engine = {
+      open: async () => ({
+        ...summaryOf(wf),
+        files: options.config
+          ? [
+              {
+                path: "nextflow.config",
+                language: "config",
+                status: "modelled",
+                problems: 0,
+              },
+            ]
+          : [],
+      }),
+      project: async (): Promise<ProjectionResult> => ({
+        revision,
+        projection: projectionOf(wf[0] as WorkflowRef) as never,
+        positions: {},
+      }),
+      apply: async (
+        command: { kind: string },
+        rev: number,
+        applyOptions: unknown,
+      ) => {
+        log.push({ kind: command.kind, rev, options: applyOptions });
+        if (
+          (options.refuse === "second" && command.kind === "addConfigPlugin") ||
+          (options.refuse === "first" && log.length === 1)
+        )
+          return {
+            ok: false,
+            revision: rev,
+            code: "invalid",
+            message: "Refused.",
+            path: "nextflow.config",
+            problems: [],
+          };
+        revision = rev + 1;
+        return changeAt(revision, wf);
+      },
+      undo: async (rev: number, undoOptions?: unknown) => {
+        undos.push(undoOptions);
+        revision = rev + 1;
+        return changeAt(revision, wf, statusOf(0, 1), { label: "x" });
+      },
+      history: async () => EMPTY_HISTORY,
+    } as unknown as EngineApi;
+    return { engine, log, undos };
+  }
+  const plugin = { id: "nf-schema", version: "3.1.0" };
+
+  it("F-505 IO-33 AR-23: addPlugin applies addConfigPlugin with the index version under one group and label", async () => {
+    const { engine, log } = plugging();
+    const store = createCanvasStore(() => engine);
+    await store.getState().open(request);
+    const flushed: string[] = [];
+    store.getState().registerFlush(async () => {
+      flushed.push("flush");
+    });
+    const out = await store.getState().addPlugin(plugin);
+    expect(out).toEqual({ ok: true, id: "nf-schema", version: "3.1.0" });
+    expect(flushed).toEqual(["flush"]);
+    expect(log).toHaveLength(1);
+    expect(log[0]).toMatchObject({ kind: "addConfigPlugin", rev: 1 });
+    expect(log[0]?.options).toMatchObject({
+      label: "Add plugin nf-schema@3.1.0",
+    });
+    expect(log[0]?.options).toMatchObject({
+      group: expect.stringMatching(/^plugin-/),
+    });
+  });
+
+  it("F-505 IO-33: with no nextflow.config, createFile and addConfigPlugin form one group; a refused second part is undone", async () => {
+    const created = plugging({ config: false });
+    const store = createCanvasStore(() => created.engine);
+    await store.getState().open(request);
+    expect((await store.getState().addPlugin(plugin)).ok).toBe(true);
+    expect(created.log.map((l) => l.kind)).toEqual([
+      "createFile",
+      "addConfigPlugin",
+    ]);
+    const groups = created.log.map(
+      (l) => (l.options as { group: string }).group,
+    );
+    expect(groups[0]).toMatch(/^plugin-/);
+    expect(groups[1]).toBe(groups[0]);
+    expect(created.log[0]?.options).toMatchObject({
+      label: "Add plugin nf-schema@3.1.0",
+    });
+
+    const refused = plugging({ config: false, refuse: "second" });
+    const second = createCanvasStore(() => refused.engine);
+    await second.getState().open(request);
+    const out = await second.getState().addPlugin(plugin);
+    expect(out).toEqual({
+      ok: false,
+      message: "Couldn't add nf-schema: Refused. Nothing was changed.",
+    });
+    expect(refused.undos).toEqual([{ discard: true }]);
+
+    const first = plugging({ config: true, refuse: "first" });
+    const third = createCanvasStore(() => first.engine);
+    await third.getState().open(request);
+    expect((await third.getState().addPlugin(plugin)).ok).toBe(false);
+    expect(first.undos).toEqual([]);
+  });
+
+  it("F-505 UX-04: addPlugin is refused in read-only and calls no engine method", async () => {
+    const { engine, log, undos } = plugging();
+    const store = createCanvasStore(
+      () => engine,
+      () => true,
+    );
+    await store.getState().open(request);
+    const out = await store.getState().addPlugin(plugin);
+    expect(out.ok).toBe(false);
+    if (!out.ok)
+      expect(out.message).toBe(
+        "Editing needs a larger screen or a wider window.",
+      );
+    expect(log).toEqual([]);
+    expect(undos).toEqual([]);
+  });
+});
