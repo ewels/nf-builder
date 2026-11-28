@@ -3,6 +3,7 @@
 
 import type { GraphNode, Port, Projection } from "@nf-builder/lang-core";
 import { typeText } from "../canvas/view";
+import { modelledShare, projectionCoverage } from "../projection/coverage";
 import { kindLabel } from "./node-view";
 import type {
   SummaryCall,
@@ -84,5 +85,6 @@ export function workflowSummary(projection: Projection): WorkflowSummary {
     outputs,
     calls,
     modules: moduleRows,
+    coverage: modelledShare(projectionCoverage(projection)),
   };
 }

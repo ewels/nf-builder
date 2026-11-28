@@ -82,6 +82,7 @@ export type {
   PortDetail,
   Preview,
   SummaryCall,
+  SummaryCoverage,
   SummaryModule,
   SummaryPort,
   WorkflowSummary,
@@ -161,7 +162,7 @@ export {
   problemsView,
   problemTarget,
 } from "./problems";
-export { projectionCoverage } from "./projection/coverage";
+export { modelledShare, projectionCoverage } from "./projection/coverage";
 export type {
   FreeRead,
   StatementVariables,

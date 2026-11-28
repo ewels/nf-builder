@@ -252,6 +252,7 @@ describe("F-206 details pane", () => {
         },
       ],
       modules: [{ module: "nf-core/wordcount", calls: ["WORDCOUNT"] }],
+      coverage: { statements: 4, modelled: 3, percent: 75 },
     };
     const out = renderToStaticMarkup(<WorkflowSummaryView summary={summary} />);
     for (const heading of ["Take", "Emit", "Calls", "Registry modules"])
