@@ -391,3 +391,6 @@ Paused at the maintainer's request after F-304 for MVP testing. To resume:
 - Phases: 1 MVP fixes and functional feedback (`plan-mvp-feedback.md`); 2 finish editing (F-305, F-306, F-314, a new "drop on a node to add a take or input" feature, F-311, F-312, F-308, F-313, F-315, F-316, F-317); 3 F-407, F-406, F-504, F-506; 4 M6; 5 design pass; 6 M7.
 - New feature (to be added with `scope-change`): drag an output and hold it over a workflow or process node; after about a second a tooltip offers "Drop to add take and connect" or "Drop to add input and connect"; the port's name and type come from the source; one undo step; not for registry modules (use F-506's "Make a local copy" first); off in read-only. Hovering an existing port keeps today's connect behaviour.
 - Records: one batch ADR for the MVP feedback changes; a normal ADR per new feature.
+
+### MVP feedback (F-318, F-319) — [plan](plan-mvp-feedback.md)
+- The plan's open points are settled in its section 8, which overrides section 6 where they differ. Records: ADR 0071, the spec rows it cites, and F-318, F-319 and F-320 in `features.json` (F-320, drop on a node to add a take or input, needs its own plan and ADR). ADR 0070 is reserved for `fix/factory-inputs`. Build F-318 and F-319 in parallel; don't run F-319 beside F-406.
