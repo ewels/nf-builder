@@ -347,6 +347,7 @@ const editing = (
   editable: true,
   schema: {
     version: "26.10",
+    pluginsKey: "",
     forms: { scopes: [], maps: {} },
     scopes: [schemaNode("process"), schemaNode("docker")],
   },

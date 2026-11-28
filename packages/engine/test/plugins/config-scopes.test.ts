@@ -1,4 +1,8 @@
-import type { ConfigCatalogue, ConfigNode } from "@nf-builder/lang-core";
+import type {
+  ConfigCatalogue,
+  ConfigNode,
+  LanguagePack,
+} from "@nf-builder/lang-core";
 import { describe, expect, it } from "vitest";
 import { installedPacks } from "../../src/packs";
 import {
@@ -112,5 +116,27 @@ describe("plugin config scopes", () => {
     const a = mergePluginScopes(base, scopes);
     expect(mergePluginScopes(base, [...scopes])).toBe(a);
     expect(installedPacks.length).toBeGreaterThan(0);
+  });
+
+  it("F-505 FI-01 FI-03: with nf-schema merged, classifyPath calls validation.monochromeLogs an option; without it, unknown", async () => {
+    const pack = installedPacks[0] as LanguagePack;
+    const catalogue = await pack.loadCatalogue();
+    const merged = mergePluginScopes(catalogue.config, [
+      {
+        id: "nf-schema",
+        version: "3.1.0",
+        nodes: pluginConfigNodes(nfSchema()),
+      },
+    ]);
+    const path = ["validation", "monochromeLogs"];
+    const rules = await pack.loadConfigRules(merged);
+    expect(rules.classify(path)).toMatchObject({
+      kind: "option",
+      types: ["Boolean"],
+    });
+    expect((await pack.loadConfigRules()).classify(path).kind).toBe("unknown");
+    expect(rules.classify(["validation", "monochromeLog"]).kind).toBe(
+      "unknown",
+    );
   });
 });

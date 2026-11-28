@@ -142,6 +142,8 @@ export interface DiagnosticsResult {
   readonly diagnostics: readonly Diagnostic[];
   /** The registry module folders, so the Suggestions tab can list their files last (F-405). */
   readonly registry: readonly RegistryFolder[];
+  /** The plugin scopes the lints used (`EngineApi.setPluginScopes`); the page pulls again when it changes (F-505). */
+  readonly pluginsKey: string;
 }
 
 export interface NodeDetailsResult {
@@ -155,6 +157,8 @@ export interface ConfigViewResult {
   readonly revision: number;
   /** Null when the file's text can't be viewed at all. */
   readonly view: ConfigView | null;
+  /** The plugin scopes the view's rules used; the page pulls again when it changes (F-505). */
+  readonly pluginsKey: string;
 }
 
 /** The plugins the root `nextflow.config` declares at a revision (F-505, IO-33). */

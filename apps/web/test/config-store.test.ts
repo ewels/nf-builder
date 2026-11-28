@@ -50,6 +50,7 @@ const viewAt = (path: string, marker: number): ConfigView => ({
 });
 const schema: ConfigSchema = {
   version: "26.10",
+  pluginsKey: "",
   scopes: [],
   forms: { scopes: [], maps: {} },
 };

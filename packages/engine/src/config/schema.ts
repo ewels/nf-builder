@@ -32,9 +32,11 @@ export function configSchema(
   version: string,
   catalogue: ConfigCatalogue,
   rules: ConfigRules,
+  pluginsKey = "",
 ): ConfigSchema {
   return {
     version,
+    pluginsKey,
     scopes: catalogue.scopes.map((s) => node(rules, s, [])),
     forms: rules.forms,
   };

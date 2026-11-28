@@ -155,4 +155,6 @@ export interface ConfigSchema {
   readonly version: string;
   readonly scopes: readonly ConfigSchemaNode[];
   readonly forms: ConfigFormLayout;
+  /** The plugin scopes merged into `scopes`, as `EngineApi.setPluginScopes` keyed them; empty for the pack's own (F-505). */
+  readonly pluginsKey: string;
 }
