@@ -1,11 +1,9 @@
-import type { RegistryIndex } from "@nf-builder/sources";
+import { queryTerms } from "@nf-builder/engine";
+import { createRegistrySearch, type RegistryIndex } from "@nf-builder/sources";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { PalettePanel } from "../src/palette/palette-panel";
-import {
-  REGISTRY_LIST_LIMIT,
-  RegistrySectionView,
-} from "../src/registry/registry-section";
+import { RegistrySectionView } from "../src/registry/registry-section";
 import type { RegistryState } from "../src/registry/registry-store";
 
 const NOW = new Date("2026-11-22T05:00:00Z");
@@ -54,19 +52,40 @@ const ready = (index: RegistryIndex, refreshing = false): RegistryState => ({
 
 const render = (
   state: RegistryState,
-  searching = false,
+  query = "",
   open = { modules: true, plugins: false },
-) =>
-  renderToStaticMarkup(
+  collapsed: ReadonlySet<string> = new Set(),
+) => {
+  const index = state.status === "ready" ? state.index : null;
+  const matches = index ? createRegistrySearch(index)(queryTerms(query)) : null;
+  return renderToStaticMarkup(
     <RegistrySectionView
       state={state}
       now={NOW}
-      searching={searching}
+      query={query}
+      matches={matches}
       open={open}
+      collapsed={collapsed}
       onToggle={noop}
+      onToggleNamespace={noop}
       onRefresh={noop}
     />,
   );
+};
+
+const typedModule = (
+  name: string,
+  over: Partial<RegistryIndex["modules"][number]> = {},
+): RegistryIndex["modules"][number] => ({
+  name,
+  version: "1.0.0",
+  kind: "process",
+  component: null,
+  typed: false,
+  description: `About ${name}`,
+  keywords: [],
+  ...over,
+});
 
 describe("registry section", () => {
   it("F-502 step 1 UX-14: a snapshot index shows the registry.nextflow.io heading, 'Snapshot · updated 5 hours ago' and a Refresh registry data button described by that line", () => {
@@ -174,20 +193,86 @@ describe("registry section", () => {
     }
   });
 
-  it("F-502 UX-14: lists show at most 50 names with a 'Showing 50 of N' note, are hidden while searching, and use no palette-item classes and no role=status", () => {
-    const big = ready(indexOf({}, 2322));
-    const html = render(big, false, { modules: true, plugins: true });
-    expect(html.match(/class="registry-item"/g)?.length).toBe(
-      REGISTRY_LIST_LIMIT + 1,
+  it("F-503 UX-14: modules render under namespace headings with counts, with short labels, data-name holding the full name, and a hidden process or workflow word", () => {
+    const html = render(
+      ready(
+        indexOf({
+          modules: [
+            typedModule("cellgeni/anndata/concat"),
+            typedModule("nf-core/bam_applybqsr", { kind: "workflow" }),
+            typedModule("nf-core/samtools/merge"),
+          ],
+        }),
+      ),
     );
-    expect(html).toContain("Showing 50 of 2,322 modules.");
+    expect(html).toMatch(/<h4[^>]*><button[^>]*aria-expanded="true"/);
+    expect(html.indexOf("nf-core")).toBeLessThan(html.indexOf("cellgeni"));
+    expect(html).toMatch(/nf-core<\/span><span[^>]*>2<\/span>/);
+    expect(html).toContain('data-name="nf-core/samtools/merge"');
+    expect(html).toMatch(
+      /<span class="registry-item-label">samtools\/merge<\/span>/,
+    );
+    expect(html).toMatch(/visually-hidden">workflow</);
+    expect(html).toMatch(/visually-hidden">process</);
+    expect(html).toContain('title="nf-core/samtools/merge · About');
+  });
+
+  it("F-503 UX-14: only typed modules with a version carry the typed tag", () => {
+    const html = render(
+      ready(
+        indexOf({
+          modules: [
+            typedModule("nf-core/a", { typed: true }),
+            typedModule("nf-core/b", { typed: null }),
+            typedModule("nf-core/c", { typed: true, version: null }),
+          ],
+        }),
+      ),
+    );
+    expect(html.match(/registry-badge-typed/g)?.length).toBe(1);
+    expect(html).toMatch(
+      /data-name="nf-core\/a".*?registry-badge-typed.*?data-name="nf-core\/b"/,
+    );
+  });
+
+  it("F-503 step 2 UX-14: with 250 modules in one namespace, 100 rows render, followed by a Show more (100 of 250) button", () => {
+    const html = render(ready(indexOf({}, 250)));
+    expect(html.match(/data-name="nf-core\//g)?.length).toBe(100);
+    expect(html).toMatch(/<button[^>]*>Show more \(100 of 250\)<\/button>/);
+  });
+
+  it("F-503 UX-11: while searching, matching modules and plugins render with every group open; no matches give the plain note and no role=status", () => {
+    const index = indexOf({
+      modules: [typedModule("nf-core/fastqc"), typedModule("other/hello")],
+    });
+    const html = render(
+      ready(index),
+      "fastqc",
+      { modules: false, plugins: false },
+      new Set(["nf-core"]),
+    );
+    expect(html).toContain('data-name="nf-core/fastqc"');
+    expect(html).not.toContain("other/hello");
+    expect(html).toContain('aria-disabled="true"');
+    const plugin = render(ready(index), "schema valid", {
+      modules: false,
+      plugins: false,
+    });
+    expect(plugin).toContain('data-name="nf-schema"');
+    const none = render(ready(index), "zzzz");
+    expect(none).toContain("No registry modules or plugins match.");
+    expect(none).not.toContain('role="status"');
+    expect(none).not.toContain("registry-item");
+  });
+
+  it("F-503 UX-14: registry rows use no palette-item class and the section has no role=status", () => {
+    const html = render(ready(indexOf({}, 300)), "", {
+      modules: true,
+      plugins: true,
+    });
     expect(html).toContain("nf-schema");
     expect(html).not.toContain("palette-item");
     expect(html).not.toContain('role="status"');
-    const searching = render(big, true, { modules: true, plugins: true });
-    expect(searching).not.toContain("registry-item");
-    expect(searching).toContain("<span> · updated 5 hours ago</span>");
-    expect(searching).toContain("registry.nextflow.io");
   });
 
   it("F-502 UX-14: loading and refreshing states say so", () => {
