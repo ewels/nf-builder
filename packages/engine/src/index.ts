@@ -37,6 +37,7 @@ export type {
   ParamsNode,
   ParseProblem,
   ParseStatus,
+  PathClashes,
   PlainSourceFile,
   Port,
   PortRef,
@@ -56,6 +57,8 @@ export type {
   WorkflowRef,
   WorkflowTarget,
 } from "@nf-builder/lang-core";
+// paths that clash in an export (F-404): the page reads them through the engine package, which owns the lang-core dependency
+export { exportClashes } from "@nf-builder/lang-core";
 export type {
   CanvasAppearance,
   CanvasEdgeView,

@@ -36,6 +36,7 @@ describe("@nf-builder/web", () => {
     expect(header).toContain("No project");
     expect(header).toMatch(/<p[^>]*role="status"[^>]*>Nothing to save<\/p>/);
     expect(header).toMatch(/<button(?![^>]*disabled)[^>]*>Templates<\/button>/);
+    // Export is disabled with no project (F-404); Import stays disabled until F-406
     for (const name of ["Import", "Export"])
       expect(header).toMatch(
         new RegExp(`<button[^>]*disabled[^>]*>${name}</button>`),
@@ -58,6 +59,8 @@ describe("@nf-builder/web", () => {
       storageWarning: null,
       storageNote: false,
       onTemplates,
+      onExport: () => undefined,
+      canExport: false,
     });
     const found: { disabled?: boolean; onClick?: () => void }[] = [];
     const walk = (node: unknown): void => {
@@ -209,6 +212,8 @@ describe("F-703 shell", () => {
         storageWarning: null,
         storageNote: false,
         onTemplates: () => undefined,
+        onExport: () => undefined,
+        canExport: false,
         readOnly: true,
       }),
     );
@@ -238,5 +243,31 @@ describe("F-703 shell", () => {
       '</header><div class="read-only-note" role="status"></div><div class="app-columns"',
     );
     expect(html).toContain('<div class="app-shell">');
+  });
+});
+
+describe("F-404 header Export", () => {
+  const props = {
+    languageVersions: ["26.10"],
+    projectControls: null,
+    saveLabel: "Saved",
+    saveFailed: null,
+    storageWarning: null,
+    storageNote: false,
+    onTemplates: () => undefined,
+  };
+  it("F-404 UX-62: Export is disabled with no project and enabled with one; read-only renders no Export (ADR 0056)", () => {
+    const off = renderToStaticMarkup(
+      <AppHeader {...props} canExport={false} onExport={() => undefined} />,
+    );
+    expect(off).toMatch(/<button[^>]*disabled[^>]*>Export<\/button>/);
+    const on = renderToStaticMarkup(
+      <AppHeader {...props} canExport onExport={() => undefined} />,
+    );
+    expect(on).toMatch(/<button(?![^>]*disabled)[^>]*>Export<\/button>/);
+    const ro = renderToStaticMarkup(
+      <AppHeader {...props} readOnly canExport onExport={() => undefined} />,
+    );
+    expect(ro).not.toContain("Export");
   });
 });

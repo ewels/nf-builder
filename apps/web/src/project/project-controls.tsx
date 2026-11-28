@@ -2,9 +2,11 @@
 // header's Templates button opens the New project dialog too.
 import { installedPackVersions } from "@nf-builder/engine";
 import { type JSX, useEffect, useRef } from "react";
+import { getEngine } from "../engine/engine-client";
 import { ImportReportDialog } from "../import/import-report-dialog";
 import { useGithubImport } from "../import/use-github-import";
 import { useReadOnly } from "../read-only/read-only-store";
+import { ExportDialog } from "./export-dialog";
 import { focusTarget } from "./focus-target";
 import { NewProjectDialog } from "./new-project-dialog";
 import { DeleteProjectDialog, ProjectNameDialog } from "./project-dialogs";
@@ -27,6 +29,7 @@ export function ProjectControls(): JSX.Element {
   const open = useProjects((s) => s.open);
   const rename = useProjects((s) => s.rename);
   const remove = useProjects((s) => s.remove);
+  const exportProject = useProjects((s) => s.exportProject);
   const showDialog = useProjects((s) => s.showDialog);
   const closeDialog = useProjects((s) => s.closeDialog);
   // a dialog's own unmount can't restore focus, so put it back on the element that opened it once the dialog has gone
@@ -76,6 +79,19 @@ export function ProjectControls(): JSX.Element {
         <ProjectNameDialog
           initialName={current.name}
           onSubmit={(name) => rename(current.id, name)}
+          onClose={closeDialog}
+        />
+      ) : null}
+      {!readOnly && dialog?.kind === "export" && current ? (
+        <ExportDialog
+          projectName={current.name}
+          imported={current.source !== undefined}
+          list={async () => {
+            const listed = await getEngine().listFiles();
+            if ("ok" in listed) throw new Error(listed.message);
+            return listed.files.map((f) => f.path);
+          }}
+          onExport={exportProject}
           onClose={closeDialog}
         />
       ) : null}

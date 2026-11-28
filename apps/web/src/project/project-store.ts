@@ -22,6 +22,7 @@ import {
   type WorkspaceApi,
   type WorkspaceStatus,
 } from "../workspace/types";
+import { downloadBytes } from "./download";
 import type { NewProjectRequest, NewProjectRoute } from "./new-project-dialog";
 import {
   nearQuota,
@@ -35,7 +36,8 @@ import { requestTemplates } from "./templates";
 export type ProjectDialog =
   | { readonly kind: "new"; readonly route: NewProjectRoute }
   | { readonly kind: "rename" }
-  | { readonly kind: "delete" };
+  | { readonly kind: "delete" }
+  | { readonly kind: "export" };
 
 interface ProjectUiState {
   readonly dialog: ProjectDialog | null;
@@ -72,6 +74,8 @@ interface ProjectActions {
     o: { signal: AbortSignal; onProgress(done: number, total: number): void },
   ): Promise<void>;
   closeImportReport(): void;
+  /** Flushes pending code edits, zips the project and downloads it; throws the refusal's message (F-404, IO-20). */
+  exportProject(layout: boolean): Promise<void>;
 }
 
 export interface ProjectStoreDeps {
@@ -83,6 +87,10 @@ export interface ProjectStoreDeps {
   readonly storage: () => StorageManager | undefined;
   /** Whether the app is read-only (F-703, UX-04); create, rename, delete and GitHub import are refused then. Default: the page's mode. */
   readonly readOnly?: () => boolean;
+  /** Saves bytes as a file; default: a download link (F-404). */
+  readonly download?: (bytes: Uint8Array, fileName: string) => void;
+  /** Applies Code-view text that is still pending; default: the canvas store's (F-404). */
+  readonly flushEdits?: () => Promise<void>;
   readonly languageVersion: string | undefined;
   /** The canvas (F-205): shown every project the worker opens, and told when the stored project is gone. */
   readonly canvas: {
@@ -261,6 +269,15 @@ export function createProjectStore(
 
       closeImportReport() {
         set({ importReport: null });
+      },
+
+      async exportProject(layout) {
+        await (
+          deps.flushEdits ?? (() => canvasStore.getState().flushEdits())
+        )();
+        const result = await deps.workspace().exportProject({ layout });
+        if (!result.ok) throw new Error(result.message);
+        (deps.download ?? downloadBytes)(result.bytes, result.fileName);
       },
 
       async rename(id, name) {
