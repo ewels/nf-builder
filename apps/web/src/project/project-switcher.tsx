@@ -22,6 +22,8 @@ interface ProjectSwitcherProps {
   /** Lets the owner of a dialog put focus back on the switcher button. */
   readonly buttonRef?: RefObject<HTMLButtonElement | null>;
   readonly initiallyOpen?: boolean;
+  /** Below 1024 px (F-703, UX-04): the panel only switches between stored projects. */
+  readonly readOnly?: boolean;
 }
 
 function panelItems(panel: HTMLElement | null): HTMLButtonElement[] {
@@ -107,28 +109,36 @@ export function ProjectSwitcher(p: ProjectSwitcherProps): JSX.Element {
               </button>
             ))}
           </div>
+        ) : p.readOnly ? (
+          <p className="project-empty">No projects in this browser.</p>
         ) : null}
-        <div className="project-actions">
-          <button type="button" className="project-item" onClick={act(p.onNew)}>
-            New project…
-          </button>
-          <button
-            type="button"
-            className="project-item"
-            disabled={!hasProject}
-            onClick={act(p.onRename)}
-          >
-            Rename project…
-          </button>
-          <button
-            type="button"
-            className="project-item"
-            disabled={!hasProject}
-            onClick={act(p.onDelete)}
-          >
-            Delete project…
-          </button>
-        </div>
+        {p.readOnly ? null : (
+          <div className="project-actions">
+            <button
+              type="button"
+              className="project-item"
+              onClick={act(p.onNew)}
+            >
+              New project…
+            </button>
+            <button
+              type="button"
+              className="project-item"
+              disabled={!hasProject}
+              onClick={act(p.onRename)}
+            >
+              Rename project…
+            </button>
+            <button
+              type="button"
+              className="project-item"
+              disabled={!hasProject}
+              onClick={act(p.onDelete)}
+            >
+              Delete project…
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

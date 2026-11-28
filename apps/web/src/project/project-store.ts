@@ -16,6 +16,7 @@ import {
 } from "../import/github-import";
 import type { ImportReport } from "../import/import-report-dialog";
 import { requestPaletteView } from "../palette/use-palette-view";
+import { isReadOnly, READ_ONLY_REFUSAL } from "../read-only/read-only-store";
 import {
   INITIAL_STATUS,
   type WorkspaceApi,
@@ -80,6 +81,8 @@ export interface ProjectStoreDeps {
   /** The template list, requested up front like the palette so the New project dialog finds it ready (F-203). */
   readonly templates: (version: string) => Promise<unknown>;
   readonly storage: () => StorageManager | undefined;
+  /** Whether the app is read-only (F-703, UX-04); create, rename, delete are refused then. Default: the page's mode. */
+  readonly readOnly?: () => boolean;
   readonly languageVersion: string | undefined;
   /** The canvas (F-205): shown every project the worker opens, and told when the stored project is gone. */
   readonly canvas: {
@@ -91,6 +94,10 @@ export interface ProjectStoreDeps {
 export function createProjectStore(
   deps: ProjectStoreDeps,
 ): StoreApi<ProjectUiState & ProjectActions> {
+  const readOnly = deps.readOnly ?? isReadOnly;
+  const refuseWhenReadOnly = (): void => {
+    if (readOnly()) throw new Error(READ_ONLY_REFUSAL);
+  };
   const storage = (): StorageManager | undefined => {
     try {
       return deps.storage();
@@ -190,6 +197,7 @@ export function createProjectStore(
       },
 
       async create(request) {
+        refuseWhenReadOnly();
         const workspace = deps.workspace();
         const meta = await workspace.createProject({
           name: request.name,
@@ -255,10 +263,12 @@ export function createProjectStore(
       },
 
       async rename(id, name) {
+        refuseWhenReadOnly();
         await deps.workspace().renameProject(id, name);
       },
 
       async remove(id) {
+        refuseWhenReadOnly();
         await deps.workspace().deleteProject(id);
         void checkUsage();
       },
@@ -294,4 +304,9 @@ export function useProjects<T>(
 /** Starts the workspace once from `main.tsx`. */
 export function startProjects(): void {
   void projectStore().getState().start();
+}
+
+/** Closes whichever project dialog is open: read-only mode starts with none (F-703). */
+export function closeProjectDialog(): void {
+  projectStore().getState().closeDialog();
 }

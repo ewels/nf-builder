@@ -218,3 +218,21 @@ describe("F-202 project UI", () => {
     expect(dialog.close).not.toHaveBeenCalled();
   });
 });
+
+describe("F-703 read-only project panel", () => {
+  it("F-703 UX-04: the read-only project panel lists stored projects with no New, Rename or Delete, and says when there are none", () => {
+    const listed = switcher({
+      readOnly: true,
+      projects: [meta("a", "a"), meta("b", "b")],
+      current: meta("a", "a"),
+    });
+    expect(listed).toContain(">a</button>");
+    expect(listed).toContain(">b</button>");
+    for (const gone of ["New project", "Rename project", "Delete project"])
+      expect(listed).not.toContain(gone);
+    expect(listed).not.toContain("project-actions");
+    const none = switcher({ readOnly: true });
+    expect(none).toContain("No projects in this browser.");
+    expect(switcher()).not.toContain("No projects in this browser.");
+  });
+});

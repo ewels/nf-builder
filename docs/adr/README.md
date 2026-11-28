@@ -58,4 +58,5 @@ Process: [0001](0001-record-decisions-as-adrs.md). Template: [template.md](templ
 | [0052](0052-layout-sidecar.md) | Store node positions in a layout sidecar owned by the engine, and place new nodes with ELK in its own worker | Accepted (agent) |
 | [0053](0053-zip-import.md) | Import zips in the engine worker with fflate, one shared set of limits, ignore rules and text checks | Accepted (agent) |
 | [0054](0054-problems-panel.md) | List problems in a panel pulled per revision, apply quick fixes through the engine, and open files in code-only tabs | Accepted (agent) |
+| [0056](0056-read-only-below-1024.md) | Make the app read-only below 1024 px with a width media query, canvas and details only, and refusals in the page's stores | Accepted (agent) |
 | [0057](0057-github-import.md) | Import public GitHub repositories from the document: two API calls, raw downloads, shared filters and a recorded source | Accepted (agent) |

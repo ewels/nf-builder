@@ -4,6 +4,7 @@ import { installedPackVersions } from "@nf-builder/engine";
 import { type JSX, useEffect, useRef } from "react";
 import { ImportReportDialog } from "../import/import-report-dialog";
 import { useGithubImport } from "../import/use-github-import";
+import { useReadOnly } from "../read-only/read-only-store";
 import { focusTarget } from "./focus-target";
 import { NewProjectDialog } from "./new-project-dialog";
 import { DeleteProjectDialog, ProjectNameDialog } from "./project-dialogs";
@@ -15,6 +16,7 @@ import { useZipImport } from "./zip-import";
 const languageVersions = installedPackVersions();
 
 export function ProjectControls(): JSX.Element {
+  const readOnly = useReadOnly();
   const status = useProjects((s) => s.status);
   const opener = useProjects((s) => s.opener);
   const dialog = useProjects((s) => s.dialog);
@@ -45,13 +47,14 @@ export function ProjectControls(): JSX.Element {
         projects={status.projects}
         current={current}
         buttonRef={button}
+        readOnly={readOnly}
         disabled={status.storage !== "ready"}
         onOpen={(id) => void open(id).catch(() => undefined)} // the status carries `openError`
         onNew={() => showDialog({ kind: "new", route: "blank" })}
         onRename={() => showDialog({ kind: "rename" })}
         onDelete={() => showDialog({ kind: "delete" })}
       />
-      {dialog?.kind === "new" ? (
+      {!readOnly && dialog?.kind === "new" ? (
         <NewProjectDialog
           languageVersions={languageVersions}
           useTemplates={useTemplates}
@@ -66,17 +69,17 @@ export function ProjectControls(): JSX.Element {
           onClose={closeDialog}
         />
       ) : null}
-      {importReport !== null && dialog === null ? (
+      {!readOnly && importReport !== null && dialog === null ? (
         <ImportReportDialog report={importReport} onClose={closeImportReport} />
       ) : null}
-      {dialog?.kind === "rename" && current ? (
+      {!readOnly && dialog?.kind === "rename" && current ? (
         <ProjectNameDialog
           initialName={current.name}
           onSubmit={(name) => rename(current.id, name)}
           onClose={closeDialog}
         />
       ) : null}
-      {dialog?.kind === "delete" && current ? (
+      {!readOnly && dialog?.kind === "delete" && current ? (
         <DeleteProjectDialog
           project={current}
           onConfirm={() => remove(current.id)}

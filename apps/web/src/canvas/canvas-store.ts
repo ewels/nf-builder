@@ -23,6 +23,7 @@ import {
 import { useStore } from "zustand";
 import { createStore, type StoreApi } from "zustand/vanilla";
 import { getEngine, onEngineChange } from "../engine/engine-client";
+import { isReadOnly, READ_ONLY_REFUSAL } from "../read-only/read-only-store";
 import type { ViewMode } from "../views/view-mode";
 
 export interface WorkflowTab {
@@ -157,6 +158,8 @@ export interface WorkspaceActions {
   redo(session?: number): Promise<HistoryOutcome>;
   /** A code pane registers its flush, awaited before an undo or redo; returns the unregister function. */
   registerFlush(flush: () => Promise<void>): () => void;
+  /** Awaits every registered flush, so pending code edits are sent; one that fails doesn't stop the others (F-703). */
+  flushEdits(): Promise<void>;
   /** Selects a node and loads its details; null clears the selection. */
   select(id: string | null): Promise<void>;
   /**
@@ -277,6 +280,7 @@ const messageOf = (error: unknown): string =>
 
 export function createCanvasStore(
   engine: () => EngineApi,
+  readOnly: () => boolean = () => false,
 ): StoreApi<WorkspaceState & WorkspaceActions> {
   return createStore<WorkspaceState & WorkspaceActions>()((set, get) => {
     // a result for a superseded tab or project is dropped
@@ -400,6 +404,8 @@ export function createCanvasStore(
       replace: boolean,
       retried = false,
     ): Promise<void> {
+      // read-only writes nothing to the project: placements are shown, never saved (F-703, UX-04)
+      if (readOnly()) return;
       let notice: string | null = null;
       try {
         const result = await engine().setLayout({
@@ -500,6 +506,8 @@ export function createCanvasStore(
           return refusal("no-project", "The project changed.");
         if (summary === null)
           return refusal("no-project", "No project is open.");
+        // read when the task runs, so an edit flushed on the way to read-only still passes (F-703, UX-04)
+        if (readOnly()) return refusal("read-only", READ_ONLY_REFUSAL);
         const outcome = await call(summary.revision);
         const now = get().summary;
         if (now === null) return outcome;
@@ -526,8 +534,9 @@ export function createCanvasStore(
     }
 
     /** Sends the code panes' pending edits; outside the queue, as their send is queued itself. */
-    const flushPending = () =>
-      Promise.all([...flushes].map((flush) => flush().catch(() => {})));
+    const flushPending = async (): Promise<void> => {
+      await Promise.all([...flushes].map((flush) => flush().catch(() => {})));
+    };
 
     /** Adds `tab` once and shows it. */
     async function openTab(tab: WorkflowTab): Promise<void> {
@@ -774,6 +783,8 @@ export function createCanvasStore(
         return () => void flushes.delete(flush);
       },
 
+      flushEdits: flushPending,
+
       async select(id) {
         if (id === null) {
           clearSelection();
@@ -785,6 +796,7 @@ export function createCanvasStore(
       },
 
       async moveNodes(moves) {
+        if (readOnly()) return;
         const { content, tabs, activeTab } = get();
         const tab = tabs.find((t) => t.id === activeTab);
         if (content.status !== "ready" || tab === undefined) return;
@@ -842,7 +854,7 @@ export function createCanvasStore(
   });
 }
 
-export const canvasStore = createCanvasStore(getEngine);
+export const canvasStore = createCanvasStore(getEngine, isReadOnly);
 onEngineChange((change) => void canvasStore.getState().changed(change));
 
 export function useWorkspace<T>(

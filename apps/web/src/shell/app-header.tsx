@@ -18,6 +18,8 @@ interface AppHeaderProps {
   readonly storageNote: boolean;
   /** Opens the New project dialog on From a template (UX-60). */
   readonly onTemplates: () => void;
+  /** Below 1024 px (F-703, UX-04): no Templates, Import, Export or version selector. */
+  readonly readOnly?: boolean;
 }
 
 export function AppHeader({
@@ -28,6 +30,7 @@ export function AppHeader({
   storageWarning,
   storageNote,
   onTemplates,
+  readOnly = false,
 }: AppHeaderProps): JSX.Element {
   return (
     <header className="app-header">
@@ -45,27 +48,29 @@ export function AppHeader({
       </p>
       {storageWarning ? <StorageWarning usage={storageWarning} /> : null}
       {storageNote ? <PersistenceNote framed={isFramed()} /> : null}
-      <div className="header-actions">
-        <button type="button" className="header-button" onClick={onTemplates}>
-          Templates
-        </button>
-        <button type="button" className="header-button" disabled>
-          Import
-        </button>
-        <button type="button" className="header-button" disabled>
-          Export
-        </button>
-        <label className="version-picker">
-          <span className="version-label">Nextflow</span>
-          <select aria-label="Nextflow version">
-            {languageVersions.map((version) => (
-              <option key={version} value={version}>
-                {version}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
+      {readOnly ? null : (
+        <div className="header-actions">
+          <button type="button" className="header-button" onClick={onTemplates}>
+            Templates
+          </button>
+          <button type="button" className="header-button" disabled>
+            Import
+          </button>
+          <button type="button" className="header-button" disabled>
+            Export
+          </button>
+          <label className="version-picker">
+            <span className="version-label">Nextflow</span>
+            <select aria-label="Nextflow version">
+              {languageVersions.map((version) => (
+                <option key={version} value={version}>
+                  {version}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+      )}
     </header>
   );
 }

@@ -1435,3 +1435,110 @@ describe("F-209 history", () => {
     expect(store.getState().reveal?.seq).toBe(5);
   });
 });
+
+describe("F-703 read-only canvas store", () => {
+  const wf = [ref("main.nf", null)];
+  const stored: Positions = { a: { x: 1, y: 2 }, b: { x: 3, y: 4 } };
+
+  it("F-703 UX-04 AR-24 AR-23: read-only apply, undo and redo are refused with code read-only without calling the engine", async () => {
+    const { engine, log } = historic(wf, {});
+    const store = createCanvasStore(
+      () => engine,
+      () => true,
+    );
+    await store.getState().open(request);
+    const outcomes = [
+      await store.getState().apply(command),
+      await store.getState().undo(),
+      await store.getState().redo(),
+    ];
+    for (const o of outcomes) {
+      expect(o.ok).toBe(false);
+      if (o.ok) continue;
+      expect(o.code).toBe("read-only");
+      expect(o.message).toBe(
+        "Editing needs a larger screen or a wider window.",
+      );
+    }
+    expect(log).toEqual([]);
+  });
+
+  it("F-703 UX-04 F-309: a read-only quick fix is refused with code read-only without calling the engine", async () => {
+    const calls: string[] = [];
+    const engine = {
+      ...fake(wf).engine,
+      applyFix: async () => {
+        calls.push("applyFix");
+        return changeAt(2, wf);
+      },
+    } as unknown as EngineApi;
+    const store = createCanvasStore(
+      () => engine,
+      () => true,
+    );
+    await store.getState().open(request);
+    const outcome = await store
+      .getState()
+      .applyFix({ title: "x", path: "main.nf", edits: [] }, 1);
+    expect(outcome.ok === false && outcome.code).toBe("read-only");
+    expect(calls).toEqual([]);
+  });
+
+  it("F-703 UX-04 F-207: read-only placements are shown but never saved, and moves are ignored", async () => {
+    const { engine, writes } = fake(wf, {
+      positions: stored,
+      nodes: ["a", "b", "c"],
+    });
+    const store = createCanvasStore(
+      () => engine,
+      () => true,
+    );
+    await store.getState().open(request);
+    await store.getState().moveNodes({ a: { x: 50, y: 50 } });
+    await store.getState().placeNodes(
+      { tab: "main.nf#", revision: 1 },
+      {
+        positions: { c: { x: 9, y: 9 } },
+        saved: { c: { x: 9, y: 9 } },
+        replace: false,
+        notice: null,
+      },
+    );
+    const c = store.getState().content;
+    if (c.status !== "ready") throw new Error("not ready");
+    expect(c.positions).toEqual({ ...stored, c: { x: 9, y: 9 } });
+    expect(writes).toEqual([]);
+  });
+
+  it("F-703 F-209: flushEdits awaits every registered code-pane flush, and one failing flush doesn't stop the others", async () => {
+    const store = createCanvasStore(() => fake(wf).engine);
+    const done: string[] = [];
+    store.getState().registerFlush(async () => {
+      throw new Error("boom");
+    });
+    store.getState().registerFlush(async () => {
+      await new Promise((r) => setTimeout(r, 5));
+      done.push("b");
+    });
+    await expect(store.getState().flushEdits()).resolves.toBeUndefined();
+    expect(done).toEqual(["b"]);
+  });
+
+  it("F-703: once editable again, apply reaches the engine", async () => {
+    const { engine, log } = historic(wf, {
+      apply: async (r) => changeAt(r + 1, wf),
+    });
+    let readOnly = true;
+    const store = createCanvasStore(
+      () => engine,
+      () => readOnly,
+    );
+    await store.getState().open(request);
+    await store.getState().apply(command);
+    expect(log).toEqual([]);
+    readOnly = false;
+    const outcome = await store.getState().apply(command);
+    expect(outcome.ok).toBe(true);
+    expect(log).toEqual(["apply@1"]);
+  });
+});
