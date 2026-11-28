@@ -1331,6 +1331,7 @@ describe("F-209 history", () => {
         label: "legacy_count/main.nf",
         title: "modules/local/legacy_count/main.nf",
         mode: "code",
+        readOnly: null,
       },
     ]);
     expect(s.activeTab).toBe(files[0]?.id);
@@ -1411,6 +1412,52 @@ describe("F-209 history", () => {
     expect(store.getState().tabs.map((t) => t.id)).toEqual(["main.nf#"]);
     expect(store.getState().activeTab).toBe("main.nf#");
     expect(store.getState().content.status).toBe("ready");
+  });
+
+  it("F-210 UX-20: closeTab closes a file tab and activates its previous neighbour, else the next, else none; workflow tabs stay", async () => {
+    const wf = [ref("main.nf", null)];
+    const { engine, calls } = fake(wf);
+    const store = createCanvasStore(() => engine);
+    await store.getState().open(request);
+    await store.getState().openFile("a.config");
+    await store.getState().openFile("b.config");
+    await store.getState().openFile("c.config");
+    // a background tab goes without moving the active one
+    await store.getState().closeTab("file:a.config");
+    expect(store.getState().activeTab).toBe("file:c.config");
+    // the active tab goes: the previous tab takes over
+    await store.getState().closeTab("file:c.config");
+    expect(store.getState().activeTab).toBe("file:b.config");
+    // a workflow tab can't be closed here
+    await store.getState().closeTab("main.nf#");
+    expect(store.getState().tabs.map((t) => t.id)).toEqual([
+      "main.nf#",
+      "file:b.config",
+    ]);
+    await store.getState().closeTab("file:b.config");
+    expect(store.getState().activeTab).toBe("main.nf#");
+    expect(store.getState().content.status).toBe("ready");
+    // the first tab goes when it is active: the next takes over, and with none left nothing is active
+    await store.getState().openFile("d.config");
+    await store.getState().selectTab("file:d.config");
+    await store.getState().closeTab("file:d.config");
+    expect(store.getState().activeTab).toBe("main.nf#");
+    expect(calls.length).toBeGreaterThan(0);
+  });
+
+  it("F-210 IO-02: a .nf-builder/ file tab is read-only, any other is not", async () => {
+    const store = createCanvasStore(() => fake([ref("main.nf", null)]).engine);
+    await store.getState().open(request);
+    await store.getState().openFile(".nf-builder/layout.json");
+    await store.getState().openFile("README.md");
+    const byPath = Object.fromEntries(
+      store.getState().tabs.map((t) => [t.path, t.readOnly]),
+    );
+    expect(byPath).toEqual({
+      "main.nf": null,
+      ".nf-builder/layout.json": "managed",
+      "README.md": null,
+    });
   });
 
   it("F-309 AR-30: revealCode and focusOn record requests with rising sequence numbers, holding offsets and ids, never text", async () => {

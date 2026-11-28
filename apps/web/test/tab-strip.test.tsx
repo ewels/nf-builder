@@ -12,6 +12,7 @@ const strip = (tabs: Parameters<typeof TabStripView>[0]["tabs"]) =>
     controls,
     onSelect: noop,
     onMode: noop,
+    onClose: noop,
   });
 
 const children = (element: ReactElement): ReactNode[] =>
@@ -29,6 +30,7 @@ describe("F-209 QA-10 tab strip", () => {
           workflow: null,
           label: "main.nf",
           mode: "graph",
+          readOnly: null,
         },
       ]),
     );

@@ -37,3 +37,7 @@
   position: absolute;
   inset: 0;
 }
+
+.code-pane-readonly {
+  color: var(--color-muted);
+}

@@ -3,6 +3,7 @@ import { useWorkspace, type WorkflowTab } from "../canvas/canvas-store";
 import { HistoryControls } from "../history/history-controls";
 import type { ViewMode } from "../views/view-mode";
 import { ViewModeToggle } from "../views/view-mode-toggle";
+import { GlyphIcon } from "./icons";
 
 export const workflowTabId = (id: string): string => `workflow-tab-${id}`;
 
@@ -16,12 +17,14 @@ export function TabStripView({
   controls,
   onSelect,
   onMode,
+  onClose,
 }: {
   readonly tabs: readonly WorkflowTab[];
   readonly activeTab: string | null;
   readonly controls: ReactNode;
   readonly onSelect: (id: string) => void;
   readonly onMode: (id: string, mode: ViewMode) => void;
+  readonly onClose: (id: string) => void;
 }): JSX.Element {
   const active = tabs.find((t) => t.id === activeTab);
   const move = (event: KeyboardEvent<HTMLDivElement>) => {
@@ -46,25 +49,37 @@ export function TabStripView({
       ) : (
         <div
           role="tablist"
-          aria-label="Workflows"
+          aria-label="Open workflows and files"
           className="workflow-tabs"
           onKeyDown={move}
         >
           {tabs.map((t) => (
-            <button
-              key={t.id}
-              type="button"
-              role="tab"
-              id={workflowTabId(t.id)}
-              className="workflow-tab"
-              title={t.title}
-              aria-selected={activeTab === t.id}
-              aria-controls="canvas-panel"
-              tabIndex={activeTab === t.id ? 0 : -1}
-              onClick={() => onSelect(t.id)}
-            >
-              {t.label}
-            </button>
+            <span key={t.id} className="workflow-tab-item">
+              <button
+                type="button"
+                role="tab"
+                id={workflowTabId(t.id)}
+                className="workflow-tab"
+                title={t.title}
+                aria-selected={activeTab === t.id}
+                aria-controls="canvas-panel"
+                tabIndex={activeTab === t.id ? 0 : -1}
+                onClick={() => onSelect(t.id)}
+              >
+                {t.label}
+              </button>
+              {t.kind === "file" ? (
+                <button
+                  type="button"
+                  className="workflow-tab-close"
+                  aria-label={`Close ${t.label}`}
+                  title={`Close ${t.label}`}
+                  onClick={() => onClose(t.id)}
+                >
+                  <GlyphIcon name="close" />
+                </button>
+              ) : null}
+            </span>
           ))}
         </div>
       )}
@@ -84,6 +99,7 @@ export function TabStrip(): JSX.Element {
   const activeTab = useWorkspace((s) => s.activeTab);
   const selectTab = useWorkspace((s) => s.selectTab);
   const setMode = useWorkspace((s) => s.setMode);
+  const closeTab = useWorkspace((s) => s.closeTab);
   return (
     <TabStripView
       tabs={tabs}
@@ -91,6 +107,7 @@ export function TabStrip(): JSX.Element {
       controls={<HistoryControls />}
       onSelect={(id) => void selectTab(id)}
       onMode={setMode}
+      onClose={(id) => void closeTab(id)}
     />
   );
 }

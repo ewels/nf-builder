@@ -35,6 +35,7 @@ describe("F-208 tab panel", () => {
       label: "nextflow.config",
       title: "nextflow.config",
       mode: "code",
+      readOnly: null,
     } as const;
     // the panel lays a file tab out in Code mode, which has no canvas and no divider
     const panel = html(file.mode);
@@ -49,6 +50,7 @@ describe("F-208 tab panel", () => {
           controls={null}
           onSelect={() => undefined}
           onMode={() => undefined}
+          onClose={() => undefined}
         />,
       );
     expect(strip(file)).not.toContain("view-mode");
