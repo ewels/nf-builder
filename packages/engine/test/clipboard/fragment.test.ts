@@ -73,6 +73,20 @@ describe("F-310 buildFragment", () => {
     expect(f.files.map((x) => x.path)).toEqual(["modules/local/size/main.nf"]);
   });
 
+  it("F-310: a definition at modules/main.nf or modules/local/main.nf doesn't copy its parent directory", async () => {
+    for (const path of ["modules/main.nf", "modules/local/main.nf"]) {
+      const dir = path.slice(0, path.lastIndexOf("/") + 1);
+      const state = await stateFor({
+        "main.nf": `include { P } from './${path}'\n\nworkflow {\n    P()\n}\n`,
+        [path]: "process P {\n    script:\n    'p'\n}\n",
+        [`${dir}neighbour.nf`]: "process N {\n    script:\n    'n'\n}\n",
+        "modules/local/q/main.nf": "process Q {\n    script:\n    'q'\n}\n",
+      });
+      const f = buildFragment(state, request([node(state, "P@1").id]), VERSION);
+      expect(f.files.map((x) => x.path)).toEqual([path]);
+    }
+  });
+
   it("F-310: transitive local includes and the module directory come along", async () => {
     const state = await stateFor({
       "main.nf":

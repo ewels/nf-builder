@@ -146,6 +146,13 @@ export function planPaste(
         throw invalid(
           `${callee} is defined in the same file as the workflow it was copied from. Move ${callee} to its own module to copy it.`,
         );
+      if (
+        node.kind === "process" &&
+        (used.has(callee) || callsAlready(def, callee))
+      )
+        throw invalid(
+          `\`${callee}\` is already called in ${def.name ? `workflow \`${def.name.name}\`` : "the entry workflow"}, and Nextflow can call a process only once per workflow. \`${callee}\` is defined in this file, so it can't be included again under another name. Move it to its own module to call it twice.`,
+        );
       used.add(callee);
       nodes.push({ source: node.source, bound: callee });
       continue;

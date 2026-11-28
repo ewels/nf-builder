@@ -142,6 +142,27 @@ describe("F-310 planPaste", () => {
     );
   });
 
+  it("F-310 ADR-0039: an inline process pasted into the workflow that already calls it is refused without suggesting an include", async () => {
+    const state = await stateFor({
+      "main.nf":
+        "process P {\n    script:\n    'p'\n}\n\nworkflow {\n    P()\n}\n",
+    });
+    const f = buildFragment(
+      state,
+      {
+        path: "main.nf",
+        workflow: null,
+        nodes: [node(state, "P@1").id],
+        positions: {},
+      },
+      VERSION,
+    );
+    const r = refusal(() => planPaste(state, f, entry, true));
+    expect(r.message).toContain("`P` is already called");
+    expect(r.message).toContain("defined in this file");
+    expect(r.message).not.toContain("include {");
+  });
+
   it("F-310: a fragment of another language version refuses, naming both", async () => {
     const f = await fragment();
     expect(() => checkVersion(f, VERSION)).not.toThrow();

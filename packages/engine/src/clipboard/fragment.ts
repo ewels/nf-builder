@@ -7,9 +7,9 @@ import { graphNode, locateWorkflow } from "../edit/workflow";
 import type { Point, Positions } from "../layout";
 
 /** IO-12 for one file, and the limits of one copy (1 MB is 1,000,000 bytes). */
-export const MAX_FILE_BYTES = 1_000_000;
-export const MAX_FILES = 200;
-export const MAX_TOTAL_BYTES = 5_000_000;
+const MAX_FILE_BYTES = 1_000_000;
+const MAX_FILES = 200;
+const MAX_TOTAL_BYTES = 5_000_000;
 
 export interface CopyRequest {
   /** The workflow the nodes are in. */
@@ -78,8 +78,9 @@ const invalid = (message: string, path?: string) =>
 
 const bytes = (text: string): number => new TextEncoder().encode(text).length;
 
+/** `main.nf` of a module directory `modules/<...>/<name>/`: at least two folders below `modules` or `subworkflows`. */
 const isModuleMain = (path: string): boolean =>
-  /^(modules|subworkflows)\/(.+\/)?main\.nf$/.test(path);
+  /^(modules|subworkflows)(\/[^/]+){2,}\/main\.nf$/.test(path);
 
 /**
  * The files a copy carries: each definition's file and, transitively, the project files it includes; for a
