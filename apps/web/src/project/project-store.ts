@@ -81,7 +81,7 @@ export interface ProjectStoreDeps {
   /** The template list, requested up front like the palette so the New project dialog finds it ready (F-203). */
   readonly templates: (version: string) => Promise<unknown>;
   readonly storage: () => StorageManager | undefined;
-  /** Whether the app is read-only (F-703, UX-04); create, rename, delete are refused then. Default: the page's mode. */
+  /** Whether the app is read-only (F-703, UX-04); create, rename, delete and GitHub import are refused then. Default: the page's mode. */
   readonly readOnly?: () => boolean;
   readonly languageVersion: string | undefined;
   /** The canvas (F-205): shown every project the worker opens, and told when the stored project is gone. */
@@ -217,6 +217,7 @@ export function createProjectStore(
       },
 
       async importGithub(run, o) {
+        refuseWhenReadOnly();
         const files = await download(deps.github(), run.review, run.plan, o);
         const workspace = deps.workspace();
         const { input, listing } = run.review;

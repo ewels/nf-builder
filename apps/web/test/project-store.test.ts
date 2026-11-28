@@ -455,6 +455,16 @@ describe("F-401 project store GitHub import", () => {
     expect(f.store.getState().importReport).toBeNull();
   });
 
+  it("F-401 F-703 UX-04: read-only importGithub is refused before any download or import", async () => {
+    const f = fixture(ready(), undefined, () => true);
+    await expect(
+      f.store.getState().importGithub(run(), options()),
+    ).rejects.toThrow("Editing needs a larger screen or a wider window.");
+    expect(f.github.download).not.toHaveBeenCalled();
+    expect(f.workspace.importProject).not.toHaveBeenCalled();
+    expect(f.store.getState().importReport).toBeNull();
+  });
+
   it("F-401 UX-61: a report that fails leaves the import standing", async () => {
     const f = fixture(ready());
     (f.workspace.report as ReturnType<typeof vi.fn>).mockResolvedValue({
