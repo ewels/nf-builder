@@ -162,6 +162,41 @@ describe("F-113 engine client", () => {
     close();
   });
 
+  it("F-304 UX-43 UX-44: the facade forwards parseDeclaration, formatDeclaration and declarationText across the bridge", async () => {
+    const { engine, close } = connected();
+    const request = { path: "main.nf", name: "P", text: "" };
+    expect(await engine.parseDeclaration(request)).toMatchObject({
+      code: "no-project",
+    });
+    await engine.open({
+      version,
+      files: [
+        {
+          path: "main.nf",
+          text: "nextflow.enable.types = true\n\nprocess P {\n    input:\n    x: String\n\n    script:\n    'p'\n}\n\nworkflow {\n    P('a')\n}\n",
+        },
+      ],
+    });
+    const projection = await engine.project("main.nf", null);
+    const node =
+      "projection" in projection ? projection.projection?.nodes[0] : undefined;
+    const form = await engine.declarationForm("main.nf", null, node?.id ?? "");
+    if (!("form" in form)) throw new Error("no form");
+    expect(form.text.startsWith("process P")).toBe(true);
+    const parsed = await engine.parseDeclaration({
+      ...request,
+      text: form.text,
+    });
+    expect(parsed).toMatchObject({ name: "P", form: { name: "P" } });
+    expect(
+      await engine.formatDeclaration({ ...request, text: form.text }),
+    ).toMatchObject({ text: form.text });
+    expect(
+      await engine.declarationText({ ...request, base: null, form: form.form }),
+    ).toMatchObject({ text: form.text });
+    close();
+  });
+
   it("F-202 ADR-0003: watch receives status pushes across Comlink; a second watch releases the first listener", async () => {
     const { engine, close } = connected();
     const first: WorkspaceStatus[] = [];

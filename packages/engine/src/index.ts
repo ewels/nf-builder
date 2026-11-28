@@ -243,6 +243,8 @@ export type {
   ConfigViewResult,
   ConnectionTargetsRequest,
   ConnectionTargetsResult,
+  DeclarationCode,
+  DeclarationCodeResult,
   DeclarationFormResult,
   DiagnosticsResult,
   EngineApi,

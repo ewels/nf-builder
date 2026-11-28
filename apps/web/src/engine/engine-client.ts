@@ -37,6 +37,9 @@ export function connectEngine(
       race(remote.details(path, workflow, node)),
     declarationForm: (path, workflow, node) =>
       race(remote.declarationForm(path, workflow, node)),
+    parseDeclaration: (request) => race(remote.parseDeclaration(request)),
+    formatDeclaration: (request) => race(remote.formatDeclaration(request)),
+    declarationText: (request) => race(remote.declarationText(request)),
     outline: (path) => race(remote.outline(path)),
     report: () => race(remote.report()),
     configView: (path) => race(remote.configView(path)),

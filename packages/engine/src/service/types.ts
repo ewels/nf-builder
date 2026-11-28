@@ -177,6 +177,26 @@ export interface DeclarationFormResult {
   readonly target: { readonly path: string; readonly name: string };
   readonly form: DeclarationForm;
   readonly choices: FormChoices;
+  /** The declaration's text as the Code tab shows it, doc comment included, and where it sits in its file (F-304, UX-43). */
+  readonly text: string;
+  readonly span: { readonly start: number; readonly end: number };
+}
+
+/** A declaration's text as the Code tab holds it (F-304, UX-43). */
+export interface DeclarationCode {
+  readonly path: string;
+  /** The declaration as it is named in the project now. */
+  readonly name: string;
+  readonly text: string;
+}
+
+/** The Configure form of a Code tab text (F-304, UX-44). */
+export interface DeclarationCodeResult {
+  readonly revision: number;
+  /** The name the text gives the declaration. */
+  readonly name: string;
+  readonly form: DeclarationForm;
+  readonly choices: FormChoices;
 }
 
 export interface NodeDetailsResult {
@@ -262,6 +282,25 @@ export interface EngineApi {
     workflow: string | null,
     node: string,
   ): Promise<DeclarationFormResult | EngineRefusal>;
+  /** The form of the text a Code tab holds; `does-not-parse` with problems on the text's own lines when it isn't one typed process of the declaration's kind (F-304, UX-44). Read-only. */
+  parseDeclaration(
+    request: DeclarationCode,
+  ): Promise<DeclarationCodeResult | EngineRefusal>;
+  /** The text printed as `nextflow lint -format` lays it out, without a final newline (F-304, UX-43); refused as `parseDeclaration` is. Read-only. */
+  formatDeclaration(
+    request: DeclarationCode,
+  ): Promise<
+    { readonly revision: number; readonly text: string } | EngineRefusal
+  >;
+  /** The Code tab's text for a form: `UpdateDeclaration` applied to the declaration alone (to `base` text, or to the project's own when null) and its text read back; nothing changes (F-304, UX-44). */
+  declarationText(request: {
+    readonly path: string;
+    readonly name: string;
+    readonly base: string | null;
+    readonly form: DeclarationForm;
+  }): Promise<
+    { readonly revision: number; readonly text: string } | EngineRefusal
+  >;
   /** The config editor's view of a config file: cards, rows, selector counts and the diagnostics in them (F-601). `not-found` for a path that isn't a config file. */
   configView(path: string): Promise<ConfigViewResult | EngineRefusal>;
   /** The config catalogue as a clone-safe tree, for descriptions and Add scope (F-601). Needs no open project; rejects for an unknown version. */
