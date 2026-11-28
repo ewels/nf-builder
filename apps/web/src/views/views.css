@@ -85,3 +85,47 @@
   font-size: 13px;
   color: var(--color-text);
 }
+
+.canvas-with-path {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+.breadcrumb {
+  font-size: 12px;
+  padding: var(--space-1) var(--space-4);
+  background: var(--color-surface-muted);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.breadcrumb ol {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.breadcrumb li {
+  display: inline-flex;
+  align-items: center;
+}
+
+.breadcrumb button {
+  font: inherit;
+  padding: 0 var(--space-1);
+  color: var(--color-accent);
+  background: none;
+  border: 0;
+  border-radius: 4px;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.breadcrumb [aria-current="page"] {
+  padding: 0 var(--space-1);
+  font-weight: 600;
+}

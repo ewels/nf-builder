@@ -31,6 +31,8 @@ export function CanvasHost(): JSX.Element {
   const disconnect = useWorkspace((s) => s.disconnect);
   const connectionTargets = useWorkspace((s) => s.connectionTargets);
   const canvasNotice = useWorkspace((s) => s.canvasNotice);
+  const navigationNotice = useWorkspace((s) => s.navigationNotice);
+  const openCallee = useWorkspace((s) => s.openCallee);
   const diagnostics = useProblems((s) => s.diagnostics);
   const diagnosedAt = useProblems((s) => s.revision);
   const shownRevision = content.status === "ready" ? content.revision : null;
@@ -72,15 +74,19 @@ export function CanvasHost(): JSX.Element {
             onConnectionTargets={connectionTargets}
             onConnect={(from, to) => void connect(from, to)}
             onDisconnect={(port) => void disconnect(port)}
+            onOpenCallee={(node) => void openCallee(node)}
             onOpenNode={
               readOnly
                 ? undefined
                 : (node, opener) =>
                     void openPopup({ tab: activeTab ?? "", node, opener })
             }
-            notices={[layoutNotice, content.notice, canvasNotice].filter(
-              (m): m is string => m !== null,
-            )}
+            notices={[
+              layoutNotice,
+              content.notice,
+              canvasNotice,
+              navigationNotice,
+            ].filter((m): m is string => m !== null)}
             onMove={(moves) => void moveNodes(moves)}
             onPlace={(placement) =>
               void placeNodes(

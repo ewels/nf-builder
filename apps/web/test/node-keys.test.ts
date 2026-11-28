@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, expect, it } from "vitest";
-import { opensPopup } from "../src/canvas/node-keys";
+import { openNode, opensPopup } from "../src/canvas/node-keys";
 
 const node = (id: string, inner = "span") => {
   const el = document.createElement("div");
@@ -37,5 +37,27 @@ describe("F-303 node keys", () => {
   it("F-303 UX-40: a target outside every node opens nothing", () => {
     const outside = document.createElement("div");
     expect(opensPopup({ key: "Enter", target: outside }, "n1")).toBeNull();
+  });
+});
+
+describe("F-307 UX-40 UX-50: one handler routes opening a node", () => {
+  const calls: string[] = [];
+  const handlers = {
+    onOpenCallee: (id: string) => calls.push(`tab:${id}`),
+    onOpenNode: (id: string) => calls.push(`popup:${id}`),
+  };
+
+  it("F-307 UX-50: a workflow node opens its tab, even read-only (no popup handler)", () => {
+    calls.length = 0;
+    openNode(true, "w", null, handlers);
+    openNode(true, "w", null, { onOpenCallee: handlers.onOpenCallee });
+    expect(calls).toEqual(["tab:w", "tab:w"]);
+  });
+
+  it("F-303 UX-40: a process node opens its popup, and nothing read-only", () => {
+    calls.length = 0;
+    openNode(false, "p", null, handlers);
+    openNode(false, "p", null, { onOpenCallee: handlers.onOpenCallee });
+    expect(calls).toEqual(["popup:p"]);
   });
 });
