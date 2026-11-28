@@ -133,6 +133,8 @@ export type {
   FileTreeRow,
   ReadOnlyReason,
 } from "./files/types";
+export { formChanged, inputOrigins, isIdentifier } from "./form/form-diff";
+export { type PopupTarget, popupTarget } from "./form/popup-target";
 export {
   EMPTY_HISTORY,
   type HistoryLimits,

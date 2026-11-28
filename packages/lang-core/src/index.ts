@@ -58,6 +58,22 @@ export type {
   ConfigScopeForm,
   ConfigValueKind,
 } from "./config.ts";
+export type {
+  CodeRow,
+  DeclarationForm,
+  DirectiveChoice,
+  DirectiveRow,
+  FieldProblem,
+  FormChoices,
+  FormField,
+  FormSection,
+  InputRow,
+  OutputRow,
+  StageChoice,
+  StageRow,
+  TopicRow,
+  TypedProcessForm,
+} from "./declaration-form.ts";
 export type { Diagnostic, DiagnosticSeverity, QuickFix } from "./diagnostic.ts";
 export {
   type AddCall,
