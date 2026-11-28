@@ -660,9 +660,11 @@ export function assertSequences(
   );
 }
 
-/** What has to happen first for a kind to have something to act on: a plugin is removed after one is added. */
+/** What has to happen first for a kind to have something to act on: a plugin is removed after one is added, a process is edited after one is created. */
 const PRELUDE: Partial<Record<string, string>> = {
   removeConfigPlugin: "addConfigPlugin",
+  // a pin with no typed process gets a real typed scaffold first (F-301), then edits it
+  updateDeclaration: "createProcess",
 };
 
 /**
