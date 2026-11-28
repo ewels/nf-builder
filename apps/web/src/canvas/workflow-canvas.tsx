@@ -1,15 +1,20 @@
 // The canvas of one workflow, in a lazily loaded chunk (F-205, QA-01, ADR 0003): React Flow stays out of the initial JS.
 import {
+  type ConnectionTarget,
   canvasView,
+  type PortRef,
   type Positions,
   type Projection,
   unplaced,
 } from "@nf-builder/engine";
 import {
   Background,
+  type Connection,
+  ConnectionMode,
   ControlButton,
   Controls,
   MiniMap,
+  type OnConnectStart,
   type OnNodesChange,
   ReactFlow,
   ReactFlowProvider,
@@ -21,6 +26,7 @@ import "@xyflow/react/dist/style.css";
 import {
   type DragEvent,
   type JSX,
+  type KeyboardEvent,
   type MouseEvent,
   useEffect,
   useMemo,
@@ -33,6 +39,13 @@ import { autoLayout, placedNodes, placeMissing } from "../layout/layout-flow";
 import { hasPaletteDrag, readPaletteDrag } from "../palette/palette-drag";
 import { NODE_TYPES } from "./canvas-nodes";
 import type { Placement } from "./canvas-store";
+import {
+  ConnectTargetsContext,
+  portRefOfHandle,
+  type TargetStatusMap,
+  targetStatusMap,
+} from "./connect-targets";
+import { edgeKeyAction } from "./edge-keys";
 import { EDGE_TYPES } from "./flow-edge";
 import {
   type CanvasFlowEdge,
@@ -48,7 +61,7 @@ const NODE_DESCRIPTION =
 /** Read-only (F-703): nodes don't move, so the description doesn't offer it. */
 const NODE_DESCRIPTION_READ_ONLY = "Press enter or space to select this node.";
 
-/** Sentence-case labels with no delete wording (nodes can't be deleted yet) and none that offers to select an edge (edges aren't selectable). */
+/** Sentence-case labels with no node delete wording (nodes can't be deleted yet); an edge is disconnected with Delete, which its own label says. */
 const CANVAS_ARIA_LABELS = {
   "node.a11yDescription.default": NODE_DESCRIPTION,
   "node.a11yDescription.keyboardDisabled": NODE_DESCRIPTION,
@@ -103,6 +116,16 @@ interface WorkflowCanvasProps {
   readonly onMove: (moves: Positions) => void;
   /** The result of a layout run on this canvas. */
   readonly onPlace: (placement: Placement) => void;
+  /** Edge id to the message of the mismatch diagnostic on its target port (UX-24, LA-32). */
+  readonly mismatches: ReadonlyMap<string, string>;
+  /** Asks the engine for the status of every input port while an output port is dragged; null when it can't answer (F-302). */
+  readonly onConnectionTargets: (
+    from: PortRef,
+  ) => Promise<readonly ConnectionTarget[] | null>;
+  /** An output port was dropped on an input port (F-302, UX-25). */
+  readonly onConnect: (from: PortRef, to: PortRef) => void;
+  /** The selected or focused edge's target port is disconnected (F-302, UX-70). */
+  readonly onDisconnect: (port: PortRef) => void;
 }
 
 // the newest focus request acted on: a canvas mounted later (another tab) doesn't repeat it
@@ -123,6 +146,10 @@ function CanvasInner({
   notices,
   onMove,
   onPlace,
+  mismatches,
+  onConnectionTargets,
+  onConnect,
+  onDisconnect,
 }: WorkflowCanvasProps): JSX.Element {
   const view = useMemo(
     () => canvasView(projection, { portLabels }),
@@ -223,7 +250,84 @@ function CanvasInner({
         moves[c.id] = c.position;
     if (Object.keys(moves).length > 0) onMove(moves);
   };
-  const edges = useMemo(() => toFlowEdges(view, selected), [view, selected]);
+  // the edge selected on the canvas, to disconnect; React Flow's own edge selection stays off (F-206, F-302)
+  const [selectedEdge, setSelectedEdge] = useState<string | null>(null);
+  const edgeIds = useMemo(() => new Set(view.edges.map((e) => e.id)), [view]);
+  useEffect(() => {
+    if (selectedEdge !== null && !edgeIds.has(selectedEdge))
+      setSelectedEdge(null);
+  }, [selectedEdge, edgeIds]);
+  const edges = useMemo(
+    () =>
+      toFlowEdges(view, selected, mismatches, {
+        selectedEdge,
+        deletable: !readOnly,
+      }),
+    [view, selected, mismatches, selectedEdge, readOnly],
+  );
+  // while an output port is dragged: the engine's status for every input port. Until it answers, every target looks normal
+  const [targets, setTargets] = useState<TargetStatusMap | null>(null);
+  const dragging = useRef(0);
+  const onConnectStart: OnConnectStart = (_event, params) => {
+    const from =
+      params.handleType === "source" && params.nodeId !== null
+        ? portRefOfHandle(params.nodeId, params.handleId)
+        : null;
+    const mine = ++dragging.current;
+    if (from === null) return;
+    void onConnectionTargets(from).then((answer) => {
+      if (mine === dragging.current && answer !== null)
+        setTargets(targetStatusMap(answer));
+    });
+  };
+  const endDrag = () => {
+    dragging.current++;
+    setTargets(null);
+  };
+  // a target the dry run refused can't take the drop; mismatched ones can (LA-29)
+  const isValidConnection = (c: {
+    target: string;
+    targetHandle?: string | null;
+    source: string;
+  }) => {
+    if (c.source === c.target) return false;
+    const to = portRefOfHandle(c.target, c.targetHandle);
+    if (to === null) return false;
+    return targets?.get(to.node)?.get(to.port) !== "refused";
+  };
+  const connected = (c: Connection) => {
+    const from = portRefOfHandle(c.source, c.sourceHandle);
+    const to = portRefOfHandle(c.target, c.targetHandle);
+    if (from !== null && to !== null) onConnect(from, to);
+  };
+  const onKeyDown = (event: KeyboardEvent) => {
+    const target = event.target as HTMLElement;
+    const onEdge = target.closest<HTMLElement>(".react-flow__edge");
+    const id = onEdge?.getAttribute("data-id") ?? null;
+    // a key typed in a field is the field's
+    if (
+      id === null &&
+      target.closest("input, textarea, select, button, [contenteditable]")
+    )
+      return;
+    const edge = id ?? selectedEdge;
+    const action = edgeKeyAction(event.key, readOnly);
+    if (action === null || (edge === null && action !== "clear")) return;
+    if (action === "clear") {
+      setSelectedEdge(null);
+      return;
+    }
+    const found = view.edges.find((e) => e.id === edge);
+    if (found === undefined) return;
+    event.preventDefault();
+    if (action === "select") {
+      setSelectedEdge(found.id);
+      onSelect(null);
+    } else {
+      setSelectedEdge(null);
+      onDisconnect({ node: found.target, port: found.targetPort });
+    }
+  };
   // shown at the pointer, outside the zoomed viewport so it stays readable (UX-24)
   const [tooltip, setTooltip] = useState<{
     text: string;
@@ -354,12 +458,13 @@ function CanvasInner({
     }
   };
   return (
-    // biome-ignore lint/a11y/noStaticElementInteractions: a drop target for palette drags; the keyboard way is Enter on the palette item (UX-15)
+    // biome-ignore lint/a11y/noStaticElementInteractions: a drop target for palette drags (the keyboard way is Enter on the palette item, UX-15) and the keys of a focused or selected edge (F-302)
     <div
       ref={host}
       className="workflow-canvas"
       onDragOver={onDragOver}
       onDrop={onDrop}
+      onKeyDown={onKeyDown}
       data-canvas-state={ready ? "ready" : "loading"}
     >
       <div role="status" className="canvas-notices">
@@ -368,60 +473,55 @@ function CanvasInner({
           <p key={text}>{text}</p>
         ))}
       </div>
-      <ReactFlow
-        nodes={nodes}
-        onNodesChange={onNodesChange}
-        edges={edges}
-        elevateEdgesOnSelect={false}
-        nodeTypes={NODE_TYPES}
-        edgeTypes={EDGE_TYPES}
-        forceColorMode="light"
-        fitView
-        fitViewOptions={FIT}
-        nodesDraggable={!readOnly}
-        nodesConnectable={false}
-        multiSelectionKeyCode={null}
-        selectionKeyCode={null}
-        onNodeClick={(_event, n) => onSelect(n.id)}
-        onPaneClick={() => onSelect(null)}
-        deleteKeyCode={null}
-        ariaLabelConfig={readOnly ? READ_ONLY_ARIA_LABELS : CANVAS_ARIA_LABELS}
-        attributionPosition="bottom-center"
-        onEdgeMouseEnter={showTooltip}
-        onEdgeMouseMove={showTooltip}
-        onEdgeMouseLeave={() => setTooltip(null)}
-      >
-        <Background />
-        <Controls showInteractive={false} fitViewOptions={FIT}>
-          <ControlButton
-            onClick={() => onPortLabelsChange(!portLabels)}
-            aria-pressed={portLabels}
-            title="Port labels"
-            aria-label="Port labels"
-          >
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 16 16"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              aria-hidden="true"
-              focusable="false"
-            >
-              <path d="M2 4h3M7 4h7M2 8h3M7 8h7M2 12h3M7 12h7" />
-            </svg>
-          </ControlButton>
-          {readOnly ? null : (
+      <ConnectTargetsContext.Provider value={targets}>
+        <ReactFlow
+          nodes={nodes}
+          onNodesChange={onNodesChange}
+          edges={edges}
+          elevateEdgesOnSelect={false}
+          nodeTypes={NODE_TYPES}
+          edgeTypes={EDGE_TYPES}
+          forceColorMode="light"
+          fitView
+          fitViewOptions={FIT}
+          nodesDraggable={!readOnly}
+          nodesConnectable={!readOnly}
+          connectionMode={ConnectionMode.Strict}
+          isValidConnection={isValidConnection}
+          onConnectStart={onConnectStart}
+          onConnect={connected}
+          onConnectEnd={endDrag}
+          multiSelectionKeyCode={null}
+          selectionKeyCode={null}
+          onNodeClick={(_event, n) => {
+            setSelectedEdge(null);
+            onSelect(n.id);
+          }}
+          onEdgeClick={(_event, edge) => {
+            if (readOnly) return;
+            setSelectedEdge(edge.id);
+            onSelect(null);
+          }}
+          onPaneClick={() => {
+            setSelectedEdge(null);
+            onSelect(null);
+          }}
+          deleteKeyCode={null}
+          ariaLabelConfig={
+            readOnly ? READ_ONLY_ARIA_LABELS : CANVAS_ARIA_LABELS
+          }
+          attributionPosition="bottom-center"
+          onEdgeMouseEnter={showTooltip}
+          onEdgeMouseMove={showTooltip}
+          onEdgeMouseLeave={() => setTooltip(null)}
+        >
+          <Background />
+          <Controls showInteractive={false} fitViewOptions={FIT}>
             <ControlButton
-              onClick={() => void runAutoLayout()}
-              title={
-                several ? "Auto-layout selected nodes" : "Auto-layout all nodes"
-              }
-              aria-label={
-                several ? "Auto-layout selected nodes" : "Auto-layout all nodes"
-              }
+              onClick={() => onPortLabelsChange(!portLabels)}
+              aria-pressed={portLabels}
+              title="Port labels"
+              aria-label="Port labels"
             >
               <svg
                 width="14"
@@ -431,17 +531,46 @@ function CanvasInner({
                 stroke="currentColor"
                 strokeWidth="1.5"
                 strokeLinecap="round"
-                strokeLinejoin="round"
                 aria-hidden="true"
                 focusable="false"
               >
-                <path d="M2 3h4v3H2zM10 2h4v3h-4zM10 11h4v3h-4zM2 10h4v3H2zM6 4.5h4M6 11.5h4" />
+                <path d="M2 4h3M7 4h7M2 8h3M7 8h7M2 12h3M7 12h7" />
               </svg>
             </ControlButton>
-          )}
-        </Controls>
-        {readOnly ? null : <MiniMap pannable zoomable />}
-      </ReactFlow>
+            {readOnly ? null : (
+              <ControlButton
+                onClick={() => void runAutoLayout()}
+                title={
+                  several
+                    ? "Auto-layout selected nodes"
+                    : "Auto-layout all nodes"
+                }
+                aria-label={
+                  several
+                    ? "Auto-layout selected nodes"
+                    : "Auto-layout all nodes"
+                }
+              >
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                  focusable="false"
+                >
+                  <path d="M2 3h4v3H2zM10 2h4v3h-4zM10 11h4v3h-4zM2 10h4v3H2zM6 4.5h4M6 11.5h4" />
+                </svg>
+              </ControlButton>
+            )}
+          </Controls>
+          {readOnly ? null : <MiniMap pannable zoomable />}
+        </ReactFlow>
+      </ConnectTargetsContext.Provider>
       {tooltip === null ? null : (
         <div
           role="tooltip"

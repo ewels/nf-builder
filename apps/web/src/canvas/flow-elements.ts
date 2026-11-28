@@ -17,6 +17,10 @@ type CanvasEdgeData = {
   tooltip: string;
   /** The edge touches the selected node (UX-24). */
   highlighted: boolean;
+  /** The edge the user selected on the canvas, to disconnect (F-302). */
+  selected: boolean;
+  /** The message of the type-mismatch diagnostic on the target port, or null (UX-24, LA-32). */
+  mismatch: string | null;
 } & Record<string, unknown>;
 export type CanvasFlowEdge = Edge<CanvasEdgeData, "flow">;
 
@@ -40,14 +44,23 @@ export function toFlowNodes(
   }));
 }
 
-/** Edges touching the selected node (highlighted) come last, so they paint above other edges but, with no z-index, below nodes (UX-24). */
+const NO_MISMATCHES: ReadonlyMap<string, string> = new Map();
+
+/**
+ * Edges touching the selected node (highlighted) come last, so they paint above other edges but, with no z-index,
+ * below nodes (UX-24); mismatched edges come after those, selected or not (F-302).
+ */
 export function toFlowEdges(
   view: CanvasView,
   selected: string | null,
+  mismatches: ReadonlyMap<string, string> = NO_MISMATCHES,
+  options: { selectedEdge?: string | null; deletable?: boolean } = {},
 ): CanvasFlowEdge[] {
   const edges = view.edges.map((e): CanvasFlowEdge => {
     const highlighted =
       selected !== null && (e.source === selected || e.target === selected);
+    const mismatch = mismatches.get(e.id) ?? null;
+    const tooltip = mismatch === null ? e.tooltip : `${e.tooltip}\n${mismatch}`;
     return {
       id: e.id,
       type: "flow",
@@ -55,13 +68,25 @@ export function toFlowEdges(
       sourceHandle: outputHandle({ id: e.sourcePort }),
       target: e.target,
       targetHandle: inputHandle({ id: e.targetPort }),
-      data: { dataflow: e.dataflow, tooltip: e.tooltip, highlighted },
-      ariaLabel: e.tooltip,
+      data: {
+        dataflow: e.dataflow,
+        tooltip,
+        highlighted,
+        selected: options.selectedEdge === e.id,
+        mismatch,
+      },
+      ariaLabel:
+        options.deletable === true
+          ? `${tooltip}. Press Delete to disconnect.`
+          : tooltip,
       selectable: false,
     };
   });
-  return [
-    ...edges.filter((e) => e.data?.highlighted !== true),
-    ...edges.filter((e) => e.data?.highlighted === true),
-  ];
+  const order = (e: CanvasFlowEdge): number =>
+    e.data?.mismatch != null
+      ? 2
+      : e.data?.highlighted === true || e.data?.selected === true
+        ? 1
+        : 0;
+  return [0, 1, 2].flatMap((rank) => edges.filter((e) => order(e) === rank));
 }

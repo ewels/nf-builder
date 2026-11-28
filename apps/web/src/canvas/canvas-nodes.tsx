@@ -2,11 +2,13 @@
 import {
   CANVAS_METRICS,
   type CanvasAppearance,
+  type CanvasPortView,
   portY,
 } from "@nf-builder/engine";
 import { Handle, type NodeProps, Position } from "@xyflow/react";
-import type { CSSProperties, JSX } from "react";
+import { type CSSProperties, type JSX, useContext } from "react";
 import { type Glyph, GlyphIcon, PALETTE_GLYPHS } from "../glyphs";
+import { ConnectTargetsContext } from "./connect-targets";
 import {
   type CanvasFlowNode,
   inputHandle,
@@ -48,18 +50,30 @@ function NodeGlyph({
   );
 }
 
+/** The class and title a dragged connection's status gives an input port (F-302, UX-25); `ok` and no drag give none. */
+const TARGET_CLASSES = {
+  refused: "is-target-refused",
+  mismatch: "is-target-mismatch",
+} as const;
+const TARGET_TITLES = {
+  refused: "This port can't be connected to the port being dragged.",
+  mismatch:
+    "The types don't match: the connection is allowed, and is reported as an error.",
+} as const;
+
+function useTargetStatus(data: NodeData, port: string) {
+  const status = useContext(ConnectTargetsContext)
+    ?.get(data.view.id)
+    ?.get(port);
+  return status === "refused" || status === "mismatch" ? status : null;
+}
+
 function Handles({ data }: { data: NodeData }): JSX.Element {
   const { view } = data;
   return (
     <>
       {view.inputs.map((p, i) => (
-        <Handle
-          key={p.id}
-          id={inputHandle(p)}
-          type="target"
-          position={Position.Left}
-          style={{ top: portY(view, i) }}
-        />
+        <InputHandle key={p.id} data={data} index={i} />
       ))}
       {view.outputs.map((p, i) => (
         <Handle
@@ -67,6 +81,7 @@ function Handles({ data }: { data: NodeData }): JSX.Element {
           id={outputHandle(p)}
           type="source"
           position={Position.Right}
+          isConnectableEnd={false}
           style={{ top: portY(view, i) }}
         />
       ))}
@@ -74,16 +89,48 @@ function Handles({ data }: { data: NodeData }): JSX.Element {
   );
 }
 
-/** The outer box's classes and the size `canvasView` computed. */
-function frame({ view, portLabels }: NodeData) {
+function InputHandle({
+  data,
+  index,
+}: {
+  data: NodeData;
+  index: number;
+}): JSX.Element {
+  const { view } = data;
+  const p = view.inputs[index] as CanvasPortView;
+  const status = useTargetStatus(data, p.id);
+  return (
+    <Handle
+      id={inputHandle(p)}
+      type="target"
+      position={Position.Left}
+      isConnectableStart={false}
+      className={status === null ? undefined : TARGET_CLASSES[status]}
+      style={{ top: portY(view, index) }}
+    />
+  );
+}
+
+/** The outer box's classes and the size `canvasView` computed. A card none of whose inputs can take the dragged connection dims. */
+function frame({ view, portLabels }: NodeData, dimmed: boolean) {
   return {
-    className: `canvas-node is-${view.appearance} is-${view.shape}${portLabels ? "" : " is-compact"}`,
+    className: `canvas-node is-${view.appearance} is-${view.shape}${portLabels ? "" : " is-compact"}${dimmed ? " is-dimmed" : ""}`,
     style: {
       width: view.width,
       height: view.height,
       "--port-row": `${view.rowHeight}px`,
     } as CSSProperties,
   };
+}
+
+function useDimmed({ view }: NodeData): boolean {
+  const targets = useContext(ConnectTargetsContext);
+  if (targets === null) return false;
+  const ports = targets.get(view.id);
+  return !view.inputs.some((p) => {
+    const status = ports?.get(p.id);
+    return status === "ok" || status === "mismatch";
+  });
 }
 
 function PortRows({ data }: { data: NodeData }): JSX.Element | null {
@@ -97,12 +144,7 @@ function PortRows({ data }: { data: NodeData }): JSX.Element | null {
         const output = view.outputs[i];
         return (
           <div className="canvas-port-row" key={input?.id ?? output?.id ?? i}>
-            <span
-              className="canvas-port is-input"
-              title={input?.type ?? input?.label}
-            >
-              {input?.label}
-            </span>
+            <InputLabel data={data} input={input} />
             <span
               className="canvas-port is-output"
               title={output?.type ?? output?.label}
@@ -116,10 +158,31 @@ function PortRows({ data }: { data: NodeData }): JSX.Element | null {
   );
 }
 
+function InputLabel({
+  data,
+  input,
+}: {
+  data: NodeData;
+  input: CanvasPortView | undefined;
+}): JSX.Element {
+  const status = useTargetStatus(data, input?.id ?? "");
+  return (
+    <span
+      className={`canvas-port is-input${status === null ? "" : ` ${TARGET_CLASSES[status]}`}`}
+      title={
+        status === null ? (input?.type ?? input?.label) : TARGET_TITLES[status]
+      }
+    >
+      {input?.label}
+    </span>
+  );
+}
+
 export function CardNode({ data }: NodeProps<CanvasFlowNode>): JSX.Element {
   const { view } = data;
+  const dimmed = useDimmed(data);
   return (
-    <div {...frame(data)}>
+    <div {...frame(data, dimmed)}>
       {view.badge === null ? null : (
         <span className="canvas-badge">{view.badge}</span>
       )}
@@ -151,8 +214,9 @@ export function CardNode({ data }: NodeProps<CanvasFlowNode>): JSX.Element {
 /** Chains, take and emit. Take and emit show their kind as a prefix; a chain has no subtitle. */
 export function PillNode({ data }: NodeProps<CanvasFlowNode>): JSX.Element {
   const { view } = data;
+  const dimmed = useDimmed(data);
   return (
-    <div {...frame(data)}>
+    <div {...frame(data, dimmed)}>
       <NodeGlyph appearance={view.appearance} />
       {view.subtitle === null ? null : (
         <span className="canvas-pill-prefix">{view.subtitle}</span>
