@@ -789,7 +789,9 @@ export function createCanvasStore(
       label: string,
     ): Promise<ApplyOutcome> {
       let last: ApplyOutcome | undefined;
-      for (const [index, command] of commands.entries()) {
+      // a part with no patches records no step, so only a recorded one leaves a step to undo
+      let recorded = false;
+      for (const command of commands) {
         const outcome = (await sendNow(
           session,
           async (revision) => {
@@ -807,7 +809,7 @@ export function createCanvasStore(
           afterApply,
         )) as ApplyOutcome;
         if (!outcome.ok) {
-          if (index > 0)
+          if (recorded)
             // the step holds the parts applied so far, so nothing is left behind
             await sendNow(
               session,
@@ -824,6 +826,7 @@ export function createCanvasStore(
             );
           return outcome;
         }
+        if (outcome.patches.length > 0) recorded = true;
         last = outcome;
       }
       return last as ApplyOutcome;
@@ -1361,7 +1364,10 @@ export function createCanvasStore(
           );
           if (!outcome.ok)
             return fail(
-              `Couldn't apply: ${outcome.message} Nothing was changed.`,
+              // a refusal that says so already isn't followed by it again
+              /Nothing was changed\.$/.test(outcome.message)
+                ? `Couldn't apply: ${outcome.message}`
+                : `Couldn't apply: ${outcome.message} Nothing was changed.`,
               outcome.fields ?? [],
             );
           const node = nodeAfterRename(

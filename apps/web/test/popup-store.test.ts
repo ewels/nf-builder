@@ -141,7 +141,11 @@ function setup(options: Options = {}) {
       revision = rev + 1;
       if (command.kind === "renameDeclaration")
         renamed = command.newName ?? null;
-      return change(revision);
+      // the patch of a recorded step (a real engine's apply carries them)
+      return {
+        ...change(revision),
+        patches: [{ kind: "edit", path: MODULE, edits: [] }],
+      };
     },
     undo: async (rev: number, undoOptions?: unknown) => {
       log.push(`undo@${rev}`);
