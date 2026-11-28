@@ -3,15 +3,30 @@
 // (QA-10, QA-11) and inside a cross-origin frame (ADR 0044). An error shows inline and the dialog stays open.
 import { BLANK_TEMPLATE, type TemplateList } from "@nf-builder/engine";
 import { importProblem } from "@nf-builder/sources";
-import { type FormEvent, type JSX, useEffect, useId, useState } from "react";
+import { repoSlug } from "@nf-builder/sources/github";
+import {
+  type FormEvent,
+  type JSX,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+} from "react";
+import {
+  githubImportProblem,
+  githubProjectName,
+} from "../import/github-import";
+import { importErrorMessage } from "../import/messages";
+import type { GithubImportView } from "../import/use-github-import";
 import {
   DEFAULT_PROJECT_NAME,
   normaliseProjectName,
   PROJECT_NAME_MAX,
 } from "../workspace/project-name";
 import type { ImportChoice, ProjectMeta } from "../workspace/types";
-import { ImportSection } from "./import-section";
+import { ImportSection, type ImportSource } from "./import-section";
 import { useModal } from "./project-dialogs";
+import type { GithubImportRun } from "./project-store";
 import type { TemplatesView } from "./templates";
 import {
   type ZipImportState,
@@ -63,7 +78,7 @@ export function newProjectRequest(
     return {
       name,
       languageVersion: form.languageVersion,
-      publishDocs: form.publishDocs,
+      publishDocs: false, // hidden on the Import route (UX-60)
       import: { id: zip.id, ignore: zip.ignore },
     };
   }
@@ -111,9 +126,18 @@ export interface NewProjectDialogProps {
   readonly projects: readonly ProjectMeta[];
   readonly currentId: string | null;
   readonly initialRoute: NewProjectRoute;
+  /** The Import route's source when the dialog opens; Zip file when not given. */
+  readonly initialSource?: ImportSource;
   /** The zip import hook (`useZipImport`): its stage is discarded when the dialog closes. */
   readonly useZipImport: () => ZipImportView;
+  /** The GitHub import hook (`useGithubImport`): its listing is dropped when the dialog closes. */
+  readonly useGithubImport: () => GithubImportView;
   onCreate(request: NewProjectRequest): Promise<void>;
+  /** Downloads, stores and opens a reviewed repository (F-401). Rejects with a `GithubError` or an `Error`. */
+  onImportGithub(
+    run: GithubImportRun,
+    o: { signal: AbortSignal; onProgress(done: number, total: number): void },
+  ): Promise<void>;
   onOpen(id: string): Promise<void>;
   onClose(): void;
 }
@@ -144,13 +168,92 @@ export function NewProjectDialog(props: NewProjectDialogProps): JSX.Element {
     setName((current) => (current === autoName ? next : current));
     setAutoName(next);
   }, [zipName, autoName]);
+  const github = props.useGithubImport();
+  const [source, setSource] = useState<ImportSource>(
+    props.initialSource ?? "zip",
+  );
+  const [progress, setProgress] = useState<{
+    done: number;
+    total: number;
+  } | null>(null);
+  const abort = useRef<AbortController | null>(null);
+  // closing the dialog (Escape, Cancel, a route change) aborts a download still running (plan 2.2)
+  useEffect(() => () => abort.current?.abort(), []);
+  // the repository's name becomes the project name while the field still holds the default or the last name taken from a repository
+  const [autoRepoName, setAutoRepoName] = useState(DEFAULT_PROJECT_NAME);
+  const repoName = githubProjectName(github.repo);
+  useEffect(() => {
+    if (repoName === null) return;
+    setName((current) => (current === autoRepoName ? repoName : current));
+    setAutoRepoName(repoName);
+  }, [repoName, autoRepoName]);
+  const githubSelected = route === "import" && source === "github";
   const chooseRoute = (next: NewProjectRoute) => {
-    if (next !== "import") zipView.reset();
+    if (next !== "import") {
+      zipView.reset();
+      github.reset();
+    }
     setRoute(next);
+  };
+  const chooseSource = (next: ImportSource) => {
+    if (next === "github") zipView.reset();
+    else github.reset();
+    setSource(next);
+  };
+
+  const submitGithub = async () => {
+    const { state } = github;
+    const normalised = normaliseProjectName(name);
+    if (normalised === null) {
+      modal.setError(`Enter a name of 1 to ${PROJECT_NAME_MAX} characters.`);
+      return;
+    }
+    if (state.status !== "ready") {
+      modal.setError(null);
+      await github.review();
+      return;
+    }
+    const problem = githubImportProblem(state.plan);
+    if (problem !== null) {
+      modal.setError(problem);
+      return;
+    }
+    const controller = new AbortController();
+    abort.current = controller;
+    setProgress({ done: 0, total: state.plan.files.length });
+    await modal.run(async () => {
+      try {
+        await props.onImportGithub(
+          {
+            name: normalised,
+            languageVersion,
+            review: state.review,
+            plan: state.plan,
+          },
+          {
+            signal: controller.signal,
+            onProgress: (done, total) => setProgress({ done, total }),
+          },
+        );
+      } catch (failure) {
+        setProgress(null);
+        const { repo, ref } = state.review.input;
+        throw new Error(
+          importErrorMessage(failure, {
+            repo: repoSlug(repo),
+            ref,
+          }),
+        );
+      }
+    });
   };
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
+    if (githubSelected) {
+      await submitGithub();
+      return;
+    }
     const outcome = submitOutcome(
       { name, languageVersion, route, templateId, publishDocs, zip },
       templates,
@@ -232,7 +335,13 @@ export function NewProjectDialog(props: NewProjectDialogProps): JSX.Element {
           </label>
         </fieldset>
         {route === "import" ? (
-          <ImportSection view={zipView} busy={modal.busy} />
+          <ImportSection
+            view={zipView}
+            github={github}
+            source={source}
+            busy={modal.busy}
+            onSource={chooseSource}
+          />
         ) : null}
         {route === "template" ? (
           <fieldset className="dialog-group">
@@ -266,14 +375,16 @@ export function NewProjectDialog(props: NewProjectDialogProps): JSX.Element {
             ))}
           </fieldset>
         ) : null}
-        <label className="dialog-choice">
-          <input
-            type="checkbox"
-            checked={publishDocs}
-            onChange={(event) => setPublishDocs(event.target.checked)}
-          />
-          <span>Publish docs to GitHub Pages</span>
-        </label>
+        {route === "import" ? null : (
+          <label className="dialog-choice">
+            <input
+              type="checkbox"
+              checked={publishDocs}
+              onChange={(event) => setPublishDocs(event.target.checked)}
+            />
+            <span>Publish docs to GitHub Pages</span>
+          </label>
+        )}
         <section className="dialog-projects" aria-labelledby={projectsId}>
           <h3 id={projectsId}>Projects in this browser</h3>
           {props.projects.length === 0 ? (
@@ -301,17 +412,43 @@ export function NewProjectDialog(props: NewProjectDialogProps): JSX.Element {
             them.
           </p>
         </section>
+        {/* one live region that stays in the page, so the progress is announced */}
+        <p className="muted" role="status">
+          {modal.busy && githubSelected && progress !== null
+            ? progress.done < progress.total
+              ? `Downloading ${progress.done} of ${progress.total} files…`
+              : "Importing…"
+            : null}
+        </p>
         {modal.error ? (
           <p className="dialog-error" role="alert">
             {modal.error}
           </p>
         ) : null}
         <div className="dialog-buttons">
-          <button type="button" onClick={() => modal.ref.current?.close()}>
-            Cancel
-          </button>
-          <button type="submit" className="primary" disabled={modal.busy}>
-            {modal.busy ? "Creating…" : "Create"}
+          {modal.busy && githubSelected ? (
+            <button type="button" onClick={() => abort.current?.abort()}>
+              Cancel import
+            </button>
+          ) : (
+            <button type="button" onClick={() => modal.ref.current?.close()}>
+              Cancel
+            </button>
+          )}
+          <button
+            type="submit"
+            className="primary"
+            disabled={modal.busy || github.state.status === "checking"}
+          >
+            {githubSelected
+              ? modal.busy
+                ? "Importing…"
+                : github.state.status === "ready"
+                  ? `Import ${github.state.plan.summary.files} ${github.state.plan.summary.files === 1 ? "file" : "files"}`
+                  : "Review"
+              : modal.busy
+                ? "Creating…"
+                : "Create"}
           </button>
         </div>
       </form>

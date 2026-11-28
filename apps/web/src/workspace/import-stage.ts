@@ -6,13 +6,17 @@ import type {
   ImportSummary,
   ZipRead,
 } from "@nf-builder/sources/import";
-import type { ImportStageResult } from "./types";
+import type { ImportStageResult, ProjectSource } from "./types";
 
 export type SourcesModule = typeof import("@nf-builder/sources/import");
 
 /** The files to store, or the message that stops Create. A refusal has the same shape. */
 type ImportFilesResult =
-  | { readonly ok: true; readonly files: readonly ImportedFile[] }
+  | {
+      readonly ok: true;
+      readonly files: readonly ImportedFile[];
+      readonly source: ProjectSource;
+    }
   | { readonly ok: false; readonly message: string };
 
 export interface ImportStager {
@@ -26,6 +30,19 @@ interface Stage {
   readonly id: string;
   readonly source: string;
   readonly read: ZipRead;
+  readonly sha256?: string;
+}
+
+/** Hex SHA-256, or undefined where `crypto.subtle` isn't available (insecure contexts, ADR 0044). */
+async function sha256Hex(bytes: Uint8Array): Promise<string | undefined> {
+  if (!globalThis.crypto?.subtle) return undefined;
+  const digest = await crypto.subtle.digest(
+    "SHA-256",
+    bytes as Uint8Array<ArrayBuffer>,
+  );
+  return Array.from(new Uint8Array(digest), (b) =>
+    b.toString(16).padStart(2, "0"),
+  ).join("");
 }
 
 /** `getRandomValues` works in insecure contexts, where `crypto.randomUUID` doesn't (ADR 0044). */
@@ -76,7 +93,9 @@ export function createImportStager(options: StagerOptions = {}): ImportStager {
       if (mine !== generation) return m.refuse("gone");
       const read = m.readZip(bytes);
       if (!read.ok) return read;
-      const staged: Stage = { id: newId(), source: name, read };
+      const sha256 = await sha256Hex(bytes);
+      if (mine !== generation) return m.refuse("gone");
+      const staged: Stage = { id: newId(), source: name, read, sha256 };
       stage = staged;
       return result(staged, summaryOf(m, staged, m.DEFAULT_IGNORE));
     },
@@ -95,6 +114,11 @@ export function createImportStager(options: StagerOptions = {}): ImportStager {
       return {
         ok: true,
         files: m.selectFiles(stage.read.candidates, m.parseIgnore(ignore)),
+        source: {
+          kind: "zip",
+          name: stage.source,
+          ...(stage.sha256 === undefined ? {} : { sha256: stage.sha256 }),
+        },
       };
     },
 

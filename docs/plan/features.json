@@ -691,7 +691,7 @@
         "A registry module folder shows the `registry` tag and a file with a syntax error shows an error badge"
       ],
       "passes": false,
-      "notes": "Added 2026-11-22 (F-204 PR, scope-change; Q16): UX-16 had no owning feature; F-301 step 1 relies on the Files view. Dropping a zip reuses F-403's zip import. From F-111: there is no create, delete or rename file command yet. From F-202: IndexedDB schema v1 stores text only; binary files need a schema version bump (ADR 0045). From F-208: an entry file with no workflows gets no tab, so there is no toggle to reach its Code view. From F-209: `writeFiles` (uploads, new files written raw) clears the undo history. From F-207: show `.nf-builder/layout.json` read-only, because commands refuse it; a sidecar added through `writeFiles` replaces the layout. From F-403: reuse `stageZip`, `restageImport` and `discardImport` for dropped zips, and `selectFiles` for loose files; writes go through `writeFiles` in the worker. From F-309: reuse `openFile(path)` and `fileTabFor(path)` from the canvas store for code-only file tabs (`kind: \"file\"`, id `file:<path>`); add tab closing; a file tab already closes when its file is deleted; the tablist is still labelled \"Workflows\"; make `.nf-builder/` tabs read-only. From F-703: the left column isn't rendered in read-only; commands go through `canvasStore.apply`, which refuses `read-only` (ADR 0056)."
+      "notes": "Added 2026-11-22 (F-204 PR, scope-change; Q16): UX-16 had no owning feature; F-301 step 1 relies on the Files view. Dropping a zip reuses F-403's zip import. From F-111: there is no create, delete or rename file command yet. From F-202: IndexedDB schema v1 stores text only; binary files need a schema version bump (ADR 0045). From F-208: an entry file with no workflows gets no tab, so there is no toggle to reach its Code view. From F-209: `writeFiles` (uploads, new files written raw) clears the undo history. From F-207: show `.nf-builder/layout.json` read-only, because commands refuse it; a sidecar added through `writeFiles` replaces the layout. From F-403: reuse `stageZip`, `restageImport` and `discardImport` for dropped zips, and `selectFiles` for loose files; writes go through `writeFiles` in the worker. From F-309: reuse `openFile(path)` and `fileTabFor(path)` from the canvas store for code-only file tabs (`kind: \"file\"`, id `file:<path>`); add tab closing; a file tab already closes when its file is deleted; the tablist is still labelled \"Workflows\"; make `.nf-builder/` tabs read-only. From F-703: the left column isn't rendered in read-only; commands go through `canvasStore.apply`, which refuses `read-only` (ADR 0056). From F-401: the parse failures in `EngineApi.report()` (files whose status is partial or verbatim) can drive the error badges."
     },
     {
       "id": "F-211",
@@ -982,8 +982,8 @@
         "The import uses at most two api.github.com requests (network log)",
         "The report lists parse failures and legacy share"
       ],
-      "passes": false,
-      "notes": "From F-113: load an imported project with getEngine().open(request, onProgress) or getEngine().writeFiles(files). From F-202: IndexedDB schema v1 stores text only; binary imports need a schema version bump (ADR 0045). From F-203: a third radio in the New project dialog's route group can hold Import. Projects don't record their template; F-401 may add `{kind: \"template\", id, version}` as a project source (a stored-format change, ADR 0045). From F-403: reuse `@nf-builder/sources/import` (limits, `DEFAULT_IGNORE`, `parseIgnore`, `selectFiles`, `summarise`, `importProblem`) and `ImportSection`; add \"GitHub repository\" before \"Zip file\" in the dialog's \"Import from\" group; reuse `RNASEQ_NF_SKIPPED` in e2e; binaries are skipped on both routes; record the IO-13 zip case as `{kind: \"zip\", name, sha256}` hashed in the worker (`crypto.subtle` needs a secure context); the worker imports only the `./import` subpath, which the planned `web-worker-no-github-client` rule keeps clean. From F-703: guard `importProject` in the project store like `create`."
+      "passes": true,
+      "notes": "From F-113: load an imported project with getEngine().open(request, onProgress) or getEngine().writeFiles(files). From F-202: IndexedDB schema v1 stores text only; binary imports need a schema version bump (ADR 0045). From F-203: a third radio in the New project dialog's route group can hold Import. Projects don't record their template; F-401 may add `{kind: \"template\", id, version}` as a project source (a stored-format change, ADR 0045). From F-403: reuse `@nf-builder/sources/import` (limits, `DEFAULT_IGNORE`, `parseIgnore`, `selectFiles`, `summarise`, `importProblem`) and `ImportSection`; add \"GitHub repository\" before \"Zip file\" in the dialog's \"Import from\" group; reuse `RNASEQ_NF_SKIPPED` in e2e; binaries are skipped on both routes; record the IO-13 zip case as `{kind: \"zip\", name, sha256}` hashed in the worker (`crypto.subtle` needs a secure context); the worker imports only the `./import` subpath, which the planned `web-worker-no-github-client` rule keeps clean. From F-703: guard `importProject` in the project store like `create`. Verified 2026-11-28 (ADR 0057): step 1 by `e2e/github-import.spec.ts` \"F-401 step 1\" (nf-core/fetchngs at 1.13.0 against a mocked GitHub: the tree fixture is generated from git at the pin and its blob SHAs are checked against the corpus cache; the 155 stored files match the corpus by SHA-256 and git blob SHA, the 4 PNGs are skipped, and `source` is recorded); step 2 by \"F-401 step 2\" (exactly two api.github.com requests, one raw request per imported file and no other cross-origin request); step 3 by \"F-401 step 3\" (the report lists parse failures and the legacy share). Also the summary and ignore-list edits with no request, rate limiting, a failed download, cancelling by Escape or Cancel import, and no CSP violation. The unit tests in `packages/sources` use API responses synthesised from the GitHub REST docs (the sandbox couldn't reach the API); only the fetchngs tree fixture is real. The opt-in live test (`F401_LIVE=1`) was not run. GitHub is a second source in F-403's \"Import from\" group, sharing `ImportSummaryView` and F-403's default ignore list."
     },
     {
       "id": "F-402",
@@ -1003,7 +1003,7 @@
         "The token never appears in exports or console output"
       ],
       "passes": false,
-      "notes": "Deferred past v0.1 by the maintainer on 2026-11-22 (ADR 0030); milestone M8 holds deferred features."
+      "notes": "Deferred past v0.1 by the maintainer on 2026-11-22 (ADR 0030); milestone M8 holds deferred features. From F-401: add the token field, an `Authorization` header (which preflights; S4 saw 204 with `*`) and the blobs API to `createGithubClient` in `@nf-builder/sources/github` (ADR 0057)."
     },
     {
       "id": "F-403",
@@ -1023,7 +1023,7 @@
         "A zip exceeding the limits is refused with a clear message"
       ],
       "passes": true,
-      "notes": "From F-008 (S4): codeload.github.com only allows https://render.githubusercontent.com, so zip import is a file upload; no GitHub archive URL can be fetched in the browser. From F-113: load an imported project with getEngine().open(request, onProgress) or getEngine().writeFiles(files). From F-202: IndexedDB schema v1 stores text only; binary files in a zip need a schema version bump (ADR 0045). From F-203: zip import can join the New project dialog's route group. Verified 2026-11-23 (ADR 0053): step 1 by `e2e/zip-import.spec.ts` (a `git archive` zip of the pinned rnaseq-nf tree gives the same 22 files as the pinned tree after the IO-12 rules, 12 `data/` files ignored and one PNG skipped; with `/data/` removed from the list, 34 files); step 2 by the 20,001-entry and 201 MB refusals in e2e and the `packages/sources` limit and bomb tests (a 1 GB entry recorded as 1 MB is cut to its recorded size); also the newest-stage race, the iframe case, and an `@smoke` import of the hello-world template on all three browsers. Binary files are skipped (F-407). From F-703: guard `importProject` in the project store like `create`."
+      "notes": "From F-008 (S4): codeload.github.com only allows https://render.githubusercontent.com, so zip import is a file upload; no GitHub archive URL can be fetched in the browser. From F-113: load an imported project with getEngine().open(request, onProgress) or getEngine().writeFiles(files). From F-202: IndexedDB schema v1 stores text only; binary files in a zip need a schema version bump (ADR 0045). From F-203: zip import can join the New project dialog's route group. Verified 2026-11-23 (ADR 0053): step 1 by `e2e/zip-import.spec.ts` (a `git archive` zip of the pinned rnaseq-nf tree gives the same 22 files as the pinned tree after the IO-12 rules, 12 `data/` files ignored and one PNG skipped; with `/data/` removed from the list, 34 files); step 2 by the 20,001-entry and 201 MB refusals in e2e and the `packages/sources` limit and bomb tests (a 1 GB entry recorded as 1 MB is cut to its recorded size); also the newest-stage race, the iframe case, and an `@smoke` import of the hello-world template on all three browsers. Binary files are skipped (F-407). From F-703: guard `importProject` in the project store like `create`. From F-401: `ProjectMeta.source` holds only `{kind: \"github\", repo, ref, sha}`; the IO-13 zip case (`{kind: \"zip\", name, sha256}`) isn't recorded yet. The Import route's \"Import from\" group now holds Zip file and GitHub repository, sharing `ImportSummaryView`. F-401's PR closed the zip source gap: zip imports now record `{kind: \"zip\", name, sha256}` (`sha256` absent in insecure contexts, ADR 0044), and Publish docs is hidden for the zip source too."
     },
     {
       "id": "F-404",
@@ -1044,7 +1044,7 @@
         "Export, clear storage, import the zip: layout identical (ADR 0008 confirmation)"
       ],
       "passes": false,
-      "notes": "From F-104: untouched files export as printSourceFile output (byte-identical); IO-20 checks use engine equivalent(). From F-207: the export's layout checkbox filters `LAYOUT_PATH` (`.nf-builder/layout.json`); importing a sidecar through `writeFiles` replaces the layout but doesn't update the canvas store's layout notice yet. From F-403: imported projects lack binary files, symlinks (imported as text holding the target) and executable bits; `.nf-builder/` is never ignored; write with fflate `zipSync`; a file and a folder can share a path prefix (`x` and `x/y`). F-403 added to `depends_on` (step 3 imports a zip). From F-703: Export stays hidden in read-only for v0.1 (ADR 0056)."
+      "notes": "From F-104: untouched files export as printSourceFile output (byte-identical); IO-20 checks use engine equivalent(). From F-207: the export's layout checkbox filters `LAYOUT_PATH` (`.nf-builder/layout.json`); importing a sidecar through `writeFiles` replaces the layout but doesn't update the canvas store's layout notice yet. From F-403: imported projects lack binary files, symlinks (imported as text holding the target) and executable bits; `.nf-builder/` is never ignored; write with fflate `zipSync`; a file and a folder can share a path prefix (`x` and `x/y`). F-403 added to `depends_on` (step 3 imports a zip). From F-703: Export stays hidden in read-only for v0.1 (ADR 0056). From F-401: GitHub imports lack skipped binaries and executable bits (mark `bin/*` executable on export); `ProjectMeta.source` holds the repo, ref and commit SHA (ADR 0057)."
     },
     {
       "id": "F-405",
@@ -1063,7 +1063,7 @@
         "Import nf-core/rnaseq: nf-core processes carry no typed badge; status bar shows suggestions; workflow summary shows % modelled"
       ],
       "passes": false,
-      "notes": "From F-112: count LA-35 suggestions per workflow; vendored registry modules aren't excluded from LA-35 in v0.1, so group or filter them here. From F-206: add the modelled percentage (`projectionCoverage`) to `workflowSummary`."
+      "notes": "From F-112: count LA-35 suggestions per workflow; vendored registry modules aren't excluded from LA-35 in v0.1, so group or filter them here. From F-206: add the modelled percentage (`projectionCoverage`) to `workflowSummary`. From F-401: `EngineApi.report()` gives per-project typed and legacy counts of processes and workflows, parse failures and diagnostic counts (ADR 0057)."
     },
     {
       "id": "F-406",
@@ -1079,7 +1079,7 @@
         "Export all, clear storage, import the backup: every project restored with layout"
       ],
       "passes": false,
-      "notes": "From F-202: the backup format is its own and reads through the workspace; it is also the way to move projects to another origin (ADR 0045). From F-403: a backup import may bypass the ignore list; reuse the limits and the text check. From F-703: Export stays hidden in read-only for v0.1 (ADR 0056)."
+      "notes": "From F-202: the backup format is its own and reads through the workspace; it is also the way to move projects to another origin (ADR 0045). From F-403: a backup import may bypass the ignore list; reuse the limits and the text check. From F-703: Export stays hidden in read-only for v0.1 (ADR 0056). From F-401: the backup must carry `ProjectMeta.source` (ADR 0057)."
     },
     {
       "id": "F-501",
@@ -1311,7 +1311,7 @@
         "Import a pipeline: no docs files are added until Add docs publishing is used"
       ],
       "passes": false,
-      "notes": "From F-203: the New project dialog sends `NewProject.publishDocs` (checked by default), which does nothing yet; F-606 writes the FI-40 stubs when it is set. From F-703: editors aren't shown in read-only; F-605 decides on previews."
+      "notes": "From F-203: the New project dialog sends `NewProject.publishDocs` (checked by default), which does nothing yet; F-606 writes the FI-40 stubs when it is set. From F-703: editors aren't shown in read-only; F-605 decides on previews. From F-401: Publish docs is hidden for a GitHub import; the zip route still shows it and sends `publishDocs` (ADR 0057). F-401's PR closed this gap: Publish docs is now hidden on the whole Import route, the zip source included; an import request sends `publishDocs: false`."
     },
     {
       "id": "F-607",

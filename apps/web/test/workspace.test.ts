@@ -719,6 +719,12 @@ describe("F-403 workspace zip import", () => {
       { path: "README.md", text: "# pipe\n" },
       { path: "main.nf", text: "workflow {}\n" },
     ]);
+    // IO-13: the zip's name and hash are recorded as the source
+    expect(stored?.project.source).toEqual({
+      kind: "zip",
+      name: "pipe.zip",
+      sha256: expect.stringMatching(/^[0-9a-f]{64}$/),
+    });
     expect(s.statuses.at(-1)?.projects.map((p) => p.id)).toEqual([meta.id]);
     expect(await s.workspace.restageImport(staged.id, "")).toMatchObject({
       ok: false,
@@ -819,5 +825,77 @@ describe("F-403 workspace zip import", () => {
       expect(
         structuredClone(await s.workspace.restageImport(staged.id, "a/")),
       ).toBeTruthy();
+  });
+});
+
+describe("F-401 workspace import", () => {
+  const sha = "a".repeat(40);
+  const source = { kind: "github", repo: "nf-core/x", ref: null, sha } as const;
+  const bytes = (...values: number[]) => new Uint8Array(values).buffer;
+  const text = (t: string) => new TextEncoder().encode(t).buffer as ArrayBuffer;
+
+  it("F-401 step 1 IO-13: importProject decodes the bytes (BOM and CRLF kept), stores the files and the source in one project, and returns the not-text files it skipped", async () => {
+    const s = setup();
+    await s.watching;
+    const imported = await s.workspace.importProject({
+      name: "X",
+      languageVersion: version,
+      source,
+      files: [
+        { path: "main.nf", bytes: text("\uFEFFworkflow {\r\n}\r\n") },
+        { path: "notes.txt", bytes: bytes(0x61, 0xe9) },
+      ],
+    });
+    expect(imported.skipped).toEqual([
+      { path: "notes.txt", reason: "not-text" },
+    ]);
+    expect(imported.meta.source).toEqual(source);
+    const db = await s.reader();
+    const stored = await db.readProject(imported.meta.id);
+    expect(stored?.project.source).toEqual(source);
+    expect(stored?.files).toEqual([
+      { path: "main.nf", text: "\uFEFFworkflow {\r\n}\r\n" },
+    ]);
+    db.close();
+  });
+
+  it("F-401 IO-14: importProject refuses duplicate or unsafe paths, a bad name or an unknown version, and then stores nothing", async () => {
+    const s = setup();
+    await s.watching;
+    const base = { name: "X", languageVersion: version, source, files: [] };
+    const file = (path: string) => ({ path, bytes: text("x") });
+    for (const bad of [
+      { ...base, files: [file("a.nf"), file("a.nf")] },
+      { ...base, files: [file("../a.nf")] },
+      { ...base, files: [file("/a.nf")] },
+      { ...base, name: "  " },
+      { ...base, languageVersion: "0.0" },
+      { ...base, source: { ...source, sha: "nope" } },
+    ])
+      await expect(s.workspace.importProject(bad)).rejects.toThrow();
+    const db = await s.reader();
+    expect(await db.listProjects()).toEqual([]);
+    db.close();
+  });
+
+  it("F-401 IO-12: importProject refuses a file over 1 MB, more than 20,000 files or more than 200 MB in all, and stores nothing", async () => {
+    const s = setup();
+    await s.watching;
+    const base = { name: "X", languageVersion: version, source };
+    const shared = new ArrayBuffer(1_000_000);
+    const small = new ArrayBuffer(1);
+    const many = (n: number, bytes: ArrayBuffer) =>
+      Array.from({ length: n }, (_, i) => ({ path: `f${i}.txt`, bytes }));
+    for (const files of [
+      [{ path: "big.txt", bytes: new ArrayBuffer(1_000_001) }],
+      many(20_001, small),
+      many(201, shared),
+    ])
+      await expect(
+        s.workspace.importProject({ ...base, files }),
+      ).rejects.toThrow(/too (large|many|big)|limit/i);
+    const db = await s.reader();
+    expect(await db.listProjects()).toEqual([]);
+    db.close();
   });
 });

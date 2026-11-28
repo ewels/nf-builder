@@ -9,6 +9,7 @@ import {
   installedPackVersions,
   type LayoutChange,
   type ProjectChange,
+  type ProjectFile,
   templateFiles,
 } from "@nf-builder/engine";
 import { createAutosaver, type Timer } from "./autosave";
@@ -16,10 +17,13 @@ import { createImportStager } from "./import-stage";
 import type { ProjectDb } from "./project-db";
 import { normaliseProjectName } from "./project-name";
 import {
+  type ImportedProject,
+  type ImportProject,
   INITIAL_STATUS,
   type NewProject,
   type OpenedProject,
   type ProjectMeta,
+  type ProjectSource,
   type WorkspaceApi,
   type WorkspaceStatus,
 } from "./types";
@@ -119,6 +123,7 @@ export function createWorkspace(options: WorkspaceOptions): WorkspaceApi {
     project: (path, workflow) => engine.project(path, workflow),
     diagnostics: () => engine.diagnostics(),
     details: (path, workflow, node) => engine.details(path, workflow, node),
+    report: () => engine.report(),
     readFile: (path) => engine.readFile(path),
     history: () => engine.history(),
 
@@ -178,6 +183,7 @@ export function createWorkspace(options: WorkspaceOptions): WorkspaceApi {
             "An import can't be combined with a template or files.",
           );
         let files = input.files;
+        let source: ProjectSource | undefined;
         if (input.import !== undefined) {
           const chosen = await importer.files(
             input.import.id,
@@ -185,6 +191,7 @@ export function createWorkspace(options: WorkspaceOptions): WorkspaceApi {
           );
           if (!chosen.ok) throw new Error(chosen.message);
           files = chosen.files;
+          source = chosen.source;
         } else if (input.template !== undefined)
           files = await templateFiles(input.languageVersion, input.template);
         const time = now();
@@ -195,11 +202,68 @@ export function createWorkspace(options: WorkspaceOptions): WorkspaceApi {
           createdAt: time,
           updatedAt: time,
           openedAt: time,
+          ...(source === undefined ? {} : { source }),
         };
         await store.createProject(meta, files);
         if (input.import !== undefined) importer.discard(input.import.id);
         await refresh();
         return meta;
+      }),
+
+    importProject: (input: ImportProject) =>
+      serial(async (): Promise<ImportedProject> => {
+        const store = needDb();
+        const name = normaliseProjectName(input.name);
+        if (name === null)
+          throw new Error("A project name needs 1 to 100 characters.");
+        if (!installedPackVersions().includes(input.languageVersion))
+          throw new Error(`No language pack for ${input.languageVersion}.`);
+        const { source } = input;
+        if (
+          source.kind !== "github" ||
+          !/^[0-9a-f]{40}$/.test(source.sha) ||
+          source.repo === ""
+        )
+          throw new Error("The import's source is not valid.");
+        // loaded on first use, so the unzip code stays out of the worker's main chunk (import-stage.ts)
+        const { decodeText, entryPath, IMPORT_LIMITS } = await import(
+          "@nf-builder/sources/import"
+        );
+        // IO-12 again here: the worker doesn't trust the main thread's plan
+        if (input.files.length > IMPORT_LIMITS.maxEntries)
+          throw new Error("The import has too many files (limit 20,000).");
+        let total = 0;
+        for (const f of input.files) {
+          if (f.bytes.byteLength > IMPORT_LIMITS.maxTextFileBytes)
+            throw new Error(`${f.path} is too large (limit 1 MB per file).`);
+          total += f.bytes.byteLength;
+        }
+        if (total > IMPORT_LIMITS.maxTotalBytes)
+          throw new Error("The import is too large (limit 200 MB in all).");
+        const seen = new Set<string>();
+        const files: ProjectFile[] = [];
+        const skipped: ImportedProject["skipped"][number][] = [];
+        for (const f of input.files) {
+          if (entryPath(f.path).kind !== "file" || seen.has(f.path))
+            throw new Error(`${f.path} is not a unique, safe file path.`);
+          seen.add(f.path);
+          const text = decodeText(new Uint8Array(f.bytes));
+          if (text === null) skipped.push({ path: f.path, reason: "not-text" });
+          else files.push({ path: f.path, text });
+        }
+        const time = now();
+        const meta: ProjectMeta = {
+          id: newId(),
+          name,
+          languageVersion: input.languageVersion,
+          createdAt: time,
+          updatedAt: time,
+          openedAt: time,
+          source,
+        };
+        await store.createProject(meta, files);
+        await refresh();
+        return { meta, skipped };
       }),
 
     openProject: (id) =>
