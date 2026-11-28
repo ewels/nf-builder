@@ -30,6 +30,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | Parser error position | merged, PR #47 | |
 | F-501 registry snapshot | merged, PR #29; passing | Confirmed on live data after the snapshot-triggered Pages deploy. |
 | F-011 GitHub Pages hosting | merged, PR #37 | Live at https://ewels.github.io/nf-builder/; first `verify` passed. |
+| F-703 read-only below 1024 px | merged, PR #53 | Plan deleted in its PR. |
 
 ## Merge order
 
@@ -245,7 +246,7 @@ Next free ADR number: 0055 (0054 is F-309's).
   - mocked e2e evidence with blob SHAs checked against the corpus, an opt-in `F401_LIVE=1` test, the git-generated tree fixture;
   - 8 requests in flight, one retry on network errors or 5xx; the accepted input forms (IO-10); session-only report; the repository name as the default project name; warn but allow a repository with no `.nf` files.
 
-### F-703 — [plan](plan-F-703.md)
+### F-703 — plan deleted
 - Accept every recommendation in section 6:
   - start after F-207 merges (no `depends_on` change; recorded in notes);
   - the code view isn't mounted below 1024 px: Graph only, modes kept per tab;
