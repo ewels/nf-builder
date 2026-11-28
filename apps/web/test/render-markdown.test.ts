@@ -1,6 +1,10 @@
 // @vitest-environment jsdom
-import { describe, expect, it } from "vitest";
-import { projectLinkOf, renderMarkdown } from "../src/markdown/render-markdown";
+import { describe, expect, it, vi } from "vitest";
+import {
+  projectLinkOf,
+  renderMarkdown,
+  stripNoisyHtml,
+} from "../src/markdown/render-markdown";
 
 const HOSTILE = `# Title kept
 
@@ -196,5 +200,43 @@ describe("F-605 renderMarkdown", () => {
         expect(source.includes(sink), `${file} ${sink}`).toBe(false);
       }
     }
+  });
+
+  it("F-605 QA-31: untrusted HTML is never parsed with DOMParser, which Chromium reports to the CSP", () => {
+    const spy = vi.spyOn(DOMParser.prototype, "parseFromString");
+    try {
+      render(HOSTILE);
+      expect(spy).not.toHaveBeenCalled();
+    } finally {
+      spy.mockRestore();
+    }
+  });
+
+  it("F-605 QA-30: the pre-filter strips event handlers and base tags from raw HTML only", () => {
+    expect(stripNoisyHtml('<img src="x" onerror="a()" alt="b">')).toBe(
+      '<img src="x" alt="b">',
+    );
+    expect(stripNoisyHtml("<p onclick='a()' title=t>go online now</p>")).toBe(
+      "<p title=t>go online now</p>",
+    );
+    expect(stripNoisyHtml("<img/onerror=x src=y>")).toBe("<img src=y>");
+    expect(stripNoisyHtml('<DIV OnMouseOver = "a">t</DIV>')).toBe(
+      "<DIV>t</DIV>",
+    );
+    expect(stripNoisyHtml("<details ontoggle open>x</details>")).toBe(
+      "<details open>x</details>",
+    );
+    expect(stripNoisyHtml('<BASE href="https://e.example/"><base/>t')).toBe(
+      "t",
+    );
+  });
+
+  it("F-605 QA-30: a README with handlers and a base tag renders as before apart from them", () => {
+    const text =
+      '<p onclick="a()">hi <b>there</b></p>\n\n<base href="https://e.example/">\n\n<img onerror=x alt="pic" src="data:image/png;base64,AAAA">';
+    const html = render(text).innerHTML;
+    expect(html).toContain("<p>hi <b>there</b></p>");
+    expect(html).toContain('alt="pic"');
+    expect(html).not.toMatch(/onclick|onerror|<base/i);
   });
 });
