@@ -614,9 +614,9 @@ html.is-resizing body * {
   font-size: 0.8125rem;
 }
 
-.workflow-tab-item {
-  display: flex;
-  align-items: stretch;
+/* the tablist holds only tabs; its children join the strip's flex row, with the close buttons ordered between them */
+.workflow-tablist {
+  display: contents;
 }
 
 .workflow-tab-close {

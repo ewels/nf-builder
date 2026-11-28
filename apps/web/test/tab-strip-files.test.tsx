@@ -27,6 +27,16 @@ describe("F-210 file tabs", () => {
     expect(markup).not.toContain("view-mode");
   });
 
+  it("F-210 UX-20 QA-10: the tablist holds only tabs; the close button is outside it", () => {
+    const markup = html();
+    const list = /<div role="tablist"[^>]*>(.*?)<\/div>/.exec(markup)?.[1];
+    expect(list).toBeDefined();
+    expect(list).not.toContain("workflow-tab-close");
+    for (const button of (list as string).match(/<button[^>]*>/g) ?? [])
+      expect(button).toContain('role="tab"');
+    expect(markup).toContain("workflow-tab-close");
+  });
+
   it("F-210 UX-20: a workflow tab has no close button", () => {
     const markup = html({
       kind: "workflow",

@@ -195,7 +195,12 @@ test(
       "x/one.txt": "one\n",
       "x/two.txt": "two\n",
     });
-    await dropFiles(page, filesPanel(page).locator(".files-hint"), [zip]);
+    // Firefox's page crashes when Playwright dispatches drag events carrying a synthetic DataTransfer with Files (a
+    // Playwright/Firefox limitation, not the app's), so the drop path runs on Chromium; Firefox and WebKit take the
+    // same zip through the Upload input, which reaches the same Add files dialog.
+    if (testInfo.project.name === "chromium")
+      await dropFiles(page, filesPanel(page).locator(".files-hint"), [zip]);
+    else await uploadFiles(page, [zip]);
     await confirmAdd(page);
     await expect(treeRow(page, "one.txt")).toBeVisible();
     await expect(treeRow(page, "two.txt")).toBeVisible();
@@ -244,6 +249,22 @@ test("F-210 AR-23 ADR-0051: New file and New folder are one undo step each; addi
   await expect(treeRow(page, "c.csv")).toBeVisible();
   expect((await historyStatus(page)).undoCount).toBe(0);
   await expect(undoButton(page)).toBeDisabled();
+});
+
+test("F-210 UX-16 QA-10: the New file dialog shows the check's message inline as you type and disables Create", async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name !== "chromium", "one browser is enough");
+  await blankProject(page, "files-inline");
+  await createInFiles(page, "file", "a.txt");
+  await filesPanel(page).getByRole("button", { name: "New file" }).click();
+  const dialog = page.getByRole("dialog", { name: "New file" });
+  await dialog.getByLabel("Name").fill("a.txt");
+  await expect(dialog.getByRole("alert")).toHaveText("a.txt already exists.");
+  await expect(dialog.getByRole("button", { name: "Create" })).toBeDisabled();
+  await dialog.getByLabel("Name").fill("b.txt");
+  await expect(dialog.getByRole("alert")).toHaveCount(0);
+  await expect(dialog.getByRole("button", { name: "Create" })).toBeEnabled();
 });
 
 test("F-210 UX-70 QA-10: the tree works by keyboard (arrows, Right and Left, Home and End, Enter, type-ahead) and the three actions are reachable with Tab", async ({
@@ -364,16 +385,20 @@ test("F-210 UX-20 UX-52 IO-02: a script with a workflow opens its canvas tab, RE
     "Read-only: nf-builder keeps .nf-builder/ up to date itself.",
   );
   const sidecar = await readFile(page, ".nf-builder/layout.json");
-  await page.locator(".monaco-editor .view-lines").click();
+  const lines = page.locator(".monaco-editor .view-lines");
+  const shown = await lines.textContent();
+  await lines.click();
   await page.keyboard.type("x");
   await page.keyboard.press("ControlOrMeta+s");
   await page.waitForTimeout(500);
+  // the editor itself refused the keystroke
+  await expect(lines).toHaveText(shown as string);
   expect(await readFile(page, ".nf-builder/layout.json")).toBe(sidecar);
   // closing tabs: the active one goes, the previous one takes over
-  await tabs.getByRole("button", { name: "Close layout.json" }).click();
+  await page.getByRole("button", { name: "Close layout.json" }).click();
   await expect(tabs.getByRole("tab", { name: "layout.json" })).toHaveCount(0);
   await expect(readme).toHaveAttribute("aria-selected", "true");
-  await tabs.getByRole("button", { name: "Close README.md" }).click();
+  await page.getByRole("button", { name: "Close README.md" }).click();
   await expect(readme).toHaveCount(0);
   await expect(tabs.getByRole("tab", { name: "SHOUT" })).toHaveAttribute(
     "aria-selected",

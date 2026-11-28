@@ -47,19 +47,21 @@ export function TabStripView({
       {tabs.length === 0 ? (
         <span className="muted">No files open</span>
       ) : (
-        <div
-          role="tablist"
-          aria-label="Open workflows and files"
-          className="workflow-tabs"
-          onKeyDown={move}
-        >
-          {tabs.map((t) => (
-            <span key={t.id} className="workflow-tab-item">
+        <div className="workflow-tabs">
+          <div
+            role="tablist"
+            aria-label="Open workflows and files"
+            className="workflow-tablist"
+            onKeyDown={move}
+          >
+            {tabs.map((t, i) => (
               <button
+                key={t.id}
                 type="button"
                 role="tab"
                 id={workflowTabId(t.id)}
                 className="workflow-tab"
+                style={{ order: i * 2 }}
                 title={t.title}
                 aria-selected={activeTab === t.id}
                 aria-controls="canvas-panel"
@@ -68,19 +70,24 @@ export function TabStripView({
               >
                 {t.label}
               </button>
-              {t.kind === "file" ? (
-                <button
-                  type="button"
-                  className="workflow-tab-close"
-                  aria-label={`Close ${t.label}`}
-                  title={`Close ${t.label}`}
-                  onClick={() => onClose(t.id)}
-                >
-                  <GlyphIcon name="close" />
-                </button>
-              ) : null}
-            </span>
-          ))}
+            ))}
+          </div>
+          {/* outside the tablist, which holds only tabs; `order` puts each close button after its tab */}
+          {tabs.map((t, i) =>
+            t.kind === "file" ? (
+              <button
+                key={t.id}
+                type="button"
+                className="workflow-tab-close"
+                style={{ order: i * 2 + 1 }}
+                aria-label={`Close ${t.label}`}
+                title={`Close ${t.label}`}
+                onClick={() => onClose(t.id)}
+              >
+                <GlyphIcon name="close" />
+              </button>
+            ) : null,
+          )}
         </div>
       )}
       {controls}
