@@ -65,7 +65,7 @@ Every lint message says what to do. Mechanical fixes are offered as quick fixes.
 
 | ID | Default |
 |---|---|
-| LA-40 | Pipelines use a typed `params` block and an `output` block. No `publishDir`. |
+| LA-40 | Pipelines use a typed `params` block and an `output` block. No `publishDir`. The blank template has an empty `output` block if that lints clean on the pinned release; otherwise the first output added creates it (F-314, ADR 0071). |
 | LA-41 | Structured data uses `record` types; processes take and emit records where there is more than one related value. |
 | LA-42 | Tool versions go to the `versions` topic from a `topic:` section. |
 | LA-43 | Channel factories use lower-case `channel.`; closures name their parameters. |

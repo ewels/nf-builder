@@ -73,3 +73,4 @@ Process: [0001](0001-record-decisions-as-adrs.md). Template: [template.md](templ
 | [0067](0067-clipboard.md) | Select several nodes, delete them as one command, and copy and paste call nodes through a clipboard in the engine worker | Accepted (agent) |
 | [0068](0068-workflow-tabs.md) | Open workflow definitions in tabs with a navigation breadcrumb, and add takes and emits without editing call sites | Accepted (agent) |
 | [0069](0069-popup-code-tab.md) | Edit a declaration's code in the popup with a declaration-only model, ReplaceDeclaration, and the code as the truth once edited | Accepted (agent) |
+| [0071](0071-mvp-feedback.md) | Apply the MVP feedback with value modes, set-only config options, a search-only registry, toasts, tooltips, a context menu and a welcome screen | Accepted (agent) |

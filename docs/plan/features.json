@@ -1061,6 +1061,99 @@
       "notes": "Split from F-304 (ADR 0069), which built the Code tab without UX-43's hover help. The popup's Monaco model is `nf-builder-popup:` and lives in `apps/web/src/popup/declaration-editor.tsx`; the page can't import the pack, so resolve hovers in the worker from the pack's `catalogue/*.json` and send only the text. Hover widgets must render in the editor's own DOM to work inside the modal `<dialog>` (no `overflowWidgetsDomNode`). Consider the Code view (F-208) too, so both editors share one hover provider. Lints of the unapplied draft were also deferred by F-304; they need a what-if model in the worker and can be planned with this feature or separately."
     },
     {
+      "id": "F-318",
+      "milestone": "M3",
+      "description": "MVP feedback, forms: value modes (Text, File, Files, Expression) for directive, output and topic values in the edit popup; config scope cards listing only set options, each removable, with suggested options first in Add option; Markdown descriptions in the config pickers; a Files view Configuration button; a search-only registry section with a link to registry.nextflow.io; Params & outputs after Workflows in the palette; an output block in the blank template.",
+      "spec": [
+        "UX-12",
+        "UX-14",
+        "UX-16",
+        "UX-41",
+        "UX-51",
+        "FI-02",
+        "FI-03",
+        "LA-40",
+        "ADR-0071"
+      ],
+      "depends_on": [
+        "F-303",
+        "F-307",
+        "F-601",
+        "F-503",
+        "F-505"
+      ],
+      "steps": [
+        "In the edit popup add a `container` directive with an unquoted image URL in Text mode, an output `*.html` in File mode and a topic `hello`, then Apply: the code shows `container 'quay.io/…'`, `file('*.html')` and `'hello'`, has no problems, and matches oracle case `f318-value-modes`, which lints clean and stub-runs",
+        "Open Hello world's `nextflow.config`: the `manifest` card lists only the options the file sets, Add option… lists the pinned options under Suggested first, and removing a set pinned option is one undo step; the Files view's Configuration button opens the config tab",
+        "With an empty search the registry section says \"Type to search modules and plugins\", links registry.nextflow.io and lists no rows; searching `fastqc` shows nf-core/fastqc",
+        "The palette lists Processes, Workflows, Params & outputs, then Channel factories; a new blank project shows an output node and its template lints clean (oracle case `template-blank`)"
+      ],
+      "passes": false,
+      "notes": "Plan: `docs/plan/handoff/plan-mvp-feedback.md` (branch A; section 8 settles its open points; ADR 0071). Builds in parallel with F-319; don't edit `popup-store.ts`, `use-palette-add.ts`, `palette-message.tsx` or `canvas-store.ts`. Check `file()` and `files()` with globs in typed outputs against docs.seqera.io and the oracle before building, and report if the syntax differs. Step 4's output block applies only if an empty `output {}` lints clean on 26.10.7; otherwise stop and report: F-314's `UpdateOutputs` then creates the block on the first add, and step 4's second half moves to F-314 by an ADR. Existing tests in the plan's section 1.3 change how they reach the UI, never what they assert; F-503 step 2 and F-502's tests are reached through search. Visual polish waits for the design pass: shared components in `apps/web/src/ui/`, minimal CSS."
+    },
+    {
+      "id": "F-319",
+      "milestone": "M3",
+      "description": "MVP feedback, shell: toasts in one live region; a Plugins strip on the default workflow's canvas; viewport kept per tab; tooltips on canvas controls; error colour on the problems count; a canvas context menu; a welcome screen with one New project flow and the header Import on its Import route; a Publish docs description; an import Review step with plain skip reasons and actionable GitHub errors.",
+      "spec": [
+        "UX-01",
+        "UX-03",
+        "UX-05",
+        "UX-15",
+        "UX-20",
+        "UX-21",
+        "UX-26",
+        "UX-27",
+        "UX-31",
+        "UX-60",
+        "UX-61",
+        "UX-70",
+        "QA-10",
+        "QA-11",
+        "QA-12",
+        "QA-13",
+        "ADR-0071"
+      ],
+      "depends_on": [
+        "F-301",
+        "F-307",
+        "F-310",
+        "F-401"
+      ],
+      "steps": [
+        "Add nf-schema from the palette: a toast says \"Added plugin nf-schema@<version> to nextflow.config.\" with Open configuration, a chip appears in the Plugins strip of the default workflow's canvas, the active tab doesn't change, and the chip opens the config tab",
+        "Pan and zoom in workflow tab A, switch to tab B and back: tab A's viewport is unchanged",
+        "Focus each canvas control: its tooltip shows at once; Shift+F10 on a focused node opens the context menu, and Delete there removes the node as one undo step",
+        "Delete the last project: the welcome screen shows; From template opens the New project dialog on that route and creates a project",
+        "Import a zip: the dialog goes Source, Review (summary and skipped files in plain words), Create, then the report",
+        "Press Enter on a params node: a toast says \"Params nodes have no Configure form yet.\" and clears, and the details header shows no notice"
+      ],
+      "passes": false,
+      "notes": "Plan: `docs/plan/handoff/plan-mvp-feedback.md` (branch B; section 8 settles its open points; ADR 0071). Builds in parallel with F-318; don't edit `configure-form.tsx`, `config/*`, `registry/*` or `files-panel.tsx`. Don't run in parallel with F-406 (`app-header.tsx`, `project-store.ts`); F-406 later detects a backup zip on the Import route, so Import keeps one meaning. Toasts must show above modal dialogs (top layer); verify it in e2e, and until then toast a dialog's outcome after it closes. No toast for autosave; failed saves raise an error toast. Links to github.com need `scripts/non-fetched-urls.ts` entries (nf-docs, Open on GitHub, the issues page). Existing tests in the plan's section 1.3 change their locators, never their assertions. Check `pnpm check:budget` after build (QA-01). Visual polish waits for the design pass: shared components in `apps/web/src/ui/`, minimal CSS."
+    },
+    {
+      "id": "F-320",
+      "milestone": "M3",
+      "description": "Drop on a node to add a take or input: drag an output and hold it over a workflow or process node; after about a second a tooltip offers 'Drop to add take and connect' or 'Drop to add input and connect'; the port's name and type come from the source; one undo step; not for registry modules (F-506's Make a local copy first); off in read-only. Hovering an existing port keeps connect.",
+      "spec": [
+        "UX-24",
+        "UX-25",
+        "UX-51"
+      ],
+      "depends_on": [
+        "F-302",
+        "F-303",
+        "F-307"
+      ],
+      "steps": [
+        "Drag a typed process call's output and hold it over another typed process node, away from its ports: after about a second a tooltip says \"Drop to add input and connect\"; dropping adds an input with the output's name and type and connects it, and the files match an oracle case that lints clean and stub-runs",
+        "Hold an output over a workflow call node: the tooltip says \"Drop to add take and connect\"; dropping adds a take with the output's name and type to that workflow and connects it at the call, and one undo restores every file byte for byte",
+        "Hovering an existing input port connects as before with no tooltip; over a registry module node the drop is refused, pointing to Make a local copy; in read-only mode nothing is offered"
+      ],
+      "passes": false,
+      "notes": "Added by the maintainer on 2026-11-28 after MVP testing (ADR 0071; `docs/plan/handoff/README.md`, \"Maintainer decisions, 2026-11-28\"). Needs its own ADR when built. Builds on F-302's connect drag (ADR 0064), F-303's `UpdateDeclaration` (ADR 0066) and F-307's `AddTake` (ADR 0068); the add and the connect are one undo group. A name already used by an input or take needs a rule (fresh suffix or refusal); decide it in the plan."
+    },
+    {
       "id": "F-401",
       "milestone": "M4",
       "description": "Import a public GitHub repo: ref resolution, tree listing, raw contents, filters, summary before and report after.",
@@ -1233,10 +1326,10 @@
       ],
       "steps": [
         "Search `fastqc`: nf-core/fastqc appears under Modules",
-        "Scrolling the module list loads more without blocking input"
+        "Search a term matching 2,500 modules: results load more as they scroll without blocking input"
       ],
       "passes": true,
-      "notes": "From F-501: namespace is the first segment of name; kind is process or workflow; typed is true, false or null (unknown); search over name, description and keywords; ports.json holds meta.yml ports per module. From F-502: `useRegistry` and `registryStore` live in `apps/web/src/registry/`; replace the interim lists (`REGISTRY_LIST_LIMIT`, `RegistryList`) and keep the heading, refresh button and source line; registry rows use `registry-item*`, never `.palette-item`; F-204 tests are scoped to the generic region; registry search joins UX-11 (lists are hidden while searching today); `version: null` means live-only with no typed tag, `typed: null` means unknown; names can have three segments (`cellgeni/anndata/concat`); add `ports(name)` to the client. From F-703: the left column isn't rendered in read-only; commands go through `canvasStore.apply`, which refuses `read-only` (ADR 0056). Verified 2026-11-28 (ADR 0058): step 1 by `e2e/registry-modules.spec.ts` (search `fastqc` shows nf-core/fastqc in the nf-core group and hides nextflow-io/hello, fixture snapshot with registry.nextflow.io blocked, no console errors or CSP violations, no \"No components match\" status) and `packages/sources/test/registry-view.test.ts` (search over name, description and keywords, nf-core-first grouping, short names, typed marks); step 2 by the routed 2,500-module e2e test (the nf-core group shows 100 rows, scrolling loads at least 400 with no long task over 200 ms, a key typed into search appears at once), `apps/web/test/registry-lazy-window.test.ts` and `apps/web/test/registry-section.test.tsx` (100 rows then \"Show 100 more (of 250)\"). Lazy loading is 100-row windows with a real \"Show N more (of T)\" button pressed by an IntersectionObserver; group windows reset when a group closes. The single status message is kept by `apps/web/test/palette-message-rule.test.ts` and the e2e `zzzz` test. `ports(name)` added, snapshot-only, read on demand (`packages/sources/test/registry-ports.test.ts`). F-502's e2e locator now reads `data-name` and expects nf-core first (names and counts unchanged); F-502's interim-list unit test replaced as its note asked. The app-shell @visual baseline re-approved from CI (ADR 0021)."
+      "notes": "From F-501: namespace is the first segment of name; kind is process or workflow; typed is true, false or null (unknown); search over name, description and keywords; ports.json holds meta.yml ports per module. From F-502: `useRegistry` and `registryStore` live in `apps/web/src/registry/`; replace the interim lists (`REGISTRY_LIST_LIMIT`, `RegistryList`) and keep the heading, refresh button and source line; registry rows use `registry-item*`, never `.palette-item`; F-204 tests are scoped to the generic region; registry search joins UX-11 (lists are hidden while searching today); `version: null` means live-only with no typed tag, `typed: null` means unknown; names can have three segments (`cellgeni/anndata/concat`); add `ports(name)` to the client. From F-703: the left column isn't rendered in read-only; commands go through `canvasStore.apply`, which refuses `read-only` (ADR 0056). Verified 2026-11-28 (ADR 0058): step 1 by `e2e/registry-modules.spec.ts` (search `fastqc` shows nf-core/fastqc in the nf-core group and hides nextflow-io/hello, fixture snapshot with registry.nextflow.io blocked, no console errors or CSP violations, no \"No components match\" status) and `packages/sources/test/registry-view.test.ts` (search over name, description and keywords, nf-core-first grouping, short names, typed marks); step 2 by the routed 2,500-module e2e test (the nf-core group shows 100 rows, scrolling loads at least 400 with no long task over 200 ms, a key typed into search appears at once), `apps/web/test/registry-lazy-window.test.ts` and `apps/web/test/registry-section.test.tsx` (100 rows then \"Show 100 more (of 250)\"). Lazy loading is 100-row windows with a real \"Show N more (of T)\" button pressed by an IntersectionObserver; group windows reset when a group closes. The single status message is kept by `apps/web/test/palette-message-rule.test.ts` and the e2e `zzzz` test. `ports(name)` added, snapshot-only, read on demand (`packages/sources/test/registry-ports.test.ts`). F-502's e2e locator now reads `data-name` and expects nf-core first (names and counts unchanged); F-502's interim-list unit test replaced as its note asked. The app-shell @visual baseline re-approved from CI (ADR 0021). Step 2 reworded on 2026-11-28 (ADR 0071, `scope-change`): the registry section now lists search results only (UX-14), so the step scrolls search results. Nothing is weakened: the same 2,500-module fixture, 100 rows first, at least 400 after four scrolls, no long task over 200 ms, and a typed key showing at once. F-318 moves `e2e/registry-modules.spec.ts` to reach the rows through search."
     },
     {
       "id": "F-504",
@@ -1539,7 +1632,7 @@
     },
     {
       "id": "F-407",
-      "milestone": "M8",
+      "milestone": "M7",
       "description": "Binary files in projects: IndexedDB schema v2 stores binary content; both import routes and export keep binary files; binaries are listed in the Files view but not opened.",
       "spec": [
         "FI-32",
@@ -1557,7 +1650,7 @@
         "A .png in the project is listed in the Files view but not opened"
       ],
       "passes": false,
-      "notes": "Split from F-403 on 2026-11-23 (ADR 0053): v0.1 projects hold text files only and imports skip binary files; deferred past v0.1 (ADR 0030). From F-605 (2026-11-28, ADR 0059, `scope-change`): step 4 is F-605's step 2, moved here because v0.1 projects hold text files only. Route a binary path in `openPath` to the notice, not to `readFile` and a file tab. From F-404 (2026-11-28, ADR 0062): export writes text through `TextEncoder`; write stored binary files' bytes unchanged once they are stored, and drop the dialog's skipped-files note for them."
+      "notes": "Split from F-403 on 2026-11-23 (ADR 0053): v0.1 projects hold text files only and imports skip binary files; deferred past v0.1 (ADR 0030). From F-605 (2026-11-28, ADR 0059, `scope-change`): step 4 is F-605's step 2, moved here because v0.1 projects hold text files only. Route a binary path in `openPath` to the notice, not to `readFile` and a file tab. From F-404 (2026-11-28, ADR 0062): export writes text through `TextEncoder`; write stored binary files' bytes unchanged once they are stored, and drop the dialog's skipped-files note for them. Pulled into v0.1 by the maintainer, 2026-11-28 (ADR 0071)."
     }
   ]
 }

@@ -950,3 +950,13 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
 - Next: F-305, F-306 and F-311 (after F-303/F-304), F-308, F-313 to F-317, F-406 and F-504 (plans ready), F-506, then M6 and M7.
 - Decisions: ADRs 0055 to 0069 (one per feature; see each PR). Spec-driven updates to two existing e2e assertions (F-206 details Edit/Code buttons, F-303 popup Code tab) as ADR 0049 and F-303's notes anticipated. New features F-313 to F-317 (`scope-change`).
 - Blockers: none. Open maintainer issues #6 (Renovate) and #7 (required checks) unchanged.
+
+## 2026-11-28 · MVP feedback records · Claude (autonomous)
+- Did: recorded the maintainer's MVP feedback (Task 0 of `docs/plan/handoff/plan-mvp-feedback.md`) as docs only: ADR 0071, the spec rows, and `features.json`. No product code changed.
+- State: F-318 (forms) and F-319 (shell) are ready to build in parallel from the plan; F-320 needs a plan and its own ADR.
+- Next: F-318 and F-319 in their own worktrees (not F-319 beside F-406); then phase 2 (F-305, F-306, F-314, F-320, F-311, F-312, F-308, F-313, F-315 to F-317).
+- Decisions:
+  - [ADR 0071](../adr/0071-mvp-feedback.md) (amends ADRs 0030, 0046, 0047, 0053, 0057, 0058, 0059, 0060, 0061, 0062, 0065 and 0066): value modes (Text, File, Files, Expression; single quotes always, a non-blocking `$` hint, File by default for outputs); config cards list only set options, every one removable, pinned options as suggestions; Markdown in the config pickers; a Files view Configuration button, hidden without `nextflow.config`; a search-only registry with a link to registry.nextflow.io; Params & outputs after Workflows; a blank-template `output` block only if lint-clean, else F-314 creates it; toasts in one live region (none for autosave, above modal dialogs once verified); the plugin strip, with no tab switch after an add; viewport per tab; tooltips; error colour on the problems count; the context menu; a welcome screen and one New project flow, with the header Import on its Import route; the Publish docs description and nf-docs link; the import Review step, plain skip reasons and actionable GitHub errors; stage arguments stay raw; the design pass deferred, with shared components meanwhile. ADR 0070 is reserved for `fix/factory-inputs`.
+  - `features.json` (`scope-change`): new F-318 and F-319 (M3) from the plan, and F-320 (M3, depends on F-302, F-303 and F-307), drop on a node to add a take or input; F-503 step 2 reworded to scroll search results with the same fixture and thresholds; F-407 moved from M8 to M7 (in v0.1).
+  - Updated UX-01, UX-03, UX-12, UX-14, UX-15, UX-16, UX-20, UX-21, UX-26, UX-27, UX-31, UX-41, UX-60, UX-61, UX-70, FI-02, FI-03, FI-32 and LA-40; added UX-05 (toasts).
+- Blockers: none.
