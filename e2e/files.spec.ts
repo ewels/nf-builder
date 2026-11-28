@@ -396,15 +396,24 @@ test("F-210 UX-20 UX-52 IO-02: a script with a workflow opens its canvas tab, RE
   await expect(lines).toHaveText(shown as string);
   expect(await readFile(page, ".nf-builder/layout.json")).toBe(sidecar);
   // closing tabs: the active one goes, the previous one takes over
-  await page.getByRole("button", { name: "Close layout.json" }).click();
+  await tabs
+    .getByRole("tab", { name: "layout.json" })
+    .locator(".workflow-tab-close")
+    .click();
   await expect(tabs.getByRole("tab", { name: "layout.json" })).toHaveCount(0);
   await expect(readme).toHaveAttribute("aria-selected", "true");
-  await page.getByRole("button", { name: "Close README.md" }).click();
+  // Delete on the focused tab closes it and focus moves to the neighbouring tab
+  await readme.focus();
+  await page.keyboard.press("Delete");
   await expect(readme).toHaveCount(0);
   await expect(tabs.getByRole("tab", { name: "SHOUT" })).toHaveAttribute(
     "aria-selected",
     "true",
   );
+  await expect(tabs.getByRole("tab", { name: "SHOUT" })).toBeFocused();
+  // Tab from the strip leaves it: no close button sits in the tab order
+  await page.keyboard.press("Tab");
+  await expect(page.locator(".workflow-tabs :focus")).toHaveCount(0);
 });
 
 test("F-210 UX-16 IO-12 QA-32: a dropped zip with more than 20,000 entries is refused with F-403's message and nothing is written", async ({

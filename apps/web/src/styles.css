@@ -706,16 +706,22 @@ html.is-resizing body * {
   font-size: 0.8125rem;
 }
 
-/* the tablist holds only tabs; its children join the strip's flex row, with the close buttons ordered between them */
+/* the tablist holds only tabs; each closable tab carries a pointer-only close control (Delete closes from the keyboard) */
 .workflow-tablist {
-  display: contents;
+  display: flex;
+  gap: 2px;
+}
+
+.workflow-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
 }
 
 .workflow-tab-close {
   display: grid;
   place-items: center;
   width: 20px;
-  align-self: center;
   height: 20px;
   padding: 0;
   color: #3d4659;
@@ -727,9 +733,4 @@ html.is-resizing body * {
 
 .workflow-tab-close:hover {
   background: var(--color-border);
-}
-
-.workflow-tab-close:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: -2px;
 }
