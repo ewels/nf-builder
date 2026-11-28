@@ -37,7 +37,6 @@ export type {
   ParamsNode,
   ParseProblem,
   ParseStatus,
-  PathClashes,
   PlainSourceFile,
   Port,
   PortRef,

@@ -8,8 +8,6 @@ export interface ExportEntry {
 export interface ZipProjectOptions {
   /** The one folder every entry sits under, so re-import (IO-11) strips exactly it. */
   readonly folder: string;
-  /** Milliseconds since the epoch; defaults to now. */
-  readonly mtime?: number;
 }
 
 const EXECUTABLE = 0o100755;
@@ -33,12 +31,11 @@ export function zipProject(
   options: ZipProjectOptions,
 ): Uint8Array {
   const encoder = new TextEncoder();
-  const mtime = options.mtime ?? Date.now();
   const zippable: Zippable = {};
   for (const file of files) {
     zippable[`${options.folder}/${file.path}`] = [
       encoder.encode(file.text),
-      { os: 3, attrs: exportMode(file.path) << 16, mtime },
+      { os: 3, attrs: exportMode(file.path) << 16, mtime: Date.now() },
     ];
   }
   return zipSync(zippable);

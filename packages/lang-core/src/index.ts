@@ -102,7 +102,6 @@ export type {
   PaletteViewGroup,
   PaletteViewItem,
 } from "./palette.ts";
-export type { PathClashes } from "./paths.ts";
 export { exportClashes, projectPathProblem } from "./paths.ts";
 export {
   PrintError,

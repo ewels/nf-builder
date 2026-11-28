@@ -1,5 +1,4 @@
 // The zip export modules alone (F-404): the engine worker loads this entry lazily, so fflate's writer stays in its own chunk.
 
 export { exportFileName, exportSlug } from "./name.ts";
-export type { ExportEntry, ZipProjectOptions } from "./zip-project.ts";
-export { exportMode, zipProject } from "./zip-project.ts";
+export { zipProject } from "./zip-project.ts";
