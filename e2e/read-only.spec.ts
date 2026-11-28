@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { SMOKE_TAG } from "./browsers.ts";
+import { NODE, selectNode } from "./canvas.ts";
 import { watchForCspViolations } from "./csp.ts";
 import { switcher } from "./projects.ts";
 import {
@@ -31,6 +32,11 @@ test("F-703 UX-04: at 390 px the app starts read-only with the note and without 
   await expect(page.getByLabel("Nextflow version")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Templates" })).toHaveCount(0);
   await expect(details(page)).toBeVisible();
+  await switcher(page).click();
+  await expect(page.getByText("No projects in this browser.")).toBeVisible();
+  await expect(page.getByRole("button", { name: /New project/ })).toHaveCount(
+    0,
+  );
   expect(await horizontalOverflow(page)).toBe(0);
   expect(await watch.violations()).toEqual([]);
   expect(watch.consoleErrors).toEqual([]);
@@ -112,4 +118,31 @@ test("F-703 UX-04: narrow windows keep the side-by-side layout at 1000 px", asyn
   await page.goto("./");
   await expect(readOnlyNote(page)).toHaveText(NOTE_TEXT);
   expect(await horizontalOverflow(page)).toBe(0);
+});
+
+test("F-703 UX-04: entering read-only closes an open dialog and leaves only the project list in the switcher", async ({
+  page,
+}) => {
+  await openStoredCanvas(page, "Dialog project");
+  await page.getByRole("button", { name: "Templates" }).click();
+  const dialog = page.getByRole("dialog", { name: "New project" });
+  await expect(dialog).toBeVisible();
+  await resize(page, PHONE);
+  await expect(readOnlyNote(page)).toHaveText(NOTE_TEXT);
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await switcher(page).click();
+  await expect(
+    page.locator(".project-panel").getByRole("button", {
+      name: "Dialog project",
+    }),
+  ).toBeVisible();
+  for (const gone of ["New project", "Rename project", "Delete project"])
+    await expect(page.getByRole("button", { name: gone })).toHaveCount(0);
+  // the details header has no Edit or Code buttons even with a node selected
+  await page.keyboard.press("Escape");
+  await page.getByRole("button", { name: "Fit view" }).click();
+  await selectNode(page, NODE.greeted);
+  await expect(
+    details(page).getByRole("button", { name: /^(Edit|Code)$/ }),
+  ).toHaveCount(0);
 });

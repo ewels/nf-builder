@@ -496,6 +496,13 @@ html.is-resizing body * {
   border-bottom: 1px solid var(--color-border);
 }
 
+.project-empty {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  font-size: 13px;
+  color: var(--color-muted);
+}
+
 .project-actions {
   display: flex;
   flex-direction: column;
