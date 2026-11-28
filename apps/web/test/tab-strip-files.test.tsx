@@ -6,7 +6,7 @@ import { TabStripView } from "../src/shell/tab-strip";
 
 const noop = () => undefined;
 
-const html = (tab = fileTabFor("modules/local/x/main.nf")) =>
+const html = (tab = fileTabFor("modules/local/x/main.nf"), readOnly = false) =>
   renderToStaticMarkup(
     <TabStripView
       tabs={[tab]}
@@ -15,6 +15,7 @@ const html = (tab = fileTabFor("modules/local/x/main.nf")) =>
       onSelect={noop}
       onMode={noop}
       onClose={noop}
+      readOnly={readOnly}
     />,
   );
 
@@ -35,6 +36,10 @@ describe("F-210 file tabs", () => {
     for (const button of (list as string).match(/<button[^>]*>/g) ?? [])
       expect(button).toContain('role="tab"');
     expect(markup).toContain("workflow-tab-close");
+  });
+
+  it("F-210 F-703 UX-04: a file tab keeps its close button while read-only, since closing a tab doesn't write the project (ADR 0056 doesn't hide it)", () => {
+    expect(html(undefined, true)).toContain('aria-label="Close x/main.nf"');
   });
 
   it("F-210 UX-20: a workflow tab has no close button", () => {

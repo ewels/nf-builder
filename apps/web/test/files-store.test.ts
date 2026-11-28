@@ -49,7 +49,7 @@ interface Pending {
 }
 
 /** A fake engine whose `listFiles` replies when the test says so. */
-function setup() {
+function setup(readOnly = false) {
   const pending: Pending[] = [];
   const calls: string[] = [];
   let outcome: () => unknown = () => ({
@@ -78,7 +78,10 @@ function setup() {
       return outcome();
     },
   } as never;
-  const canvas = createCanvasStore(() => engine);
+  const canvas = createCanvasStore(
+    () => engine,
+    () => readOnly,
+  );
   const listeners = new Set<() => void>();
   const files = createFilesStore({
     engine: () => engine,
@@ -233,6 +236,20 @@ describe("F-210 files store", () => {
     expect(text(files)).toBe(false);
     expect(text(registry)).toBe(false);
     expect(Object.keys(t.files.getState())).not.toContain("text");
+  });
+
+  it("F-210 F-703 UX-04: createFile and createFolder are refused while read-only, with the refusal message and no engine call", async () => {
+    const t = setup(true);
+    t.files.getState().setVisible(true);
+    await t.show();
+    await tick();
+    await t.reply();
+    const at = { folder: "modules", session: t.canvas.getState().session };
+    const message = "Editing needs a larger screen or a wider window.";
+    expect(await t.files.getState().createFile("notes.txt", at)).toBe(message);
+    expect(await t.files.getState().createFolder("data", at)).toBe(message);
+    expect(t.calls).toEqual([]);
+    expect(t.files.getState().selected).toBeNull();
   });
 
   it('F-210 AR-23 UX-16: createFile and createFolder send createFile through canvas apply with the session, label a folder "Create folder <path>", and return a refusal message', async () => {
