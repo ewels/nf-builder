@@ -371,3 +371,15 @@ ADR numbers reserved for features in flight, so parallel branches don't clash: 0
 
 ### F-304 — plan deleted
 - Accept every recommendation in section 6. Point 8: Escape with an edited code draft asks before discarding (amends ADR 0066); an unedited draft closes at once. Point 7's hover-help feature is added in F-304's PR (`scope-change`). Start after F-303 merges.
+
+## Paused on 2026-11-28 (session 3)
+
+Paused at the maintainer's request after F-304 for MVP testing. To resume:
+- No open PRs or worktrees. 52 of 77 features pass; M8 (F-211, F-402, F-407) is deferred.
+- Plans ready with settled decisions: F-406, F-504 (above). Plan next: F-305, F-306, F-311, F-308, F-313 to F-317, F-506, then M6 (F-602 onwards) and M7.
+- ADR numbers used up to 0069; next free 0070.
+- Process lessons from this session:
+  - `check_suite.completed` fires per workflow: before merging, confirm every check run on the PR head is green (`gh api repos/ewels/nf-builder/commits/<sha>/check-runs`; a cancelled Scope guard run superseded by a successful one is fine).
+  - CI artefacts download with `gh api repos/ewels/nf-builder/actions/artifacts/<id>/zip`; run ids come from the failing check's details URL.
+  - New command kinds shift the edit harness's seeded draws: add a PRELUDE entry or a generator filter for no-op inputs; never change an assertion.
+  - Builders' e2e may share ports 4173/5173 across worktrees; they must only trust runs against their own server.
