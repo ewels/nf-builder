@@ -523,3 +523,10 @@ cases:
     lint:
       expect: error
       errors: ["not compatible with process input of type Sample"]
+  - id: f307-workflow-tabs
+    about: A typed entry workflow that calls the named workflow ALIGN twice (once through an alias); ALIGN calls SORT, which has two emits (sorted and report). The workflow tab tests open it.
+    spec: [F-307, UX-50, UX-51]
+    sources:
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/workflow-typed.mdx
+    lint: { expect: ok, clean: true }
+    run: { expect: ok, args: ["-stub"] }
