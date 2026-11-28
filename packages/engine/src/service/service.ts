@@ -412,6 +412,7 @@ export function createEngineService(
     given: number,
     startedChanging: () => void,
     direction: "undo" | "redo",
+    discard = false,
   ): HistoryOutcome => {
     const old = stale(given);
     if (old) return old;
@@ -442,7 +443,9 @@ export function createEngineService(
     );
     startedChanging();
     const label =
-      direction === "undo" ? open.history.undone() : open.history.redone();
+      direction === "undo"
+        ? open.history.undone(discard)
+        : open.history.redone();
     return {
       ok: true,
       label,
@@ -558,9 +561,9 @@ export function createEngineService(
         );
       }),
 
-    undo: (given) =>
+    undo: (given, options) =>
       guarded((open, startedChanging) =>
-        move(open, given, startedChanging, "undo"),
+        move(open, given, startedChanging, "undo", options?.discard === true),
       ),
 
     redo: (given) =>

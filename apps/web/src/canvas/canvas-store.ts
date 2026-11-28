@@ -358,6 +358,8 @@ export function createCanvasStore(
       at: Point;
     } | null = null;
     let adds = 0;
+    // palette adds in flight: every view they cause keeps the viewport, the intermediate one included (F-301)
+    let addsPending = 0;
 
     function clearSelection(): void {
       selection++;
@@ -395,7 +397,7 @@ export function createCanvasStore(
             revision: result.revision,
             projection: result.projection,
             positions: result.positions,
-            refit: true,
+            refit: addsPending === 0,
             notice: null,
           };
       } catch (error) {
@@ -991,83 +993,93 @@ export function createCanvasStore(
         if (tab === undefined || tab.kind !== "workflow")
           return Promise.resolve(fail(FILE_TAB_ADD));
         if (action === null) return Promise.resolve(fail(NO_ACTION_ADD));
+        addsPending++;
         return enqueue(async () => {
-          const fresh = await engine()
-            .freshName({ kind: action.kind, caller: tab.path })
-            .catch((error: unknown) => refusal("internal", messageOf(error)));
-          if ("ok" in fresh) return fail(fresh.message);
-          const group = `palette-${mine}-${++adds}`;
-          const label = `Add ${action.kind} ${fresh.name}`;
-          const key = formatNodeKey({
-            path: tab.path,
-            workflow: tab.workflow,
-            local: {
-              kind: "unassigned",
-              callee: fresh.name,
-              occurrence: 1,
-            },
-          });
-          pendingPlacement =
-            request.at === null
-              ? null
-              : { session: mine, tab: tab.id, key, at: request.at };
-          const refused = (outcome: EngineRefusal): PaletteAddOutcome => {
-            pendingPlacement = null;
-            return fail(
-              `Couldn't add ${fresh.name}: ${outcome.message} Nothing was changed.`,
+          try {
+            const fresh = await engine()
+              .freshName({ kind: action.kind, caller: tab.path })
+              .catch((error: unknown) => refusal("internal", messageOf(error)));
+            if ("ok" in fresh) return fail(fresh.message);
+            const group = `palette-${mine}-${++adds}`;
+            const label = `Add ${action.kind} ${fresh.name}`;
+            const key = formatNodeKey({
+              path: tab.path,
+              workflow: tab.workflow,
+              local: {
+                kind: "unassigned",
+                callee: fresh.name,
+                occurrence: 1,
+              },
+            });
+            pendingPlacement =
+              request.at === null
+                ? null
+                : { session: mine, tab: tab.id, key, at: request.at };
+            const refused = (outcome: EngineRefusal): PaletteAddOutcome => {
+              pendingPlacement = null;
+              return fail(
+                `Couldn't add ${fresh.name}: ${outcome.message} Nothing was changed.`,
+              );
+            };
+            const creating = await sendNow(
+              mine,
+              (revision) =>
+                engine().apply(
+                  {
+                    kind:
+                      action.kind === "process"
+                        ? "createProcess"
+                        : "createWorkflow",
+                    name: fresh.name,
+                    caller: tab.path,
+                  },
+                  revision,
+                  { group, label },
+                ),
+              afterApply,
             );
-          };
-          const creating = await sendNow(
-            mine,
-            (revision) =>
-              engine().apply(
-                {
-                  kind:
-                    action.kind === "process"
-                      ? "createProcess"
-                      : "createWorkflow",
-                  name: fresh.name,
-                  caller: tab.path,
-                },
-                revision,
-                { group, label },
-              ),
-            afterApply,
-          );
-          if (!creating.ok) return refused(creating);
-          const calling = await sendNow(
-            mine,
-            (revision) =>
-              engine().apply(
-                {
-                  kind: "addCall",
-                  target: { path: tab.path, workflow: tab.workflow },
-                  callee: fresh.name,
-                },
-                revision,
-                { group },
-              ),
-            afterApply,
-          );
-          if (!calling.ok) {
-            // only the group's first part is undone, so nothing is left behind
-            await sendNow(
+            if (!creating.ok) return refused(creating);
+            const calling = await sendNow(
               mine,
               async (revision) => {
                 try {
-                  return await engine().undo(revision);
+                  return await engine().apply(
+                    {
+                      kind: "addCall",
+                      target: { path: tab.path, workflow: tab.workflow },
+                      callee: fresh.name,
+                    },
+                    revision,
+                    { group },
+                  );
                 } catch (error) {
                   return refusal("internal", messageOf(error));
                 }
               },
-              async (outcome) => {
-                if (!outcome.ok) await refreshHistory();
-              },
+              afterApply,
             );
-            return refused(calling);
+            if (!calling.ok) {
+              // only the group's first part is undone, so nothing is left behind
+              await sendNow(
+                mine,
+                async (revision) => {
+                  try {
+                    return await engine().undo(revision, { discard: true });
+                  } catch (error) {
+                    return refusal("internal", messageOf(error));
+                  }
+                },
+                async (outcome) => {
+                  if (!outcome.ok) await refreshHistory();
+                },
+              );
+              return refused(calling);
+            }
+            await get().select(key);
+            return { ok: true, name: fresh.name, path: fresh.path, node: key };
+          } finally {
+            addsPending--;
           }
-          await get().select(key);
-          return { ok: true, name: fresh.name, path: fresh.path, node: key };
         });
       },
     };

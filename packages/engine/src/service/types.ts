@@ -113,6 +113,12 @@ export interface ApplyOptions {
   readonly label?: string;
 }
 
+/** How `undo` treats the step it takes back. */
+export interface UndoOptions {
+  /** Leave no redo step: for a rollback of a step that should never come back (F-301). */
+  readonly discard?: boolean;
+}
+
 /** A successful undo or redo: the change it made and the label of the step it moved. */
 export interface Undone extends ProjectChange {
   readonly ok: true;
@@ -166,7 +172,7 @@ export interface EngineApi {
     options?: ApplyOptions,
   ): Promise<ApplyOutcome>;
   /** Undoes the newest step; `revision` must be current. Advances the revision by one (F-209, AR-23). */
-  undo(revision: number): Promise<HistoryOutcome>;
+  undo(revision: number, options?: UndoOptions): Promise<HistoryOutcome>;
   /** Re-applies the newest undone step; `revision` must be current. */
   redo(revision: number): Promise<HistoryOutcome>;
   /** The undo history of the open project; empty with no project. */

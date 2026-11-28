@@ -1607,6 +1607,7 @@ describe("F-301 addFromPalette", () => {
   function adding(
     options: {
       refuseCall?: boolean;
+      throwCall?: boolean;
       name?: string;
       fresh?: EngineRefusal;
     } = {},
@@ -1615,6 +1616,7 @@ describe("F-301 addFromPalette", () => {
     const log: string[] = [];
     const applies: { command: { kind: string }; options: unknown }[] = [];
     const writes: LayoutWrite[] = [];
+    const undos: unknown[] = [];
     let revision = 1;
     let called = false;
     const engine = {
@@ -1644,6 +1646,8 @@ describe("F-301 addFromPalette", () => {
       ) => {
         log.push(`${command.kind}@${rev}`);
         applies.push({ command, options: applyOptions });
+        if (options.throwCall && command.kind === "addCall")
+          throw new Error("The worker stopped.");
         if (options.refuseCall && command.kind === "addCall")
           return {
             ok: false,
@@ -1657,8 +1661,9 @@ describe("F-301 addFromPalette", () => {
         if (command.kind === "addCall") called = true;
         return changeAt(revision, wf);
       },
-      undo: async (rev: number) => {
+      undo: async (rev: number, undoOptions?: unknown) => {
         log.push(`undo@${rev}`);
+        undos.push(undoOptions);
         revision = rev + 1;
         called = false;
         return changeAt(revision, wf, statusOf(0, 1), { label: "x" });
@@ -1678,7 +1683,7 @@ describe("F-301 addFromPalette", () => {
         return { revision, details: { node, diagnostics: [] } };
       },
     } as unknown as EngineApi;
-    return { engine, log, applies, writes };
+    return { engine, log, applies, writes, undos };
   }
   const where = { x: 400, y: 300 };
 
@@ -1790,8 +1795,30 @@ describe("F-301 addFromPalette", () => {
     const c = store.getState().content;
     if (c.status !== "ready") throw new Error("not ready");
     expect(c.positions[NODE]).toBeUndefined();
-    expect(c.refit).toBe(true);
+    expect(c.refit).toBe(false);
     expect(writes).toEqual([]);
+  });
+
+  it("F-301 UX-15: no view shown while an add is pending asks for a refit, the intermediate one after createProcess included", async () => {
+    const { engine } = adding();
+    const store = createCanvasStore(() => engine);
+    await store.getState().open(request);
+    const refits: boolean[] = [];
+    store.subscribe((state, before) => {
+      const now = state.content;
+      const then = before.content;
+      // a view with a new projection is what the canvas draws and may fit
+      if (
+        now.status === "ready" &&
+        (then.status !== "ready" || now.projection !== then.projection)
+      )
+        refits.push(now.refit);
+    });
+    await store
+      .getState()
+      .addFromPalette({ item: "process", tab: "main.nf#", at: null });
+    expect(refits.length).toBeGreaterThan(0);
+    expect(refits).not.toContain(true);
   });
 
   it("F-301 AR-23: when addCall is refused after create, the store undoes once and returns the refusal", async () => {
@@ -1807,6 +1834,32 @@ describe("F-301 addFromPalette", () => {
       message: "Couldn't add NEW_PROCESS: Already called. Nothing was changed.",
     });
     expect(store.getState().selected).toBeNull();
+  });
+
+  it("F-301 AR-23: the rollback discards the half add, so Redo cannot bring it back", async () => {
+    const { engine, undos } = adding({ refuseCall: true });
+    const store = createCanvasStore(() => engine);
+    await store.getState().open(request);
+    await store
+      .getState()
+      .addFromPalette({ item: "process", tab: "main.nf#", at: where });
+    expect(undos).toEqual([{ discard: true }]);
+  });
+
+  it("F-301 AR-23: an addCall that throws after create is rolled back too, and the add reports a refusal", async () => {
+    const { engine, log, undos } = adding({ throwCall: true });
+    const store = createCanvasStore(() => engine);
+    await store.getState().open(request);
+    const out = await store
+      .getState()
+      .addFromPalette({ item: "process", tab: "main.nf#", at: where });
+    expect(log.slice(1)).toEqual(["createProcess@1", "addCall@2", "undo@2"]);
+    expect(undos).toEqual([{ discard: true }]);
+    expect(out).toEqual({
+      ok: false,
+      message:
+        "Couldn't add NEW_PROCESS: The worker stopped. Nothing was changed.",
+    });
   });
 
   it("F-301: addFromPalette refuses with no project, a file tab, an older session or an item with no action, and calls no engine method", async () => {

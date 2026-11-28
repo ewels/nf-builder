@@ -178,3 +178,31 @@ test("F-301 QA-30: adding logs no CSP violation and no console error", async ({
   expect(await watch.violations()).toEqual([]);
   expect(watch.consoleErrors).toEqual([]);
 });
+
+test("F-301 UX-15: on a canvas that has nodes, adding by Enter and by drop keeps a panned viewport", async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name !== "chromium", "one browser is enough");
+  await blank(page, "palette-viewport");
+  await addByKeyboard(page, "Workflow");
+  await expect(node(page, WORKFLOW)).toBeVisible();
+  await layoutSettled(page);
+  const centre = await paneCentre(page);
+  await page.mouse.move(centre.x + 200, centre.y + 150);
+  await page.mouse.down();
+  await page.mouse.move(centre.x + 50, centre.y + 50, { steps: 10 });
+  await page.mouse.up();
+  const panned = await viewportTransform(page);
+  await addByKeyboard(page, "Process");
+  await expect(node(page, PROCESS)).toBeVisible();
+  await layoutSettled(page);
+  await page.waitForTimeout(500);
+  expect(await viewportTransform(page)).toBe(panned);
+  expectBoxContains(await nodeBox(page, PROCESS), await paneCentre(page));
+  const dropped = await dragToCanvas(page, "Process", { x: 150, y: 120 });
+  await expect(node(page, "main.nf#/NEW_PROCESS_2@1")).toBeVisible();
+  await layoutSettled(page);
+  await page.waitForTimeout(500);
+  expect(await viewportTransform(page)).toBe(panned);
+  expectBoxContains(await nodeBox(page, "main.nf#/NEW_PROCESS_2@1"), dropped);
+});
