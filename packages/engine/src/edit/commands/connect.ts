@@ -20,7 +20,7 @@ import {
   replaceNode,
 } from "../nodes";
 import { EditRefusal } from "../refusal";
-import { reprintDeclaration } from "../splice";
+import { assertCommentsKept, reprintDeclaration } from "../splice";
 import {
   assignedNames,
   clearArgument,
@@ -190,7 +190,9 @@ export function planConnect(state: EditState, command: Connect): ConnectPlan {
     ];
   }
   const main = updated.main && { ...updated.main, items: list };
-  return { file, def, next: { ...updated, main: main ?? null }, removed };
+  const next = { ...updated, main: main ?? null };
+  assertCommentsKept(file, def, next, removed);
+  return { file, def, next, removed };
 }
 
 /** Feeds the output port `from` into the input port `to` of the same workflow (UX-25). */

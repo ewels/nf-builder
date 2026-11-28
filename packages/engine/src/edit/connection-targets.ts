@@ -3,13 +3,17 @@
 // Connect makes except the ones only the reprint finds; a type mismatch comes from the pack's `connection` check.
 import type {
   FlowType,
+  GraphNode,
   PackLints,
+  Port,
   PortRef,
-  TypeExpr,
+  WorkflowDef,
   WorkflowTarget,
 } from "@nf-builder/lang-core";
+import { formatType } from "../projection/types";
 import type { EditState } from "./apply";
-import { planConnect } from "./commands/connect";
+import { type ConnectPlan, planConnect } from "./commands/connect";
+import { findByRange } from "./nodes";
 import { EditRefusal } from "./refusal";
 import { locateWorkflow } from "./workflow";
 
@@ -24,12 +28,29 @@ export interface ConnectionTarget {
   readonly message: string | null;
 }
 
-const typeName = (type: TypeExpr): string =>
-  `${type.name}${
-    type.args.length === 0 ? "" : `<${type.args.map(typeName).join(", ")}>`
-  }${type.nullable ? "?" : ""}`;
 const flowName = (type: FlowType): string =>
-  type.element === null ? "?" : typeName(type.element);
+  type.element === null ? "?" : formatType(type.element);
+
+/**
+ * Whether the lint rules would check the call's arguments once `input` is connected: nf-lang checks them only when
+ * their number is right, so a connection that leaves the count wrong shows no red edge (LA-32). Replacing an argument
+ * keeps the count; filling a free input pads the earlier ones with `null`.
+ */
+function checkedAfterConnect(
+  def: WorkflowDef,
+  node: GraphNode,
+  input: Port,
+): boolean {
+  if (node.kind !== "call") return true;
+  const call = findByRange(def, node.range);
+  if (call?.kind !== "MethodCall") return true;
+  const positional = call.args.filter((a) => a.kind !== "NamedArgument").length;
+  const named = call.args.some((a) => a.kind === "NamedArgument") ? 1 : 0;
+  const grown = input.argument
+    ? positional
+    : Math.max(positional, node.inputs.indexOf(input) + 1);
+  return grown + named + call.closures.length === node.inputs.length;
+}
 
 /** The status of connecting `from` to every input port of every node of the workflow, the source's own included (refused) `target`. */
 export function connectionTargets(
@@ -60,11 +81,16 @@ export function connectionTargets(
   for (const node of projection.nodes) {
     for (const input of node.inputs) {
       const to = { node: node.id, port: input.id };
+      let plan: ConnectPlan;
       try {
-        planConnect(state, { kind: "connect", target, from, to });
+        plan = planConnect(state, { kind: "connect", target, from, to });
       } catch (error) {
         if (!(error instanceof EditRefusal)) throw error;
         out.push({ ...to, status: "refused", message: error.message });
+        continue;
+      }
+      if (!checkedAfterConnect(plan.def, node, input)) {
+        out.push({ ...to, status: "ok", message: null });
         continue;
       }
       const arity = typed ? lints.tupleArity(source.type, input) : null;

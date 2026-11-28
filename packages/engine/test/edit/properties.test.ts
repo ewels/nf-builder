@@ -106,7 +106,14 @@ describe("F-111 properties", () => {
             if (t.status === "refused") {
               refused++;
               expect(result.ok, `${name} ${from.id} -> ${t.node}`).toBe(false);
-            } else if (result.ok) accepted++;
+            } else {
+              // both directions: a target the dry run lets through is accepted (apart from a reprint failure)
+              if (!result.ok)
+                expect(result.code, `${name} ${from.id} -> ${t.node}`).toBe(
+                  "internal",
+                );
+              else accepted++;
+            }
           }
         }
     }

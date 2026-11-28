@@ -140,4 +140,54 @@ describe("F-302 connectionTargets", () => {
     );
     expect(find(right, "LEGACY_COUNT@1", "$1").status).toBe("ok");
   });
+
+  it("F-302 UX-25: a code node's input is refused with Connect's message", async () => {
+    const state = await stateFor({
+      "main.nf":
+        "workflow {\n    ch = channel.of(1)\n    ch.view()\n    println(ch.toString())\n}\n",
+    });
+    const code = projection(state).nodes.find((n) => n.kind === "code");
+    expect(code, "a code node").toBeDefined();
+    const src = projection(state).nodes.find(
+      (n) => n.id !== code?.id && n.outputs.length > 0,
+    );
+    const list = connectionTargets(state, lints, target, {
+      node: src?.id as string,
+      port: src?.outputs[0]?.id as string,
+    });
+    const hit = list.filter((t) => t.node === code?.id);
+    expect(hit.length).toBeGreaterThan(0);
+    for (const t of hit)
+      expect(t).toMatchObject({
+        status: "refused",
+        message: `${code?.label} can't take another argument.`,
+      });
+  });
+
+  it("F-302 LA-32 UX-25: a call lint skips for its argument count is ok when connecting leaves the count wrong, a mismatch when it makes it right", async () => {
+    const make = (n: 1 | 3) =>
+      stateFor({
+        "main.nf": `nextflow.enable.types = true\n\nprocess T {\n    output:\n    file('t')\n\n    script:\n    't'\n}\n\nprocess P {\n    input:\n    a: String\n    b: String\n    c: String\n\n    output:\n    file('p')\n\n    script:\n    'p'\n}\n\nworkflow {\n    T()\n    ${n === 1 ? "P('x')" : "P('x', 'y', 'z')"}\n}\n`,
+      });
+    const statuses = async (n: 1 | 3) => {
+      const state = await make(n);
+      const list = connectionTargets(
+        state,
+        lints,
+        target,
+        port(state, "T@1", "out"),
+      );
+      return Object.fromEntries(
+        ["a", "b", "c"].map((p) => [p, find(list, "P@1", p).status]),
+      );
+    };
+    // P('x') has 1 of 3 arguments: replacing a keeps it wrong (lint skips the check); filling c pads to 3, so c is checked
+    expect(await statuses(1)).toEqual({ a: "ok", b: "ok", c: "mismatch" });
+    // P('x', 'y', 'z') has the right count, so replacing any argument is checked
+    expect(await statuses(3)).toEqual({
+      a: "mismatch",
+      b: "mismatch",
+      c: "mismatch",
+    });
+  });
 });
