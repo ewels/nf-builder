@@ -163,6 +163,8 @@ export interface WorkspaceActions {
   redo(session?: number): Promise<HistoryOutcome>;
   /** A code pane registers its flush, awaited before an undo or redo; returns the unregister function. */
   registerFlush(flush: () => Promise<void>): () => void;
+  /** Sends the code panes' pending edits to the engine and waits for them (F-210's add files, before its raw write). */
+  flushEdits(): Promise<void>;
   /** Selects a node and loads its details; null clears the selection. */
   select(id: string | null): Promise<void>;
   /**
@@ -794,6 +796,10 @@ export function createCanvasStore(
 
       undo: (session) => stepHistory("undo", session),
       redo: (session) => stepHistory("redo", session),
+
+      flushEdits: async () => {
+        await flushPending();
+      },
 
       registerFlush(flush) {
         flushes.add(flush);

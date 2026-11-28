@@ -100,4 +100,16 @@ describe("F-210 files panel", () => {
     );
     expect(markup.match(/file-badge/g)).toHaveLength(1);
   });
+
+  it('F-210 UX-16 QA-12: a verbatim file with no problems has a neutral badge, never "0 parse errors"', () => {
+    const verbatim = fileTreeRows({
+      files: [{ ...file("big.nf"), status: "verbatim" as const }],
+      registry: [],
+      expanded: new Set(),
+    });
+    const markup = html(verbatim);
+    expect(markup).toContain("file-badge");
+    expect(markup).not.toContain("0 parse errors");
+    expect(markup).toContain("Not fully parsed");
+  });
 });

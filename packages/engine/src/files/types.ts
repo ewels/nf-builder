@@ -56,15 +56,3 @@ export interface AddPlan {
   readonly replaced: readonly string[];
   readonly conflicts: readonly AddConflict[];
 }
-
-export type OpenTarget =
-  | {
-      readonly kind: "workflow";
-      readonly path: string;
-      readonly workflow: string | null;
-    }
-  | {
-      readonly kind: "file";
-      readonly path: string;
-      readonly readOnly: ReadOnlyReason | null;
-    };

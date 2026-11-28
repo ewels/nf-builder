@@ -57,6 +57,8 @@ interface AddFilesDeps {
   /** The project shown now: a stage that finishes in another project is discarded. */
   session(): number;
   onChange(state: AddFilesState): void;
+  /** Sends the code panes' pending edits, so the write is a step after them as undo and redo are (AR-23). */
+  flush(): Promise<void>;
   /** After the files were written: the folder they went to and how many. */
   onAdded(folder: string, count: number): void;
   readonly timer?: Timer;
@@ -114,34 +116,37 @@ export function createAddFiles(
     folder: s.preview.folder,
   });
 
-  const preview = () => {
-    handle = undefined;
-    if (state.status !== "ready") return;
-    const mine = ++request;
-    const wanted = choice;
+  /** The preview of `choice`; a call that throws is a "gone" refusal. */
+  const previewOf = (choice: AddChoice): Promise<AddPreviewResult> =>
     deps
       .workspace()
-      .previewAdd(choiceOf(state))
+      .previewAdd(choice)
       .catch(
         (failure: unknown): AddPreviewResult => ({
           ok: false,
           code: "gone",
           message: messageOf(failure),
         }),
-      )
-      .then((result) => {
-        if (mine !== request || wanted !== choice || state.status !== "ready")
-          return;
-        if (result.ok)
-          set({
-            ...state,
-            preview: result,
-            // a reply for older text leaves the newer edit pending
-            updating: state.zip && state.ignore !== result.summary.ignore,
-          });
-        else
-          set({ status: "refused", name: state.name, message: result.message });
-      });
+      );
+
+  const preview = () => {
+    handle = undefined;
+    if (state.status !== "ready") return;
+    const mine = ++request;
+    const wanted = choice;
+    previewOf(choiceOf(state)).then((result) => {
+      if (mine !== request || wanted !== choice || state.status !== "ready")
+        return;
+      if (result.ok)
+        set({
+          ...state,
+          preview: result,
+          // a reply for older text leaves the newer edit pending
+          updating: state.zip && state.ignore !== result.summary.ignore,
+        });
+      else
+        set({ status: "refused", name: state.name, message: result.message });
+    });
   };
   const edit = (change: Partial<AddFilesState & { status: "ready" }>) => {
     if (state.status !== "ready" || state.adding) return;
@@ -184,16 +189,12 @@ export function createAddFiles(
         if (!stage.ok)
           return set({ status: "refused", name, message: stage.message });
         const ignore = zip ? stage.summary.ignore : "";
-        const first = await deps
-          .workspace()
-          .previewAdd({ id: stage.id, ignore, keepFolder: false, folder })
-          .catch(
-            (failure: unknown): AddPreviewResult => ({
-              ok: false,
-              code: "gone",
-              message: messageOf(failure),
-            }),
-          );
+        const first = await previewOf({
+          id: stage.id,
+          ignore,
+          keepFolder: false,
+          folder,
+        });
         if (mine !== choice) {
           discard(stage.id);
           return;
@@ -227,6 +228,7 @@ export function createAddFiles(
       set({ ...ready, adding: true });
       let outcome: Awaited<ReturnType<WorkspaceApi["addFiles"]>>;
       try {
+        await deps.flush();
         outcome = await deps.workspace().addFiles(choiceOf(ready));
       } catch (failure) {
         outcome = {

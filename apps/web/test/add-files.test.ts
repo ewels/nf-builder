@@ -90,6 +90,9 @@ function setup(
     workspace: () => workspace as never,
     session: overrides.session ?? (() => 1),
     onChange: (s) => states.push(s),
+    flush: async () => {
+      calls.push("flush");
+    },
     onAdded: (folder, count) => added.push([folder, count]),
     timer: timers,
     debounceMs: 300,
@@ -160,6 +163,18 @@ describe("F-210 add files", () => {
     expect(s.status === "ready" && s.preview.adds).toBe(7);
     expect(s.status === "ready" && s.updating).toBe(false);
     expect(s.status === "ready" && s.keepFolder).toBe(true);
+  });
+
+  it("F-210 AR-23: confirm sends the code panes' pending edits before the write", async () => {
+    const t = setup();
+    t.view.start({ kind: "files", files: [file("a.csv")] }, "");
+    await t.settle();
+    await t.view.confirm();
+    const flushed = t.calls.indexOf("flush");
+    expect(flushed).toBeGreaterThan(-1);
+    expect(flushed).toBeLessThan(
+      t.calls.findIndex((c) => c.startsWith("addFiles")),
+    );
   });
 
   it("F-210 UX-16: confirm sends the choice and reports the count and folder; cancel discards the stage; a refusal shows its message", async () => {

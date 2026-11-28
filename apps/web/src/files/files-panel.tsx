@@ -45,9 +45,8 @@ const NAV_KEYS = new Set([
   "Enter",
 ]);
 
-export const DROP_HINT =
-  "Drop files or a .zip here to add them to the project.";
-export const MANAGED_TARGET =
+const DROP_HINT = "Drop files or a .zip here to add them to the project.";
+const MANAGED_TARGET =
   "nf-builder keeps .nf-builder/ up to date itself. Choose another folder.";
 
 /** The panel's layout: the header with its actions, the status line, the tree or why there isn't one, and the drop hint. */
@@ -196,12 +195,14 @@ export function FilesPanel(): JSX.Element {
   const [creating, setCreating] = useState<{
     kind: "file" | "folder";
     folder: string;
+    session: number;
   } | null>(null);
   const [adding, setAdding] = useState<AddFilesState>({ status: "idle" });
   const add = useRef<ReturnType<typeof createAddFiles>>(undefined);
   add.current ??= createAddFiles({
     workspace: getEngine,
     session: () => canvasStore.getState().session,
+    flush: () => canvasStore.getState().flushEdits(),
     onChange: (state) => {
       setAdding(state);
       const { notify } = filesStore.getState();
@@ -345,7 +346,7 @@ export function FilesPanel(): JSX.Element {
         notice={notice}
         dropTarget={dropFolder}
         uploadDisabled={isManagedPath(target)}
-        onNew={(kind) => setCreating({ kind, folder: target })}
+        onNew={(kind) => setCreating({ kind, folder: target, session })}
         onFiles={(chosen) => {
           if (chosen.length === 0) return;
           filesStore.getState().notify(null);
@@ -373,8 +374,8 @@ export function FilesPanel(): JSX.Element {
                 }
                 onSubmit={(name) =>
                   creating.kind === "file"
-                    ? filesStore.getState().createFile(name)
-                    : filesStore.getState().createFolder(name)
+                    ? filesStore.getState().createFile(name, creating)
+                    : filesStore.getState().createFolder(name, creating)
                 }
                 onClose={() => setCreating(null)}
               />

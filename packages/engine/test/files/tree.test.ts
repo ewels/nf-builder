@@ -131,4 +131,20 @@ describe("F-210 file tree rows", () => {
       "modules/nf-core/fastqc",
     ]);
   });
+
+  it("F-210 UX-16 QA-10: a path that is both a file and a folder is one row, the folder, so rows keep unique paths", () => {
+    const rows = fileTreeRows({
+      files: [
+        file("a"),
+        file("a/b.txt", { language: "text", status: "plain" }),
+      ],
+      registry: [],
+      expanded: new Set(["a"]),
+    });
+    expect(rows.map((r) => `${r.kind} ${r.path}`)).toEqual([
+      "folder a",
+      "file a/b.txt",
+    ]);
+    expect(rows[0]?.setSize).toBe(1);
+  });
 });

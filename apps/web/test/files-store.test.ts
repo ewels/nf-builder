@@ -206,7 +206,7 @@ describe("F-210 files store", () => {
     expect(s().selected).toBeNull();
   });
 
-  it("F-210 UX-16 UX-52: open dispatches to openWorkflow or openFile by openTarget", async () => {
+  it("F-210 UX-16 UX-52: open selects the row and opens a script with a workflow on its canvas, anything else as a file", async () => {
     const t = setup();
     t.files.getState().setVisible(true);
     await t.show();
@@ -242,7 +242,8 @@ describe("F-210 files store", () => {
     await tick();
     await t.reply();
     // a refusal comes back as its message and changes nothing
-    expect(await t.files.getState().createFile("notes.txt")).toBe("No.");
+    const at = { folder: "modules", session: t.canvas.getState().session };
+    expect(await t.files.getState().createFile("notes.txt", at)).toBe("No.");
     expect(t.files.getState().selected).toBeNull();
     t.setOutcome(() => ({
       ok: true,
@@ -252,7 +253,7 @@ describe("F-210 files store", () => {
       history: EMPTY_HISTORY,
     }));
     t.files.getState().select("modules");
-    expect(await t.files.getState().createFile("notes.txt")).toBeNull();
+    expect(await t.files.getState().createFile("notes.txt", at)).toBeNull();
     expect(t.calls[1]).toBe(
       '{"kind":"createFile","path":"modules/notes.txt"} null',
     );
@@ -265,7 +266,7 @@ describe("F-210 files store", () => {
     });
     // the new file opens in a code tab
     expect(t.canvas.getState().activeTab).toBe("file:modules/notes.txt");
-    expect(await t.files.getState().createFolder("assets/raw/")).toBeNull();
+    expect(await t.files.getState().createFolder("assets/raw/", at)).toBeNull();
     expect(t.calls[2]).toBe(
       '{"kind":"createFile","path":"modules/assets/raw/.gitkeep"} {"label":"Create folder modules/assets/raw"}',
     );
@@ -273,5 +274,37 @@ describe("F-210 files store", () => {
     expect(t.files.getState().notice?.text).toBe(
       "Created folder modules/assets/raw.",
     );
+  });
+
+  it("F-210 UX-16: createFile and createFolder use the folder and session the dialog opened with, not the selection or session at submit", async () => {
+    const t = setup();
+    t.files.getState().setVisible(true);
+    await t.show();
+    await tick();
+    await t.reply();
+    t.setOutcome(() => ({
+      ok: true,
+      revision: 2,
+      workflows: [entry],
+      files: [{ path: "x", text: "" }],
+      history: EMPTY_HISTORY,
+    }));
+    const session = t.canvas.getState().session;
+    // the selection moved on while the dialog was open
+    t.files.getState().select("modules");
+    expect(
+      await t.files.getState().createFile("a.txt", { folder: "", session }),
+    ).toBeNull();
+    expect(t.calls.at(-1)).toContain('"path":"a.txt"');
+    expect(
+      await t.files.getState().createFolder("d", { folder: "x", session }),
+    ).toBeNull();
+    expect(t.calls.at(-1)).toContain('"path":"x/d/.gitkeep"');
+    // another project opened meanwhile: the file is not created in it
+    const before = t.calls.length;
+    expect(
+      await t.files.getState().createFile("b.txt", { folder: "", session: -1 }),
+    ).toBe("The project changed.");
+    expect(t.calls).toHaveLength(before);
   });
 });

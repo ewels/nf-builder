@@ -45,8 +45,8 @@ export function fileTreeRows(input: {
     children.set(parent, list);
   };
   const byPath = new Map(files.map((f) => [f.path, f]));
-  // a path that is both a file and a folder (FileTree allows it) shows as both
-  for (const f of files) add(f.path, false);
+  // a path that is both a file and a folder (the project tree allows it) is one row, the folder: rows are keyed by path
+  for (const f of files) if (!folders.has(f.path)) add(f.path, false);
   for (const d of folders) add(d, true);
   const rows: FileTreeRow[] = [];
   const visit = (folder: string, level: number) => {

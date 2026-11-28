@@ -1,11 +1,12 @@
 // The Files view's store (F-210, AR-30): the project's file list pulled from the worker while the panel is visible, and
 // the tree's session-only state (expanded folders, selection). It holds paths, statuses and counts, never file text.
 import {
+  ancestorsOf,
   type EngineApi,
   type FileSummary,
+  folderOf,
   folderSet,
   joinFolder,
-  openTarget,
   type RegistryFolder,
 } from "@nf-builder/engine";
 import { useStore } from "zustand";
@@ -42,6 +43,12 @@ export interface FilesState {
   readonly visible: boolean;
 }
 
+/** Where a new path goes: the folder and canvas session the dialog opened with, not what is selected at submit. */
+export interface CreateAt {
+  readonly folder: string;
+  readonly session: number;
+}
+
 export interface FilesActions {
   /** The panel is shown or hidden; showing it pulls when the list is missing or stale. */
   setVisible(visible: boolean): void;
@@ -56,25 +63,15 @@ export interface FilesActions {
   open(path: string): Promise<void>;
   /** The folder new files go to: the selected folder, else the selected file's folder, else the top. */
   targetFolder(): string;
-  /** Creates an empty file in the target folder, reveals and opens it; the refusal's message, or null. */
-  createFile(name: string): Promise<string | null>;
+  /** Creates an empty file in `at.folder`, reveals and opens it; the refusal's message, or null. */
+  createFile(name: string, at: CreateAt): Promise<string | null>;
   /** Creates a folder as its `.gitkeep` (UX-16), reveals it; the refusal's message, or null. */
-  createFolder(name: string): Promise<string | null>;
+  createFolder(name: string, at: CreateAt): Promise<string | null>;
   notify(notice: FilesNotice | null): void;
 }
 
 const messageOf = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
-
-const folderOf = (path: string): string =>
-  path.includes("/") ? path.slice(0, path.lastIndexOf("/")) : "";
-
-const ancestors = (path: string): string[] => {
-  const out: string[] = [];
-  for (let at = path.indexOf("/"); at >= 0; at = path.indexOf("/", at + 1))
-    out.push(path.slice(0, at));
-  return out;
-};
 
 export function createFilesStore(deps: {
   engine: () => Pick<EngineApi, "listFiles">;
@@ -205,46 +202,40 @@ export function createFilesStore(deps: {
       select: (path) => set({ selected: path }),
       reveal(path) {
         setExpanded((s) => {
-          for (const a of ancestors(path)) s.add(a);
+          for (const a of ancestorsOf(path)) s.add(a);
         });
         set({ selected: path });
       },
       async open(path) {
-        const { summary } = canvas.getState();
-        if (summary === null) return;
         set({ selected: path });
-        const target = openTarget(path, summary.workflows);
-        if (target.kind === "workflow")
-          await canvas.getState().openWorkflow(path, target.workflow);
-        else await canvas.getState().openFile(path);
+        await canvas.getState().openFile(path);
       },
       targetFolder() {
         const { selected, files } = get();
         if (selected === null) return "";
         return folderSet(files).has(selected) ? selected : folderOf(selected);
       },
-      async createFile(name) {
-        const path = joinFolder(get().targetFolder(), name);
+      async createFile(name, at) {
+        const path = joinFolder(at.folder, name);
         const outcome = await canvas
           .getState()
-          .apply({ kind: "createFile", path }, canvas.getState().session);
+          .apply({ kind: "createFile", path }, at.session);
         if (!outcome.ok) return outcome.message;
         get().reveal(path);
         set({ notice: { tone: "status", text: `Created ${path}.` } });
         await get().open(path);
         return null;
       },
-      async createFolder(name) {
-        const folder = joinFolder(
-          get().targetFolder(),
-          name.replace(/\/+$/, ""),
-        );
+      async createFolder(name, at) {
+        const folder = joinFolder(at.folder, name.replace(/\/+$/, ""));
         const outcome = await canvas
           .getState()
           .apply(
             { kind: "createFile", path: `${folder}/.gitkeep` },
-            canvas.getState().session,
-            { label: `Create folder ${folder}` },
+            at.session,
+            {
+              label: `Create folder ${folder}`,
+            },
           );
         if (!outcome.ok) return outcome.message;
         get().reveal(folder);

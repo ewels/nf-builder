@@ -31,30 +31,19 @@ export function looseCandidates(
   limits: ImportLimits = IMPORT_LIMITS,
 ): ZipRead {
   const seen = new Set<string>();
+  const skipped = (
+    path: string,
+    size: number,
+    reason: ImportCandidate["reason"],
+  ): ImportCandidate => ({ path, size, text: null, reason });
   const candidates: ImportCandidate[] = entries.map((entry) => {
     const path = entryPath(entry.name);
     if (path.kind !== "file")
-      return {
-        path: entry.name,
-        size: entry.size,
-        text: null,
-        reason: "unsafe-path",
-      };
-    if (seen.has(path.path))
-      return {
-        path: path.path,
-        size: entry.size,
-        text: null,
-        reason: "duplicate",
-      };
+      return skipped(entry.name, entry.size, "unsafe-path");
+    if (seen.has(path.path)) return skipped(path.path, entry.size, "duplicate");
     seen.add(path.path);
     if (entry.size > limits.maxTextFileBytes)
-      return {
-        path: path.path,
-        size: entry.size,
-        text: null,
-        reason: "too-large",
-      };
+      return skipped(path.path, entry.size, "too-large");
     const text = entry.bytes === null ? null : decodeText(entry.bytes);
     return {
       path: path.path,

@@ -2,8 +2,13 @@ import type { FileTreeRow } from "@nf-builder/engine";
 import type { JSX, KeyboardEvent } from "react";
 import { ChevronIcon, GlyphIcon } from "../shell/icons";
 
+/** What a badge says: the error count when there is one, else (a verbatim or partial parse with no problem) a neutral note. */
 const parseErrors = (n: number): string =>
-  n === 1 ? "1 parse error" : `${n} parse errors`;
+  n === 0
+    ? "Not fully parsed"
+    : n === 1
+      ? "1 parse error"
+      : `${n} parse errors`;
 
 /**
  * The project's files as a WAI-ARIA tree (UX-16, QA-10): flat rows with their level, set size and position; one row is in
@@ -84,7 +89,7 @@ export function FileTree({
           {row.failed ? (
             <span
               className="file-badge"
-              title={`This file doesn't parse completely: ${parseErrors(row.problems)}.`}
+              title={`This file doesn't parse completely: ${parseErrors(row.problems).toLowerCase()}.`}
             >
               <GlyphIcon name="error" />
               <span className="visually-hidden">
