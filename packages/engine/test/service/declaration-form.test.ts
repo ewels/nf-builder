@@ -49,6 +49,9 @@ describe("F-303 engine service declarationForm", () => {
     expect(result.form.name).toBe("GREET");
     expect(result.form.inputs).toHaveLength(1);
     expect(result.choices.directives.length).toBeGreaterThan(20);
+    expect(result.choices.types).toEqual(
+      expect.arrayContaining(["Boolean", "Record", "Tuple", "Path"]),
+    );
     expect(structuredClone(result)).toEqual(result);
   });
 

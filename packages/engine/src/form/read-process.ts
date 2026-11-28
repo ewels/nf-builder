@@ -237,6 +237,7 @@ export function formChoices(
   catalogue: ScriptCatalogue,
   rules: ConfigRules,
   local: readonly string[] = [],
+  standard: readonly string[] = [],
 ): FormChoices {
   const directives = catalogue.directives
     .filter((d) => !d.deprecated)
@@ -252,6 +253,7 @@ export function formChoices(
     if (plain !== "Channel" && plain !== "Value" && !plain.includes("."))
       types.add(plain);
   }
+  for (const name of standard) types.add(name);
   for (const name of local) types.add(name);
   return { directives, stage, types: [...types].sort() };
 }

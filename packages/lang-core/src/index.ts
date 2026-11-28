@@ -25,6 +25,8 @@ export interface LanguagePack {
   readonly scaffold: Scaffold;
   /** Legacy-only operators, with their result kinds (F-107): pure, loaded with the pack. */
   readonly legacyOperators: readonly LegacyOperator[];
+  /** Documented standard type names the generated catalogue lacks (F-303): pure, loaded with the pack. */
+  readonly standardTypes?: readonly string[];
   /** The generated catalogue, loaded on first call (a dynamic import, so it stays out of the initial bundle; ADR 0028). */
   loadCatalogue(): Promise<Catalogue>;
   /** The parser with declaration-level fallback, loaded on first call (a dynamic import; ADR 0004, ADR 0027). */

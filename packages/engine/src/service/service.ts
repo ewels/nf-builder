@@ -780,7 +780,13 @@ export function createEngineService(
           revision,
           target: { path: target.path, name: target.name },
           form: processForm(model.source, process, open.state.catalogue),
-          choices: formChoices(open.state.catalogue, open.configRules, local),
+          choices: formChoices(
+            open.state.catalogue,
+            open.configRules,
+            local,
+            installedPacks.find((p) => p.version === open.version)
+              ?.standardTypes,
+          ),
         };
       }),
 

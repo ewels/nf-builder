@@ -154,6 +154,22 @@ describe("F-303 read process", () => {
     expect(choices.types.some((t) => t.startsWith("shim."))).toBe(false);
   });
 
+  it("F-303 UX-41: type suggestions include the documented standard types the generated catalogue lacks", async () => {
+    const { state } = await load();
+    const pack = installedPacks.find((p) => p.version === version);
+    const rules = await pack?.loadConfigRules();
+    if (!rules) throw new Error("no rules");
+    const { types } = formChoices(
+      state.catalogue,
+      rules,
+      [],
+      pack?.standardTypes,
+    );
+    for (const name of ["Boolean", "Record", "Tuple"])
+      expect(types).toContain(name);
+    expect(types.filter((t) => t === "Boolean")).toHaveLength(1);
+  });
+
   it("F-303 UX-41: each directive choice's kind and default come from its catalogue type", async () => {
     const { state } = await load();
     const pack = installedPacks.find((p) => p.version === version);
