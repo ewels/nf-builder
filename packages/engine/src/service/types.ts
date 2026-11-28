@@ -15,6 +15,7 @@ import type {
   WorkflowRef,
 } from "@nf-builder/lang-core";
 import type { NodeDetails } from "../details/types";
+import type { ProjectFiles } from "../files/types";
 import type { HistoryStatus } from "../history/history";
 import type {
   LayoutChange,
@@ -23,6 +24,7 @@ import type {
   Positions,
 } from "../layout";
 import type { ProjectFile } from "../model/project";
+import type { ProjectReport } from "../report/report";
 import type { TemplateList } from "../templates";
 
 export interface OpenRequest {
@@ -39,6 +41,8 @@ export interface LoadProgress {
   readonly total: number;
   readonly path: string | null;
 }
+
+export type { ProjectFiles, RegistryFolder } from "../files/types";
 
 export interface FileSummary {
   readonly path: string;
@@ -169,6 +173,8 @@ export interface EngineApi {
     workflow: string | null,
   ): Promise<ProjectionResult | EngineRefusal>;
   diagnostics(): Promise<DiagnosticsResult | EngineRefusal>;
+  /** Parse failures, legacy share and diagnostic counts of the current revision (F-401, UX-61). */
+  report(): Promise<ProjectReport | EngineRefusal>;
   /** The declaration details and diagnostics of one node of a workflow's projection (F-206). */
   details(
     path: string,
@@ -181,6 +187,8 @@ export interface EngineApi {
    * the revision.
    */
   setLayout(write: LayoutWrite): Promise<LayoutChange | EngineRefusal>;
+  /** Every file with its parse status, and the registry module folders, for the Files view (UX-16, F-210). */
+  listFiles(): Promise<ProjectFiles | EngineRefusal>;
   /** The current text of a file, or null with no project or no such file. */
   readFile(path: string): Promise<string | null>;
   /** Drops the open project; later calls answer `no-project` until the next `open`. The revision counter keeps counting. */

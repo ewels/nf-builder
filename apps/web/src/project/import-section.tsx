@@ -1,20 +1,12 @@
-// The Import route of the New project dialog (F-403, IO-12, UX-61): a source (Zip file for now), the file input and the
-// summary of what would be imported before anything is. Presentational; the state is in `zip-import.ts` (AR-31).
-import { formatBytes, formatCount, type SkipReason } from "@nf-builder/sources";
+// The Import route of the New project dialog (F-403, F-401; IO-10, IO-12, UX-61): a source (Zip file or GitHub repository), its
+// inputs and the summary of what would be imported before anything is. Presentational; the state is in `zip-import.ts` and
+// `use-github-import.ts` (AR-31).
 import { type JSX, useId } from "react";
+import { ImportSummaryView } from "../import/import-summary";
+import type { GithubImportView } from "../import/use-github-import";
 import type { ZipImportView } from "./zip-import";
 
-const SKIP_LABELS: Record<SkipReason, string> = {
-  ignored: "Ignored by the list",
-  "too-large": "Over 1 MB",
-  binary: "Binary or non-UTF-8 files",
-  "unsafe-path": "Unsafe paths",
-  duplicate: "Duplicate paths",
-  unsupported: "Unsupported compression",
-};
-
-const plural = (n: number, one: string, many: string): string =>
-  n === 1 ? `1 ${one}` : `${formatCount(n)} ${many}`;
+export type ImportSource = "zip" | "github";
 
 /** Passes the chosen file on and empties the input, so choosing the same file again still fires `change`. */
 export function takeChosenFile(
@@ -28,12 +20,76 @@ export function takeChosenFile(
 
 export function ImportSection(props: {
   readonly view: ZipImportView;
+  readonly github: GithubImportView;
+  readonly source: ImportSource;
   readonly busy: boolean;
+  onSource(source: ImportSource): void;
 }): JSX.Element {
   const ids = useId();
   const { state } = props.view;
-  const helpId = `${ids}-help`;
-  const problemsId = `${ids}-problems`;
+  const gh = props.github;
+  const input = (
+    <>
+      <label className="dialog-field">
+        <span>Zip file to import</span>
+        <input
+          type="file"
+          accept=".zip,application/zip,application/x-zip-compressed"
+          disabled={props.busy}
+          onChange={(event) => takeChosenFile(props.view, event.target)}
+        />
+      </label>
+      {/* one live region that stays in the page, so its changes are announced */}
+      <p className="muted" role="status">
+        {state.status === "reading" ? `Reading ${state.name}…` : null}
+        {state.status === "ready" && state.updating ? "Updating…" : null}
+      </p>
+      {state.status === "refused" ? (
+        <p className="dialog-error" role="alert">
+          {state.message}
+        </p>
+      ) : null}
+    </>
+  );
+  const repository = (
+    <>
+      <label className="dialog-field">
+        <span>Repository</span>
+        <input
+          type="text"
+          value={gh.repo}
+          placeholder="nf-core/fetchngs or github.com/nf-core/fetchngs"
+          disabled={props.busy}
+          spellCheck={false}
+          autoComplete="off"
+          onChange={(event) => gh.setRepo(event.target.value)}
+        />
+      </label>
+      <label className="dialog-field">
+        <span>Branch, tag or commit</span>
+        <input
+          type="text"
+          value={gh.ref}
+          disabled={props.busy}
+          spellCheck={false}
+          autoComplete="off"
+          aria-describedby={`${ids}-ref-help`}
+          onChange={(event) => gh.setRef(event.target.value)}
+        />
+      </label>
+      <p className="muted" id={`${ids}-ref-help`}>
+        Leave empty for the default branch
+      </p>
+      <p className="muted" role="status">
+        {gh.state.status === "checking" ? `Checking ${gh.state.slug}…` : null}
+      </p>
+      {gh.state.status === "failed" ? (
+        <p className="dialog-error" role="alert">
+          {gh.state.message}
+        </p>
+      ) : null}
+    </>
+  );
   return (
     <>
       <fieldset className="dialog-group">
@@ -42,107 +98,37 @@ export function ImportSection(props: {
           <input
             type="radio"
             name={`${ids}-source`}
-            checked
-            onChange={() => undefined}
+            checked={props.source === "zip"}
+            onChange={() => props.onSource("zip")}
           />
           <span>Zip file</span>
         </label>
-        <label className="dialog-field">
-          <span>Zip file to import</span>
+        <label className="dialog-choice">
           <input
-            type="file"
-            accept=".zip,application/zip,application/x-zip-compressed"
-            disabled={props.busy}
-            onChange={(event) => takeChosenFile(props.view, event.target)}
+            type="radio"
+            name={`${ids}-source`}
+            checked={props.source === "github"}
+            onChange={() => props.onSource("github")}
           />
+          <span>GitHub repository</span>
         </label>
-        {/* one live region that stays in the page, so its changes are announced */}
-        <p className="muted" role="status">
-          {state.status === "reading" ? `Reading ${state.name}…` : null}
-          {state.status === "ready" && state.updating ? "Updating…" : null}
-        </p>
-        {state.status === "refused" ? (
-          <p className="dialog-error" role="alert">
-            {state.message}
-          </p>
-        ) : null}
+        {props.source === "zip" ? input : repository}
       </fieldset>
-      {state.status === "ready" ? (
-        <section className="import-summary" aria-labelledby={`${ids}-summary`}>
-          <h3 id={`${ids}-summary`}>Import summary</h3>
-          <p>
-            {plural(state.summary.files, "file", "files")},{" "}
-            {formatBytes(state.summary.bytes)}
-          </p>
-          {state.summary.stripped !== null ? (
-            <p className="muted">
-              Removed the top-level folder {state.summary.stripped}/.
-            </p>
-          ) : null}
-          {state.summary.skipped.length > 0 ? (
-            <details>
-              <summary>
-                Skipped files (
-                {formatCount(
-                  state.summary.skipped.reduce((n, g) => n + g.count, 0),
-                )}
-                )
-              </summary>
-              {state.summary.skipped.map((group) => (
-                <div key={group.reason}>
-                  <h4>
-                    {SKIP_LABELS[group.reason]}:{" "}
-                    {plural(group.count, "file", "files")},{" "}
-                    {formatBytes(group.bytes)}
-                  </h4>
-                  <ul className="import-paths">
-                    {group.paths.map((path, index) => (
-                      // the same path can be listed twice (duplicate entries)
-                      // biome-ignore lint/suspicious/noArrayIndexKey: the list is static between renders
-                      <li key={`${index}:${path}`}>{path}</li>
-                    ))}
-                    {group.count > group.paths.length ? (
-                      <li className="muted">
-                        and {formatCount(group.count - group.paths.length)} more
-                      </li>
-                    ) : null}
-                  </ul>
-                </div>
-              ))}
-            </details>
-          ) : null}
-          <label className="dialog-field" htmlFor={`${ids}-ignore`}>
-            Ignore list
-          </label>
-          <textarea
-            id={`${ids}-ignore`}
-            className="import-ignore"
-            rows={6}
-            spellCheck={false}
-            value={state.ignore}
-            aria-describedby={
-              state.summary.ignoreProblems.length > 0
-                ? `${problemsId} ${helpId}`
-                : helpId
-            }
-            aria-invalid={state.summary.ignoreProblems.length > 0}
-            onChange={(event) => props.view.setIgnore(event.target.value)}
-          />
-          <p className="muted" id={helpId}>
-            One pattern per line, as in .gitignore. A trailing / matches a
-            folder and a leading / anchors to the top. Binary or non-UTF-8 files
-            and files over 1 MB are always skipped.
-          </p>
-          {state.summary.ignoreProblems.length > 0 ? (
-            <ul className="dialog-error" id={problemsId}>
-              {state.summary.ignoreProblems.map((problem) => (
-                <li key={problem.line}>
-                  Line {problem.line}: {problem.message}
-                </li>
-              ))}
-            </ul>
-          ) : null}
-        </section>
+      {props.source === "zip" && state.status === "ready" ? (
+        <ImportSummaryView
+          summary={state.summary}
+          ignore={state.ignore}
+          onIgnoreChange={props.view.setIgnore}
+        />
+      ) : null}
+      {props.source === "github" && gh.state.status === "ready" ? (
+        <ImportSummaryView
+          summary={gh.state.plan.summary}
+          ignore={gh.state.ignore}
+          onIgnoreChange={gh.setIgnore}
+          breaches={gh.state.plan.breaches}
+          hasNextflow={gh.state.plan.hasNextflow}
+        />
       ) : null}
     </>
   );

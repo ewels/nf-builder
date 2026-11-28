@@ -2,10 +2,19 @@
 // of IO-03. Nothing starts at import. Storage trouble (no API, a refusal, an unreachable worker) shows up as state, never
 // as an exception, so the app also works in a cross-origin frame (ADR 0044).
 import { installedPackVersions, type ProjectSummary } from "@nf-builder/engine";
+import type { ImportPlan } from "@nf-builder/sources";
+import { type GithubClient, repoSlug } from "@nf-builder/sources/github";
 import { useStore } from "zustand";
 import { createStore, type StoreApi } from "zustand/vanilla";
 import { canvasStore } from "../canvas/canvas-store";
 import { getEngine } from "../engine/engine-client";
+import {
+  download,
+  githubClient,
+  type Review,
+  skippedWithNotText,
+} from "../import/github-import";
+import type { ImportReport } from "../import/import-report-dialog";
 import { requestPaletteView } from "../palette/use-palette-view";
 import { isReadOnly, READ_ONLY_REFUSAL } from "../read-only/read-only-store";
 import {
@@ -37,6 +46,16 @@ interface ProjectUiState {
   readonly storageWarning: StorageUsage | null;
   /** Whether the browser granted persistent storage: null until asked or when unsupported, false when refused. */
   readonly persisted: boolean | null;
+  /** The report of the last GitHub import, shown once and then dropped (session-only, F-401). */
+  readonly importReport: ImportReport | null;
+}
+
+/** What a GitHub import needs once the user has reviewed the repository. */
+export interface GithubImportRun {
+  readonly name: string;
+  readonly languageVersion: string;
+  readonly review: Review;
+  readonly plan: ImportPlan;
 }
 
 interface ProjectActions {
@@ -47,15 +66,22 @@ interface ProjectActions {
   open(id: string): Promise<void>;
   rename(id: string, name: string): Promise<void>;
   remove(id: string): Promise<void>;
+  /** Downloads the planned files, stores the project with its source, opens it and builds the report (F-401). */
+  importGithub(
+    run: GithubImportRun,
+    o: { signal: AbortSignal; onProgress(done: number, total: number): void },
+  ): Promise<void>;
+  closeImportReport(): void;
 }
 
 export interface ProjectStoreDeps {
   readonly workspace: () => WorkspaceApi;
+  readonly github: () => GithubClient;
   readonly palette: (version: string) => Promise<unknown>;
   /** The template list, requested up front like the palette so the New project dialog finds it ready (F-203). */
   readonly templates: (version: string) => Promise<unknown>;
   readonly storage: () => StorageManager | undefined;
-  /** Whether the app is read-only (F-703, UX-04); create, rename and delete are refused then. Default: the page's mode. */
+  /** Whether the app is read-only (F-703, UX-04); create, rename, delete and GitHub import are refused then. Default: the page's mode. */
   readonly readOnly?: () => boolean;
   readonly languageVersion: string | undefined;
   /** The canvas (F-205): shown every project the worker opens, and told when the stored project is gone. */
@@ -122,6 +148,7 @@ export function createProjectStore(
       status: INITIAL_STATUS,
       storageWarning: null,
       persisted: null,
+      importReport: null,
 
       async start() {
         try {
@@ -189,6 +216,53 @@ export function createProjectStore(
         await openAndShow(id);
       },
 
+      async importGithub(run, o) {
+        refuseWhenReadOnly();
+        const files = await download(deps.github(), run.review, run.plan, o);
+        const workspace = deps.workspace();
+        const { input, listing } = run.review;
+        const source = {
+          kind: "github",
+          repo: repoSlug(input.repo),
+          ref: input.ref,
+          sha: listing.sha,
+        } as const;
+        const { meta, skipped } = await workspace.importProject({
+          name: run.name,
+          languageVersion: run.languageVersion,
+          source,
+          files,
+        });
+        void askPersistence();
+        void checkUsage();
+        await openAndShow(meta.id);
+        let project: ImportReport["project"];
+        try {
+          const report = await workspace.report();
+          project = "ok" in report ? { error: report.message } : report;
+        } catch (failure) {
+          project = {
+            error: failure instanceof Error ? failure.message : String(failure),
+          };
+        }
+        set({
+          importReport: {
+            source,
+            projectName: meta.name,
+            imported: files.length - skipped.length,
+            skipped: skippedWithNotText(
+              run.plan,
+              skipped.map((f) => f.path),
+            ),
+            project,
+          },
+        });
+      },
+
+      closeImportReport() {
+        set({ importReport: null });
+      },
+
       async rename(id, name) {
         refuseWhenReadOnly();
         await deps.workspace().renameProject(id, name);
@@ -208,6 +282,7 @@ let store: StoreApi<ProjectUiState & ProjectActions> | undefined;
 function projectStore() {
   store ??= createProjectStore({
     workspace: getEngine,
+    github: githubClient,
     palette: requestPaletteView,
     templates: requestTemplates,
     storage: () =>

@@ -31,6 +31,8 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-501 registry snapshot | merged, PR #29; passing | Confirmed on live data after the snapshot-triggered Pages deploy. |
 | F-011 GitHub Pages hosting | merged, PR #37 | Live at https://ewels.github.io/nf-builder/; first `verify` passed. |
 | F-703 read-only below 1024 px | merged, PR #53 | Plan deleted in its PR. |
+| F-401 GitHub import | merged, PR #55 | Plan deleted in its PR. |
+| F-210 Files view | merged, PR #54 | Plan deleted in its PR. |
 | F-503 registry palette | merged, PR #56 | Plan deleted in its PR. |
 
 ## Merge order
@@ -236,7 +238,7 @@ Next free ADR number: 0055 (0054 is F-309's).
   - fixtures built with `git archive` from the corpus cache; step 1 read as "the pinned tree after the IO-12 rules"; tag the small-zip test `@smoke`.
 - F-403 lands before F-401, which then builds on the shared `packages/sources` import module and the Import route.
 
-### F-401 — [plan](plan-F-401.md)
+### F-401 — plan deleted
 - Accept every recommendation in section 6, with one change: the default ignore list is F-403's (2.5 in plan-F-403), shared by both routes, rather than point 4's list. One list keeps both routes' summaries consistent and reads ADR 0009's "test data" one way.
   - fetching in the document, bytes transferred to the worker as `ArrayBuffer`s (an AR-30 reading);
   - `ProjectMeta.source` as an optional field with no schema version bump, and the rule for when a bump is needed (amends ADR 0045);
@@ -261,7 +263,7 @@ Next free ADR number: 0055 (0054 is F-309's).
   - the copy in point 12; the `READ_ONLY_ALLOWED` e2e allow-list; one `@smoke` test; no prefetch change;
   - F-202's multi-tab note answered: last write wins stands for v0.1.
 
-### F-210 — [plan](plan-F-210.md)
+### F-210 — plan deleted
 - Accept every recommendation in section 6:
   - `EngineApi.listFiles`, pulled while the panel is visible, rows built by a pure engine function;
   - a new `CreateFile` command (one undo step; extends ADR 0039 and AR-21);

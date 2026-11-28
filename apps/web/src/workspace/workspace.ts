@@ -9,6 +9,9 @@ import {
   installedPackVersions,
   type LayoutChange,
   type ProjectChange,
+  type ProjectFile,
+  planAdd,
+  projectTreeOf,
   templateFiles,
 } from "@nf-builder/engine";
 import { createAutosaver, type Timer } from "./autosave";
@@ -16,10 +19,15 @@ import { createImportStager } from "./import-stage";
 import type { ProjectDb } from "./project-db";
 import { normaliseProjectName } from "./project-name";
 import {
+  type AddChoice,
+  type AddPreviewResult,
+  type ImportedProject,
+  type ImportProject,
   INITIAL_STATUS,
   type NewProject,
   type OpenedProject,
   type ProjectMeta,
+  type ProjectSource,
   type WorkspaceApi,
   type WorkspaceStatus,
 } from "./types";
@@ -39,6 +47,12 @@ export function randomId(): string {
   const bytes = crypto.getRandomValues(new Uint8Array(16));
   return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
 }
+
+/** Replaced and conflicting paths listed for a preview (UX-61 style cap). */
+const LIST_MAX = 100;
+
+const NOTHING_TO_ADD =
+  "Nothing to add: every file was skipped or clashes with the project.";
 
 const message = (error: unknown) =>
   error instanceof Error ? error.message : String(error);
@@ -111,6 +125,31 @@ export function createWorkspace(options: WorkspaceOptions): WorkspaceApi {
       return result;
     });
 
+  const invalid = (text: string, revision: number | null): EngineRefusal => ({
+    ok: false,
+    revision,
+    code: "invalid",
+    message: text,
+    path: null,
+    problems: [],
+  });
+
+  /** The files a staged import would write into `choice.folder`, planned against the open project (F-210). */
+  const planFor = async (choice: AddChoice) => {
+    const listed = await engine.listFiles();
+    if ("ok" in listed) return listed;
+    const chosen = await importer.files(choice.id, choice.ignore, {
+      keepFolder: choice.keepFolder,
+    });
+    if (!chosen.ok) return { chosen, listed };
+    const plan = planAdd({
+      paths: chosen.files.map((f) => f.path),
+      folder: choice.folder,
+      tree: projectTreeOf(listed.files.map((f) => f.path)),
+    });
+    return { chosen, listed, plan };
+  };
+
   const flushAll = async () => (db ? autosaver.flush() : status.save);
 
   return {
@@ -119,7 +158,9 @@ export function createWorkspace(options: WorkspaceOptions): WorkspaceApi {
     project: (path, workflow) => engine.project(path, workflow),
     diagnostics: () => engine.diagnostics(),
     details: (path, workflow, node) => engine.details(path, workflow, node),
+    report: () => engine.report(),
     readFile: (path) => engine.readFile(path),
+    listFiles: () => engine.listFiles(),
     history: () => engine.history(),
 
     open: (request, onProgress) =>
@@ -159,6 +200,45 @@ export function createWorkspace(options: WorkspaceOptions): WorkspaceApi {
     stageZip: (file, name) => importer.stageZip(file, name),
     restageImport: (id, ignore) => importer.restage(id, ignore),
     discardImport: async (id) => importer.discard(id),
+    stageFiles: (files) => importer.stageFiles(files),
+
+    previewAdd: async (choice): Promise<AddPreviewResult> => {
+      const staged = await importer.restage(choice.id, choice.ignore);
+      if (!staged.ok) return staged;
+      const planned = await planFor(choice);
+      if ("ok" in planned) return planned;
+      const { plan } = planned;
+      return {
+        ok: true,
+        id: choice.id,
+        summary: staged.summary,
+        folder: choice.folder,
+        adds: plan?.writes.length ?? 0,
+        replaced: plan?.replaced.slice(0, LIST_MAX) ?? [],
+        replacedCount: plan?.replaced.length ?? 0,
+        conflicts: plan?.conflicts.slice(0, LIST_MAX) ?? [],
+        conflictCount: plan?.conflicts.length ?? 0,
+      };
+    },
+
+    addFiles: (choice) =>
+      change(async () => {
+        const planned = await planFor(choice);
+        if ("ok" in planned) return planned;
+        const { chosen, listed, plan } = planned;
+        if (!chosen.ok) return invalid(chosen.message, listed.revision);
+        if (!plan || plan.writes.length === 0)
+          return invalid(NOTHING_TO_ADD, listed.revision);
+        const text = new Map(chosen.files.map((f) => [f.path, f.text]));
+        const result = await engine.writeFiles(
+          plan.writes.map((w) => ({
+            path: w.to,
+            text: text.get(w.from) as string,
+          })),
+        );
+        if ("files" in result) importer.discard(choice.id);
+        return result;
+      }),
 
     createProject: (input: NewProject) =>
       serial(async (): Promise<ProjectMeta> => {
@@ -178,6 +258,7 @@ export function createWorkspace(options: WorkspaceOptions): WorkspaceApi {
             "An import can't be combined with a template or files.",
           );
         let files = input.files;
+        let source: ProjectSource | undefined;
         if (input.import !== undefined) {
           const chosen = await importer.files(
             input.import.id,
@@ -185,6 +266,7 @@ export function createWorkspace(options: WorkspaceOptions): WorkspaceApi {
           );
           if (!chosen.ok) throw new Error(chosen.message);
           files = chosen.files;
+          source = chosen.source;
         } else if (input.template !== undefined)
           files = await templateFiles(input.languageVersion, input.template);
         const time = now();
@@ -195,11 +277,68 @@ export function createWorkspace(options: WorkspaceOptions): WorkspaceApi {
           createdAt: time,
           updatedAt: time,
           openedAt: time,
+          ...(source === undefined ? {} : { source }),
         };
         await store.createProject(meta, files);
         if (input.import !== undefined) importer.discard(input.import.id);
         await refresh();
         return meta;
+      }),
+
+    importProject: (input: ImportProject) =>
+      serial(async (): Promise<ImportedProject> => {
+        const store = needDb();
+        const name = normaliseProjectName(input.name);
+        if (name === null)
+          throw new Error("A project name needs 1 to 100 characters.");
+        if (!installedPackVersions().includes(input.languageVersion))
+          throw new Error(`No language pack for ${input.languageVersion}.`);
+        const { source } = input;
+        if (
+          source.kind !== "github" ||
+          !/^[0-9a-f]{40}$/.test(source.sha) ||
+          source.repo === ""
+        )
+          throw new Error("The import's source is not valid.");
+        // loaded on first use, so the unzip code stays out of the worker's main chunk (import-stage.ts)
+        const { decodeText, entryPath, IMPORT_LIMITS } = await import(
+          "@nf-builder/sources/import"
+        );
+        // IO-12 again here: the worker doesn't trust the main thread's plan
+        if (input.files.length > IMPORT_LIMITS.maxEntries)
+          throw new Error("The import has too many files (limit 20,000).");
+        let total = 0;
+        for (const f of input.files) {
+          if (f.bytes.byteLength > IMPORT_LIMITS.maxTextFileBytes)
+            throw new Error(`${f.path} is too large (limit 1 MB per file).`);
+          total += f.bytes.byteLength;
+        }
+        if (total > IMPORT_LIMITS.maxTotalBytes)
+          throw new Error("The import is too large (limit 200 MB in all).");
+        const seen = new Set<string>();
+        const files: ProjectFile[] = [];
+        const skipped: ImportedProject["skipped"][number][] = [];
+        for (const f of input.files) {
+          if (entryPath(f.path).kind !== "file" || seen.has(f.path))
+            throw new Error(`${f.path} is not a unique, safe file path.`);
+          seen.add(f.path);
+          const text = decodeText(new Uint8Array(f.bytes));
+          if (text === null) skipped.push({ path: f.path, reason: "not-text" });
+          else files.push({ path: f.path, text });
+        }
+        const time = now();
+        const meta: ProjectMeta = {
+          id: newId(),
+          name,
+          languageVersion: input.languageVersion,
+          createdAt: time,
+          updatedAt: time,
+          openedAt: time,
+          source,
+        };
+        await store.createProject(meta, files);
+        await refresh();
+        return { meta, skipped };
       }),
 
     openProject: (id) =>

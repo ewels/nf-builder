@@ -53,6 +53,7 @@ export {
   type AddCall,
   type CommandResult,
   type Connect,
+  type CreateFile,
   type CreateProcess,
   type DeleteNode,
   type Disconnect,
@@ -101,6 +102,7 @@ export type {
   PaletteViewGroup,
   PaletteViewItem,
 } from "./palette.ts";
+export { projectPathProblem } from "./paths.ts";
 export {
   PrintError,
   type PrintOptions,

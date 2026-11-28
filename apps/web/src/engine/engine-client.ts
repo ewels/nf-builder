@@ -1,7 +1,7 @@
 // Main-thread side of the Comlink bridge (F-113, ADR 0003). The worker starts on the first `getEngine()`, never at import.
 
 import type { EngineRefusal, ProjectChange } from "@nf-builder/engine";
-import { type Endpoint, proxy, releaseProxy, wrap } from "comlink";
+import { type Endpoint, proxy, releaseProxy, transfer, wrap } from "comlink";
 import type { WorkspaceApi } from "../workspace/types";
 
 /**
@@ -34,14 +34,28 @@ export function connectEngine(
     diagnostics: () => race(remote.diagnostics()),
     details: (path, workflow, node) =>
       race(remote.details(path, workflow, node)),
+    report: () => race(remote.report()),
     setLayout: (write) => race(remote.setLayout(write)),
     readFile: (path) => race(remote.readFile(path)),
+    listFiles: () => race(remote.listFiles()),
     close: () => race(remote.close()),
     watch: (listener) => race(remote.watch(proxy(listener))),
     stageZip: (file, name) => race(remote.stageZip(file, name)),
     restageImport: (id, ignore) => race(remote.restageImport(id, ignore)),
     discardImport: (id) => race(remote.discardImport(id)),
+    stageFiles: (files) => race(remote.stageFiles(files)),
+    previewAdd: (choice) => race(remote.previewAdd(choice)),
+    addFiles: (choice) => race(remote.addFiles(choice)),
     createProject: (input) => race(remote.createProject(input)),
+    importProject: (input) =>
+      race(
+        remote.importProject(
+          transfer(
+            input,
+            input.files.map((f) => f.bytes),
+          ),
+        ),
+      ),
     openProject: (id) => race(remote.openProject(id)),
     renameProject: (id, name) => race(remote.renameProject(id, name)),
     deleteProject: (id) => race(remote.deleteProject(id)),
@@ -58,6 +72,16 @@ export function onEngineChange(
 ): () => void {
   changeListeners.add(listener);
   return () => changeListeners.delete(listener);
+}
+
+const layoutListeners = new Set<(paths: readonly string[]) => void>();
+
+/** Calls `listener` with the paths a `setLayout` made through `getEngine()` wrote (the sidecar), so the Files view can list a new one (F-210). */
+export function onLayoutWritten(
+  listener: (paths: readonly string[]) => void,
+): () => void {
+  layoutListeners.add(listener);
+  return () => layoutListeners.delete(listener);
 }
 
 const announced = <R extends ProjectChange | EngineRefusal>(result: R): R => {
@@ -79,6 +103,15 @@ function withChangeEvents<E extends WorkspaceApi>(api: E): E {
     redo: async (revision) => announced(await api.redo(revision)),
     applyPatches: async (patches, revision) =>
       announced(await api.applyPatches(patches, revision)),
+    addFiles: async (choice) => announced(await api.addFiles(choice)),
+    setLayout: async (write) => {
+      const result = await api.setLayout(write);
+      if ("files" in result && result.files.length > 0) {
+        const paths = result.files.map((f) => f.path);
+        for (const listener of layoutListeners) listener(paths);
+      }
+      return result;
+    },
   };
 }
 

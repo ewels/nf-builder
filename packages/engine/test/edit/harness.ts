@@ -39,7 +39,7 @@ export const choiceArb: fc.Arbitrary<Choice> = fc.record({
   snippet: fc.nat(3),
 });
 
-export const sequenceArb = fc.array(choiceArb, { minLength: 1, maxLength: 4 });
+export const sequenceArb = fc.array(choiceArb, { minLength: 1, maxLength: 5 });
 
 /** What happened over a run: accepted commands per kind, refusals per kind and code, and skipped choices. */
 export class Stats {
@@ -209,6 +209,10 @@ export function buildCommand(state: EditState, c: Choice): EditCommand | null {
       else next = `${text}\n// note\n`;
       return { kind, path, text: next };
     }
+    case "createFile": {
+      const ext = [".nf", ".config", ".md", "/.gitkeep"][c.snippet % 4];
+      return { kind, path: `${c.name.toLowerCase()}${ext}` };
+    }
     default:
       return null;
   }
@@ -297,7 +301,7 @@ function checkAccepted(
     const after = createSourceFile(f.path, f.text, state.parser);
     parsed.set(f.path, after);
     // (a2) a modelled file stays modelled, and a new file is modelled
-    if (!before || before.status === "modelled")
+    if ((!before && after.status !== "plain") || before?.status === "modelled")
       expect(after.status, `${label}: ${f.path} is still modelled`).toBe(
         "modelled",
       );
@@ -388,6 +392,11 @@ function checkAccepted(
         patches.length === 0 ? [] : [command.path],
       );
       break;
+    case "createFile":
+      expect(patches).toEqual([
+        { kind: "create", path: command.path, text: "" },
+      ]);
+      break;
   }
 }
 
@@ -456,6 +465,15 @@ export function assertSequences(
   numRuns: number,
 ) {
   const base = snapshot(state);
+  // every kind is tried a few times first, however the random kinds fall (small run counts can miss one)
+  const examples = EDIT_COMMAND_KINDS.flatMap((_, kind) =>
+    [0, 1, 2, 3, 5, 8].map(
+      (a) =>
+        [[{ kind, a, b: a, name: "ZED", snippet: a }] as readonly Choice[]] as [
+          readonly Choice[],
+        ],
+    ),
+  );
   fc.assert(
     fc.property(arb, (choices) => {
       try {
@@ -464,6 +482,7 @@ export function assertSequences(
         reset(state, base);
       }
     }),
-    { seed: 111, numRuns },
+    // fast-check counts the examples in numRuns
+    { seed: 111, numRuns: numRuns + examples.length, examples },
   );
 }

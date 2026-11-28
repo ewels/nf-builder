@@ -26,6 +26,10 @@ const samples: Record<EditCommand["kind"], [EditCommand, string]> = {
     { kind: "replaceFileText", path: "main.nf", text: "" },
     "Edit main.nf",
   ],
+  createFile: [
+    { kind: "createFile", path: "notes/a.txt" },
+    "Create notes/a.txt",
+  ],
 };
 
 describe("F-209 labels", () => {

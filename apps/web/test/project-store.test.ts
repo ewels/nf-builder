@@ -1,4 +1,7 @@
+import type { ImportPlan } from "@nf-builder/sources";
+import type { GithubClient } from "@nf-builder/sources/github";
 import { describe, expect, it, vi } from "vitest";
+import type { Review } from "../src/import/github-import";
 import type { NewProjectRequest } from "../src/project/new-project-dialog";
 import {
   createProjectStore,
@@ -58,12 +61,37 @@ function fixture(
       calls.push(`openProject:${id}`);
       return { summary: { revision: 7 }, seq: 0 };
     }),
+    importProject: vi.fn(async (input: { name: string; files: unknown[] }) => {
+      calls.push("importProject");
+      return {
+        meta: meta("imp", { name: input.name }),
+        skipped: [{ path: "notes.txt", reason: "not-text" }],
+      };
+    }),
+    report: vi.fn(async () => {
+      calls.push("report");
+      return {
+        revision: 7,
+        files: 2,
+        parseFailures: [],
+        processes: { typed: 0, legacy: 1 },
+        workflows: { typed: 0, legacy: 0 },
+        diagnostics: { errors: 0, warnings: 0, suggestions: 2 },
+      };
+    }),
     renameProject: vi.fn(async () => meta("x")),
     deleteProject: vi.fn(async () => {
       calls.push("deleteProject");
     }),
   } as unknown as WorkspaceApi;
+  const github = {
+    download: vi.fn(
+      async (_r: unknown, _sha: string, files: { path: string }[]) =>
+        files.map((f) => ({ path: f.path, bytes: new ArrayBuffer(1) })),
+    ),
+  };
   const deps: ProjectStoreDeps = {
+    github: () => github as unknown as GithubClient,
     workspace: () => workspace,
     palette: async (v) => {
       calls.push(`palette:${v}`);
@@ -89,6 +117,7 @@ function fixture(
     shown,
     gone,
     workspace,
+    github,
     store: createProjectStore(deps),
     push: (s: WorkspaceStatus) => push(s),
   };
@@ -201,6 +230,7 @@ describe("F-202 project store", () => {
     // a palette that never settles must not hold the workspace back
     const never = createProjectStore({
       workspace: () => f.workspace,
+      github: () => f.github as unknown as GithubClient,
       palette: () => new Promise(() => undefined),
       templates: () => new Promise(() => undefined),
       storage: () => undefined,
@@ -216,6 +246,7 @@ describe("F-202 project store", () => {
     const f = fixture(ready({ projects: [meta("a")] }));
     const failing = createProjectStore({
       workspace: () => f.workspace,
+      github: () => f.github as unknown as GithubClient,
       palette: async () => undefined,
       templates: async () => {
         throw new Error("worker failed");
@@ -350,6 +381,111 @@ describe("F-202 project store", () => {
       storage: "unavailable",
       storageError: "The engine worker failed (error): no detail",
     });
+  });
+});
+
+const SHA = "955c892d80927cee633765e6e390f9cc6b7235c9";
+const run = () => ({
+  name: "fetchngs",
+  languageVersion: "26.10",
+  review: {
+    input: { repo: { owner: "nf-core", name: "fetchngs" }, ref: "1.13.0" },
+    listing: {
+      repo: { owner: "nf-core", name: "fetchngs" },
+      ref: "1.13.0",
+      sha: SHA,
+      entries: [],
+    },
+    candidates: [],
+  } as Review,
+  plan: {
+    files: [
+      { path: "main.nf", size: 1 },
+      { path: "notes.txt", size: 1 },
+    ],
+    summary: {
+      source: "",
+      stripped: null,
+      files: 2,
+      bytes: 2,
+      skipped: [{ reason: "binary", count: 1, bytes: 5, paths: ["a.png"] }],
+      ignore: "",
+      ignoreProblems: [],
+    },
+    breaches: [],
+    hasNextflow: true,
+  } as ImportPlan,
+});
+const options = () => ({
+  signal: new AbortController().signal,
+  onProgress: vi.fn(),
+});
+
+describe("F-401 project store GitHub import", () => {
+  it("F-401 UX-61 IO-13: importGithub downloads, imports with the source, opens the project, then sets the report", async () => {
+    const f = fixture(ready());
+    await f.store.getState().importGithub(run(), options());
+    expect(f.calls.filter((c) => c !== "watch")).toEqual([
+      "importProject",
+      "openProject:imp",
+      "report",
+    ]);
+    expect(f.workspace.importProject).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: "fetchngs",
+        source: {
+          kind: "github",
+          repo: "nf-core/fetchngs",
+          ref: "1.13.0",
+          sha: SHA,
+        },
+      }),
+    );
+    const report = f.store.getState().importReport;
+    expect(report).toMatchObject({
+      projectName: "fetchngs",
+      imported: 1,
+      source: { sha: SHA },
+    });
+    // the worker's not-text file joins the plan's binary group
+    expect(report?.skipped).toEqual([
+      { reason: "binary", count: 2, bytes: 6, paths: ["a.png", "notes.txt"] },
+    ]);
+    f.store.getState().closeImportReport();
+    expect(f.store.getState().importReport).toBeNull();
+  });
+
+  it("F-401 F-703 UX-04: read-only importGithub is refused before any download or import", async () => {
+    const f = fixture(ready(), undefined, () => true);
+    await expect(
+      f.store.getState().importGithub(run(), options()),
+    ).rejects.toThrow("Editing needs a larger screen or a wider window.");
+    expect(f.github.download).not.toHaveBeenCalled();
+    expect(f.workspace.importProject).not.toHaveBeenCalled();
+    expect(f.store.getState().importReport).toBeNull();
+  });
+
+  it("F-401 UX-61: a report that fails leaves the import standing", async () => {
+    const f = fixture(ready());
+    (f.workspace.report as ReturnType<typeof vi.fn>).mockResolvedValue({
+      ok: false,
+      code: "no-project",
+      message: "No project is open.",
+    });
+    await f.store.getState().importGithub(run(), options());
+    expect(f.store.getState().importReport?.project).toEqual({
+      error: "No project is open.",
+    });
+  });
+
+  it("F-401 UX-61 IO-13: a failed download imports nothing and sets no report", async () => {
+    const f = fixture(ready());
+    f.github.download.mockRejectedValue(new Error("down"));
+    await expect(
+      f.store.getState().importGithub(run(), options()),
+    ).rejects.toThrow("down");
+    expect(f.workspace.importProject).not.toHaveBeenCalled();
+    expect(f.store.getState().importReport).toBeNull();
   });
 });
 

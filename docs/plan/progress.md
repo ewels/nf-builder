@@ -679,6 +679,36 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - `EngineRefusalCode` gains `"read-only"`, type-only: the worker never returns it (ADR 0043 unchanged).
   - F-202's multi-tab note answered: ADR 0045's last-write-wins per file stands for v0.1, with no Web Locks.
   - `read-only-phone` and `read-only-narrow` baselines approved from CI (ADR 0021).
+## 2026-11-28 · F-401 · Claude (autonomous)
+- Did:
+  - GitHub import of public repositories: a second source, "GitHub repository", in F-403's "Import from" group on the Import route. Review lists the repository with two `api.github.com` requests and shows the summary in the shared `ImportSummaryView`; Import downloads from `raw.githubusercontent.com` (8 in flight, one retry), with progress and Cancel import; closing the dialog aborts an in-flight import.
+  - `@nf-builder/sources/github`: ref resolution, tree listing and raw downloads, run in the document. The client checks `content-length` before reading a body (skipped when `content-encoding` is set) and maps malformed tree entries to `GithubError("unexpected")`. F-403's import helpers are reused; only `binary.ts` and `plan.ts` were added in `sources/import`.
+  - `WorkspaceApi.importProject` stores the transferred bytes with the project's `source` in one transaction and re-checks the IO-12 limits. `EngineApi.report()` and the Import report dialog show files, parse failures, the legacy share and suggestions.
+  - Tests: `e2e/github-import.spec.ts` against a mocked GitHub, with the fetchngs tree fixture generated from git and its blob SHAs checked against the corpus cache. The unit tests' API responses are synthesised from the GitHub docs, since the sandbox couldn't reach the API. The opt-in live test (`F401_LIVE=1`) was not run.
+- State: passing once CI is green.
+- Next: F-210 merging, then F-503, F-605, F-601 and F-301.
+- Decisions:
+  - [ADR 0057](../adr/0057-github-import.md): fetching in the document with bytes transferred to the worker (an AR-30 reading); `ProjectMeta.source` as an optional field with no schema version bump, and the rule for when a bump is needed (amends ADR 0045); `EngineApi.report()` and `WorkspaceApi.importProject()` (amend ADRs 0043 and 0045); the `web-worker-no-github-client` dependency-cruiser rule and the `./github` subpath export; F-403's default ignore list shared by both routes instead of the plan's list; limits on the selected files; length checks, no SHA-1 in the app; no token field until F-402; Publish docs hidden for a GitHub import; the report's definitions; mocked e2e evidence with an opt-in live test.
+  - IO-10, IO-12, IO-13, UX-60, UX-61 and the architecture data flow updated.
+  - Known limitation: a raw 429 without CORS headers is opaque, so it shows as "Couldn't reach GitHub" rather than the rate-limit message.
+- Blockers: none.
+
+## 2026-11-28 · F-210 · Claude (autonomous)
+- Did:
+  - The Files view in the left column's Files tab: the project tree as a WAI-ARIA tree (files before folders, type-ahead, Enter to open), with New file, New folder and Upload, a drop hint, `registry` tags on registry module folders and parse badges.
+  - `EngineApi.listFiles`, pulled while the panel is visible and stopped when it is hidden, including in read-only where the left column isn't rendered; tree rows built on the main thread by a pure engine function. A path that is both a file and a folder shows the folder only.
+  - A `CreateFile` command for new files and folders, one undo step each; an empty folder is `<folder>/.gitkeep`. `projectPathProblem` moved from F-403's import code into lang-core and shared by new names, zips and uploads.
+  - Adding files through the workspace's `stageFiles`, `previewAdd` and `addFiles`: the Add files dialog is always shown, names the target folder, lists replacements and skipped clashes with reasons, and says adding can't be undone and clears the undo history. A pending code edit is flushed first. Loose files take IO-12's limits with binary files skipped; a dropped zip uses F-403's staging with a "Keep the folder" checkbox; dropped folders are refused.
+  - Opening files: a script with a workflow opens its canvas tab, anything else a code-only file tab through F-309's `openFile`, and `.nf-builder/**` opens read-only. The tablist ("Open workflows and files") holds only tabs; a closable file tab closes with Delete (`aria-keyshortcuts`) and has an `aria-hidden` pointer-only ×.
+  - Read-only guards: adds are refused even when already in flight, `createFile` and `createFolder` are refused through F-703's apply refusal, and the document drop guard stays mounted.
+  - Tests: `e2e/files.spec.ts` and unit tests in `packages/engine`, `packages/sources`, `packages/lang-core` and `apps/web`. The property and corpus edit harness now runs 6 fixed examples per command kind before its random runs (no assertion weakened). The Firefox and WebKit `@smoke` run adds the zip through the Upload input, because Playwright's synthetic `DataTransfer` with files crashes Firefox; the drop path is tested on Chromium.
+- State: passing once CI is green with the approved baseline.
+- Next: F-605, F-601, F-301.
+- Decisions:
+  - [ADR 0055](../adr/0055-files-view.md): `listFiles` and the workspace's add methods (amend ADR 0043's API list); `CreateFile` (extends ADR 0039 and AR-21); `.gitkeep` for empty folders with no stored-format change; adds as raw writes that clear the history (ADR 0051); IO-12 limits for loose files with no ignore list; F-403's staging plus "Keep the folder" for zips; clash handling; the registry rule from the pack's include check with `local` excluded; badges from parse status, with "Not fully parsed" for verbatim or partial files without problems; file tabs and the tablist rename; the tree keyboard model; read-only refusals.
+  - UX-16, UX-20, AR-21, IO-12 and the architecture data flow updated.
+  - `scope-change`: F-313 "Files view: rename, move and delete files and folders" added to M3, depending on F-210.
+  - `files-view-registry-error` baseline approved from CI (ADR 0021).
 - Blockers: none.
 
 ## 2026-11-28 · F-503 · Claude (autonomous)

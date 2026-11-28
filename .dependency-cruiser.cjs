@@ -78,6 +78,14 @@ module.exports = {
       },
     },
     {
+      name: "web-worker-no-github-client",
+      severity: "error",
+      comment:
+        "The engine worker must not reach the GitHub client (packages/sources/src/github/): the document fetches and passes the worker data (QA-30, ADR 0040; package boundaries, ADR 0003). Import only @nf-builder/sources or @nf-builder/sources/import in worker code.",
+      from: { path: "^apps/web/src/engine/engine\\.worker\\.ts$" },
+      to: { path: "^packages/sources/src/github/", reachable: true },
+    },
+    {
       name: "web-src-not-to-build-scripts",
       severity: "error",
       comment:

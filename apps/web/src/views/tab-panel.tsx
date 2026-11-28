@@ -62,7 +62,11 @@ export function TabPanel(): JSX.Element {
           mode={mode}
           canvas={<CanvasHost key="canvas" />}
           code={
-            <CodePane key={`code:${session}:${tab.path}`} path={tab.path} />
+            <CodePane
+              key={`code:${session}:${tab.path}`}
+              path={tab.path}
+              readOnly={tab.readOnly}
+            />
           }
         />
       )}

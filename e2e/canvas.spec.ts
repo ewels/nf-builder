@@ -50,7 +50,9 @@ test("F-205 step 1 UX-20 AR-10 QA-30: opening a fixture shows the entry workflow
   const tab = page.getByRole("tab", { name: "main.nf" });
   await expect(tab).toHaveAttribute("aria-selected", "true");
   await expect(
-    page.getByRole("tablist", { name: "Workflows" }).getByRole("tab"),
+    page
+      .getByRole("tablist", { name: "Open workflows and files" })
+      .getByRole("tab"),
   ).toHaveCount(1);
   await expect(page.locator(".react-flow__node")).toHaveCount(expected.nodes);
   await expect(page.locator(".react-flow__edge")).toHaveCount(expected.edges);
@@ -550,7 +552,9 @@ test("F-205 F-202 UX-20: deleting the open project resets the canvas, and a hook
   await expect(dialog).toBeHidden();
   await expect(page.locator(".workflow-canvas")).toHaveCount(0);
   await expect(page.locator(".canvas-area")).toContainText("No project open");
-  await expect(page.getByRole("tablist", { name: "Workflows" })).toHaveCount(0);
+  await expect(
+    page.getByRole("tablist", { name: "Open workflows and files" }),
+  ).toHaveCount(0);
   // a raw hook open leaves current null in the status, yet its canvas stays
   await openFixture(page);
   await canvasReady(page);

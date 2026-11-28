@@ -55,15 +55,32 @@ describe("F-403 import stager", () => {
     expect(await stager.files("s1", staged.summary.ignore)).toEqual({
       ok: true,
       files: [{ path: "main.nf", text: "workflow {}\n" }],
+      source: { kind: "zip", name: "top.zip", sha256: expect.any(String) },
     });
     const again = await stager.restage("s1", "work/\n");
     expect(again).toMatchObject({ ok: true, summary: { files: 2 } });
-    expect(await stager.files("s1", "work/\n")).toEqual({
+    expect(await stager.files("s1", "work/\n")).toMatchObject({
       ok: true,
       files: [
         { path: "data/a.txt", text: "data\n" },
         { path: "main.nf", text: "workflow {}\n" },
       ],
+    });
+  });
+
+  it("F-401 IO-13: files returns the zip source with the file name and the SHA-256 of the zip bytes", async () => {
+    const stager = createImportStager({ newId: () => "s1" });
+    const blob = zip({ "main.nf": "x" });
+    await stager.stageZip(blob, "my.zip");
+    const expected = Array.from(
+      new Uint8Array(
+        await crypto.subtle.digest("SHA-256", await blob.arrayBuffer()),
+      ),
+      (b) => b.toString(16).padStart(2, "0"),
+    ).join("");
+    expect(await stager.files("s1", "")).toMatchObject({
+      ok: true,
+      source: { kind: "zip", name: "my.zip", sha256: expected },
     });
   });
 
@@ -125,5 +142,89 @@ describe("F-403 import stager", () => {
     expect(second).toMatchObject({ ok: true, id: "s1" });
     expect(await first).toMatchObject({ ok: false, code: "gone" });
     expect(await stager.restage("s1", "")).toMatchObject({ ok: true });
+  });
+});
+
+const named = (name: string, body: string | Uint8Array) => {
+  const data = typeof body === "string" ? enc.encode(body) : body;
+  return { name, blob: new Blob([data as BlobPart]) };
+};
+
+describe("F-210 import stager: loose files", () => {
+  it("F-210 UX-16 IO-12: stageFiles stages text files, skips binary files and files over 1 MB without reading them, and refuses too many files or too much in total before reading", async () => {
+    const stager = createImportStager({ newId: () => "l1" });
+    const arrayBuffer = vi.fn(() => {
+      throw new Error("must not be read");
+    });
+    const big = {
+      name: "big.txt",
+      blob: { size: 1_000_001, arrayBuffer } as unknown as Blob,
+    };
+    const staged = await stager.stageFiles([
+      named("a.nf", "workflow {}\n"),
+      named("pic.png", new Uint8Array([137, 0, 80])),
+      big,
+    ]);
+    if (!staged.ok) throw new Error(staged.message);
+    expect(arrayBuffer).not.toHaveBeenCalled();
+    expect(staged.id).toBe("l1");
+    expect(staged.summary).toMatchObject({
+      source: "3 files",
+      stripped: null,
+      files: 1,
+    });
+    expect(staged.summary.skipped.map((g) => [g.reason, g.count])).toEqual([
+      ["too-large", 1],
+      ["binary", 1],
+    ]);
+    // the ignore list doesn't apply to files the user chose
+    expect(await stager.files("l1", "*.nf\n")).toMatchObject({
+      ok: true,
+      files: [{ path: "a.nf", text: "workflow {}\n" }],
+    });
+
+    const many = Array.from({ length: 20_001 }, (_, i) => ({
+      name: `f${i}.txt`,
+      blob: { size: 1, arrayBuffer } as unknown as Blob,
+    }));
+    expect(await stager.stageFiles(many)).toMatchObject({
+      ok: false,
+      code: "too-many-files",
+    });
+    const heavy = [
+      {
+        name: "a",
+        blob: { size: 150_000_000, arrayBuffer } as unknown as Blob,
+      },
+      { name: "b", blob: { size: 50_000_001, arrayBuffer } as unknown as Blob },
+    ];
+    expect(await stager.stageFiles(heavy)).toMatchObject({
+      ok: false,
+      code: "files-too-large",
+    });
+    expect(arrayBuffer).not.toHaveBeenCalled();
+    expect(await stager.files("l1", "")).toMatchObject({ ok: false });
+  });
+
+  it("F-210 IO-11: files(id, ignore, {keepFolder: true}) puts the stripped folder back on every path", async () => {
+    const stager = createImportStager({ newId: () => "s1" });
+    await stager.stageZip(
+      zip({ "top/main.nf": "x", "top/sub/a.txt": "a" }),
+      "top.zip",
+    );
+    expect(await stager.files("s1", "", { keepFolder: true })).toMatchObject({
+      ok: true,
+      files: [
+        { path: "top/main.nf", text: "x" },
+        { path: "top/sub/a.txt", text: "a" },
+      ],
+    });
+    expect(await stager.files("s1", "", { keepFolder: false })).toMatchObject({
+      ok: true,
+      files: [
+        { path: "main.nf", text: "x" },
+        { path: "sub/a.txt", text: "a" },
+      ],
+    });
   });
 });

@@ -61,6 +61,12 @@ export interface ReplaceFileText {
   readonly text: string;
 }
 
+/** Create an empty file (UX-16); a new folder is its `.gitkeep`. */
+export interface CreateFile {
+  readonly kind: "createFile";
+  readonly path: string;
+}
+
 export type EditCommand =
   | CreateProcess
   | AddCall
@@ -68,7 +74,8 @@ export type EditCommand =
   | Disconnect
   | DeleteNode
   | RenameDeclaration
-  | ReplaceFileText;
+  | ReplaceFileText
+  | CreateFile;
 
 export const EDIT_COMMAND_KINDS = [
   "createProcess",
@@ -78,6 +85,7 @@ export const EDIT_COMMAND_KINDS = [
   "deleteNode",
   "renameDeclaration",
   "replaceFileText",
+  "createFile",
 ] as const satisfies readonly EditCommand["kind"][];
 
 /** Replace `text.slice(start, end)`: UTF-16 offsets into the file as it was before the patch. */

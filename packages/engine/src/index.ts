@@ -99,6 +99,26 @@ export {
   type EditState,
 } from "./edit/apply";
 export { applyPatches, PatchError } from "./edit/patches";
+export { planAdd } from "./files/add";
+export {
+  ancestorsOf,
+  folderOf,
+  isManagedPath,
+  joinFolder,
+  newFolderProblem,
+  newPathProblem,
+  projectTreeOf,
+  readOnlyReason,
+} from "./files/paths";
+export {
+  fileTreeRows,
+  folderSet,
+} from "./files/tree";
+export type {
+  AddConflict,
+  FileTreeRow,
+  ReadOnlyReason,
+} from "./files/types";
 export {
   EMPTY_HISTORY,
   type HistoryLimits,
@@ -151,6 +171,13 @@ export {
 } from "./projection/project";
 export { formatFlowType, formatType } from "./projection/types";
 export {
+  legacyShare,
+  type ParseFailure,
+  type ProjectReport,
+  projectReport,
+  type StyleCounts,
+} from "./report/report";
+export {
   createEngineService,
   type EngineServiceOptions,
 } from "./service/service";
@@ -169,8 +196,10 @@ export type {
   NodeDetailsResult,
   OpenRequest,
   ProjectChange,
+  ProjectFiles,
   ProjectionResult,
   ProjectSummary,
+  RegistryFolder,
   Undone,
 } from "./service/types";
 export {
