@@ -950,3 +950,8 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
 - Next: F-305, F-306 and F-311 (after F-303/F-304), F-308, F-313 to F-317, F-406 and F-504 (plans ready), F-506, then M6 and M7.
 - Decisions: ADRs 0055 to 0069 (one per feature; see each PR). Spec-driven updates to two existing e2e assertions (F-206 details Edit/Code buttons, F-303 popup Code tab) as ADR 0049 and F-303's notes anticipated. New features F-313 to F-317 (`scope-change`).
 - Blockers: none. Open maintainer issues #6 (Renovate) and #7 (required checks) unchanged.
+
+## 2026-11-28 · Fix GitHub import · Claude (autonomous)
+- Did: every GitHub import failed as "didn't download completely" because the browser exposes the compressed `content-length` of raw.githubusercontent.com (gzip, no exposed `content-encoding`). Removed the pre-read length check in `packages/sources/src/github/client.ts`; the decoded size is still checked after the read. The unit test and the e2e mock now model a smaller `content-length`. The live F-401 test passes against real GitHub.
+- Decisions: ADR 0057 amendment (2026-11-28).
+- Blockers: none.

@@ -238,7 +238,10 @@ export async function mockGithub(
         RAW_HEADERS,
       );
     }
-    return fulfil(route, { status: 200, body: bytes }, RAW_HEADERS);
+    // like the real host: gzip hidden by CORS, so content-length counts fewer bytes than the body and no content-encoding shows
+    const headers: Record<string, string> =
+      bytes.length > 1 ? { "content-length": String(bytes.length - 1) } : {};
+    return fulfil(route, { status: 200, headers, body: bytes }, RAW_HEADERS);
   });
   return log;
 }
