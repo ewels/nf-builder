@@ -12,6 +12,7 @@ import type {
   WorkflowRef,
 } from "@nf-builder/lang-core";
 import { nodeDetails } from "../details/details";
+import { fileOutline } from "../details/outline";
 import { createDiagnoser, type Diagnoser } from "../diagnostics/diagnose";
 import { loadLints } from "../diagnostics/lints";
 import { applyTextEdits } from "../diagnostics/text-edits";
@@ -61,6 +62,7 @@ import type {
   HistoryOutcome,
   LoadProgress,
   NodeDetailsResult,
+  OutlineResult,
   ProjectChange,
   ProjectionResult,
   ProjectSummary,
@@ -691,6 +693,14 @@ export function createEngineService(
             node,
           ),
         };
+      }),
+
+    outline: (path) =>
+      guarded((open): OutlineResult | EngineRefusal => {
+        const file = open.state.model.file(path);
+        if (file === undefined)
+          return { ...refusal("not-found", `No file ${path}.`), path };
+        return { revision, items: fileOutline(file.source) ?? [] };
       }),
 
     readFile: (path) =>
