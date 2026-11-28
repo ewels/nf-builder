@@ -9,7 +9,7 @@ describe("F-112 lint registry", () => {
       expect(c.code, c.code).toMatch(/^[a-z]+(-[a-z]+)*$/);
       expect(["error", "warning", "suggestion"], c.code).toContain(c.severity);
       expect(c.spec.length, c.code).toBeGreaterThan(0);
-      for (const id of c.spec) expect(id, c.code).toMatch(/^(LA|AR)-\d{2}$/);
+      for (const id of c.spec) expect(id, c.code).toMatch(/^(LA|AR|FI)-\d{2}$/);
       expect(
         ["parser", "model", "lint", "paranoid", "ours", "internal"],
         c.code,
@@ -68,6 +68,7 @@ describe("F-112 lint registry", () => {
         "feature-flag",
         "pipeline-include-types",
         "config-include-placement",
+        "config-unknown-option",
         "agent-output",
         "include-alias",
         "duplicate-name",

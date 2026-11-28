@@ -23,6 +23,7 @@ const fake = (load: () => Promise<SourceParser>): LanguagePack => ({
   loadParser: load,
   loadLints: () => Promise.reject(new Error("not used here")),
   loadTemplates: () => Promise.reject(new Error("not used here")),
+  loadConfigRules: () => Promise.reject(new Error("not used here")),
 });
 
 describe("F-104 ADR-0027 ADR-0028: loadParser", () => {
