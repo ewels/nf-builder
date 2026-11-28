@@ -14,7 +14,7 @@ import type {
   TextPatch,
   WorkflowRef,
 } from "@nf-builder/lang-core";
-import type { NodeDetails } from "../details/types";
+import type { NodeDetails, OutlineItem } from "../details/types";
 import type { ProjectFiles } from "../files/types";
 import type { HistoryStatus } from "../history/history";
 import type {
@@ -131,6 +131,12 @@ export interface NodeDetailsResult {
   readonly details: NodeDetails | null;
 }
 
+export interface OutlineResult {
+  readonly revision: number;
+  /** The declarations of a Nextflow file; empty for any other file (F-605, FI-31). */
+  readonly items: readonly OutlineItem[];
+}
+
 export interface EngineApi {
   palette(version: string): Promise<PaletteView>;
   /** The pack's project templates for a version, without file text (F-203). Needs no open project. */
@@ -181,6 +187,8 @@ export interface EngineApi {
     workflow: string | null,
     node: string,
   ): Promise<NodeDetailsResult | EngineRefusal>;
+  /** The declarations of one file, for the details pane of a file tab (F-605, FI-31, amends ADR 0043's API list). */
+  outline(path: string): Promise<OutlineResult | EngineRefusal>;
   /**
    * The only writer of `.nf-builder/layout.json` (F-207). Merges or replaces one workflow's positions and returns the
    * sidecar's new text in `files` (empty when nothing changed or the file is newer than this build). It doesn't advance

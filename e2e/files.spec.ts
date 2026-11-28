@@ -346,7 +346,7 @@ test("F-210 UX-70 QA-10: the tree works by keyboard (arrows, Right and Left, Hom
   );
 });
 
-test("F-210 UX-20 UX-52 IO-02: a script with a workflow opens its canvas tab, README.md opens a code-only tab with a close button, and .nf-builder/layout.json opens read-only", async ({
+test("F-210 UX-20 UX-52 IO-02: a script with a workflow opens its canvas tab, README.md opens a file tab (a Markdown preview, F-605) with a close button, and .nf-builder/layout.json opens read-only", async ({
   page,
 }, testInfo) => {
   test.skip(testInfo.project.name !== "chromium", "one browser is enough");
@@ -374,10 +374,15 @@ test("F-210 UX-20 UX-52 IO-02: a script with a workflow opens its canvas tab, RE
   const readme = tabs.getByRole("tab", { name: "README.md" });
   await expect(readme).toHaveAttribute("aria-selected", "true");
   await expect(readme).toHaveAttribute("title", "README.md");
-  await expect(page.locator(".code-pane-path")).toHaveText("README.md");
-  await expect(page.getByRole("radiogroup", { name: "View mode" })).toHaveCount(
-    0,
+  // Markdown opens in Preview, with Preview, Split and Code (F-605)
+  await expect(page.locator(".markdown-pane-path")).toHaveText("README.md");
+  await expect(page.locator("#canvas-panel")).toHaveAttribute(
+    "data-view-mode",
+    "preview",
   );
+  await expect(
+    page.getByRole("radiogroup", { name: "View mode" }).getByRole("radio"),
+  ).toHaveText(["Preview", "Split", "Code"]);
   // the sidecar the layout wrote is listed and opens read-only
   await expect(treeRow(page, ".nf-builder")).toBeVisible();
   await expandPath(page, ".nf-builder/layout.json");

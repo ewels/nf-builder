@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   isEditableTarget,
+  modesFor,
   shownMode,
   VIEW_MODES,
   type ViewModeKey,
@@ -72,5 +73,24 @@ describe("F-703 shown mode", () => {
       expect(shownMode(mode, true)).toBe("graph");
       expect(shownMode(mode, false)).toBe(mode);
     }
+  });
+
+  it("F-605 UX-27 UX-70: workflow tabs offer Graph, Split and Code, Markdown tabs Preview, Split and Code, other file tabs none; G, S and C pick the first, second and third mode", () => {
+    const names = (kind: "workflow" | "file", path: string) =>
+      modesFor(kind, path).map((m) => m.mode);
+    expect(names("workflow", "main.nf")).toEqual(["graph", "split", "code"]);
+    expect(names("file", "README.md")).toEqual(["preview", "split", "code"]);
+    expect(names("file", "docs/a.markdown")).toEqual([
+      "preview",
+      "split",
+      "code",
+    ]);
+    expect(names("file", "README.MD")).toEqual([]);
+    expect(names("file", "conf/params.yml")).toEqual([]);
+    const md = modesFor("file", "README.md");
+    expect(viewModeForKey(press({ key: "g" }), md)).toBe("preview");
+    expect(viewModeForKey(press({ key: "S" }), md)).toBe("split");
+    expect(viewModeForKey(press({ key: "c" }), md)).toBe("code");
+    expect(viewModeForKey(press({ key: "g" }), [])).toBeNull();
   });
 });
