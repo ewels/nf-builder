@@ -1,7 +1,11 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { TabStripView } from "../src/shell/tab-strip";
-import { PanelLayout } from "../src/views/tab-panel";
+import {
+  PanelLayout,
+  READ_ONLY_FILE_NOTE,
+  ReadOnlyFileNote,
+} from "../src/views/tab-panel";
 import { shownMode } from "../src/views/view-mode";
 
 const html = (mode: "graph" | "split" | "code") =>
@@ -72,5 +76,15 @@ describe("F-208 tab panel", () => {
       expect(layout(mode, true)).not.toContain("view-divider");
     }
     expect(layout("split", false)).toContain("code-pane");
+  });
+
+  it("F-703 UX-04 UX-20: read-only, a code-only file tab shows a plain note instead of the code view or the canvas", () => {
+    const markup = renderToStaticMarkup(<ReadOnlyFileNote />);
+    expect(READ_ONLY_FILE_NOTE).toBe(
+      "This file opens in the code view on screens 1024 px or wider.",
+    );
+    expect(markup).toContain(READ_ONLY_FILE_NOTE);
+    expect(markup).not.toContain("code-pane");
+    expect(markup).not.toContain("workflow-canvas");
   });
 });

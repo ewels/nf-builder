@@ -1,8 +1,10 @@
 import { expect, test } from "@playwright/test";
-import { SMOKE_TAG } from "./browsers.ts";
+import { SMOKE_TAG, VISUAL_TAG } from "./browsers.ts";
 import {
   canvasReady,
   clickEmptyCanvas,
+  expectBaseline,
+  layoutSettled,
   NODE,
   node,
   selectNode,
@@ -380,3 +382,44 @@ test("F-703 UX-04 F-309: read-only, the problems panel lists problems with go bu
   expect(unexpected).toEqual([]);
   expect(await horizontalOverflow(page)).toBe(0);
 });
+
+test("F-703 UX-04 UX-20 F-309: read-only, a problem in a file without a workflow opens its tab with a note, not the code view or the canvas", async ({
+  page,
+}) => {
+  await page.goto("./");
+  await openProblemsFixture(page);
+  await expect(problemsReady(page)).toBeVisible();
+  await resize(page, PHONE);
+  await expect(readOnlyNote(page)).toHaveText(NOTE_TEXT);
+  await statusCount(page, "suggestions").click();
+  await problemRow(page, "legacy-process").locator(".problem-go").click();
+  await expect(
+    page.getByRole("tab", { name: "legacy_count/main.nf" }),
+  ).toHaveAttribute("aria-selected", "true");
+  await expect(page.locator(".read-only-file-note")).toHaveText(
+    "This file opens in the code view on screens 1024 px or wider.",
+  );
+  await expect(page.locator(".workflow-canvas")).toHaveCount(0);
+  await expect(page.locator(".cm-editor")).toHaveCount(0);
+  await expect(page.getByText("No workflow open")).toHaveCount(0);
+});
+
+test(
+  "F-703 UX-04: the read-only views at 390 and 1000 px match their approved baselines @visual",
+  { tag: VISUAL_TAG },
+  async ({ page }, testInfo) => {
+    await openStoredCanvas(page, "Visual project");
+    for (const [name, size] of [
+      ["read-only-phone.png", PHONE],
+      ["read-only-narrow.png", NARROW],
+    ] as const) {
+      await resize(page, size);
+      await expect(readOnlyNote(page)).toHaveText(NOTE_TEXT);
+      await canvasReady(page);
+      await layoutSettled(page);
+      await expectBaseline(page, testInfo, name, {
+        target: page.locator(".app-shell"),
+      });
+    }
+  },
+);

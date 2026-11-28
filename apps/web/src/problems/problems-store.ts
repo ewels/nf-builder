@@ -21,6 +21,7 @@ import {
   type WorkspaceState,
 } from "../canvas/canvas-store";
 import { getEngine } from "../engine/engine-client";
+import { isReadOnly } from "../read-only/read-only-store";
 
 export type DiagnosticsStatus =
   | "idle"
@@ -83,8 +84,11 @@ export function createProblemsStore(options: {
   workspace: StoreApi<WorkspaceState & WorkspaceActions>;
   /** Defers a pull by one macrotask, so the canvas store's projection request reaches the worker first. */
   schedule?: (fn: () => void) => void;
+  /** Whether the app is read-only (F-703): navigation then never changes a tab's mode or asks for the code. */
+  readOnly?: () => boolean;
 }): StoreApi<ProblemsState & ProblemsActions> {
   const { engine, workspace } = options;
+  const readOnly = options.readOnly ?? isReadOnly;
   const schedule = options.schedule ?? ((fn) => void setTimeout(fn, 0));
   return createStore<ProblemsState & ProblemsActions>()((set, get) => {
     let inFlight = false;
@@ -186,7 +190,7 @@ export function createProblemsStore(options: {
         const target = problemTarget(d, summary.workflows);
         if (target.kind === "file") {
           await ws().openFile(target.path);
-          ws().revealCode(target.path, d.range);
+          if (!readOnly()) ws().revealCode(target.path, d.range);
           return;
         }
         // an active tab is not reloaded, so its selection and viewport are kept
@@ -205,9 +209,11 @@ export function createProblemsStore(options: {
         if (node !== null) {
           await ws().select(node);
           ws().focusOn(node);
-          if (tab.mode !== "graph") ws().revealCode(d.path, d.range);
+          if (tab.mode !== "graph" && !readOnly())
+            ws().revealCode(d.path, d.range);
           return;
         }
+        if (readOnly()) return;
         if (tab.mode === "graph") ws().setMode(tab.id, "split");
         ws().revealCode(d.path, d.range);
       },

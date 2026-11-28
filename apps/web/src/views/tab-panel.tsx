@@ -31,6 +31,14 @@ export function PanelLayout({
   );
 }
 
+export const READ_ONLY_FILE_NOTE =
+  "This file opens in the code view on screens 1024 px or wider.";
+
+/** What a code-only file tab shows while read-only: the code view stays unmounted below 1024 px (F-703, UX-04). */
+export function ReadOnlyFileNote(): JSX.Element {
+  return <p className="read-only-file-note">{READ_ONLY_FILE_NOTE}</p>;
+}
+
 /** The tab panel: the active tab's graph, code or both, by its view mode. */
 export function TabPanel(): JSX.Element {
   const summary = useWorkspace((s) => s.summary);
@@ -47,11 +55,17 @@ export function TabPanel(): JSX.Element {
       aria-labelledby={workflowTabId(tab.id)}
       data-view-mode={mode}
     >
-      <PanelLayout
-        mode={mode}
-        canvas={<CanvasHost key="canvas" />}
-        code={<CodePane key={`code:${session}:${tab.path}`} path={tab.path} />}
-      />
+      {readOnly && tab.kind === "file" ? (
+        <ReadOnlyFileNote />
+      ) : (
+        <PanelLayout
+          mode={mode}
+          canvas={<CanvasHost key="canvas" />}
+          code={
+            <CodePane key={`code:${session}:${tab.path}`} path={tab.path} />
+          }
+        />
+      )}
     </div>
   );
 }
