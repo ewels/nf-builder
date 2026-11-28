@@ -12,7 +12,23 @@ import type {
   QuickFix,
   TextPatch,
   WorkflowRef,
+  WorkflowTarget,
 } from "@nf-builder/lang-core";
+import {
+  buildFragment,
+  type NodeFragment,
+  summarise,
+} from "../clipboard/fragment";
+import {
+  callCommands,
+  callCounts,
+  checkVersion,
+  connectCommand,
+  type PastePlan,
+  pastedIds,
+  planPaste,
+  setupCommands,
+} from "../clipboard/paste";
 import { configSchema } from "../config/schema";
 import type { ConfigSchema, ProcessUses } from "../config/types";
 import { processUses } from "../config/uses";
@@ -49,6 +65,7 @@ import {
   type LayoutChange,
   type LayoutDocument,
   type LayoutStatus,
+  type LayoutWrite,
   parseLayout,
   RemovedPositions,
   trackedWorkflows,
@@ -70,6 +87,7 @@ import type {
   ApplyOutcome,
   ConfigViewResult,
   ConnectionTargetsResult,
+  Copied,
   DiagnosticsResult,
   EngineApi,
   EngineRefusal,
@@ -79,6 +97,9 @@ import type {
   LoadProgress,
   NodeDetailsResult,
   OutlineResult,
+  Pasted,
+  PastePlanned,
+  PasteRequest,
   ProjectChange,
   ProjectionResult,
   ProjectSummary,
@@ -179,6 +200,9 @@ export function createEngineService(
   let current: Open | null = null;
   let revision = 0;
   let tail: Promise<unknown> = Promise.resolve();
+  /** What the last copy took, and the project it came from: it outlives `close` (F-310, AR-30). */
+  let clipboard: { fragment: NodeFragment; origin: Open } | null = null;
+  let pastes = 0;
 
   /** Runs `fn` after every earlier call has settled. */
   const serial = <T>(fn: () => Promise<T> | T): Promise<T> => {
@@ -483,6 +507,177 @@ export function createEngineService(
     };
   };
 
+  /**
+   * Merges `write` into the sidecar and the model; returns the sidecar's new text when it changed. Nothing is written
+   * when the file is newer than this build or would stay as it is.
+   */
+  const writeSidecar = (
+    open: Open,
+    write: Omit<LayoutWrite, "revision">,
+    startedChanging: () => void,
+  ): FileText[] => {
+    if (open.layoutStatus.state === "newer") return [];
+    const next = writePositions(open.layout, write);
+    const text = formatLayout(next);
+    const present = open.state.model.file(LAYOUT_PATH)?.source.text;
+    if (present === text) {
+      open.layout = next;
+      return [];
+    }
+    if (present === undefined && Object.keys(next.nodes).length === 0)
+      return [];
+    startedChanging();
+    open.state.model.setFile(LAYOUT_PATH, text);
+    open.layout = next;
+    open.layoutStatus = OK;
+    return [{ path: LAYOUT_PATH, text }];
+  };
+
+  /** Refuses with the message of an `EditRefusal`; anything else is rethrown for `guarded`. */
+  const refused = (error: unknown): EngineRefusal => {
+    if (error instanceof EditRefusal)
+      return { ...refusal(error.code, error.message), path: error.path };
+    throw error;
+  };
+
+  /** The nodes of the clipboard and how they are named in `target`; refuses what can't be pasted there. */
+  const planFor = (
+    open: Open,
+    target: WorkflowTarget,
+  ): { fragment: NodeFragment; plan: PastePlan } | EngineRefusal => {
+    if (!clipboard) return refusal("invalid", "Nothing has been copied.");
+    try {
+      checkVersion(clipboard.fragment, open.version);
+      return {
+        fragment: clipboard.fragment,
+        plan: planPaste(
+          open.state,
+          clipboard.fragment,
+          target,
+          clipboard.origin === open,
+        ),
+      };
+    } catch (error) {
+      return refused(error);
+    }
+  };
+
+  /** Runs a paste's commands as one group; a refused part takes the recorded ones back and says so. */
+  const pasteGroup = (
+    open: Open,
+    request: PasteRequest,
+    fragment: NodeFragment,
+    plan: PastePlan,
+    startedChanging: () => void,
+  ): Pasted | EngineRefusal => {
+    const { target } = request;
+    const count = fragment.nodes.length;
+    pastes += 1;
+    const options = {
+      group: `paste-${pastes}`,
+      label: `Paste ${count} node${count === 1 ? "" : "s"}`,
+    };
+    const files = new Map<string, FileText>();
+    const remodelled = new Set<string>();
+    let recorded = 0;
+    const step = (command: EditCommand): EngineRefusal | null => {
+      const result = run(open, command, startedChanging, options);
+      if (!result.ok) return result;
+      recorded += 1;
+      for (const f of result.files) files.set(f.path, f);
+      for (const p of result.remodelled) remodelled.add(p);
+      return null;
+    };
+    const rollback = (why: EngineRefusal): EngineRefusal => {
+      if (recorded > 0) {
+        const undone = move(open, revision, startedChanging, "undo", true);
+        if (!undone.ok)
+          return refusal(
+            "internal",
+            `Couldn't paste: ${why.message} The partial paste couldn't be taken back (${undone.message}); check the project's files.`,
+          );
+      }
+      return refusal(
+        why.code,
+        `Couldn't paste: ${why.message.replace(/ ?Nothing was changed\.$/, "")} Nothing was changed.`,
+      );
+    };
+    const before = callCounts(
+      projectionOf(open, target.path, target.workflow) as Projection,
+    );
+    const idsNow = () =>
+      pastedIds(
+        projectionOf(open, target.path, target.workflow) as Projection,
+        plan,
+        before,
+      );
+    try {
+      for (const command of [
+        ...setupCommands(plan, target),
+        ...callCommands(plan, target),
+      ]) {
+        const failed = step(command);
+        if (failed) return rollback(failed);
+      }
+      for (const edge of fragment.edges) {
+        // ids change as connects name variables, so each edge reads them again
+        const ids = idsNow();
+        const from = ids.get(edge.from.node);
+        const to = ids.get(edge.to.node);
+        if (from === undefined || to === undefined)
+          return rollback(refusal("internal", "A pasted node wasn't found."));
+        const failed = step(
+          connectCommand(
+            target,
+            { node: from, port: edge.from.port },
+            { node: to, port: edge.to.port },
+          ),
+        );
+        if (failed) return rollback(failed);
+      }
+      const ids = idsNow();
+      const pasted = fragment.nodes.map((n) => ids.get(n.source) as string);
+      if (request.at !== null) {
+        const xs = fragment.nodes.map((n) => n.offset.x);
+        const ys = fragment.nodes.map((n) => n.offset.y);
+        const x = request.at.x - (Math.max(...xs) + Math.min(...xs)) / 2;
+        const y = request.at.y - (Math.max(...ys) + Math.min(...ys)) / 2;
+        const sidecar = writeSidecar(
+          open,
+          {
+            path: target.path,
+            workflow: target.workflow,
+            positions: Object.fromEntries(
+              fragment.nodes.map((n, i) => [
+                pasted[i] as string,
+                { x: x + n.offset.x, y: y + n.offset.y },
+              ]),
+            ),
+            replace: false,
+          },
+          startedChanging,
+        );
+        for (const f of sidecar) {
+          files.set(f.path, f);
+          remodelled.add(f.path);
+        }
+      }
+      return {
+        ok: true,
+        revision,
+        files: [...files.values()],
+        remodelled: [...remodelled].sort(),
+        workflows: projectorOf(open).workflows(),
+        history: open.history.status(),
+        pasted,
+      };
+    } catch (error) {
+      // the model may be partly changed: take back what was recorded, then let `guarded` report the failure
+      if (recorded > 0) move(open, revision, startedChanging, "undo", true);
+      throw error;
+    }
+  };
+
   const schemas = new Map<string, ConfigSchema>();
 
   return {
@@ -673,29 +868,11 @@ export function createEngineService(
               `The position of ${id} isn't a usable number. Nothing was saved.`,
             );
         }
-        const nothing = (): LayoutChange => ({
-          revision,
-          files: [],
-          layout: open.layoutStatus,
-        });
-        if (open.layoutStatus.state === "newer") return nothing();
-        const next = writePositions(open.layout, write);
-        const text = formatLayout(next);
-        const present = open.state.model.file(LAYOUT_PATH)?.source.text;
-        if (present === text) {
-          open.layout = next;
-          return nothing();
-        }
-        if (present === undefined && Object.keys(next.nodes).length === 0)
-          return nothing();
-        startedChanging();
-        open.state.model.setFile(LAYOUT_PATH, text);
-        open.layout = next;
-        open.layoutStatus = OK;
+        const files = writeSidecar(open, write, startedChanging);
         return {
           revision,
-          files: [{ path: LAYOUT_PATH, text }],
-          layout: OK,
+          files,
+          layout: files.length > 0 ? OK : open.layoutStatus,
         };
       }),
 
@@ -824,6 +1001,54 @@ export function createEngineService(
           request,
         );
         return { revision, name, path: definitionPath(request.kind, name) };
+      }),
+
+    copy: (request) =>
+      guarded((open): Copied | EngineRefusal => {
+        try {
+          const fragment = buildFragment(open.state, request, open.version);
+          clipboard = { fragment, origin: open };
+          return { revision, summary: summarise(fragment) };
+        } catch (error) {
+          return refused(error);
+        }
+      }),
+
+    clipboard: () =>
+      serial(() => (clipboard ? summarise(clipboard.fragment) : null)),
+
+    planPaste: (request) =>
+      guarded((open): PastePlanned | EngineRefusal => {
+        const planned = planFor(open, request.target);
+        return "ok" in planned
+          ? planned
+          : { revision, aliases: planned.plan.aliases };
+      }),
+
+    paste: (request, given) =>
+      guarded((open, startedChanging): Pasted | EngineRefusal => {
+        const old = stale(given);
+        if (old) return old;
+        const planned = planFor(open, request.target);
+        if ("ok" in planned) return planned;
+        const missing = planned.plan.aliases.filter(
+          (a) =>
+            !request.aliases.some(
+              (r) => r.name === a.name && r.alias === a.alias,
+            ),
+        );
+        if (missing.length > 0)
+          return refusal(
+            "invalid",
+            `These nodes need new names in this workflow (${missing.map((a) => `${a.name} as ${a.alias}`).join(", ")}). Confirm them first. Nothing was changed.`,
+          );
+        return pasteGroup(
+          open,
+          request,
+          planned.fragment,
+          planned.plan,
+          startedChanging,
+        );
       }),
 
     readFile: (path) =>
