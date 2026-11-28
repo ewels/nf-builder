@@ -63,3 +63,4 @@ Process: [0001](0001-record-decisions-as-adrs.md). Template: [template.md](templ
 | [0057](0057-github-import.md) | Import public GitHub repositories from the document: two API calls, raw downloads, shared filters and a recorded source | Accepted (agent) |
 | [0058](0058-registry-palette.md) | List registry modules by namespace in scroll-loaded windows, share the palette search, and read ports from the snapshot on demand | Accepted (agent) |
 | [0059](0059-markdown-and-text-files.md) | Preview Markdown with marked and DOMPurify in a lazy chunk, open other project files in Monaco by extension, and keep binary files out of v0.1 projects | Accepted (agent) |
+| [0060](0060-palette-adds.md) | Add palette items as grouped commands with fresh names, positions set before the first draw, and the viewport kept | Accepted (agent) |
