@@ -14,6 +14,7 @@ import type {
   TextPatch,
   WorkflowRef,
 } from "@nf-builder/lang-core";
+import type { ConfigSchema, ConfigView } from "../config/types";
 import type { NodeDetails } from "../details/types";
 import type { HistoryStatus } from "../history/history";
 import type {
@@ -128,6 +129,13 @@ export interface NodeDetailsResult {
   readonly details: NodeDetails | null;
 }
 
+/** The config editor's view of one config file at a revision (F-601, AR-30). */
+export interface ConfigViewResult {
+  readonly revision: number;
+  /** Null when the file's text can't be viewed at all. */
+  readonly view: ConfigView | null;
+}
+
 export interface EngineApi {
   palette(version: string): Promise<PaletteView>;
   /** The pack's project templates for a version, without file text (F-203). Needs no open project. */
@@ -178,6 +186,10 @@ export interface EngineApi {
     workflow: string | null,
     node: string,
   ): Promise<NodeDetailsResult | EngineRefusal>;
+  /** The config editor's view of a config file: cards, rows, selector counts and the diagnostics in them (F-601). `not-found` for a path that isn't a config file. */
+  configView(path: string): Promise<ConfigViewResult | EngineRefusal>;
+  /** The config catalogue as a clone-safe tree, for descriptions and Add scope (F-601). Needs no open project; rejects for an unknown version. */
+  configSchema(version: string): Promise<ConfigSchema>;
   /**
    * The only writer of `.nf-builder/layout.json` (F-207). Merges or replaces one workflow's positions and returns the
    * sidecar's new text in `files` (empty when nothing changed or the file is newer than this build). It doesn't advance

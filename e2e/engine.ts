@@ -69,6 +69,22 @@ export interface EngineHook {
     }[];
     code?: string;
   }>;
+  /** The config editor's view of a config file (F-601): the fields the tests read. */
+  configView(path: string): Promise<{
+    revision?: number;
+    view?: {
+      path: string;
+      editable: boolean;
+      items: { kind: string; card?: { scope: string; rows: unknown[] } }[];
+    } | null;
+    ok?: false;
+    code?: string;
+  }>;
+  /** The config catalogue tree (F-601): the fields the tests read. */
+  configSchema(version: string): Promise<{
+    version: string;
+    scopes: { name: string; kind: string }[];
+  }>;
   /** The import report of the open project (F-401): the fields the tests read. */
   report(): Promise<{
     files?: number;

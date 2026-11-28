@@ -87,6 +87,29 @@ describe("F-113 engine client", () => {
     close();
   });
 
+  it("F-601 ADR-0003: the facade forwards configView and configSchema", async () => {
+    const { engine, close } = connected();
+    expect(await engine.configView("nextflow.config")).toMatchObject({
+      code: "no-project",
+    });
+    const schema = await engine.configSchema(version);
+    expect(schema.version).toBe(version);
+    expect(schema.scopes.map((s) => s.name)).toContain("docker");
+    await engine.open({
+      version,
+      files: [
+        { path: "main.nf", text: "workflow {\n}\n" },
+        { path: "nextflow.config", text: "docker.enabled = true\n" },
+      ],
+    });
+    const result = await engine.configView("nextflow.config");
+    expect(result).toMatchObject({ view: { path: "nextflow.config" } });
+    expect(await engine.configView("main.nf")).toMatchObject({
+      code: "not-found",
+    });
+    close();
+  });
+
   it("F-202 ADR-0003: watch receives status pushes across Comlink; a second watch releases the first listener", async () => {
     const { engine, close } = connected();
     const first: WorkspaceStatus[] = [];
