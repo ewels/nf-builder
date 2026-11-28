@@ -99,6 +99,20 @@ describe("F-601 config details", () => {
     );
   });
 
+  it("F-505 FI-04: an option of a plugin scope with no docs link shows no link; the plugin's own link is used when there is one", () => {
+    const target = { kind: "option" as const, row: row() };
+    const plugin = node({ docsUrl: null, description: "From a plugin." });
+    expect(html({ target, schemaNode: plugin })).not.toContain(
+      "Open in Nextflow docs",
+    );
+    expect(
+      html({
+        target,
+        schemaNode: { ...plugin, docsUrl: "https://example.org/nf-schema" },
+      }),
+    ).toContain('href="https://example.org/nf-schema"');
+  });
+
   it("F-601 FI-04: a scope shows its description; nothing selected says to select an option", () => {
     const card = {
       key: "scope:/:docker",

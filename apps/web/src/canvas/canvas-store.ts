@@ -11,6 +11,7 @@ import {
   EMPTY_HISTORY,
   type EngineApi,
   type EngineRefusal,
+  type FieldProblem,
   formatNodeKey,
   type HistoryOutcome,
   type HistoryStatus,
@@ -26,9 +27,11 @@ import {
   type Projection,
   type ProjectSummary,
   paletteAction,
+  parseNodeKey,
   type QuickFix,
   type ReadOnlyReason,
   readOnlyReason,
+  type TypedProcessForm,
   type WorkflowRef,
   type WorkflowTarget,
 } from "@nf-builder/engine";
@@ -243,6 +246,22 @@ export interface WorkspaceActions {
     session?: number,
   ): Promise<PaletteAddOutcome>;
   /**
+   * Applies the popup's edit of a typed process (F-303, UX-44): one `UpdateDeclaration`, or, when the name changes, that
+   * update, `RenameDeclaration` and the move of the module folder as one undo step (AR-23, ADR 0051). A refused part
+   * undoes the parts before it, so a refusal changes nothing. Refused as stale when the project moved on since
+   * `request.revision`. Runs as one task of the queue of applies, undos and redos.
+   */
+  editDeclaration(
+    request: DeclarationEdit,
+    session?: number,
+  ): Promise<EditOutcome>;
+  /**
+   * Adds a registry plugin to the project's `plugins` block as one undo step: `CreateFile` of `nextflow.config` first
+   * when it is missing, then `AddConfigPlugin`. A refused second part is undone, so a refusal changes nothing (F-505,
+   * IO-33, AR-23). Runs as one task of the queue of applies, undos and redos.
+   */
+  addPlugin(request: PluginAdd, session?: number): Promise<PluginAddOutcome>;
+  /**
    * Feeds the `from` output port into the `to` input port of the active workflow tab as one undo step (F-302, UX-25).
    * A refusal sets `canvasNotice`. The view that follows keeps the viewport (ADR 0052).
    */
@@ -284,6 +303,36 @@ export type PaletteAddOutcome =
       readonly path: string;
       readonly node: string;
     }
+  | { readonly ok: false; readonly message: string };
+
+/** The popup's edit of a typed process (F-303). */
+export interface DeclarationEdit {
+  /** The declaration's file and name, as the form was read. */
+  readonly target: { readonly path: string; readonly name: string };
+  /** The revision the form was read at. */
+  readonly revision: number;
+  readonly form: TypedProcessForm;
+  /** The node the popup was opened from; selected again afterwards. */
+  readonly node: string;
+}
+
+export type EditOutcome =
+  | { readonly ok: true; readonly node: string }
+  | {
+      readonly ok: false;
+      readonly message: string;
+      readonly fields: readonly FieldProblem[];
+    };
+
+/** A registry plugin to add to `nextflow.config` (F-505, IO-33). */
+export interface PluginAdd {
+  readonly id: string;
+  /** The snapshot's release. */
+  readonly version: string;
+}
+
+export type PluginAddOutcome =
+  | { readonly ok: true; readonly id: string; readonly version: string }
   | { readonly ok: false; readonly message: string };
 
 /** The workflow a project opens with: main.nf's entry, else the first entry workflow, else the first named one. */
@@ -354,8 +403,10 @@ export function tabFor(ref: {
   };
 }
 
+const CONFIG_PATH = "nextflow.config";
 const NO_PROJECT_ADD = "Open or create a project to add components.";
 const FILE_TAB_ADD = "Open a workflow tab to add components to it.";
+const NO_PROJECT_EDIT = "Open a project to edit it.";
 const NO_ACTION_ADD = "That item can't be added from the palette yet.";
 
 const REPLACED_NOTICE = "The layout file couldn't be read and was replaced.";
@@ -406,10 +457,75 @@ const IDLE: DetailsContent = { status: "idle" };
 const messageOf = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
 
+/** Where a file went when the change moved it or a folder above it (F-303). */
+function movedPath(
+  path: string,
+  moves: readonly { readonly from: string; readonly to: string }[],
+): string {
+  for (const m of moves) {
+    if (path === m.from) return m.to;
+    if (path.startsWith(`${m.from}/`))
+      return `${m.to}${path.slice(m.from.length)}`;
+  }
+  return path;
+}
+
+/** `modules/local/<lower name>`, the folder of a module of that name (LA-12). */
+const folderOf = (name: string): string =>
+  `modules/local/${name.toLowerCase()}`;
+
+/** The module folder of a process whose file is its module's `main.nf`; else null. */
+function moduleFolder(path: string, name: string): string | null {
+  const folder = folderOf(name);
+  return path === `${folder}/main.nf` ? folder : null;
+}
+
+/** Whether the declarations of a file are this process alone: a module folder moves only then (LA-12). */
+function declaresOnly(
+  items: readonly { readonly kind: string; readonly name: string }[],
+  name: string,
+): boolean {
+  const declared = items.filter((i) =>
+    [
+      "process",
+      "workflow",
+      "function",
+      "record",
+      "enum",
+      "agent",
+      "unparsed",
+    ].includes(i.kind),
+  );
+  return declared.length === 1 && declared[0]?.name === name;
+}
+
+/** The key of a node after its process was renamed: an unassigned call carries the callee in its key. */
+function nodeAfterRename(
+  node: string,
+  from: string,
+  to: string,
+  content: CanvasContent,
+): string {
+  if (from === to) return node;
+  const key = parseNodeKey(node);
+  if (key?.local.kind !== "unassigned" || key.local.callee !== from)
+    return node;
+  const renamed = formatNodeKey({
+    ...key,
+    local: { ...key.local, callee: to },
+  });
+  return content.status === "ready" &&
+    content.projection.nodes.some((n) => n.id === renamed)
+    ? renamed
+    : node;
+}
+
+export type CanvasStore = StoreApi<WorkspaceState & WorkspaceActions>;
+
 export function createCanvasStore(
   engine: () => EngineApi,
   readOnly: () => boolean = () => false,
-): StoreApi<WorkspaceState & WorkspaceActions> {
+): CanvasStore {
   return createStore<WorkspaceState & WorkspaceActions>()((set, get) => {
     // a result for a superseded tab or project is dropped
     let generation = 0;
@@ -440,6 +556,7 @@ export function createCanvasStore(
       at: Point;
     } | null = null;
     let adds = 0;
+    let edits = 0;
     // palette adds in flight: every view they cause keeps the viewport, the intermediate one included (F-301)
     let addsPending = 0;
 
@@ -735,6 +852,61 @@ export function createCanvasStore(
       return outcome;
     }
 
+    /**
+     * Applies `commands` one after another under one history group with `label`, as one undo step. A refused
+     * part undoes the parts before it (`discard`, so the step isn't left to redo) and its refusal is returned; else the
+     * last part's outcome. Runs inside a task of the queue.
+     */
+    async function applyGroup(
+      session: number | undefined,
+      group: string,
+      commands: readonly EditCommand[],
+      label: string,
+    ): Promise<ApplyOutcome> {
+      let last: ApplyOutcome | undefined;
+      // a part whose patches are empty records no step, so only the others leave a step to undo
+      let recorded = false;
+      for (const command of commands) {
+        const outcome = (await sendNow(
+          session,
+          async (revision) => {
+            try {
+              return await engine().apply(
+                command,
+                revision,
+                // every part carries the label: one with no patches starts no step, so a later one may
+                { group, label },
+              );
+            } catch (error) {
+              return refusal("internal", messageOf(error));
+            }
+          },
+          afterApply,
+        )) as ApplyOutcome;
+        if (!outcome.ok) {
+          if (recorded)
+            // the step holds the parts applied so far, so nothing is left behind
+            await sendNow(
+              session,
+              async (revision) => {
+                try {
+                  return await engine().undo(revision, { discard: true });
+                } catch (error) {
+                  return refusal("internal", messageOf(error));
+                }
+              },
+              async (undone) => {
+                if (!undone.ok) await refreshHistory();
+              },
+            );
+          return outcome;
+        }
+        if (outcome.patches?.length !== 0) recorded = true;
+        last = outcome;
+      }
+      return last as ApplyOutcome;
+    }
+
     const send = <T extends Sent>(
       session: number | undefined,
       call: (revision: number) => Promise<T>,
@@ -754,6 +926,31 @@ export function createCanvasStore(
     async function afterApply(outcome: ApplyOutcome | Pasted): Promise<void> {
       await adoptNewer(outcome);
       if (!outcome.ok && outcome.code === "internal") await refreshHistory();
+    }
+
+    /** `call`, with a throw turned into an internal refusal. */
+    async function safely<T>(
+      call: () => Promise<T>,
+    ): Promise<T | EngineRefusal> {
+      try {
+        return await call();
+      } catch (error) {
+        return refusal("internal", messageOf(error));
+      }
+    }
+
+    /** Undoes only the first part of a group, so a refused second part leaves nothing behind. */
+    async function discardFirstPart(session: number): Promise<void> {
+      await sendNow(
+        session,
+        (revision) =>
+          safely(() =>
+            engine().undo(revision, { discard: true }),
+          ) as Promise<HistoryOutcome>,
+        async (outcome) => {
+          if (!outcome.ok) await refreshHistory();
+        },
+      );
     }
 
     /** Sends the code panes' pending edits; outside the queue, as their send is queued itself. */
@@ -961,11 +1158,26 @@ export function createCanvasStore(
         const renamed = renamedTabs(summary.workflows, change.workflows);
         // a stale tab that already holds a new id gives way to the renamed one
         const taken = new Set([...renamed.values()].map((w) => tabFor(w).id));
+        // a file tab follows its file when the change moved it (F-303)
+        const following = (t: WorkflowTab): WorkflowTab => {
+          if (!isFileLike(t)) return t;
+          const to = movedPath(t.path, change.moves ?? []);
+          if (to === t.path) return t;
+          return {
+            ...(t.kind === "config" ? configTabFor(to) : fileTabFor(to)),
+            mode: t.mode,
+          };
+        };
+        const followed = new Map(
+          get()
+            .tabs.map((t) => [t.id, following(t).id] as const)
+            .filter(([from, to]) => from !== to),
+        );
         // a file tab goes with its file (text null: deleted, e.g. by undoing CreateProcess)
         const deleted = new Set(
           change.files.filter((f) => f.text === null).map((f) => f.path),
         );
-        const before = get().tabs;
+        const before = get().tabs.map(following);
         const tabs = before
           .filter((t) => renamed.has(t.id) || !taken.has(t.id))
           .filter((t) => !(isFileLike(t) && deleted.has(t.path)))
@@ -973,7 +1185,7 @@ export function createCanvasStore(
             const to = renamed.get(t.id);
             return to === undefined ? t : { ...tabFor(to), mode: t.mode };
           });
-        const current = get().activeTab;
+        const current = followed.get(get().activeTab ?? "") ?? get().activeTab;
         const moved = current === null ? undefined : renamed.get(current);
         let activeTab = moved === undefined ? current : tabFor(moved).id;
         // the active file tab went: the previous tab takes over, else the first left
@@ -1374,65 +1586,176 @@ export function createCanvasStore(
                 `Couldn't add ${fresh.name}: ${outcome.message} Nothing was changed.`,
               );
             };
-            const creating = await sendNow(
+            const applied = await applyGroup(
               mine,
-              (revision) =>
-                engine().apply(
-                  {
-                    kind:
-                      action.kind === "process"
-                        ? "createProcess"
-                        : "createWorkflow",
-                    name: fresh.name,
-                    caller: tab.path,
-                  },
-                  revision,
-                  { group, label },
-                ),
-              afterApply,
-            );
-            if (!creating.ok) return refused(creating);
-            const calling = await sendNow(
-              mine,
-              async (revision) => {
-                try {
-                  return await engine().apply(
-                    {
-                      kind: "addCall",
-                      target: { path: tab.path, workflow: tab.workflow },
-                      callee: fresh.name,
-                    },
-                    revision,
-                    { group },
-                  );
-                } catch (error) {
-                  return refusal("internal", messageOf(error));
-                }
-              },
-              afterApply,
-            );
-            if (!calling.ok) {
-              // only the group's first part is undone, so nothing is left behind
-              await sendNow(
-                mine,
-                async (revision) => {
-                  try {
-                    return await engine().undo(revision, { discard: true });
-                  } catch (error) {
-                    return refusal("internal", messageOf(error));
-                  }
+              group,
+              [
+                {
+                  kind:
+                    action.kind === "process"
+                      ? "createProcess"
+                      : "createWorkflow",
+                  name: fresh.name,
+                  caller: tab.path,
                 },
-                async (outcome) => {
-                  if (!outcome.ok) await refreshHistory();
+                {
+                  kind: "addCall",
+                  target: { path: tab.path, workflow: tab.workflow },
+                  callee: fresh.name,
                 },
-              );
-              return refused(calling);
-            }
+              ],
+              label,
+            );
+            if (!applied.ok) return refused(applied);
             await get().select(key);
             return { ok: true, name: fresh.name, path: fresh.path, node: key };
           } finally {
             addsPending--;
           }
+        });
+      },
+
+      editDeclaration(request, session) {
+        const mine = session ?? get().session;
+        const { target, form } = request;
+        const fail = (
+          message: string,
+          fields: readonly FieldProblem[] = [],
+        ): EditOutcome => ({ ok: false, message, fields });
+        if (mine !== get().session || get().summary === null)
+          return Promise.resolve(fail(NO_PROJECT_EDIT));
+        if (readOnly()) return Promise.resolve(fail(READ_ONLY_REFUSAL));
+        return enqueue(async () => {
+          if (get().summary?.revision !== request.revision)
+            return fail(
+              `${target.name} changed since the popup opened. Close it and open it again.`,
+            );
+          const renamed = form.name !== target.name;
+          const commands: EditCommand[] = [
+            {
+              kind: "updateDeclaration",
+              path: target.path,
+              name: target.name,
+              form,
+            },
+          ];
+          if (renamed) {
+            commands.push({
+              kind: "renameDeclaration",
+              path: target.path,
+              name: target.name,
+              newName: form.name,
+            });
+            const folder = moduleFolder(target.path, target.name);
+            const newFolder = folderOf(form.name);
+            // a case-only rename keeps the folder, and a folder that is taken stays where it is
+            if (folder !== null && newFolder !== folder) {
+              const [outline, taken] = await Promise.all([
+                engine()
+                  .outline(target.path)
+                  .catch(() => null),
+                engine()
+                  .readFile(`${newFolder}/main.nf`)
+                  .catch(() => null),
+              ]);
+              if (
+                taken === null &&
+                outline !== null &&
+                !("ok" in outline) &&
+                declaresOnly(outline.items, target.name)
+              )
+                commands.push({
+                  kind: "moveFile",
+                  path: folder,
+                  newPath: newFolder,
+                });
+            }
+          }
+          const label = `Edit process ${form.name}`;
+          const outcome = await applyGroup(
+            mine,
+            `popup-${mine}-${++edits}`,
+            commands,
+            label,
+          );
+          if (!outcome.ok)
+            return fail(
+              // a refusal that says so already isn't followed by it again
+              /Nothing was changed\.$/.test(outcome.message)
+                ? `Couldn't apply: ${outcome.message}`
+                : `Couldn't apply: ${outcome.message} Nothing was changed.`,
+              outcome.fields ?? [],
+            );
+          const node = nodeAfterRename(
+            request.node,
+            target.name,
+            form.name,
+            get().content,
+          );
+          await get().select(node);
+          return { ok: true, node };
+        });
+      },
+
+      addPlugin(request, session) {
+        const mine = session ?? get().session;
+        const fail = (message: string): PluginAddOutcome => ({
+          ok: false,
+          message,
+        });
+        const { summary } = get();
+        if (mine !== get().session || summary === null)
+          return Promise.resolve(fail(NO_PROJECT_ADD));
+        if (readOnly()) return Promise.resolve(fail(READ_ONLY_REFUSAL));
+        const { id, version } = request;
+        return enqueue(async () => {
+          await flushPending();
+          const group = `plugin-${mine}-${++adds}`;
+          const label = `Add plugin ${id}@${version}`;
+          const refused = (outcome: EngineRefusal): PluginAddOutcome =>
+            fail(`Couldn't add ${id}: ${outcome.message} Nothing was changed.`);
+          const missing = !get().summary?.files.some(
+            (f) => f.path === CONFIG_PATH,
+          );
+          if (missing) {
+            const creating = await sendNow(
+              mine,
+              (revision) =>
+                safely(() =>
+                  engine().apply(
+                    { kind: "createFile", path: CONFIG_PATH },
+                    revision,
+                    { group, label },
+                  ),
+                ) as Promise<ApplyOutcome>,
+              afterApply,
+            );
+            if (!creating.ok) return refused(creating);
+          }
+          const adding = await sendNow(
+            mine,
+            async (revision) => {
+              try {
+                return await engine().apply(
+                  {
+                    kind: "addConfigPlugin",
+                    path: CONFIG_PATH,
+                    id: `${id}@${version}`,
+                  },
+                  revision,
+                  { group, label },
+                );
+              } catch (error) {
+                return refusal("internal", messageOf(error));
+              }
+            },
+            afterApply,
+          );
+          if (!adding.ok) {
+            if (missing) await discardFirstPart(mine);
+            return refused(adding);
+          }
+          return { ok: true, id, version };
         });
       },
 

@@ -1,6 +1,7 @@
 import { type ModuleGroup, moduleMarks, shortName } from "@nf-builder/sources";
 import type { JSX } from "react";
 import { GlyphIcon, PALETTE_GLYPHS } from "../glyphs";
+import { writePaletteDrag } from "../palette/palette-drag";
 import { ChevronIcon } from "../shell/icons";
 import { REGISTRY_PAGE, useLazyWindow, windowOf } from "./lazy-window";
 
@@ -29,6 +30,56 @@ function RegistryRow({
       {announceKind ? <span className="visually-hidden">{icon}</span> : null}
       <span className="registry-item-label">{label}</span>
       {typed ? <span className="registry-badge-typed">typed</span> : null}
+    </li>
+  );
+}
+
+/** The drag key of a registry plugin row: the drop handler resolves the version itself (F-505, UX-15). */
+export const REGISTRY_PLUGIN_KEY = "registry-plugin:";
+
+/**
+ * A registry plugin row (F-505, IO-33, UX-15): a button, so Enter, Space and a click add the plugin to `nextflow.config`
+ * and a drag onto the canvas does the same. Its summary is its accessible description (QA-11). The text "added" marks a
+ * declared plugin (QA-12). Read-only (F-703): `aria-disabled`, not draggable, and a press adds nothing.
+ */
+export function RegistryPluginRow({
+  id,
+  summary,
+  added,
+  readOnly,
+  onAdd,
+}: {
+  readonly id: string;
+  readonly summary: string;
+  readonly added: boolean;
+  readonly readOnly: boolean;
+  readonly onAdd: (id: string) => void;
+}): JSX.Element {
+  const describedBy = `registry-plugin-${id.replace(/[^A-Za-z0-9_-]/g, "-")}-summary`;
+  return (
+    <li className="registry-item" data-name={id} title={summary}>
+      <button
+        type="button"
+        className="registry-item-button"
+        draggable={!readOnly}
+        aria-disabled={readOnly ? "true" : undefined}
+        aria-describedby={describedBy}
+        onClick={() => {
+          if (!readOnly) onAdd(id);
+        }}
+        onDragStart={(event) => {
+          if (readOnly) event.preventDefault();
+          else
+            writePaletteDrag(event.dataTransfer, `${REGISTRY_PLUGIN_KEY}${id}`);
+        }}
+      >
+        <GlyphIcon glyph={PALETTE_GLYPHS.plugin} className="palette-glyph" />
+        <span className="registry-item-label">{id}</span>
+        {added ? <span className="registry-badge-added">added</span> : null}
+      </button>
+      <span id={describedBy} className="visually-hidden">
+        {summary}
+      </span>
     </li>
   );
 }
@@ -208,12 +259,19 @@ export function RegistryPlugins({
   plugins,
   open,
   searching,
+  declared,
+  readOnly,
   onToggle,
+  onAdd,
 }: {
   readonly plugins: readonly Plugin[];
   readonly open: boolean;
   readonly searching: boolean;
+  /** Ids of the plugins `nextflow.config` declares. */
+  readonly declared: ReadonlySet<string>;
+  readonly readOnly: boolean;
   readonly onToggle: () => void;
+  readonly onAdd: (id: string) => void;
 }): JSX.Element {
   const listOpen = searching || open;
   return (
@@ -232,12 +290,13 @@ export function RegistryPlugins({
             items={plugins}
             label="Plugins"
             row={(p) => (
-              <RegistryRow
+              <RegistryPluginRow
                 key={p.id}
-                name={p.id}
-                label={p.id}
-                title={p.summary}
-                icon="plugin"
+                id={p.id}
+                summary={p.summary}
+                added={declared.has(p.id)}
+                readOnly={readOnly}
+                onAdd={onAdd}
               />
             )}
           />

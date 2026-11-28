@@ -40,6 +40,8 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-601 config editor | merged, PR #60 | Plan deleted in its PR. |
 | F-405 legacy import summary | merged, PR #61 | Plan deleted in its PR. |
 | F-302 connect ports | merged, PR #62 | Plan deleted in its PR. |
+| F-505 registry plugins | merged, PR #64 | Plan deleted in its PR. |
+| F-303 edit popup | merged, PR #65 | Plan deleted in its PR. |
 
 ## Merge order
 
@@ -331,7 +333,7 @@ ADR numbers reserved for features in flight, so parallel branches don't clash: 0
 ### F-405 — plan deleted
 - Accept every recommendation in section 6. ADR number: the next free one when F-405 starts.
 
-### F-505 — [plan](plan-F-505.md)
+### F-505 — plan deleted
 - Accept every recommendation in section 6: add F-601 and F-301 to F-505's `depends_on` in its PR (`scope-change`); tasks 1 to 3 may start before they merge, tasks 4 to 7 after.
 
 ### F-404 — plan deleted
@@ -343,7 +345,7 @@ ADR numbers reserved for features in flight, so parallel branches don't clash: 0
 ### F-307 — [plan](plan-F-307.md)
 - Accept every recommendation in section 6: the new feature for removing and renaming takes and emits (point 1) is added in F-307's PR with `scope-change`. Start after F-301 merges. ADR number: the next free one when F-307 starts.
 
-### F-303 — [plan](plan-F-303.md)
+### F-303 — plan deleted
 - Accept every recommendation in section 6, including point 5: renaming a process moves its module folder in the same undo group, superseding ADR 0039's "files don't move" line through F-303's ADR. Point 9: ask the researcher during the build whether the catalogue's missing `Boolean` and `Record` types are an upstream gap, and record it in `docs/research/upstream-bugs.md` if so. Start after F-301 merges; reuse F-601's value kinds if it has merged. ADR number: the next free one when F-303 starts.
 
 ### F-406 — [plan](plan-F-406.md)
@@ -363,3 +365,6 @@ ADR numbers reserved for features in flight, so parallel branches don't clash: 0
 
 ### F-504 — [plan](plan-F-504.md)
 - Accept every recommendation in section 6: F-302 joins F-504's `depends_on` in its PR (`scope-change`); `.module-info` not written until the researcher reproduces the checksum (one bounded try); bundles with binary files refused (pointing to F-407); registry subworkflows count as registry folders (amends ADRs 0055 and 0063); the Hello world connection step stays lint-only with the run failure recorded, and widening `tuple-arity` becomes a follow-up note. ADR number: the next free one when F-504 starts.
+
+### F-304 — [plan](plan-F-304.md)
+- Accept every recommendation in section 6. Point 8: Escape with an edited code draft asks before discarding (amends ADR 0066); an unedited draft closes at once. Point 7's hover-help feature is added in F-304's PR (`scope-change`). Start after F-303 merges.

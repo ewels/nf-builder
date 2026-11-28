@@ -4,8 +4,11 @@ import {
   type RegistryMatches,
 } from "@nf-builder/sources";
 import { type JSX, useEffect, useMemo, useState } from "react";
+import { addRegistryPlugin } from "../palette/use-palette-add";
+import { useReadOnly } from "../read-only/read-only-store";
 import { RefreshIcon } from "../shell/icons";
 import { formatAge, formatBuildTime, sourceName } from "./age";
+import { usePlugins } from "./plugin-store";
 import { RegistryModules, RegistryPlugins } from "./registry-lists";
 import { type RegistryState, useRegistry } from "./registry-store";
 
@@ -33,7 +36,13 @@ interface RegistrySectionViewProps {
   readonly onToggle: (list: "modules" | "plugins") => void;
   readonly onToggleNamespace: (namespace: string) => void;
   readonly onRefresh: () => void;
+  /** Ids of the plugins `nextflow.config` declares (F-505). */
+  readonly declared?: ReadonlySet<string>;
+  readonly readOnly?: boolean;
+  readonly onAddPlugin?: (id: string) => void;
 }
+
+const NO_PLUGINS: ReadonlySet<string> = new Set();
 
 /** Presentational: the registry.nextflow.io section of the palette (UX-14). */
 export function RegistrySectionView({
@@ -46,6 +55,9 @@ export function RegistrySectionView({
   onToggle,
   onToggleNamespace,
   onRefresh,
+  declared = NO_PLUGINS,
+  readOnly = false,
+  onAddPlugin = () => undefined,
 }: RegistrySectionViewProps): JSX.Element {
   const searching = query.trim() !== "";
   const groups = useMemo(
@@ -120,7 +132,10 @@ export function RegistrySectionView({
                 plugins={matches.plugins}
                 open={open.plugins}
                 searching={searching}
+                declared={declared}
+                readOnly={readOnly}
                 onToggle={() => onToggle("plugins")}
+                onAdd={onAddPlugin}
               />
             ) : null}
           </>
@@ -141,6 +156,12 @@ export function RegistrySection({
   const state = useRegistry((s) => s.state);
   const load = useRegistry((s) => s.load);
   const refresh = useRegistry((s) => s.refresh);
+  const readOnly = useReadOnly();
+  const declaredPlugins = usePlugins((s) => s.declared);
+  const declared = useMemo(
+    () => new Set(declaredPlugins.map((p) => p.id)),
+    [declaredPlugins],
+  );
   const [now, setNow] = useState(() => new Date());
   const [open, setOpen] = useState({ modules: true, plugins: false });
   const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(new Set());
@@ -168,6 +189,9 @@ export function RegistrySection({
         })
       }
       onRefresh={refresh}
+      declared={declared}
+      readOnly={readOnly}
+      onAddPlugin={(id) => void addRegistryPlugin(id)}
     />
   );
 }

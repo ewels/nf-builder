@@ -1,9 +1,12 @@
 // The engine's API as plain data (F-113, ADR 0003). Pure TypeScript: the Comlink bridge in apps/web wraps it. Every result
 // survives structuredClone, so it can cross the worker boundary unchanged.
 import type {
+  DeclarationForm,
   Diagnostic,
   EditCommand,
+  FieldProblem,
   FileText,
+  FormChoices,
   PaletteView,
   ParseProblem,
   ParseStatus,
@@ -28,10 +31,13 @@ import type {
   LayoutChange,
   LayoutStatus,
   LayoutWrite,
+  MoveHint,
   Point,
   Positions,
 } from "../layout";
 import type { ProjectFile } from "../model/project";
+import type { PluginScopes } from "../plugins/config-scopes";
+import type { DeclaredPlugin } from "../plugins/declared";
 import type { ProjectReport } from "../report/report";
 import type { TemplateList } from "../templates";
 
@@ -76,6 +82,8 @@ export interface ProjectChange {
   readonly workflows: readonly WorkflowRef[];
   /** The undo history after this change (F-209). */
   readonly history: HistoryStatus;
+  /** The files or folders this change moved, so open tabs can follow them (F-303); absent when none. */
+  readonly moves?: readonly MoveHint[];
 }
 
 export type EngineRefusalCode =
@@ -94,6 +102,8 @@ export interface EngineRefusal {
   readonly message: string;
   readonly path: string | null;
   readonly problems: readonly ParseProblem[];
+  /** The form fields a refused `UpdateDeclaration` is about (F-303). */
+  readonly fields?: readonly FieldProblem[];
 }
 
 export interface Applied extends ProjectChange {
@@ -190,6 +200,17 @@ export interface DiagnosticsResult {
   readonly diagnostics: readonly Diagnostic[];
   /** The registry module folders, so the Suggestions tab can list their files last (F-405). */
   readonly registry: readonly RegistryFolder[];
+  /** The plugin scopes the lints used (`EngineApi.setPluginScopes`); the page pulls again when it changes (F-505). */
+  readonly pluginsKey: string;
+}
+
+/** The Configure form of a node's declaration, read at `revision` (F-303, UX-41). */
+export interface DeclarationFormResult {
+  readonly revision: number;
+  /** The declaration the form edits: its file and name. */
+  readonly target: { readonly path: string; readonly name: string };
+  readonly form: DeclarationForm;
+  readonly choices: FormChoices;
 }
 
 export interface NodeDetailsResult {
@@ -203,6 +224,14 @@ export interface ConfigViewResult {
   readonly revision: number;
   /** Null when the file's text can't be viewed at all. */
   readonly view: ConfigView | null;
+  /** The plugin scopes the view's rules used; the page pulls again when it changes (F-505). */
+  readonly pluginsKey: string;
+}
+
+/** The plugins the root `nextflow.config` declares at a revision (F-505, IO-33). */
+export interface PluginsResult {
+  readonly revision: number;
+  readonly plugins: readonly DeclaredPlugin[];
 }
 
 export interface OutlineResult {
@@ -261,10 +290,22 @@ export interface EngineApi {
     workflow: string | null,
     node: string,
   ): Promise<NodeDetailsResult | EngineRefusal>;
+  /** The Configure form and choices for a call node of a typed process (F-303); `invalid` with the reason for any other node, `not-found` for an unknown one. */
+  declarationForm(
+    path: string,
+    workflow: string | null,
+    node: string,
+  ): Promise<DeclarationFormResult | EngineRefusal>;
   /** The config editor's view of a config file: cards, rows, selector counts and the diagnostics in them (F-601). `not-found` for a path that isn't a config file. */
   configView(path: string): Promise<ConfigViewResult | EngineRefusal>;
   /** The config catalogue as a clone-safe tree, for descriptions and Add scope (F-601). Needs no open project; rejects for an unknown version. */
   configSchema(version: string): Promise<ConfigSchema>;
+  /** The plugins declared in the root `nextflow.config`, in source order (F-505, IO-33; amends ADR 0043's API list). */
+  plugins(): Promise<PluginsResult | EngineRefusal>;
+  /** Gives the worker the config scopes of the declared plugins' specs, which the page read; replaces the last set. Cleared when a project opens or closes (F-505, FI-01). */
+  setPluginScopes(
+    scopes: readonly PluginScopes[],
+  ): Promise<{ readonly pluginsKey: string }>;
   /** The declarations of one file, for the details pane of a file tab (F-605, FI-31, amends ADR 0043's API list). */
   outline(path: string): Promise<OutlineResult | EngineRefusal>;
   /**

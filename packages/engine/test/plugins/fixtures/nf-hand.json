@@ -1,0 +1,76 @@
+{
+  "format": 1,
+  "id": "nf-hand",
+  "version": "1.0.0",
+  "requires": null,
+  "description": "A hand-written spec with an operator and a factory.",
+  "definitions": [
+    {
+      "type": "Operator",
+      "spec": {
+        "name": "tapLog",
+        "description": "Logs each item and passes it on.\n\nA second paragraph that the summary leaves out.",
+        "returnType": {
+          "name": "Channel",
+          "typeArguments": [
+            "Object"
+          ]
+        },
+        "parameters": [
+          {
+            "name": "source",
+            "type": "Channel"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Factory",
+      "spec": {
+        "name": "fromHand",
+        "description": null,
+        "returnType": "Channel",
+        "parameters": []
+      }
+    },
+    {
+      "type": "Function",
+      "spec": {
+        "name": "shout",
+        "returnType": "String",
+        "parameters": [
+          {
+            "name": "s",
+            "type": "String"
+          }
+        ]
+      }
+    },
+    {
+      "type": "ConfigScope",
+      "spec": {
+        "name": "hand",
+        "children": [
+          {
+            "type": "ConfigOption",
+            "spec": {
+              "name": "level",
+              "type": "Integer",
+              "additionalTypes": [
+                "String"
+              ]
+            }
+          },
+          {
+            "type": "ConfigScope",
+            "spec": {
+              "name": "inner",
+              "description": "Nested.",
+              "children": []
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

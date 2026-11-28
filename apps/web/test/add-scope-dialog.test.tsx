@@ -28,6 +28,7 @@ const node = (
 });
 const schema: ConfigSchema = {
   version: "26.10",
+  pluginsKey: "",
   forms: { scopes: [], maps: {} },
   scopes: [
     node(

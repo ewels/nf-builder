@@ -123,3 +123,39 @@ describe("palette tree", () => {
     expect(html).toMatch(/role="status"[^>]*>Loading components…/);
   });
 });
+
+describe("F-505 plugin items in the palette tree", () => {
+  const withConfig: PaletteView = {
+    ...view,
+    categories: [
+      ...view.categories,
+      {
+        id: "plugins-config",
+        label: "Plugins & config",
+        icon: "config",
+        items: [],
+        groups: [],
+      },
+    ],
+  };
+
+  it("F-505 IO-33 UX-11: the plugin list sits at the end of Plugins & config, and only there", () => {
+    const html = renderToStaticMarkup(
+      <PaletteTree
+        view={withConfig}
+        open={["plugins-config"]}
+        searching={false}
+        onToggle={() => undefined}
+        onAdd={() => undefined}
+        extra={{
+          category: "plugins-config",
+          node: <p className="from-plugins">From plugins</p>,
+        }}
+      />,
+    );
+    expect(html.match(/from-plugins/g)).toHaveLength(1);
+    expect(html.indexOf("from-plugins")).toBeGreaterThan(
+      html.indexOf("Plugins &amp; config"),
+    );
+  });
+});

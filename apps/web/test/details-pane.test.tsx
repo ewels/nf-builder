@@ -340,6 +340,38 @@ describe("F-206 details pane", () => {
     expect(none).toBe('<h2 class="column-title">Details</h2>');
   });
 
+  it("F-303 UX-32: Edit is enabled for a typed process and disabled with its reason otherwise; Code stays disabled", () => {
+    const editable = renderToStaticMarkup(
+      <DetailsHeaderView
+        selected
+        edit={{ reason: null, onOpen: () => undefined }}
+      />,
+    );
+    expect(editable).toMatch(/<button(?![^>]*disabled)[^>]*>Edit<\/button>/);
+    expect(editable).toMatch(/<button[^>]*disabled[^>]*>Code<\/button>/);
+    const refused = renderToStaticMarkup(
+      <DetailsHeaderView
+        selected
+        edit={{
+          reason: "Editing legacy processes arrives with Migrate to typed.",
+          onOpen: () => undefined,
+        }}
+      />,
+    );
+    expect(refused).toMatch(/<button[^>]*disabled[^>]*>Edit<\/button>/);
+    expect(refused).toContain(
+      'title="Editing legacy processes arrives with Migrate to typed."',
+    );
+    const readOnly = renderToStaticMarkup(
+      <DetailsHeaderView
+        selected
+        readOnly
+        edit={{ reason: null, onOpen: () => undefined }}
+      />,
+    );
+    expect(readOnly).not.toContain("<button");
+  });
+
   it("F-703 UX-04 UX-32: read-only, the details header has no Edit or Code buttons while a node is selected", () => {
     const html = renderToStaticMarkup(<DetailsHeaderView selected readOnly />);
     expect(html).not.toContain("<button");

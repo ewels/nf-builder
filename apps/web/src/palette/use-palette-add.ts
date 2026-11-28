@@ -5,6 +5,9 @@ import { useStore } from "zustand";
 import { createStore } from "zustand/vanilla";
 import { canvasStore } from "../canvas/canvas-store";
 import { filesStore } from "../files/files-store";
+import { pluginStore } from "../registry/plugin-store";
+import { REGISTRY_PLUGIN_KEY } from "../registry/registry-lists";
+import { registryStore } from "../registry/registry-store";
 
 interface AddedItem {
   readonly key: string;
@@ -24,11 +27,40 @@ const say = (message: string): void =>
 export const paletteAddMessage = (): string | null =>
   messages.getState().message;
 
+/** Adds a registry plugin to `nextflow.config` at the snapshot's release, and says so (F-505, IO-33, UX-15, QA-11). */
+export async function addRegistryPlugin(id: string): Promise<void> {
+  const registry = registryStore.getState().state;
+  const listed =
+    registry.status === "ready"
+      ? registry.index.plugins.find((p) => p.id === id)
+      : undefined;
+  if (listed === undefined) {
+    say(`Couldn't add ${id}: the registry isn't loaded. Nothing was changed.`);
+    return;
+  }
+  if (pluginStore.getState().declared.some((p) => p.id === id)) {
+    say(`${id} is already in nextflow.config.`);
+    return;
+  }
+  const outcome = await canvasStore
+    .getState()
+    .addPlugin({ id, version: listed.version });
+  say(
+    outcome.ok
+      ? `Added plugin ${id}@${outcome.version} to nextflow.config.`
+      : outcome.message,
+  );
+}
+
 /** Adds `item` to the active workflow tab with its centre at `at` (a flow point), or lets the layout place it. */
 export async function paletteAdd(
   item: AddedItem,
   at: Point | null,
 ): Promise<void> {
+  if (item.key.startsWith(REGISTRY_PLUGIN_KEY)) {
+    await addRegistryPlugin(item.key.slice(REGISTRY_PLUGIN_KEY.length));
+    return;
+  }
   if (paletteAction(item) === null) {
     say(`${item.label ?? item.key} can't be added from the palette yet.`);
     return;

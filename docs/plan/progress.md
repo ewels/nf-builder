@@ -826,3 +826,52 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - Notes appended to F-308, F-310, F-504 and F-701.
   - The `connect-mismatch` baseline is approved from CI (ADR 0021); no existing baseline changed.
 - Blockers: none.
+
+## 2026-11-28 · F-505 · Claude (autonomous)
+- Did:
+  - Registry plugins (IO-33, UX-15): registry plugin rows are draggable buttons; Enter or a drop on the canvas runs F-601's `AddConfigPlugin` with the snapshot's version as one undo step ("Add plugin nf-schema@3.1.0"). With no `nextflow.config`, `CreateFile` runs first in the same undo group, and a refusal or a throw discards the group. A plugin already declared at any version is refused ("nf-schema is already in nextflow.config."); its row shows an "added" text badge matched by id. Read-only: rows are `aria-disabled`, not draggable, and add nothing.
+  - Sources: `RegistryClient.plugin(id, version)` reads `plugins/<id>/<version>.json` from the snapshot only, same-origin (ADR 0002), with the spec shape-checked and malformed definitions dropped; cached per `id@version`, failed reads retried.
+  - Engine: `declaredPlugins` reads `id` lines from top-level `plugins` blocks of the root `nextflow.config` only; `EngineApi.plugins()` and `setPluginScopes()`; plugin `ConfigScope` definitions merged into the catalogue the diagnoser, config rules, `configView` and `configSchema` use, with a `pluginsKey` on their results so the problems and config stores pull again. `validation.*` is no longer flagged once nf-schema is declared.
+  - Palette: a "From plugins" list at the end of "Plugins & config", grouped by plugin ("spec from <version>" when the declared version differs), found by search, items focusable and `aria-disabled` (inserting them is F-314's).
+  - FI-04: a plugin option's docs link is the plugin's `projectUrl` only when it is `https`, else none.
+  - Tests: `e2e/plugins.spec.ts` (step 1 by Enter and by drag, undo, missing `nextflow.config`, the config form's `validation` scope, duplicate refusal, CSP), oracle case `f505-plugin` with its engine golden, and unit tests in `packages/sources/test/`, `packages/engine/test/plugins/`, `packages/engine/test/service/plugins.test.ts`, `packages/lang-2610/test/` and `apps/web/test/`.
+- State: passing once CI is green.
+- Next: F-303, F-310, then F-307, F-406, F-504.
+- Decisions:
+  - [ADR 0065](../adr/0065-registry-plugins.md): snapshot-only `RegistryClient.plugin` (amends ADR 0050); `EngineApi.plugins` and `setPluginScopes` (amends ADR 0043's API list); plugin scopes merged in the worker with `pluginsKey` re-pulls beside the per-revision diagnostics pull (amends ADR 0054); the snapshot release's spec for any declared version, marked in the palette, and duplicates refused at any version; only top-level `plugins` blocks of the root `nextflow.config` count; plugin docs link is an `https` `projectUrl` or none; "From plugins" list, not insertable yet; F-601's free-text Add plugin… stays; plugin `requires` not checked (the snapshot admits only releases for the pinned Nextflow).
+  - `features.json` (scope-change): F-601 and F-301 added to F-505's `depends_on`, as F-505 reuses their command and palette add.
+  - Plugin syntax checked against docs.seqera.io/nextflow/plugins/using-plugins; oracle case `f505-plugin` is lint only, as a run downloads the plugin.
+  - IO-30, IO-33, FI-01, FI-03, FI-04 and UX-14 updated.
+  - Notes appended to F-314, F-506, F-701 and F-702.
+  - No visual baseline changed.
+- Blockers: none.
+
+## 2026-11-28 · F-303 · Claude (autonomous)
+- Did:
+  - Edit popup (UX-40, UX-42): a native modal dialog, "Edit process <NAME>", opens on double-click of a process node, Enter on a node that is already selected, or the details pane's Edit button. Enter on an unselected node only selects it. The Code tab is `aria-disabled` until F-304. Read-only: no popup, and narrowing below 1024 px closes it and discards the draft.
+  - Configure tab for typed processes (UX-41). It has name, description (the doc comment before its first tag), inputs, stage, outputs, topics, directives (a searchable picker over the catalogue minus deprecated ones, with defaults `1`, `true`, `1.GB` and `1.h`), and script and stub as text areas. `record(...)` and `tuple(...)` inputs, non-string topics and `when:` are kept as code. Registry modules can be edited, with a note.
+  - Engine: `EngineApi.declarationForm` reads the form and its choices in the worker. Type suggestions come from the catalogue, the project's records and enums, and a hand-kept list of documented class-less standard types (`Boolean`, `Record`, `Tuple`, `VersionNumber`).
+  - Engine: the `UpdateDeclaration` command keeps untouched rows' text and comments, and refuses row parse problems with `fields`. Call sites follow input changes (reordered, dropped, `null` appended); a pipe-fed call refuses the change. Input renames follow in unedited rows, respecting shadowing. Output reads (`r.x`, `P().x`, `P.out.x`, `P().out.x`) are renamed only when the process has two or more outputs.
+  - Engine: a new `MoveFile` command moves a file or folder, rewrites include paths and carries layout keys, including those of workflows in moved files. `ProjectChange.moves` makes open tabs follow.
+  - Store: `applyGroup` (shared with F-301's palette add) rolls back only the parts that recorded a step. `editDeclaration` applies the update, then the rename and the module folder move, as one undo step, and refuses stale forms.
+  - Tests: `e2e/popup.spec.ts`; oracle cases `f303-configure-start`, `f303-configure-typed`, `f303-directive-defaults`, `f303-rename-moved`, `f303-outputs-renamed`, `f303-outputs-legacy-reads` and `f303-configure-all`, with engine goldens. Unit tests are in `packages/engine/test/{form,edit,service,history}/` and `apps/web/test/`. The edit harness's prelude runs `createProcess` before `updateDeclaration`, so legacy pins exercise it; no assertion changed.
+  - Merged `main` (F-505 and others): resolved conflicts in the canvas store (kept both `editDeclaration` and `addPlugin`, and kept `addFromPalette` on `applyGroup`), in the oracle goldens test and in `cases.yaml`.
+- State: passing once CI is green.
+- Next: F-310, F-307, then F-304, F-305, F-306, F-311.
+- Decisions:
+  - [ADR 0066](../adr/0066-edit-popup.md):
+    - `UpdateDeclaration`, and how it treats rows, call sites, input renames and output reads (extends ADR 0039's command set; AR-21);
+    - `EngineApi.declarationForm` (amends ADR 0043's API list);
+    - a rename moves the module folder through `MoveFile` in the same undo group, superseding ADR 0039's "files don't move" line; the move is skipped for a case-only rename or a taken target;
+    - `MoveFile` carries layout keys (amends ADR 0052);
+    - Edit is enabled for typed processes (amends ADR 0049);
+    - Enter opens the popup only on an already selected node;
+    - the directive defaults are checked by the oracle;
+    - stale forms are refused;
+    - narrowing discards the draft;
+    - registry modules can be edited, with a note.
+  - Type suggestions: our catalogue generator drops documented class-less types. A hand-kept list citing docs.seqera.io/nextflow/reference/stdlib-types covers them; this is not an upstream bug.
+  - Updated UX-32, UX-40, UX-41, UX-44, AR-21 and LA-12.
+  - F-206's e2e test was updated from "Edit disabled" to "Edit enabled, Code disabled", as ADR 0049 anticipated. If the `details-process-trim` visual baseline moves, it is re-approved from CI (ADR 0021).
+  - Notes appended to F-304, F-305, F-306, F-307 and F-311.
+- Blockers: none.

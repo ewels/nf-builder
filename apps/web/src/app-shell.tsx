@@ -1,5 +1,5 @@
 import { installedPackVersions } from "@nf-builder/engine";
-import type { JSX } from "react";
+import { type JSX, lazy, Suspense } from "react";
 import { type CanvasContent, useWorkspace } from "./canvas/canvas-store";
 import { useClipboardKeys } from "./canvas/use-clipboard-keys";
 import { DetailsHeader } from "./details/details-header";
@@ -7,6 +7,7 @@ import { DetailsPane } from "./details/details-pane";
 import { useFileDropGuard } from "./files/drop";
 import { useHistoryKeys } from "./history/use-history-keys";
 import { COLLAPSED_WIDTH, useLayout } from "./layout/layout-store";
+import { usePopup } from "./popup/popup-store";
 import { ProblemsPanel, problemsTabId } from "./problems/problems-panel";
 import { useProblems } from "./problems/problems-store";
 import { ProjectControls } from "./project/project-controls";
@@ -22,6 +23,9 @@ import { StatusBar, type StatusProblems } from "./shell/status-bar";
 import { TabStrip } from "./shell/tab-strip";
 import { TabPanel } from "./views/tab-panel";
 import { useViewModeKeys } from "./views/use-view-mode-keys";
+
+// the popup and the form are a lazy chunk, fetched when the first popup opens (QA-01)
+const EditPopup = lazy(() => import("./popup/edit-popup"));
 
 const languageVersions = installedPackVersions();
 
@@ -132,6 +136,7 @@ export function AppShell(): JSX.Element {
           <DetailsPane />
         </SideColumn>
       </div>
+      <PopupHost />
       <StatusBar
         diagnostics={diagnostics}
         nodes={counts?.nodes ?? null}
@@ -140,4 +145,14 @@ export function AppShell(): JSX.Element {
       />
     </div>
   );
+}
+
+/** Mounts the edit popup's chunk once a popup has been asked for. */
+function PopupHost(): JSX.Element | null {
+  const open = usePopup((s) => s.status !== "closed");
+  return open ? (
+    <Suspense fallback={null}>
+      <EditPopup />
+    </Suspense>
+  ) : null;
 }

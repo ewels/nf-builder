@@ -141,4 +141,36 @@ describe("F-601 the pack loads its config rules lazily", () => {
     expect(rules.classify(["process", "memmory"]).kind).toBe("unknown");
     expect(rules.forms.scopes.map((s) => s.scope)).toContain("manifest");
   });
+
+  it("F-505 FI-01 FI-03: loadConfigRules(catalogue) gives rules over that catalogue and leaves the kept ones alone", async () => {
+    const kept = await entry.pack.loadConfigRules();
+    const catalogue = await entry.pack.loadCatalogue();
+    const extended = {
+      ...catalogue.config,
+      scopes: [
+        ...catalogue.config.scopes,
+        {
+          kind: "scope" as const,
+          name: "validation",
+          description: "",
+          children: [
+            {
+              kind: "option" as const,
+              name: "monochromeLogs",
+              description: "",
+              types: ["Boolean"],
+            },
+          ],
+        },
+      ],
+    };
+    const rules = await entry.pack.loadConfigRules(extended);
+    expect(rules.classify(["validation", "monochromeLogs"]).kind).toBe(
+      "option",
+    );
+    expect(kept.classify(["validation", "monochromeLogs"]).kind).toBe(
+      "unknown",
+    );
+    expect(await entry.pack.loadConfigRules()).toBe(kept);
+  });
 });

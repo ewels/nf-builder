@@ -1,4 +1,4 @@
-import type { Catalogue } from "./catalogue.ts";
+import type { Catalogue, ConfigCatalogue } from "./catalogue.ts";
 import type { ConfigRules } from "./config.ts";
 import type { Scaffold } from "./edit.ts";
 import type { IncludeRules } from "./includes.ts";
@@ -25,6 +25,8 @@ export interface LanguagePack {
   readonly scaffold: Scaffold;
   /** Legacy-only operators, with their result kinds (F-107): pure, loaded with the pack. */
   readonly legacyOperators: readonly LegacyOperator[];
+  /** Documented standard type names the generated catalogue lacks (F-303): pure, loaded with the pack. */
+  readonly standardTypes?: readonly string[];
   /** The generated catalogue, loaded on first call (a dynamic import, so it stays out of the initial bundle; ADR 0028). */
   loadCatalogue(): Promise<Catalogue>;
   /** The parser with declaration-level fallback, loaded on first call (a dynamic import; ADR 0004, ADR 0027). */
@@ -33,8 +35,11 @@ export interface LanguagePack {
   loadLints(): Promise<PackLints>;
   /** The project templates (LA-02, F-203), loaded on first call (a dynamic import of a generated JSON chunk, so it stays out of the initial bundle). */
   loadTemplates(): Promise<TemplateSet>;
-  /** The config editor's rules over the config catalogue (F-601), loaded on first call and kept. */
-  loadConfigRules(): Promise<ConfigRules>;
+  /**
+   * The config editor's rules over the config catalogue (F-601), loaded on first call and kept. With a `catalogue` (the
+   * pack's with plugin scopes merged in, F-505), fresh rules over that one, not kept.
+   */
+  loadConfigRules(catalogue?: ConfigCatalogue): Promise<ConfigRules>;
 }
 
 export * from "./ast/index.ts";
@@ -58,6 +63,22 @@ export type {
   ConfigScopeForm,
   ConfigValueKind,
 } from "./config.ts";
+export type {
+  CodeRow,
+  DeclarationForm,
+  DirectiveChoice,
+  DirectiveRow,
+  FieldProblem,
+  FormChoices,
+  FormField,
+  FormSection,
+  InputRow,
+  OutputRow,
+  StageChoice,
+  StageRow,
+  TopicRow,
+  TypedProcessForm,
+} from "./declaration-form.ts";
 export type { Diagnostic, DiagnosticSeverity, QuickFix } from "./diagnostic.ts";
 export {
   type AddCall,
@@ -80,6 +101,7 @@ export {
   type EditCommand,
   type FileText,
   type MemoryUnitName,
+  type MoveFile,
   type RefusalCode,
   type RemoveConfigOption,
   type RemoveConfigPlugin,
@@ -89,6 +111,7 @@ export {
   type SetConfigOption,
   type TextEdit,
   type TextPatch,
+  type UpdateDeclaration,
   type WorkflowTarget,
 } from "./edit.ts";
 export type {

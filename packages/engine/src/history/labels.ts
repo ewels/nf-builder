@@ -52,5 +52,9 @@ export function commandLabel(command: EditCommand): string {
         : `Include ${command.name} as ${command.alias}`;
     case "createFile":
       return `Create ${command.path}`;
+    case "updateDeclaration":
+      return `Edit process ${command.name}`;
+    case "moveFile":
+      return `Move ${command.path} to ${command.newPath}`;
   }
 }

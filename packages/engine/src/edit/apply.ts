@@ -31,8 +31,10 @@ import { createProcess, createWorkflow } from "./commands/create-definition";
 import { createFile } from "./commands/create-file";
 import { deleteNode } from "./commands/delete-node";
 import { deleteNodes } from "./commands/delete-nodes";
+import { moveFile } from "./commands/move-file";
 import { renameDeclaration } from "./commands/rename";
 import { replaceFileText } from "./commands/replace-file-text";
+import { updateDeclaration } from "./commands/update-declaration";
 import { checkResult } from "./guards";
 import { applyPatches } from "./patches";
 import { EditRefusal } from "./refusal";
@@ -99,6 +101,10 @@ const build = (state: EditState, command: EditCommand): TextPatch[] => {
       return createFile(state, command);
     case "addInclude":
       return addInclude(state, command);
+    case "updateDeclaration":
+      return updateDeclaration(state, command);
+    case "moveFile":
+      return moveFile(state, command);
     default:
       throw new EditRefusal(
         "invalid",
@@ -124,6 +130,7 @@ export function applyCommand(
         message: error.message,
         path: error.path,
         problems: error.problems,
+        ...(error.fields ? { fields: error.fields } : {}),
       };
     return {
       ok: false,

@@ -2,6 +2,7 @@ import { edgeMismatches } from "@nf-builder/engine";
 import type { JSX } from "react";
 import { lazy, Suspense, useMemo } from "react";
 import { paletteAdd } from "../palette/use-palette-add";
+import { openPopup } from "../popup/popup-store";
 import { useProblems } from "../problems/problems-store";
 import { CanvasPlaceholder } from "../project/project-status";
 import { useProjects } from "../project/project-store";
@@ -80,6 +81,12 @@ export function CanvasHost(): JSX.Element {
             onConnectionTargets={connectionTargets}
             onConnect={(from, to) => void connect(from, to)}
             onDisconnect={(port) => void disconnect(port)}
+            onOpenNode={
+              readOnly
+                ? undefined
+                : (node, opener) =>
+                    void openPopup({ tab: activeTab ?? "", node, opener })
+            }
             notices={[
               layoutNotice,
               content.notice,

@@ -12,6 +12,8 @@ import {
   type SourceFile,
   type TextEdit,
   type TextPatch,
+  type TypedProcess,
+  type TypedProcessForm,
   type WorkflowDef,
   type WorkflowTarget,
 } from "@nf-builder/lang-core";
@@ -23,6 +25,8 @@ import { definitionStyles, problemKeys } from "../../src/edit/guards";
 import { freshName, relativeSource } from "../../src/edit/names";
 import { applyPatches } from "../../src/edit/patches";
 import { itemSpan } from "../../src/edit/splice";
+import { folderOf, isManagedPath } from "../../src/files/paths";
+import { processForm } from "../../src/form/read-process";
 import { createProjector } from "../../src/projection/project";
 import { diffNodes } from "../../src/source/equivalent";
 import { createSourceFile } from "../../src/source/source-file";
@@ -331,6 +335,88 @@ export function buildCommand(state: EditState, c: Choice): EditCommand | null {
       const ext = [".nf", ".config", ".md", "/.gitkeep"][c.snippet % 4];
       return { kind, path: `${c.name.toLowerCase()}${ext}` };
     }
+    case "moveFile": {
+      // a script, or the folder holding it, moved under a new top-level folder
+      // (a file that already has a problem would be refused as a new file with one, AR-24)
+      const path = pick(
+        paths.filter(
+          (p) =>
+            !isManagedPath(p) &&
+            state.model.file(p)?.source.problems.length === 0,
+        ),
+        c.a,
+      );
+      if (!path) return null;
+      const folder = folderOf(path);
+      const from = c.b % 2 === 0 && folder !== "" ? folder : path;
+      return {
+        kind,
+        path: from,
+        newPath: `moved_${c.name.toLowerCase()}/${from.split("/").pop()}`,
+      };
+    }
+    case "updateDeclaration": {
+      // a typed process, its form read back, with one random change to a row or a text
+      const procs = scripts.flatMap((path) =>
+        [...(state.model.file(path)?.declarations.entries() ?? [])].flatMap(
+          ([name, { declaration }]) =>
+            declaration.kind === "Process" && declaration.typed
+              ? [{ path, name, declaration }]
+              : [],
+        ),
+      );
+      const p = pick(procs, c.a);
+      if (!p) return null;
+      const form = processForm(
+        state.model.file(p.path)?.source as ScriptSourceFile,
+        p.declaration,
+        state.catalogue,
+      );
+      const lower = c.name.toLowerCase();
+      const changed: TypedProcessForm = (
+        [
+          { ...form, description: `Note ${c.name}.` },
+          {
+            ...form,
+            inputs: [
+              ...form.inputs,
+              {
+                origin: null,
+                kind: "named",
+                name: lower,
+                type: "String",
+                nullable: c.snippet % 2 === 0,
+              },
+            ],
+          },
+          {
+            ...form,
+            directives: [
+              ...form.directives,
+              {
+                origin: null,
+                kind: "named",
+                name: "cpus",
+                args: String(c.snippet + 1),
+                deprecated: false,
+                known: true,
+              },
+            ],
+          },
+          { ...form, inputs: form.inputs.slice(0, -1) },
+          { ...form, outputs: form.outputs.slice(0, -1) },
+          { ...form, stub: form.stub === null ? "'stub'" : null },
+          {
+            ...form,
+            script: { ...form.script, text: `${form.script.text}\n// note` },
+          },
+          { ...form, outputs: [...form.outputs].reverse() },
+        ] as TypedProcessForm[]
+      )[c.b % 8] as TypedProcessForm;
+      // a "change" that leaves the form as it was (reversing one output, dropping from an empty list) is no edit
+      if (JSON.stringify(changed) === JSON.stringify(form)) return null;
+      return { kind, path: p.path, name: p.name, form: changed };
+    }
     default:
       return null;
   }
@@ -518,6 +604,36 @@ function checkAccepted(
         { kind: "create", path: command.path, text: "" },
       ]);
       break;
+    case "moveFile": {
+      // F-303: every moved file is deleted and created once; the other patches only edit
+      const deleted = patches.filter((p) => p.kind === "delete");
+      const created = patches.filter((p) => p.kind === "create");
+      expect(created.length, `${label}: one create per delete`).toBe(
+        deleted.length,
+      );
+      expect(deleted.length).toBeGreaterThan(0);
+      for (const p of created)
+        expect(p.path.startsWith(command.newPath)).toBe(true);
+      break;
+    }
+    case "updateDeclaration": {
+      // F-303: the process's own file is patched, and each edit (it, and the call sites') is one top-level item
+      expect(patches.map((p) => p.path)).toContain(command.path);
+      for (const patch of patches) {
+        if (patch.kind !== "edit") throw new Error("edits only");
+        const before = state.model.file(patch.path)?.source as SourceFile;
+        const items = before.ast?.kind === "Script" ? before.ast.body : [];
+        for (const e of patch.edits)
+          expect(
+            items.some((i) => {
+              const span = itemSpan(i);
+              return e.start >= span.start && e.end <= span.end;
+            }),
+            `${label}: edit in ${patch.path} lies within one item`,
+          ).toBe(true);
+      }
+      break;
+    }
   }
 }
 
@@ -616,11 +732,14 @@ export function assertSequences(
 
 /**
  * What has to happen first for a kind to have something to act on: a plugin is removed after one is added, and added
- * after the one the fixed choices pick is removed (a config that already has it refuses the add).
+ * after the one the fixed choices pick is removed (a config that already has it refuses the add); a process is edited
+ * after one is created.
  */
 const PRELUDE: Partial<Record<string, string>> = {
   removeConfigPlugin: "addConfigPlugin",
   addConfigPlugin: "removeConfigPlugin",
+  // a pin with no typed process gets a real typed scaffold first (F-301), then edits it
+  updateDeclaration: "createProcess",
 };
 
 /**
@@ -638,7 +757,8 @@ function runFixedExamples(state: EditState, stats: Stats) {
       const choice: Choice = {
         kind: index,
         a: i * 7,
-        b: i * 13,
+        // odd, so a choice that indexes by a + b (the plugin list) reaches both of its entries
+        b: i * 13 + 1,
         name: `FIX${i}`,
         snippet: i,
       };

@@ -9,6 +9,7 @@ import { includes } from "./includes/index.ts";
 import { legacyOperators } from "./legacy-operators.ts";
 import { palette } from "./palette.ts";
 import { scaffold } from "./scaffold.ts";
+import { standardTypes } from "./standard-types.ts";
 
 /** The pack's version, exported on its own so the main thread can read it without the pack (F-113). */
 export const version = "26.10";
@@ -22,6 +23,7 @@ export const pack: LanguagePack = {
   includes,
   scaffold,
   legacyOperators,
+  standardTypes,
   loadCatalogue: async () => {
     const [script, config] = await Promise.all([
       import("../catalogue/script.json"),
@@ -40,7 +42,11 @@ export const pack: LanguagePack = {
   loadTemplates: async () =>
     (await import("../templates.json")).default as TemplateSet,
   // The rules read the config catalogue, so they stay a lazy chunk too (F-601); the promise is kept.
-  loadConfigRules: () => {
+  loadConfigRules: (catalogue?: ConfigCatalogue) => {
+    if (catalogue)
+      return import("./config/index.ts").then((rules) =>
+        rules.createConfigRules(catalogue),
+      );
     configRules ??= Promise.all([
       import("./config/index.ts"),
       import("../catalogue/config.json"),

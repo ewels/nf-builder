@@ -133,6 +133,34 @@ describe("F-202 workspace", () => {
     expect(s.saves).toHaveLength(savedBefore);
   });
 
+  it("F-303 UX-41: the workspace passes declarationForm straight through and saves nothing", async () => {
+    const s = setup();
+    await s.watching;
+    const meta = await s.workspace.createProject({
+      name: "P",
+      languageVersion: version,
+      files: [
+        {
+          path: "main.nf",
+          text: "nextflow.enable.types = true\n\nprocess P {\n    input:\n    x: String\n\n    script:\n    'p'\n}\n\nworkflow {\n    P('a')\n}\n",
+        },
+      ],
+    });
+    await s.workspace.openProject(meta.id);
+    const projection = await s.workspace.project("main.nf", null);
+    const node =
+      "projection" in projection ? projection.projection?.nodes[0] : undefined;
+    const savedBefore = s.saves.length;
+    const result = await s.workspace.declarationForm(
+      "main.nf",
+      null,
+      node?.id ?? "",
+    );
+    expect(result).toMatchObject({ form: { name: "P" } });
+    expect(await s.workspace.flush()).toMatchObject({ status: "saved" });
+    expect(s.saves).toHaveLength(savedBefore);
+  });
+
   it("F-203 UX-20: every status has a higher seq than the one before, and openProject returns the seq of the status that made the project current", async () => {
     const s = setup();
     await s.watching;
