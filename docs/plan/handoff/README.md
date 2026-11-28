@@ -347,3 +347,12 @@ ADR numbers reserved for features in flight, so parallel branches don't clash: 0
 
 ### F-406 — [plan](plan-F-406.md)
 - Accept every recommendation in section 6. ADR number: the next free one when F-406 starts.
+
+## Session 3 state (2026-11-28, 06:00 UTC)
+
+- Merged this session: F-703 (#53), F-401 (#55), F-210 (#54), F-503 (#56), F-605 (#57), F-301 (#58), F-404 (#59), F-601 (#60), F-405 (#61).
+- In flight: F-302 (PR #62, CI), F-303 (`feat/F-303`, building: corpus prelude for `updateDeclaration`, output renames, module folder move; then tasks 6 to 9), F-505 (`feat/F-505`, tasks 1 to 4).
+- F-303 type suggestions: `Boolean`, `Record` and `Tuple` are valid standard types (docs.seqera.io/nextflow/reference/stdlib-types; pinned lint accepts them) but our catalogue generator (`tools/spec-extract`) drops types without a class-level `@Description` or without a class. F-303 adds the documented class-less types from a small hand-kept list citing that page; not an upstream bug.
+- ADR numbers used: 0055 to 0064. Next free: 0065.
+- Merge check: `check_suite.completed` fires per workflow, so verify every check run on the PR head (`gh api repos/ewels/nf-builder/commits/<sha>/check-runs`) before merging.
+- Next: F-307, F-406, then F-304, F-305, F-306, F-311 (after F-303), F-308 and F-310 (after F-302), F-504, F-602.
