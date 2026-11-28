@@ -11,6 +11,7 @@ import { engineDiagnostics, problemsPanel, statusCount } from "./problems.ts";
 import { switcher } from "./projects.ts";
 
 interface Projected {
+  workflow: { path: string; range: { start: number; end: number } };
   statements: { modelled: boolean }[];
   nodes: {
     id: string;
@@ -105,21 +106,21 @@ test("F-405 step 1 UX-23 ADR-0007 UX-03 ADR-0004 UX-31: an imported legacy pipel
 
   await test.step("the workflow summary shows how much of each workflow is modelled", async () => {
     await clickEmptyCanvas(page);
-    const statements = await page.evaluate(
+    const projected = await page.evaluate(
       async ({ path }) => {
         const engine = (window as unknown as { nfBuilderEngine: EngineHook })
           .nfBuilderEngine;
         const { projection } = (await engine.project(path, "RNASEQ")) as {
           projection: Projected;
         };
-        const all = projection.statements;
-        return {
-          total: all.length,
-          modelled: all.filter((s) => s.modelled).length,
-        };
+        return projection;
       },
       { path: RNASEQ },
     );
+    const statements = {
+      total: projected.statements.length,
+      modelled: projected.statements.filter((s) => s.modelled).length,
+    };
     const percent = Math.floor((100 * statements.modelled) / statements.total);
     expect(percent).toBeLessThan(100);
     const modelled = detailsSection(page, "Modelled");
@@ -130,9 +131,35 @@ test("F-405 step 1 UX-23 ADR-0007 UX-03 ADR-0004 UX-31: an imported legacy pipel
       "data-coverage",
       `${statements.modelled}/${statements.total}`,
     );
+    const { range } = projected.workflow;
+    const own = (await engineDiagnostics(page)).filter(
+      (d) =>
+        d.severity === "suggestion" &&
+        d.path === projected.workflow.path &&
+        d.range.start >= range.start &&
+        d.range.end <= range.end,
+    ).length;
+    expect(own).toBeGreaterThan(0);
     await expect(detailsSection(page, "Suggestions")).toContainText(
-      /\d+ suggestions? in this workflow|No suggestions in this workflow/,
+      `${own} suggestion${own === 1 ? "" : "s"} in this workflow`,
     );
+    // relative includes of registry module files are listed, as the problems panel tags them (ADR 0055)
+    const modules = [
+      ...new Set(
+        projected.nodes.flatMap((n) => {
+          const dir = n.callee?.path?.match(/^modules\/(nf-core\/.+)\/[^/]+$/);
+          return n.kind === "call" && dir?.[1] ? [dir[1]] : [];
+        }),
+      ),
+    ];
+    expect(modules.length).toBeGreaterThan(0);
+    expect(
+      (
+        await detailsSection(page, "Registry modules")
+          .locator(".details-port-name")
+          .allTextContents()
+      ).sort(),
+    ).toEqual(modules.sort());
     await openWorkflow(page, "main.nf", null);
     await canvasReady(page);
     await clickEmptyCanvas(page);

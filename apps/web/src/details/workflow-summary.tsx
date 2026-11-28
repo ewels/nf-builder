@@ -5,6 +5,7 @@ import type {
   WorkflowSummary,
 } from "@nf-builder/engine";
 import type { JSX } from "react";
+import { plural } from "../import/import-summary";
 
 function Ports({
   title,
@@ -36,11 +37,9 @@ function Ports({
   );
 }
 
-const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
-
 /** "165 of 184 statements (89%)", "All 3 statements (100%)" or "No statements" (F-405, ADR 0004). */
-export function coverageText(c: SummaryCoverage): string {
-  if (c.statements === 0 || c.percent === null) return "No statements";
+function coverageText(c: SummaryCoverage): string {
+  if (c.percent === null) return "No statements";
   if (c.modelled === c.statements)
     return `All ${c.statements} statements (${c.percent}%)`;
   return `${c.modelled} of ${c.statements} statements (${c.percent}%)`;
@@ -81,7 +80,7 @@ export function WorkflowSummaryView({
             <p className="details-note">No suggestions in this workflow</p>
           ) : (
             <p className="details-note">
-              {`${plural(suggestions.length, "suggestion")} in this workflow `}
+              {`${plural(suggestions.length, "suggestion", "suggestions")} in this workflow `}
               <button
                 type="button"
                 className="details-show-problems"

@@ -12,6 +12,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { plural } from "../import/import-summary";
 import { focusTarget } from "../project/focus-target";
 import { useReadOnly } from "../read-only/read-only-store";
 import { PROBLEMS_PANEL_ID, statusLinkId } from "../shell/status-bar";
@@ -232,7 +233,7 @@ export function ProblemsPanelView({
             <section key={group.path} className="problems-group">
               {position === firstRegistry ? (
                 <h3 className="problems-subheading">
-                  {`Registry modules (${registryRows} ${noun}${registryRows === 1 ? "" : "s"})`}
+                  {`Registry modules (${plural(registryRows, noun, `${noun}s`)})`}
                 </h3>
               ) : null}
               <h3 className="problems-file">

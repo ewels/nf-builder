@@ -9,7 +9,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import type { DetailsContent } from "../src/canvas/canvas-store";
 import { DetailsHeaderView } from "../src/details/details-header";
-import { DetailsBody } from "../src/details/details-pane";
+import { DetailsBody, diagnosticsAt } from "../src/details/details-pane";
 import { DiagnosticList } from "../src/details/diagnostic-list";
 import { NodeDetailsView } from "../src/details/node-details";
 import { WorkflowSummaryView } from "../src/details/workflow-summary";
@@ -502,5 +502,28 @@ describe("F-206 details pane", () => {
     const button = findButton(element);
     button.props.onClick();
     expect(got).toBe(first);
+  });
+});
+
+describe("F-405 UX-31: which diagnostics the summary shows", () => {
+  const ready = (revision: number) =>
+    ({ status: "ready", revision }) as unknown as Parameters<
+      typeof diagnosticsAt
+    >[0];
+  const list = [{ code: "x" }] as unknown as readonly Diagnostic[];
+
+  it("F-405: diagnostics made at the projection's revision are shown", () => {
+    expect(diagnosticsAt(ready(3), "ready", 3, list)).toBe(list);
+  });
+
+  it("F-405: diagnostics of another revision, or no projection, are still being pulled (null)", () => {
+    expect(diagnosticsAt(ready(3), "refreshing", 2, list)).toBeNull();
+    expect(diagnosticsAt(ready(3), "loading", null, list)).toBeNull();
+    expect(diagnosticsAt({ status: "loading" }, "ready", 3, list)).toBeNull();
+  });
+
+  it("F-405: failed diagnostics leave the section out (undefined), whatever the revision", () => {
+    expect(diagnosticsAt(ready(3), "failed", 3, list)).toBeUndefined();
+    expect(diagnosticsAt(ready(3), "failed", 2, list)).toBeUndefined();
   });
 });
