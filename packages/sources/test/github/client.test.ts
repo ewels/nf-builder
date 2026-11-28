@@ -235,23 +235,21 @@ describe("GitHub client", () => {
       expect([e.kind, e.path]).toEqual(["incomplete", "a.txt"]);
     });
 
-    it("F-401 IO-14: a content-length that differs from the tree size is incomplete before the body is read", async () => {
-      const res = new Response(new Uint8Array([1, 2, 3]), {
-        headers: { "content-length": "999" },
-      });
-      let read = false;
-      res.arrayBuffer = () => {
-        read = true;
-        return Promise.resolve(new ArrayBuffer(3));
-      };
-      const f = fake(() => res);
-      const e = await kindOf(
-        createGithubClient({ fetch: f.fetch }).download(repo, SHA, [
-          { path: "a.txt", size: 3 },
-        ]),
+    it("F-401 IO-14: a content-length smaller than the decoded size (gzip hidden by CORS) is accepted", async () => {
+      const f = fake(
+        () =>
+          new Response(new Uint8Array([1, 2, 3]), {
+            headers: { "content-length": "2" },
+          }),
       );
-      expect([e.kind, e.path]).toEqual(["incomplete", "a.txt"]);
-      expect(read).toBe(false);
+      const got = await createGithubClient({ fetch: f.fetch }).download(
+        repo,
+        SHA,
+        [{ path: "a.txt", size: 3 }],
+      );
+      expect(got.map((d) => [d.path, d.bytes.byteLength])).toEqual([
+        ["a.txt", 3],
+      ]);
     });
 
     it("F-401 IO-14: an abort stops everything", async () => {

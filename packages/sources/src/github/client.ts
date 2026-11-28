@@ -180,14 +180,7 @@ export function createGithubClient(o: GithubClientOptions): GithubClient {
             host: "raw",
             path: file.path,
           });
-        // refuse a body that is too long before it is held in memory; with a content-encoding the header counts encoded bytes
-        const length = res.headers.get("content-length");
-        if (
-          length !== null &&
-          res.headers.get("content-encoding") === null &&
-          Number(length) !== file.size
-        )
-          throw incomplete();
+        // no content-length check: a cross-origin response hides content-encoding, so the header may count encoded bytes; only the decoded size is checked
         const bytes = await res.arrayBuffer();
         if (bytes.byteLength !== file.size) throw incomplete();
         return { path: file.path, bytes };

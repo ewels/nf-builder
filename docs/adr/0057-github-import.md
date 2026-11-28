@@ -77,3 +77,7 @@ Research: the [F-401 plan](https://github.com/ewels/nf-builder/blob/d5d4b7b/docs
 - **Verifying git SHA-1 in the app:** unavailable in insecure frames and redundant for immutable raw URLs.
 - **A token field now:** inert until F-402.
 - **No dependency-cruiser rule, relying on the injected `fetch`:** weaker; a later import could pull the client into the worker unnoticed.
+
+## Amendment 2026-11-28
+
+The pre-read `content-length` check is removed. Cross-origin responses hide `content-encoding` (raw.githubusercontent.com sends gzip and `access-control-allow-origin: *` but no `Access-Control-Expose-Headers`), so in the browser `content-length` counts the compressed bytes and every import failed as incomplete. Only the decoded size is checked, after the body is read (`bytes.byteLength !== file.size`).
