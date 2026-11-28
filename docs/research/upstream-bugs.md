@@ -33,6 +33,7 @@ To reproduce with the pinned dist: `NXF_OFFLINE=true .cache/nextflow/26.10.7/nex
 | 21 | Nextflow registry | The download endpoint for `nf-core/cooler/digest` 0.0.0-6d1763b returns HTTP 401 | F-501 live build | no |
 | 22 | nf-lang lint | Errors on a bare variable that is an `if` condition or the only index in `x[i]` point one column early, at the `(` or `[` | F-108 | no |
 | 23 | nf-lang formatter | `lint -format` re-indents multi-line string content, changing the string's value | F-111 | no |
+| 27 | nf-lang lint | A workflow emit named `log` passes lint, but `nextflow run` fails with "No such variable: log" | F-307 | no |
 
 ## Details
 
@@ -410,3 +411,30 @@ ext.'my-key' = 1
 - **Expected:** the quotes stay when the name isn't an identifier.
 - **What else:** `ext.'a.b' = 1` becomes `ext.a.b = 1`, which parses but is a different option (a nested `ext.a.b`).
 - **nf-builder:** the config printer keeps the quotes when a name isn't an identifier (F-601), a deliberate deviation from `lint -format` that no corpus config reaches.
+
+### 27. An emit named `log` passes lint but fails at run time
+
+`main.nf`:
+
+```nextflow
+nextflow.enable.types = true
+
+workflow SUB {
+    take:
+    reads: Channel<String>
+
+    emit:
+    log: Channel<String> = reads
+}
+
+workflow {
+    main:
+    ch = channel.of('a')
+    out = SUB(ch)
+    out.view()
+}
+```
+
+- **What happens:** `nextflow lint .` (26.10.7) reports no errors, but `nextflow run main.nf -stub` fails with `ERROR ~ No such variable: log` at the line of the emit. `log` is the script's built-in logger, which the emit's name seems to collide with.
+- **Expected:** lint reports the name, or the run accepts it like any other emit name (`report` works).
+- **nf-builder:** nothing special yet. The F-307 fixture names its second emit `report` for this reason; AddEmit does not refuse `log`.
