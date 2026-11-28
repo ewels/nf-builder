@@ -7,6 +7,7 @@ import {
   type EngineApi,
   type EngineRefusal,
   installedPackVersions,
+  LAYOUT_PATH,
   type LayoutChange,
   type ProjectChange,
   type ProjectFile,
@@ -21,6 +22,7 @@ import { normaliseProjectName } from "./project-name";
 import {
   type AddChoice,
   type AddPreviewResult,
+  type ExportResult,
   type ImportedProject,
   type ImportProject,
   INITIAL_STATUS,
@@ -39,6 +41,10 @@ interface WorkspaceOptions {
   readonly now?: () => number;
   readonly newId?: () => string;
   readonly timer?: Timer;
+  /** Loads the zip writer; the default is a dynamic import, so it is a separate worker chunk (F-404). */
+  readonly loadExport?: () => Promise<
+    typeof import("@nf-builder/sources/export")
+  >;
 }
 
 /** `crypto.randomUUID` exists only in secure contexts, and a frame inside an insecure page isn't one (ADR 0044). */
@@ -62,6 +68,8 @@ export function createWorkspace(options: WorkspaceOptions): WorkspaceApi {
   const now = options.now ?? (() => Date.now());
   const newId = options.newId ?? randomId;
   const importer = createImportStager();
+  const loadExport =
+    options.loadExport ?? (() => import("@nf-builder/sources/export"));
 
   let db: ProjectDb | null = null;
   let currentId: string | null = null;
@@ -153,6 +161,29 @@ export function createWorkspace(options: WorkspaceOptions): WorkspaceApi {
   const flushAll = async () => (db ? autosaver.flush() : status.save);
 
   return {
+    exportProject: (exportOptions) =>
+      serial(async (): Promise<ExportResult | EngineRefusal> => {
+        const listed = await engine.listFiles();
+        if ("ok" in listed) return listed;
+        const entries: { path: string; text: string }[] = [];
+        for (const { path } of listed.files) {
+          if (path === LAYOUT_PATH && !exportOptions.layout) continue;
+          const text = await engine.readFile(path);
+          if (text !== null) entries.push({ path, text });
+        }
+        if (entries.length === 0)
+          return invalid("Nothing to export.", listed.revision);
+        const { exportFileName, exportSlug, zipProject } = await loadExport();
+        const name = status.current?.name ?? "";
+        return {
+          ok: true,
+          fileName: exportFileName(name),
+          bytes: zipProject(entries, { folder: exportSlug(name) }),
+          files: entries.length,
+          revision: listed.revision,
+        };
+      }),
+
     palette: (version) => engine.palette(version),
     templates: (version) => engine.templates(version),
     project: (path, workflow) => engine.project(path, workflow),

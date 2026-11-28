@@ -7,6 +7,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./import": "./src/import/index.ts",
+    "./export": "./src/export/index.ts",
     "./github": "./src/github/index.ts"
   },
   "scripts": {

@@ -36,6 +36,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-503 registry palette | merged, PR #56 | Plan deleted in its PR. |
 | F-605 Markdown and text files | merged, PR #57 | Plan deleted in its PR. |
 | F-301 add from palette | merged, PR #58 | Plan deleted in its PR. |
+| F-404 zip export | merged, PR #59 | Plan deleted in its PR. |
 
 ## Merge order
 
@@ -330,7 +331,7 @@ ADR numbers reserved for features in flight, so parallel branches don't clash: 0
 ### F-505 — [plan](plan-F-505.md)
 - Accept every recommendation in section 6: add F-601 and F-301 to F-505's `depends_on` in its PR (`scope-change`); tasks 1 to 3 may start before they merge, tasks 4 to 7 after.
 
-### F-404 — [plan](plan-F-404.md)
+### F-404 — plan deleted
 - Accept every recommendation in section 6. For point 3, give module binaries under `resources/usr/bin/` the executable bit too, once the builder has confirmed that folder name in the Nextflow docs (module binaries); otherwise root `bin/` only. ADR number: the next free one when F-404 starts.
 
 ### F-302 — [plan](plan-F-302.md)
@@ -341,3 +342,6 @@ ADR numbers reserved for features in flight, so parallel branches don't clash: 0
 
 ### F-303 — [plan](plan-F-303.md)
 - Accept every recommendation in section 6, including point 5: renaming a process moves its module folder in the same undo group, superseding ADR 0039's "files don't move" line through F-303's ADR. Point 9: ask the researcher during the build whether the catalogue's missing `Boolean` and `Record` types are an upstream gap, and record it in `docs/research/upstream-bugs.md` if so. Start after F-301 merges; reuse F-601's value kinds if it has merged. ADR number: the next free one when F-303 starts.
+
+### F-406 — [plan](plan-F-406.md)
+- Accept every recommendation in section 6. ADR number: the next free one when F-406 starts.

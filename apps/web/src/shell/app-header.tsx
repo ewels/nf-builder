@@ -18,6 +18,10 @@ interface AppHeaderProps {
   readonly storageNote: boolean;
   /** Opens the New project dialog on From a template (UX-60). */
   readonly onTemplates: () => void;
+  /** Opens the Export dialog (F-404, UX-62). */
+  readonly onExport: () => void;
+  /** A project is open (F-404). */
+  readonly canExport: boolean;
   /** Below 1024 px (F-703, UX-04): no Templates, Import, Export or version selector. */
   readonly readOnly?: boolean;
 }
@@ -30,6 +34,8 @@ export function AppHeader({
   storageWarning,
   storageNote,
   onTemplates,
+  onExport,
+  canExport,
   readOnly = false,
 }: AppHeaderProps): JSX.Element {
   return (
@@ -56,7 +62,12 @@ export function AppHeader({
           <button type="button" className="header-button" disabled>
             Import
           </button>
-          <button type="button" className="header-button" disabled>
+          <button
+            type="button"
+            className="header-button"
+            disabled={!canExport}
+            onClick={onExport}
+          >
             Export
           </button>
           <label className="version-picker">

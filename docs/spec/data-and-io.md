@@ -24,8 +24,8 @@
 
 | ID | Requirement |
 |---|---|
-| IO-20 | Export writes a zip of all project files, with the layout sidecar optional. Files the user did not change are equivalent to what was imported (see glossary). |
-| IO-21 | Exported projects pass `nextflow lint` with no errors when the imported project did (CI oracle, ADR 0011). |
+| IO-20 | Export writes a zip of all project files, with the layout sidecar optional. Files the user did not change are equivalent to what was imported (see glossary). Entries sit under one folder named after the project; files under the root `bin/` and under `resources/usr/bin/` are executable; names are UTF-8; every file is the stored text byte for byte (ADR 0062). |
+| IO-21 | Exported projects pass `nextflow lint` with no errors when the imported project did (CI oracle, ADR 0011). For v0.1 this is checked on a CI-linted oracle pair exported after an edit; linting edited corpus exports is a follow-up (ADR 0062). |
 
 ## Registry
 

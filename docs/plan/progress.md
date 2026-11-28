@@ -757,3 +757,19 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - `scope-change`: F-314 "Add the remaining palette items" (factories, records, enums, functions, includes, params, output, Exec process, Agent, Include pipeline) added to M3, depending on F-301. The F-111 alias note moved to F-310 and F-504.
   - No visual baseline changed.
 - Blockers: none.
+
+## 2026-11-28 · F-404 · Claude (autonomous)
+- Did:
+  - The header's Export button opens an Export dialog (UX-62): the file name, the file count, "Include the layout (.nf-builder/layout.json)" checked by default (disabled with a note when there is no sidecar), warnings for case-only and file-and-folder path clashes (export still runs), and a note when the project was imported. Errors show inline; success closes the dialog and returns focus. Export stays hidden in read-only (ADR 0056); the header's Import button stays disabled for F-406.
+  - `WorkspaceApi.exportProject({layout})` in the engine worker, inside `serial`: pending Code-view edits are flushed first, every file's stored text is read at one revision and zipped with fflate `zipSync` from the new lazily loaded `@nf-builder/sources/export` subpath; the bytes are transferred to the page and downloaded through a blob URL revoked after 60 s.
+  - The zip: every entry under `<slug>/`, `<slug>.zip` (unsafe characters replaced, at most 100 characters, `project` when empty, `-project` added to names the importer skips or Windows reserves), UTF-8 names, export-time timestamps, default compression, no folder entries; 0755 for the root `bin/` and `resources/usr/bin/`, 0644 otherwise, made on Unix; files byte-identical to the stored text, BOM and CRLF included. `exportClashes` in lang-core, re-exported from `@nf-builder/engine`.
+  - Tests: `e2e/export.spec.ts` (steps 1 to 3, typed-then-exported text, layout unticked, CSP at top level and in a frame); unit tests in `packages/sources/test/export/`, `packages/lang-core/test/paths.test.ts` and `apps/web/test/` (workspace export, dialog, store, download, expose, header).
+- State: passing once CI is green.
+- Next: F-601, F-302, then F-303, F-307, F-405, F-505.
+- Decisions:
+  - [ADR 0062](../adr/0062-zip-export.md): the exported format (one top folder, name rule, modes, timestamps, compression, no folder entries, byte-identical text); `WorkspaceApi.exportProject` and the `./export` subpath with `zipSync` (amends ADR 0053's "only `unzipSync`" and the API lists of ADRs 0043 and 0045); module binaries under `resources/usr/bin/` executable, confirmed in the Nextflow docs; clash warnings without blocking; the imported-project note; flush before export; the 60 s URL lifetime; no re-import limit checks in v0.1. Confirms ADR 0008's sidecar default (step 3); ADR 0008's body is unchanged.
+  - IO-20, IO-21 and UX-62 updated.
+  - Step 2 reuses the CI-linted oracle pair `f208-code-edit` and `f208-code-edit-after`; ADR 0011's edited-corpus-export lint is a follow-up needing a `corpus-parse` workflow step (Q17 in `open-questions.md`).
+  - Notes appended to F-406 (reuse the writer and name rule; the Import button) and F-407 (export binary files once stored).
+  - `@visual` baselines that show the enabled Export button are re-approved from CI (ADR 0021) and listed in the PR.
+- Blockers: none.
