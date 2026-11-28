@@ -828,6 +828,180 @@ describe("F-403 workspace zip import", () => {
   });
 });
 
+describe("F-210 workspace add files", () => {
+  const start = [
+    { path: "main.nf", text: "workflow {\n}\n" },
+    { path: "assets/old.csv", text: "old\n" },
+    { path: "assets/sub/x.txt", text: "x\n" },
+  ];
+  const opened = async () => {
+    const s = setup();
+    await s.watching;
+    const meta = await s.workspace.createProject({
+      name: "P",
+      languageVersion: version,
+      files: start,
+    });
+    await s.workspace.openProject(meta.id);
+    return { s, meta };
+  };
+  const loose = (...entries: [string, string][]) =>
+    entries.map(([name, text]) => ({ name, blob: new Blob([text]) }));
+  const stage = async (
+    s: Awaited<ReturnType<typeof opened>>["s"],
+    ...entries: [string, string][]
+  ) => {
+    const staged = await s.workspace.stageFiles(loose(...entries));
+    if (!staged.ok) throw new Error(staged.message);
+    return staged.id;
+  };
+
+  it("F-210 UX-16 IO-01: addFiles writes the selected files under the target folder, records them for autosave and discards the stage", async () => {
+    const { s, meta } = await opened();
+    const id = await stage(s, ["new.csv", "n\n"], ["b.txt", "b\n"]);
+    const added = ok(
+      await s.workspace.addFiles({
+        id,
+        ignore: "",
+        keepFolder: false,
+        folder: "assets",
+      }),
+    ) as { files: { path: string; text: string | null }[] };
+    expect(added.files.map((f) => f.path).sort()).toEqual([
+      "assets/b.txt",
+      "assets/new.csv",
+    ]);
+    expect(await s.workspace.readFile("assets/new.csv")).toBe("n\n");
+    expect(await s.workspace.flush()).toEqual({ status: "saved", error: null });
+    const stored = await (await s.reader()).readProject(meta.id);
+    expect(stored?.files.find((f) => f.path === "assets/b.txt")?.text).toBe(
+      "b\n",
+    );
+    expect(
+      await s.workspace.previewAdd({
+        id,
+        ignore: "",
+        keepFolder: false,
+        folder: "",
+      }),
+    ).toMatchObject({ ok: false, code: "gone" });
+  });
+
+  it("F-210 ADR-0051: addFiles clears the undo history", async () => {
+    const { s } = await opened();
+    const revision = (await s.workspace.diagnostics()) as { revision: number };
+    ok(
+      await s.workspace.apply(
+        { kind: "createFile", path: "x.txt" },
+        revision.revision,
+      ),
+    );
+    expect((await s.workspace.history()).undoCount).toBe(1);
+    const id = await stage(s, ["n.txt", "n"]);
+    ok(
+      await s.workspace.addFiles({
+        id,
+        ignore: "",
+        keepFolder: false,
+        folder: "",
+      }),
+    );
+    expect((await s.workspace.history()).undoCount).toBe(0);
+  });
+
+  it("F-210 UX-16: previewAdd lists replaced files and conflicts; addFiles replaces existing files and skips conflicts and .nf-builder/ entries", async () => {
+    const { s } = await opened();
+    const id = await stage(
+      s,
+      ["old.csv", "replaced\n"],
+      ["sub", "folder clash\n"],
+      ["fresh.csv", "f\n"],
+    );
+    const choice = { id, ignore: "", keepFolder: false, folder: "assets" };
+    const preview = await s.workspace.previewAdd(choice);
+    expect(preview).toMatchObject({
+      ok: true,
+      folder: "assets",
+      adds: 2,
+      replaced: ["assets/old.csv"],
+      replacedCount: 1,
+      conflicts: [{ path: "assets/sub", reason: "folder" }],
+      conflictCount: 1,
+      summary: { files: 3 },
+    });
+    expect(await s.workspace.readFile("assets/old.csv")).toBe("old\n");
+    ok(await s.workspace.addFiles(choice));
+    expect(await s.workspace.readFile("assets/old.csv")).toBe("replaced\n");
+    expect(await s.workspace.readFile("assets/fresh.csv")).toBe("f\n");
+    expect(await s.workspace.readFile("assets/sub")).toBeNull();
+
+    const managed = await stage(s, [".nf-builder/layout.json", "{}"]);
+    expect(
+      await s.workspace.addFiles({
+        id: managed,
+        ignore: "",
+        keepFolder: false,
+        folder: "",
+      }),
+    ).toMatchObject({
+      ok: false,
+      code: "invalid",
+      message: expect.stringMatching(/^Nothing to add/),
+    });
+  });
+
+  it("F-210 UX-16: addFiles refuses a gone stage, ignore-list problems and nothing to add, writing nothing", async () => {
+    const { s } = await opened();
+    const before = await s.workspace.readFile("main.nf");
+    expect(
+      await s.workspace.addFiles({
+        id: "nope",
+        ignore: "",
+        keepFolder: false,
+        folder: "",
+      }),
+    ).toMatchObject({
+      ok: false,
+      code: "invalid",
+      message: expect.stringMatching(/no longer available/),
+    });
+    const zip = await s.workspace.stageZip(
+      zipBlob({ "t/a.txt": "a\n" }),
+      "t.zip",
+    );
+    if (!zip.ok) throw new Error(zip.message);
+    const bad = await s.workspace.addFiles({
+      id: zip.id,
+      ignore: "!a.txt\n",
+      keepFolder: false,
+      folder: "",
+    });
+    expect(bad).toMatchObject({
+      ok: false,
+      code: "invalid",
+      message: expect.stringMatching(/^Fix the ignore list first/),
+    });
+    const none = await s.workspace.addFiles({
+      id: zip.id,
+      ignore: "*\n",
+      keepFolder: false,
+      folder: "",
+    });
+    expect(none).toMatchObject({ ok: false, code: "invalid" });
+    // a zip keeps its top-level folder on request
+    ok(
+      await s.workspace.addFiles({
+        id: zip.id,
+        ignore: "",
+        keepFolder: true,
+        folder: "docs",
+      }),
+    );
+    expect(await s.workspace.readFile("main.nf")).toBe(before);
+    expect(await s.workspace.readFile("docs/t/a.txt")).toBe("a\n");
+  });
+});
+
 describe("F-401 workspace import", () => {
   const sha = "a".repeat(40);
   const source = { kind: "github", repo: "nf-core/x", ref: null, sha } as const;

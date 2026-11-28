@@ -48,6 +48,8 @@ export type ImportRefusalCode =
   | "not-zip"
   | "damaged"
   | "too-slow"
+  | "too-many-files"
+  | "files-too-large"
   | "gone";
 
 export interface ImportRefusal {

@@ -5,6 +5,7 @@
 import type {
   Diagnostic,
   IncludeRules,
+  ProjectTree,
   SourceParser,
 } from "@nf-builder/lang-core";
 import { installedPacks } from "../packs";
@@ -142,6 +143,11 @@ export class ProjectModel {
 
   file(path: string): FileModel | undefined {
     return this.#models.get(path);
+  }
+
+  /** The project's files and folders, read-only (F-210). */
+  get tree(): ProjectTree {
+    return this.#tree;
   }
 
   paths(): readonly string[] {

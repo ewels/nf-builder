@@ -32,6 +32,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-011 GitHub Pages hosting | merged, PR #37 | Live at https://ewels.github.io/nf-builder/; first `verify` passed. |
 | F-703 read-only below 1024 px | merged, PR #53 | Plan deleted in its PR. |
 | F-401 GitHub import | merged, PR #55 | Plan deleted in its PR. |
+| F-210 Files view | merged, PR #54 | Plan deleted in its PR. |
 
 ## Merge order
 
@@ -261,7 +262,7 @@ Next free ADR number: 0055 (0054 is F-309's).
   - the copy in point 12; the `READ_ONLY_ALLOWED` e2e allow-list; one `@smoke` test; no prefetch change;
   - F-202's multi-tab note answered: last write wins stands for v0.1.
 
-### F-210 — [plan](plan-F-210.md)
+### F-210 — plan deleted
 - Accept every recommendation in section 6:
   - `EngineApi.listFiles`, pulled while the panel is visible, rows built by a pure engine function;
   - a new `CreateFile` command (one undo step; extends ADR 0039 and AR-21);

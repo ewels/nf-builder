@@ -360,6 +360,97 @@ describe("F-113 engine client failures", () => {
     });
     close();
   });
+
+  it("F-210 ADR-0003: listFiles, stageFiles (with Blobs and names), previewAdd and addFiles cross the bridge; addFiles is announced to onEngineChange and a layout write to onLayoutWritten", async () => {
+    const { port1, port2 } = new MessageChannel();
+    exposeEngine(
+      createWorkspace({
+        engine: createEngineService(),
+        openDb: (onClosed) => openProjectDb(new IDBFactory(), onClosed),
+      }),
+      port1,
+    );
+    class PortWorker extends EventTarget {
+      constructor() {
+        super();
+        port2.addEventListener("message", (e) =>
+          this.dispatchEvent(new MessageEvent("message", { data: e.data })),
+        );
+        port2.start();
+      }
+      postMessage(message: unknown, transfer?: Transferable[]) {
+        port2.postMessage(message, transfer ?? []);
+      }
+      terminate() {}
+    }
+    vi.stubGlobal("Worker", PortWorker);
+    vi.resetModules();
+    const fresh = await import("../src/engine/engine-client");
+    const engine = fresh.getEngine();
+    const heard: unknown[] = [];
+    const off = fresh.onEngineChange((c) => heard.push(c));
+    try {
+      await engine.open({ version, files });
+      const listed = await engine.listFiles();
+      if (!("files" in listed)) throw new Error("refused");
+      expect(listed.files.map((f) => f.path)).toEqual(["README.md", "main.nf"]);
+      expect(listed.registry).toEqual([]);
+      const staged = await engine.stageFiles([
+        { name: "notes.txt", blob: new Blob(["hello\n"]) },
+      ]);
+      if (!staged.ok) throw new Error(staged.message);
+      expect(staged.summary).toMatchObject({ source: "notes.txt", files: 1 });
+      const choice = {
+        id: staged.id,
+        ignore: "",
+        keepFolder: false,
+        folder: "docs",
+      };
+      expect(await engine.previewAdd(choice)).toMatchObject({
+        ok: true,
+        adds: 1,
+      });
+      expect(heard).toHaveLength(0);
+      const added = await engine.addFiles(choice);
+      if (!("files" in added)) throw new Error("refused");
+      expect(added.files).toEqual([
+        { path: "docs/notes.txt", text: "hello\n" },
+      ]);
+      expect(heard).toHaveLength(1);
+      expect(await engine.readFile("docs/notes.txt")).toBe("hello\n");
+
+      // a layout write that wrote the sidecar is announced to onLayoutWritten, not to onEngineChange
+      const written: (readonly string[])[] = [];
+      const offLayout = fresh.onLayoutWritten((p) => written.push(p));
+      const reopened = await engine.open({
+        version,
+        files: [
+          {
+            path: "main.nf",
+            text: "process A {\n    script:\n    'A'\n}\n\nworkflow {\n    A()\n}\n",
+          },
+        ],
+      });
+      const layout = await engine.setLayout({
+        revision: reopened.revision,
+        path: "main.nf",
+        workflow: null,
+        positions: { "main.nf#/A@1": { x: 5, y: 6 } },
+        replace: false,
+      });
+      expect(layout).toMatchObject({
+        files: [{ path: ".nf-builder/layout.json" }],
+      });
+      expect(written).toEqual([[".nf-builder/layout.json"]]);
+      expect(heard).toHaveLength(1);
+      offLayout();
+    } finally {
+      off();
+      vi.unstubAllGlobals();
+      port1.close();
+      port2.close();
+    }
+  });
 });
 
 describe("F-401 engine client import", () => {
