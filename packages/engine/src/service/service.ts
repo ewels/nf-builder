@@ -293,6 +293,7 @@ export function createEngineService(
         (w) => projectionOf(open, w.path, w.name),
         before.changed,
         hints.renames ?? [],
+        hints.moves ?? [],
       );
       const next = carryLayout(open.layout, pairs, hints, open.removed);
       const text = formatLayout(next);
@@ -431,6 +432,7 @@ export function createEngineService(
         patches: result.patches,
         inverse: result.inverse,
         renames: hints.renames ?? [],
+        moves: hints.moves ?? [],
         deleted: hints.deleted ?? [],
       },
       options?.label ?? commandLabel(command),

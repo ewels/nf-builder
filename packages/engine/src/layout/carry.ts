@@ -19,10 +19,18 @@ export interface RenameHint {
   readonly to: string;
 }
 
+/** A file, or every file under a folder, moved from `from` to `to` (a `moveFile` command). */
+export interface MoveHint {
+  readonly from: string;
+  readonly to: string;
+}
+
 /** What a command tells the carry about the change it makes; each part is optional. */
 export interface CarryHints {
   /** Declarations the command renamed. */
   readonly renames?: readonly RenameHint[];
+  /** Files or folders the command moved: the workflows in them keep their positions under the new path (F-303). */
+  readonly moves?: readonly MoveHint[];
   /** Ids of nodes before the change that the command deleted: they never match a node after it. */
   readonly deleted?: readonly string[];
   /** Ids of nodes after the change that an undo restored: they never match a node before it, and take back a remembered position. */
@@ -235,12 +243,24 @@ export const carryHints = (command: EditCommand | undefined): CarryHints => {
           { path: command.path, from: command.name, to: command.newName },
         ],
       };
+    case "moveFile":
+      return { moves: [{ from: command.path, to: command.newPath }] };
     case "deleteNode":
       return { deleted: [command.node] };
     default:
       return {};
   }
 };
+
+/** Where a file went: through the first move of it or of a folder above it. */
+function movedPath(path: string, moves: readonly MoveHint[]): string {
+  for (const m of moves) {
+    if (path === m.from) return m.to;
+    if (path.startsWith(`${m.from}/`))
+      return `${m.to}${path.slice(m.from.length)}`;
+  }
+  return path;
+}
 
 /**
  * For each workflow in `before`, the workflow it became in `after`, or null when it vanished. A workflow with the same
@@ -252,6 +272,7 @@ export function pairWorkflows(
   after: readonly WorkflowRef[],
   changed: ReadonlySet<string>,
   renames: readonly RenameHint[],
+  moves: readonly MoveHint[] = [],
 ): ReadonlyMap<string, WorkflowRef | null> {
   const present = new Map(after.map((w) => [workflowKey(w), w]));
   const beforeKeys = new Set(before.map(workflowKey));
@@ -267,10 +288,13 @@ export function pairWorkflows(
   }
   const rest: WorkflowRef[] = [];
   for (const w of vanished) {
-    const hint = renames.find((h) => h.path === w.path && h.from === w.name);
-    const target = hint
-      ? present.get(workflowKey({ path: w.path, name: hint.to }))
-      : undefined;
+    const path = movedPath(w.path, moves);
+    const hint = renames.find((h) => h.path === path && h.from === w.name);
+    const target =
+      present.get(workflowKey({ path, name: hint ? hint.to : w.name })) ??
+      (hint
+        ? present.get(workflowKey({ path: w.path, name: hint.to }))
+        : undefined);
     if (target && !claimed.has(workflowKey(target))) {
       result.set(workflowKey(w), target);
       claimed.add(workflowKey(target));
@@ -314,8 +338,15 @@ export function workflowPairs(
   project: (w: WorkflowRef) => Projection | null,
   changed: ReadonlySet<string>,
   renames: readonly RenameHint[],
+  moves: readonly MoveHint[] = [],
 ): WorkflowPair[] {
-  const paired = pairWorkflows(before.workflows, after, changed, renames);
+  const paired = pairWorkflows(
+    before.workflows,
+    after,
+    changed,
+    renames,
+    moves,
+  );
   const pairs: WorkflowPair[] = [];
   for (const w of before.workflows) {
     const old = before.projections.get(workflowKey(w));
