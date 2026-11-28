@@ -6,7 +6,7 @@ import { createStore } from "zustand/vanilla";
 import { canvasStore } from "../canvas/canvas-store";
 import { filesStore } from "../files/files-store";
 
-export interface AddedItem {
+interface AddedItem {
   readonly key: string;
   readonly label?: string;
 }
@@ -14,7 +14,15 @@ export interface AddedItem {
 const messages = createStore<{ message: string | null }>()(() => ({
   message: null,
 }));
-const say = (message: string): void => messages.setState({ message });
+// the same text again is a change a screen reader announces only when it differs, so a trailing no-break space alternates
+const say = (message: string): void =>
+  messages.setState((s) => ({
+    message: s.message === message ? `${message}\u00A0` : message,
+  }));
+
+/** What the live region says now. */
+export const paletteAddMessage = (): string | null =>
+  messages.getState().message;
 
 /** Adds `item` to the active workflow tab with its centre at `at` (a flow point), or lets the layout place it. */
 export async function paletteAdd(
@@ -27,10 +35,11 @@ export async function paletteAdd(
   }
   const state = canvasStore.getState();
   const tab = state.tabs.find((t) => t.id === state.activeTab);
-  const outcome = await state.addFromPalette(
-    { item: item.key, tab: state.activeTab ?? "", at },
-    state.session,
-  );
+  const outcome = await state.addFromPalette({
+    item: item.key,
+    tab: state.activeTab ?? "",
+    at,
+  });
   if (!outcome.ok) {
     say(outcome.message);
     return;

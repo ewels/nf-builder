@@ -143,26 +143,39 @@ test("F-301 UX-15: an item with no action says so and changes nothing", async ({
   expect(await readFile(page, "main.nf")).toBe(main);
 });
 
-test("F-301 F-210: a palette drag over the canvas isn't taken by the Files drop guard", async ({
+test("F-301 F-210: the canvas accepts a palette drag and not a text drag, and the Files drop guard still refuses a Files drag over it", async ({
   page,
 }, testInfo) => {
   test.skip(testInfo.project.name !== "chromium", "one browser is enough");
   await blank(page, "palette-guard");
-  // a synthetic event keeps dropEffect "none" in Chromium, so only whether the drag is accepted can be read
-  const accepted = (type: string) =>
-    page.locator(".react-flow__pane").evaluate((pane, type) => {
+  // a synthetic event keeps dropEffect "none" in Chromium, so only whether the drag is accepted can be read; the guard
+  // refuses a Files drag by cancelling it, the canvas accepts a palette drag by cancelling it
+  const accepted = (kind: "palette" | "text" | "files") =>
+    page.locator(".react-flow__pane").evaluate((pane, kind) => {
       const dt = new DataTransfer();
-      dt.setData(type, "x");
+      if (kind === "palette")
+        dt.setData("application/x-nf-builder-palette", "x");
+      else if (kind === "text") dt.setData("text/plain", "x");
+      else dt.items.add(new File(["x"], "a.txt", { type: "text/plain" }));
       const event = new DragEvent("dragover", {
         dataTransfer: dt,
         bubbles: true,
         cancelable: true,
       });
       pane.dispatchEvent(event);
-      return event.defaultPrevented;
-    }, type);
-  expect(await accepted("application/x-nf-builder-palette")).toBe(true);
-  expect(await accepted("text/plain")).toBe(false);
+      return { types: [...dt.types], prevented: event.defaultPrevented };
+    }, kind);
+  expect(await accepted("palette")).toEqual({
+    types: ["application/x-nf-builder-palette"],
+    prevented: true,
+  });
+  expect(await accepted("text")).toEqual({
+    types: ["text/plain"],
+    prevented: false,
+  });
+  const files = await accepted("files");
+  expect(files.types).toContain("Files");
+  expect(files.prevented).toBe(true);
 });
 
 test("F-301 QA-30: adding logs no CSP violation and no console error", async ({

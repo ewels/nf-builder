@@ -76,4 +76,20 @@ describe("F-301 palette item row", () => {
     ]);
     canvasStore.setState({ activeTab: null });
   });
+
+  it("F-301 UX-70 QA-11: Enter and Space add through the button's native activation, with no key handler that could add twice", () => {
+    const button = find(
+      PaletteItemRow({ item: item("process"), onAdd: () => undefined }),
+      "button",
+    );
+    if (button === null) throw new Error("no button");
+    const props = button.props as Record<string, unknown>;
+    // a browser turns Enter and Space on a focused button into its click; a key handler as well would add twice
+    expect(button.type).toBe("button");
+    expect(props.type).toBe("button");
+    expect(props.onClick).toBeTypeOf("function");
+    expect(props.onKeyDown).toBeUndefined();
+    expect(props.onKeyUp).toBeUndefined();
+    expect(props.onKeyPress).toBeUndefined();
+  });
 });
