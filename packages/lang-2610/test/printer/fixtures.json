@@ -72,6 +72,19 @@
     },
     {
       "tree": "printer",
+      "path": "f304-format.nf",
+      "kind": "parsed",
+      "spec": [
+        "LA-45",
+        "F-304"
+      ],
+      "covers": [
+        "Process (typed)",
+        "irregular layout"
+      ]
+    },
+    {
+      "tree": "printer",
       "path": "typed/process-exec.nf",
       "kind": "parsed",
       "spec": [

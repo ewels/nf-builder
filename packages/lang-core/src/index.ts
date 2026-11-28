@@ -104,6 +104,7 @@ export {
   type RemoveConfigOption,
   type RemoveConfigPlugin,
   type RenameDeclaration,
+  type ReplaceDeclaration,
   type ReplaceFileText,
   type Scaffold,
   type SetConfigOption,

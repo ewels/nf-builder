@@ -63,6 +63,7 @@ export type {
   RemoveConfigOption,
   RemoveConfigPlugin,
   RenameDeclaration,
+  ReplaceDeclaration,
   ReplaceFileText,
   ScriptSourceFile,
   SetConfigOption,
