@@ -9,6 +9,7 @@ import { useProjects } from "../project/project-store";
 import { useReadOnly } from "../read-only/read-only-store";
 import { CanvasErrorBoundary } from "./canvas-error-boundary";
 import { useWorkspace } from "./canvas-store";
+import { PasteAliasDialog } from "./paste-dialog";
 
 // React Flow is in this chunk only (QA-01, ADR 0003).
 const WorkflowCanvas = lazy(() => import("./workflow-canvas"));
@@ -22,6 +23,12 @@ export function CanvasHost(): JSX.Element {
   const setPortLabels = useWorkspace((s) => s.setPortLabels);
   const selected = useWorkspace((s) => s.selected);
   const select = useWorkspace((s) => s.select);
+  const selection = useWorkspace((s) => s.selection);
+  const selectNodes = useWorkspace((s) => s.selectNodes);
+  const pendingPaste = useWorkspace((s) => s.pendingPaste);
+  const confirmPaste = useWorkspace((s) => s.confirmPaste);
+  const cancelPaste = useWorkspace((s) => s.cancelPaste);
+  const clipboardNotice = useWorkspace((s) => s.clipboardNotice);
   const focus = useWorkspace((s) => s.focusNode);
   const layoutNotice = useWorkspace((s) => s.layoutNotice);
   const readOnly = useReadOnly();
@@ -69,6 +76,8 @@ export function CanvasHost(): JSX.Element {
             selected={selected}
             focus={focus}
             onSelect={(id) => void select(id)}
+            selection={selection}
+            onSelectNodes={(ids) => void selectNodes(ids)}
             positions={content.positions}
             mismatches={mismatches}
             onConnectionTargets={connectionTargets}
@@ -86,6 +95,7 @@ export function CanvasHost(): JSX.Element {
               content.notice,
               canvasNotice,
               navigationNotice,
+              clipboardNotice?.startsWith("Couldn't") ? clipboardNotice : null,
             ].filter((m): m is string => m !== null)}
             onMove={(moves) => void moveNodes(moves)}
             onPlace={(placement) =>
@@ -103,5 +113,19 @@ export function CanvasHost(): JSX.Element {
   else if (content.status === "loading")
     body = <p className="muted">Loading workflow…</p>;
   else body = <p className="muted">No workflow open</p>;
-  return <div className="canvas-area">{body}</div>;
+  return (
+    <div className="canvas-area">
+      {body}
+      <p role="status" className="visually-hidden" data-clipboard-notice>
+        {clipboardNotice}
+      </p>
+      {pendingPaste === null ? null : (
+        <PasteAliasDialog
+          aliases={pendingPaste.aliases}
+          onPaste={() => void confirmPaste()}
+          onCancel={cancelPaste}
+        />
+      )}
+    </div>
+  );
 }

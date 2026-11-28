@@ -447,3 +447,53 @@ describe("F-207 carry", () => {
     expect(next.doc.nodes["other.nf#ONE/xs"]).toEqual({ x: 5, y: 6 });
   });
 });
+
+describe("F-310 carry", () => {
+  it("F-310 ADR-0052 AR-23: deleting two nodes in one command and undoing it restores every position", async () => {
+    const state = await fixtureState("f111-start-typed", {
+      "main.nf":
+        "nextflow.enable.types = true\n\ninclude { COUNT } from './modules/local/count/main.nf'\n\nworkflow {\n    a = channel.of('a')\n    a.view()\n    a.view()\n}\n",
+    });
+    const removed = new RemovedPositions();
+    const start = seedLayout(snapshot(state));
+    const both = ["main.nf#/.view@1", "main.nf#/.view@2"];
+    const del = step(
+      state,
+      start,
+      { kind: "deleteNodes", target: entry, nodes: both },
+      removed,
+    );
+    for (const id of both) expect(del.doc.nodes[id]).toBeUndefined();
+    const undone = stepPatches(state, del.doc, del.inverse, removed, {
+      inserted: both,
+    });
+    expect(undone.doc).toEqual(start);
+  });
+
+  it("F-310 ADR-0064 F-207: Disconnect turning the producer's assignment into a bare call keeps its position, and undo restores every key", async () => {
+    const state = await fixtureState("f111-start-typed", {
+      "main.nf":
+        "include { B } from './b.nf'\ninclude { C } from './c.nf'\n\nworkflow {\n    c = C()\n    B(c)\n}\n",
+      "b.nf": "process B {\n    input:\n    val x\n\n    script:\n    'b'\n}\n",
+      "c.nf": "process C {\n    script:\n    'c'\n}\n",
+    });
+    const removed = new RemovedPositions();
+    const start = seedLayout(snapshot(state));
+    expect(start.nodes["main.nf#/c"]).toBeDefined();
+    const cut = step(
+      state,
+      start,
+      {
+        kind: "disconnect",
+        target: entry,
+        port: port(state, "B@1", "x"),
+      },
+      removed,
+    );
+    // `c = C()` is now the bare `C()`, so its key changes from `c` to `C@1`
+    expect(cut.doc.nodes["main.nf#/C@1"]).toEqual(start.nodes["main.nf#/c"]);
+    expect(cut.doc.nodes["main.nf#/B@1"]).toEqual(start.nodes["main.nf#/B@1"]);
+    const undone = stepPatches(state, cut.doc, cut.inverse, removed);
+    expect(undone.doc).toEqual(start);
+  });
+});

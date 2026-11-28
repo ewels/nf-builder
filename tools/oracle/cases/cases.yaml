@@ -616,3 +616,50 @@ cases:
       - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/workflow.mdx
     lint: { expect: ok, clean: true }
     run: { expect: ok, args: ["-stub"] }
+
+  # F-310: copy and paste of call nodes, multi-select delete. The paste and delete goldens in oracle-goldens.test.ts
+  # write the trees below from the start trees.
+  - id: f310-copy-source
+    about: A typed project with two processes in modules/local, MAKE (no input) and SIZE (takes MAKE's output), called and connected in the entry workflow; the source of the copy.
+    spec: [F-310, UX-26, LA-12]
+    sources:
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/process-typed.mdx
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/workflow.mdx
+    lint: { expect: ok, clean: true }
+    run: { expect: ok }
+  - id: f310-paste-across
+    about: The blank template after the two connected processes of f310-copy-source are pasted into it (both module files, the includes, the calls and the connection).
+    spec: [F-310, UX-26, AR-21, AR-23]
+    sources:
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/process-typed.mdx
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/workflow.mdx
+    lint: { expect: ok, clean: true }
+    run: { expect: ok }
+  - id: f310-paste-alias
+    about: One process included twice from the same file, once plainly and once under an alias in a separate statement, and both called in one workflow; what a paste into a workflow that already calls it writes.
+    spec: [F-310, F-111, ADR-0039]
+    sources:
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/module.mdx
+    lint: { expect: ok, clean: true }
+    run: { expect: ok }
+  - id: f310-delete-start
+    about: The multi-delete fixture, MAKE assigned to a variable that SIZE reads, and an independent STAMP.
+    spec: [F-310, UX-26, AR-23]
+    sources:
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/process-typed.mdx
+    lint: { expect: ok, clean: true }
+    run: { expect: ok }
+  - id: f310-delete-multi
+    about: f310-delete-start after SIZE and STAMP are deleted in one command; the variable only SIZE read becomes a bare call.
+    spec: [F-310, UX-26, AR-23, ADR-0064]
+    sources:
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/process-typed.mdx
+    lint: { expect: ok, clean: true }
+    run: { expect: ok }
+  - id: f310-delete-unread
+    about: f310-delete-start after SIZE alone is deleted; `make = MAKE()` becomes `MAKE()` so no unused variable is left.
+    spec: [F-310, ADR-0064]
+    sources:
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/process-typed.mdx
+    lint: { expect: ok, clean: true }
+    run: { expect: ok }
