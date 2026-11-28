@@ -167,6 +167,7 @@ describe("@nf-builder/web", () => {
       status: "ready",
       revision: 1,
       positions: {},
+      refit: true,
       notice: null,
       projection: {
         workflow: {

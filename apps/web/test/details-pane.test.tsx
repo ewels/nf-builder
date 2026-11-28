@@ -342,6 +342,7 @@ describe("F-206 details pane", () => {
       revision: 1,
       projection,
       positions: {},
+      refit: true,
       notice: null,
     } as const;
     const summary = renderToStaticMarkup(
@@ -362,6 +363,7 @@ describe("F-206 details pane", () => {
           status: "ready",
           revision: 1,
           positions: {},
+          refit: true,
           notice: null,
           projection: {
             ...projection,
@@ -393,6 +395,7 @@ describe("F-206 details pane", () => {
           status: "ready",
           revision: 1,
           positions: {},
+          refit: true,
           notice: null,
           projection: {
             ...projection,
