@@ -529,4 +529,24 @@ describe("F-307 oracle goldens", () => {
       ]),
     );
   });
+
+  it("F-307 step 2 UX-51: a legacy workflow with two unnamed emits plus AddEmit equals oracle case f307-add-emit-legacy-unnamed", async () => {
+    await golden(
+      "f307-add-emit-legacy-unnamed",
+      await run(
+        {
+          "main.nf":
+            "workflow ALIGN {\n    take:\n    reads\n\n    main:\n    doubled = reads.map { v -> v * 2 }\n\n    emit:\n    reads\n    doubled\n}\n\nworkflow {\n    ALIGN(channel.of(1, 2))\n}\n",
+        },
+        [
+          (): EditCommand => ({
+            kind: "addEmit",
+            target: { path: "main.nf", workflow: "ALIGN" },
+            name: "extra",
+            type: null,
+          }),
+        ],
+      ),
+    );
+  });
 });

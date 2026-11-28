@@ -76,6 +76,27 @@ describe("F-307 calleeWorkflow", () => {
   });
 });
 
+describe("F-307 calleeWorkflow plugin includes", () => {
+  it("F-307 UX-50: a name included from a plugin is not a call node, so calleeWorkflow is never asked about it", async () => {
+    // A plugin contributes functions and operators, not workflows or processes, so `include { HELLO } from 'plugin/…'`
+    // gives no `call` graph node (`callee` refusal for plugins can't arise); calleeWorkflow refuses any non-call node.
+    const t = await open({
+      "main.nf":
+        "include { HELLO } from 'plugin/nf-hello'\n\nworkflow {\n    HELLO()\n}\n",
+    });
+    const projection = t.projector.project("main.nf", null);
+    expect(projection?.nodes.some((n) => n.kind === "call")).toBe(false);
+    const node = projection?.nodes[0];
+    if (!projection || !node) throw new Error("no node");
+    expect(
+      calleeWorkflow(t.state.model, projection, node.id, t.workflows),
+    ).toEqual({
+      ok: false,
+      message: "This node isn't a call, so it has no canvas.",
+    });
+  });
+});
+
 describe("F-307 callPath", () => {
   it("F-307 UX-50: callPath gives entry → ALIGN → SORT, null when unreachable, and terminates on recursion", async () => {
     const t = await open(tree("f307-workflow-tabs"));

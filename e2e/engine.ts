@@ -96,25 +96,6 @@ export interface EngineHook {
     }[];
     code?: string;
   }>;
-  /** The definition a call node opens, or a refusal saying why not (F-307, UX-50). */
-  calleeWorkflow(request: {
-    path: string;
-    workflow: string | null;
-    node: string;
-  }): Promise<{
-    path?: string;
-    name?: string | null;
-    ok?: false;
-    code?: string;
-    message?: string;
-  }>;
-  /** The call path from the default workflow to a workflow, for the breadcrumb (F-307, UX-50). */
-  callPath(ref: { path: string; workflow: string | null }): Promise<{
-    revision?: number;
-    trail?: { path: string; name: string | null }[];
-    ok?: false;
-    code?: string;
-  }>;
   /** The config editor's view of a config file (F-601): the fields the tests read. */
   configView(path: string): Promise<{
     revision?: number;

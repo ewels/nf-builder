@@ -5,10 +5,7 @@ import { REPO_ROOT } from "../scripts/check-common.ts";
 import { openStoredFixture } from "./history.ts";
 
 /** A typed entry workflow that calls ALIGN twice (once as MAP); ALIGN calls SORT. */
-export const TABS_FIXTURE = join(
-  REPO_ROOT,
-  "tools/oracle/cases/f307-workflow-tabs",
-);
+const TABS_FIXTURE = join(REPO_ROOT, "tools/oracle/cases/f307-workflow-tabs");
 export const ALIGN_PATH = "subworkflows/local/align/main.nf";
 export const ALIGNED = "main.nf#/aligned";
 export const MAPPED = "main.nf#/mapped";

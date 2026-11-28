@@ -5,10 +5,12 @@ import { resolveCallee } from "./details/declaration";
 import type { ProjectModel } from "./model/project";
 
 /** Why a call node has no canvas to open. */
-export interface CalleeRefusal {
+interface CalleeRefusal {
   readonly ok: false;
   readonly message: string;
 }
+
+const refuse = (message: string): CalleeRefusal => ({ ok: false, message });
 
 const workflowKey = (w: { path: string; name: string | null }): string =>
   `${w.path}#${w.name ?? ""}`;
@@ -26,27 +28,20 @@ export function calleeWorkflow(
 ): WorkflowRef | CalleeRefusal {
   const graphNode = projection.nodes.find((n) => n.id === node);
   if (graphNode?.kind !== "call")
-    return {
-      ok: false,
-      message: "This node isn't a call, so it has no canvas.",
-    };
+    return refuse("This node isn't a call, so it has no canvas.");
   const { callee } = graphNode;
-  const refuse = (message: string): CalleeRefusal => ({ ok: false, message });
   const unparsed = refuse(
     `${callee.name} couldn't be parsed, so there is no canvas to show.`,
   );
-  if (callee.status === "unresolved")
-    return refuse(
-      `${callee.name} isn't defined in this project, so it has no canvas.`,
-    );
+  const undefinedHere = refuse(
+    `${callee.name} isn't defined in this project, so it has no canvas.`,
+  );
+  if (callee.status === "unresolved") return undefinedHere;
   if (callee.status === "unparsed") return unparsed;
   if (callee.kind === "process") return refuse(`${callee.name} is a process.`);
   if (callee.kind === "agent") return refuse(`${callee.name} is an agent.`);
   const resolved = resolveCallee(model, projection.workflow.path, callee.name);
-  if (resolved === null || resolved.path === null)
-    return refuse(
-      `${callee.name} isn't defined in this project, so it has no canvas.`,
-    );
+  if (resolved === null || resolved.path === null) return undefinedHere;
   const declaration = resolved.declaration;
   if (declaration?.kind !== "Workflow") return unparsed;
   const found = workflows.find(
