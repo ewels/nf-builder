@@ -1,6 +1,7 @@
 import type { JSX, KeyboardEvent, ReactNode } from "react";
 import {
   canvasStore,
+  closesTab,
   useWorkspace,
   type WorkflowTab,
 } from "../canvas/canvas-store";
@@ -24,6 +25,7 @@ export function TabStripView({
   onMode,
   onClose,
   readOnly = false,
+  closable = (t) => t.kind !== "workflow",
 }: {
   readonly tabs: readonly WorkflowTab[];
   readonly activeTab: string | null;
@@ -34,6 +36,8 @@ export function TabStripView({
   readonly onClose: (id: string, byKeyboard?: boolean) => void;
   /** Below 1024 px (F-703, UX-04): the workflow tabs only, with no view-mode toggle. */
   readonly readOnly?: boolean;
+  /** Which tabs close: by default the file-like ones; the store adds every workflow tab but the default one (F-307, ADR 0055). */
+  readonly closable?: (tab: WorkflowTab) => boolean;
 }): JSX.Element {
   const active = tabs.find((t) => t.id === activeTab);
   const modes = active === undefined ? [] : modesFor(active.kind, active.path);
@@ -41,7 +45,7 @@ export function TabStripView({
     if (event.key === "Delete") {
       const id = (event.target as HTMLElement).id;
       const tab = tabs.find((t) => workflowTabId(t.id) === id);
-      if (tab === undefined || tab.kind === "workflow") return;
+      if (tab === undefined || !closable(tab)) return;
       event.preventDefault();
       onClose(tab.id, true);
       return;
@@ -82,12 +86,12 @@ export function TabStripView({
                 title={t.title}
                 aria-selected={activeTab === t.id}
                 aria-controls="canvas-panel"
-                aria-keyshortcuts={t.kind === "workflow" ? undefined : "Delete"}
+                aria-keyshortcuts={closable(t) ? "Delete" : undefined}
                 tabIndex={activeTab === t.id ? 0 : -1}
                 onClick={() => onSelect(t.id)}
               >
                 {t.label}
-                {t.kind !== "workflow" ? (
+                {closable(t) ? (
                   // pointer-only: keyboard users close with Delete, so this stays out of the tab order and the a11y tree
                   <span
                     className="workflow-tab-close"
@@ -124,10 +128,13 @@ export function TabStrip(): JSX.Element {
   const selectTab = useWorkspace((s) => s.selectTab);
   const setMode = useWorkspace((s) => s.setMode);
   const closeTab = useWorkspace((s) => s.closeTab);
+  const summary = useWorkspace((s) => s.summary);
   const readOnly = useReadOnly();
+  const workflows = summary?.workflows ?? [];
   return (
     <TabStripView
       tabs={tabs}
+      closable={(t) => closesTab(t, workflows)}
       activeTab={activeTab}
       controls={readOnly ? null : <HistoryControls />}
       readOnly={readOnly}

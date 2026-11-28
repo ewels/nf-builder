@@ -38,6 +38,7 @@ export function DetailsBody({
   registry,
   configPath,
   onOpenConfig,
+  onAddPort,
   selection = [],
   onSelectNode,
   onCopy,
@@ -66,6 +67,12 @@ export function DetailsBody({
   /** The project's root `nextflow.config`, linked from the entry workflow's summary (F-601). */
   readonly configPath?: string;
   readonly onOpenConfig?: (path: string) => void;
+  /** Adds a take or an emit to the open workflow; left out read-only (F-307, F-703). */
+  readonly onAddPort?: (
+    role: "take" | "emit",
+    name: string,
+    type: string | null,
+  ) => Promise<string | null>;
 }): JSX.Element {
   if (content.status !== "ready")
     return <p className="muted">Nothing selected</p>;
@@ -100,6 +107,7 @@ export function DetailsBody({
           onShowSuggestions={onShowProblems}
           configPath={configPath}
           onOpenConfig={onOpenConfig}
+          onAddPort={onAddPort}
           pasteNodes={pasteNodes}
           onPaste={onPaste}
         />
@@ -164,7 +172,9 @@ export function DetailsPane(): JSX.Element {
       ? "nextflow.config"
       : undefined,
   );
+  const workspaceSession = () => canvasStore.getState().session;
   const openFile = useWorkspace((s) => s.openFile);
+  const apply = useWorkspace((s) => s.apply);
   const file = useWorkspace((s) => s.tabs.find((t) => t.id === s.activeTab));
   const status = useProblems((s) => s.status);
   const revision = useProblems((s) => s.revision);
@@ -188,6 +198,21 @@ export function DetailsPane(): JSX.Element {
       registry={registry}
       configPath={rootConfig}
       onOpenConfig={(path) => void openFile(path)}
+      onAddPort={
+        readOnly || file?.kind !== "workflow"
+          ? undefined
+          : async (role, name, type) => {
+              const target = { path: file.path, workflow: file.workflow };
+              const session = workspaceSession();
+              const outcome = await apply(
+                role === "take"
+                  ? { kind: "addTake", target, name, type }
+                  : { kind: "addEmit", target, name, type },
+                session,
+              );
+              return outcome.ok ? null : outcome.message;
+            }
+      }
       onShowProblems={(first) =>
         problemsStore.getState().show(problemsView(first), problemKey(first))
       }

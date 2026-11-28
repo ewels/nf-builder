@@ -1,4 +1,5 @@
 import type { JSX, ReactNode } from "react";
+import { Breadcrumb } from "../canvas/breadcrumb";
 import { CanvasHost } from "../canvas/canvas-host";
 import { useWorkspace, type WorkflowTab } from "../canvas/canvas-store";
 import { CodePane } from "../code/code-pane";
@@ -61,6 +62,7 @@ export function TabPanel(): JSX.Element {
   const summary = useWorkspace((s) => s.summary);
   const session = useWorkspace((s) => s.session);
   const tab = useWorkspace((s) => s.tabs.find((t) => t.id === s.activeTab));
+  const openWorkflow = useWorkspace((s) => s.openWorkflow);
   const readOnly = useReadOnly();
   if (summary === null || tab === undefined) return <CanvasHost />;
   const fileMode = tab.kind === "file" ? shownFileMode(tab, readOnly) : null;
@@ -96,7 +98,13 @@ export function TabPanel(): JSX.Element {
                 path={tab.path}
               />
             ) : (
-              <CanvasHost key="canvas" />
+              <div className="canvas-with-path" key="canvas">
+                <Breadcrumb
+                  tab={tab}
+                  onOpen={(c) => void openWorkflow(c.path, c.workflow)}
+                />
+                <CanvasHost />
+              </div>
             )
           }
           code={code}

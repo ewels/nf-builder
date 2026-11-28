@@ -88,6 +88,25 @@ const samples: Record<EditCommand["kind"], [EditCommand, string]> = {
     { kind: "createWorkflow", name: "ALIGN", caller: "main.nf" },
     "Create workflow ALIGN",
   ],
+  // F-307 AR-23: addTake and addEmit are labelled "Add take <n> to <WF>" / "Add emit <n> to <WF>"
+  addTake: [
+    {
+      kind: "addTake",
+      target: { path: "a.nf", workflow: "ALIGN" },
+      name: "index",
+      type: "Channel<String>",
+    },
+    "Add take index to ALIGN",
+  ],
+  addEmit: [
+    {
+      kind: "addEmit",
+      target: { path: "a.nf", workflow: "ALIGN" },
+      name: "log",
+      type: null,
+    },
+    "Add emit log to ALIGN",
+  ],
   // F-303 AR-23: updateDeclaration is labelled "Edit process <name>"
   updateDeclaration: [
     {

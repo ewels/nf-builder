@@ -591,6 +591,36 @@ describe("F-405 UX-31: which diagnostics the summary shows", () => {
   });
 });
 
+describe("F-307 UX-51 UX-04: take and emit forms", () => {
+  const base: WorkflowSummary = {
+    name: "ALIGN",
+    path: "a.nf",
+    entry: false,
+    typed: true,
+    takes: [],
+    emits: [],
+    params: [],
+    outputs: [],
+    calls: [],
+    modules: [],
+    coverage: { statements: 0, modelled: 0, percent: null },
+  };
+  const add = async () => null;
+  const html = (summary: WorkflowSummary, onAddPort?: typeof add) =>
+    renderToStaticMarkup(
+      <WorkflowSummaryView summary={summary} onAddPort={onAddPort} />,
+    );
+
+  it("F-307 UX-51 UX-04: Add take and Add emit show for a named workflow, not for the entry workflow or read-only", () => {
+    const out = html(base, add);
+    expect(out).toContain(">Add take<");
+    expect(out).toContain(">Add emit<");
+    expect(html({ ...base, entry: true }, add)).not.toContain("Add take");
+    expect(html(base)).not.toContain("Add take");
+    expect(html({ ...base, typed: null }, add)).not.toContain("Add emit");
+  });
+});
+
 describe("F-310 details for several nodes", () => {
   const node = (id: string, name: string) => ({
     id,

@@ -102,3 +102,77 @@ describe("F-605 tab strip", () => {
     expect(plain).not.toContain("view-mode");
   });
 });
+
+describe("F-307 workflow tab strip", () => {
+  const wf = (workflow: string | null, label: string) =>
+    ({
+      kind: "workflow",
+      id: `main.nf#${workflow ?? ""}`,
+      path: "main.nf",
+      workflow,
+      label,
+      mode: "graph",
+      readOnly: null,
+    }) as const;
+  const html = (
+    closable: (t: { id: string }) => boolean,
+    onClose: (id: string) => void = noop,
+  ) => {
+    const tabs = [wf(null, "main.nf"), wf("ALIGN", "ALIGN")];
+    const element = TabStripView({
+      tabs,
+      activeTab: tabs[0]?.id ?? null,
+      controls: null,
+      onSelect: noop,
+      onMode: noop,
+      onClose,
+      closable,
+    });
+    return renderToStaticMarkup(element);
+  };
+
+  it("F-307 ADR-0055: a closable workflow tab has aria-keyshortcuts Delete and a close mark; the default workflow's has neither", () => {
+    const out = html((t) => t.id !== "main.nf#");
+    expect(out.match(/aria-keyshortcuts="Delete"/g)).toHaveLength(1);
+    expect(out.match(/workflow-tab-close/g)).toHaveLength(1);
+    expect(html(() => false)).not.toContain("Delete");
+  });
+
+  it("F-307 ADR-0055: Delete on a closable workflow tab closes it, and on the default workflow's tab does nothing", () => {
+    const closed: string[] = [];
+    const element = TabStripView({
+      tabs: [wf(null, "main.nf"), wf("ALIGN", "ALIGN")],
+      activeTab: "main.nf#",
+      controls: null,
+      onSelect: noop,
+      onMode: noop,
+      onClose: (id) => closed.push(id),
+      closable: (t) => t.id !== "main.nf#",
+    });
+    const find = (node: ReactNode): ((e: unknown) => void) | null => {
+      if (node === null || typeof node !== "object") return null;
+      if (Array.isArray(node)) {
+        for (const n of node) {
+          const f = find(n);
+          if (f) return f;
+        }
+        return null;
+      }
+      const props = (node as ReactElement).props as {
+        onKeyDown?: (e: unknown) => void;
+        children?: ReactNode;
+      };
+      return props.onKeyDown ?? find(props.children);
+    };
+    const onKeyDown = find(element) as (e: unknown) => void;
+    const press = (id: string) =>
+      onKeyDown({
+        key: "Delete",
+        target: { id: `workflow-tab-${id}` },
+        preventDefault: () => undefined,
+      });
+    press("main.nf#");
+    press("main.nf#ALIGN");
+    expect(closed).toEqual(["main.nf#ALIGN"]);
+  });
+});

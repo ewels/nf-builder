@@ -76,6 +76,7 @@ import {
 import { inRange } from "../layout/sidecar";
 import type { ConfigIncludeModel } from "../model/file-model";
 import type { ModelEvent, ProjectModel } from "../model/project";
+import { calleeWorkflow, callPath, defaultWorkflowRef } from "../navigation";
 import { installedPacks } from "../packs";
 import { loadPalette } from "../palette";
 import {
@@ -91,6 +92,7 @@ import { templateList } from "../templates";
 import type {
   ApplyOptions,
   ApplyOutcome,
+  CallPathResult,
   ConfigViewResult,
   ConnectionTargetsResult,
   Copied,
@@ -1123,6 +1125,43 @@ export function createEngineService(
           request,
         );
         return { revision, name, path: definitionPath(request.kind, name) };
+      }),
+
+    calleeWorkflow: (request) =>
+      guarded((open): WorkflowRef | EngineRefusal => {
+        const projection = projectionOf(open, request.path, request.workflow);
+        if (projection === null)
+          return refusal("not-found", "There is no workflow to open from.");
+        if (!projection.nodes.some((n) => n.id === request.node))
+          return refusal("not-found", `There is no node ${request.node}.`);
+        const result = calleeWorkflow(
+          open.state.model,
+          projection,
+          request.node,
+          projectorOf(open).workflows(),
+        );
+        return "ok" in result ? refusal("not-found", result.message) : result;
+      }),
+
+    callPath: (ref) =>
+      guarded((open): CallPathResult | EngineRefusal => {
+        const workflows = projectorOf(open).workflows();
+        const to = workflows.find(
+          (w) => w.path === ref.path && w.name === ref.workflow,
+        );
+        if (!to)
+          return refusal("not-found", `There is no workflow in ${ref.path}.`);
+        const from = defaultWorkflowRef(workflows);
+        const trail =
+          from &&
+          callPath(
+            open.state.model,
+            (w) => projectionOf(open, w.path, w.name),
+            workflows,
+            from,
+            to,
+          );
+        return { revision, trail: trail ?? [] };
       }),
 
     copy: (request) =>

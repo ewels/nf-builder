@@ -14,3 +14,20 @@ export function opensPopup(
   const id = target?.closest?.(".react-flow__node")?.getAttribute("data-id");
   return id === selected ? selected : null;
 }
+
+/**
+ * Opens a node, by double-click or Enter on the selected one: a workflow call opens its canvas tab (F-307, UX-50, also
+ * read-only), anything else its edit popup, which read-only has none of (F-303, UX-40, F-703).
+ */
+export function openNode(
+  opens: boolean,
+  id: string,
+  opener: HTMLElement | null,
+  handlers: {
+    readonly onOpenCallee: (id: string) => void;
+    readonly onOpenNode?: (id: string, opener: HTMLElement | null) => void;
+  },
+): void {
+  if (opens) handlers.onOpenCallee(id);
+  else handlers.onOpenNode?.(id, opener);
+}

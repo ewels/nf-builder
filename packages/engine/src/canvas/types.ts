@@ -34,6 +34,8 @@ export interface CanvasNodeView {
   readonly title: string;
   readonly subtitle: string | null;
   readonly badge: "typed" | null;
+  /** A call of a resolved workflow or pipeline: double-click opens its canvas tab (F-307, UX-50). */
+  readonly opens: boolean;
   readonly inputs: readonly CanvasPortView[];
   readonly outputs: readonly CanvasPortView[];
   readonly ariaLabel: string;

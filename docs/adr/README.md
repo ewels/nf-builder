@@ -71,3 +71,4 @@ Process: [0001](0001-record-decisions-as-adrs.md). Template: [template.md](templ
 | [0065](0065-registry-plugins.md) | Add plugins from the palette with F-601's command, read plugin specs from the snapshot in the document, and merge their scopes in the worker | Accepted (agent) |
 | [0066](0066-edit-popup.md) | Edit typed processes in a popup form read in the worker, applied by UpdateDeclaration, with renames moving the module folder | Accepted (agent) |
 | [0067](0067-clipboard.md) | Select several nodes, delete them as one command, and copy and paste call nodes through a clipboard in the engine worker | Accepted (agent) |
+| [0068](0068-workflow-tabs.md) | Open workflow definitions in tabs with a navigation breadcrumb, and add takes and emits without editing call sites | Accepted (agent) |

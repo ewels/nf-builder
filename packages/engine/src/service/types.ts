@@ -134,6 +134,20 @@ export interface ConnectionTargetsResult {
   readonly targets: readonly ConnectionTarget[];
 }
 
+/** The call node to open: a node of the projection of `path`/`workflow` (F-307, UX-50). */
+export interface CalleeRequest {
+  readonly path: string;
+  readonly workflow: string | null;
+  readonly node: string;
+}
+
+/** The workflows from the project's default workflow down to, but not including, the one asked about (F-307, UX-50). */
+export interface CallPathResult {
+  readonly revision: number;
+  /** Empty for the default workflow itself and for one it can't reach. */
+  readonly trail: readonly WorkflowRef[];
+}
+
 export type { ClipboardSummary, CopyRequest } from "../clipboard/fragment";
 export type { PasteAlias } from "../clipboard/paste";
 
@@ -325,6 +339,13 @@ export interface EngineApi {
   ): Promise<ConnectionTargetsResult | EngineRefusal>;
   /** A name for a new process or workflow added from the palette, free in `caller`'s scope and directory (F-301). */
   freshName(request: FreshNameRequest): Promise<FreshName | EngineRefusal>;
+  /** The definition a call node opens (aliases resolved), or a `not-found` refusal saying why it has no canvas (F-307, UX-50; amends ADR 0043's API list). */
+  calleeWorkflow(request: CalleeRequest): Promise<WorkflowRef | EngineRefusal>;
+  /** The shortest call path from the project's default workflow to `ref`, for the breadcrumb (F-307, UX-50). */
+  callPath(ref: {
+    readonly path: string;
+    readonly workflow: string | null;
+  }): Promise<CallPathResult | EngineRefusal>;
   /**
    * Puts the call nodes (processes and workflows) of a workflow, with their definitions and the connections between
    * them, on the engine's clipboard, replacing it (F-310, UX-26; amends ADR 0043's API list). The clipboard lives in the

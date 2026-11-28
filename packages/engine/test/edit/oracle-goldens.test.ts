@@ -472,6 +472,85 @@ describe("F-302 oracle goldens", () => {
   });
 });
 
+const legacyStart = {
+  "main.nf":
+    "workflow ALIGN {\n    take:\n    reads\n\n    main:\n    reads.view()\n}\n\nworkflow {\n    reads = channel.of('a', 'b')\n    ALIGN(reads)\n}\n",
+};
+
+describe("F-307 oracle goldens", () => {
+  const align = { path: "subworkflows/local/align/main.nf", workflow: "ALIGN" };
+  const sort = { path: "subworkflows/local/sort/main.nf", workflow: "SORT" };
+  const golden = async (expected: string, result: Record<string, string>) => {
+    for (const [path, text] of Object.entries(result))
+      await expect(text).toMatchFileSnapshot(join(cases, expected, path));
+    expect(readTree(join(cases, expected)).map((f) => f.path)).toEqual(
+      Object.keys(result).sort(),
+    );
+  };
+
+  it("F-307 step 2 UX-51: f307-workflow-tabs plus AddTake equals oracle case f307-add-take", async () => {
+    await golden(
+      "f307-add-take",
+      await run("f307-workflow-tabs", [
+        (): EditCommand => ({
+          kind: "addTake",
+          target: align,
+          name: "index",
+          type: "Channel<String>",
+        }),
+      ]),
+    );
+  });
+
+  it("F-307 step 2 UX-51: f307-workflow-tabs plus AddEmit equals oracle case f307-add-emit", async () => {
+    await golden(
+      "f307-add-emit",
+      await run("f307-workflow-tabs", [
+        (): EditCommand => ({
+          kind: "addEmit",
+          target: sort,
+          name: "extra",
+          type: "Channel<String>",
+        }),
+      ]),
+    );
+  });
+
+  it("F-307 step 2 UX-51: a legacy workflow plus AddEmit equals oracle case f307-add-emit-legacy", async () => {
+    await golden(
+      "f307-add-emit-legacy",
+      await run(legacyStart, [
+        (): EditCommand => ({
+          kind: "addEmit",
+          target: { path: "main.nf", workflow: "ALIGN" },
+          name: "extra",
+          type: null,
+        }),
+      ]),
+    );
+  });
+
+  it("F-307 step 2 UX-51: a legacy workflow with two unnamed emits plus AddEmit equals oracle case f307-add-emit-legacy-unnamed", async () => {
+    await golden(
+      "f307-add-emit-legacy-unnamed",
+      await run(
+        {
+          "main.nf":
+            "workflow ALIGN {\n    take:\n    reads\n\n    main:\n    doubled = reads.map { v -> v * 2 }\n\n    emit:\n    reads\n    doubled\n}\n\nworkflow {\n    ALIGN(channel.of(1, 2))\n}\n",
+        },
+        [
+          (): EditCommand => ({
+            kind: "addEmit",
+            target: { path: "main.nf", workflow: "ALIGN" },
+            name: "extra",
+            type: null,
+          }),
+        ],
+      ),
+    );
+  });
+});
+
 describe("F-310 oracle goldens", () => {
   const delete_ =
     (...locals: string[]) =>

@@ -37,6 +37,7 @@ function node(
     title: id,
     subtitle: null,
     badge: null,
+    opens: false,
     inputs: inputs.map(port),
     outputs: outputs.map(port),
     ariaLabel: id,
