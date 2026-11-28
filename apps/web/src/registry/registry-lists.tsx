@@ -8,25 +8,25 @@ const count = (n: number) => n.toLocaleString("en-GB");
 
 type Plugin = { readonly id: string; readonly summary: string };
 
-export function RegistryRow({
+function RegistryRow({
   name,
   label,
   title,
   icon,
   typed,
-  kindWord,
+  announceKind,
 }: {
   readonly name: string;
   readonly label: string;
   readonly title: string;
   readonly icon: "process" | "workflow" | "plugin";
   readonly typed?: boolean;
-  readonly kindWord?: string;
+  readonly announceKind?: boolean;
 }): JSX.Element {
   return (
     <li className="registry-item" data-name={name} title={title}>
       <GlyphIcon glyph={PALETTE_GLYPHS[icon]} className="palette-glyph" />
-      {kindWord ? <span className="visually-hidden">{kindWord}</span> : null}
+      {announceKind ? <span className="visually-hidden">{icon}</span> : null}
       <span className="registry-item-label">{label}</span>
       {typed ? <span className="registry-badge-typed">typed</span> : null}
     </li>
@@ -34,12 +34,12 @@ export function RegistryRow({
 }
 
 function ShowMore({
-  batch,
+  next,
   total,
   more,
   sentinelRef,
 }: {
-  readonly batch: number;
+  readonly next: number;
   readonly total: number;
   readonly more: () => void;
   readonly sentinelRef: (el: HTMLElement | null) => void;
@@ -51,36 +51,31 @@ function ShowMore({
       ref={sentinelRef}
       onClick={more}
     >
-      Show more ({count(batch)} of {count(total)})
+      Show {count(next)} more (of {count(total)})
     </button>
   );
 }
 
-function ModuleRows({ group }: { readonly group: ModuleGroup }): JSX.Element {
-  const total = group.modules.length;
-  const { limit, more, sentinelRef } = useLazyWindow(total, group.modules);
-  const { shown, remaining } = windowOf(group.modules, limit);
+function LazyRows<T>({
+  items,
+  label,
+  row,
+}: {
+  readonly items: readonly T[];
+  readonly label: string;
+  readonly row: (item: T) => JSX.Element;
+}): JSX.Element {
+  const total = items.length;
+  const { limit, more, sentinelRef } = useLazyWindow(total, items);
+  const { shown, remaining } = windowOf(items, limit);
   return (
     <>
-      <ul className="registry-items" aria-label={group.namespace}>
-        {shown.map((m) => {
-          const marks = moduleMarks(m);
-          return (
-            <RegistryRow
-              key={m.name}
-              name={m.name}
-              label={shortName(m.name)}
-              title={`${m.name} · ${m.description}`}
-              icon={marks.kind}
-              typed={marks.typed}
-              kindWord={marks.kind}
-            />
-          );
-        })}
+      <ul className="registry-items" aria-label={label}>
+        {shown.map(row)}
       </ul>
       {remaining > 0 ? (
         <ShowMore
-          batch={Math.min(REGISTRY_PAGE, remaining)}
+          next={Math.min(REGISTRY_PAGE, remaining)}
           total={total}
           more={more}
           sentinelRef={sentinelRef}
@@ -90,36 +85,38 @@ function ModuleRows({ group }: { readonly group: ModuleGroup }): JSX.Element {
   );
 }
 
-function PluginRows({
-  plugins,
+function ListHeading({
+  title,
+  total,
+  controls,
+  listOpen,
+  searching,
+  onToggle,
 }: {
-  readonly plugins: readonly Plugin[];
+  readonly title: string;
+  readonly total: number;
+  readonly controls: string;
+  readonly listOpen: boolean;
+  readonly searching: boolean;
+  readonly onToggle: () => void;
 }): JSX.Element {
-  const total = plugins.length;
-  const { limit, more, sentinelRef } = useLazyWindow(total, plugins);
-  const { shown, remaining } = windowOf(plugins, limit);
   return (
-    <>
-      <ul className="registry-items" aria-label="Plugins">
-        {shown.map((p) => (
-          <RegistryRow
-            key={p.id}
-            name={p.id}
-            label={p.id}
-            title={p.summary}
-            icon="plugin"
-          />
-        ))}
-      </ul>
-      {remaining > 0 ? (
-        <ShowMore
-          batch={Math.min(REGISTRY_PAGE, remaining)}
-          total={total}
-          more={more}
-          sentinelRef={sentinelRef}
-        />
-      ) : null}
-    </>
+    <h3 className="palette-category-heading">
+      <button
+        type="button"
+        className="palette-category-button"
+        aria-expanded={listOpen}
+        aria-controls={controls}
+        aria-disabled={searching ? "true" : undefined}
+        onClick={() => {
+          if (!searching) onToggle();
+        }}
+      >
+        <ChevronIcon direction={listOpen ? "down" : "right"} />
+        {title}
+        <span className="registry-count">{count(total)}</span>
+      </button>
+    </h3>
   );
 }
 
@@ -143,22 +140,14 @@ export function RegistryModules({
   const listOpen = searching || open;
   return (
     <div className="registry-list">
-      <h3 className="palette-category-heading">
-        <button
-          type="button"
-          className="palette-category-button"
-          aria-expanded={listOpen}
-          aria-controls="registry-modules"
-          aria-disabled={searching ? "true" : undefined}
-          onClick={() => {
-            if (!searching) onToggle();
-          }}
-        >
-          <ChevronIcon direction={listOpen ? "down" : "right"} />
-          Modules
-          <span className="registry-count">{count(total)}</span>
-        </button>
-      </h3>
+      <ListHeading
+        title="Modules"
+        total={total}
+        controls="registry-modules"
+        listOpen={listOpen}
+        searching={searching}
+        onToggle={onToggle}
+      />
       <div id="registry-modules" hidden={!listOpen}>
         {listOpen
           ? groups.map((group) => {
@@ -185,7 +174,26 @@ export function RegistryModules({
                     </button>
                   </h4>
                   <div id={groupId} hidden={!groupOpen}>
-                    {groupOpen ? <ModuleRows group={group} /> : null}
+                    {groupOpen ? (
+                      <LazyRows
+                        items={group.modules}
+                        label={group.namespace}
+                        row={(m) => {
+                          const marks = moduleMarks(m);
+                          return (
+                            <RegistryRow
+                              key={m.name}
+                              name={m.name}
+                              label={shortName(m.name)}
+                              title={`${m.name} · ${m.description}`}
+                              icon={marks.kind}
+                              typed={marks.typed}
+                              announceKind
+                            />
+                          );
+                        }}
+                      />
+                    ) : null}
                   </div>
                 </div>
               );
@@ -210,24 +218,30 @@ export function RegistryPlugins({
   const listOpen = searching || open;
   return (
     <div className="registry-list">
-      <h3 className="palette-category-heading">
-        <button
-          type="button"
-          className="palette-category-button"
-          aria-expanded={listOpen}
-          aria-controls="registry-plugins"
-          aria-disabled={searching ? "true" : undefined}
-          onClick={() => {
-            if (!searching) onToggle();
-          }}
-        >
-          <ChevronIcon direction={listOpen ? "down" : "right"} />
-          Plugins
-          <span className="registry-count">{count(plugins.length)}</span>
-        </button>
-      </h3>
+      <ListHeading
+        title="Plugins"
+        total={plugins.length}
+        controls="registry-plugins"
+        listOpen={listOpen}
+        searching={searching}
+        onToggle={onToggle}
+      />
       <div id="registry-plugins" hidden={!listOpen}>
-        {listOpen ? <PluginRows plugins={plugins} /> : null}
+        {listOpen ? (
+          <LazyRows
+            items={plugins}
+            label="Plugins"
+            row={(p) => (
+              <RegistryRow
+                key={p.id}
+                name={p.id}
+                label={p.id}
+                title={p.summary}
+                icon="plugin"
+              />
+            )}
+          />
+        ) : null}
       </div>
     </div>
   );

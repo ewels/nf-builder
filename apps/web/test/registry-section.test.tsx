@@ -235,10 +235,17 @@ describe("registry section", () => {
     );
   });
 
-  it("F-503 step 2 UX-14: with 250 modules in one namespace, 100 rows render, followed by a Show more (100 of 250) button", () => {
+  it("F-503 step 2 UX-14: with 250 modules in one namespace, 100 rows render, followed by a Show 100 more (of 250) button", () => {
     const html = render(ready(indexOf({}, 250)));
     expect(html.match(/data-name="nf-core\//g)?.length).toBe(100);
-    expect(html).toMatch(/<button[^>]*>Show more \(100 of 250\)<\/button>/);
+    expect(html).toMatch(/<button[^>]*>Show 100 more \(of 250\)<\/button>/);
+  });
+
+  it("F-503 UX-14: the last window's button counts what is left, with en-GB separators", () => {
+    const html = render(ready(indexOf({}, 2500)));
+    expect(html).toMatch(/>Show 100 more \(of 2,500\)</);
+    const last = render(ready(indexOf({}, 130)));
+    expect(last).toMatch(/>Show 30 more \(of 130\)</);
   });
 
   it("F-503 UX-11: while searching, matching modules and plugins render with every group open; no matches give the plain note and no role=status", () => {
@@ -254,6 +261,8 @@ describe("registry section", () => {
     expect(html).toContain('data-name="nf-core/fastqc"');
     expect(html).not.toContain("other/hello");
     expect(html).toContain('aria-disabled="true"');
+    expect(html).toContain("registry.nextflow.io");
+    expect(html).toContain("<span> · updated 5 hours ago</span>");
     const plugin = render(ready(index), "schema valid", {
       modules: false,
       plugins: false,

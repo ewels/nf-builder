@@ -8,6 +8,7 @@ import { type JSX, useDeferredValue, useMemo, useState } from "react";
 import { RegistrySection } from "../registry/registry-section";
 import { useRegistry } from "../registry/registry-store";
 import "./palette.css";
+import { PaletteHeading } from "./palette-heading";
 import { PaletteMessage } from "./palette-message";
 import { paletteMessage } from "./palette-message-rule";
 import { PaletteSearch } from "./palette-search";
@@ -42,10 +43,9 @@ export function PalettePanel({
     () => (search ? search(queryTerms(deferredQuery)) : null),
     [search, deferredQuery],
   );
-  const genericCount = shown ? paletteItemCount(shown) : 0;
   const message = shown
     ? paletteMessage(
-        genericCount,
+        paletteItemCount(shown),
         matches ? matches.modules.length + matches.plugins.length : null,
       )
     : "none";
@@ -63,9 +63,7 @@ export function PalettePanel({
         <PaletteMessage>No components match "{query.trim()}".</PaletteMessage>
       ) : message === "no-language-match" ? (
         <section aria-labelledby="palette-heading" className="palette-tree">
-          <h2 id="palette-heading" className="palette-heading">
-            Nextflow language · {shown.version}
-          </h2>
+          <PaletteHeading version={shown.version} />
           <p className="registry-note">No language components match.</p>
         </section>
       ) : (

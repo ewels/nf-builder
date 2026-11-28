@@ -104,6 +104,46 @@ describe("registry ports", () => {
     expect(portsCalls(heals)).toHaveLength(2);
   });
 
+  it("F-503 IO-30: the ports() call after a failed read reads again", async () => {
+    let n = 0;
+    const f = serve((url) =>
+      url === PORTS
+        ? n++ === 0
+          ? jsonResponse("{}", "application/json", 500)
+          : jsonResponse(portsText())
+        : undefined,
+    );
+    const client = createSnapshotClient({
+      snapshotUrl: SNAPSHOT_URL,
+      fetch: f.fetch,
+    });
+    await rejection(client.ports("nf-core/fastqc"));
+    expect(await client.ports("nf-core/fastqc")).not.toBeNull();
+    expect(portsCalls(f)).toHaveLength(2);
+  });
+
+  it("F-503 IO-30: concurrent ports() calls while the file is stale share one re-fetch", async () => {
+    const stale = JSON.stringify({
+      ...portsGolden(),
+      generatedAt: "2026-11-01T00:00:00.000Z",
+    });
+    let n = 0;
+    const f = serve((url) =>
+      url === PORTS ? jsonResponse(n++ === 0 ? stale : portsText()) : undefined,
+    );
+    const client = createSnapshotClient({
+      snapshotUrl: SNAPSHOT_URL,
+      fetch: f.fetch,
+    });
+    const all = await Promise.all([
+      client.ports("nf-core/fastqc"),
+      client.ports("nf-core/fastqc"),
+      client.ports("nf-core/fastqc"),
+    ]);
+    expect(all.every((p) => p !== null)).toBe(true);
+    expect(portsCalls(f)).toHaveLength(2);
+  });
+
   it("F-503 ADR-0050: with live on, ports() reads only the snapshot and requests nothing from registry.nextflow.io", async () => {
     const f = fakeFetch((url) =>
       url === PORTS

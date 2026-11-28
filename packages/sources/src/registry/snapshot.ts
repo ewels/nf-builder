@@ -114,6 +114,7 @@ export function createSnapshotClient(
 
   const portsUrl = new URL("ports.json", options.snapshotUrl).href;
   let heldPorts: Promise<RegistrySnapshotPorts> | null = null;
+  let rereading: Promise<RegistrySnapshotPorts> | null = null;
 
   async function readPorts(refresh: boolean): Promise<RegistrySnapshotPorts> {
     const response = await request(
@@ -148,7 +149,13 @@ export function createSnapshotClient(
     });
     const first = await current;
     if (first.generatedAt === generatedAt) return first;
-    const next = readPorts(true);
+    // Concurrent stale callers share one re-fetch.
+    const next =
+      rereading ??
+      readPorts(true).finally(() => {
+        rereading = null;
+      });
+    rereading = next;
     const again = await next;
     if (again.generatedAt !== generatedAt) {
       throw new RegistryError(
