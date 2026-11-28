@@ -416,6 +416,26 @@ describe("F-113 engine service", () => {
   });
 });
 
+describe("F-401 UX-61 report", () => {
+  it("F-401 UX-61: report refuses with no-project, works after open, and its result survives structuredClone", async () => {
+    const service = createEngineService();
+    expect(await service.report()).toMatchObject({
+      ok: false,
+      code: "no-project",
+    });
+    const summary = await service.open({ version, files });
+    const report = await service.report();
+    expect(report).toMatchObject({
+      revision: summary.revision,
+      files: files.length,
+      parseFailures: [],
+      processes: { typed: 0, legacy: 2 },
+      workflows: { typed: 0, legacy: 1 },
+    });
+    expect(structuredClone(report)).toEqual(report);
+  });
+});
+
 describe("F-209 AR-23 guarded history", () => {
   it("F-209 AR-23: a throw after a write started clears the history", async () => {
     let armed = false;

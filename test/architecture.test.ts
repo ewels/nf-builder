@@ -158,6 +158,46 @@ describe("ADR-0003 package boundaries", () => {
     );
   }, 30_000);
 
+  it("F-401 QA-30 ADR-0040: the engine worker may reach sources/import but not the GitHub client, even through another module", () => {
+    const dir = makeWorkDir();
+    const worker = join(dir, "apps/web/src/engine/engine.worker.ts");
+    mkdirSync(join(dir, "apps/web/src/engine"), { recursive: true });
+    mkdirSync(join(dir, "packages/sources/src/import"), { recursive: true });
+    mkdirSync(join(dir, "packages/sources/src/github"), { recursive: true });
+    writeFileSync(
+      join(dir, "packages/sources/src/import/index.ts"),
+      `export const i = 1;\n`,
+    );
+    writeFileSync(
+      join(dir, "packages/sources/src/github/index.ts"),
+      `export const g = 1;\n`,
+    );
+    writeFileSync(
+      join(dir, "apps/web/src/engine/uses-import.ts"),
+      `export * from "../../../../packages/sources/src/import/index";\n`,
+    );
+    writeFileSync(worker, `export * from "./uses-import";\n`);
+    const entry = runArch(dir);
+    expect(entry.output).toContain("no dependency violations found");
+    expect(entry.status).toBe(0);
+
+    writeFileSync(
+      join(dir, "apps/web/src/engine/uses-github.ts"),
+      `export * from "../../../../packages/sources/src/github/index";\n`,
+    );
+    writeFileSync(
+      worker,
+      `export * from "./uses-import";\nexport * from "./uses-github";\n`,
+    );
+    const { status, output } = runArch(dir);
+    const rule = rules.find((r) => r.name === "web-worker-no-github-client");
+    expect(status).not.toBe(0);
+    expect(output).toContain(
+      "error web-worker-no-github-client: apps/web/src/engine/engine.worker.ts → packages/sources/src/github/index.ts",
+    );
+    expect(collapse(output)).toContain(collapse(rule?.comment ?? "missing"));
+  }, 30_000);
+
   const CORPUS = "tools/corpus/src/index.ts";
   const violations: [string, string, string, string][] = [
     [

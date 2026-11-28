@@ -93,6 +93,12 @@ describe("problems panel", () => {
     expect(idle.match(/class="problem-fix"/g)).toHaveLength(1);
   });
 
+  it("F-703 UX-04 F-309: read-only, a fixable row has no fix button but still has its go button", () => {
+    const narrow = render([warning, error], { readOnly: true });
+    expect(narrow).not.toContain("problem-fix");
+    expect(narrow.match(/class="problem-go"/g)).toHaveLength(2);
+  });
+
   it('F-309 UX-03: the tabs show their counts, and an empty tab reads "No problems" or "No suggestions"', () => {
     const html = render([warning, error, hint]);
     expect(html).toMatch(/role="tablist"[^>]*aria-label="Problem kinds"/);

@@ -81,4 +81,10 @@ export interface EngineHook {
     }[];
     code?: string;
   }>;
+  /** The import report of the open project (F-401): the fields the tests read. */
+  report(): Promise<{
+    files?: number;
+    diagnostics?: { suggestions: number };
+    ok?: false;
+  }>;
 }

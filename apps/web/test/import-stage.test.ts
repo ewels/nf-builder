@@ -55,15 +55,32 @@ describe("F-403 import stager", () => {
     expect(await stager.files("s1", staged.summary.ignore)).toEqual({
       ok: true,
       files: [{ path: "main.nf", text: "workflow {}\n" }],
+      source: { kind: "zip", name: "top.zip", sha256: expect.any(String) },
     });
     const again = await stager.restage("s1", "work/\n");
     expect(again).toMatchObject({ ok: true, summary: { files: 2 } });
-    expect(await stager.files("s1", "work/\n")).toEqual({
+    expect(await stager.files("s1", "work/\n")).toMatchObject({
       ok: true,
       files: [
         { path: "data/a.txt", text: "data\n" },
         { path: "main.nf", text: "workflow {}\n" },
       ],
+    });
+  });
+
+  it("F-401 IO-13: files returns the zip source with the file name and the SHA-256 of the zip bytes", async () => {
+    const stager = createImportStager({ newId: () => "s1" });
+    const blob = zip({ "main.nf": "x" });
+    await stager.stageZip(blob, "my.zip");
+    const expected = Array.from(
+      new Uint8Array(
+        await crypto.subtle.digest("SHA-256", await blob.arrayBuffer()),
+      ),
+      (b) => b.toString(16).padStart(2, "0"),
+    ).join("");
+    expect(await stager.files("s1", "")).toMatchObject({
+      ok: true,
+      source: { kind: "zip", name: "my.zip", sha256: expected },
     });
   });
 
@@ -161,7 +178,7 @@ describe("F-210 import stager: loose files", () => {
       ["binary", 1],
     ]);
     // the ignore list doesn't apply to files the user chose
-    expect(await stager.files("l1", "*.nf\n")).toEqual({
+    expect(await stager.files("l1", "*.nf\n")).toMatchObject({
       ok: true,
       files: [{ path: "a.nf", text: "workflow {}\n" }],
     });
@@ -195,14 +212,14 @@ describe("F-210 import stager: loose files", () => {
       zip({ "top/main.nf": "x", "top/sub/a.txt": "a" }),
       "top.zip",
     );
-    expect(await stager.files("s1", "", { keepFolder: true })).toEqual({
+    expect(await stager.files("s1", "", { keepFolder: true })).toMatchObject({
       ok: true,
       files: [
         { path: "top/main.nf", text: "x" },
         { path: "top/sub/a.txt", text: "a" },
       ],
     });
-    expect(await stager.files("s1", "", { keepFolder: false })).toEqual({
+    expect(await stager.files("s1", "", { keepFolder: false })).toMatchObject({
       ok: true,
       files: [
         { path: "main.nf", text: "x" },

@@ -1,7 +1,7 @@
 // Main-thread side of the Comlink bridge (F-113, ADR 0003). The worker starts on the first `getEngine()`, never at import.
 
 import type { EngineRefusal, ProjectChange } from "@nf-builder/engine";
-import { type Endpoint, proxy, releaseProxy, wrap } from "comlink";
+import { type Endpoint, proxy, releaseProxy, transfer, wrap } from "comlink";
 import type { WorkspaceApi } from "../workspace/types";
 
 /**
@@ -34,6 +34,7 @@ export function connectEngine(
     diagnostics: () => race(remote.diagnostics()),
     details: (path, workflow, node) =>
       race(remote.details(path, workflow, node)),
+    report: () => race(remote.report()),
     setLayout: (write) => race(remote.setLayout(write)),
     readFile: (path) => race(remote.readFile(path)),
     listFiles: () => race(remote.listFiles()),
@@ -46,6 +47,15 @@ export function connectEngine(
     previewAdd: (choice) => race(remote.previewAdd(choice)),
     addFiles: (choice) => race(remote.addFiles(choice)),
     createProject: (input) => race(remote.createProject(input)),
+    importProject: (input) =>
+      race(
+        remote.importProject(
+          transfer(
+            input,
+            input.files.map((f) => f.bytes),
+          ),
+        ),
+      ),
     openProject: (id) => race(remote.openProject(id)),
     renameProject: (id, name) => race(remote.renameProject(id, name)),
     deleteProject: (id) => race(remote.deleteProject(id)),

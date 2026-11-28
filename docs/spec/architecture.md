@@ -17,6 +17,7 @@ The main thread keeps only pack versions and palette search; parsing, modelling,
 - The engine runs in a Web Worker behind a Comlink API. The UI keeps a read-only copy of the latest projection and diagnostics.
 - The engine worker owns the layout sidecar and carries node positions on every change; ELK runs in its own worker, started lazily from the canvas chunk (ADR 0052).
 - Zip import reads and unpacks the file in the engine worker; the page sees only the summary (ADR 0053).
+- GitHub import fetches in the document, which lists the repository and downloads raw files, then transfers the bytes to the engine worker in one `importProject` call; the worker decodes and stores them, and never reaches the GitHub client (ADR 0057).
 
 ## Engine model
 

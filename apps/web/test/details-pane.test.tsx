@@ -301,6 +301,12 @@ describe("F-206 details pane", () => {
     expect(none).toBe('<h2 class="column-title">Details</h2>');
   });
 
+  it("F-703 UX-04 UX-32: read-only, the details header has no Edit or Code buttons while a node is selected", () => {
+    const html = renderToStaticMarkup(<DetailsHeaderView selected readOnly />);
+    expect(html).not.toContain("<button");
+    expect(html).toMatch(/<h2[^>]*>Details<\/h2>/);
+  });
+
   it("F-206 F-201: with no project, or while one loads, the body is exactly Nothing selected", () => {
     const body = (content: Parameters<typeof DetailsBody>[0]["content"]) =>
       renderToStaticMarkup(

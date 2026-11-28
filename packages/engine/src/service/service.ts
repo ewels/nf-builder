@@ -50,6 +50,7 @@ import type { ModelEvent, ProjectModel } from "../model/project";
 import { installedPacks } from "../packs";
 import { loadPalette } from "../palette";
 import { createProjector, type Projector } from "../projection/project";
+import { type ProjectReport, projectReport } from "../report/report";
 import { templateList } from "../templates";
 import type {
   ApplyOptions,
@@ -664,6 +665,18 @@ export function createEngineService(
         (open): DiagnosticsResult => ({
           revision,
           diagnostics: diagnoserOf(open).all(),
+        }),
+      ),
+
+    report: () =>
+      guarded(
+        (open): ProjectReport => ({
+          revision,
+          ...projectReport(
+            open.state.model,
+            projectorOf(open).workflows(),
+            diagnoserOf(open).all(),
+          ),
         }),
       ),
 

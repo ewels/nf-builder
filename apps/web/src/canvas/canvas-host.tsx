@@ -2,6 +2,7 @@ import type { JSX } from "react";
 import { lazy, Suspense } from "react";
 import { CanvasPlaceholder } from "../project/project-status";
 import { useProjects } from "../project/project-store";
+import { useReadOnly } from "../read-only/read-only-store";
 import { CanvasErrorBoundary } from "./canvas-error-boundary";
 import { useWorkspace } from "./canvas-store";
 
@@ -19,6 +20,7 @@ export function CanvasHost(): JSX.Element {
   const select = useWorkspace((s) => s.select);
   const focus = useWorkspace((s) => s.focusNode);
   const layoutNotice = useWorkspace((s) => s.layoutNotice);
+  const readOnly = useReadOnly();
   const moveNodes = useWorkspace((s) => s.moveNodes);
   const placeNodes = useWorkspace((s) => s.placeNodes);
   if (summary === null)
@@ -35,6 +37,7 @@ export function CanvasHost(): JSX.Element {
           <WorkflowCanvas
             key={activeTab ?? ""}
             projection={content.projection}
+            readOnly={readOnly}
             portLabels={portLabels}
             onPortLabelsChange={setPortLabels}
             selected={selected}

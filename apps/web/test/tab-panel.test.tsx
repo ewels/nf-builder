@@ -1,7 +1,12 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { TabStripView } from "../src/shell/tab-strip";
-import { PanelLayout } from "../src/views/tab-panel";
+import {
+  PanelLayout,
+  READ_ONLY_FILE_NOTE,
+  ReadOnlyFileNote,
+} from "../src/views/tab-panel";
+import { shownMode } from "../src/views/view-mode";
 
 const html = (mode: "graph" | "split" | "code") =>
   renderToStaticMarkup(
@@ -56,5 +61,32 @@ describe("F-208 tab panel", () => {
     expect(strip(file)).not.toContain("view-mode");
     expect(strip(file)).toContain('title="nextflow.config"');
     expect(strip({ kind: "workflow", mode: "graph" })).toContain("view-mode");
+  });
+
+  it("F-703 UX-04 UX-27: read-only, the panel lays out the shown mode: only the graph, and the code pane is not built", () => {
+    const layout = (mode: "graph" | "split" | "code", readOnly: boolean) =>
+      renderToStaticMarkup(
+        <PanelLayout
+          mode={shownMode(mode, readOnly)}
+          canvas={<div className="canvas-area" />}
+          code={<section className="code-pane" />}
+        />,
+      );
+    for (const mode of ["split", "code"] as const) {
+      expect(layout(mode, true)).toContain("canvas-area");
+      expect(layout(mode, true)).not.toContain("code-pane");
+      expect(layout(mode, true)).not.toContain("view-divider");
+    }
+    expect(layout("split", false)).toContain("code-pane");
+  });
+
+  it("F-703 UX-04 UX-20: read-only, a code-only file tab shows a plain note instead of the code view or the canvas", () => {
+    const markup = renderToStaticMarkup(<ReadOnlyFileNote />);
+    expect(READ_ONLY_FILE_NOTE).toBe(
+      "This file opens in the code view on screens 1024 px or wider.",
+    );
+    expect(markup).toContain(READ_ONLY_FILE_NOTE);
+    expect(markup).not.toContain("code-pane");
+    expect(markup).not.toContain("workflow-canvas");
   });
 });

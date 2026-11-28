@@ -42,6 +42,8 @@ import { useRefitOnResize } from "./use-refit-on-resize";
 
 const NODE_DESCRIPTION =
   "Press enter or space to select this node, then use the arrow keys to move it.";
+/** Read-only (F-703): nodes don't move, so the description doesn't offer it. */
+const NODE_DESCRIPTION_READ_ONLY = "Press enter or space to select this node.";
 
 /** Sentence-case labels with no delete wording (nodes can't be deleted yet) and none that offers to select an edge (edges aren't selectable). */
 const CANVAS_ARIA_LABELS = {
@@ -66,9 +68,17 @@ const CANVAS_ARIA_LABELS = {
   "handle.ariaLabel": "Connection point",
 } as const;
 
+const READ_ONLY_ARIA_LABELS = {
+  ...CANVAS_ARIA_LABELS,
+  "node.a11yDescription.default": NODE_DESCRIPTION_READ_ONLY,
+  "node.a11yDescription.keyboardDisabled": NODE_DESCRIPTION_READ_ONLY,
+} as const;
+
 const FIT = { maxZoom: 1 } as const;
 
 interface WorkflowCanvasProps {
+  /** Below 1024 px (F-703, UX-04): nodes don't move, and there is no Auto-layout or minimap. */
+  readonly readOnly: boolean;
   readonly projection: Projection;
   readonly portLabels: boolean;
   readonly onPortLabelsChange: (value: boolean) => void;
@@ -90,6 +100,7 @@ interface WorkflowCanvasProps {
 let handledFocus = 0;
 
 function CanvasInner({
+  readOnly,
   projection,
   portLabels,
   onPortLabelsChange,
@@ -315,14 +326,14 @@ function CanvasInner({
         forceColorMode="light"
         fitView
         fitViewOptions={FIT}
-        nodesDraggable
+        nodesDraggable={!readOnly}
         nodesConnectable={false}
         multiSelectionKeyCode={null}
         selectionKeyCode={null}
         onNodeClick={(_event, n) => onSelect(n.id)}
         onPaneClick={() => onSelect(null)}
         deleteKeyCode={null}
-        ariaLabelConfig={CANVAS_ARIA_LABELS}
+        ariaLabelConfig={readOnly ? READ_ONLY_ARIA_LABELS : CANVAS_ARIA_LABELS}
         attributionPosition="bottom-center"
         onEdgeMouseEnter={showTooltip}
         onEdgeMouseMove={showTooltip}
@@ -350,32 +361,34 @@ function CanvasInner({
               <path d="M2 4h3M7 4h7M2 8h3M7 8h7M2 12h3M7 12h7" />
             </svg>
           </ControlButton>
-          <ControlButton
-            onClick={() => void runAutoLayout()}
-            title={
-              several ? "Auto-layout selected nodes" : "Auto-layout all nodes"
-            }
-            aria-label={
-              several ? "Auto-layout selected nodes" : "Auto-layout all nodes"
-            }
-          >
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 16 16"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-              focusable="false"
+          {readOnly ? null : (
+            <ControlButton
+              onClick={() => void runAutoLayout()}
+              title={
+                several ? "Auto-layout selected nodes" : "Auto-layout all nodes"
+              }
+              aria-label={
+                several ? "Auto-layout selected nodes" : "Auto-layout all nodes"
+              }
             >
-              <path d="M2 3h4v3H2zM10 2h4v3h-4zM10 11h4v3h-4zM2 10h4v3H2zM6 4.5h4M6 11.5h4" />
-            </svg>
-          </ControlButton>
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 16 16"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <path d="M2 3h4v3H2zM10 2h4v3h-4zM10 11h4v3h-4zM2 10h4v3H2zM6 4.5h4M6 11.5h4" />
+              </svg>
+            </ControlButton>
+          )}
         </Controls>
-        <MiniMap pannable zoomable />
+        {readOnly ? null : <MiniMap pannable zoomable />}
       </ReactFlow>
       {tooltip === null ? null : (
         <div

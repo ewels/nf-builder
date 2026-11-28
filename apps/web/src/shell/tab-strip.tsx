@@ -1,6 +1,7 @@
 import type { JSX, KeyboardEvent, ReactNode } from "react";
 import { useWorkspace, type WorkflowTab } from "../canvas/canvas-store";
 import { HistoryControls } from "../history/history-controls";
+import { useReadOnly } from "../read-only/read-only-store";
 import type { ViewMode } from "../views/view-mode";
 import { ViewModeToggle } from "../views/view-mode-toggle";
 import { GlyphIcon } from "./icons";
@@ -18,6 +19,7 @@ export function TabStripView({
   onSelect,
   onMode,
   onClose,
+  readOnly = false,
 }: {
   readonly tabs: readonly WorkflowTab[];
   readonly activeTab: string | null;
@@ -25,6 +27,8 @@ export function TabStripView({
   readonly onSelect: (id: string) => void;
   readonly onMode: (id: string, mode: ViewMode) => void;
   readonly onClose: (id: string) => void;
+  /** Below 1024 px (F-703, UX-04): the workflow tabs only, with no view-mode toggle. */
+  readonly readOnly?: boolean;
 }): JSX.Element {
   const active = tabs.find((t) => t.id === activeTab);
   const move = (event: KeyboardEvent<HTMLDivElement>) => {
@@ -91,7 +95,7 @@ export function TabStripView({
         </div>
       )}
       {controls}
-      {active === undefined || active.kind === "file" ? null : (
+      {readOnly || active === undefined || active.kind === "file" ? null : (
         <ViewModeToggle
           mode={active.mode}
           onChange={(mode) => onMode(active.id, mode)}
@@ -107,11 +111,13 @@ export function TabStrip(): JSX.Element {
   const selectTab = useWorkspace((s) => s.selectTab);
   const setMode = useWorkspace((s) => s.setMode);
   const closeTab = useWorkspace((s) => s.closeTab);
+  const readOnly = useReadOnly();
   return (
     <TabStripView
       tabs={tabs}
       activeTab={activeTab}
-      controls={<HistoryControls />}
+      controls={readOnly ? null : <HistoryControls />}
+      readOnly={readOnly}
       onSelect={(id) => void selectTab(id)}
       onMode={setMode}
       onClose={(id) => void closeTab(id)}

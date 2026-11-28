@@ -691,7 +691,7 @@
         "A registry module folder shows the `registry` tag and a file with a syntax error shows an error badge"
       ],
       "passes": false,
-      "notes": "Added 2026-11-22 (F-204 PR, scope-change; Q16): UX-16 had no owning feature; F-301 step 1 relies on the Files view. Dropping a zip reuses F-403's zip import. From F-111: there is no create, delete or rename file command yet. From F-202: IndexedDB schema v1 stores text only; binary files need a schema version bump (ADR 0045). From F-208: an entry file with no workflows gets no tab, so there is no toggle to reach its Code view. From F-209: `writeFiles` (uploads, new files written raw) clears the undo history. From F-207: show `.nf-builder/layout.json` read-only, because commands refuse it; a sidecar added through `writeFiles` replaces the layout. From F-403: reuse `stageZip`, `restageImport` and `discardImport` for dropped zips, and `selectFiles` for loose files; writes go through `writeFiles` in the worker. From F-309: reuse `openFile(path)` and `fileTabFor(path)` from the canvas store for code-only file tabs (`kind: \"file\"`, id `file:<path>`); add tab closing; a file tab already closes when its file is deleted; the tablist is still labelled \"Workflows\"; make `.nf-builder/` tabs read-only."
+      "notes": "Added 2026-11-22 (F-204 PR, scope-change; Q16): UX-16 had no owning feature; F-301 step 1 relies on the Files view. Dropping a zip reuses F-403's zip import. From F-111: there is no create, delete or rename file command yet. From F-202: IndexedDB schema v1 stores text only; binary files need a schema version bump (ADR 0045). From F-208: an entry file with no workflows gets no tab, so there is no toggle to reach its Code view. From F-209: `writeFiles` (uploads, new files written raw) clears the undo history. From F-207: show `.nf-builder/layout.json` read-only, because commands refuse it; a sidecar added through `writeFiles` replaces the layout. From F-403: reuse `stageZip`, `restageImport` and `discardImport` for dropped zips, and `selectFiles` for loose files; writes go through `writeFiles` in the worker. From F-309: reuse `openFile(path)` and `fileTabFor(path)` from the canvas store for code-only file tabs (`kind: \"file\"`, id `file:<path>`); add tab closing; a file tab already closes when its file is deleted; the tablist is still labelled \"Workflows\"; make `.nf-builder/` tabs read-only. From F-703: the left column isn't rendered in read-only; commands go through `canvasStore.apply`, which refuses `read-only` (ADR 0056). From F-401: the parse failures in `EngineApi.report()` (files whose status is partial or verbatim) can drive the error badges."
     },
     {
       "id": "F-211",
@@ -737,7 +737,7 @@
         "Exported result passes `nextflow lint`"
       ],
       "passes": false,
-      "notes": "From F-204: palette item descriptions are only a title tooltip on non-focusable rows; making items focusable here must also expose descriptions to keyboard users (QA-11). From F-111: group several commands as one undo step by committing each and concatenating the inverses in reverse. From F-111: AddCall refuses a process the workflow already calls (Nextflow can call a process once per workflow); offer to include it again under an alias (`include { X as X_2 }`) instead. From F-209: apply a drop's commands through `canvasStore.apply(cmd, session, {group, label})` so they undo as one step (this supersedes the F-111 note about concatenating inverses); a partially applied group rolls back with one undo. From F-207: set a dropped node's position with `setLayout` (with the current revision) before the canvas refreshes, so ELK doesn't place it; keep groups that delete nodes to one part where possible, because undoing a multi-part group restores positions best effort (ADR 0052)."
+      "notes": "From F-204: palette item descriptions are only a title tooltip on non-focusable rows; making items focusable here must also expose descriptions to keyboard users (QA-11). From F-111: group several commands as one undo step by committing each and concatenating the inverses in reverse. From F-111: AddCall refuses a process the workflow already calls (Nextflow can call a process once per workflow); offer to include it again under an alias (`include { X as X_2 }`) instead. From F-209: apply a drop's commands through `canvasStore.apply(cmd, session, {group, label})` so they undo as one step (this supersedes the F-111 note about concatenating inverses); a partially applied group rolls back with one undo. From F-207: set a dropped node's position with `setLayout` (with the current revision) before the canvas refreshes, so ELK doesn't place it; keep groups that delete nodes to one part where possible, because undoing a multi-part group restores positions best effort (ADR 0052). From F-703: the left column isn't rendered in read-only; commands go through `canvasStore.apply`, which refuses `read-only` (ADR 0056)."
     },
     {
       "id": "F-302",
@@ -757,7 +757,7 @@
         "Delete an edge: the call argument is removed and the code still parses"
       ],
       "passes": false,
-      "notes": "From F-005 (S1): nextflow lint doesn't check a legacy tuple input's arity, so connecting to a legacy tuple input compares arity with its declaration (LA-14). From F-111: a refused Connect serves as the invalid-target dry run; type checks and LA-14 arity are F-112's. Disconnect writes null for a missing earlier positional input (ADR 0039). From F-112: lints.connection(source, node, port) dims invalid targets while dragging; a type-mismatch diagnostic's range is the port's argument, used to draw the edge red (UX-24). LA-14 tuple arity is yours (and F-504's): nextflow lint doesn't check it. From F-205: draw mismatch red over the edge-<dataflow> class. From F-206: mismatch red must take precedence over the selection highlight (`.is-highlighted`, 3 px accent); add the rule after the highlight and hover rules in `canvas.css`. From F-309: the problems store holds the diagnostics with their revision; map `type-mismatch` to the edge through its port's argument range; mismatch red takes precedence over the selection highlight."
+      "notes": "From F-005 (S1): nextflow lint doesn't check a legacy tuple input's arity, so connecting to a legacy tuple input compares arity with its declaration (LA-14). From F-111: a refused Connect serves as the invalid-target dry run; type checks and LA-14 arity are F-112's. Disconnect writes null for a missing earlier positional input (ADR 0039). From F-112: lints.connection(source, node, port) dims invalid targets while dragging; a type-mismatch diagnostic's range is the port's argument, used to draw the edge red (UX-24). LA-14 tuple arity is yours (and F-504's): nextflow lint doesn't check it. From F-205: draw mismatch red over the edge-<dataflow> class. From F-206: mismatch red must take precedence over the selection highlight (`.is-highlighted`, 3 px accent); add the rule after the highlight and hover rules in `canvas.css`. From F-309: the problems store holds the diagnostics with their revision; map `type-mismatch` to the edge through its port's argument range; mismatch red takes precedence over the selection highlight. From F-703: keep `nodesConnectable` and edge drops off when `readOnly` (`WorkflowCanvas` prop)."
     },
     {
       "id": "F-303",
@@ -779,7 +779,7 @@
         "There is no control for changing kind"
       ],
       "passes": false,
-      "notes": "From F-206: enable the details header's Edit button. React Flow's Enter selects a focused node; settle it against Enter opening the popup. From F-209: the popup's Apply is one command or one group, so one undo step. From F-207: repeat F-207 step 3 (a rename keeps the position) through the popup once it exists."
+      "notes": "From F-206: enable the details header's Edit button. React Flow's Enter selects a focused node; settle it against Enter opening the popup. From F-209: the popup's Apply is one command or one group, so one undo step. From F-207: repeat F-207 step 3 (a rename keeps the position) through the popup once it exists. From F-703: don't open the popup on double-click or Enter in read-only."
     },
     {
       "id": "F-304",
@@ -798,7 +798,7 @@
         "Format produces the same text as the oracle formatter for that declaration"
       ],
       "passes": false,
-      "notes": "From F-206: enable the details header's Code button.From F-208: reuse `apps/web/src/code/monaco.ts`, `nextflow-language.ts` and `markers.ts`. Refusal markers use the owner `nf-builder-refusal`; use another owner for the file's own diagnostics. From F-209: the popup's Monaco keeps its own undo and must register its flush with the canvas store (`registerFlush`), as the Code view does."
+      "notes": "From F-206: enable the details header's Code button.From F-208: reuse `apps/web/src/code/monaco.ts`, `nextflow-language.ts` and `markers.ts`. Refusal markers use the owner `nf-builder-refusal`; use another owner for the file's own diagnostics. From F-209: the popup's Monaco keeps its own undo and must register its flush with the canvas store (`registerFlush`), as the Code view does. From F-703: don't open the popup on double-click or Enter in read-only."
     },
     {
       "id": "F-305",
@@ -818,7 +818,7 @@
         "Operator closures are editable in a small Monaco field"
       ],
       "passes": false,
-      "notes": "From F-111: takes, emits, params and outputs have no edit commands yet."
+      "notes": "From F-111: takes, emits, params and outputs have no edit commands yet. From F-703: don't open the popup on double-click or Enter in read-only."
     },
     {
       "id": "F-306",
@@ -838,7 +838,7 @@
         "No silent migration happens on any edit"
       ],
       "passes": false,
-      "notes": ""
+      "notes": "From F-703: don't open the popup on double-click or Enter in read-only."
     },
     {
       "id": "F-307",
@@ -857,7 +857,7 @@
         "Breadcrumb back returns to main.nf"
       ],
       "passes": false,
-      "notes": "From F-111: takes, emits, params and outputs have no edit commands yet. From F-205: closing tabs, the breadcrumb and double-click to open a workflow go through canvasStore.openWorkflow."
+      "notes": "From F-111: takes, emits, params and outputs have no edit commands yet. From F-205: closing tabs, the breadcrumb and double-click to open a workflow go through canvasStore.openWorkflow. From F-703: opening a workflow tab is allowed in read-only; add the breadcrumb to `READ_ONLY_ALLOWED`; take and emit editing stays hidden."
     },
     {
       "id": "F-308",
@@ -876,7 +876,7 @@
         "Expand and collapse a chain: code unchanged"
       ],
       "passes": false,
-      "notes": ""
+      "notes": "From F-703: keep `nodesConnectable` and edge drops off when `readOnly` (`WorkflowCanvas` prop)."
     },
     {
       "id": "F-309",
@@ -919,7 +919,7 @@
         "Delete a multi-selection: one undo step restores all"
       ],
       "passes": false,
-      "notes": "From F-111: group several commands as one undo step by committing each and concatenating the inverses in reverse. From F-011 (ADR 0044): inside an iframe the clipboard API needs the embedder's allow=\"clipboard-read; clipboard-write\"; fall back to in-app copy and paste when it is refused. From F-206: selection is single (multi-select and marquee are off); re-enable them here and define the details pane for several nodes. From F-209: multi-node delete and paste apply their commands under one `group`, so one undo reverts them. From F-207: \"Auto-layout selected nodes\" is built but unreachable until multi-select; switch it on and add its e2e test. Redo's deleted ids for later parts of a group refer to intermediate states (ADR 0052)."
+      "notes": "From F-111: group several commands as one undo step by committing each and concatenating the inverses in reverse. From F-011 (ADR 0044): inside an iframe the clipboard API needs the embedder's allow=\"clipboard-read; clipboard-write\"; fall back to in-app copy and paste when it is refused. From F-206: selection is single (multi-select and marquee are off); re-enable them here and define the details pane for several nodes. From F-209: multi-node delete and paste apply their commands under one `group`, so one undo reverts them. From F-207: \"Auto-layout selected nodes\" is built but unreachable until multi-select; switch it on and add its e2e test. Redo's deleted ids for later parts of a group refer to intermediate states (ADR 0052). From F-703: Delete, paste and their keys check `isReadOnly()`."
     },
     {
       "id": "F-311",
@@ -942,7 +942,7 @@
         "Docs oracle: nf-docs JSON for the result contains every description"
       ],
       "passes": false,
-      "notes": "From F-203: templates produce no LA-54 suggestion; the `lang-2610` template test checks doc comments until the engine does.From F-206: the details description is the doc comment's text before its first tag (`docSummary`); replace it with the comment parser and add per-port descriptions."
+      "notes": "From F-203: templates produce no LA-54 suggestion; the `lang-2610` template test checks doc comments until the engine does.From F-206: the details description is the doc comment's text before its first tag (`docSummary`); replace it with the comment parser and add per-port descriptions. From F-703: don't open the popup on double-click or Enter in read-only."
     },
     {
       "id": "F-312",
@@ -959,7 +959,7 @@
         "A fresh process from the palette shows a documentation suggestion; filling the description clears it"
       ],
       "passes": false,
-      "notes": "From F-203: templates produce no documentation suggestion; when this lands, turn the template test's doc-comment check into an engine check."
+      "notes": "From F-203: templates produce no documentation suggestion; when this lands, turn the template test's doc-comment check into an engine check. From F-703: documentation fixes are hidden in read-only."
     },
     {
       "id": "F-401",
@@ -982,8 +982,8 @@
         "The import uses at most two api.github.com requests (network log)",
         "The report lists parse failures and legacy share"
       ],
-      "passes": false,
-      "notes": "From F-113: load an imported project with getEngine().open(request, onProgress) or getEngine().writeFiles(files). From F-202: IndexedDB schema v1 stores text only; binary imports need a schema version bump (ADR 0045). From F-203: a third radio in the New project dialog's route group can hold Import. Projects don't record their template; F-401 may add `{kind: \"template\", id, version}` as a project source (a stored-format change, ADR 0045). From F-403: reuse `@nf-builder/sources/import` (limits, `DEFAULT_IGNORE`, `parseIgnore`, `selectFiles`, `summarise`, `importProblem`) and `ImportSection`; add \"GitHub repository\" before \"Zip file\" in the dialog's \"Import from\" group; reuse `RNASEQ_NF_SKIPPED` in e2e; binaries are skipped on both routes; record the IO-13 zip case as `{kind: \"zip\", name, sha256}` hashed in the worker (`crypto.subtle` needs a secure context); the worker imports only the `./import` subpath, which the planned `web-worker-no-github-client` rule keeps clean."
+      "passes": true,
+      "notes": "From F-113: load an imported project with getEngine().open(request, onProgress) or getEngine().writeFiles(files). From F-202: IndexedDB schema v1 stores text only; binary imports need a schema version bump (ADR 0045). From F-203: a third radio in the New project dialog's route group can hold Import. Projects don't record their template; F-401 may add `{kind: \"template\", id, version}` as a project source (a stored-format change, ADR 0045). From F-403: reuse `@nf-builder/sources/import` (limits, `DEFAULT_IGNORE`, `parseIgnore`, `selectFiles`, `summarise`, `importProblem`) and `ImportSection`; add \"GitHub repository\" before \"Zip file\" in the dialog's \"Import from\" group; reuse `RNASEQ_NF_SKIPPED` in e2e; binaries are skipped on both routes; record the IO-13 zip case as `{kind: \"zip\", name, sha256}` hashed in the worker (`crypto.subtle` needs a secure context); the worker imports only the `./import` subpath, which the planned `web-worker-no-github-client` rule keeps clean. From F-703: guard `importProject` in the project store like `create`. Verified 2026-11-28 (ADR 0057): step 1 by `e2e/github-import.spec.ts` \"F-401 step 1\" (nf-core/fetchngs at 1.13.0 against a mocked GitHub: the tree fixture is generated from git at the pin and its blob SHAs are checked against the corpus cache; the 155 stored files match the corpus by SHA-256 and git blob SHA, the 4 PNGs are skipped, and `source` is recorded); step 2 by \"F-401 step 2\" (exactly two api.github.com requests, one raw request per imported file and no other cross-origin request); step 3 by \"F-401 step 3\" (the report lists parse failures and the legacy share). Also the summary and ignore-list edits with no request, rate limiting, a failed download, cancelling by Escape or Cancel import, and no CSP violation. The unit tests in `packages/sources` use API responses synthesised from the GitHub REST docs (the sandbox couldn't reach the API); only the fetchngs tree fixture is real. The opt-in live test (`F401_LIVE=1`) was not run. GitHub is a second source in F-403's \"Import from\" group, sharing `ImportSummaryView` and F-403's default ignore list."
     },
     {
       "id": "F-402",
@@ -1003,7 +1003,7 @@
         "The token never appears in exports or console output"
       ],
       "passes": false,
-      "notes": "Deferred past v0.1 by the maintainer on 2026-11-22 (ADR 0030); milestone M8 holds deferred features."
+      "notes": "Deferred past v0.1 by the maintainer on 2026-11-22 (ADR 0030); milestone M8 holds deferred features. From F-401: add the token field, an `Authorization` header (which preflights; S4 saw 204 with `*`) and the blobs API to `createGithubClient` in `@nf-builder/sources/github` (ADR 0057)."
     },
     {
       "id": "F-403",
@@ -1023,7 +1023,7 @@
         "A zip exceeding the limits is refused with a clear message"
       ],
       "passes": true,
-      "notes": "From F-008 (S4): codeload.github.com only allows https://render.githubusercontent.com, so zip import is a file upload; no GitHub archive URL can be fetched in the browser. From F-113: load an imported project with getEngine().open(request, onProgress) or getEngine().writeFiles(files). From F-202: IndexedDB schema v1 stores text only; binary files in a zip need a schema version bump (ADR 0045). From F-203: zip import can join the New project dialog's route group. Verified 2026-11-23 (ADR 0053): step 1 by `e2e/zip-import.spec.ts` (a `git archive` zip of the pinned rnaseq-nf tree gives the same 22 files as the pinned tree after the IO-12 rules, 12 `data/` files ignored and one PNG skipped; with `/data/` removed from the list, 34 files); step 2 by the 20,001-entry and 201 MB refusals in e2e and the `packages/sources` limit and bomb tests (a 1 GB entry recorded as 1 MB is cut to its recorded size); also the newest-stage race, the iframe case, and an `@smoke` import of the hello-world template on all three browsers. Binary files are skipped (F-407)."
+      "notes": "From F-008 (S4): codeload.github.com only allows https://render.githubusercontent.com, so zip import is a file upload; no GitHub archive URL can be fetched in the browser. From F-113: load an imported project with getEngine().open(request, onProgress) or getEngine().writeFiles(files). From F-202: IndexedDB schema v1 stores text only; binary files in a zip need a schema version bump (ADR 0045). From F-203: zip import can join the New project dialog's route group. Verified 2026-11-23 (ADR 0053): step 1 by `e2e/zip-import.spec.ts` (a `git archive` zip of the pinned rnaseq-nf tree gives the same 22 files as the pinned tree after the IO-12 rules, 12 `data/` files ignored and one PNG skipped; with `/data/` removed from the list, 34 files); step 2 by the 20,001-entry and 201 MB refusals in e2e and the `packages/sources` limit and bomb tests (a 1 GB entry recorded as 1 MB is cut to its recorded size); also the newest-stage race, the iframe case, and an `@smoke` import of the hello-world template on all three browsers. Binary files are skipped (F-407). From F-703: guard `importProject` in the project store like `create`. From F-401: `ProjectMeta.source` holds only `{kind: \"github\", repo, ref, sha}`; the IO-13 zip case (`{kind: \"zip\", name, sha256}`) isn't recorded yet. The Import route's \"Import from\" group now holds Zip file and GitHub repository, sharing `ImportSummaryView`. F-401's PR closed the zip source gap: zip imports now record `{kind: \"zip\", name, sha256}` (`sha256` absent in insecure contexts, ADR 0044), and Publish docs is hidden for the zip source too."
     },
     {
       "id": "F-404",
@@ -1044,7 +1044,7 @@
         "Export, clear storage, import the zip: layout identical (ADR 0008 confirmation)"
       ],
       "passes": false,
-      "notes": "From F-104: untouched files export as printSourceFile output (byte-identical); IO-20 checks use engine equivalent(). From F-207: the export's layout checkbox filters `LAYOUT_PATH` (`.nf-builder/layout.json`); importing a sidecar through `writeFiles` replaces the layout but doesn't update the canvas store's layout notice yet. From F-403: imported projects lack binary files, symlinks (imported as text holding the target) and executable bits; `.nf-builder/` is never ignored; write with fflate `zipSync`; a file and a folder can share a path prefix (`x` and `x/y`). F-403 added to `depends_on` (step 3 imports a zip)."
+      "notes": "From F-104: untouched files export as printSourceFile output (byte-identical); IO-20 checks use engine equivalent(). From F-207: the export's layout checkbox filters `LAYOUT_PATH` (`.nf-builder/layout.json`); importing a sidecar through `writeFiles` replaces the layout but doesn't update the canvas store's layout notice yet. From F-403: imported projects lack binary files, symlinks (imported as text holding the target) and executable bits; `.nf-builder/` is never ignored; write with fflate `zipSync`; a file and a folder can share a path prefix (`x` and `x/y`). F-403 added to `depends_on` (step 3 imports a zip). From F-703: Export stays hidden in read-only for v0.1 (ADR 0056). From F-401: GitHub imports lack skipped binaries and executable bits (mark `bin/*` executable on export); `ProjectMeta.source` holds the repo, ref and commit SHA (ADR 0057)."
     },
     {
       "id": "F-405",
@@ -1063,7 +1063,7 @@
         "Import nf-core/rnaseq: nf-core processes carry no typed badge; status bar shows suggestions; workflow summary shows % modelled"
       ],
       "passes": false,
-      "notes": "From F-112: count LA-35 suggestions per workflow; vendored registry modules aren't excluded from LA-35 in v0.1, so group or filter them here. From F-206: add the modelled percentage (`projectionCoverage`) to `workflowSummary`."
+      "notes": "From F-112: count LA-35 suggestions per workflow; vendored registry modules aren't excluded from LA-35 in v0.1, so group or filter them here. From F-206: add the modelled percentage (`projectionCoverage`) to `workflowSummary`. From F-401: `EngineApi.report()` gives per-project typed and legacy counts of processes and workflows, parse failures and diagnostic counts (ADR 0057)."
     },
     {
       "id": "F-406",
@@ -1079,7 +1079,7 @@
         "Export all, clear storage, import the backup: every project restored with layout"
       ],
       "passes": false,
-      "notes": "From F-202: the backup format is its own and reads through the workspace; it is also the way to move projects to another origin (ADR 0045). From F-403: a backup import may bypass the ignore list; reuse the limits and the text check."
+      "notes": "From F-202: the backup format is its own and reads through the workspace; it is also the way to move projects to another origin (ADR 0045). From F-403: a backup import may bypass the ignore list; reuse the limits and the text check. From F-703: Export stays hidden in read-only for v0.1 (ADR 0056). From F-401: the backup must carry `ProjectMeta.source` (ADR 0057)."
     },
     {
       "id": "F-501",
@@ -1137,7 +1137,7 @@
         "Scrolling the module list loads more without blocking input"
       ],
       "passes": false,
-      "notes": "From F-501: namespace is the first segment of name; kind is process or workflow; typed is true, false or null (unknown); search over name, description and keywords; ports.json holds meta.yml ports per module. From F-502: `useRegistry` and `registryStore` live in `apps/web/src/registry/`; replace the interim lists (`REGISTRY_LIST_LIMIT`, `RegistryList`) and keep the heading, refresh button and source line; registry rows use `registry-item*`, never `.palette-item`; F-204 tests are scoped to the generic region; registry search joins UX-11 (lists are hidden while searching today); `version: null` means live-only with no typed tag, `typed: null` means unknown; names can have three segments (`cellgeni/anndata/concat`); add `ports(name)` to the client."
+      "notes": "From F-501: namespace is the first segment of name; kind is process or workflow; typed is true, false or null (unknown); search over name, description and keywords; ports.json holds meta.yml ports per module. From F-502: `useRegistry` and `registryStore` live in `apps/web/src/registry/`; replace the interim lists (`REGISTRY_LIST_LIMIT`, `RegistryList`) and keep the heading, refresh button and source line; registry rows use `registry-item*`, never `.palette-item`; F-204 tests are scoped to the generic region; registry search joins UX-11 (lists are hidden while searching today); `version: null` means live-only with no typed tag, `typed: null` means unknown; names can have three segments (`cellgeni/anndata/concat`); add `ports(name)` to the client. From F-703: the left column isn't rendered in read-only; commands go through `canvasStore.apply`, which refuses `read-only` (ADR 0056)."
     },
     {
       "id": "F-504",
@@ -1157,7 +1157,7 @@
         "Drop it again: the bundle is not duplicated"
       ],
       "passes": false,
-      "notes": "From F-005 (S1): typed workflows may call legacy registry modules across files with no warning; tuple inputs as tuple(...), outputs by assignment (LA-14). .module-info isn't written until its checksum algorithm is verified with the oracle (ADR 0009 spike result). From F-105: registry includes need modules/<scope>/<name>/main.nf and meta.yml, under the project root or, for scripts under a modules/ directory, under that directory (nested vendoring); .module-info isn't needed to resolve (ADR 0034). From F-501: modules/<name>/<version>.json holds every file of the registry bundle (base64 for non-UTF-8), the include name (component), the pinned requires (each present as its own bundle) and the registry tar.gz checksum; .module-info records the installed directory's checksum (ADR 0009 spike result), which F-504 computes. From F-112: LA-14 tuple arity is checked at connection time here or in F-302; nextflow lint doesn't check it. From F-203: both templates are typed and use local modules only, so a registry insert into a template project is the first registry include. From F-502: add `bundle(name, version)` to the registry client, snapshot only; `encodeURIComponent` module names in registry API paths; fetch in the document and pass files to the worker; a `version: null` module isn't insertable."
+      "notes": "From F-005 (S1): typed workflows may call legacy registry modules across files with no warning; tuple inputs as tuple(...), outputs by assignment (LA-14). .module-info isn't written until its checksum algorithm is verified with the oracle (ADR 0009 spike result). From F-105: registry includes need modules/<scope>/<name>/main.nf and meta.yml, under the project root or, for scripts under a modules/ directory, under that directory (nested vendoring); .module-info isn't needed to resolve (ADR 0034). From F-501: modules/<name>/<version>.json holds every file of the registry bundle (base64 for non-UTF-8), the include name (component), the pinned requires (each present as its own bundle) and the registry tar.gz checksum; .module-info records the installed directory's checksum (ADR 0009 spike result), which F-504 computes. From F-112: LA-14 tuple arity is checked at connection time here or in F-302; nextflow lint doesn't check it. From F-203: both templates are typed and use local modules only, so a registry insert into a template project is the first registry include. From F-502: add `bundle(name, version)` to the registry client, snapshot only; `encodeURIComponent` module names in registry API paths; fetch in the document and pass files to the worker; a `version: null` module isn't insertable. From F-703: insert and Make local copy are refused or hidden in read-only."
     },
     {
       "id": "F-505",
@@ -1174,7 +1174,7 @@
         "Add nf-schema: `nextflow.config` gains the plugin line; its functions appear in the palette"
       ],
       "passes": false,
-      "notes": "From F-501: plugins/<id>/<version>.json holds the description and definitions; the version is already chosen as the highest published release admitted by the pack's pinned Nextflow. From F-502: add `plugin(id, version)` to the registry client; plugin rows use `summary` (plugins have no description); live data can only prune plugins."
+      "notes": "From F-501: plugins/<id>/<version>.json holds the description and definitions; the version is already chosen as the highest published release admitted by the pack's pinned Nextflow. From F-502: add `plugin(id, version)` to the registry client; plugin rows use `summary` (plugins have no description); live data can only prune plugins. From F-703: insert and Make local copy are refused or hidden in read-only."
     },
     {
       "id": "F-506",
@@ -1192,7 +1192,7 @@
         "Make local copy: module moves to `modules/local/`, include updated, editing allowed"
       ],
       "passes": false,
-      "notes": "From F-501: the index version is the module's latest release. From F-206: the summary's registry rows show only `callee.module`; add version, upstream link and update status (UX-32)."
+      "notes": "From F-501: the index version is the module's latest release. From F-206: the summary's registry rows show only `callee.module`; add version, upstream link and update status (UX-32). From F-703: insert and Make local copy are refused or hidden in read-only."
     },
     {
       "id": "F-601",
@@ -1215,7 +1215,7 @@
         "An unknown option in an imported config is kept and flagged"
       ],
       "passes": false,
-      "notes": "From F-103: the config AST is syntactic. Profiles, params and env are ConfigBlocks; selectors are ConfigSelector with the kind as written; plugins is ConfigApplyBlock; mapping to catalogue/config.json is F-601's. From F-105: FI-05 links come from FileModel.includes (config includes with file targets); external sources (expressions, URLs) have no link. From F-203: templates set no `manifest.name`; the config forms are where a user sets it. From F-309: config files open in a code-only tab through `openFile` until the forms land; `revealCode` reveals a range in the Code view."
+      "notes": "From F-103: the config AST is syntactic. Profiles, params and env are ConfigBlocks; selectors are ConfigSelector with the kind as written; plugins is ConfigApplyBlock; mapping to catalogue/config.json is F-601's. From F-105: FI-05 links come from FileModel.includes (config includes with file targets); external sources (expressions, URLs) have no link. From F-203: templates set no `manifest.name`; the config forms are where a user sets it. From F-309: config files open in a code-only tab through `openFile` until the forms land; `revealCode` reveals a range in the Code view. From F-703: editors aren't shown in read-only; F-605 decides on previews."
     },
     {
       "id": "F-602",
@@ -1234,7 +1234,7 @@
         "Change a type in the schema: a diagnostic with quick fix appears on the params block"
       ],
       "passes": false,
-      "notes": ""
+      "notes": "From F-703: editors aren't shown in read-only; F-605 decides on previews."
     },
     {
       "id": "F-603",
@@ -1250,7 +1250,7 @@
         "Add a field to the Sample record: a diagnostic offers to add the matching samplesheet column"
       ],
       "passes": false,
-      "notes": ""
+      "notes": "From F-703: editors aren't shown in read-only; F-605 decides on previews."
     },
     {
       "id": "F-604",
@@ -1267,7 +1267,7 @@
         "Change a local process's inputs, run Update from process: diff shows the matching meta.yml change"
       ],
       "passes": false,
-      "notes": ""
+      "notes": "From F-703: editors aren't shown in read-only; F-605 decides on previews."
     },
     {
       "id": "F-605",
@@ -1287,7 +1287,7 @@
         "A .png in the project is listed but not opened"
       ],
       "passes": false,
-      "notes": "From F-208: the markdown sanitiser must strip `<style>` elements and `style` attributes, because the policy allows inline styles for Monaco (ADR 0048); reuse the Monaco modules in `apps/web/src/code/`. From F-403: the deferred F-407 \"Binary files in projects\" exists; move F-605 step 2 there as planned. From F-309: route Markdown and other text files through `openFile`; file tabs are `kind: \"file\"` and show Code only, so add a preview mode for Markdown."
+      "notes": "From F-208: the markdown sanitiser must strip `<style>` elements and `style` attributes, because the policy allows inline styles for Monaco (ADR 0048); reuse the Monaco modules in `apps/web/src/code/`. From F-403: the deferred F-407 \"Binary files in projects\" exists; move F-605 step 2 there as planned. From F-309: route Markdown and other text files through `openFile`; file tabs are `kind: \"file\"` and show Code only, so add a preview mode for Markdown. From F-703: editors aren't shown in read-only; F-605 decides on previews."
     },
     {
       "id": "F-606",
@@ -1311,7 +1311,7 @@
         "Import a pipeline: no docs files are added until Add docs publishing is used"
       ],
       "passes": false,
-      "notes": "From F-203: the New project dialog sends `NewProject.publishDocs` (checked by default), which does nothing yet; F-606 writes the FI-40 stubs when it is set."
+      "notes": "From F-203: the New project dialog sends `NewProject.publishDocs` (checked by default), which does nothing yet; F-606 writes the FI-40 stubs when it is set. From F-703: editors aren't shown in read-only; F-605 decides on previews. From F-401: Publish docs is hidden for a GitHub import; the zip route still shows it and sends `publishDocs` (ADR 0057). F-401's PR closed this gap: Publish docs is now hidden on the whole Import route, the zip source included; an import request sends `publishDocs: false`."
     },
     {
       "id": "F-607",
@@ -1338,7 +1338,7 @@
         "Docs oracle: `nf-metro validate` passes on every template's generated map"
       ],
       "passes": false,
-      "notes": "From F-010 (S5): nf-metro renders in the browser with no patches (ADR 0013 spike result): self-host Pyodide and five wheels (nf-metro, lark, drawsvg, networkx by URL, Pillow), lazy-load the worker with a boot timeout, add 'wasm-unsafe-eval' to netlify.toml, set Pyodide's package base URL (its default CDN string would trip IO-41), add licences.md entries, and delete spikes/s5-nf-metro/. From F-011: on Pages workers aren't under the meta CSP, so no `'wasm-unsafe-eval'` is needed for Pyodide in a worker; add it to `scripts/security-policy.ts` only if the document compiles WebAssembly. Take `indexURL` from `BASE_URL`. Whether github.io serves `.wasm` as `application/wasm` is unconfirmed. From F-203: the metro map checkbox in the New project dialog is F-607's; the metro title comes from `manifest.name`, which templates don't set. From F-206: the FI-55 metro map can sit in the entry workflow's summary."
+      "notes": "From F-010 (S5): nf-metro renders in the browser with no patches (ADR 0013 spike result): self-host Pyodide and five wheels (nf-metro, lark, drawsvg, networkx by URL, Pillow), lazy-load the worker with a boot timeout, add 'wasm-unsafe-eval' to netlify.toml, set Pyodide's package base URL (its default CDN string would trip IO-41), add licences.md entries, and delete spikes/s5-nf-metro/. From F-011: on Pages workers aren't under the meta CSP, so no `'wasm-unsafe-eval'` is needed for Pyodide in a worker; add it to `scripts/security-policy.ts` only if the document compiles WebAssembly. Take `indexURL` from `BASE_URL`. Whether github.io serves `.wasm` as `application/wasm` is unconfirmed. From F-203: the metro map checkbox in the New project dialog is F-607's; the metro title comes from `manifest.name`, which templates don't set. From F-206: the FI-55 metro map can sit in the entry workflow's summary. From F-703: editors aren't shown in read-only; F-605 decides on previews."
     },
     {
       "id": "F-701",
@@ -1361,7 +1361,7 @@
         "axe reports no violations on the main screens"
       ],
       "passes": false,
-      "notes": "From F-201: drag-to-resize columns needs a single-pointer alternative for WCAG 2.5.7 (keyboard resizing alone doesn't satisfy it). From F-205: the F shortcut for fit view, keyboard parity for edge tooltips, and the canvas ariaLabelConfig and node descriptions need an audit. From F-203: audit the New project dialog's two radio groups and its focus order; Hello world is a small typed project for keyboard tests. From F-206: announce selection changes to screen readers; Enter and Space select a focused node, Escape clears. Edges are focusable but not selectable: give keyboard users a way to read an edge's type. From F-208: G, S and C are done and don't fire in text fields, the code editor or dialogs; Ctrl+M then Tab leaves Monaco; audit the view-mode radio group and Monaco. Switching to Code from a focused canvas node drops focus to the page body. From F-209: audit the Undo and Redo tooltips, `aria-keyshortcuts`, the history live region and the ignored key repeat. From F-207: nodes move with the arrow keys once selected, and their description says so; audit the \"Laying out nodes…\" status and the layout notices. From F-309: decide a shortcut for the problems panel; audit the roving list, the empty tabpanel's tab stop, focus after a refused fix, and focus returning to the details link."
+      "notes": "From F-201: drag-to-resize columns needs a single-pointer alternative for WCAG 2.5.7 (keyboard resizing alone doesn't satisfy it). From F-205: the F shortcut for fit view, keyboard parity for edge tooltips, and the canvas ariaLabelConfig and node descriptions need an audit. From F-203: audit the New project dialog's two radio groups and its focus order; Hello world is a small typed project for keyboard tests. From F-206: announce selection changes to screen readers; Enter and Space select a focused node, Escape clears. Edges are focusable but not selectable: give keyboard users a way to read an edge's type. From F-208: G, S and C are done and don't fire in text fields, the code editor or dialogs; Ctrl+M then Tab leaves Monaco; audit the view-mode radio group and Monaco. Switching to Code from a focused canvas node drops focus to the page body. From F-209: audit the Undo and Redo tooltips, `aria-keyshortcuts`, the history live region and the ignored key repeat. From F-207: nodes move with the arrow keys once selected, and their description says so; audit the \"Laying out nodes…\" status and the layout notices. From F-309: decide a shortcut for the problems panel; audit the roving list, the empty tabpanel's tab stop, focus after a refused fix, and focus returning to the details link. From F-703: shortcuts check `isReadOnly()`; audit the read-only note and its focus move; decide on a session-only \"Edit anyway\" override for zoomed desktops (WCAG 1.4.4, ADR 0056); give touch users the edge types."
     },
     {
       "id": "F-702",
@@ -1382,7 +1382,7 @@
         "On `main`, CI fails when QA-01, QA-03 or QA-06 is exceeded, and its budget report shows the QA-02, QA-04 and QA-05 measurements"
       ],
       "passes": false,
-      "notes": "ADR 0015 excludes worker bundles from the QA-01 measurement until this feature; revisit that here. 2026-11-22, maintainer (ADR 0030): QA-02, QA-04 and QA-05 are reported, not gates. From F-113: the reference profile throttles the page 4x but Chromium can't throttle workers, so worker timings are unthrottled (ADR 0043 clarifies ADR 0029's profile this way; a cgroup CPU quota at a real 4x would put sarek near 60 s, over the 30 s ceiling). Gate QA-03 on the bench job's cold open (18.6 s locally). QA-04's edit p95 is 271 ms locally: re-projecting the 722-line SAREK workflow after each edit and the double parse (F-111's guard parse plus commit's setFile) dominate; reuse the checked SourceFile and project incrementally. Worker chunks are outside QA-01 (ADR 0015): engine.worker about 87 kB raw, parser 653 kB raw, catalogues about 105 kB raw each. From F-206: `details` reprojects the workflow per click (10 to 38 ms on sarek's SAREK, unthrottled); include it in the performance checks. From F-209: add an undo and redo row to `pnpm bench`. From F-207: the carry costs two projections per tracked workflow in each changed file, and the bench project has no sidecar (add a variant that seeds one); ELK takes 0.3 to 1.2 s on sarek's PREPARE_GENOME and 3.8 to 8.7 s on SAREK under load; the service memoises one projection per revision. From F-309: every revision pulls the whole project's diagnostics (about 215 ms of worker time on sarek), and a result dropped as stale is wasted work; carrying results over needs a transitive dependants rule; add a diagnostics row to `pnpm bench`."
+      "notes": "ADR 0015 excludes worker bundles from the QA-01 measurement until this feature; revisit that here. 2026-11-22, maintainer (ADR 0030): QA-02, QA-04 and QA-05 are reported, not gates. From F-113: the reference profile throttles the page 4x but Chromium can't throttle workers, so worker timings are unthrottled (ADR 0043 clarifies ADR 0029's profile this way; a cgroup CPU quota at a real 4x would put sarek near 60 s, over the 30 s ceiling). Gate QA-03 on the bench job's cold open (18.6 s locally). QA-04's edit p95 is 271 ms locally: re-projecting the 722-line SAREK workflow after each edit and the double parse (F-111's guard parse plus commit's setFile) dominate; reuse the checked SourceFile and project incrementally. Worker chunks are outside QA-01 (ADR 0015): engine.worker about 87 kB raw, parser 653 kB raw, catalogues about 105 kB raw each. From F-206: `details` reprojects the workflow per click (10 to 38 ms on sarek's SAREK, unthrottled); include it in the performance checks. From F-209: add an undo and redo row to `pnpm bench`. From F-207: the carry costs two projections per tracked workflow in each changed file, and the bench project has no sidecar (add a variant that seeds one); ELK takes 0.3 to 1.2 s on sarek's PREPARE_GENOME and 3.8 to 8.7 s on SAREK under load; the service memoises one projection per revision. From F-309: every revision pulls the whole project's diagnostics (about 215 ms of worker time on sarek), and a result dropped as stale is wasted work; carrying results over needs a transitive dependants rule; add a diagnostics row to `pnpm bench`. From F-703: the palette and template prefetch still run on phones."
     },
     {
       "id": "F-703",
@@ -1397,8 +1397,8 @@
       "steps": [
         "At 390 px wide: canvas and details visible, no editing controls, note shown"
       ],
-      "passes": false,
-      "notes": "From F-202: tabs don't coordinate writes (last write wins per file); consider Web Locks if needed. From F-206: hide the details header's Edit and Code buttons in read-only mode. From F-208: set Monaco `readOnly` below 1024 px. From F-309: hide the problems panel's fix buttons in read-only mode, and check `applyFix` is refused through the canvas store's `send` queue."
+      "passes": true,
+      "notes": "From F-202: tabs don't coordinate writes (last write wins per file); consider Web Locks if needed. From F-206: hide the details header's Edit and Code buttons in read-only mode. From F-208: set Monaco `readOnly` below 1024 px. From F-309: hide the problems panel's fix buttons in read-only mode, and check `applyFix` is refused through the canvas store's `send` queue. Verified 2026-11-28: step 1 by `e2e/read-only.spec.ts` (390 px stored project, allow-list, blocked commands, sidecar, transition, 1024 boundary, 640 stacking, 320 reflow, iframe, touch, `@smoke` on three browsers) and the `read-only-phone` and `read-only-narrow` baselines (ADR 0056). Monaco isn't mounted below 1024 px (F-208's note); a code-only file tab shows \"This file opens in the code view on screens 1024 px or wider.\" instead. The problems panel's fix buttons are hidden and `goTo` doesn't change a tab's view mode or reveal code while read-only (F-309's note). F-202's multi-tab note: not UX-04; ADR 0045's last-write-wins stands for v0.1."
     },
     {
       "id": "F-704",
@@ -1417,7 +1417,7 @@
         "Tag v0.1.0; https://ewels.github.io/nf-builder/ (or the custom domain that replaces it, ADR 0040) serves the release build; README explains what the app does and where projects are stored"
       ],
       "passes": false,
-      "notes": "Hosting moved to GitHub Pages (ADR 0040); the URL is a placeholder until a custom domain is decided (#35). From F-208: the notices page carries the texts for Monaco (its ThirdPartyNotices), DOMPurify (Apache-2.0), marked, the codicons (CC-BY-4.0) and the Shiki Nextflow grammars, because minification strips their licence comments."
+      "notes": "Hosting moved to GitHub Pages (ADR 0040); the URL is a placeholder until a custom domain is decided (#35). From F-208: the notices page carries the texts for Monaco (its ThirdPartyNotices), DOMPurify (Apache-2.0), marked, the codicons (CC-BY-4.0) and the Shiki Nextflow grammars, because minification strips their licence comments. From F-703: the README says small screens get a read-only view."
     },
     {
       "id": "F-705",

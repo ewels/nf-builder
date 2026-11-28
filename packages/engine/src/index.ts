@@ -171,6 +171,13 @@ export {
 } from "./projection/project";
 export { formatFlowType, formatType } from "./projection/types";
 export {
+  legacyShare,
+  type ParseFailure,
+  type ProjectReport,
+  projectReport,
+  type StyleCounts,
+} from "./report/report";
+export {
   createEngineService,
   type EngineServiceOptions,
 } from "./service/service";

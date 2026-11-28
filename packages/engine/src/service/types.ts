@@ -24,6 +24,7 @@ import type {
   Positions,
 } from "../layout";
 import type { ProjectFile } from "../model/project";
+import type { ProjectReport } from "../report/report";
 import type { TemplateList } from "../templates";
 
 export interface OpenRequest {
@@ -73,7 +74,9 @@ export type EngineRefusalCode =
   | RefusalCode
   | "stale"
   | "no-project"
-  | "no-history";
+  | "no-history"
+  /** Returned only by the page's canvas store below 1024 px (F-703, UX-04), never by the worker. */
+  | "read-only";
 
 export interface EngineRefusal {
   readonly ok: false;
@@ -170,6 +173,8 @@ export interface EngineApi {
     workflow: string | null,
   ): Promise<ProjectionResult | EngineRefusal>;
   diagnostics(): Promise<DiagnosticsResult | EngineRefusal>;
+  /** Parse failures, legacy share and diagnostic counts of the current revision (F-401, UX-61). */
+  report(): Promise<ProjectReport | EngineRefusal>;
   /** The declaration details and diagnostics of one node of a workflow's projection (F-206). */
   details(
     path: string,

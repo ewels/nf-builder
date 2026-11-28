@@ -78,3 +78,10 @@
   outline: 2px solid var(--color-accent);
   outline-offset: 1px;
 }
+
+.read-only-file-note {
+  margin: 0;
+  padding: var(--space-4);
+  font-size: 13px;
+  color: var(--color-text);
+}

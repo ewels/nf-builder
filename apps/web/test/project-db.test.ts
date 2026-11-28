@@ -263,3 +263,25 @@ describe("F-202 project database", () => {
     expect(reasons[0]).toMatch(/closed/);
   });
 });
+
+describe("F-401 project source", () => {
+  it("F-401 IO-13 ADR-0045: a record's source is stored and survives listProjects, readProject, rename, touch and saveFiles", async () => {
+    const db = await fresh().db;
+    const source = {
+      kind: "github",
+      repo: "nf-core/x",
+      ref: "1.0",
+      sha: "b".repeat(40),
+    } as const;
+    await db.createProject(meta("a", { source }), [
+      { path: "m.nf", text: "1" },
+    ]);
+    expect((await db.listProjects())[0]?.source).toEqual(source);
+    expect((await db.readProject("a"))?.project.source).toEqual(source);
+    expect((await db.renameProject("a", "New", 2000))?.source).toEqual(source);
+    expect((await db.touchProject("a", 3000))?.source).toEqual(source);
+    await db.saveFiles([{ projectId: "a", path: "m.nf", text: "2" }], 4000);
+    expect((await db.readProject("a"))?.project.source).toEqual(source);
+    db.close();
+  });
+});

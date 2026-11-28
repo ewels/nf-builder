@@ -4,7 +4,7 @@ import type { AddConflict } from "@nf-builder/engine";
 import { formatBytes } from "@nf-builder/sources";
 import type { JSX } from "react";
 import { useId } from "react";
-import { plural, SkippedFiles } from "../project/import-section";
+import { plural, SkippedList } from "../import/import-summary";
 import { useModal } from "../project/project-dialogs";
 import type { AddFilesState, AddFilesView } from "./add-files";
 
@@ -66,7 +66,7 @@ export function AddFilesDialog({
             </label>
           </>
         )}
-        <SkippedFiles summary={preview.summary} />
+        <SkippedList groups={preview.summary.skipped} />
         {replaces ? (
           <details>
             <summary>

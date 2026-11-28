@@ -9,7 +9,7 @@ Mockup: [docs/mockup](../mockup/README.md). Where the mockup and this file disag
 | UX-01 | Header bar with app name, project switcher, save state, Templates, Import, Export, and Nextflow version selector. The selector lists installed language packs; at launch only `26.10`. |
 | UX-02 | Three columns under the header: left (palette or files, 256 px default), centre (tabs plus canvas or editor), right (details, 296 px default). Side columns can be resized and collapsed; widths persist per browser. |
 | UX-03 | Status bar: problems count, suggestions count (separate, links to the problems panel), node and channel counts for the active canvas, language version. Problems count errors plus warnings; with a project open both counts are buttons that open the problems panel on their tab; the bar reads "Checking for problems…" before the first result; node and channel counts are hidden on a file tab (ADR 0054). |
-| UX-04 | Below 1024 px wide the app is read-only: canvas and details only, with a note that editing needs a larger screen. |
+| UX-04 | Below 1024 px wide (CSS pixels of the window or frame; 1024 px is editable) the app is read-only: canvas and details only, with a note that editing needs a larger screen. The palette, Files view, code view, undo and redo, node moves, Auto-layout and project creation, renaming and deletion aren't offered. Commands are refused and nothing is written to the project. Switching projects and workflow tabs, selection, pan, zoom and fit still work. Below 640 px the details sit under the canvas. Narrowing sends a pending code edit first; widening restores the editing controls and each tab's view mode (ADR 0056). |
 
 ## Left column
 
@@ -69,8 +69,8 @@ Mockup: [docs/mockup](../mockup/README.md). Where the mockup and this file disag
 
 | ID | Requirement |
 |---|---|
-| UX-60 | New project dialog: name, language version (installed packs only); three routes: Start blank, From a template, Import (GitHub repo with ref and optional token, or zip). Shows projects stored in this browser. States that projects live in this browser only. Has "Publish docs to GitHub Pages" (FI-40) and "Generate metro map" (FI-50) checkboxes, both on by default. |
-| UX-61 | Import shows a summary (files, skipped, size) before creating the project, then a report afterwards: parse failures, legacy share, suggestions count. |
+| UX-60 | New project dialog: name, language version (installed packs only); three routes: Start blank, From a template, Import (GitHub repo with ref and optional token, or zip; the token field arrives with F-402). Shows projects stored in this browser. States that projects live in this browser only. Has "Publish docs to GitHub Pages" (FI-40) and "Generate metro map" (FI-50) checkboxes, both on by default; Publish docs is hidden for a GitHub import (ADR 0057). |
+| UX-61 | Import shows a summary (files, skipped, size) before creating the project, then a report afterwards: parse failures, legacy share, suggestions count. Parse failures are files whose parse status is partial or verbatim, with the declarations kept as text; the legacy share is legacy processes and workflows over all modelled processes and workflows, as counts and a percentage; suggestions are diagnostics of severity `suggestion` at import time. The report is session-only (ADR 0057). |
 | UX-62 | Export dialog: zip of the project, with a checkbox to include the layout sidecar (on by default). |
 
 ## Keyboard
