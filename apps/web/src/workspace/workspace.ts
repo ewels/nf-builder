@@ -119,6 +119,7 @@ export function createWorkspace(options: WorkspaceOptions): WorkspaceApi {
     project: (path, workflow) => engine.project(path, workflow),
     diagnostics: () => engine.diagnostics(),
     details: (path, workflow, node) => engine.details(path, workflow, node),
+    report: () => engine.report(),
     readFile: (path) => engine.readFile(path),
     history: () => engine.history(),
 
