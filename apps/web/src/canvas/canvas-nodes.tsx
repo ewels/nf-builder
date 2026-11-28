@@ -61,10 +61,8 @@ const TARGET_TITLES = {
     "The types don't match: the connection is allowed, and is reported as an error.",
 } as const;
 
-function useTargetStatus(data: NodeData, port: string) {
-  const status = useContext(ConnectTargetsContext)
-    ?.get(data.view.id)
-    ?.get(port);
+function useTargetStatus(node: string, port: string) {
+  const status = useContext(ConnectTargetsContext)?.get(node)?.get(port);
   return status === "refused" || status === "mismatch" ? status : null;
 }
 
@@ -73,7 +71,7 @@ function Handles({ data }: { data: NodeData }): JSX.Element {
   return (
     <>
       {view.inputs.map((p, i) => (
-        <InputHandle key={p.id} data={data} index={i} />
+        <InputHandle key={p.id} data={data} port={p} index={i} />
       ))}
       {view.outputs.map((p, i) => (
         <Handle
@@ -91,14 +89,15 @@ function Handles({ data }: { data: NodeData }): JSX.Element {
 
 function InputHandle({
   data,
+  port: p,
   index,
 }: {
   data: NodeData;
+  port: CanvasPortView;
   index: number;
 }): JSX.Element {
   const { view } = data;
-  const p = view.inputs[index] as CanvasPortView;
-  const status = useTargetStatus(data, p.id);
+  const status = useTargetStatus(view.id, p.id);
   return (
     <Handle
       id={inputHandle(p)}
@@ -165,7 +164,7 @@ function InputLabel({
   data: NodeData;
   input: CanvasPortView | undefined;
 }): JSX.Element {
-  const status = useTargetStatus(data, input?.id ?? "");
+  const status = useTargetStatus(data.view.id, input?.id ?? "");
   return (
     <span
       className={`canvas-port is-input${status === null ? "" : ` ${TARGET_CLASSES[status]}`}`}

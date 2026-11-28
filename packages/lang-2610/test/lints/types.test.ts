@@ -317,6 +317,24 @@ describe("F-112 LA-29 LA-32 rules", () => {
     expect(found.every((f) => f.range.start === 10)).toBe(true);
   });
 
+  it("F-302 LA-32: Path into a Sample process input is incompatible and Channel<Sample> into it is compatible, with the script's own record declaration", () => {
+    const sampleIn = port("sample", flow("plain", t("Sample")), true);
+    const call = callNode("process", true, [sampleIn], "describe");
+    const script = "record Sample {\n    id: String\n}\n\nworkflow {}";
+    const check = (source: FlowType) =>
+      typeMismatch
+        .check(
+          typedContext(script, [
+            projection([call], [edge(call, "sample", source)]),
+          ]),
+        )
+        .map((f) => f.message);
+    expect(check(flow("channel", t("Path")))).toEqual([
+      "Argument with type Path is not compatible with process input of type Sample -- pass a Sample, or a channel or value of Sample",
+    ]);
+    expect(check(flow("channel", t("Sample")))).toEqual([]);
+  });
+
   it("F-112 LA-29: legacy scripts, legacy callees and calls with the wrong number of arguments are not type-checked", () => {
     const nameIn = port("name", flow("plain", t("String")), true);
     const call = callNode("process", true, [nameIn]);

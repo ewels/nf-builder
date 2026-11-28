@@ -26,6 +26,7 @@ import {
   type ReadOnlyReason,
   readOnlyReason,
   type WorkflowRef,
+  type WorkflowTarget,
 } from "@nf-builder/engine";
 import { useStore } from "zustand";
 import { createStore, type StoreApi } from "zustand/vanilla";
@@ -394,7 +395,7 @@ export function createCanvasStore(
     /** One connect or disconnect: the views it causes keep the viewport; a refusal becomes the canvas notice. */
     async function rewire(
       verb: "connect" | "disconnect",
-      command: (tab: WorkflowTab) => EditCommand,
+      command: (target: WorkflowTarget) => EditCommand,
       session: number | undefined,
     ): Promise<ApplyOutcome> {
       const tab = workflowTab();
@@ -404,7 +405,11 @@ export function createCanvasStore(
       try {
         const outcome = await send(
           session,
-          (revision) => engine().apply(command(tab), revision),
+          (revision) =>
+            engine().apply(
+              command({ path: tab.path, workflow: tab.workflow }),
+              revision,
+            ),
           afterApply,
         );
         if (!outcome.ok && outcome.code !== "read-only")
@@ -1169,23 +1174,14 @@ export function createCanvasStore(
       connect: (from, to, session) =>
         rewire(
           "connect",
-          (tab) => ({
-            kind: "connect",
-            target: { path: tab.path, workflow: tab.workflow },
-            from,
-            to,
-          }),
+          (target) => ({ kind: "connect", target, from, to }),
           session,
         ),
 
       disconnect: (port, session) =>
         rewire(
           "disconnect",
-          (tab) => ({
-            kind: "disconnect",
-            target: { path: tab.path, workflow: tab.workflow },
-            port,
-          }),
+          (target) => ({ kind: "disconnect", target, port }),
           session,
         ),
 

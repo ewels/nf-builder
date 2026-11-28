@@ -180,7 +180,7 @@ export const connection: PackLints["connection"] = (
   }
 };
 
-export type EdgeIndex = ReadonlyMap<string, readonly GraphEdge[]>;
+type EdgeIndex = ReadonlyMap<string, readonly GraphEdge[]>;
 const key = (node: string, port: string): string => `${node}\u0000${port}`;
 
 export function indexEdges(projection: Projection): EdgeIndex {

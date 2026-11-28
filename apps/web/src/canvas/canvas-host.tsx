@@ -68,7 +68,7 @@ export function CanvasHost(): JSX.Element {
             onSelect={(id) => void select(id)}
             positions={content.positions}
             mismatches={mismatches}
-            onConnectionTargets={(from) => connectionTargets(from)}
+            onConnectionTargets={connectionTargets}
             onConnect={(from, to) => void connect(from, to)}
             onDisconnect={(port) => void disconnect(port)}
             notices={[layoutNotice, content.notice, canvasNotice].filter(
