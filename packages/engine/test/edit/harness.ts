@@ -465,6 +465,15 @@ export function assertSequences(
   numRuns: number,
 ) {
   const base = snapshot(state);
+  // every kind is tried a few times first, however the random kinds fall (small run counts can miss one)
+  const examples = EDIT_COMMAND_KINDS.flatMap((_, kind) =>
+    [0, 1, 2, 3, 5, 8].map(
+      (a) =>
+        [[{ kind, a, b: a, name: "ZED", snippet: a }] as readonly Choice[]] as [
+          readonly Choice[],
+        ],
+    ),
+  );
   fc.assert(
     fc.property(arb, (choices) => {
       try {
@@ -473,6 +482,7 @@ export function assertSequences(
         reset(state, base);
       }
     }),
-    { seed: 111, numRuns },
+    // fast-check counts the examples in numRuns
+    { seed: 111, numRuns: numRuns + examples.length, examples },
   );
 }
