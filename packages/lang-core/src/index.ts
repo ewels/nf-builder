@@ -61,6 +61,8 @@ export type {
 export type { Diagnostic, DiagnosticSeverity, QuickFix } from "./diagnostic.ts";
 export {
   type AddCall,
+  type AddConfigBlock,
+  type AddConfigPlugin,
   type CommandResult,
   type ConfigContext,
   type ConfigSelectorRef,
@@ -75,9 +77,12 @@ export {
   type FileText,
   type MemoryUnitName,
   type RefusalCode,
+  type RemoveConfigOption,
+  type RemoveConfigPlugin,
   type RenameDeclaration,
   type ReplaceFileText,
   type Scaffold,
+  type SetConfigOption,
   type TextEdit,
   type TextPatch,
   type WorkflowTarget,

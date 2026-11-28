@@ -2,12 +2,24 @@
 // corpus pipeline. Run by `pnpm test:corpus` after `pnpm corpus:fetch`; writes .cache/reports/config-corpus.md.
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import type { ConfigAst, ConfigSourceFile } from "@nf-builder/lang-core";
+import type {
+  ConfigAst,
+  ConfigSourceFile,
+  EditCommand,
+} from "@nf-builder/lang-core";
 import { beforeAll, describe, expect, it } from "vitest";
 import type { ConfigViewItem, ScopeCard } from "../../src/config/types";
 import { EXCERPT_LIMIT } from "../../src/config/types";
+import {
+  applyCommand,
+  createEditState,
+  type EditState,
+} from "../../src/edit/apply";
+import { applyPatches } from "../../src/edit/patches";
 import type { Opened } from "../config/helpers";
 import { open } from "../config/helpers";
+import { checkUntouched } from "../edit/config-untouched";
+import { version } from "../edit/helpers";
 import { readTree } from "../model/read-tree";
 
 const ROOT = join(import.meta.dirname, "../../../..");
@@ -21,12 +33,18 @@ const IDS = [
 ].map((m) => m[1] as string);
 
 const opened = new Map<string, Opened>();
+const states = new Map<string, EditState>();
+const timings: number[] = [];
+const outcomes = new Map<string, number>();
 const report: string[] = [];
 const zeroMatches: string[] = [];
 let configs = 0;
 
 beforeAll(async () => {
-  for (const id of IDS) opened.set(id, await open(readTree(join(CORPUS, id))));
+  for (const id of IDS) {
+    opened.set(id, await open(readTree(join(CORPUS, id))));
+    states.set(id, await createEditState(version, readTree(join(CORPUS, id))));
+  }
 });
 
 const configPaths = (o: Opened): string[] =>
@@ -124,12 +142,108 @@ describe("F-601 config view corpus", () => {
     report.push(`Selectors evaluated: ${selectors}`);
   });
 
+  it("F-601 AR-22 AR-23: set, remove and add-block on every corpus config pass the guards, keep untouched statements byte for byte and undo exactly", () => {
+    let accepted = 0;
+    for (const [id, o] of opened) {
+      const state = states.get(id) as EditState;
+      for (const path of configPaths(o)) {
+        const view = o.view(path);
+        // the first option the file sets at its top level, for the removal
+        const first = cardsOf(view.items)
+          .flatMap((c) => c.rows)
+          .find((r) => r.kind === "option" && r.class === "option");
+        const commands: EditCommand[] = [
+          {
+            kind: "setConfigOption",
+            path,
+            context: { profile: null, selector: null },
+            option: ["docker", "enabled"],
+            value: { kind: "boolean", value: true },
+          },
+          {
+            kind: "setConfigOption",
+            path,
+            context: { profile: "corpus-test", selector: null },
+            option: ["process", "cpus"],
+            value: { kind: "integer", value: 2 },
+          },
+          {
+            kind: "setConfigOption",
+            path,
+            context: {
+              profile: null,
+              selector: { kind: "withLabel", pattern: "corpus_label" },
+            },
+            option: ["process", "memory"],
+            value: { kind: "memory", amount: 8, unit: "GB" },
+          },
+          {
+            kind: "addConfigBlock",
+            path,
+            context: { profile: null, selector: null },
+            scope: ["wave"],
+          },
+          { kind: "addConfigPlugin", path, id: "nf-corpus@1.0.0" },
+          ...(first?.kind === "option"
+            ? [
+                {
+                  kind: "removeConfigOption",
+                  path,
+                  context: { profile: null, selector: null },
+                  option: first.option,
+                } satisfies EditCommand,
+              ]
+            : []),
+        ];
+        const before = state.model.file(path)?.source as ConfigSourceFile;
+        for (const command of commands) {
+          const started = performance.now();
+          const result = applyCommand(state, command);
+          timings.push(performance.now() - started);
+          const key = `${command.kind}:${result.ok ? "ok" : result.code}`;
+          outcomes.set(key, (outcomes.get(key) ?? 0) + 1);
+          if (!result.ok) {
+            expect(
+              ["invalid", "not-found", "does-not-parse"],
+              `${id}/${path} ${command.kind}: ${result.message}`,
+            ).toContain(result.code);
+            continue;
+          }
+          accepted += 1;
+          for (const patch of result.patches) {
+            if (patch.kind !== "edit") throw new Error("edits only");
+            const text = result.files.find((f) => f.path === patch.path)
+              ?.text as string;
+            if (before.ast !== null)
+              checkUntouched(
+                before,
+                text,
+                patch.edits,
+                `${id}/${path} ${command.kind}`,
+              );
+          }
+          const after = result.files.find((f) => f.path === path)?.text ?? "";
+          const undone = applyPatches(new Map([[path, after]]), result.inverse);
+          expect(
+            undone.files.get(path),
+            `${id}/${path} ${command.kind} undoes`,
+          ).toBe(before.text);
+        }
+      }
+    }
+    expect(accepted).toBeGreaterThan(500);
+  });
+
   it("F-601: the config corpus report is written", () => {
     mkdirSync(REPORTS, { recursive: true });
     const lines = [
       "# Config editor over the corpus (F-601)",
       "",
       `Config files viewed: ${configs}.`,
+      "",
+      `Edit commands over every config (${timings.length}; p95 ${[...timings].sort((a, b) => a - b)[Math.floor(timings.length * 0.95)]?.toFixed(1)} ms, max ${Math.max(...timings).toFixed(1)} ms):`,
+      "",
+      ...[...outcomes].sort().map(([k, n]) => `- ${k}: ${n}`),
       "",
       ...report.map((l) => `- ${l}`),
       "",

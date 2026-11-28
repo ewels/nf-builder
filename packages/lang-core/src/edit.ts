@@ -109,6 +109,44 @@ export type ConfigValue =
       }[];
     };
 
+/** Set a config option (F-601, FI-02): replaces its value where it is set, else places a new statement (plan 2.6). `option` is the full option path as the validator names it, also inside a selector. */
+export interface SetConfigOption {
+  readonly kind: "setConfigOption";
+  readonly path: string;
+  readonly context: ConfigContext;
+  readonly option: readonly string[];
+  readonly value: ConfigValue;
+}
+
+/** Remove every statement that sets an option in a context, with the comments attached to them. */
+export interface RemoveConfigOption {
+  readonly kind: "removeConfigOption";
+  readonly path: string;
+  readonly context: ConfigContext;
+  readonly option: readonly string[];
+}
+
+/** Ensures the blocks exist: `scope` within the context, or the profile or selector block itself when `scope` is empty. */
+export interface AddConfigBlock {
+  readonly kind: "addConfigBlock";
+  readonly path: string;
+  readonly context: ConfigContext;
+  readonly scope: readonly string[];
+}
+
+/** Add `id '<id>'` to the `plugins` block, which is created when there is none. */
+export interface AddConfigPlugin {
+  readonly kind: "addConfigPlugin";
+  readonly path: string;
+  readonly id: string;
+}
+
+export interface RemoveConfigPlugin {
+  readonly kind: "removeConfigPlugin";
+  readonly path: string;
+  readonly id: string;
+}
+
 export type EditCommand =
   | CreateProcess
   | AddCall
@@ -116,7 +154,12 @@ export type EditCommand =
   | Disconnect
   | DeleteNode
   | RenameDeclaration
-  | ReplaceFileText;
+  | ReplaceFileText
+  | SetConfigOption
+  | RemoveConfigOption
+  | AddConfigBlock
+  | AddConfigPlugin
+  | RemoveConfigPlugin;
 
 export const EDIT_COMMAND_KINDS = [
   "createProcess",
@@ -126,6 +169,11 @@ export const EDIT_COMMAND_KINDS = [
   "deleteNode",
   "renameDeclaration",
   "replaceFileText",
+  "setConfigOption",
+  "removeConfigOption",
+  "addConfigBlock",
+  "addConfigPlugin",
+  "removeConfigPlugin",
 ] as const satisfies readonly EditCommand["kind"][];
 
 /** Replace `text.slice(start, end)`: UTF-16 offsets into the file as it was before the patch. */

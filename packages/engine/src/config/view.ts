@@ -233,7 +233,6 @@ export function configView(input: ConfigViewInput): ConfigView {
 
   const build = (
     statements: readonly ConfigItem[],
-    ctx: ConfigContext,
     ctxKey: string,
   ): ConfigViewItem[] => {
     const slots: Slot[] = [];
@@ -456,11 +455,7 @@ export function configView(input: ConfigViewInput): ConfigView {
           key: `profile:${ctxKey}:${p.name}`,
           name: p.name,
           range: p.range,
-          items: build(
-            p.statements,
-            { profile: p.name, selector: null },
-            `${ctxKey}/${p.name}`,
-          ),
+          items: build(p.statements, `${ctxKey}/${p.name}`),
         }),
       );
       const card: ScopeCard = {
@@ -506,7 +501,6 @@ export function configView(input: ConfigViewInput): ConfigView {
     status: file.status,
     editable: file.status === "modelled" && file.problems.length === 0,
     context: ROOT,
-    items:
-      file.ast === null ? verbatim() : build(file.ast.statements, ROOT, "top"),
+    items: file.ast === null ? verbatim() : build(file.ast.statements, "top"),
   };
 }

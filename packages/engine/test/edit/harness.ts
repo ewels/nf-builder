@@ -1,6 +1,9 @@
 // The property harness (F-111 plan 4.1): random command sequences against a project, with the invariants of AR-22,
 // AR-23, AR-24 and LA-13 checked after each command and the undo check after the sequence.
 import {
+  type ConfigAst,
+  type ConfigContext,
+  type ConfigValue,
   EDIT_COMMAND_KINDS,
   type EditCommand,
   MIXED_DEFINITIONS,
@@ -15,6 +18,7 @@ import {
 import * as fc from "fast-check";
 import { expect } from "vitest";
 import { applyCommand, commit, type EditState } from "../../src/edit/apply";
+import { plugins } from "../../src/edit/config/locate";
 import { definitionStyles, problemKeys } from "../../src/edit/guards";
 import { applyPatches } from "../../src/edit/patches";
 import { itemSpan } from "../../src/edit/splice";
@@ -57,6 +61,35 @@ const SNIPPETS = [
   "/*",
   "workflow W {}\n",
 ];
+
+// what the config kinds are built from: options of the catalogue with a value of their kind, profiles and plugins
+const CONFIG_PROFILES = ["test", "ci"];
+const CONFIG_OPTIONS: readonly (readonly [readonly string[], ConfigValue])[] = [
+  [["process", "cpus"], { kind: "integer", value: 2 }],
+  [["docker", "enabled"], { kind: "boolean", value: true }],
+  [["process", "memory"], { kind: "memory", amount: 8, unit: "GB" }],
+  [["manifest", "name"], { kind: "string", value: "it's" }],
+];
+const CONFIG_PLUGINS = ["nf-schema@2.5.1", "nf-prov@1.4.0"];
+
+/** The options a config sets at its top level, in blocks or dotted, whose names the form can write. */
+function configOptionNames(ast: ConfigAst): string[][] {
+  const out: string[][] = [];
+  const visit = (
+    statements: readonly ConfigAst["statements"][number][],
+    prefix: readonly string[],
+  ) => {
+    for (const s of statements) {
+      if (s.kind === "ConfigAssign") {
+        const names = [...prefix, ...s.path.map((n) => n.name)];
+        if (names.every((n) => /^[A-Za-z_]\w*$/.test(n))) out.push(names);
+      } else if (s.kind === "ConfigBlock" && s.name.name !== "profiles")
+        visit(s.statements, [...prefix, s.name.name]);
+    }
+  };
+  visit(ast.statements, []);
+  return out;
+}
 
 const pick = <T>(list: readonly T[], i: number): T | undefined =>
   list.length === 0 ? undefined : list[i % list.length];
@@ -208,6 +241,57 @@ export function buildCommand(state: EditState, c: Choice): EditCommand | null {
         }).text;
       else next = `${text}\n// note\n`;
       return { kind, path, text: next };
+    }
+    case "setConfigOption":
+    case "removeConfigOption":
+    case "addConfigBlock":
+    case "addConfigPlugin":
+    case "removeConfigPlugin": {
+      const configs = paths.filter(
+        (p) => state.model.file(p)?.source.language === "config",
+      );
+      const path = pick(configs, c.a);
+      if (!path) return null;
+      const context: ConfigContext = {
+        profile: c.b % 5 === 0 ? (pick(CONFIG_PROFILES, c.a) ?? null) : null,
+        selector: null,
+      };
+      const chosen = pick(CONFIG_OPTIONS, c.b);
+      if (!chosen) return null;
+      const [option, value] = chosen;
+      if (kind === "setConfigOption")
+        return { kind, path, context, option, value };
+      if (kind === "removeConfigOption") {
+        // an option the file sets at its top level, when it has one
+        const file = state.model.file(path)?.source;
+        const present =
+          file?.language === "config" && file.ast
+            ? configOptionNames(file.ast)
+            : [];
+        return {
+          kind,
+          path,
+          context:
+            present.length > 0 ? { profile: null, selector: null } : context,
+          option: pick(present, c.b) ?? option,
+        };
+      }
+      if (kind === "addConfigBlock")
+        return { kind, path, context, scope: [option[0] as string] };
+      if (kind === "removeConfigPlugin") {
+        // a plugin the file has, when it has one
+        const file = state.model.file(path)?.source;
+        const present =
+          file?.language === "config" && file.ast
+            ? plugins(file.ast).flatMap(({ node }) =>
+                node.args[0]?.kind === "String" ? [node.args[0].value] : [],
+              )
+            : [];
+        const id = pick(present, c.a) ?? pick(CONFIG_PLUGINS, c.a + c.b);
+        return id ? { kind, path, id } : null;
+      }
+      const id = pick(CONFIG_PLUGINS, c.a + c.b);
+      return id ? { kind, path, id } : null;
     }
     default:
       return null;
@@ -429,11 +513,15 @@ export function runSequence(
           result.message,
           `${command.kind} refused as internal: ${result.message}`,
         ).toMatch(/drop the comment/);
-      if (result.code === "does-not-parse")
+      if (result.code === "does-not-parse") {
+        // a config command refuses a file that was already broken, saying so; it never produces a result that doesn't parse
+        if (command.kind === "replaceFileText") continue;
         expect(
-          command.kind,
+          result.message,
           `${command.kind} produced a result that doesn't parse: ${result.message}`,
-        ).toBe("replaceFileText");
+        ).toMatch(/can't work around/);
+        expect(command.kind).toMatch(/Config/);
+      }
       continue;
     }
     checkAccepted(state, command, result.patches, result.files);
@@ -466,4 +554,48 @@ export function assertSequences(
     }),
     { seed: 111, numRuns },
   );
+}
+
+/** What has to happen first for a kind to have something to act on: a plugin is removed after one is added. */
+const PRELUDE: Partial<Record<string, string>> = {
+  removeConfigPlugin: "addConfigPlugin",
+};
+
+/**
+ * One accepted command of every kind, by searching small choices for the first the state accepts, each run through
+ * `runSequence` for its invariants. Random sequences alone leave a kind unexercised on some trees; this keeps the
+ * "every kind is accepted" checks honest as kinds are added (F-601). A kind with no accepted choice stays at zero.
+ */
+export function runFixedExamples(state: EditState, stats: Stats) {
+  const base = snapshot(state);
+  EDIT_COMMAND_KINDS.forEach((kind, index) => {
+    const before = EDIT_COMMAND_KINDS.indexOf(
+      PRELUDE[kind] as (typeof EDIT_COMMAND_KINDS)[number],
+    );
+    for (let i = 0; i < 40; i++) {
+      const choice: Choice = {
+        kind: index,
+        a: i * 7,
+        b: i * 13,
+        name: `FIX${i}`,
+        snippet: i,
+      };
+      const sequence =
+        before >= 0 ? [{ ...choice, kind: before }, choice] : [choice];
+      // search on a scratch tally; a sequence that accepted the kind is run again for the real one
+      const scratch = new Stats();
+      try {
+        runSequence(state, sequence, scratch);
+      } finally {
+        reset(state, base);
+      }
+      if ((scratch.accepted.get(kind) ?? 0) === 0) continue;
+      try {
+        runSequence(state, sequence, stats);
+      } finally {
+        reset(state, base);
+      }
+      return;
+    }
+  });
 }

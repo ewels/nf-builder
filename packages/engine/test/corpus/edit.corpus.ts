@@ -10,7 +10,12 @@ import { createEditState, type EditState } from "../../src/edit/apply";
 import { reprintDeclaration } from "../../src/edit/splice";
 import { installedPackVersions } from "../../src/packs";
 import { createSourceFile } from "../../src/source/source-file";
-import { assertSequences, choiceArb, Stats } from "../edit/harness";
+import {
+  assertSequences,
+  choiceArb,
+  runFixedExamples,
+  Stats,
+} from "../edit/harness";
 import { structure } from "../edit/structure";
 import { readTree } from "../model/read-tree";
 
@@ -51,6 +56,7 @@ describe("F-111 step 1 corpus properties", () => {
       const state = states.get(id) as EditState;
       const s = new Stats();
       stats.set(id, s);
+      runFixedExamples(state, s);
       assertSequences(
         state,
         fc.array(choiceArb, { minLength: 1, maxLength: longest }),

@@ -443,3 +443,31 @@ cases:
           "There's no process matching config selector: .*:SHOUT",
           "There's no process matching config selector: NOPE",
         ]
+  - id: f601-forms
+    about: A typed project with a config that has a manifest, a dotted docker option, a one-line selector, an empty wave block and a profile; the starting point of each placement rule of the config commands.
+    spec: [F-601, FI-02, FI-06]
+    sources:
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/config.mdx#L29-L95
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/config.mdx#L185-L357
+    lint: { expect: ok, clean: true }
+    run:
+      expect: ok
+      output: ["NULL: HELLO ADA (NULL)"]
+  - id: f601-forms-after
+    about: The f601-forms tree after the scripted sequence of config commands in the engine test (every placement rule and value kind); the run shows the selector memories.
+    spec: [F-601, FI-02, FI-06, AR-23]
+    sources:
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/config.mdx#L185-L357
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/reference/stdlib-types/memory-unit.mdx#L10
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/reference/stdlib-types/duration.mdx#L10-L34
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/reference/process/directives/resource-limits.mdx
+    lint: { expect: ok, clean: true }
+    run:
+      expect: ok
+      output: ["8 GB: HELLO ADA (4 GB)", "8 GB: HELLO GRACE (4 GB)"]
+  - id: f601-plugins
+    about: The f601-config tree after the plugin commands and the profile and docker block commands; lint only, as a run would download the plugin.
+    spec: [F-601, IO-33]
+    sources:
+      - https://github.com/nextflow-io/nextflow/blob/v26.10.7/docs/config.mdx#L29-L95
+    lint: { expect: ok, clean: true }
