@@ -69,6 +69,7 @@ export type {
   EdgeDataflow,
 } from "./canvas";
 export { CANVAS_METRICS, canvasView, portY } from "./canvas";
+export { edgeMismatches, MISMATCH_CODES } from "./canvas/mismatch";
 export { nodeView } from "./details/node-view";
 export { workflowSummary } from "./details/summary";
 export type {
