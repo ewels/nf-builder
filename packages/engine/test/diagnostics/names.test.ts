@@ -73,4 +73,31 @@ describe("F-112 names and includes", () => {
       diagnoser.file("main.nf").filter((d) => d.code === "include-alias"),
     ).toEqual([]);
   });
+
+  it("F-601 FI-03 AR-05: config-unknown-option starts with Nextflow's run-time message and says what to do", async () => {
+    const { diagnoser } = await diagnoseFiles([
+      {
+        path: "nextflow.config",
+        text: "process {\n    cpus = 1\n    memmory = '4 GB' // misspelt\n}\n\nmystery.level = 3\nparams.x = 1\n",
+      },
+    ]);
+    const list = diagnoser
+      .file("nextflow.config")
+      .filter((d) => d.code === "config-unknown-option");
+    expect(
+      list.map((d) => [
+        d.severity,
+        d.range.line,
+        d.range.column,
+        d.range.endColumn,
+      ]),
+    ).toEqual([
+      ["warning", 3, 5, 12],
+      ["warning", 6, 1, 14],
+    ]);
+    expect(list.map((d) => d.message)).toEqual([
+      "Unrecognized config option 'process.memmory' -- check the name against the config reference, add the plugin that defines it, or remove it",
+      "Unrecognized config option 'mystery.level' -- check the name against the config reference, add the plugin that defines it, or remove it",
+    ]);
+  });
 });

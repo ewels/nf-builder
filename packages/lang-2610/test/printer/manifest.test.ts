@@ -37,6 +37,9 @@ const walk = (dir: string, prefix = ""): string[] =>
         )
     : [];
 
+/** The files `lint -format` formats: scripts and configs (F-601). */
+const isFormatted = (p: string) => p.endsWith(".nf") || p.endsWith(".config");
+
 const dir = (tree: Tree, key: "input" | "formatted" | "printed") =>
   resolve(here, tree[key] as string);
 
@@ -49,11 +52,9 @@ describe("printer fixture manifest", () => {
 
     it(`F-110 ADR-0019: the ${tree.name} tree lists every script of its input, and each has a formatted golden`, () => {
       if (tree.input === null) return;
-      const scripts = walk(dir(tree, "input")).filter((p) => p.endsWith(".nf"));
+      const scripts = walk(dir(tree, "input")).filter(isFormatted);
       expect(printable.map((f) => f.path).sort()).toEqual([...scripts].sort());
-      expect(
-        walk(dir(tree, "formatted")).filter((p) => p.endsWith(".nf")),
-      ).toEqual(scripts);
+      expect(walk(dir(tree, "formatted")).filter(isFormatted)).toEqual(scripts);
     });
 
     it(`F-110 ADR-0005: printed/ of the ${tree.name} tree holds exactly the files with a known difference or no input`, () => {
@@ -66,9 +67,7 @@ describe("printer fixture manifest", () => {
         )
         .map((f) => f.path)
         .sort();
-      expect(
-        walk(dir(tree, "printed")).filter((p) => p.endsWith(".nf")),
-      ).toEqual(expected);
+      expect(walk(dir(tree, "printed")).filter(isFormatted)).toEqual(expected);
     });
   }
 

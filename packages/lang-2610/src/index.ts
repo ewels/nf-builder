@@ -1,5 +1,6 @@
 import type {
   ConfigCatalogue,
+  ConfigRules,
   LanguagePack,
   ScriptCatalogue,
   TemplateSet,
@@ -11,6 +12,8 @@ import { scaffold } from "./scaffold.ts";
 
 /** The pack's version, exported on its own so the main thread can read it without the pack (F-113). */
 export const version = "26.10";
+
+let configRules: Promise<ConfigRules> | undefined;
 
 // Import the catalogue JSON only dynamically here: it must stay lazy chunks that come straight from JSON (QA-01, ADR 0028).
 export const pack: LanguagePack = {
@@ -36,4 +39,14 @@ export const pack: LanguagePack = {
   // Import the generated templates JSON only dynamically here: the pack stays erasable under plain Node, and the templates stay a lazy chunk (F-203).
   loadTemplates: async () =>
     (await import("../templates.json")).default as TemplateSet,
+  // The rules read the config catalogue, so they stay a lazy chunk too (F-601); the promise is kept.
+  loadConfigRules: () => {
+    configRules ??= Promise.all([
+      import("./config/index.ts"),
+      import("../catalogue/config.json"),
+    ]).then(([rules, config]) =>
+      rules.createConfigRules(config.default as ConfigCatalogue),
+    );
+    return configRules;
+  },
 };

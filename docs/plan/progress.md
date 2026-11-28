@@ -773,3 +773,24 @@ Append-only. Newest entry at the bottom. One entry per agent session or human wo
   - Notes appended to F-406 (reuse the writer and name rule; the Import button) and F-407 (export binary files once stored).
   - `@visual` baselines that show the enabled Export button are re-approved from CI (ADR 0021) and listed in the PR.
 - Blockers: none.
+
+## 2026-11-28 · F-601 · Claude (autonomous)
+- Did:
+  - Config tabs: `openFile` opens a `.config` file in a config tab with Form, Split and Code through the shared `modesFor` (G, S and C); Form loads no Monaco. The entry workflow's summary links the root `nextflow.config`. Below 1024 px a config tab shows the F-703 note.
+  - The form: a card per scope in source order; first-class forms for `manifest`, `params`, `process` (defaults, `resourceLimits`, `withName` and `withLabel` selectors with "used by N processes"), `profiles`, `plugins`, `docker`, `singularity`, `apptainer`, `conda`, `wave` and `executor`; generic typed forms for every other catalogue scope; Add scope…, Add option…, Add selector…, Add profile…, Add plugin…; values the form can't model shown as read-only code with Edit in code and Set a value; read-only while the file has parse problems. Option docs, types and a docs link in the right pane through a minimal safe Markdown renderer; include rows open the included file in its own config tab.
+  - Engine: `EngineApi.configView` and `configSchema`; five config commands, each one statement-level `TextEdit`, with the placement rules, labels and refusals; the process-use index and `ConfigSelectorResolver` matching.
+  - lang-2610: a port of nf-lang's `ConfigFormattingVisitor` (default options) as the config printer, with corpus parity against `lint -format` and three known rnaseq differences; the `config-unknown-option` warning mirroring Nextflow's run-time `ConfigValidator`; form layouts and verified docs URL rules.
+  - Tests: `e2e/config.spec.ts` (both steps and FI-01 to FI-06), oracle cases `f601-config`, `f601-config-after`, `f601-unknown`, `f601-unknown-after`, `f601-selectors`, `f601-forms`, `f601-forms-after` and `f601-plugins`, config command goldens and property tests, the edit harness's fixed examples for every config command kind, corpus tests (printer parity, every printed config parses, view excerpts) and unit tests in `apps/web/test/`.
+- State: passing once CI is green.
+- Next: F-302, F-405, then F-303, F-307, F-505, F-406.
+- Decisions:
+  - [ADR 0061](../adr/0061-config-editor.md): the five config commands (AR-21 amended), each one `TextEdit` at statement level (amends ADR 0039's reprint level for configs, refines ADR 0032); the placement rules, with new top-level blocks at the end of the file; `8.GB`, `2.h` and single-quoted literals; `EngineApi.configView` and `configSchema` with excerpts of at most 160 characters (amends ADR 0043's API list); the form read-only while the file has parse problems.
+  - The config printer ports `ConfigFormattingVisitor`; deliberate deviations from `lint -format`: it keeps typed closure parameters and the quotes of non-identifier option names (upstream bugs 25 and 26, recorded in `docs/research/upstream-bugs.md`). Commands still refuse new non-identifier option names.
+  - `config-unknown-option` mirrors Nextflow's run-time `ConfigValidator` (FI-03 amended); it skips a map assigned to a whole scope and checks core plugin scopes the catalogue lists (such as `wave`), both on purpose. FI-06 selector counts follow `ConfigSelectorResolver` (FI-06 amended).
+  - Option descriptions go through a minimal safe renderer (no HTML, `https` links only); "Open in Nextflow docs" always resolves under `https://docs.seqera.io/nextflow/` (FI-04).
+  - Configs open through `openFile` and a "Configuration" link in the entry summary (UX-31 amended); config tabs have Form, Split and Code (UX-27 amended); UX-04, FI-01, FI-02, FI-04, FI-05 and the architecture overview's note on file text updated.
+  - Step 2's "imported" is read as a project created from existing files, as settled in the handoff README.
+  - `docs/licences.md`: the ported `ConfigFormattingVisitor` in the nf-lang formatter row; new rows for the `ConfigValidator` and `ConfigSelectorResolver` logic and for the selector fixture's shapes adapted from `config.mdx` (all Apache-2.0).
+  - Notes appended to F-210, F-309, F-314 (the remaining Plugins & config palette items stay with F-314), F-505, F-602, F-607, F-701, F-702 and F-703.
+  - The `config-form` and `config-details` baselines are approved from CI (ADR 0021).
+- Blockers: none.

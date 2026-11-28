@@ -12,6 +12,7 @@ import {
   formatNodeKey,
   type HistoryOutcome,
   type HistoryStatus,
+  languageOf,
   type NodeDetails,
   type OpenRequest,
   type Point,
@@ -33,10 +34,10 @@ import { isReadOnly, READ_ONLY_REFUSAL } from "../read-only/read-only-store";
 import { modesFor, type ViewMode } from "../views/view-mode";
 
 export interface WorkflowTab {
-  /** `<path>#<workflow>`, the empty name for the entry workflow (the projection key prefix, ADR 0036); `file:<path>` for a file tab. */
+  /** `<path>#<workflow>`, the empty name for the entry workflow (the projection key prefix, ADR 0036); `file:<path>` for a file tab, `config:<path>` for a config tab (F-601). */
   readonly id: string;
   /** A workflow's canvas tab, or a code-only tab of a file (F-309, UX-20). */
-  readonly kind: "workflow" | "file";
+  readonly kind: "workflow" | "file" | "config";
   readonly path: string;
   /** Null for the entry workflow. */
   readonly workflow: string | null;
@@ -265,6 +266,24 @@ export function fileTabFor(path: string): WorkflowTab {
   };
 }
 
+/** A config tab (F-601, UX-27): the form of a `.config` file, shown as Graph mode, with its code beside it in Split. */
+export function configTabFor(path: string): WorkflowTab {
+  return {
+    id: `config:${path}`,
+    kind: "config",
+    path,
+    workflow: null,
+    label: fileLabel(path),
+    title: path,
+    mode: "graph",
+    readOnly: readOnlyReason(path),
+  };
+}
+
+/** Whether a tab has no canvas projection: a code-only file tab or a config tab. */
+export const isFileLike = (tab: { readonly kind: string }): boolean =>
+  tab.kind !== "workflow";
+
 export function tabFor(ref: {
   readonly path: string;
   readonly name: string | null;
@@ -374,7 +393,7 @@ export function createCanvasStore(
     async function load(tab: WorkflowTab, quiet = false): Promise<void> {
       const mine = ++generation;
       // a file tab has no projection: its code pane reads the file itself
-      if (tab.kind === "file") {
+      if (isFileLike(tab)) {
         clearSelection();
         set({ activeTab: tab.id, content: EMPTY });
         return;
@@ -775,7 +794,7 @@ export function createCanvasStore(
         const before = get().tabs;
         const tabs = before
           .filter((t) => renamed.has(t.id) || !taken.has(t.id))
-          .filter((t) => !(t.kind === "file" && deleted.has(t.path)))
+          .filter((t) => !(isFileLike(t) && deleted.has(t.path)))
           .map((t) => {
             const to = renamed.get(t.id);
             return to === undefined ? t : { ...tabFor(to), mode: t.mode };
@@ -788,7 +807,7 @@ export function createCanvasStore(
           activeTab !== null && !tabs.some((t) => t.id === activeTab)
             ? before.find((t) => t.id === activeTab)
             : undefined;
-        if (closed?.kind === "file") {
+        if (closed !== undefined && isFileLike(closed)) {
           const at = before.indexOf(closed);
           const left = before
             .slice(0, at)
@@ -812,11 +831,15 @@ export function createCanvasStore(
           },
         });
         const active = tabs.find((t) => t.id === activeTab);
-        if (closed?.kind === "file" && active !== undefined) {
+        if (
+          closed !== undefined &&
+          isFileLike(closed) &&
+          active !== undefined
+        ) {
           await load(active);
           return;
         }
-        if (active?.kind === "file") return;
+        if (active !== undefined && isFileLike(active)) return;
         if (active !== undefined) {
           await load(active, true);
           await resendMove(active);
@@ -840,7 +863,14 @@ export function createCanvasStore(
         const workflow = defaultWorkflow(
           summary.workflows.filter((w) => w.path === path),
         );
-        await openTab(workflow === null ? fileTabFor(path) : tabFor(workflow));
+        const language = languageOf(path);
+        await openTab(
+          workflow !== null
+            ? tabFor(workflow)
+            : language === "config"
+              ? configTabFor(path)
+              : fileTabFor(path),
+        );
       },
 
       async openPath(path) {
@@ -859,7 +889,9 @@ export function createCanvasStore(
         }
         // the project may have been replaced while the file was read
         if (text === null || get().session !== session) return "missing";
-        await openTab(fileTabFor(path));
+        await openTab(
+          languageOf(path) === "config" ? configTabFor(path) : fileTabFor(path),
+        );
         return "file";
       },
 
@@ -867,7 +899,7 @@ export function createCanvasStore(
         const { tabs, activeTab } = get();
         const at = tabs.findIndex((t) => t.id === id);
         const tab = tabs[at];
-        if (tab === undefined || tab.kind !== "file") return;
+        if (tab === undefined || !isFileLike(tab)) return;
         const rest = tabs.filter((t) => t.id !== id);
         set({ tabs: rest });
         if (activeTab !== id) return;

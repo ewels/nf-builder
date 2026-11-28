@@ -17,6 +17,10 @@ import type { WorkspaceStatus } from "../src/workspace/types";
 import { createWorkspace, randomId } from "../src/workspace/workspace";
 
 const version = installedPackVersions()[0] as string;
+const configFiles = [
+  { path: "main.nf", text: "workflow {\n}\n" },
+  { path: "nextflow.config", text: "docker.enabled = true\n" },
+];
 const readme = (text: string): EditCommand => ({
   kind: "replaceFileText",
   path: "README.md",
@@ -1087,5 +1091,39 @@ describe("F-401 workspace import", () => {
     const db = await s.reader();
     expect(await db.listProjects()).toEqual([]);
     db.close();
+  });
+
+  it("F-601: configView and configSchema pass straight through, and a config edit is autosaved like any change", async () => {
+    const s = setup();
+    await s.watching;
+    expect((await s.workspace.configSchema(version)).version).toBe(version);
+    expect(await s.workspace.configView("nextflow.config")).toMatchObject({
+      code: "no-project",
+    });
+    const meta = await s.workspace.createProject({
+      name: "C",
+      languageVersion: version,
+      files: configFiles,
+    });
+    const opened = await s.workspace.openProject(meta.id);
+    const result = await s.workspace.configView("nextflow.config");
+    expect(result).toMatchObject({
+      revision: opened.summary.revision,
+      view: { path: "nextflow.config", editable: true },
+    });
+    const applied = await s.workspace.apply(
+      {
+        kind: "setConfigOption",
+        path: "nextflow.config",
+        context: { profile: null, selector: null },
+        option: ["docker", "registry"],
+        value: { kind: "string", value: "quay.io" },
+      },
+      opened.summary.revision,
+    );
+    expect(applied.ok).toBe(true);
+    s.clock.fire();
+    await s.workspace.flush();
+    expect(s.saves.flat().map((c) => c.path)).toContain("nextflow.config");
   });
 });

@@ -3,7 +3,7 @@ import type { ConfigAst } from "./ast/config.ts";
 import type { ParseProblem } from "./ast/parse-result.ts";
 import type { Comment } from "./ast/range.ts";
 import type { ScriptAst } from "./ast/script.ts";
-import type { ScriptPrinter } from "./printer.ts";
+import type { ConfigPrinter, ScriptPrinter } from "./printer.ts";
 
 export type SourceLanguage =
   | "nextflow"
@@ -39,6 +39,7 @@ export type ConfigSourceParse = SourceParse<ConfigAst>;
  */
 export interface SourceParser {
   readonly printer: ScriptPrinter;
+  readonly configPrinter: ConfigPrinter;
   parseScript(text: string): ScriptSourceParse;
   parseConfig(text: string): ConfigSourceParse;
 }

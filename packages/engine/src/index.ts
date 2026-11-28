@@ -1,12 +1,18 @@
 export type {
   AddCall,
+  AddConfigBlock,
+  AddConfigPlugin,
   Callee,
   CallNode,
   ChainNode,
   ChainStep,
   CodeNode,
   CommandResult,
+  ConfigContext,
+  ConfigSelectorRef,
   ConfigSourceFile,
+  ConfigValue,
+  ConfigValueKind,
   Connect,
   CreateProcess,
   CreateWorkflow,
@@ -44,9 +50,12 @@ export type {
   Projection,
   QuickFix,
   RefusalCode,
+  RemoveConfigOption,
+  RemoveConfigPlugin,
   RenameDeclaration,
   ReplaceFileText,
   ScriptSourceFile,
+  SetConfigOption,
   SourceFile,
   SourceLanguage,
   SourceParser,
@@ -69,6 +78,7 @@ export type {
   EdgeDataflow,
 } from "./canvas";
 export { CANVAS_METRICS, canvasView, portY } from "./canvas";
+export * from "./config";
 export { nodeView } from "./details/node-view";
 export { workflowSummary } from "./details/summary";
 export type {
@@ -128,6 +138,7 @@ export {
   type HistoryLimits,
   type HistoryStatus,
 } from "./history/history";
+export { commandLabel } from "./history/labels";
 export * from "./layout";
 export type {
   Binding,
@@ -190,6 +201,7 @@ export type {
   Applied,
   ApplyOptions,
   ApplyOutcome,
+  ConfigViewResult,
   DiagnosticsResult,
   EngineApi,
   EngineRefusal,

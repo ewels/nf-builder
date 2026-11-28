@@ -1,4 +1,5 @@
 import type { Catalogue } from "./catalogue.ts";
+import type { ConfigRules } from "./config.ts";
 import type { Scaffold } from "./edit.ts";
 import type { IncludeRules } from "./includes.ts";
 import type { PackLints } from "./lint.ts";
@@ -32,6 +33,8 @@ export interface LanguagePack {
   loadLints(): Promise<PackLints>;
   /** The project templates (LA-02, F-203), loaded on first call (a dynamic import of a generated JSON chunk, so it stays out of the initial bundle). */
   loadTemplates(): Promise<TemplateSet>;
+  /** The config editor's rules over the config catalogue (F-601), loaded on first call and kept. */
+  loadConfigRules(): Promise<ConfigRules>;
 }
 
 export * from "./ast/index.ts";
@@ -48,23 +51,40 @@ export type {
   ScriptCatalogue,
   Signature,
 } from "./catalogue.ts";
+export type {
+  ConfigFormLayout,
+  ConfigPathClass,
+  ConfigRules,
+  ConfigScopeForm,
+  ConfigValueKind,
+} from "./config.ts";
 export type { Diagnostic, DiagnosticSeverity, QuickFix } from "./diagnostic.ts";
 export {
   type AddCall,
+  type AddConfigBlock,
+  type AddConfigPlugin,
   type CommandResult,
+  type ConfigContext,
+  type ConfigSelectorRef,
+  type ConfigValue,
   type Connect,
   type CreateFile,
   type CreateProcess,
   type CreateWorkflow,
   type DeleteNode,
   type Disconnect,
+  type DurationUnitName,
   EDIT_COMMAND_KINDS,
   type EditCommand,
   type FileText,
+  type MemoryUnitName,
   type RefusalCode,
+  type RemoveConfigOption,
+  type RemoveConfigPlugin,
   type RenameDeclaration,
   type ReplaceFileText,
   type Scaffold,
+  type SetConfigOption,
   type TextEdit,
   type TextPatch,
   type WorkflowTarget,
@@ -105,6 +125,7 @@ export type {
 } from "./palette.ts";
 export { exportClashes, projectPathProblem } from "./paths.ts";
 export {
+  type ConfigPrinter,
   PrintError,
   type PrintOptions,
   type PrintResult,

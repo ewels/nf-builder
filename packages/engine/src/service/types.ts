@@ -14,6 +14,7 @@ import type {
   TextPatch,
   WorkflowRef,
 } from "@nf-builder/lang-core";
+import type { ConfigSchema, ConfigView } from "../config/types";
 import type { NodeDetails, OutlineItem } from "../details/types";
 import type { FreshNameRequest } from "../edit/fresh-name";
 import type { ProjectFiles } from "../files/types";
@@ -145,6 +146,13 @@ export interface NodeDetailsResult {
   readonly details: NodeDetails | null;
 }
 
+/** The config editor's view of one config file at a revision (F-601, AR-30). */
+export interface ConfigViewResult {
+  readonly revision: number;
+  /** Null when the file's text can't be viewed at all. */
+  readonly view: ConfigView | null;
+}
+
 export interface OutlineResult {
   readonly revision: number;
   /** The declarations of a Nextflow file; empty for any other file (F-605, FI-31). */
@@ -201,6 +209,10 @@ export interface EngineApi {
     workflow: string | null,
     node: string,
   ): Promise<NodeDetailsResult | EngineRefusal>;
+  /** The config editor's view of a config file: cards, rows, selector counts and the diagnostics in them (F-601). `not-found` for a path that isn't a config file. */
+  configView(path: string): Promise<ConfigViewResult | EngineRefusal>;
+  /** The config catalogue as a clone-safe tree, for descriptions and Add scope (F-601). Needs no open project; rejects for an unknown version. */
+  configSchema(version: string): Promise<ConfigSchema>;
   /** The declarations of one file, for the details pane of a file tab (F-605, FI-31, amends ADR 0043's API list). */
   outline(path: string): Promise<OutlineResult | EngineRefusal>;
   /**
