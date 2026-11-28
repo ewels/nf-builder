@@ -5,6 +5,7 @@ import {
   type AddTake,
   type NamedOutput,
   NO_RANGE,
+  type ScriptSourceFile,
   type Section,
   type TextPatch,
   type TypedName,
@@ -49,8 +50,8 @@ function parseType(state: EditState, text: string): TypeRef | null {
 function check(
   state: EditState,
   command: AddTake | AddEmit,
-  role: Role,
-): { path: string; def: WorkflowDef; type: TypeRef | null } {
+): { file: ScriptSourceFile; def: WorkflowDef; type: TypeRef | null } {
+  const role: Role = command.kind === "addTake" ? "take" : "emit";
   const { file, def } = locateWorkflow(state, command.target);
   const refuse = (message: string) =>
     new EditRefusal("invalid", message, file.path);
@@ -65,6 +66,11 @@ function check(
   if (!isIdentifier(name))
     throw refuse(
       `"${name}" isn't a valid ${role} name. Use letters, digits and underscores, starting with a letter or underscore.`,
+    );
+  // `log` passes lint but fails at run time ("No such variable: log"), docs/research/upstream-bugs.md 27
+  if (role === "emit" && name === "log")
+    throw refuse(
+      `"log" clashes with the built-in log in Nextflow, and the run fails. Pick another emit name.`,
     );
   if (builtinNames(state.catalogue).has(name))
     throw refuse(
@@ -95,12 +101,12 @@ function check(
       `${where} is a legacy workflow, so its ${role}s have no type.`,
     );
   }
-  return { path: file.path, def, type };
+  return { file, def, type };
 }
 
 function section<T>(
   existing: Section<T> | null,
-  label: "take" | "emit",
+  label: Role,
   item: T,
 ): Section<T> {
   return existing
@@ -116,12 +122,12 @@ function section<T>(
 
 /** Appends `name: Type` (typed) or `name` (legacy) to the workflow's `take:`, creating the section when it has none. */
 export function addTake(state: EditState, command: AddTake): TextPatch[] {
-  const { path, def, type } = check(state, command, "take");
+  const { file, def, type } = check(state, command);
   if (def.main === null && def.emits === null)
     throw new EditRefusal(
       "invalid",
       `Add a step or an emit to ${def.name?.name} first; Nextflow needs one after take.`,
-      path,
+      file.path,
     );
   const item: TypedName = {
     kind: "TypedName",
@@ -129,7 +135,7 @@ export function addTake(state: EditState, command: AddTake): TextPatch[] {
     type,
     range: NO_RANGE,
   };
-  return patch(state, command, def, {
+  return patch(state, file, def, {
     ...def,
     takes: section(def.takes, "take", item),
   });
@@ -140,12 +146,12 @@ export function addTake(state: EditState, command: AddTake): TextPatch[] {
  * has none. Refused when the workflow has one emit: its call sites read it directly, and a second one would break them.
  */
 export function addEmit(state: EditState, command: AddEmit): TextPatch[] {
-  const { def, type } = check(state, command, "emit");
+  const { file, def, type } = check(state, command);
   if (def.emits?.items.length === 1)
     throw new EditRefusal(
       "invalid",
       `${def.name?.name}'s only emit is read directly at its call sites; adding a second one would break them.`,
-      command.target.path,
+      file.path,
     );
   const item: NamedOutput = {
     kind: "NamedOutput",
@@ -154,7 +160,7 @@ export function addEmit(state: EditState, command: AddEmit): TextPatch[] {
     value: nullLiteral(),
     range: NO_RANGE,
   };
-  return patch(state, command, def, {
+  return patch(state, file, def, {
     ...def,
     emits: section(def.emits, "emit", item),
   });
@@ -162,11 +168,10 @@ export function addEmit(state: EditState, command: AddEmit): TextPatch[] {
 
 function patch(
   state: EditState,
-  command: AddTake | AddEmit,
+  file: ScriptSourceFile,
   def: WorkflowDef,
   updated: WorkflowDef,
 ): TextPatch[] {
-  const { file } = locateWorkflow(state, command.target);
   const edit = reprintDeclaration(file, def, updated, state.parser.printer);
   return [{ kind: "edit", path: file.path, edits: [edit] }];
 }

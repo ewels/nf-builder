@@ -148,6 +148,13 @@ describe("F-307 AddEmit", () => {
     ]);
   });
 
+  it("F-307 UX-51: AddEmit refuses an emit named log, which passes lint but fails at run time (upstream-bugs 27)", async () => {
+    const state = await stateFor(fixture());
+    expect(
+      refused(state, emit(sort, "log", "Channel<String>")).message,
+    ).toContain("clashes with the built-in log");
+  });
+
   it("F-307 UX-51: AddEmit refuses a workflow with exactly one emit", async () => {
     const state = await stateFor({ ...fixture(), "legacy.nf": legacy });
     const r = refused(state, emit(align, "extra", "Channel<String>"));
