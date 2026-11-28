@@ -18,6 +18,7 @@ import {
   type OnNodesChange,
   ReactFlow,
   ReactFlowProvider,
+  SelectionMode,
   useNodesInitialized,
   useNodesState,
   useReactFlow,
@@ -93,6 +94,8 @@ const READ_ONLY_ARIA_LABELS = {
 } as const;
 
 const FIT = { maxZoom: 1 } as const;
+/** Held while clicking, these add a node to the selection; Shift also drags a marquee (F-310, UX-26). */
+const MULTI_SELECT_KEYS = ["Shift", "Meta", "Control"];
 
 interface WorkflowCanvasProps {
   /** The workflow tab this canvas shows (the viewport bridge looks it up, F-301). */
@@ -108,6 +111,10 @@ interface WorkflowCanvasProps {
   readonly onPortLabelsChange: (value: boolean) => void;
   readonly selected: string | null;
   readonly onSelect: (id: string | null) => void;
+  /** The selected nodes, one or several (F-310); `selected` is the single one. */
+  readonly selection: readonly string[];
+  /** The selection changed to these nodes: Shift-click, Shift-drag marquee or the keyboard (F-310, UX-26). */
+  readonly onSelectNodes: (ids: readonly string[]) => void;
   /** A request to centre a node (F-309); each `seq` is acted on once, by whichever canvas is ready first. */
   readonly focus: { readonly id: string; readonly seq: number } | null;
   /** The stored positions, kept up to date by the store (F-207). */
@@ -145,6 +152,8 @@ function CanvasInner({
   onPortLabelsChange,
   selected,
   onSelect,
+  selection,
+  onSelectNodes,
   focus,
   positions,
   notices,
@@ -205,17 +214,19 @@ function CanvasInner({
   useEffect(() => setNodes(initialNodes), [initialNodes, setNodes]);
   // the selection (held in the store) is applied apart from that, so it keeps the sizes and the viewport;
   // it also runs after each new view, which has replaced the nodes unselected
+  const chosenIds = useRef<readonly string[]>(selection);
+  chosenIds.current = selection;
   // biome-ignore lint/correctness/useExhaustiveDependencies: initialNodes re-applies the selection to the new nodes
   useEffect(
     () =>
       setNodes((current) =>
         current.map((n) =>
-          n.selected === (n.id === selected)
+          n.selected === selection.includes(n.id)
             ? n
-            : { ...n, selected: n.id === selected },
+            : { ...n, selected: selection.includes(n.id) },
         ),
       ),
-    [initialNodes, selected, setNodes],
+    [initialNodes, selection, setNodes],
   );
   useEffect(
     () =>
@@ -240,12 +251,25 @@ function CanvasInner({
       }),
     [positions, view, portLabels, setNodes],
   );
-  // selection is the store's: only React Flow's keyboard select and deselect are forwarded (single select, UX-30)
+  // selection is the store's: React Flow's select changes (click, Shift-click, marquee, keyboard) are folded into one list
+  // and forwarded once; the changes themselves are dropped, so the store stays the one source (F-310, UX-26)
   const onNodesChange: OnNodesChange<CanvasFlowNode> = (changes) => {
     const picks = changes.getByType("select");
-    const chosen = picks.find((c) => c.selected);
-    if (chosen !== undefined) onSelect(chosen.id);
-    else if (picks.some((c) => c.id === selected)) onSelect(null);
+    if (picks.length > 0) {
+      const next = new Set(chosenIds.current);
+      for (const pick of picks)
+        if (pick.selected) next.add(pick.id);
+        else next.delete(pick.id);
+      const list = [...next];
+      if (
+        list.length !== chosenIds.current.length ||
+        list.some((id, i) => id !== chosenIds.current[i])
+      ) {
+        chosenIds.current = list;
+        if (list.length > 0) setSelectedEdge(null);
+        onSelectNodes(list);
+      }
+    }
     for (const pick of picks) changes.remove(pick);
     applyNodeChanges(changes);
     // a drag stop and a keyboard move (not a drag in progress) are saved (F-207)
@@ -402,6 +426,8 @@ function CanvasInner({
   }, [ready, focus, getNode, getZoom, setCenter]);
   const host = useRef<HTMLDivElement>(null);
   useRefitOnResize(host, FIT);
+  // where the pointer is over the canvas, so a paste key lands the nodes there (F-310)
+  const pointer = useRef<{ x: number; y: number } | null>(null);
   // the palette reaches the viewport through this bridge (F-301)
   useEffect(
     () =>
@@ -414,6 +440,7 @@ function CanvasInner({
             y: (box?.top ?? 0) + (box?.height ?? 0) / 2,
           });
         },
+        pointer: () => pointer.current,
       }),
     [tab, screenToFlowPosition],
   );
@@ -487,6 +514,15 @@ function CanvasInner({
       onDragOver={onDragOver}
       onDrop={onDrop}
       onKeyDown={onKeyDown}
+      onPointerMove={(event) => {
+        pointer.current = screenToFlowPosition({
+          x: event.clientX,
+          y: event.clientY,
+        });
+      }}
+      onPointerLeave={() => {
+        pointer.current = null;
+      }}
       onFocus={onFocus}
       onBlur={onBlur}
       data-canvas-state={ready ? "ready" : "loading"}
@@ -515,10 +551,13 @@ function CanvasInner({
           onConnectStart={onConnectStart}
           onConnect={connected}
           onConnectEnd={endDrag}
-          multiSelectionKeyCode={null}
-          selectionKeyCode={null}
-          onNodeClick={(_event, n) => {
+          multiSelectionKeyCode={MULTI_SELECT_KEYS}
+          selectionKeyCode="Shift"
+          selectionMode={SelectionMode.Partial}
+          onNodeClick={(event, n) => {
             setSelectedEdge(null);
+            // a Shift, Ctrl or ⌘ click adds to or takes from the selection, which React Flow reported already
+            if (event.shiftKey || event.ctrlKey || event.metaKey) return;
             onSelect(n.id);
           }}
           onNodeDoubleClick={

@@ -17,7 +17,10 @@ import type {
   SourceLanguage,
   TextPatch,
   WorkflowRef,
+  WorkflowTarget,
 } from "@nf-builder/lang-core";
+import type { ClipboardSummary, CopyRequest } from "../clipboard/fragment";
+import type { PasteAlias } from "../clipboard/paste";
 import type { ConfigSchema, ConfigView } from "../config/types";
 import type { NodeDetails, OutlineItem } from "../details/types";
 import type { ConnectionTarget } from "../edit/connection-targets";
@@ -29,6 +32,7 @@ import type {
   LayoutStatus,
   LayoutWrite,
   MoveHint,
+  Point,
   Positions,
 } from "../layout";
 import type { ProjectFile } from "../model/project";
@@ -128,6 +132,36 @@ export interface ConnectionTargetsResult {
   readonly revision: number;
   readonly from: PortRef;
   readonly targets: readonly ConnectionTarget[];
+}
+
+export type { ClipboardSummary, CopyRequest } from "../clipboard/fragment";
+export type { PasteAlias } from "../clipboard/paste";
+
+/** What a copy put on the clipboard (F-310). */
+export interface Copied {
+  readonly revision: number;
+  readonly summary: ClipboardSummary;
+}
+
+/** The aliases a paste into `target` needs, at `revision` (F-310, ADR 0039). */
+export interface PastePlanned {
+  readonly revision: number;
+  readonly aliases: readonly PasteAlias[];
+}
+
+export interface PasteRequest {
+  readonly target: WorkflowTarget;
+  /** The aliases `planPaste` offered, confirmed by the user; a paste that needs others is refused. */
+  readonly aliases: readonly PasteAlias[];
+  /** Where the centre of the pasted nodes lands (canvas coordinates); null leaves them to the auto-layout. */
+  readonly at: Point | null;
+}
+
+/** A paste: one change, one undo step. */
+export interface Pasted extends ProjectChange {
+  readonly ok: true;
+  /** The ids of the new nodes, in the order the nodes were copied. */
+  readonly pasted: readonly string[];
 }
 
 export type ApplyOutcome = Applied | EngineRefusal;
@@ -291,6 +325,26 @@ export interface EngineApi {
   ): Promise<ConnectionTargetsResult | EngineRefusal>;
   /** A name for a new process or workflow added from the palette, free in `caller`'s scope and directory (F-301). */
   freshName(request: FreshNameRequest): Promise<FreshName | EngineRefusal>;
+  /**
+   * Puts the call nodes (processes and workflows) of a workflow, with their definitions and the connections between
+   * them, on the engine's clipboard, replacing it (F-310, UX-26; amends ADR 0043's API list). The clipboard lives in the
+   * worker, so it survives `close` and the next `open`; it holds file text the page never sees (AR-30).
+   */
+  copy(request: CopyRequest): Promise<Copied | EngineRefusal>;
+  /** What the clipboard holds, or null; needs no open project. */
+  clipboard(): Promise<ClipboardSummary | null>;
+  /** The names a paste into `target` would give the callees that are already called or taken there (F-310, F-111). */
+  planPaste(request: {
+    target: WorkflowTarget;
+  }): Promise<PastePlanned | EngineRefusal>;
+  /**
+   * Pastes the clipboard into `target` as one undo step labelled "Paste N nodes": files, includes, calls and
+   * connections, then the positions. A refused part rolls the whole paste back (F-310, ADR 0060).
+   */
+  paste(
+    request: PasteRequest,
+    revision: number,
+  ): Promise<Pasted | EngineRefusal>;
   /** The current text of a file, or null with no project or no such file. */
   readFile(path: string): Promise<string | null>;
   /** Drops the open project; later calls answer `no-project` until the next `open`. The revision counter keeps counting. */

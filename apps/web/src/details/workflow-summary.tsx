@@ -52,8 +52,13 @@ export function WorkflowSummaryView({
   onShowSuggestions,
   configPath,
   onOpenConfig,
+  pasteNodes = null,
+  onPaste,
 }: {
   readonly summary: WorkflowSummary;
+  /** The nodes on the clipboard, or null when it is empty: the summary then offers to paste them (F-310). */
+  readonly pasteNodes?: number | null;
+  readonly onPaste?: () => void;
   /** The workflow's own suggestions (F-405); null while they are being found, left out when not known. */
   readonly suggestions?: readonly Diagnostic[] | null;
   readonly onShowSuggestions?: (first: Diagnostic) => void;
@@ -69,6 +74,13 @@ export function WorkflowSummaryView({
         {summary.path}
         {summary.typed === null ? "" : summary.typed ? " · Typed" : " · Legacy"}
       </p>
+      {pasteNodes === null || onPaste === undefined ? null : (
+        <section className="details-section">
+          <button type="button" className="details-action" onClick={onPaste}>
+            {`Paste ${pasteNodes} node${pasteNodes === 1 ? "" : "s"}`}
+          </button>
+        </section>
+      )}
       <section
         className="details-section"
         data-coverage={`${summary.coverage.modelled}/${summary.coverage.statements}`}

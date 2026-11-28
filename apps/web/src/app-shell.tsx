@@ -1,6 +1,7 @@
 import { installedPackVersions } from "@nf-builder/engine";
 import { type JSX, lazy, Suspense } from "react";
 import { type CanvasContent, useWorkspace } from "./canvas/canvas-store";
+import { useClipboardKeys } from "./canvas/use-clipboard-keys";
 import { DetailsHeader } from "./details/details-header";
 import { DetailsPane } from "./details/details-pane";
 import { useFileDropGuard } from "./files/drop";
@@ -69,6 +70,7 @@ export function AppShell(): JSX.Element {
   useViewModeKeys();
   useFileDropGuard();
   useHistoryKeys();
+  useClipboardKeys();
   const readOnly = useReadOnly();
   const left = useLayout((s) => s.left);
   const right = useLayout((s) => s.right);

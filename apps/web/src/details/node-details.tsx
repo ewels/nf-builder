@@ -1,6 +1,7 @@
 import type { DetailRow, Diagnostic, NodeView } from "@nf-builder/engine";
 import type { JSX } from "react";
 import type { DetailsContent } from "../canvas/canvas-store";
+import { DetailsActions } from "./details-actions";
 import { DiagnosticList } from "./diagnostic-list";
 import { PortList } from "./port-list";
 
@@ -33,8 +34,13 @@ export function NodeDetailsView({
   view,
   details,
   onShowProblems,
+  onCopy,
+  onDelete,
 }: {
   readonly view: NodeView;
+  /** Copy and Delete for the node, each left out where it isn't offered (F-310, ADR 0056). */
+  readonly onCopy?: () => void;
+  readonly onDelete?: () => void;
   readonly details: DetailsContent;
   /** Opens the problems panel on a problem of this node (F-309). */
   readonly onShowProblems?: (first: Diagnostic) => void;
@@ -46,6 +52,7 @@ export function NodeDetailsView({
     <div className="details-node">
       <h3 className="details-name">{view.name}</h3>
       <p className="details-kind">{view.kindLabel}</p>
+      <DetailsActions onCopy={onCopy} onDelete={onDelete} />
       <section className="details-section">
         <h4>File</h4>
         <p className="details-file">

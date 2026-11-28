@@ -7,6 +7,8 @@ export interface CanvasViewport {
   readonly tab: string;
   /** The centre of the visible canvas, in flow coordinates. */
   centre(): Point;
+  /** Where the pointer last was over this canvas, in flow coordinates; null when it is outside (F-310, paste). */
+  pointer?(): Point | null;
 }
 
 const mounted = new Map<string, CanvasViewport>();

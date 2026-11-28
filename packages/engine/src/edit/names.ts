@@ -67,3 +67,15 @@ export function relativeSource(fromPath: string, toPath: string): string {
   const rest = to.slice(common).join("/");
   return up === 0 ? `./${rest}` : `${"../".repeat(up)}${rest}`;
 }
+
+/** The project path an include `source` written in the script at `fromPath` points to; null when it leaves the project. */
+export function resolveSource(fromPath: string, source: string): string | null {
+  const parts = fromPath.split("/").slice(0, -1);
+  for (const part of source.split("/")) {
+    if (part === "" || part === ".") continue;
+    if (part === "..") {
+      if (parts.pop() === undefined) return null;
+    } else parts.push(part);
+  }
+  return parts.join("/");
+}

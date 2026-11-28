@@ -1,6 +1,7 @@
 import type {
   CreateProcess,
   CreateWorkflow,
+  ScriptSourceFile,
   TextPatch,
 } from "@nf-builder/lang-core";
 import type { EditState } from "../apply";
@@ -23,6 +24,32 @@ const STATEMENT_KINDS = new Set([
 ]);
 
 type Kind = "process" | "workflow";
+
+/** The script `caller` when an include can be added to it; refuses a missing file, a non-script and top-level statements. */
+export function includableScript(
+  state: EditState,
+  caller: string,
+): ScriptSourceFile {
+  const file = state.model.file(caller)?.source;
+  if (!file)
+    throw new EditRefusal("not-found", `There is no file ${caller}.`, caller);
+  if (
+    file.language !== "nextflow" ||
+    (file.status !== "modelled" && file.status !== "partial")
+  )
+    throw new EditRefusal(
+      "invalid",
+      `${caller} isn't a Nextflow script the builder can add an include to.`,
+      caller,
+    );
+  if (file.ast?.body.some((i) => STATEMENT_KINDS.has(i.kind)))
+    throw new EditRefusal(
+      "invalid",
+      `${caller} has statements outside a workflow block, and Nextflow doesn't allow an include next to them. Move them into a workflow first.`,
+      caller,
+    );
+  return file;
+}
 
 /** A new typed process in `modules/local/<name>/main.nf`, included from the caller (LA-12). It adds no call. */
 export const createProcess = (
@@ -47,24 +74,7 @@ function createDefinition(
       "invalid",
       `"${name}" isn't a valid ${kind} name. Use letters, digits and underscores, starting with a letter or underscore.`,
     );
-  const file = state.model.file(caller)?.source;
-  if (!file)
-    throw new EditRefusal("not-found", `There is no file ${caller}.`, caller);
-  if (
-    file.language !== "nextflow" ||
-    (file.status !== "modelled" && file.status !== "partial")
-  )
-    throw new EditRefusal(
-      "invalid",
-      `${caller} isn't a Nextflow script the builder can add an include to.`,
-      caller,
-    );
-  if (file.ast?.body.some((i) => STATEMENT_KINDS.has(i.kind)))
-    throw new EditRefusal(
-      "invalid",
-      `${caller} has statements outside a workflow block, and Nextflow doesn't allow an include next to them. Move them into a workflow first.`,
-      caller,
-    );
+  const file = includableScript(state, caller);
   const path = definitionPath(kind, name);
   if (state.model.paths().includes(path))
     throw new EditRefusal(

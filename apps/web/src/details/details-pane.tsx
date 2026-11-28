@@ -10,18 +10,22 @@ import {
 import type { JSX } from "react";
 import {
   type CanvasContent,
+  canvasStore,
   type DetailsContent,
   useWorkspace,
 } from "../canvas/canvas-store";
+import { activeViewport } from "../canvas/viewport";
 import { ConfigDetails } from "../config/config-details";
 import {
   type DiagnosticsStatus,
   problemsStore,
   useProblems,
 } from "../problems/problems-store";
+import { useReadOnly } from "../read-only/read-only-store";
 import "./details.css";
 import { FileDetails } from "./file-details";
 import { NodeDetailsView } from "./node-details";
+import { SelectionSummary } from "./selection-summary";
 import { WorkflowSummaryView } from "./workflow-summary";
 
 /** The details body for the canvas content, the selection and the worker's details (UX-30, UX-31). */
@@ -34,10 +38,26 @@ export function DetailsBody({
   registry,
   configPath,
   onOpenConfig,
+  selection = [],
+  onSelectNode,
+  onCopy,
+  onDelete,
+  pasteNodes = null,
+  onPaste,
 }: {
   readonly content: CanvasContent;
   readonly selected: string | null;
   readonly details: DetailsContent;
+  /** The selected nodes' ids; two or more show the selection summary (F-310, UX-30). */
+  readonly selection?: readonly string[];
+  readonly onSelectNode?: (id: string) => void;
+  /** Left out where copy isn't offered. */
+  readonly onCopy?: () => void;
+  /** Left out where delete isn't offered: read-only (F-310, ADR 0056). */
+  readonly onDelete?: () => void;
+  /** The nodes on the clipboard, or null when it is empty or paste isn't offered. */
+  readonly pasteNodes?: number | null;
+  readonly onPaste?: () => void;
   readonly onShowProblems?: (first: Diagnostic) => void;
   /** The project's diagnostics at this revision; null while they are being pulled, left out when they failed (F-405). */
   readonly diagnostics?: readonly Diagnostic[] | null;
@@ -50,6 +70,22 @@ export function DetailsBody({
   if (content.status !== "ready")
     return <p className="muted">Nothing selected</p>;
   const { projection } = content;
+  if (selection.length >= 2) {
+    const nodes = selection.flatMap((id) => {
+      const v = nodeView(projection, id);
+      return v === null ? [] : [{ id, label: v.name, kind: v.kindLabel }];
+    });
+    return (
+      <div className="details-pane">
+        <SelectionSummary
+          nodes={nodes}
+          onSelect={(id) => onSelectNode?.(id)}
+          onCopy={onCopy}
+          onDelete={onDelete}
+        />
+      </div>
+    );
+  }
   const view = selected === null ? null : nodeView(projection, selected);
   if (view === null)
     return (
@@ -64,6 +100,8 @@ export function DetailsBody({
           onShowSuggestions={onShowProblems}
           configPath={configPath}
           onOpenConfig={onOpenConfig}
+          pasteNodes={pasteNodes}
+          onPaste={onPaste}
         />
       </div>
     );
@@ -77,6 +115,8 @@ export function DetailsBody({
         view={view}
         details={details}
         onShowProblems={onShowProblems}
+        onCopy={onCopy}
+        onDelete={onDelete}
       />
     </div>
   );
@@ -98,9 +138,22 @@ export function diagnosticsAt(
     : null;
 }
 
+/** Where a button's paste lands: the centre of the visible canvas, or the layout's choice when none is mounted. */
+const centreOfCanvas = () => {
+  const { activeTab } = canvasStore.getState();
+  return activeViewport(activeTab ?? "")?.centre() ?? null;
+};
+
 export function DetailsPane(): JSX.Element {
   const content = useWorkspace((s) => s.content);
   const selected = useWorkspace((s) => s.selected);
+  const selection = useWorkspace((s) => s.selection);
+  const select = useWorkspace((s) => s.select);
+  const copySelection = useWorkspace((s) => s.copySelection);
+  const deleteSelection = useWorkspace((s) => s.deleteSelection);
+  const paste = useWorkspace((s) => s.paste);
+  const clipboard = useWorkspace((s) => s.clipboard);
+  const readOnly = useReadOnly();
   const details = useWorkspace((s) => s.details);
   const configPath = useWorkspace((s) => {
     const tab = s.tabs.find((t) => t.id === s.activeTab);
@@ -125,6 +178,12 @@ export function DetailsPane(): JSX.Element {
       content={content}
       selected={selected}
       details={details}
+      selection={selection}
+      onSelectNode={(id) => void select(id)}
+      onCopy={readOnly ? undefined : () => void copySelection()}
+      onDelete={readOnly ? undefined : () => void deleteSelection()}
+      pasteNodes={clipboard?.nodes ?? null}
+      onPaste={readOnly ? undefined : () => void paste(centreOfCanvas())}
       diagnostics={diagnostics}
       registry={registry}
       configPath={rootConfig}

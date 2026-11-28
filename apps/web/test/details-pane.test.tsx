@@ -590,3 +590,81 @@ describe("F-405 UX-31: which diagnostics the summary shows", () => {
     expect(diagnosticsAt(ready(3), "failed", 2, list)).toBeUndefined();
   });
 });
+
+describe("F-310 details for several nodes", () => {
+  const node = (id: string, name: string) => ({
+    id,
+    kind: "take",
+    name,
+    label: name,
+    range,
+    inputs: [],
+    outputs: [],
+  });
+  const content = {
+    status: "ready",
+    revision: 1,
+    positions: {},
+    refit: true,
+    notice: null,
+    projection: {
+      workflow: {
+        path: "main.nf",
+        name: null,
+        modelled: true,
+        typed: true,
+        range,
+      },
+      nodes: [node("a", "FASTQC"), node("b", "MULTIQC")],
+      edges: [],
+      statements: [],
+    } as unknown as Projection,
+  } as const;
+  const body = (over: Partial<Parameters<typeof DetailsBody>[0]> = {}) =>
+    renderToStaticMarkup(
+      <DetailsBody
+        content={content}
+        selected={null}
+        details={{ status: "idle" }}
+        {...over}
+      />,
+    );
+
+  it("F-310 UX-30: two selected nodes show the selection summary, with Copy and Delete when offered", () => {
+    const out = body({
+      selection: ["a", "b"],
+      onCopy: () => undefined,
+      onDelete: () => undefined,
+    });
+    expect(out).toContain('data-details-state="selection"');
+    expect(out).toContain("2 nodes selected");
+    expect(out).toContain(">FASTQC<");
+    expect(out).toContain(">Copy<");
+    expect(out).toContain(">Delete<");
+    expect(out).not.toContain('data-details-state="summary"');
+  });
+
+  it("F-310 ADR-0056: read-only offers no Delete and no Paste", () => {
+    const out = body({ selection: ["a", "b"], onCopy: () => undefined });
+    expect(out).not.toContain(">Delete<");
+    expect(out).not.toContain("Paste");
+    expect(body({ pasteNodes: 2 })).not.toContain("Paste");
+  });
+
+  it("F-310 UX-26: a single node offers Copy and Delete; the summary offers Paste N nodes with nothing selected", () => {
+    const one = body({
+      selected: "a",
+      selection: ["a"],
+      details: { status: "loading", node: "a" },
+      onCopy: () => undefined,
+      onDelete: () => undefined,
+    });
+    expect(one).toContain(">Copy<");
+    expect(one).toContain(">Delete<");
+    const summary = body({ pasteNodes: 2, onPaste: () => undefined });
+    expect(summary).toContain(">Paste 2 nodes<");
+    expect(body({ pasteNodes: 1, onPaste: () => undefined })).toContain(
+      ">Paste 1 node<",
+    );
+  });
+});
