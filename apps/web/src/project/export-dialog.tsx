@@ -1,4 +1,4 @@
-// The Export dialog (F-404, UX-62): the zip's name and size, the layout checkbox (on by default, ADR 0008), warnings about
+// The Export dialog (F-404, UX-62): the zip's name and file count (the layout file only when its box is ticked), the layout checkbox (on by default, ADR 0008), warnings about
 // paths that clash when unzipped (ADR 0055) and the note that files skipped at import aren't in it.
 import { exportClashes } from "@nf-builder/engine";
 import { exportFileName } from "@nf-builder/sources/export";
@@ -18,6 +18,9 @@ export interface ExportDialogProps {
   readonly onExport: (layout: boolean) => Promise<void>;
   readonly onClose: () => void;
 }
+
+const failed = (failure: unknown) =>
+  `Couldn't export the project: ${failure instanceof Error ? failure.message : String(failure)}`;
 
 const listed = (paths: readonly string[]) =>
   paths.length > LIST_MAX
@@ -42,11 +45,7 @@ export function ExportDialog({
     let live = true;
     listRef.current().then(
       (all) => live && setPaths(all),
-      (failure: unknown) =>
-        live &&
-        setLoadError(
-          `Couldn't export the project: ${failure instanceof Error ? failure.message : String(failure)}`,
-        ),
+      (failure: unknown) => live && setLoadError(failed(failure)),
     );
     return () => {
       live = false;
@@ -54,15 +53,14 @@ export function ExportDialog({
   }, []);
 
   const hasLayout = paths?.includes(SIDECAR) ?? false;
+  const count = (paths?.length ?? 0) - (hasLayout && !layout ? 1 : 0);
   const clashes = exportClashes(paths ?? []);
   const run = () =>
     modal.run(async () => {
       try {
         await onExport(hasLayout && layout);
       } catch (failure) {
-        throw new Error(
-          `Couldn't export the project: ${failure instanceof Error ? failure.message : String(failure)}`,
-        );
+        throw new Error(failed(failure));
       }
     });
 
@@ -76,9 +74,7 @@ export function ExportDialog({
       <h2 id={titleId}>Export project</h2>
       <p>
         {exportFileName(projectName)}
-        {paths === null
-          ? null
-          : `, ${paths.length} ${paths.length === 1 ? "file" : "files"}`}
+        {paths === null ? null : `, ${count} ${count === 1 ? "file" : "files"}`}
       </p>
       <label className="dialog-choice">
         <input

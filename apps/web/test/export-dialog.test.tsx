@@ -68,6 +68,8 @@ describe("F-404 export dialog", () => {
     expect(box()?.checked).toBe(true);
     await act(async () => box()?.click());
     expect(box()?.checked).toBe(false);
+    expect(host.textContent).toContain("My pipe.zip, 1 file");
+    expect(host.textContent).not.toContain("2 files");
     await act(async () => button("Export")?.click());
     await flush();
     expect(p.onExport).toHaveBeenCalledWith(false);
