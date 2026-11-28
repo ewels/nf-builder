@@ -226,7 +226,7 @@ function push(map: Map<string, number[]>, key: string, value: number) {
 export const workflowKey = (w: { path: string; name: string | null }): string =>
   `${w.path}#${w.name ?? ""}`;
 
-/** The hints of a command: the declaration a `renameDeclaration` renamed, the node a `deleteNode` deleted. */
+/** The hints of a command: the declaration a `renameDeclaration` renamed, the node a `deleteNode` (or the nodes a `deleteNodes`) deleted. */
 export const carryHints = (command: EditCommand | undefined): CarryHints => {
   switch (command?.kind) {
     case "renameDeclaration":
@@ -237,6 +237,8 @@ export const carryHints = (command: EditCommand | undefined): CarryHints => {
       };
     case "deleteNode":
       return { deleted: [command.node] };
+    case "deleteNodes":
+      return { deleted: command.nodes };
     default:
       return {};
   }
@@ -400,11 +402,15 @@ export function carryLayout(
     if (after === null) continue;
     const map = matchNodes(before, after, hints);
     const oldSignatures = nodeSignatures(before);
+    const dropped: [string, Point][] = [];
     for (const [id, p] of Object.entries(stored)) {
       const target = map.get(id);
       if (target !== undefined) additions[target] = p;
-      else removed?.remember(fromKey, oldSignatures.get(id) ?? id, p);
+      else dropped.push([id, p]);
     }
+    // newest first: nodes of one change come back in the order they had (F-310)
+    for (const [id, p] of dropped.reverse())
+      removed?.remember(fromKey, oldSignatures.get(id) ?? id, p);
     const matchedNew = new Set(map.values());
     const newSignatures = nodeSignatures(after);
     for (const n of after.nodes) {

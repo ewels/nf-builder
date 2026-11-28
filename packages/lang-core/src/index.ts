@@ -72,6 +72,7 @@ export {
   type CreateProcess,
   type CreateWorkflow,
   type DeleteNode,
+  type DeleteNodes,
   type Disconnect,
   type DurationUnitName,
   EDIT_COMMAND_KINDS,

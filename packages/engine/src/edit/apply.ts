@@ -29,6 +29,7 @@ import { connect, disconnect } from "./commands/connect";
 import { createProcess, createWorkflow } from "./commands/create-definition";
 import { createFile } from "./commands/create-file";
 import { deleteNode } from "./commands/delete-node";
+import { deleteNodes } from "./commands/delete-nodes";
 import { renameDeclaration } from "./commands/rename";
 import { replaceFileText } from "./commands/replace-file-text";
 import { checkResult } from "./guards";
@@ -81,6 +82,8 @@ const build = (state: EditState, command: EditCommand): TextPatch[] => {
       return disconnect(state, command);
     case "deleteNode":
       return deleteNode(state, command);
+    case "deleteNodes":
+      return deleteNodes(state, command);
     case "setConfigOption":
       return setConfigOption(state, command);
     case "removeConfigOption":

@@ -13,6 +13,10 @@ const samples: Record<EditCommand["kind"], [EditCommand, string]> = {
   connect: [{ kind: "connect", target, from: port, to: port }, "Connect"],
   disconnect: [{ kind: "disconnect", target, port }, "Disconnect"],
   deleteNode: [{ kind: "deleteNode", target, node: "n" }, "Delete node"],
+  deleteNodes: [
+    { kind: "deleteNodes", target, nodes: ["a", "b"] },
+    "Delete 2 nodes",
+  ],
   renameDeclaration: [
     {
       kind: "renameDeclaration",

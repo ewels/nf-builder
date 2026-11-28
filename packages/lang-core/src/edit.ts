@@ -53,6 +53,17 @@ export interface DeleteNode {
   readonly node: string;
 }
 
+/**
+ * Remove the statements of several nodes in one command (F-310, UX-26, AR-23), clearing the arguments they fed and
+ * turning an assignment nothing reads any more into a bare call.
+ */
+export interface DeleteNodes {
+  readonly kind: "deleteNodes";
+  readonly target: WorkflowTarget;
+  /** Projection node ids of the target workflow. */
+  readonly nodes: readonly string[];
+}
+
 /** Rename a declaration, its references and the include entries that name it. */
 export interface RenameDeclaration {
   readonly kind: "renameDeclaration";
@@ -166,6 +177,7 @@ export type EditCommand =
   | Connect
   | Disconnect
   | DeleteNode
+  | DeleteNodes
   | RenameDeclaration
   | ReplaceFileText
   | SetConfigOption
@@ -182,6 +194,7 @@ export const EDIT_COMMAND_KINDS = [
   "connect",
   "disconnect",
   "deleteNode",
+  "deleteNodes",
   "renameDeclaration",
   "replaceFileText",
   "setConfigOption",

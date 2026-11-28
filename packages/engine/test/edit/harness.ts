@@ -205,6 +205,16 @@ export function buildCommand(state: EditState, c: Choice): EditCommand | null {
       const n = w && pick(w.projection.nodes, c.b);
       return w && n ? { kind, target: w.target, node: n.id } : null;
     }
+    case "deleteNodes": {
+      // one to three nodes of one workflow, from `b` on
+      const w = workflow((p) => p.nodes.length > 0);
+      if (!w) return null;
+      const all = w.projection.nodes;
+      const nodes = [0, 1, 2]
+        .slice(0, 1 + (c.a % 3))
+        .flatMap((i) => all[(c.b + i * 5) % all.length]?.id ?? []);
+      return { kind, target: w.target, nodes };
+    }
     case "renameDeclaration": {
       const decls = scripts.flatMap((path) =>
         [...(state.model.file(path)?.declarations.keys() ?? [])].map(
@@ -417,7 +427,8 @@ function checkAccepted(
     case "addCall":
     case "connect":
     case "disconnect":
-    case "deleteNode": {
+    case "deleteNode":
+    case "deleteNodes": {
       expect(patches.map((p) => p.path)).toEqual([command.target.path]);
       const before = state.model.file(command.target.path)?.source;
       const def = workflowDef(before, command.target.workflow);

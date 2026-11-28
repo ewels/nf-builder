@@ -22,6 +22,7 @@ const commands: Record<EditCommand["kind"], EditCommand> = {
   connect: { kind: "connect", target, from: port, to: port },
   disconnect: { kind: "disconnect", target, port },
   deleteNode: { kind: "deleteNode", target, node: "n" },
+  deleteNodes: { kind: "deleteNodes", target, nodes: ["n"] },
   renameDeclaration: {
     kind: "renameDeclaration",
     path: "b.nf",

@@ -18,6 +18,7 @@ export type {
   CreateWorkflow,
   Dataflow,
   DeleteNode,
+  DeleteNodes,
   Diagnostic,
   DiagnosticCode,
   Disconnect,

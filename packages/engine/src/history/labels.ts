@@ -24,6 +24,10 @@ export function commandLabel(command: EditCommand): string {
       return "Disconnect";
     case "deleteNode":
       return "Delete node";
+    case "deleteNodes":
+      return command.nodes.length === 1
+        ? "Delete node"
+        : `Delete ${command.nodes.length} nodes`;
     case "renameDeclaration":
       return `Rename ${command.name} to ${command.newName}`;
     case "replaceFileText":
