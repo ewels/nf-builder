@@ -383,3 +383,11 @@ Paused at the maintainer's request after F-304 for MVP testing. To resume:
   - CI artefacts download with `gh api repos/ewels/nf-builder/actions/artifacts/<id>/zip`; run ids come from the failing check's details URL.
   - New command kinds shift the edit harness's seeded draws: add a PRELUDE entry or a generator filter for no-op inputs; never change an assertion.
   - Builders' e2e may share ports 4173/5173 across worktrees; they must only trust runs against their own server.
+
+## Maintainer decisions, 2026-11-28 (after MVP testing)
+
+- Nothing is deferred past the first release: F-313 to F-317 and F-407 (binary files, pulled out of M8) are in v0.1. M8 still holds F-211 and F-402 unless the maintainer says otherwise.
+- Visual design polish (custom type-ahead and select, icon buttons, form row layout, styling) waits for one design pass: the maintainer will work in Claude Design from a handover bundle (screenshots of every screen and state, component inventory with states and accessibility needs, CSS tokens, constraints). Until then, new UI uses plain, consistent markup in shared components with minimal CSS tokens.
+- Phases: 1 MVP fixes and functional feedback (`plan-mvp-feedback.md`); 2 finish editing (F-305, F-306, F-314, a new "drop on a node to add a take or input" feature, F-311, F-312, F-308, F-313, F-315, F-316, F-317); 3 F-407, F-406, F-504, F-506; 4 M6; 5 design pass; 6 M7.
+- New feature (to be added with `scope-change`): drag an output and hold it over a workflow or process node; after about a second a tooltip offers "Drop to add take and connect" or "Drop to add input and connect"; the port's name and type come from the source; one undo step; not for registry modules (use F-506's "Make a local copy" first); off in read-only. Hovering an existing port keeps today's connect behaviour.
+- Records: one batch ADR for the MVP feedback changes; a normal ADR per new feature.
