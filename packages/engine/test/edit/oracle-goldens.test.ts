@@ -115,6 +115,17 @@ const goldens = {
       }),
     ],
   },
+  "template-blank -> f505-plugin": {
+    start: "../../../packages/lang-2610/templates/blank",
+    expected: "f505-plugin",
+    steps: [
+      (): EditCommand => ({
+        kind: "addConfigPlugin",
+        path: "nextflow.config",
+        id: "nf-schema@3.1.0",
+      }),
+    ],
+  },
   "f111-start-legacy -> f111-edits-legacy": {
     start: "f111-start-legacy",
     expected: "f111-edits-legacy",
@@ -140,7 +151,7 @@ const goldens = {
 
 describe("F-111 oracle goldens", () => {
   for (const [name, g] of Object.entries(goldens))
-    it(`F-111 F-301 step 2 step 3 ADR-0011: the scripted edits on ${g.start} produce tools/oracle/cases/${g.expected} byte for byte (${name})`, async () => {
+    it(`F-111 F-301 F-505 IO-33 step 2 step 3 ADR-0011: the scripted edits on ${g.start} produce tools/oracle/cases/${g.expected} byte for byte (${name})`, async () => {
       const result = await run(g.start, g.steps);
       for (const [path, text] of Object.entries(result))
         await expect(text).toMatchFileSnapshot(join(cases, g.expected, path));

@@ -40,6 +40,7 @@ Plans written by the planner agent on 2026-11-22 for features not yet merged, ke
 | F-601 config editor | merged, PR #60 | Plan deleted in its PR. |
 | F-405 legacy import summary | merged, PR #61 | Plan deleted in its PR. |
 | F-302 connect ports | merged, PR #62 | Plan deleted in its PR. |
+| F-505 registry plugins | merged, PR #64 | Plan deleted in its PR. |
 
 ## Merge order
 
@@ -331,7 +332,7 @@ ADR numbers reserved for features in flight, so parallel branches don't clash: 0
 ### F-405 — plan deleted
 - Accept every recommendation in section 6. ADR number: the next free one when F-405 starts.
 
-### F-505 — [plan](plan-F-505.md)
+### F-505 — plan deleted
 - Accept every recommendation in section 6: add F-601 and F-301 to F-505's `depends_on` in its PR (`scope-change`); tasks 1 to 3 may start before they merge, tasks 4 to 7 after.
 
 ### F-404 — plan deleted

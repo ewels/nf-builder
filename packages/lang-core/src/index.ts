@@ -1,4 +1,4 @@
-import type { Catalogue } from "./catalogue.ts";
+import type { Catalogue, ConfigCatalogue } from "./catalogue.ts";
 import type { ConfigRules } from "./config.ts";
 import type { Scaffold } from "./edit.ts";
 import type { IncludeRules } from "./includes.ts";
@@ -33,8 +33,11 @@ export interface LanguagePack {
   loadLints(): Promise<PackLints>;
   /** The project templates (LA-02, F-203), loaded on first call (a dynamic import of a generated JSON chunk, so it stays out of the initial bundle). */
   loadTemplates(): Promise<TemplateSet>;
-  /** The config editor's rules over the config catalogue (F-601), loaded on first call and kept. */
-  loadConfigRules(): Promise<ConfigRules>;
+  /**
+   * The config editor's rules over the config catalogue (F-601), loaded on first call and kept. With a `catalogue` (the
+   * pack's with plugin scopes merged in, F-505), fresh rules over that one, not kept.
+   */
+  loadConfigRules(catalogue?: ConfigCatalogue): Promise<ConfigRules>;
 }
 
 export * from "./ast/index.ts";

@@ -28,6 +28,8 @@ import type {
   Positions,
 } from "../layout";
 import type { ProjectFile } from "../model/project";
+import type { PluginScopes } from "../plugins/config-scopes";
+import type { DeclaredPlugin } from "../plugins/declared";
 import type { ProjectReport } from "../report/report";
 import type { TemplateList } from "../templates";
 
@@ -156,6 +158,8 @@ export interface DiagnosticsResult {
   readonly diagnostics: readonly Diagnostic[];
   /** The registry module folders, so the Suggestions tab can list their files last (F-405). */
   readonly registry: readonly RegistryFolder[];
+  /** The plugin scopes the lints used (`EngineApi.setPluginScopes`); the page pulls again when it changes (F-505). */
+  readonly pluginsKey: string;
 }
 
 export interface NodeDetailsResult {
@@ -169,6 +173,14 @@ export interface ConfigViewResult {
   readonly revision: number;
   /** Null when the file's text can't be viewed at all. */
   readonly view: ConfigView | null;
+  /** The plugin scopes the view's rules used; the page pulls again when it changes (F-505). */
+  readonly pluginsKey: string;
+}
+
+/** The plugins the root `nextflow.config` declares at a revision (F-505, IO-33). */
+export interface PluginsResult {
+  readonly revision: number;
+  readonly plugins: readonly DeclaredPlugin[];
 }
 
 export interface OutlineResult {
@@ -231,6 +243,12 @@ export interface EngineApi {
   configView(path: string): Promise<ConfigViewResult | EngineRefusal>;
   /** The config catalogue as a clone-safe tree, for descriptions and Add scope (F-601). Needs no open project; rejects for an unknown version. */
   configSchema(version: string): Promise<ConfigSchema>;
+  /** The plugins declared in the root `nextflow.config`, in source order (F-505, IO-33; amends ADR 0043's API list). */
+  plugins(): Promise<PluginsResult | EngineRefusal>;
+  /** Gives the worker the config scopes of the declared plugins' specs, which the page read; replaces the last set. Cleared when a project opens or closes (F-505, FI-01). */
+  setPluginScopes(
+    scopes: readonly PluginScopes[],
+  ): Promise<{ readonly pluginsKey: string }>;
   /** The declarations of one file, for the details pane of a file tab (F-605, FI-31, amends ADR 0043's API list). */
   outline(path: string): Promise<OutlineResult | EngineRefusal>;
   /**

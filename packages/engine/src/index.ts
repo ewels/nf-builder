@@ -169,6 +169,18 @@ export { loadPalette } from "./palette";
 export { type PaletteAction, paletteAction } from "./palette-actions";
 export { paletteItemCount, queryTerms, searchPalette } from "./palette-search";
 export {
+  type PluginScopes,
+  pluginConfigNodes,
+  pluginsKey,
+} from "./plugins/config-scopes";
+export type { DeclaredPlugin } from "./plugins/declared";
+export {
+  type PluginPaletteGroup,
+  type PluginPaletteItem,
+  pluginPaletteGroup,
+  searchPluginGroups,
+} from "./plugins/palette";
+export {
   nodeAtRange,
   type ProblemCounts,
   type ProblemGroup,
@@ -224,6 +236,7 @@ export type {
   NodeDetailsResult,
   OpenRequest,
   OutlineResult,
+  PluginsResult,
   ProjectChange,
   ProjectFiles,
   ProjectionResult,

@@ -39,6 +39,8 @@ export function connectEngine(
     report: () => race(remote.report()),
     configView: (path) => race(remote.configView(path)),
     configSchema: (version) => race(remote.configSchema(version)),
+    plugins: () => race(remote.plugins()),
+    setPluginScopes: (scopes) => race(remote.setPluginScopes(scopes)),
     setLayout: (write) => race(remote.setLayout(write)),
     readFile: (path) => race(remote.readFile(path)),
     listFiles: () => race(remote.listFiles()),

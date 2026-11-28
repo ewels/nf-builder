@@ -208,6 +208,12 @@ export interface WorkspaceActions {
     session?: number,
   ): Promise<PaletteAddOutcome>;
   /**
+   * Adds a registry plugin to the project's `plugins` block as one undo step: `CreateFile` of `nextflow.config` first
+   * when it is missing, then `AddConfigPlugin`. A refused second part is undone, so a refusal changes nothing (F-505,
+   * IO-33, AR-23). Runs as one task of the queue of applies, undos and redos.
+   */
+  addPlugin(request: PluginAdd, session?: number): Promise<PluginAddOutcome>;
+  /**
    * Feeds the `from` output port into the `to` input port of the active workflow tab as one undo step (F-302, UX-25).
    * A refusal sets `canvasNotice`. The view that follows keeps the viewport (ADR 0052).
    */
@@ -249,6 +255,17 @@ export type PaletteAddOutcome =
       readonly path: string;
       readonly node: string;
     }
+  | { readonly ok: false; readonly message: string };
+
+/** A registry plugin to add to `nextflow.config` (F-505, IO-33). */
+export interface PluginAdd {
+  readonly id: string;
+  /** The snapshot's release. */
+  readonly version: string;
+}
+
+export type PluginAddOutcome =
+  | { readonly ok: true; readonly id: string; readonly version: string }
   | { readonly ok: false; readonly message: string };
 
 /** The workflow a project opens with: main.nf's entry, else the first entry workflow, else the first named one. */
@@ -319,6 +336,7 @@ export function tabFor(ref: {
   };
 }
 
+const CONFIG_PATH = "nextflow.config";
 const NO_PROJECT_ADD = "Open or create a project to add components.";
 const FILE_TAB_ADD = "Open a workflow tab to add components to it.";
 const NO_ACTION_ADD = "That item can't be added from the palette yet.";
@@ -714,6 +732,31 @@ export function createCanvasStore(
     async function afterApply(outcome: ApplyOutcome): Promise<void> {
       await adoptNewer(outcome);
       if (!outcome.ok && outcome.code === "internal") await refreshHistory();
+    }
+
+    /** `call`, with a throw turned into an internal refusal. */
+    async function safely<T>(
+      call: () => Promise<T>,
+    ): Promise<T | EngineRefusal> {
+      try {
+        return await call();
+      } catch (error) {
+        return refusal("internal", messageOf(error));
+      }
+    }
+
+    /** Undoes only the first part of a group, so a refused second part leaves nothing behind. */
+    async function discardFirstPart(session: number): Promise<void> {
+      await sendNow(
+        session,
+        (revision) =>
+          safely(() =>
+            engine().undo(revision, { discard: true }),
+          ) as Promise<HistoryOutcome>,
+        async (outcome) => {
+          if (!outcome.ok) await refreshHistory();
+        },
+      );
     }
 
     /** Sends the code panes' pending edits; outside the queue, as their send is queued itself. */
@@ -1179,20 +1222,7 @@ export function createCanvasStore(
               afterApply,
             );
             if (!calling.ok) {
-              // only the group's first part is undone, so nothing is left behind
-              await sendNow(
-                mine,
-                async (revision) => {
-                  try {
-                    return await engine().undo(revision, { discard: true });
-                  } catch (error) {
-                    return refusal("internal", messageOf(error));
-                  }
-                },
-                async (outcome) => {
-                  if (!outcome.ok) await refreshHistory();
-                },
-              );
+              await discardFirstPart(mine);
               return refused(calling);
             }
             await get().select(key);
@@ -1200,6 +1230,68 @@ export function createCanvasStore(
           } finally {
             addsPending--;
           }
+        });
+      },
+
+      addPlugin(request, session) {
+        const mine = session ?? get().session;
+        const fail = (message: string): PluginAddOutcome => ({
+          ok: false,
+          message,
+        });
+        const { summary } = get();
+        if (mine !== get().session || summary === null)
+          return Promise.resolve(fail(NO_PROJECT_ADD));
+        if (readOnly()) return Promise.resolve(fail(READ_ONLY_REFUSAL));
+        const { id, version } = request;
+        return enqueue(async () => {
+          await flushPending();
+          const group = `plugin-${mine}-${++adds}`;
+          const label = `Add plugin ${id}@${version}`;
+          const refused = (outcome: EngineRefusal): PluginAddOutcome =>
+            fail(`Couldn't add ${id}: ${outcome.message} Nothing was changed.`);
+          const missing = !get().summary?.files.some(
+            (f) => f.path === CONFIG_PATH,
+          );
+          if (missing) {
+            const creating = await sendNow(
+              mine,
+              (revision) =>
+                safely(() =>
+                  engine().apply(
+                    { kind: "createFile", path: CONFIG_PATH },
+                    revision,
+                    { group, label },
+                  ),
+                ) as Promise<ApplyOutcome>,
+              afterApply,
+            );
+            if (!creating.ok) return refused(creating);
+          }
+          const adding = await sendNow(
+            mine,
+            async (revision) => {
+              try {
+                return await engine().apply(
+                  {
+                    kind: "addConfigPlugin",
+                    path: CONFIG_PATH,
+                    id: `${id}@${version}`,
+                  },
+                  revision,
+                  { group, label },
+                );
+              } catch (error) {
+                return refusal("internal", messageOf(error));
+              }
+            },
+            afterApply,
+          );
+          if (!adding.ok) {
+            if (missing) await discardFirstPart(mine);
+            return refused(adding);
+          }
+          return { ok: true, id, version };
         });
       },
 

@@ -1,8 +1,11 @@
 import { queryTerms } from "@nf-builder/engine";
 import { createRegistrySearch, type RegistryIndex } from "@nf-builder/sources";
+import { isValidElement, type ReactElement, type ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
+import { PALETTE_MIME } from "../src/palette/palette-drag";
 import { PalettePanel } from "../src/palette/palette-panel";
+import { RegistryPluginRow } from "../src/registry/registry-lists";
 import { RegistrySectionView } from "../src/registry/registry-section";
 import type { RegistryState } from "../src/registry/registry-store";
 
@@ -296,5 +299,116 @@ describe("registry section", () => {
     expect(html).toMatch(/role="status"[^>]*>Loading components…/);
     expect(html).toContain("registry.nextflow.io");
     expect(html).toContain("Loading registry modules…");
+  });
+});
+
+describe("F-505 registry plugin rows", () => {
+  const index = indexOf();
+  const view = (extra: {
+    declared?: ReadonlySet<string>;
+    readOnly?: boolean;
+    onAddPlugin?: (id: string) => void;
+  }) =>
+    renderToStaticMarkup(
+      <RegistrySectionView
+        state={ready(index)}
+        now={NOW}
+        query=""
+        matches={createRegistrySearch(index)(queryTerms(""))}
+        open={{ modules: false, plugins: true }}
+        collapsed={new Set()}
+        onToggle={noop}
+        onToggleNamespace={noop}
+        onRefresh={noop}
+        {...extra}
+      />,
+    );
+  const find = (node: ReactNode, type: string): ReactElement | null => {
+    if (!isValidElement(node)) return null;
+    const el = node as ReactElement<{ children?: ReactNode }>;
+    if (el.type === type) return el;
+    for (const child of [el.props.children].flat()) {
+      const hit = find(child as ReactNode, type);
+      if (hit) return hit;
+    }
+    return null;
+  };
+
+  it("F-505 QA-11 UX-15: a registry plugin row is a draggable button described by its summary; Enter calls addPlugin", () => {
+    const html = view({});
+    expect(html).toMatch(
+      /<li[^>]*class="registry-item"[^>]*data-name="nf-schema"/,
+    );
+    expect(html).toMatch(/<button[^>]*type="button"[^>]*draggable="true"/);
+    const describedBy =
+      /<button[^>]*draggable="true"[^>]*aria-describedby="([^"]+)"/.exec(
+        html,
+      )?.[1];
+    expect(describedBy).toBeDefined();
+    expect(html).toContain(
+      `<span id="${describedBy}" class="visually-hidden">Schema validation</span>`,
+    );
+    expect(html).not.toContain("added");
+    const calls: string[] = [];
+    const row = RegistryPluginRow({
+      id: "nf-schema",
+      summary: "Schema validation",
+      added: false,
+      readOnly: false,
+      onAdd: (id) => void calls.push(id),
+    });
+    const button = find(row, "button") as ReactElement<{
+      onClick: () => void;
+      onDragStart: (e: unknown) => void;
+    }>;
+    // a native button: Enter and Space click it; there is no key handler that could add twice
+    expect(button.props).not.toHaveProperty("onKeyDown");
+    button.props.onClick();
+    expect(calls).toEqual(["nf-schema"]);
+    const data: Record<string, string> = {};
+    button.props.onDragStart({
+      dataTransfer: {
+        setData: (k: string, v: string) => {
+          data[k] = v;
+        },
+        effectAllowed: "",
+      },
+      preventDefault: noop,
+    });
+    expect(data).toEqual({ [PALETTE_MIME]: "registry-plugin:nf-schema" });
+  });
+
+  it("F-505 QA-12: a declared plugin's row says added in text", () => {
+    expect(view({ declared: new Set(["nf-schema"]) })).toMatch(
+      /<span class="registry-badge-added">added<\/span>/,
+    );
+  });
+
+  it("F-505 UX-04: in read-only the row is aria-disabled, not draggable, and adds nothing", () => {
+    const html = view({ readOnly: true });
+    expect(html).toMatch(/<button[^>]*aria-disabled="true"/);
+    expect(html).not.toContain('draggable="true"');
+    const calls: string[] = [];
+    const row = RegistryPluginRow({
+      id: "nf-schema",
+      summary: "s",
+      added: false,
+      readOnly: true,
+      onAdd: (id) => void calls.push(id),
+    });
+    const button = find(row, "button") as ReactElement<{
+      onClick: () => void;
+      onDragStart: (e: unknown) => void;
+    }>;
+    button.props.onClick();
+    let prevented = false;
+    button.props.onDragStart({
+      dataTransfer: { setData: noop },
+      preventDefault: () => {
+        prevented = true;
+      },
+    });
+    expect(calls).toEqual([]);
+    expect(prevented).toBe(true);
   });
 });

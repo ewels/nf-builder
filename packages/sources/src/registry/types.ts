@@ -2,6 +2,7 @@ import type {
   SnapshotModule,
   SnapshotModulePorts,
   SnapshotPlugin,
+  SnapshotPluginFile,
 } from "@nf-builder/lang-core";
 
 export type RegistrySource = "live" | "snapshot";
@@ -57,4 +58,9 @@ export interface RegistryClient {
     name: string,
     options?: RegistryReadOptions,
   ): Promise<SnapshotModulePorts | null>;
+  /**
+   * A plugin's spec (plugins/<id>/<version>.json) from the snapshot, never live (ADR 0050), read once per id and
+   * version. Rejects "unavailable" when the snapshot has no file for that release.
+   */
+  plugin(id: string, version: string): Promise<SnapshotPluginFile>;
 }
