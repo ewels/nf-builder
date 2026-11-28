@@ -20,6 +20,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { canvasStore, useWorkspace } from "../canvas/canvas-store";
 import { getEngine } from "../engine/engine-client";
 import { useProjects } from "../project/project-store";
+import { isReadOnly } from "../read-only/read-only-store";
 import { GlyphIcon } from "../shell/icons";
 import { type AddFilesState, createAddFiles } from "./add-files";
 import { AddFilesDialog } from "./add-files-dialog";
@@ -203,6 +204,7 @@ export function FilesPanel(): JSX.Element {
     workspace: getEngine,
     session: () => canvasStore.getState().session,
     flush: () => canvasStore.getState().flushEdits(),
+    readOnly: isReadOnly,
     onChange: (state) => {
       setAdding(state);
       const { notify } = filesStore.getState();

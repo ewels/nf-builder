@@ -1,6 +1,7 @@
 import type { ImportSummary } from "@nf-builder/sources";
 import { describe, expect, it } from "vitest";
 import { type AddFilesState, createAddFiles } from "../src/files/add-files";
+import { READ_ONLY_REFUSAL } from "../src/read-only/read-only-store";
 import type {
   AddChoice,
   AddPreviewResult,
@@ -41,6 +42,7 @@ function setup(
     previewAdd?: (c: AddChoice) => Promise<AddPreviewResult>;
     addFiles?: (c: AddChoice) => Promise<unknown>;
     session?: () => number;
+    readOnly?: () => boolean;
   } = {},
 ) {
   const calls: string[] = [];
@@ -93,6 +95,7 @@ function setup(
     flush: async () => {
       calls.push("flush");
     },
+    readOnly: overrides.readOnly ?? (() => false),
     onAdded: (folder, count) => added.push([folder, count]),
     timer: timers,
     debounceMs: 300,
@@ -216,6 +219,47 @@ describe("F-210 add files", () => {
         "Folders can't be dropped. Drop the files in it, or a zip of the folder.",
     });
     expect(folder.calls).toEqual([]);
+  });
+
+  it("F-210 F-703 UX-04: a drop while read-only is refused before anything is staged or previewed", async () => {
+    const t = setup({ readOnly: () => true });
+    t.view.start({ kind: "files", files: [file("a.csv")] }, "");
+    await t.settle();
+    expect(t.calls).toEqual([]);
+    expect(t.last()).toEqual({
+      status: "refused",
+      name: "",
+      message: READ_ONLY_REFUSAL,
+    });
+  });
+
+  it("F-210 F-703 UX-04: an add in flight when the window narrows is refused before it writes", async () => {
+    let narrow = false;
+    const t = setup({ readOnly: () => narrow });
+    t.view.start({ kind: "files", files: [file("a.csv")] }, "");
+    await t.settle();
+    narrow = true;
+    expect(await t.view.confirm()).toBe(false);
+    expect(t.calls.some((c) => c.startsWith("addFiles"))).toBe(false);
+    expect(t.last()).toMatchObject({
+      status: "refused",
+      message: READ_ONLY_REFUSAL,
+    });
+    expect(t.added).toEqual([]);
+  });
+
+  it("F-210 F-703 UX-04: a preview after an ignore-list edit is not requested once read-only", async () => {
+    let narrow = false;
+    const t = setup({ readOnly: () => narrow });
+    t.view.start({ kind: "zip", file: file("pipe.zip") }, "");
+    await t.settle();
+    const before = t.calls.length;
+    t.view.setIgnore("x/\n");
+    narrow = true;
+    t.timers.run();
+    await t.settle();
+    expect(t.calls.length).toBe(before);
+    expect(t.last()).toMatchObject({ status: "refused" });
   });
 
   it("F-210 UX-16: a stage that finishes after another project opened is discarded", async () => {

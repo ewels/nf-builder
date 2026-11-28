@@ -2,6 +2,7 @@
 // worker (its text never reaches the page), previewed against the project, and written on confirm. As with the New project
 // dialog's zip (F-403), an ignore-list edit previews again after a short pause and a reply a newer request has overtaken
 // is dropped.
+import { READ_ONLY_REFUSAL } from "../read-only/read-only-store";
 import type { Timer } from "../workspace/autosave";
 import type {
   AddChoice,
@@ -61,6 +62,8 @@ interface AddFilesDeps {
   flush(): Promise<void>;
   /** After the files were written: the folder they went to and how many. */
   onAdded(folder: string, count: number): void;
+  /** Whether the app is read-only (F-703, UX-04): adding is a raw write, so it is refused then, even one already staged. */
+  readOnly(): boolean;
   readonly timer?: Timer;
   readonly debounceMs?: number;
 }
@@ -118,16 +121,16 @@ export function createAddFiles(
 
   /** The preview of `choice`; a call that throws is a "gone" refusal. */
   const previewOf = (choice: AddChoice): Promise<AddPreviewResult> =>
-    deps
-      .workspace()
-      .previewAdd(choice)
-      .catch(
-        (failure: unknown): AddPreviewResult => ({
-          ok: false,
-          code: "gone",
-          message: messageOf(failure),
-        }),
-      );
+    (deps.readOnly()
+      ? Promise.reject(new Error(READ_ONLY_REFUSAL))
+      : deps.workspace().previewAdd(choice)
+    ).catch(
+      (failure: unknown): AddPreviewResult => ({
+        ok: false,
+        code: "gone",
+        message: messageOf(failure),
+      }),
+    );
 
   const preview = () => {
     handle = undefined;
@@ -159,6 +162,8 @@ export function createAddFiles(
     start(kind, folder) {
       dropStage();
       if (kind.kind === "none") return set(IDLE);
+      if (deps.readOnly())
+        return set({ status: "refused", name: "", message: READ_ONLY_REFUSAL });
       if (kind.kind === "folder")
         return set({
           status: "refused",
@@ -229,6 +234,7 @@ export function createAddFiles(
       let outcome: Awaited<ReturnType<WorkspaceApi["addFiles"]>>;
       try {
         await deps.flush();
+        if (deps.readOnly()) throw new Error(READ_ONLY_REFUSAL);
         outcome = await deps.workspace().addFiles(choiceOf(ready));
       } catch (failure) {
         outcome = {
