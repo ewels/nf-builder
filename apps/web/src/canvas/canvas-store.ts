@@ -401,9 +401,12 @@ const IDLE: DetailsContent = { status: "idle" };
 const messageOf = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
 
-/** `modules/local/<lower name>`, the folder of a process whose file is its module's `main.nf` (LA-12); else null. */
+/** `modules/local/<lower name>`, the folder of a module of that name (LA-12). */
+const folderOf = (name: string): string => `modules/local/${name.toLowerCase()}`;
+
+/** The module folder of a process whose file is its module's `main.nf`; else null. */
 function moduleFolder(path: string, name: string): string | null {
-  const folder = `modules/local/${name.toLowerCase()}`;
+  const folder = folderOf(name);
   return path === `${folder}/main.nf` ? folder : null;
 }
 
@@ -1339,11 +1342,19 @@ export function createCanvasStore(
               newName: form.name,
             });
             const folder = moduleFolder(target.path, target.name);
-            if (folder !== null) {
-              const outline = await engine()
-                .outline(target.path)
-                .catch(() => null);
+            const newFolder = folderOf(form.name);
+            // a case-only rename keeps the folder, and a folder that is taken stays where it is
+            if (folder !== null && newFolder !== folder) {
+              const [outline, taken] = await Promise.all([
+                engine()
+                  .outline(target.path)
+                  .catch(() => null),
+                engine()
+                  .readFile(`${newFolder}/main.nf`)
+                  .catch(() => null),
+              ]);
               if (
+                taken === null &&
                 outline !== null &&
                 !("ok" in outline) &&
                 declaresOnly(outline.items, target.name)
@@ -1351,7 +1362,7 @@ export function createCanvasStore(
                 commands.push({
                   kind: "moveFile",
                   path: folder,
-                  newPath: `modules/local/${form.name.toLowerCase()}`,
+                  newPath: newFolder,
                 });
             }
           }

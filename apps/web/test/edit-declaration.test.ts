@@ -100,3 +100,28 @@ describe("F-303 editDeclaration with the real engine", () => {
     );
   });
 });
+
+describe("F-303 editDeclaration module folder", () => {
+  it("F-303 LA-12: a case-only rename renames the process and keeps its folder", async () => {
+    const { service, edit } = await setup();
+    const outcome = await edit("GREET", (f) => ({ ...f, name: "Greet" }));
+    expect(outcome.ok).toBe(true);
+    expect(await service.readFile("modules/local/greet/main.nf")).toContain(
+      "process Greet {",
+    );
+  });
+
+  it("F-303 LA-12: a rename whose module folder is taken keeps the file where it is", async () => {
+    const { service, edit } = await setup({
+      "modules/local/hello/main.nf": proc("OTHER"),
+    });
+    const outcome = await edit("GREET", (f) => ({ ...f, name: "HELLO" }));
+    expect(outcome.ok).toBe(true);
+    expect(await service.readFile("modules/local/greet/main.nf")).toContain(
+      "process HELLO {",
+    );
+    expect(await service.readFile("modules/local/hello/main.nf")).toContain(
+      "process OTHER {",
+    );
+  });
+});
