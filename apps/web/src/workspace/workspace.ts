@@ -9,6 +9,7 @@ import {
   installedPackVersions,
   type LayoutChange,
   type ProjectChange,
+  type ProjectFile,
   templateFiles,
 } from "@nf-builder/engine";
 import { createAutosaver, type Timer } from "./autosave";
@@ -16,6 +17,8 @@ import { createImportStager } from "./import-stage";
 import type { ProjectDb } from "./project-db";
 import { normaliseProjectName } from "./project-name";
 import {
+  type ImportedProject,
+  type ImportProject,
   INITIAL_STATUS,
   type NewProject,
   type OpenedProject,
@@ -201,6 +204,51 @@ export function createWorkspace(options: WorkspaceOptions): WorkspaceApi {
         if (input.import !== undefined) importer.discard(input.import.id);
         await refresh();
         return meta;
+      }),
+
+    importProject: (input: ImportProject) =>
+      serial(async (): Promise<ImportedProject> => {
+        const store = needDb();
+        const name = normaliseProjectName(input.name);
+        if (name === null)
+          throw new Error("A project name needs 1 to 100 characters.");
+        if (!installedPackVersions().includes(input.languageVersion))
+          throw new Error(`No language pack for ${input.languageVersion}.`);
+        const { source } = input;
+        if (
+          source.kind !== "github" ||
+          !/^[0-9a-f]{40}$/.test(source.sha) ||
+          source.repo === ""
+        )
+          throw new Error("The import's source is not valid.");
+        // loaded on first use, so the unzip code stays out of the worker's main chunk (import-stage.ts)
+        const { decodeText, entryPath } = await import(
+          "@nf-builder/sources/import"
+        );
+        const seen = new Set<string>();
+        const files: ProjectFile[] = [];
+        const skipped: ImportedProject["skipped"][number][] = [];
+        for (const f of input.files) {
+          if (entryPath(f.path).kind !== "file" || seen.has(f.path))
+            throw new Error(`${f.path} is not a unique, safe file path.`);
+          seen.add(f.path);
+          const text = decodeText(new Uint8Array(f.bytes));
+          if (text === null) skipped.push({ path: f.path, reason: "not-text" });
+          else files.push({ path: f.path, text });
+        }
+        const time = now();
+        const meta: ProjectMeta = {
+          id: newId(),
+          name,
+          languageVersion: input.languageVersion,
+          createdAt: time,
+          updatedAt: time,
+          openedAt: time,
+          source,
+        };
+        await store.createProject(meta, files);
+        await refresh();
+        return { meta, skipped };
       }),
 
     openProject: (id) =>

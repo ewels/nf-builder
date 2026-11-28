@@ -8,7 +8,18 @@ import type {
 } from "@nf-builder/engine";
 import type { ImportRefusal, ImportSummary } from "@nf-builder/sources";
 
-/** A project record as stored in IndexedDB (schema v1). Times are milliseconds since the epoch. */
+/** Where an imported project came from (IO-13). The union stays open for zip imports (F-403). */
+export type ProjectSource = {
+  readonly kind: "github";
+  /** `owner/name` as entered. */
+  readonly repo: string;
+  /** Null: the default branch. */
+  readonly ref: string | null;
+  /** The resolved 40-character commit SHA. */
+  readonly sha: string;
+};
+
+/** A project record as stored in IndexedDB (schema v1). `source` is optional and additive: no version bump (F-401). Times are milliseconds since the epoch. */
 export interface ProjectMeta {
   readonly id: string;
   readonly name: string;
@@ -18,6 +29,7 @@ export interface ProjectMeta {
   readonly updatedAt: number;
   /** Changes on every open; the most recent project is reopened after a reload. */
   readonly openedAt: number;
+  readonly source?: ProjectSource;
 }
 
 /** A staged import (F-403): the stage's id and the ignore list text to select the files with. */
@@ -41,6 +53,28 @@ export interface NewProject {
   readonly publishDocs?: boolean;
   /** A staged zip import (F-403): the worker copies its selected files, so `files` must be empty and there is no `template`. */
   readonly import?: ImportChoice;
+}
+
+/** A downloaded file: raw bytes, decoded in the worker so a BOM and line endings survive (F-401). */
+export interface ImportFile {
+  readonly path: string;
+  readonly bytes: ArrayBuffer;
+}
+
+export interface ImportProject {
+  readonly name: string;
+  readonly languageVersion: string;
+  readonly source: ProjectSource;
+  readonly files: readonly ImportFile[];
+}
+
+export interface ImportedProject {
+  readonly meta: ProjectMeta;
+  /** Files whose bytes aren't text; they weren't stored. */
+  readonly skipped: readonly {
+    readonly path: string;
+    readonly reason: "not-text";
+  }[];
 }
 
 /** One file write: a `null` text deletes the file. */
@@ -102,6 +136,8 @@ export interface WorkspaceApi extends EngineApi {
   restageImport(id: string, ignore: string): Promise<ImportStageResult>;
   discardImport(id: string): Promise<void>;
   createProject(input: NewProject): Promise<ProjectMeta>;
+  /** Stores a project from downloaded bytes with its source, in one transaction (F-401). Stores nothing when it throws. */
+  importProject(input: ImportProject): Promise<ImportedProject>;
   openProject(id: string): Promise<OpenedProject>;
   renameProject(id: string, name: string): Promise<ProjectMeta>;
   deleteProject(id: string): Promise<void>;

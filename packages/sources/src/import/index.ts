@@ -6,6 +6,7 @@ export { BINARY_EXTENSIONS, binaryByName } from "./binary.ts";
 export { DEFAULT_IGNORE, parseIgnore } from "./ignore.ts";
 export { formatBytes, formatCount } from "./limits.ts";
 export { refuse } from "./messages.ts";
+export { entryPath } from "./paths.ts";
 export type {
   ImportPlan,
   LimitBreach,
@@ -14,6 +15,7 @@ export type {
 } from "./plan.ts";
 export { planImport } from "./plan.ts";
 export { importProblem, selectFiles, summarise } from "./select.ts";
+export { decodeText } from "./text.ts";
 export type {
   FixedSkipReason,
   IgnoreProblem,

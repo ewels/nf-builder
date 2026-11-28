@@ -361,3 +361,25 @@ describe("F-113 engine client failures", () => {
     close();
   });
 });
+
+describe("F-401 engine client import", () => {
+  it("F-401 QA-30 AR-30: importProject transfers the file buffers (detached after the call) and report passes through", async () => {
+    const { engine, close } = connected();
+    const buffer = new TextEncoder().encode("workflow {\n}\n").buffer;
+    const imported = await engine.importProject({
+      name: "X",
+      languageVersion: version,
+      source: { kind: "github", repo: "o/r", ref: null, sha: "c".repeat(40) },
+      files: [{ path: "main.nf", bytes: buffer as ArrayBuffer }],
+    });
+    expect(buffer.byteLength).toBe(0);
+    expect(imported.meta.source?.repo).toBe("o/r");
+    expect(await engine.report()).toMatchObject({ code: "no-project" });
+    await engine.openProject(imported.meta.id);
+    expect(await engine.report()).toMatchObject({
+      files: 1,
+      parseFailures: [],
+    });
+    close();
+  });
+});
