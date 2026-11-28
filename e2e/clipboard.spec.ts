@@ -29,6 +29,7 @@ import {
   storedFiles,
 } from "./history.ts";
 import { createProjectInUi, readFile, switcher } from "./projects.ts";
+import { PREVIEW_URL } from "./urls.ts";
 
 const tree = (dir: string): Record<string, string> =>
   Object.fromEntries(readProject(dir).map((f) => [f.path, f.text]));
@@ -208,4 +209,72 @@ test("F-310 ADR-0056 UX-04: read-only: Delete and paste keys change nothing, cop
   expect(await readFile(page, "main.nf")).toBe(start);
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await undoCountIs(page, 0);
+});
+
+test("F-310 ADR-0044 UX-26: copy and paste work in a cross-origin iframe without clipboard permissions", async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name !== "chromium", "one browser is enough");
+  await page.setContent(
+    `<iframe id="app" src="${PREVIEW_URL}" width="1200" height="800"></iframe>`,
+  );
+  const frame = page.frameLocator("#app");
+  await expect(switcher(frame)).toBeEnabled();
+  const appFrame = page.frames().find((f) => f.url() === PREVIEW_URL);
+  if (appFrame === undefined) throw new Error("the app frame isn't there");
+  const make = (name: string, files: { path: string; text: string }[]) =>
+    appFrame.evaluate(
+      async ({ name, files }) => {
+        const engine = (
+          window as unknown as {
+            nfBuilderEngine: {
+              createProject(input: {
+                name: string;
+                languageVersion: string;
+                files: { path: string; text: string }[];
+              }): Promise<unknown>;
+            };
+          }
+        ).nfBuilderEngine;
+        await engine.createProject({ name, languageVersion: "26.10", files });
+      },
+      { name, files },
+    );
+  // the target first: the app reopens the newest project after the reload
+  await make("Framed target", [
+    {
+      path: "main.nf",
+      text: "nextflow.enable.types = true\n\nworkflow {\n}\n",
+    },
+  ]);
+  await make("Framed source", readProject(F310_SOURCE));
+  await appFrame.evaluate(() => window.location.reload());
+  await expect(switcher(frame)).toHaveText(/Framed source/);
+  const nodeIn = (id: string) =>
+    frame.locator(`.react-flow__node[data-id="${id}"]`);
+  await nodeIn(MAKE).locator(".canvas-node-title").first().click();
+  await nodeIn(SIZE)
+    .locator(".canvas-node-title")
+    .first()
+    .click({ modifiers: ["Shift"] });
+  await pressCopy(page);
+  await expect(frame.locator("[data-clipboard-notice]")).toHaveText(
+    "Copied 2 nodes.",
+  );
+  await switcher(frame).click();
+  await frame.getByRole("button", { name: "Framed target" }).last().click();
+  await expect(switcher(frame)).toHaveText(/Framed target/);
+  await frame.locator(".react-flow__pane").click({ position: { x: 8, y: 8 } });
+  await pressPaste(page);
+  await expect(frame.locator("[data-clipboard-notice]")).toHaveText(
+    "Pasted 2 nodes and 1 connection.",
+  );
+  const main = await appFrame.evaluate(() =>
+    (
+      window as unknown as {
+        nfBuilderEngine: { readFile(path: string): Promise<string | null> };
+      }
+    ).nfBuilderEngine.readFile("main.nf"),
+  );
+  expect(main).toContain("SIZE(make)");
 });
