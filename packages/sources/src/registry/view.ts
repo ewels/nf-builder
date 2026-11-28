@@ -23,7 +23,7 @@ export function shortName(name: string): string {
   return i < 0 ? name : name.slice(i + 1);
 }
 
-/** The namespace listed first (ADR 0055: it holds nearly every module). */
+/** The namespace listed first (ADR 0058: it holds nearly every module). */
 const FIRST_NAMESPACE = "nf-core";
 
 const byNamespace = (a: string, b: string) =>
