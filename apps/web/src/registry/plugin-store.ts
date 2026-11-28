@@ -52,6 +52,16 @@ export interface PluginSpecState {
   readonly pluginsKey: string;
 }
 
+/** The URL when it is `https:`, else null: a registry author's link is never rendered as anything else (FI-04). */
+function httpsOrNull(value: string | null): string | null {
+  if (value === null) return null;
+  try {
+    return new URL(value).protocol === "https:" ? value : null;
+  } catch {
+    return null;
+  }
+}
+
 const EMPTY: PluginSpecState = {
   revision: null,
   declared: [],
@@ -103,50 +113,53 @@ export function createPluginStore(options: {
             again = true;
             continue;
           }
+          // the declared list first: the "added" badge and the duplicate check follow the edit at once
+          set({ revision: result.revision, declared: result.plugins });
           const specs: LoadedPlugin[] = [];
           const failures: { id: string; message: string }[] = [];
           if (result.plugins.length > 0) {
-            const wanted = new Map(result.plugins.map((p) => [p.id, p]));
             const client = registry();
             try {
               const index = await client.index();
-              await Promise.all(
-                [...wanted.values()].map(async (declared) => {
-                  const listed = index.plugins.find(
-                    (p) => p.id === declared.id,
-                  );
-                  if (!listed || listed.definitions === 0) return;
-                  try {
-                    const at = `${declared.id}@${listed.version}`;
-                    const spec =
-                      read.get(at) ??
-                      (await client.plugin(declared.id, listed.version));
-                    read.set(at, spec);
-                    specs.push({
-                      id: declared.id,
-                      version: listed.version,
-                      approximate: declared.version !== listed.version,
-                      spec,
-                      projectUrl: listed.projectUrl,
-                    });
-                  } catch (error) {
-                    failures.push({
-                      id: declared.id,
-                      message: toFailure(error).message,
-                    });
-                  }
-                }),
+              const listing = new Map(index.plugins.map((p) => [p.id, p]));
+              const outcomes = await Promise.all(
+                [...new Map(result.plugins.map((p) => [p.id, p])).values()].map(
+                  async (declared) => {
+                    const listed = listing.get(declared.id);
+                    if (!listed || listed.definitions === 0) return null;
+                    try {
+                      const at = `${declared.id}@${listed.version}`;
+                      const spec =
+                        read.get(at) ??
+                        (await client.plugin(declared.id, listed.version));
+                      read.set(at, spec);
+                      return {
+                        id: declared.id,
+                        version: listed.version,
+                        approximate: declared.version !== listed.version,
+                        spec,
+                        projectUrl: httpsOrNull(listed.projectUrl),
+                      } satisfies LoadedPlugin;
+                    } catch (error) {
+                      return {
+                        id: declared.id,
+                        message: toFailure(error).message,
+                      };
+                    }
+                  },
+                ),
               );
+              for (const o of outcomes) {
+                if (o === null) continue;
+                if ("message" in o) failures.push(o);
+                else specs.push(o);
+              }
             } catch (error) {
               const message = toFailure(error).message;
-              for (const id of wanted.keys()) failures.push({ id, message });
+              for (const p of result.plugins)
+                failures.push({ id: p.id, message });
             }
           }
-          const order = [...result.plugins.map((p) => p.id)];
-          const byDeclared = <T extends { id: string }>(a: T, b: T) =>
-            order.indexOf(a.id) - order.indexOf(b.id);
-          specs.sort(byDeclared);
-          failures.sort(byDeclared);
           if (stale()) {
             again = true;
             continue;
@@ -164,8 +177,6 @@ export function createPluginStore(options: {
           }
           if (workspace.getState().session === mine)
             set({
-              revision: result.revision,
-              declared: result.plugins,
               specs,
               failures,
               pluginsKey: key,

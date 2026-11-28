@@ -52,13 +52,18 @@ const spec = (
     { type: "Function", spec: { name: "validate" } },
   ],
 });
-const listed = (id: string, version: string, definitions: number) => ({
+const listed = (
+  id: string,
+  version: string,
+  definitions: number,
+  projectUrl: string | null = null,
+) => ({
   id,
   version,
   requires: null,
   summary: "",
   provider: null,
-  projectUrl: null,
+  projectUrl,
   definitions,
 });
 
@@ -68,9 +73,12 @@ function setup() {
   const sent: PluginScopes[][] = [];
   const reads: string[] = [];
   let failing = false;
+  let projectUrl: string | null = null;
+  let scopesFail = false;
   const engine = {
     plugins: async () => ({ revision, plugins: declared }),
     setPluginScopes: async (scopes: PluginScopes[]) => {
+      if (scopesFail) throw new Error("Worker is gone.");
       sent.push(scopes);
       return { pluginsKey: "" };
     },
@@ -79,7 +87,7 @@ function setup() {
     index: async () =>
       ({
         plugins: [
-          listed("nf-schema", "3.1.0", 21),
+          listed("nf-schema", "3.1.0", 21, projectUrl),
           listed("nf-ffq", "0.2.0", 0),
         ],
       }) as unknown as RegistryIndex,
@@ -125,6 +133,12 @@ function setup() {
     },
     fail: (v: boolean) => {
       failing = v;
+    },
+    url: (v: string | null) => {
+      projectUrl = v;
+    },
+    failScopes: (v: boolean) => {
+      scopesFail = v;
     },
   };
 }
@@ -197,5 +211,37 @@ describe("plugin store", () => {
     await t.settle();
     expect(t.plugins.getState().failures).toEqual([]);
     expect(t.plugins.getState().specs).toHaveLength(1);
+  });
+
+  it("F-505 FI-04: only an https project URL is kept; http, data, javascript and malformed ones become no link", async () => {
+    const cases: [string | null, string | null][] = [
+      ["https://example.org/nf-schema", "https://example.org/nf-schema"],
+      ["http://example.org/nf-schema", null],
+      ["data:text/html,<b>x</b>", null],
+      ["javascript:alert(1)", null],
+      ["not a url", null],
+      [null, null],
+    ];
+    for (const [given, kept] of cases) {
+      const t = setup();
+      t.url(given);
+      t.declare(declare("nf-schema", "3.1.0"));
+      await t.workspace.getState().show(summaryAt(1));
+      await t.settle();
+      expect(t.plugins.getState().specs[0]?.projectUrl).toBe(kept);
+      expect(t.sent[0]?.[0]?.projectUrl).toBe(kept);
+    }
+  });
+
+  it("F-505 IO-33: the declared list is published even when the worker rejects the scopes", async () => {
+    const t = setup();
+    t.failScopes(true);
+    t.declare(declare("nf-schema", "3.1.0"));
+    await t.workspace.getState().show(summaryAt(1));
+    await t.settle();
+    expect(t.plugins.getState().declared.map((d) => d.id)).toEqual([
+      "nf-schema",
+    ]);
+    expect(t.plugins.getState().revision).toBe(1);
   });
 });
