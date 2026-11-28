@@ -6,6 +6,8 @@ export type ProblemsView = "problems" | "suggestions";
 export interface ProblemGroup {
   readonly path: string;
   readonly diagnostics: readonly Diagnostic[];
+  /** The registry module reference of the folder holding the file; null for the project's own files (F-405). */
+  readonly module: string | null;
 }
 
 export interface ProblemCounts {

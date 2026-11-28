@@ -3,6 +3,9 @@
 
 import type { GraphNode, Port, Projection } from "@nf-builder/lang-core";
 import { typeText } from "../canvas/view";
+import type { RegistryFolder } from "../files/types";
+import { registryModuleOf } from "../problems/sections";
+import { modelledShare, projectionCoverage } from "../projection/coverage";
 import { kindLabel } from "./node-view";
 import type {
   SummaryCall,
@@ -18,7 +21,11 @@ const portsOf = (node: GraphNode, ports: readonly Port[]): SummaryPort[] =>
     type: typeText(p.type),
   }));
 
-export function workflowSummary(projection: Projection): WorkflowSummary {
+/** `registry` is the project's registry module folders: a call belongs to the one holding its file, as in the problems panel (ADR 0055). */
+export function workflowSummary(
+  projection: Projection,
+  registry: readonly RegistryFolder[] = [],
+): WorkflowSummary {
   const { workflow, nodes } = projection;
   const takes: SummaryPort[] = [];
   const emits: SummaryPort[] = [];
@@ -57,7 +64,10 @@ export function workflowSummary(projection: Projection): WorkflowSummary {
           module: node.callee.module,
           status: node.callee.status,
         });
-        const module = node.callee.module;
+        const module =
+          node.callee.path === null
+            ? null
+            : registryModuleOf(node.callee.path, registry);
         if (module !== null) {
           const list = modules.get(module) ?? [];
           list.push(node.label);
@@ -84,5 +94,6 @@ export function workflowSummary(projection: Projection): WorkflowSummary {
     outputs,
     calls,
     modules: moduleRows,
+    coverage: modelledShare(projectionCoverage(projection)),
   };
 }

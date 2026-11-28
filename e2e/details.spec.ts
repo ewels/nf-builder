@@ -325,6 +325,9 @@ test("F-206 step 2 UX-31: clicking empty canvas shows the workflow summary with 
   await expect(section("Calls")).toContainText("GREET");
   await expect(section("Calls")).toContainText("WORDCOUNT");
   await expect(section("Registry modules")).toContainText("nf-core/wordcount");
+  await expect(section("Modelled")).toContainText(
+    /(All \d+|\d+ of \d+) statements \(\d+%\)/,
+  );
   await expect(section("Parameters")).toContainText("greeting");
   await expect(section("Outputs")).toContainText("greetings");
   await openWorkflow(page, "workflows.nf", "SHOUT");

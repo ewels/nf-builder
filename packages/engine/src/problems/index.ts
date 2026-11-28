@@ -3,6 +3,7 @@ export {
   problemKey,
   problemSections,
   problemsView,
+  registryModuleOf,
 } from "./sections";
 export { nodeAtRange, problemTarget } from "./target";
 export type {

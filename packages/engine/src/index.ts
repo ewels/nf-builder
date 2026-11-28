@@ -81,6 +81,7 @@ export { CANVAS_METRICS, canvasView, portY } from "./canvas";
 export { edgeMismatches } from "./canvas/mismatch";
 export * from "./config";
 export { nodeView } from "./details/node-view";
+export { workflowSuggestions } from "./details/suggestions";
 export { workflowSummary } from "./details/summary";
 export type {
   DeclarationDetails,
@@ -93,6 +94,7 @@ export type {
   PortDetail,
   Preview,
   SummaryCall,
+  SummaryCoverage,
   SummaryModule,
   SummaryPort,
   WorkflowSummary,

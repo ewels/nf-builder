@@ -164,3 +164,21 @@
   cursor: progress;
   color: var(--color-muted);
 }
+
+.problems-subheading {
+  margin: 0;
+  padding: var(--space-2) var(--space-3) var(--space-1);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-muted);
+}
+
+.problems-tag {
+  padding: 0 6px;
+  font-family: var(--font-sans, inherit);
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--tone-purple-fg);
+  background: var(--tone-purple-bg);
+  border-radius: 999px;
+}

@@ -18,17 +18,20 @@ describe("F-206 workflow summary", () => {
     const p = projection(
       [
         take,
-        call("a", { name: "FASTQC", module: "nf-core/fastqc" }),
+        call("a", { name: "FASTQC", path: "modules/nf-core/fastqc/main.nf" }),
         call("b", { name: "LOCAL", typed: true }),
-        call("c", { name: "FASTQC_2", module: "nf-core/fastqc" }),
-        call("d", { name: "ALIGN", module: "nf-core/bwa" }),
+        call("c", { name: "FASTQC_2", path: "modules/nf-core/fastqc/main.nf" }),
+        call("d", { name: "ALIGN", path: "modules/nf-core/bwa/main.nf" }),
         call("u", { name: "GONE", status: "unresolved", kind: null }),
         emit,
       ],
       [],
       "WF",
     );
-    const s = workflowSummary(p);
+    const s = workflowSummary(p, [
+      { path: "modules/nf-core/fastqc", module: "nf-core/fastqc" },
+      { path: "modules/nf-core/bwa", module: "nf-core/bwa" },
+    ]);
     expect([s.name, s.path, s.typed, s.entry]).toEqual([
       "WF",
       "main.nf",
@@ -55,6 +58,20 @@ describe("F-206 workflow summary", () => {
       { module: "nf-core/bwa", calls: ["ALIGN"] },
     ]);
     expect(structuredClone(s)).toEqual(s);
+  });
+
+  it("F-405 ADR-0055: a relative include of a registry folder's file counts as a registry module call, as in the problems panel", () => {
+    const p = projection([
+      call("a", { name: "FASTQC", path: "modules/nf-core/fastqc/main.nf" }),
+      call("b", { name: "LOCAL", path: "modules/local/x/main.nf" }),
+    ]);
+    const registry = [
+      { path: "modules/nf-core/fastqc", module: "nf-core/fastqc" },
+    ];
+    expect(workflowSummary(p, registry).modules).toEqual([
+      { module: "nf-core/fastqc", calls: ["FASTQC"] },
+    ]);
+    expect(workflowSummary(p).modules).toEqual([]);
   });
 
   it("F-206 UX-31: the entry workflow summary lists parameters and published outputs", () => {
